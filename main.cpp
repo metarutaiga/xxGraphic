@@ -3,12 +3,12 @@
 
 #include <sys/stat.h>
 
-#include "imgui.h"
+#include "imgui/imgui.h"
 #include "imgui/misc/freetype/imgui_freetype.h"
-#include "imgui_impl_dx9.h"
-#include "imgui_impl_dx10.h"
-#include "imgui_impl_dx11.h"
-#include "imgui_impl_win32.h"
+#include "graphic/imgui_impl_dx9.h"
+#include "graphic/imgui_impl_dx10.h"
+#include "graphic/imgui_impl_dx11.h"
+#include "graphic/imgui_impl_win32.h"
 
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN

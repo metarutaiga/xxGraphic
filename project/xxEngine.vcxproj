@@ -27,25 +27,21 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <CharacterSet>NotSet</CharacterSet>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <CharacterSet>NotSet</CharacterSet>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <CharacterSet>NotSet</CharacterSet>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <CharacterSet>NotSet</CharacterSet>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -65,30 +61,33 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <TargetName>$(ProjectName).$(Configuration).$(PlatformTarget)</TargetName>
+    <IntDir>$(SolutionDir)temp\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <TargetName>$(ProjectName).$(Configuration).$(PlatformTarget)</TargetName>
+    <IntDir>$(SolutionDir)temp\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)bin\</OutDir>
     <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName).$(Configuration).$(PlatformTarget)</TargetName>
+    <IntDir>$(SolutionDir)temp\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(ProjectDir)$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)bin\</OutDir>
     <LinkIncremental>true</LinkIncremental>
+    <TargetName>$(ProjectName).$(Configuration).$(PlatformTarget)</TargetName>
+    <IntDir>$(SolutionDir)temp\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.;graphic;imgui;freetype/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>FT2_BUILD_LIBRARY;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -100,9 +99,8 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.;graphic;imgui;freetype/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>FT2_BUILD_LIBRARY;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -116,10 +114,9 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>.;graphic;imgui;freetype/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>FT2_BUILD_LIBRARY;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -134,10 +131,9 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>.;graphic;imgui;freetype/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <PreprocessorDefinitions>FT2_BUILD_LIBRARY;DLL_EXPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -147,68 +143,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="freetype\src\base\ftdebug.c" />
-    <ClCompile Include="graphic\imgui_impl_dx10.cpp" />
-    <ClCompile Include="graphic\imgui_impl_dx11.cpp" />
-    <ClCompile Include="graphic\imgui_impl_dx9.cpp" />
-    <ClCompile Include="graphic\imgui_impl_win32.cpp" />
-    <ClCompile Include="imgui\imgui.cpp" />
-    <ClCompile Include="imgui\imgui_demo.cpp" />
-    <ClCompile Include="imgui\imgui_draw.cpp" />
-    <ClCompile Include="imgui\imgui_widgets.cpp" />
-    <ClCompile Include="imgui\misc\freetype\imgui_freetype.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="freetype\src\autofit\autofit.c" />
-    <ClCompile Include="freetype\src\base\ftbase.c" />
-    <ClCompile Include="freetype\src\base\ftbbox.c" />
-    <ClCompile Include="freetype\src\base\ftbdf.c" />
-    <ClCompile Include="freetype\src\base\ftbitmap.c" />
-    <ClCompile Include="freetype\src\base\ftcid.c" />
-    <ClCompile Include="freetype\src\base\ftfstype.c" />
-    <ClCompile Include="freetype\src\base\ftgasp.c" />
-    <ClCompile Include="freetype\src\base\ftglyph.c" />
-    <ClCompile Include="freetype\src\base\ftgxval.c" />
-    <ClCompile Include="freetype\src\base\ftinit.c" />
-    <ClCompile Include="freetype\src\base\ftmm.c" />
-    <ClCompile Include="freetype\src\base\ftotval.c" />
-    <ClCompile Include="freetype\src\base\ftpatent.c" />
-    <ClCompile Include="freetype\src\base\ftpfr.c" />
-    <ClCompile Include="freetype\src\base\ftstroke.c" />
-    <ClCompile Include="freetype\src\base\ftsynth.c" />
-    <ClCompile Include="freetype\src\base\ftsystem.c" />
-    <ClCompile Include="freetype\src\base\fttype1.c" />
-    <ClCompile Include="freetype\src\base\ftwinfnt.c" />
-    <ClCompile Include="freetype\src\bdf\bdf.c" />
-    <ClCompile Include="freetype\src\cache\ftcache.c" />
-    <ClCompile Include="freetype\src\cff\cff.c" />
-    <ClCompile Include="freetype\src\cid\type1cid.c" />
-    <ClCompile Include="freetype\src\gzip\ftgzip.c" />
-    <ClCompile Include="freetype\src\lzw\ftlzw.c" />
-    <ClCompile Include="freetype\src\pcf\pcf.c" />
-    <ClCompile Include="freetype\src\pfr\pfr.c" />
-    <ClCompile Include="freetype\src\psaux\psaux.c" />
-    <ClCompile Include="freetype\src\pshinter\pshinter.c" />
-    <ClCompile Include="freetype\src\psnames\psmodule.c" />
-    <ClCompile Include="freetype\src\raster\raster.c" />
-    <ClCompile Include="freetype\src\sfnt\sfnt.c" />
-    <ClCompile Include="freetype\src\smooth\smooth.c" />
-    <ClCompile Include="freetype\src\truetype\truetype.c" />
-    <ClCompile Include="freetype\src\type1\type1.c" />
-    <ClCompile Include="freetype\src\type42\type42.c" />
-    <ClCompile Include="freetype\src\winfonts\winfnt.c" />
+    <ClCompile Include="..\graphic\imgui_impl_dx10.cpp" />
+    <ClCompile Include="..\graphic\imgui_impl_dx11.cpp" />
+    <ClCompile Include="..\graphic\imgui_impl_dx9.cpp" />
+    <ClCompile Include="..\graphic\imgui_impl_win32.cpp" />
+    <ClCompile Include="..\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="graphic\imgui_impl_dx10.h" />
-    <ClInclude Include="graphic\imgui_impl_dx11.h" />
-    <ClInclude Include="graphic\imgui_impl_dx9.h" />
-    <ClInclude Include="graphic\imgui_impl_win32.h" />
-    <ClInclude Include="imgui\imconfig.h" />
-    <ClInclude Include="imgui\imgui.h" />
-    <ClInclude Include="imgui\imgui_internal.h" />
-    <ClInclude Include="imgui\imstb_rectpack.h" />
-    <ClInclude Include="imgui\imstb_textedit.h" />
-    <ClInclude Include="imgui\imstb_truetype.h" />
-    <ClInclude Include="imgui\misc\freetype\imgui_freetype.h" />
+    <ClInclude Include="..\graphic\imgui_impl_dx10.h" />
+    <ClInclude Include="..\graphic\imgui_impl_dx11.h" />
+    <ClInclude Include="..\graphic\imgui_impl_dx9.h" />
+    <ClInclude Include="..\graphic\imgui_impl_win32.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="imgui.vcxproj">
+      <Project>{9b49443b-7fae-479e-8cdf-29919a9f786f}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
