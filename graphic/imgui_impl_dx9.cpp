@@ -31,11 +31,9 @@
 #include <d3d9.h>
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
-#ifdef _MSC_VER
-#pragma comment(lib, "d3d9")
-#endif
 
 // DirectX data
+static HMODULE                  g_hD3D9 = NULL;
 static LPDIRECT3D9              g_pD3D = NULL;
 static LPDIRECT3DDEVICE9        g_pd3dDevice = NULL;
 static D3DPRESENT_PARAMETERS    g_d3dpp  = {};
@@ -116,7 +114,7 @@ static void ImGui_ImplDX9_SetupRenderState(ImDrawData* draw_data)
 
 // Render function.
 // (this used to be set in io.RenderDrawListsFn and called by ImGui::Render(), but you can now call this directly from your main loop)
-void ImGui_ImplDX9_RenderDrawData(ImDrawData* draw_data)
+void ImGui_ImplDX9_RenderDrawData(ImDrawData* draw_data, void*)
 {
     // Avoid rendering when minimized
     if (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f)
@@ -313,6 +311,14 @@ void ImGui_ImplDX9_NewFrame()
 
 bool ImGui_ImplDX9_Create(void* hWnd)
 {
+    if ((g_hD3D9 = LoadLibrary("d3d9.dll")) == NULL)
+        return false;
+
+    IDirect3D9* (WINAPI *Direct3DCreate9)(UINT);
+    (void*&)Direct3DCreate9 = GetProcAddress(g_hD3D9, "Direct3DCreate9");
+    if (Direct3DCreate9 == NULL)
+        return false;
+
     if ((g_pD3D = Direct3DCreate9(D3D_SDK_VERSION)) == NULL)
         return false;
 
@@ -335,18 +341,18 @@ bool ImGui_ImplDX9_Cleanup()
 {
     if (g_pd3dDevice) { g_pd3dDevice->Release(); g_pd3dDevice = NULL; }
     if (g_pD3D) { g_pD3D->Release(); g_pD3D = NULL; }
+    if (g_hD3D9) { FreeLibrary(g_hD3D9); g_hD3D9 = NULL; }
     return true;
 }
 
-bool ImGui_ImplDX9_Reset(int width, int height)
+bool ImGui_ImplDX9_Reset(void*, int width, int height)
 {
     if (g_pd3dDevice == NULL)
         return false;
-    if (width && height)
-    {
-        g_d3dpp.BackBufferWidth  = width;
-        g_d3dpp.BackBufferHeight = height;
-    }
+    if (g_d3dpp.BackBufferWidth == (UINT)width && g_d3dpp.BackBufferHeight == (UINT)height)
+        return false;
+    g_d3dpp.BackBufferWidth  = width;
+    g_d3dpp.BackBufferHeight = height;
     ImGui_ImplDX9_InvalidateDeviceObjects();
     HRESULT hr = g_pd3dDevice->Reset(&g_d3dpp);
     if (hr == D3DERR_INVALIDCALL)
@@ -476,7 +482,7 @@ static void ImGui_ImplDX9_RenderWindow(ImGuiViewport* viewport, void*)
         g_pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET, clear_col_dx, 1.0f, 0);
     }
 
-    ImGui_ImplDX9_RenderDrawData(viewport->DrawData);
+    ImGui_ImplDX9_RenderDrawData(viewport->DrawData, 0);
 
     // Restore render target
     g_pd3dDevice->SetRenderTarget(0, last_render_target);

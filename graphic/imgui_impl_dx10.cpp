@@ -33,12 +33,10 @@
 #include <d3d10_1.h>
 #include <d3d10.h>
 #include <d3dcompiler.h>
-#ifdef _MSC_VER
-#pragma comment(lib, "d3d10")
-#pragma comment(lib, "d3dcompiler") // Automatically link with d3dcompiler.lib as we are using D3DCompile() below.
-#endif
 
 // DirectX data
+static HMODULE                  g_hD3D10 = NULL;
+static HMODULE                  g_hD3DCompiler = NULL;
 static ID3D10Device*            g_pd3dDevice = NULL;
 static IDXGISwapChain*          g_pSwapChain = NULL;
 static ID3D10RenderTargetView*  g_mainRenderTargetView = NULL;
@@ -100,7 +98,7 @@ static void ImGui_ImplDX10_SetupRenderState(ImDrawData* draw_data, ID3D10Device*
 
 // Render function
 // (this used to be set in io.RenderDrawListsFn and called by ImGui::Render(), but you can now call this directly from your main loop)
-void ImGui_ImplDX10_RenderDrawData(ImDrawData* draw_data)
+void ImGui_ImplDX10_RenderDrawData(ImDrawData* draw_data, void*)
 {
     // Avoid rendering when minimized
     if (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f)
@@ -342,6 +340,20 @@ bool    ImGui_ImplDX10_CreateDeviceObjects()
     //  1) compile once, save the compiled shader blobs into a file or source code and pass them to CreateVertexShader()/CreatePixelShader() [preferred solution]
     //  2) use code to detect any version of the DLL and grab a pointer to D3DCompile from the DLL.
     // See https://github.com/ocornut/imgui/pull/638 for sources and details.
+    for (int i = 50; i >= 32; --i)
+    {
+        if (g_hD3DCompiler)
+            break;
+        char name[64];
+        snprintf(name, 64, "d3dcompiler_%d.dll", i);
+        g_hD3DCompiler = LoadLibrary(name);
+    }
+    if (g_hD3DCompiler == NULL)
+        return false;
+    HRESULT (WINAPI *D3DCompile)(LPCVOID, SIZE_T, LPCSTR, CONST D3D_SHADER_MACRO*, ID3DInclude*, LPCSTR, LPCSTR, UINT, UINT, ID3DBlob**, ID3DBlob**);
+    (void*&)D3DCompile = GetProcAddress(g_hD3DCompiler, "D3DCompile");
+    if (D3DCompile == NULL)
+        return false;
 
     // Create the vertex shader
     {
@@ -547,6 +559,29 @@ void ImGui_ImplDX10_NewFrame()
 
 bool ImGui_ImplDX10_Create(void* hWnd)
 {
+    if ((g_hD3D10 = LoadLibrary("d3d10.dll")) == NULL)
+        return false;
+
+    HRESULT (WINAPI *D3D10CreateDeviceAndSwapChain)(IDXGIAdapter*, D3D10_DRIVER_TYPE, HMODULE, UINT, UINT, DXGI_SWAP_CHAIN_DESC*, IDXGISwapChain**, ID3D10Device**);
+    (void*&)D3D10CreateDeviceAndSwapChain = GetProcAddress(g_hD3D10, "D3D10CreateDeviceAndSwapChain");
+    if (D3D10CreateDeviceAndSwapChain == NULL)
+        return false;
+
+    for (int i = 50; i > 32; --i)
+    {
+        char name[64];
+        snprintf(name, 64, "d3dcompiler_%d.dll", i);
+        g_hD3DCompiler = LoadLibrary(name);
+        if (g_hD3DCompiler)
+            break;
+    }
+    if (g_hD3DCompiler == NULL)
+        return false;
+    HRESULT(WINAPI * D3DCompile)(LPCVOID, SIZE_T, LPCSTR, CONST D3D_SHADER_MACRO*, ID3DInclude*, LPCSTR, LPCSTR, UINT, UINT, ID3DBlob * *, ID3DBlob * *);
+    (void*&)D3DCompile = GetProcAddress(g_hD3DCompiler, "D3DCompile");
+    if (D3DCompile == NULL)
+        return false;
+
     // Setup swap chain
     DXGI_SWAP_CHAIN_DESC sd;
     ZeroMemory(&sd, sizeof(sd));
@@ -581,10 +616,12 @@ bool ImGui_ImplDX10_Cleanup()
     if (g_mainRenderTargetView) { g_mainRenderTargetView->Release(); g_mainRenderTargetView = NULL; }
     if (g_pSwapChain) { g_pSwapChain->Release(); g_pSwapChain = NULL; }
     if (g_pd3dDevice) { g_pd3dDevice->Release(); g_pd3dDevice = NULL; }
+    if (g_hD3D10) { FreeLibrary(g_hD3D10); g_hD3D10 = NULL; }
+    if (g_hD3DCompiler) { FreeLibrary(g_hD3DCompiler); g_hD3DCompiler = NULL; }
     return true;
 }
 
-bool ImGui_ImplDX10_Reset(int width, int height)
+bool ImGui_ImplDX10_Reset(void*, int width, int height)
 {
     if (g_mainRenderTargetView) { g_mainRenderTargetView->Release(); g_mainRenderTargetView = NULL; }
     g_pSwapChain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
@@ -715,7 +752,7 @@ static void ImGui_ImplDX10_RenderViewport(ImGuiViewport* viewport, void*)
     g_pd3dDevice->OMSetRenderTargets(1, &data->RTView, NULL);
     if (!(viewport->Flags & ImGuiViewportFlags_NoRendererClear))
         g_pd3dDevice->ClearRenderTargetView(data->RTView, (float*)&clear_color);
-    ImGui_ImplDX10_RenderDrawData(viewport->DrawData);
+    ImGui_ImplDX10_RenderDrawData(viewport->DrawData, 0);
 }
 
 static void ImGui_ImplDX10_SwapBuffers(ImGuiViewport* viewport, void*)

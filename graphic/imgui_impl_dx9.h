@@ -17,7 +17,7 @@ struct IDirect3DDevice9;
 IMGUI_IMPL_API bool     ImGui_ImplDX9_Init(IDirect3DDevice9* device);
 IMGUI_IMPL_API void     ImGui_ImplDX9_Shutdown();
 IMGUI_IMPL_API void     ImGui_ImplDX9_NewFrame();
-IMGUI_IMPL_API void     ImGui_ImplDX9_RenderDrawData(ImDrawData* draw_data);
+IMGUI_IMPL_API void     ImGui_ImplDX9_RenderDrawData(ImDrawData* draw_data, void* dummy);
 
 // Use if you want to reset your rendering device without losing ImGui state.
 IMGUI_IMPL_API bool     ImGui_ImplDX9_CreateDeviceObjects();
@@ -26,7 +26,7 @@ IMGUI_IMPL_API void     ImGui_ImplDX9_InvalidateDeviceObjects();
 // Render flow
 IMGUI_IMPL_API bool     ImGui_ImplDX9_Create(void* hWnd);
 IMGUI_IMPL_API bool     ImGui_ImplDX9_Cleanup();
-IMGUI_IMPL_API bool     ImGui_ImplDX9_Reset(int width = 0, int height = 0);
+IMGUI_IMPL_API bool     ImGui_ImplDX9_Reset(void* hWnd = 0, int width = 0, int height = 0);
 IMGUI_IMPL_API bool     ImGui_ImplDX9_Begin();
 IMGUI_IMPL_API bool     ImGui_ImplDX9_Clear(const ImVec4& clear_color);
 IMGUI_IMPL_API bool     ImGui_ImplDX9_Finish();

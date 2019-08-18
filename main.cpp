@@ -8,19 +8,20 @@
 #include "graphic/imgui_impl_dx9.h"
 #include "graphic/imgui_impl_dx10.h"
 #include "graphic/imgui_impl_dx11.h"
+#include "graphic/imgui_impl_dx12.h"
 #include "graphic/imgui_impl_win32.h"
 
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-bool (*ImGui_ImplDraw_Init)(void* device, void* device_context);
+bool (*ImGui_ImplDraw_Init)(void* device, void*, void*, void*, void*, void*);
 void (*ImGui_ImplDraw_Shutdown)();
 void (*ImGui_ImplDraw_NewFrame)();
-void (*ImGui_ImplDraw_RenderDrawData)(ImDrawData* draw_data);
+void (*ImGui_ImplDraw_RenderDrawData)(ImDrawData* draw_data, void*);
 bool (*ImGui_ImplDraw_Create)(void* hWnd);
 bool (*ImGui_ImplDraw_Cleanup)();
-bool (*ImGui_ImplDraw_Reset)(int width, int height);
+bool (*ImGui_ImplDraw_Reset)(void* hWnd, int width, int height);
 bool (*ImGui_ImplDraw_Begin)();
 bool (*ImGui_ImplDraw_Clear)(const ImVec4& clear_color);
 bool (*ImGui_ImplDraw_Finish)();
@@ -40,11 +41,11 @@ int main(int, char**)
     ::RegisterClassExW(&wc);
     HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui DirectX Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280 * scale, 800 * scale, NULL, NULL, wc.hInstance, NULL);
 
-    int api = 11;
+    int api = 9;
     switch (api)
     {
     case 9:
-        ImGui_ImplDraw_Init           = (bool (*)(void*, void*))ImGui_ImplDX9_Init;
+        ImGui_ImplDraw_Init           = (bool (*)(void*, void*, void*, void*, void*, void*))ImGui_ImplDX9_Init;
         ImGui_ImplDraw_Shutdown       = ImGui_ImplDX9_Shutdown;
         ImGui_ImplDraw_NewFrame       = ImGui_ImplDX9_NewFrame;
         ImGui_ImplDraw_RenderDrawData = ImGui_ImplDX9_RenderDrawData;
@@ -58,7 +59,7 @@ int main(int, char**)
         break;
 
     case 10:
-        ImGui_ImplDraw_Init           = (bool (*)(void*, void*))ImGui_ImplDX10_Init;
+        ImGui_ImplDraw_Init           = (bool (*)(void*, void*, void*, void*, void*, void*))ImGui_ImplDX10_Init;
         ImGui_ImplDraw_Shutdown       = ImGui_ImplDX10_Shutdown;
         ImGui_ImplDraw_NewFrame       = ImGui_ImplDX10_NewFrame;
         ImGui_ImplDraw_RenderDrawData = ImGui_ImplDX10_RenderDrawData;
@@ -72,7 +73,7 @@ int main(int, char**)
         break;
 
     case 11:
-        ImGui_ImplDraw_Init           = (bool (*)(void*, void*))ImGui_ImplDX11_Init;
+        ImGui_ImplDraw_Init           = (bool (*)(void*, void*, void*, void*, void*, void*))ImGui_ImplDX11_Init;
         ImGui_ImplDraw_Shutdown       = ImGui_ImplDX11_Shutdown;
         ImGui_ImplDraw_NewFrame       = ImGui_ImplDX11_NewFrame;
         ImGui_ImplDraw_RenderDrawData = ImGui_ImplDX11_RenderDrawData;
@@ -83,6 +84,20 @@ int main(int, char**)
         ImGui_ImplDraw_Clear          = ImGui_ImplDX11_Clear;
         ImGui_ImplDraw_Finish         = ImGui_ImplDX11_Finish;
         ImGui_ImplDraw_Present        = ImGui_ImplDX11_Present;
+        break;
+
+    case 12:
+        ImGui_ImplDraw_Init           = (bool (*)(void*, void*, void*, void*, void*, void*))ImGui_ImplDX12_Init;
+        ImGui_ImplDraw_Shutdown       = ImGui_ImplDX12_Shutdown;
+        ImGui_ImplDraw_NewFrame       = ImGui_ImplDX12_NewFrame;
+        ImGui_ImplDraw_RenderDrawData = (void (*)(ImDrawData*, void*))ImGui_ImplDX12_RenderDrawData;
+        ImGui_ImplDraw_Create         = ImGui_ImplDX12_Create;
+        ImGui_ImplDraw_Cleanup        = ImGui_ImplDX12_Cleanup;
+        ImGui_ImplDraw_Reset          = ImGui_ImplDX12_Reset;
+        ImGui_ImplDraw_Begin          = ImGui_ImplDX12_Begin;
+        ImGui_ImplDraw_Clear          = ImGui_ImplDX12_Clear;
+        ImGui_ImplDraw_Finish         = ImGui_ImplDX12_Finish;
+        ImGui_ImplDraw_Present        = ImGui_ImplDX12_Present;
         break;
     }
 
@@ -120,13 +135,9 @@ int main(int, char**)
     io.FontGlobalScale = scale;
     style.ScaleAllSizes(scale);
 
-    // Show the window
-    ::ShowWindow(hwnd, SW_SHOWDEFAULT);
-    ::UpdateWindow(hwnd);
-
     // Setup Platform/Renderer bindings
     ImGui_ImplWin32_Init(hwnd);
-    ImGui_ImplDraw_Init(NULL, NULL);
+    ImGui_ImplDraw_Init(NULL, NULL, NULL, NULL, NULL, NULL);
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -160,22 +171,26 @@ int main(int, char**)
     if (io.FontGlobalScale == 1.0f)
     {
         struct stat st;
-        if (stat("c:\\Windows\\Fonts\\msgothic.ttc", &st) == 0)
-            io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\msgothic.ttc", 13.0f * io.FontGlobalScale, &font_config, io.Fonts->GetGlyphRangesJapanese());
-        else if (stat("c:\\Windows\\Fonts\\mingliu.ttc", &st) == 0)
-            io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\mingliu.ttc", 13.0f * io.FontGlobalScale, &font_config, io.Fonts->GetGlyphRangesJapanese());
+        if (stat("C:\\Windows\\Fonts\\msgothic.ttc", &st) == 0)
+            io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\msgothic.ttc", 13.0f * io.FontGlobalScale, &font_config, io.Fonts->GetGlyphRangesJapanese());
+        else if (stat("C:\\Windows\\Fonts\\mingliu.ttc", &st) == 0)
+            io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\mingliu.ttc", 13.0f * io.FontGlobalScale, &font_config, io.Fonts->GetGlyphRangesJapanese());
     }
     else
     {
         struct stat st;
-        if (stat("c:\\Windows\\Fonts\\meiryo.ttc", &st) == 0)
-            io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\meiryo.ttc", 13.0f * io.FontGlobalScale, &font_config, io.Fonts->GetGlyphRangesJapanese());
-        else if (stat("c:\\Windows\\Fonts\\msjh.ttc", &st) == 0)
-            io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\msjh.ttc", 13.0f * io.FontGlobalScale, &font_config, io.Fonts->GetGlyphRangesJapanese());
+        if (stat("C:\\Windows\\Fonts\\meiryo.ttc", &st) == 0)
+            io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\meiryo.ttc", 13.0f * io.FontGlobalScale, &font_config, io.Fonts->GetGlyphRangesJapanese());
+        else if (stat("C:\\Windows\\Fonts\\msjh.ttc", &st) == 0)
+            io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\msjh.ttc", 13.0f * io.FontGlobalScale, &font_config, io.Fonts->GetGlyphRangesJapanese());
     }
 #endif
     io.FontGlobalScale = 1.0f;
     ImGuiFreeType::BuildFontAtlas(io.Fonts);
+
+    // Show the window
+    ::ShowWindow(hwnd, SW_SHOWDEFAULT);
+    ::UpdateWindow(hwnd);
 
     // Our state
     bool show_demo_window = true;
@@ -247,7 +262,7 @@ int main(int, char**)
         {
             ImGui_ImplDraw_Clear(clear_color);
             ImGui::Render();
-            ImGui_ImplDraw_RenderDrawData(ImGui::GetDrawData());
+            ImGui_ImplDraw_RenderDrawData(ImGui::GetDrawData(), 0);
             ImGui_ImplDraw_Finish();
         }
 
@@ -288,7 +303,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_SIZE:
         if (wParam != SIZE_MINIMIZED)
         {
-            ImGui_ImplDraw_Reset(LOWORD(lParam), HIWORD(lParam));
+            ImGui_ImplDraw_Reset(hWnd, LOWORD(lParam), HIWORD(lParam));
         }
         return 0;
     case WM_SYSCOMMAND:

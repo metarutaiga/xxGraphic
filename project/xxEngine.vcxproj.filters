@@ -14,6 +14,9 @@
     <ClCompile Include="..\graphic\imgui_impl_dx11.cpp">
       <Filter>graphic</Filter>
     </ClCompile>
+    <ClCompile Include="..\graphic\imgui_impl_dx12.cpp">
+      <Filter>graphic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="graphic">
@@ -31,6 +34,9 @@
       <Filter>graphic</Filter>
     </ClInclude>
     <ClInclude Include="..\graphic\imgui_impl_dx11.h">
+      <Filter>graphic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\imgui_impl_dx12.h">
       <Filter>graphic</Filter>
     </ClInclude>
   </ItemGroup>

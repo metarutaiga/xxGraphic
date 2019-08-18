@@ -33,3 +33,12 @@ IMGUI_IMPL_API void     ImGui_ImplDX12_RenderDrawData(ImDrawData* draw_data, ID3
 // Use if you want to reset your rendering device without losing ImGui state.
 IMGUI_IMPL_API void     ImGui_ImplDX12_InvalidateDeviceObjects();
 IMGUI_IMPL_API bool     ImGui_ImplDX12_CreateDeviceObjects();
+
+// Render flow
+IMGUI_IMPL_API bool     ImGui_ImplDX12_Create(void* hWnd);
+IMGUI_IMPL_API bool     ImGui_ImplDX12_Cleanup();
+IMGUI_IMPL_API bool     ImGui_ImplDX12_Reset(void* hWnd = 0, int width = 0, int height = 0);
+IMGUI_IMPL_API bool     ImGui_ImplDX12_Begin();
+IMGUI_IMPL_API bool     ImGui_ImplDX12_Clear(const ImVec4& clear_color);
+IMGUI_IMPL_API bool     ImGui_ImplDX12_Finish();
+IMGUI_IMPL_API bool     ImGui_ImplDX12_Present();

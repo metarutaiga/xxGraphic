@@ -112,12 +112,10 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -129,12 +127,10 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -145,6 +141,7 @@
   <ItemGroup>
     <ClCompile Include="..\graphic\imgui_impl_dx10.cpp" />
     <ClCompile Include="..\graphic\imgui_impl_dx11.cpp" />
+    <ClCompile Include="..\graphic\imgui_impl_dx12.cpp" />
     <ClCompile Include="..\graphic\imgui_impl_dx9.cpp" />
     <ClCompile Include="..\graphic\imgui_impl_win32.cpp" />
     <ClCompile Include="..\main.cpp" />
@@ -152,6 +149,7 @@
   <ItemGroup>
     <ClInclude Include="..\graphic\imgui_impl_dx10.h" />
     <ClInclude Include="..\graphic\imgui_impl_dx11.h" />
+    <ClInclude Include="..\graphic\imgui_impl_dx12.h" />
     <ClInclude Include="..\graphic\imgui_impl_dx9.h" />
     <ClInclude Include="..\graphic\imgui_impl_win32.h" />
   </ItemGroup>
