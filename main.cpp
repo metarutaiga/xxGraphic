@@ -5,27 +5,15 @@
 
 #include "imgui/imgui.h"
 #include "imgui/misc/freetype/imgui_freetype.h"
-#include "graphic/imgui_impl_dx9.h"
-#include "graphic/imgui_impl_dx10.h"
-#include "graphic/imgui_impl_dx11.h"
-#include "graphic/imgui_impl_dx12.h"
-#include "graphic/imgui_impl_win32.h"
+
+#include "implement/imgui_impl_xx.h"
+#include "implement/imgui_impl_win32.h"
+
+#include "graphic/xxGraphic.h"
 
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-
-bool (*ImGui_ImplDraw_Init)(void* device, void*, void*, void*, void*, void*);
-void (*ImGui_ImplDraw_Shutdown)();
-void (*ImGui_ImplDraw_NewFrame)();
-void (*ImGui_ImplDraw_RenderDrawData)(ImDrawData* draw_data, void*);
-bool (*ImGui_ImplDraw_Create)(void* hWnd);
-bool (*ImGui_ImplDraw_Cleanup)();
-bool (*ImGui_ImplDraw_Reset)(void* hWnd, int width, int height);
-bool (*ImGui_ImplDraw_Begin)();
-bool (*ImGui_ImplDraw_Clear)(const ImVec4& clear_color);
-bool (*ImGui_ImplDraw_Finish)();
-bool (*ImGui_ImplDraw_Present)();
 
 // Forward declarations of helper functions
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -39,75 +27,12 @@ int main(int, char**)
     // Create application window
     WNDCLASSEXW wc = { sizeof(WNDCLASSEXW), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"ImGui Example", NULL };
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui DirectX Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280 * scale, 800 * scale, NULL, NULL, wc.hInstance, NULL);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui XX Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280 * scale, 800 * scale, NULL, NULL, wc.hInstance, NULL);
 
-    int api = 9;
-    switch (api)
-    {
-    case 9:
-        ImGui_ImplDraw_Init           = (bool (*)(void*, void*, void*, void*, void*, void*))ImGui_ImplDX9_Init;
-        ImGui_ImplDraw_Shutdown       = ImGui_ImplDX9_Shutdown;
-        ImGui_ImplDraw_NewFrame       = ImGui_ImplDX9_NewFrame;
-        ImGui_ImplDraw_RenderDrawData = ImGui_ImplDX9_RenderDrawData;
-        ImGui_ImplDraw_Create         = ImGui_ImplDX9_Create;
-        ImGui_ImplDraw_Cleanup        = ImGui_ImplDX9_Cleanup;
-        ImGui_ImplDraw_Reset          = ImGui_ImplDX9_Reset;
-        ImGui_ImplDraw_Begin          = ImGui_ImplDX9_Begin;
-        ImGui_ImplDraw_Clear          = ImGui_ImplDX9_Clear;
-        ImGui_ImplDraw_Finish         = ImGui_ImplDX9_Finish;
-        ImGui_ImplDraw_Present        = ImGui_ImplDX9_Present;
-        break;
-
-    case 10:
-        ImGui_ImplDraw_Init           = (bool (*)(void*, void*, void*, void*, void*, void*))ImGui_ImplDX10_Init;
-        ImGui_ImplDraw_Shutdown       = ImGui_ImplDX10_Shutdown;
-        ImGui_ImplDraw_NewFrame       = ImGui_ImplDX10_NewFrame;
-        ImGui_ImplDraw_RenderDrawData = ImGui_ImplDX10_RenderDrawData;
-        ImGui_ImplDraw_Create         = ImGui_ImplDX10_Create;
-        ImGui_ImplDraw_Cleanup        = ImGui_ImplDX10_Cleanup;
-        ImGui_ImplDraw_Reset          = ImGui_ImplDX10_Reset;
-        ImGui_ImplDraw_Begin          = ImGui_ImplDX10_Begin;
-        ImGui_ImplDraw_Clear          = ImGui_ImplDX10_Clear;
-        ImGui_ImplDraw_Finish         = ImGui_ImplDX10_Finish;
-        ImGui_ImplDraw_Present        = ImGui_ImplDX10_Present;
-        break;
-
-    case 11:
-        ImGui_ImplDraw_Init           = (bool (*)(void*, void*, void*, void*, void*, void*))ImGui_ImplDX11_Init;
-        ImGui_ImplDraw_Shutdown       = ImGui_ImplDX11_Shutdown;
-        ImGui_ImplDraw_NewFrame       = ImGui_ImplDX11_NewFrame;
-        ImGui_ImplDraw_RenderDrawData = ImGui_ImplDX11_RenderDrawData;
-        ImGui_ImplDraw_Create         = ImGui_ImplDX11_Create;
-        ImGui_ImplDraw_Cleanup        = ImGui_ImplDX11_Cleanup;
-        ImGui_ImplDraw_Reset          = ImGui_ImplDX11_Reset;
-        ImGui_ImplDraw_Begin          = ImGui_ImplDX11_Begin;
-        ImGui_ImplDraw_Clear          = ImGui_ImplDX11_Clear;
-        ImGui_ImplDraw_Finish         = ImGui_ImplDX11_Finish;
-        ImGui_ImplDraw_Present        = ImGui_ImplDX11_Present;
-        break;
-
-    case 12:
-        ImGui_ImplDraw_Init           = (bool (*)(void*, void*, void*, void*, void*, void*))ImGui_ImplDX12_Init;
-        ImGui_ImplDraw_Shutdown       = ImGui_ImplDX12_Shutdown;
-        ImGui_ImplDraw_NewFrame       = ImGui_ImplDX12_NewFrame;
-        ImGui_ImplDraw_RenderDrawData = (void (*)(ImDrawData*, void*))ImGui_ImplDX12_RenderDrawData;
-        ImGui_ImplDraw_Create         = ImGui_ImplDX12_Create;
-        ImGui_ImplDraw_Cleanup        = ImGui_ImplDX12_Cleanup;
-        ImGui_ImplDraw_Reset          = ImGui_ImplDX12_Reset;
-        ImGui_ImplDraw_Begin          = ImGui_ImplDX12_Begin;
-        ImGui_ImplDraw_Clear          = ImGui_ImplDX12_Clear;
-        ImGui_ImplDraw_Finish         = ImGui_ImplDX12_Finish;
-        ImGui_ImplDraw_Present        = ImGui_ImplDX12_Present;
-        break;
-    }
-
-    // Initialize Direct3D
-    if (!ImGui_ImplDraw_Create(hwnd))
-    {
-        ImGui_ImplDraw_Cleanup();
-        ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
-        return 1;
-    }
+    uint64_t instance = xxCreateInstance();
+    uint64_t device = xxCreateDevice(instance);
+    uint64_t swapchain = xxCreateSwapchain(device, hwnd);
+    uint64_t renderPass = xxCreateRenderPass(device, 0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -137,7 +62,7 @@ int main(int, char**)
 
     // Setup Platform/Renderer bindings
     ImGui_ImplWin32_Init(hwnd);
-    ImGui_ImplDraw_Init(NULL, NULL, NULL, NULL, NULL, NULL);
+    ImGui_ImplXX_Init(instance, 0, device);
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -215,7 +140,7 @@ int main(int, char**)
         }
 
         // Start the Dear ImGui frame
-        ImGui_ImplDraw_NewFrame();
+        ImGui_ImplXX_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
@@ -258,13 +183,19 @@ int main(int, char**)
 
         // Rendering
         ImGui::EndFrame();
-        if (ImGui_ImplDraw_Begin())
-        {
-            ImGui_ImplDraw_Clear(clear_color);
-            ImGui::Render();
-            ImGui_ImplDraw_RenderDrawData(ImGui::GetDrawData(), 0);
-            ImGui_ImplDraw_Finish();
-        }
+        ImGui::Render();
+
+        uint64_t commandBuffer = xxGetCommandBuffer(device, swapchain);
+        xxBeginCommandBuffer(commandBuffer);
+        xxBeginRenderPass(commandBuffer, renderPass);
+
+        ImGui_ImplXX_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+
+        xxEndRenderPass(commandBuffer, renderPass);
+        xxEndCommandBuffer(commandBuffer);
+        xxSubmitCommandBuffer(commandBuffer);
+
+        xxPresentSwapchain(swapchain, hwnd);
 
         // Update and Render additional Platform Windows
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -272,15 +203,17 @@ int main(int, char**)
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
         }
-
-        ImGui_ImplDraw_Present();
     }
 
-    ImGui_ImplDraw_Shutdown();
+    ImGui_ImplXX_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
-    ImGui_ImplDraw_Cleanup();
+    xxDestroyRenderPass(renderPass);
+    xxDestroySwapchain(swapchain);
+    xxDestroyDevice(device);
+    xxDestroyInstance(instance);
+
     ::DestroyWindow(hwnd);
     ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
 
@@ -303,7 +236,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_SIZE:
         if (wParam != SIZE_MINIMIZED)
         {
-            ImGui_ImplDraw_Reset(hWnd, LOWORD(lParam), HIWORD(lParam));
+            //ImGui_ImplDraw_Reset(hWnd, LOWORD(lParam), HIWORD(lParam));
         }
         return 0;
     case WM_SYSCOMMAND:
