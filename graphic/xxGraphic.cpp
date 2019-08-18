@@ -3,7 +3,7 @@
 #include <d3d9.h>
 typedef LPDIRECT3D9 (WINAPI *PFN_DIRECT3D_CREATE9)(UINT);
 
-static const wchar_t        g_dummy[] = L"xxGLDummyWindow";
+static const wchar_t        g_dummy[] = L"xxGraphicDummyWindow";
 static HMODULE              g_d3dLibrary = nullptr;
 static HWND                 g_hWnd = nullptr;
 static LPDIRECT3DSURFACE9   g_depthStencil = nullptr;

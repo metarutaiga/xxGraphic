@@ -18,6 +18,12 @@
 // Forward declarations of helper functions
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+// Graphic data
+static uint64_t g_instance = 0;
+static uint64_t g_device = 0;
+static uint64_t g_swapchain = 0;
+static uint64_t g_renderPass = 0;
+
 // Main code
 int main(int, char**)
 {
@@ -29,10 +35,10 @@ int main(int, char**)
     ::RegisterClassExW(&wc);
     HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui XX Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280 * scale, 800 * scale, NULL, NULL, wc.hInstance, NULL);
 
-    uint64_t instance = xxCreateInstance();
-    uint64_t device = xxCreateDevice(instance);
-    uint64_t swapchain = xxCreateSwapchain(device, hwnd);
-    uint64_t renderPass = xxCreateRenderPass(device, 0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0);
+    g_instance = xxCreateInstance();
+    g_device = xxCreateDevice(g_instance);
+    g_swapchain = xxCreateSwapchain(g_device, hwnd);
+    g_renderPass = xxCreateRenderPass(g_device, 0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -62,7 +68,7 @@ int main(int, char**)
 
     // Setup Platform/Renderer bindings
     ImGui_ImplWin32_Init(hwnd);
-    ImGui_ImplXX_Init(instance, 0, device);
+    ImGui_ImplXX_Init(g_instance, 0, g_device);
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -185,17 +191,17 @@ int main(int, char**)
         ImGui::EndFrame();
         ImGui::Render();
 
-        uint64_t commandBuffer = xxGetCommandBuffer(device, swapchain);
+        uint64_t commandBuffer = xxGetCommandBuffer(g_device, g_swapchain);
         xxBeginCommandBuffer(commandBuffer);
-        xxBeginRenderPass(commandBuffer, renderPass);
+        xxBeginRenderPass(commandBuffer, g_renderPass);
 
         ImGui_ImplXX_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
 
-        xxEndRenderPass(commandBuffer, renderPass);
+        xxEndRenderPass(commandBuffer, g_renderPass);
         xxEndCommandBuffer(commandBuffer);
         xxSubmitCommandBuffer(commandBuffer);
 
-        xxPresentSwapchain(swapchain, hwnd);
+        xxPresentSwapchain(g_swapchain, hwnd);
 
         // Update and Render additional Platform Windows
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -209,10 +215,10 @@ int main(int, char**)
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
-    xxDestroyRenderPass(renderPass);
-    xxDestroySwapchain(swapchain);
-    xxDestroyDevice(device);
-    xxDestroyInstance(instance);
+    xxDestroyRenderPass(g_renderPass);
+    xxDestroySwapchain(g_swapchain);
+    xxDestroyDevice(g_device);
+    xxDestroyInstance(g_instance);
 
     ::DestroyWindow(hwnd);
     ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
@@ -236,7 +242,8 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_SIZE:
         if (wParam != SIZE_MINIMIZED)
         {
-            //ImGui_ImplDraw_Reset(hWnd, LOWORD(lParam), HIWORD(lParam));
+            xxDestroySwapchain(g_swapchain);
+            g_swapchain = xxCreateSwapchain(g_device, hWnd, LOWORD(lParam), HIWORD(lParam));
         }
         return 0;
     case WM_SYSCOMMAND:
