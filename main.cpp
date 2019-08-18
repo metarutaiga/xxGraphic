@@ -1,4 +1,4 @@
-﻿// dear imgui: standalone example application for DirectX 9
+﻿// dear imgui: standalone example application
 // If you are new to dear imgui, see examples/README.txt and documentation at the top of imgui.cpp.
 
 #include <sys/stat.h>
@@ -25,7 +25,7 @@ static uint64_t g_swapchain = 0;
 static uint64_t g_renderPass = 0;
 
 // Main code
-int main(int, char**)
+int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
     ImGui_ImplWin32_EnableDpiAwareness();
     float scale = ImGui_ImplWin32_GetDpiScaleForHwnd(nullptr);
@@ -33,11 +33,11 @@ int main(int, char**)
     // Create application window
     WNDCLASSEXW wc = { sizeof(WNDCLASSEXW), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"ImGui Example", NULL };
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui XX Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280 * scale, 800 * scale, NULL, NULL, wc.hInstance, NULL);
+    HWND hWnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui XX Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280 * scale, 800 * scale, NULL, NULL, wc.hInstance, NULL);
 
     g_instance = xxCreateInstance();
     g_device = xxCreateDevice(g_instance);
-    g_swapchain = xxCreateSwapchain(g_device, hwnd);
+    g_swapchain = xxCreateSwapchain(g_device, hWnd);
     g_renderPass = xxCreateRenderPass(g_device, 0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0);
 
     // Setup Dear ImGui context
@@ -67,7 +67,7 @@ int main(int, char**)
     style.ScaleAllSizes(scale);
 
     // Setup Platform/Renderer bindings
-    ImGui_ImplWin32_Init(hwnd);
+    ImGui_ImplWin32_Init(hWnd);
     ImGui_ImplXX_Init(g_instance, 0, g_device);
 
     // Load Fonts
@@ -120,8 +120,8 @@ int main(int, char**)
     ImGuiFreeType::BuildFontAtlas(io.Fonts);
 
     // Show the window
-    ::ShowWindow(hwnd, SW_SHOWDEFAULT);
-    ::UpdateWindow(hwnd);
+    ::ShowWindow(hWnd, SW_SHOWDEFAULT);
+    ::UpdateWindow(hWnd);
 
     // Our state
     bool show_demo_window = true;
@@ -201,7 +201,16 @@ int main(int, char**)
         xxEndCommandBuffer(commandBuffer);
         xxSubmitCommandBuffer(commandBuffer);
 
-        xxPresentSwapchain(g_swapchain, hwnd);
+        xxPresentSwapchain(g_swapchain, hWnd);
+
+        if (xxTestDevice(g_device) == false)
+        {
+            ImGui_ImplXX_InvalidateDeviceObjects();
+            xxDestroySwapchain(g_swapchain);
+            xxResetDevice(g_device);
+            g_swapchain = xxCreateSwapchain(g_device, hWnd);
+            ImGui_ImplXX_CreateDeviceObjects();
+        }
 
         // Update and Render additional Platform Windows
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -220,7 +229,7 @@ int main(int, char**)
     xxDestroyDevice(g_device);
     xxDestroyInstance(g_instance);
 
-    ::DestroyWindow(hwnd);
+    ::DestroyWindow(hWnd);
     ::UnregisterClassW(wc.lpszClassName, wc.hInstance);
 
     return 0;

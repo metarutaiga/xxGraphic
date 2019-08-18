@@ -7,6 +7,8 @@ xxGL_API void xxDestroyInstance(uint64_t instance);
 
 xxGL_API uint64_t xxCreateDevice(uint64_t instance);
 xxGL_API void xxDestroyDevice(uint64_t device);
+xxGL_API void xxResetDevice(uint64_t device);
+xxGL_API bool xxTestDevice(uint64_t device);
 
 xxGL_API uint64_t xxCreateSwapchain(uint64_t device, void* view, unsigned int width = 0, unsigned int height = 0);
 xxGL_API void xxDestroySwapchain(uint64_t swapchain);

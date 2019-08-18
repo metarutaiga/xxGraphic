@@ -18,7 +18,6 @@
 static uint64_t                 g_instance = 0;
 static uint64_t                 g_physicalDevice = 0;
 static uint64_t                 g_device = 0;
-static uint64_t                 g_swapchain = 0;
 static int                      g_bufferIndex = 0;
 static uint64_t                 g_vertexBuffers[4] = {};
 static int                      g_vertexBufferSizes[4] = {};

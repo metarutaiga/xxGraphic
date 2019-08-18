@@ -69,7 +69,7 @@ uint64_t xxCreateDevice(uint64_t instance)
     d3dPresentParameters.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
     LPDIRECT3DDEVICE9 d3dDevice = nullptr;
-    HRESULT hResult = d3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, nullptr, D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dPresentParameters, &d3dDevice);
+    HRESULT hResult = d3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, nullptr, D3DCREATE_MULTITHREADED | D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dPresentParameters, &d3dDevice);
     if (hResult != S_OK)
         return 0;
 
@@ -95,6 +95,38 @@ void xxDestroyDevice(uint64_t device)
         UnregisterClassW(g_dummy, GetModuleHandleW(nullptr));
         g_hWnd = nullptr;
     }
+}
+//------------------------------------------------------------------------------
+xxGL_API void xxResetDevice(uint64_t device)
+{
+    LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
+    if (d3dDevice == nullptr)
+        return;
+
+    if (g_depthStencil)
+        g_depthStencil->Release();
+    g_depthStencil = nullptr;
+
+    D3DPRESENT_PARAMETERS d3dPresentParameters = {};
+    d3dPresentParameters.Windowed = TRUE;
+    d3dPresentParameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
+    d3dPresentParameters.BackBufferFormat = D3DFMT_UNKNOWN;
+    d3dPresentParameters.hDeviceWindow = g_hWnd;
+    d3dPresentParameters.EnableAutoDepthStencil = FALSE;
+    d3dPresentParameters.AutoDepthStencilFormat = D3DFMT_UNKNOWN;
+    d3dPresentParameters.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
+
+    d3dDevice->Reset(&d3dPresentParameters);
+}
+//------------------------------------------------------------------------------
+xxGL_API bool xxTestDevice(uint64_t device)
+{
+    LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
+    if (d3dDevice == nullptr)
+        return false;
+
+    HRESULT hResult = d3dDevice->TestCooperativeLevel();
+    return hResult == S_OK;
 }
 //------------------------------------------------------------------------------
 //  Swapchain
