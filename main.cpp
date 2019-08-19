@@ -9,7 +9,8 @@
 #include "implement/imgui_impl_xx.h"
 #include "implement/imgui_impl_win32.h"
 
-#include "graphic/xxGraphic.h"
+#include "graphic/xxGraphicD3D8.h"
+#include "graphic/xxGraphicD3D9.h"
 
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
@@ -31,13 +32,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     float scale = ImGui_ImplWin32_GetDpiScaleForHwnd(nullptr);
 
     // Create application window
-    WNDCLASSEXW wc = { sizeof(WNDCLASSEXW), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"ImGui Example", NULL };
+    WNDCLASSEXW wc = { sizeof(WNDCLASSEXW), CS_CLASSDC, WndProc, 0, 0, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"ImGui Example", NULL };
     ::RegisterClassExW(&wc);
     HWND hWnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui XX Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280 * scale, 800 * scale, NULL, NULL, wc.hInstance, NULL);
 
-    g_instance = xxCreateInstance();
+    g_instance = xxCreateInstanceD3D9();
     g_device = xxCreateDevice(g_instance);
-    g_swapchain = xxCreateSwapchain(g_device, hWnd);
+    g_swapchain = xxCreateSwapchain(g_device, hWnd, 0, 0);
     g_renderPass = xxCreateRenderPass(g_device, 0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0);
 
     // Setup Dear ImGui context
@@ -208,7 +209,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
             ImGui_ImplXX_InvalidateDeviceObjects();
             xxDestroySwapchain(g_swapchain);
             xxResetDevice(g_device);
-            g_swapchain = xxCreateSwapchain(g_device, hWnd);
+            g_swapchain = xxCreateSwapchain(g_device, hWnd, 0, 0);
             ImGui_ImplXX_CreateDeviceObjects();
         }
 

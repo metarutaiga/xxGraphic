@@ -77,7 +77,7 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
     {
         xxDestroyBuffer(vertexBuffer);
         vertexBufferSize = draw_data->TotalVtxCount + 5000;
-        vertexBuffer = xxCreateBuffer(g_device, vertexBufferSize * sizeof(CUSTOMVERTEX));
+        vertexBuffer = xxCreateBuffer(g_device, vertexBufferSize * sizeof(CUSTOMVERTEX), false);
         if (vertexBuffer == 0)
             return;
     }
@@ -210,16 +210,16 @@ static bool ImGui_ImplXX_CreateFontsTexture()
 
     // Upload texture to graphics system
     xxDestroyTexture(g_fontTexture);
-    g_fontTexture = xxCreateTexture(g_device, 0, width, height);
+    g_fontTexture = xxCreateTexture(g_device, 0, width, height, 1, 1, 1);
     if (g_fontTexture == 0)
         return false;
     unsigned int stride = 0;
-    void* map = xxMapTexture(g_fontTexture, stride);
+    void* map = xxMapTexture(g_fontTexture, stride, 0, 0);
     if (map == nullptr)
         return false;
     for (int y = 0; y < height; y++)
         memcpy((char*)map + stride * y, pixels + (width * bytes_per_pixel) * y, (width * bytes_per_pixel));
-    xxUnmapTexture(g_fontTexture);
+    xxUnmapTexture(g_fontTexture, 0, 0);
 
     // Store our identifier
     io.Fonts->TexID = (ImTextureID)g_fontTexture;
