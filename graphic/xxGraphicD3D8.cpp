@@ -241,7 +241,6 @@ bool xxBeginCommandBufferD3D8(uint64_t commandBuffer)
     d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
     d3dDevice->SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
     d3dDevice->SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
-    d3dDevice->SetVertexShader(D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1);
 
     return true;
 }
@@ -266,15 +265,9 @@ union D3DRENDERPASS8
     struct
     {
         D3DCOLOR color;
-        union
-        {
-            float depth;
-            struct
-            {
-                unsigned char stencil;
-                unsigned char flags;
-            };
-        };
+        uint16_t depth;
+        uint8_t stencil;
+        uint8_t flags;
     };
 };
 //------------------------------------------------------------------------------
@@ -283,7 +276,7 @@ uint64_t xxCreateRenderPassD3D8(uint64_t device, float r, float g, float b, floa
     D3DRENDERPASS8 d3dRenderPass;
 
     d3dRenderPass.color = D3DCOLOR_COLORVALUE(r, g, b, a);
-    d3dRenderPass.depth = depth;
+    d3dRenderPass.depth = (uint16_t)(depth * UINT16_MAX);
     d3dRenderPass.stencil = stencil;
     d3dRenderPass.flags = D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL;
 
@@ -302,10 +295,7 @@ bool xxBeginRenderPassD3D8(uint64_t commandBuffer, uint64_t renderPass)
         return false;
     D3DRENDERPASS8 d3dRenderPass = { renderPass };
 
-    float depth = d3dRenderPass.depth;
-    if (depth > 1.0f)
-        depth = 1.0f;
-
+    float depth = d3dRenderPass.depth / (float)UINT16_MAX;
     HRESULT hResult = d3dDevice->Clear(0, nullptr, d3dRenderPass.flags, d3dRenderPass.color, depth, d3dRenderPass.stencil);
     return hResult == S_OK;
 }
@@ -333,7 +323,7 @@ uint64_t xxCreateBufferD3D8(uint64_t device, unsigned int size, bool indexBuffer
     }
 
     LPDIRECT3DVERTEXBUFFER8 d3dVertexBuffer = nullptr;
-    HRESULT hResult = d3dDevice->CreateVertexBuffer(size, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1, D3DPOOL_DEFAULT, &d3dVertexBuffer);
+    HRESULT hResult = d3dDevice->CreateVertexBuffer(size, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &d3dVertexBuffer);
     if (hResult != S_OK)
         return 0;
     return reinterpret_cast<uint64_t>(d3dVertexBuffer);
@@ -528,6 +518,39 @@ void xxUnmapTextureD3D8(uint64_t texture, unsigned int mipmap, unsigned int arra
     }
 }
 //------------------------------------------------------------------------------
+//  Vertex Attribute
+//------------------------------------------------------------------------------
+uint64_t xxCreateVertexAttributeD3D8(uint64_t device, int count, ...)
+{
+    DWORD fvf = 0;
+
+    va_list args;
+    va_start(args, count);
+    for (int i = 0; i < count; ++i)
+    {
+        size_t offset = va_arg(args, size_t);
+        int element = va_arg(args, int);
+        size_t size = va_arg(args, size_t);
+
+        if (offset == 0 && element == 3 && size == sizeof(float) * 3)
+            fvf |= D3DFVF_XYZ;
+        if (offset != 0 && element == 3 && size == sizeof(float) * 3)
+            fvf |= D3DFVF_NORMAL;
+        if (offset != 0 && element == 4 && size == sizeof(char) * 4)
+            fvf |= D3DFVF_DIFFUSE;
+        if (offset != 0 && element == 2 && size == sizeof(float) * 2)
+            fvf += D3DFVF_TEX1;
+    }
+    va_end(args);
+
+    return fvf;
+}
+//------------------------------------------------------------------------------
+void xxDestroyVertexAttributeD3D8(uint64_t vertexAttribute)
+{
+
+}
+//------------------------------------------------------------------------------
 //  Command
 //------------------------------------------------------------------------------
 void xxSetViewportD3D8(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ)
@@ -627,6 +650,16 @@ void xxSetFragmentTexturesD3D8(uint64_t commandBuffer, const uint64_t* textures,
     }
 }
 //------------------------------------------------------------------------------
+void xxSetVertexAttributeD3D8(uint64_t commandBuffer, uint64_t vertexAttribute)
+{
+    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
+    if (d3dDevice == nullptr)
+        return;
+    DWORD fvf = (DWORD)vertexAttribute;
+
+    d3dDevice->SetVertexShader(fvf);
+}
+//------------------------------------------------------------------------------
 void xxDrawIndexedD3D8(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
@@ -660,8 +693,8 @@ void xxSetOrthographicTransformD3D8(uint64_t commandBuffer, float left, float ri
     { { {
         2.0f/(R-L),   0.0f,         0.0f,  0.0f,
         0.0f,         2.0f/(T-B),   0.0f,  0.0f,
-        0.0f,         0.0f,         0.5f,  0.0f,
-        (L+R)/(L-R),  (T+B)/(B-T),  0.5f,  1.0f
+        0.0f,         0.0f,         0.0f,  0.0f,
+        (L+R)/(L-R),  (T+B)/(B-T),  1.0f,  1.0f
     } } };
     d3dDevice->SetTransform(D3DTS_WORLD, &mat_identity);
     d3dDevice->SetTransform(D3DTS_VIEW, &mat_identity);

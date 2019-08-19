@@ -15,22 +15,16 @@
 
 #include "graphic/xxGraphic.h"
 
-static uint64_t                 g_instance = 0;
-static uint64_t                 g_physicalDevice = 0;
-static uint64_t                 g_device = 0;
-static int                      g_bufferIndex = 0;
-static uint64_t                 g_vertexBuffers[4] = {};
-static int                      g_vertexBufferSizes[4] = {};
-static uint64_t                 g_indexBuffers[4] = {};
-static int                      g_indexBufferSizes[4] = {};
-static uint64_t                 g_fontTexture = 0;
-
-struct CUSTOMVERTEX
-{
-    float           pos[3];
-    unsigned int    color;
-    float           uv[2];
-};
+static uint64_t g_instance = 0;
+static uint64_t g_physicalDevice = 0;
+static uint64_t g_device = 0;
+static int      g_bufferIndex = 0;
+static uint64_t g_vertexBuffers[4] = {};
+static int      g_vertexBufferSizes[4] = {};
+static uint64_t g_indexBuffers[4] = {};
+static int      g_indexBufferSizes[4] = {};
+static uint64_t g_fontTexture = 0;
+static uint64_t g_vertexAttribute = 0;
 
 // Forward Declarations
 static void ImGui_ImplXX_InitPlatformInterface();
@@ -51,6 +45,8 @@ static void ImGui_ImplXX_SetupRenderState(ImDrawData* draw_data, uint64_t comman
         float B = draw_data->DisplayPos.y + draw_data->DisplaySize.y + 0.5f;
         xxSetOrthographicTransform(commandBuffer, L, R, T, B);
     }
+
+    xxSetVertexAttribute(commandBuffer, g_vertexAttribute);
 }
 
 // Render function.
@@ -77,7 +73,7 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
     {
         xxDestroyBuffer(vertexBuffer);
         vertexBufferSize = draw_data->TotalVtxCount + 5000;
-        vertexBuffer = xxCreateBuffer(g_device, vertexBufferSize * sizeof(CUSTOMVERTEX), false);
+        vertexBuffer = xxCreateBuffer(g_device, vertexBufferSize * sizeof(ImDrawVert), false);
         if (vertexBuffer == 0)
             return;
     }
@@ -89,30 +85,27 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
         if (indexBuffer == 0)
             return;
     }
+    if (g_vertexAttribute == 0)
+    {
+        ImDrawVert vert;
+        g_vertexAttribute = xxCreateVertexAttribute(g_device, 3,
+                                                    xxOffsetOf(vert, pos),  3, xxSizeOf(float) * 3,
+                                                    xxOffsetOf(vert, col),  4, xxSizeOf(vert.col),
+                                                    xxOffsetOf(vert, uv),   2, xxSizeOf(vert.uv));
+        if (g_vertexAttribute == 0)
+            return;
+    }
 
-    // Copy and convert all vertices into a single contiguous buffer, convert colors to DX9 default format.
-    // FIXME-OPT: This is a waste of resource, the ideal is to use imconfig.h and
-    //  1) to avoid repacking colors:   #define IMGUI_USE_BGRA_PACKED_COLOR
-    //  2) to avoid repacking vertices: #define IMGUI_OVERRIDE_DRAWVERT_STRUCT_LAYOUT struct ImDrawVert { ImVec2 pos; float z; ImU32 col; ImVec2 uv; }
-    CUSTOMVERTEX* vtx_dst = (CUSTOMVERTEX*)xxMapBuffer(vertexBuffer);
+    // Copy and convert all vertices into a swapped buffer.
+    ImDrawVert* vtx_dst = (ImDrawVert*)xxMapBuffer(vertexBuffer);
     ImDrawIdx* idx_dst = (ImDrawIdx*)xxMapBuffer(indexBuffer);
     if (vtx_dst == nullptr || idx_dst == nullptr)
         return;
     for (int n = 0; n < draw_data->CmdListsCount; n++)
     {
         const ImDrawList* cmd_list = draw_data->CmdLists[n];
-        const ImDrawVert* vtx_src = cmd_list->VtxBuffer.Data;
-        for (int i = 0; i < cmd_list->VtxBuffer.Size; i++)
-        {
-            vtx_dst->pos[0] = vtx_src->pos.x;
-            vtx_dst->pos[1] = vtx_src->pos.y;
-            vtx_dst->pos[2] = 0.0f;
-            vtx_dst->color = (vtx_src->col & 0xFF00FF00) | ((vtx_src->col & 0xFF0000) >> 16) | ((vtx_src->col & 0xFF) << 16);
-            vtx_dst->uv[0] = vtx_src->uv.x;
-            vtx_dst->uv[1] = vtx_src->uv.y;
-            vtx_dst++;
-            vtx_src++;
-        }
+        memcpy(vtx_dst, cmd_list->VtxBuffer.Data, cmd_list->VtxBuffer.Size * sizeof(ImDrawVert));
+        vtx_dst += cmd_list->VtxBuffer.Size;
         memcpy(idx_dst, cmd_list->IdxBuffer.Data, cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx));
         idx_dst += cmd_list->IdxBuffer.Size;
     }
@@ -120,7 +113,7 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
     xxUnmapBuffer(indexBuffer);
 
     int offsets[] = { 0 };
-    int strides[] = { sizeof(CUSTOMVERTEX) };
+    int strides[] = { sizeof(ImDrawVert) };
     xxSetVertexBuffers(commandBuffer, &vertexBuffer, offsets, strides, 1);
     xxSetIndexBuffer(commandBuffer, indexBuffer);
 
@@ -250,6 +243,8 @@ void ImGui_ImplXX_InvalidateDeviceObjects()
     }
     xxDestroyTexture(g_fontTexture);
     g_fontTexture = 0;
+    xxDestroyVertexAttribute(g_vertexAttribute);
+    g_vertexAttribute = 0;
     ImGui_ImplXX_InvalidateDeviceObjectsForPlatformWindows();
 }
 

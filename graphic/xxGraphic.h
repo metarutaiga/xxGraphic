@@ -34,6 +34,9 @@ xxGL_API void (*xxDestroyTexture)(uint64_t texture);
 xxGL_API void* (*xxMapTexture)(uint64_t texture, unsigned int& stride, unsigned int mipmap, unsigned int array);
 xxGL_API void (*xxUnmapTexture)(uint64_t texture, unsigned int mipmap, unsigned int array);
 
+xxGL_API uint64_t (*xxCreateVertexAttribute)(uint64_t device, int count, ...);
+xxGL_API void (*xxDestroyVertexAttribute)(uint64_t vertexAttribute);
+
 xxGL_API void (*xxSetViewport)(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ);
 xxGL_API void (*xxSetScissor)(uint64_t commandBuffer, int x, int y, int width, int height);
 
@@ -44,8 +47,11 @@ xxGL_API void (*xxSetFragmentBuffers)(uint64_t commandBuffer, const uint64_t* bu
 xxGL_API void (*xxSetVertexTextures)(uint64_t commandBuffer, const uint64_t* textures, int count);
 xxGL_API void (*xxSetFragmentTextures)(uint64_t commandBuffer, const uint64_t* textures, int count);
 
+xxGL_API void (*xxSetVertexAttribute)(uint64_t commandBuffer, uint64_t vertexAttribute);
+
 xxGL_API void (*xxDrawIndexed)(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 
+// Fixed-Function
 xxGL_API void (*xxSetOrthographicTransform)(uint64_t commandBuffer, float left, float right, float top, float bottom);
 
 #if xxGraphicSource
@@ -82,6 +88,9 @@ xxGL_API void (*xxSetOrthographicTransform)(uint64_t commandBuffer, float left, 
         xxMapTexture = xxMapTexture ## API; \
         xxUnmapTexture = xxUnmapTexture ## API; \
 \
+        xxCreateVertexAttribute = xxCreateVertexAttribute ## API; \
+        xxDestroyVertexAttribute = xxDestroyVertexAttribute ## API; \
+\
         xxSetViewport = xxSetViewport ## API; \
         xxSetScissor = xxSetScissor ## API; \
 \
@@ -91,6 +100,8 @@ xxGL_API void (*xxSetOrthographicTransform)(uint64_t commandBuffer, float left, 
 \
         xxSetVertexTextures = xxSetVertexTextures ## API; \
         xxSetFragmentTextures = xxSetFragmentTextures ## API; \
+\
+        xxSetVertexAttribute = xxSetVertexAttribute ## API; \
 \
         xxDrawIndexed = xxDrawIndexed ## API; \
 \

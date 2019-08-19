@@ -16,6 +16,9 @@
 //---- Using 64-bits texture ID (default is 32-bits)
 #define ImTextureID unsigned long long
 
+//---- Custom Vertex layout
+#define IMGUI_OVERRIDE_DRAWVERT_STRUCT_LAYOUT struct ImDrawVert { ImVec2 pos; float z; ImU32 col; ImVec2 uv; }
+
 //---- Define assertion handler. Defaults to calling assert().
 //#define IM_ASSERT(_EXPR)  MyAssert(_EXPR)
 #ifndef _DEBUG
@@ -48,7 +51,9 @@
 //#define IMGUI_INCLUDE_IMGUI_USER_H
 
 //---- Pack colors to BGRA8 instead of RGBA8 (to avoid converting from one to another)
-//#define IMGUI_USE_BGRA_PACKED_COLOR
+#if defined(_MSC_VER)
+#define IMGUI_USE_BGRA_PACKED_COLOR
+#endif
 
 //---- Avoid multiple STB libraries implementations, or redefine path/filenames to prioritize another version
 // By default the embedded implementations are declared static and not available outside of imgui cpp files.

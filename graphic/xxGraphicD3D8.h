@@ -34,6 +34,9 @@ xxGL_API void xxDestroyTextureD3D8(uint64_t texture);
 xxGL_API void* xxMapTextureD3D8(uint64_t texture, unsigned int& stride, unsigned int mipmap = 0, unsigned int array = 0);
 xxGL_API void xxUnmapTextureD3D8(uint64_t texture, unsigned int mipmap = 0, unsigned int array = 0);
 
+xxGL_API uint64_t xxCreateVertexAttributeD3D8(uint64_t device, int count, ...);
+xxGL_API void xxDestroyVertexAttributeD3D8(uint64_t vertexAttribute);
+
 xxGL_API void xxSetViewportD3D8(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ);
 xxGL_API void xxSetScissorD3D8(uint64_t commandBuffer, int x, int y, int width, int height);
 
@@ -43,6 +46,8 @@ xxGL_API void xxSetFragmentBuffersD3D8(uint64_t commandBuffer, const uint64_t* b
 
 xxGL_API void xxSetVertexTexturesD3D8(uint64_t commandBuffer, const uint64_t* textures, int count);
 xxGL_API void xxSetFragmentTexturesD3D8(uint64_t commandBuffer, const uint64_t* textures, int count);
+
+xxGL_API void xxSetVertexAttributeD3D8(uint64_t commandBuffer, uint64_t vertexAttribute);
 
 xxGL_API void xxDrawIndexedD3D8(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 

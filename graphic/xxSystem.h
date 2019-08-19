@@ -42,8 +42,9 @@
 #   define xxUnlikely(x)    (x)
 #endif
 
-#define xxSizeOf(var)       sizeof(var)
+#define xxSizeOf(var)       (sizeof(var))
 #define xxCountOf(var)      (sizeof(var) / sizeof(*var))
+#define xxOffsetOf(st, m)   (offsetof(st, m))
 
 #define xxAlloc(T, count)   (T*)malloc(sizeof(T) * count)
 #define xxFree(ptr)         free(ptr)

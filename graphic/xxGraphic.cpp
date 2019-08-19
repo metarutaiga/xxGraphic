@@ -32,6 +32,9 @@ void (*xxDestroyTexture)(uint64_t texture);
 void* (*xxMapTexture)(uint64_t texture, unsigned int& stride, unsigned int mipmap, unsigned int array);
 void (*xxUnmapTexture)(uint64_t texture, unsigned int mipmap, unsigned int array);
 
+uint64_t (*xxCreateVertexAttribute)(uint64_t device, int count, ...);
+void (*xxDestroyVertexAttribute)(uint64_t vertexAttribute);
+
 void (*xxSetViewport)(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ);
 void (*xxSetScissor)(uint64_t commandBuffer, int x, int y, int width, int height);
 
@@ -42,6 +45,9 @@ void (*xxSetFragmentBuffers)(uint64_t commandBuffer, const uint64_t* buffers, co
 void (*xxSetVertexTextures)(uint64_t commandBuffer, const uint64_t* textures, int count);
 void (*xxSetFragmentTextures)(uint64_t commandBuffer, const uint64_t* textures, int count);
 
+void (*xxSetVertexAttribute)(uint64_t commandBuffer, uint64_t vertexAttribute);
+
 void (*xxDrawIndexed)(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 
+// Fixed-Function
 void (*xxSetOrthographicTransform)(uint64_t commandBuffer, float left, float right, float top, float bottom);
