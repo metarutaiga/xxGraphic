@@ -48,11 +48,15 @@
 
 #define xxAlloc(T, count)   (T*)malloc(sizeof(T) * count)
 #define xxFree(ptr)         free(ptr)
-
+//==============================================================================
+//  TSC
+//==============================================================================
 xxGL_API uint64_t xxTSCFrequency;
 xxGL_API uint64_t xxTSC();
 xxGL_API float xxGetCurrentTime();
-
+//==============================================================================
+//  Process / Thread ID
+//==============================================================================
 xxGL_API uint64_t xxGetCurrentProcessId();
 xxGL_API uint64_t xxGetCurrentThreadId();
 xxGL_API int xxGetIncrementThreadId();

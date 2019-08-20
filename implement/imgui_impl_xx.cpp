@@ -89,7 +89,7 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
     {
         ImDrawVert vert;
         g_vertexAttribute = xxCreateVertexAttribute(g_device, 3,
-                                                    xxOffsetOf(vert, pos),  3, xxSizeOf(float) * 3,
+                                                    xxOffsetOf(vert, pos),  3, xxSizeOf(vert.pos) + xxSizeOf(vert.z),
                                                     xxOffsetOf(vert, col),  4, xxSizeOf(vert.col),
                                                     xxOffsetOf(vert, uv),   2, xxSizeOf(vert.uv));
         if (g_vertexAttribute == 0)

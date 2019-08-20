@@ -1,5 +1,5 @@
-#define xxGraphicSource 1
 #include "xxGraphicD3D8.h"
+#include "xxGraphicInternal.h"
 
 #include "dxsdk/d3d8.h"
 typedef LPDIRECT3D8 (WINAPI *PFN_DIRECT3D_CREATE8)(UINT);
@@ -9,9 +9,9 @@ static HMODULE              g_d3dLibrary = nullptr;
 static HWND                 g_hWnd = nullptr;
 static LPDIRECT3DSURFACE8   g_depthStencil = nullptr;
 
-//------------------------------------------------------------------------------
+//==============================================================================
 //  Instance
-//------------------------------------------------------------------------------
+//==============================================================================
 uint64_t xxCreateInstanceD3D8()
 {
     if (g_d3dLibrary == nullptr)
@@ -46,9 +46,9 @@ void xxDestroyInstanceD3D8(uint64_t instance)
         g_d3dLibrary = nullptr;
     }
 }
-//------------------------------------------------------------------------------
+//==============================================================================
 //  Device
-//------------------------------------------------------------------------------
+//==============================================================================
 uint64_t xxCreateDeviceD3D8(uint64_t instance)
 {
     LPDIRECT3D8 d3d = reinterpret_cast<LPDIRECT3D8>(instance);
@@ -125,9 +125,9 @@ xxGL_API bool xxTestDeviceD3D8(uint64_t device)
     HRESULT hResult = d3dDevice->TestCooperativeLevel();
     return hResult == S_OK;
 }
-//------------------------------------------------------------------------------
+//==============================================================================
 //  Swapchain
-//------------------------------------------------------------------------------
+//==============================================================================
 uint64_t xxCreateSwapchainD3D8(uint64_t device, void* view, unsigned int width, unsigned int height)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(device);
@@ -190,9 +190,9 @@ void xxPresentSwapchainD3D8(uint64_t swapchain, void* view)
         return;
     d3dSwapchain->Present(nullptr, nullptr, (HWND)view, nullptr);
 }
-//------------------------------------------------------------------------------
-//  CommandBuffer
-//------------------------------------------------------------------------------
+//==============================================================================
+//  Command Buffer
+//==============================================================================
 uint64_t xxGetCommandBufferD3D8(uint64_t device, uint64_t swapchain)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(device);
@@ -256,9 +256,9 @@ void xxEndCommandBufferD3D8(uint64_t commandBuffer)
 void xxSubmitCommandBufferD3D8(uint64_t commandBuffer)
 {
 }
-//------------------------------------------------------------------------------
-//  RenderPass
-//------------------------------------------------------------------------------
+//==============================================================================
+//  Render Pass
+//==============================================================================
 union D3DRENDERPASS8
 {
     uint64_t value;
@@ -304,9 +304,9 @@ void xxEndRenderPassD3D8(uint64_t commandBuffer, uint64_t renderPass)
 {
 
 }
-//------------------------------------------------------------------------------
+//==============================================================================
 //  Buffer
-//------------------------------------------------------------------------------
+//==============================================================================
 uint64_t xxCreateBufferD3D8(uint64_t device, unsigned int size, bool indexBuffer)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(device);
@@ -392,9 +392,9 @@ void xxUnmapBufferD3D8(uint64_t buffer)
         d3dVertexBuffer->Unlock();
     }
 }
-//------------------------------------------------------------------------------
+//==============================================================================
 //  Texture
-//------------------------------------------------------------------------------
+//==============================================================================
 uint64_t xxCreateTextureD3D8(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(device);
@@ -517,9 +517,9 @@ void xxUnmapTextureD3D8(uint64_t texture, unsigned int mipmap, unsigned int arra
         return;
     }
 }
-//------------------------------------------------------------------------------
+//==============================================================================
 //  Vertex Attribute
-//------------------------------------------------------------------------------
+//==============================================================================
 uint64_t xxCreateVertexAttributeD3D8(uint64_t device, int count, ...)
 {
     DWORD fvf = 0;
@@ -550,9 +550,9 @@ void xxDestroyVertexAttributeD3D8(uint64_t vertexAttribute)
 {
 
 }
-//------------------------------------------------------------------------------
+//==============================================================================
 //  Command
-//------------------------------------------------------------------------------
+//==============================================================================
 void xxSetViewportD3D8(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
@@ -675,9 +675,9 @@ void xxDrawIndexedD3D8(uint64_t commandBuffer, int indexCount, int instanceCount
 
     d3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, firstIndex, indexCount / 3);
 }
-//------------------------------------------------------------------------------
-//  Legacy
-//------------------------------------------------------------------------------
+//==============================================================================
+//  Fixed-Function
+//==============================================================================
 void xxSetOrthographicTransformD3D8(uint64_t commandBuffer, float left, float right, float top, float bottom)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
@@ -700,4 +700,4 @@ void xxSetOrthographicTransformD3D8(uint64_t commandBuffer, float left, float ri
     d3dDevice->SetTransform(D3DTS_VIEW, &mat_identity);
     d3dDevice->SetTransform(D3DTS_PROJECTION, &mat_projection);
 }
-//------------------------------------------------------------------------------
+//==============================================================================
