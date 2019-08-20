@@ -1,13 +1,14 @@
 #include "xxGraphicD3D8.h"
+#include "xxGraphicD3DAsm.h"
 #include "xxGraphicInternal.h"
 
 #include "dxsdk/d3d8.h"
 typedef LPDIRECT3D8 (WINAPI *PFN_DIRECT3D_CREATE8)(UINT);
 
-static const wchar_t* const g_dummy = L"xxGraphicDummyWindow";
-static HMODULE              g_d3dLibrary = nullptr;
-static HWND                 g_hWnd = nullptr;
-static LPDIRECT3DSURFACE8   g_depthStencil = nullptr;
+static const wchar_t* const     g_dummy = L"xxGraphicDummyWindow";
+static HMODULE                  g_d3dLibrary = nullptr;
+static HWND                     g_hWnd = nullptr;
+static LPDIRECT3DSURFACE8       g_depthStencil = nullptr;
 
 //==============================================================================
 //  Instance
@@ -97,7 +98,7 @@ void xxDestroyDeviceD3D8(uint64_t device)
     }
 }
 //------------------------------------------------------------------------------
-xxGL_API void xxResetDeviceD3D8(uint64_t device)
+void xxResetDeviceD3D8(uint64_t device)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(device);
     if (d3dDevice == nullptr)
@@ -116,7 +117,7 @@ xxGL_API void xxResetDeviceD3D8(uint64_t device)
     d3dDevice->Reset(&d3dPresentParameters);
 }
 //------------------------------------------------------------------------------
-xxGL_API bool xxTestDeviceD3D8(uint64_t device)
+bool xxTestDeviceD3D8(uint64_t device)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(device);
     if (d3dDevice == nullptr)
@@ -522,7 +523,7 @@ void xxUnmapTextureD3D8(uint64_t texture, unsigned int mipmap, unsigned int arra
 //==============================================================================
 uint64_t xxCreateVertexAttributeD3D8(uint64_t device, int count, ...)
 {
-    DWORD fvf = 0;
+    D3DVERTEXATTRIBUTE8 d3dVertexAttribtue = {};
 
     va_list args;
     va_start(args, count);
@@ -533,17 +534,19 @@ uint64_t xxCreateVertexAttributeD3D8(uint64_t device, int count, ...)
         size_t size = va_arg(args, size_t);
 
         if (offset == 0 && element == 3 && size == sizeof(float) * 3)
-            fvf |= D3DFVF_XYZ;
+            d3dVertexAttribtue.fvf |= D3DFVF_XYZ;
         if (offset != 0 && element == 3 && size == sizeof(float) * 3)
-            fvf |= D3DFVF_NORMAL;
+            d3dVertexAttribtue.fvf |= D3DFVF_NORMAL;
         if (offset != 0 && element == 4 && size == sizeof(char) * 4)
-            fvf |= D3DFVF_DIFFUSE;
+            d3dVertexAttribtue.fvf |= D3DFVF_DIFFUSE;
         if (offset != 0 && element == 2 && size == sizeof(float) * 2)
-            fvf += D3DFVF_TEX1;
+            d3dVertexAttribtue.fvf += D3DFVF_TEX1;
+
+        d3dVertexAttribtue.stride += size;
     }
     va_end(args);
 
-    return fvf;
+    return d3dVertexAttribtue.value;
 }
 //------------------------------------------------------------------------------
 void xxDestroyVertexAttributeD3D8(uint64_t vertexAttribute)
@@ -587,13 +590,13 @@ void xxSetScissorD3D8(uint64_t commandBuffer, int x, int y, int width, int heigh
     scissor._41 = scissor._11 + 2.0f * (vp.X - (x + width * 0.5f)) * invWidth;
     scissor._42 = scissor._22 + 2.0f * (vp.Y - (y + height * 0.5f)) * invHeight;
 
-    D3DMATRIX proj;
-    d3dDevice->GetTransform(D3DTS_PROJECTION, &proj);
-    proj._11 = proj._11 * scissor._11;
-    proj._22 = proj._22 * scissor._22;
-    proj._41 = proj._41 * scissor._11 + scissor._41;
-    proj._42 = proj._42 * scissor._22 - scissor._42;
-    d3dDevice->SetTransform(D3DTS_PROJECTION, &proj);
+    D3DMATRIX projection;
+    d3dDevice->GetTransform(D3DTS_PROJECTION, &projection);
+    projection._11 = projection._11 * scissor._11;
+    projection._22 = projection._22 * scissor._22;
+    projection._41 = projection._41 * scissor._11 + scissor._41;
+    projection._42 = projection._42 * scissor._22 - scissor._42;
+    d3dDevice->SetTransform(D3DTS_PROJECTION, &projection);
 
     vp.X = x;
     vp.Y = y;
@@ -614,7 +617,7 @@ void xxSetIndexBufferD3D8(uint64_t commandBuffer, uint64_t buffer)
     d3dDevice->SetIndices(d3dIndexBuffer, 0);
 }
 //------------------------------------------------------------------------------
-void xxSetVertexBuffersD3D8(uint64_t commandBuffer, const uint64_t* buffers, const int* offsets, const int* strides, int count)
+void xxSetVertexBuffersD3D8(uint64_t commandBuffer, int count, const uint64_t* buffers)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
     if (d3dDevice == nullptr)
@@ -623,21 +626,21 @@ void xxSetVertexBuffersD3D8(uint64_t commandBuffer, const uint64_t* buffers, con
     for (int i = 0; i < count; ++i)
     {
         LPDIRECT3DVERTEXBUFFER8 d3dVertexBuffer = reinterpret_cast<LPDIRECT3DVERTEXBUFFER8>(buffers[i]);
-        d3dDevice->SetStreamSource(i, d3dVertexBuffer, strides[i]);
+        d3dDevice->SetStreamSource(i, d3dVertexBuffer, 0);
     }
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentBuffersD3D8(uint64_t commandBuffer, const uint64_t* buffers, const int* offsets, const int* strides, int count)
+void xxSetFragmentBuffersD3D8(uint64_t commandBuffer, int count, const uint64_t* buffers)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetVertexTexturesD3D8(uint64_t commandBuffer, const uint64_t* textures, int count)
+void xxSetVertexTexturesD3D8(uint64_t commandBuffer, int count, const uint64_t* textures)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentTexturesD3D8(uint64_t commandBuffer, const uint64_t* textures, int count)
+void xxSetFragmentTexturesD3D8(uint64_t commandBuffer, int count, const uint64_t* textures)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
     if (d3dDevice == nullptr)
@@ -655,9 +658,20 @@ void xxSetVertexAttributeD3D8(uint64_t commandBuffer, uint64_t vertexAttribute)
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
     if (d3dDevice == nullptr)
         return;
-    DWORD fvf = (DWORD)vertexAttribute;
 
-    d3dDevice->SetVertexShader(fvf);
+    D3DVERTEXATTRIBUTE8 d3dVertexAttribtue = { vertexAttribute };
+    d3dDevice->SetVertexShader(d3dVertexAttribtue.fvf);
+
+    LPDIRECT3DVERTEXBUFFER8 d3dVertexBuffer = nullptr;
+    for (int i = 0; i < 8; ++i)
+    {
+        UINT stride;
+        d3dDevice->GetStreamSource(i, &d3dVertexBuffer, &stride);
+        if (d3dVertexBuffer == nullptr)
+            break;
+        d3dDevice->SetStreamSource(i, d3dVertexBuffer, d3dVertexAttribtue.stride);
+        d3dVertexBuffer->Release();
+    }
 }
 //------------------------------------------------------------------------------
 void xxDrawIndexedD3D8(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
@@ -688,16 +702,22 @@ void xxSetOrthographicTransformD3D8(uint64_t commandBuffer, float left, float ri
     float R = right;
     float T = top;
     float B = bottom;
-    D3DMATRIX mat_identity = { { { 1.0f, 0.0f, 0.0f, 0.0f,  0.0f, 1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f,  0.0f, 0.0f, 0.0f, 1.0f } } };
-    D3DMATRIX mat_projection =
+    D3DMATRIX identity =
+    { { {
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f
+    } } };
+    D3DMATRIX projection =
     { { {
         2.0f/(R-L),   0.0f,         0.0f,  0.0f,
         0.0f,         2.0f/(T-B),   0.0f,  0.0f,
         0.0f,         0.0f,         0.0f,  0.0f,
         (L+R)/(L-R),  (T+B)/(B-T),  1.0f,  1.0f
     } } };
-    d3dDevice->SetTransform(D3DTS_WORLD, &mat_identity);
-    d3dDevice->SetTransform(D3DTS_VIEW, &mat_identity);
-    d3dDevice->SetTransform(D3DTS_PROJECTION, &mat_projection);
+    d3dDevice->SetTransform(D3DTS_WORLD, &identity);
+    d3dDevice->SetTransform(D3DTS_VIEW, &identity);
+    d3dDevice->SetTransform(D3DTS_PROJECTION, &projection);
 }
 //==============================================================================

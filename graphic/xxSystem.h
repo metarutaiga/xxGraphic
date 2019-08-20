@@ -16,21 +16,21 @@
 #   include <windows.h>
 #endif
 
-#ifndef xxGL_EXTERN
+#ifndef xxEXTERN
 #   if defined(__cplusplus)
-#       define xxGL_EXTERN extern "C"
+#       define xxEXTERN extern "C"
 #   else
-#       define xxGL_EXTERN extern
+#       define xxEXTERN extern
 #   endif
 #endif
 
-#ifndef xxGL_API
+#ifndef xxAPI
 #   if defined(_WINDLL)
-#       define xxGL_API xxGL_EXTERN __declspec(dllexport)
+#       define xxAPI xxEXTERN __declspec(dllexport)
 #   elif defined(_MSC_VER)
-#       define xxGL_API xxGL_EXTERN __declspec(dllimport)
+#       define xxAPI xxEXTERN __declspec(dllimport)
 #   else
-#       define xxGL_API xxGL_EXTERN
+#       define xxAPI xxEXTERN
 #   endif
 #endif
 
@@ -51,12 +51,11 @@
 //==============================================================================
 //  TSC
 //==============================================================================
-xxGL_API uint64_t xxTSCFrequency;
-xxGL_API uint64_t xxTSC();
-xxGL_API float xxGetCurrentTime();
+xxAPI uint64_t xxTSC();
+xxAPI float xxGetCurrentTime();
 //==============================================================================
 //  Process / Thread ID
 //==============================================================================
-xxGL_API uint64_t xxGetCurrentProcessId();
-xxGL_API uint64_t xxGetCurrentThreadId();
-xxGL_API int xxGetIncrementThreadId();
+xxAPI uint64_t xxGetCurrentProcessId();
+xxAPI uint64_t xxGetCurrentThreadId();
+xxAPI int xxGetIncrementThreadId();

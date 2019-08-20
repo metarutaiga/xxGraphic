@@ -57,10 +57,10 @@ void        (*xxDestroyVertexAttribute)(uint64_t vertexAttribute);
 void        (*xxSetViewport)(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ);
 void        (*xxSetScissor)(uint64_t commandBuffer, int x, int y, int width, int height);
 void        (*xxSetIndexBuffer)(uint64_t commandBuffer, uint64_t buffer);
-void        (*xxSetVertexBuffers)(uint64_t commandBuffer, const uint64_t* buffers, const int* offsets, const int* strides, int count);
-void        (*xxSetFragmentBuffers)(uint64_t commandBuffer, const uint64_t* buffers, const int* offsets, const int* strides, int count);
-void        (*xxSetVertexTextures)(uint64_t commandBuffer, const uint64_t* textures, int count);
-void        (*xxSetFragmentTextures)(uint64_t commandBuffer, const uint64_t* textures, int count);
+void        (*xxSetVertexBuffers)(uint64_t commandBuffer, int count, const uint64_t* buffers);
+void        (*xxSetFragmentBuffers)(uint64_t commandBuffer, int count, const uint64_t* buffers);
+void        (*xxSetVertexTextures)(uint64_t commandBuffer, int count, const uint64_t* textures);
+void        (*xxSetFragmentTextures)(uint64_t commandBuffer, int count, const uint64_t* textures);
 void        (*xxSetVertexAttribute)(uint64_t commandBuffer, uint64_t vertexAttribute);
 void        (*xxDrawIndexed)(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================

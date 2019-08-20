@@ -112,9 +112,7 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
     xxUnmapBuffer(vertexBuffer);
     xxUnmapBuffer(indexBuffer);
 
-    int offsets[] = { 0 };
-    int strides[] = { sizeof(ImDrawVert) };
-    xxSetVertexBuffers(commandBuffer, &vertexBuffer, offsets, strides, 1);
+    xxSetVertexBuffers(commandBuffer, 1, &vertexBuffer);
     xxSetIndexBuffer(commandBuffer, indexBuffer);
 
     // Setup desired xx state
@@ -157,7 +155,7 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
                 xxSetScissor(commandBuffer, clip_x, clip_y, clip_width, clip_height);
 
                 // Draw
-                xxSetFragmentTextures(commandBuffer, &pcmd->TextureId, 1);
+                xxSetFragmentTextures(commandBuffer, 1, &pcmd->TextureId);
                 xxDrawIndexed(commandBuffer, pcmd->ElemCount, 1, pcmd->IdxOffset + global_idx_offset, pcmd->VtxOffset + global_vtx_offset, 0);
             }
         }

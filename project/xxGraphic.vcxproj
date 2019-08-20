@@ -19,20 +19,21 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="freetype.vcxproj">
-      <Project>{d98a83df-490d-46d9-809c-55c80ba9275f}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\graphic\xxGraphic.cpp" />
     <ClCompile Include="..\graphic\xxGraphicD3D8.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicD3D8S.cpp" />
     <ClCompile Include="..\graphic\xxGraphicD3D9.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicD3D9S.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicD3DAsm.cpp" />
     <ClCompile Include="..\graphic\xxSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\graphic\xxGraphic.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D8.h" />
+    <ClInclude Include="..\graphic\xxGraphicD3D8S.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D9.h" />
+    <ClInclude Include="..\graphic\xxGraphicD3D9S.h" />
+    <ClInclude Include="..\graphic\xxGraphicD3DAsm.h" />
     <ClInclude Include="..\graphic\xxGraphicInternal.h" />
     <ClInclude Include="..\graphic\xxSystem.h" />
   </ItemGroup>
