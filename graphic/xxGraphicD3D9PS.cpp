@@ -1,4 +1,4 @@
-#include "xxGraphicD3D9S.h"
+#include "xxGraphicD3D9PS.h"
 #include "xxGraphicD3DAsm.h"
 #include "xxGraphicInternal.h"
 
@@ -7,50 +7,50 @@
 //==============================================================================
 //  Instance
 //==============================================================================
-uint64_t xxCreateInstanceD3D9S()
+uint64_t xxCreateInstanceD3D9PS()
 {
     uint64_t instance = xxCreateInstanceD3D9();
     if (instance == 0)
         return 0;
 
-    xxCreateInstance = xxCreateInstanceD3D9S;
-    xxGetDeviceString = xxGetDeviceStringD3D9S;
-    xxCreateVertexAttribute = xxCreateVertexAttributeD3D9S;
-    xxDestroyVertexAttribute = xxDestroyVertexAttributeD3D9S;
-    xxCreateVertexShader = xxCreateVertexShaderD3D9S;
-    xxCreateFragmentShader = xxCreateFragmentShaderD3D9S;
-    xxDestroyShader = xxDestroyShaderD3D9S;
-    xxSetVertexAttribute = xxSetVertexAttributeD3D9S;
-    xxSetVertexShader = xxSetVertexShaderD3D9S;
-    xxSetFragmentShader = xxSetFragmentShaderD3D9S;
-    xxSetVertexConstantBuffer = xxSetVertexConstantBufferD3D9S;
-    xxSetFragmentConstantBuffer = xxSetFragmentConstantBufferD3D9S;
-    xxSetTransform = xxSetTransformD3D9S;
+    xxCreateInstance = xxCreateInstanceD3D9PS;
+    xxGetDeviceString = xxGetDeviceStringD3D9PS;
+    xxCreateVertexAttribute = xxCreateVertexAttributeD3D9PS;
+    xxDestroyVertexAttribute = xxDestroyVertexAttributeD3D9PS;
+    xxCreateVertexShader = xxCreateVertexShaderD3D9PS;
+    xxCreateFragmentShader = xxCreateFragmentShaderD3D9PS;
+    xxDestroyShader = xxDestroyShaderD3D9PS;
+    xxSetVertexAttribute = xxSetVertexAttributeD3D9PS;
+    xxSetVertexShader = xxSetVertexShaderD3D9PS;
+    xxSetFragmentShader = xxSetFragmentShaderD3D9PS;
+    xxSetVertexConstantBuffer = xxSetVertexConstantBufferD3D9PS;
+    xxSetFragmentConstantBuffer = xxSetFragmentConstantBufferD3D9PS;
+    xxSetTransform = xxSetTransformD3D9PS;
 
     return instance;
 }
 //==============================================================================
 //  Device
 //==============================================================================
-const char* xxGetDeviceStringD3D9S(uint64_t device)
+const char* xxGetDeviceStringD3D9PS(uint64_t device)
 {
-    return "Direct3D 9.0 Shader";
+    return "Direct3D 9.0 Programmable Shader";
 }
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-struct D3DVERTEXATTRIBUTE9
+struct D3DVERTEXATTRIBUTE9PS
 {
     LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration;
     int stride;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexAttributeD3D9S(uint64_t device, int count, ...)
+uint64_t xxCreateVertexAttributeD3D9PS(uint64_t device, int count, ...)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
     if (d3dDevice == nullptr)
         return 0;
-    D3DVERTEXATTRIBUTE9* d3dVertexAttribute = new D3DVERTEXATTRIBUTE9;
+    D3DVERTEXATTRIBUTE9PS* d3dVertexAttribute = new D3DVERTEXATTRIBUTE9PS;
     if (d3dVertexAttribute == nullptr)
         return 0;
     d3dVertexAttribute->stride = 0;
@@ -139,9 +139,9 @@ uint64_t xxCreateVertexAttributeD3D9S(uint64_t device, int count, ...)
     return reinterpret_cast<uint64_t>(d3dVertexAttribute);
 }
 //------------------------------------------------------------------------------
-void xxDestroyVertexAttributeD3D9S(uint64_t vertexAttribute)
+void xxDestroyVertexAttributeD3D9PS(uint64_t vertexAttribute)
 {
-    D3DVERTEXATTRIBUTE9* d3dVertexAttribute = reinterpret_cast<D3DVERTEXATTRIBUTE9*>(vertexAttribute);
+    D3DVERTEXATTRIBUTE9PS* d3dVertexAttribute = reinterpret_cast<D3DVERTEXATTRIBUTE9PS*>(vertexAttribute);
     if (d3dVertexAttribute == nullptr)
         return;
 
@@ -150,7 +150,7 @@ void xxDestroyVertexAttributeD3D9S(uint64_t vertexAttribute)
 //==============================================================================
 //  Shader
 //==============================================================================
-uint64_t xxCreateVertexShaderD3D9S(uint64_t device, const char* shader, uint64_t vertexAttribute)
+uint64_t xxCreateVertexShaderD3D9PS(uint64_t device, const char* shader, uint64_t vertexAttribute)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
     if (d3dDevice == nullptr)
@@ -168,7 +168,7 @@ uint64_t xxCreateVertexShaderD3D9S(uint64_t device, const char* shader, uint64_t
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateFragmentShaderD3D9S(uint64_t device, const char* shader)
+uint64_t xxCreateFragmentShaderD3D9PS(uint64_t device, const char* shader)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
     if (d3dDevice == nullptr)
@@ -186,7 +186,7 @@ uint64_t xxCreateFragmentShaderD3D9S(uint64_t device, const char* shader)
     return 0;
 }
 //------------------------------------------------------------------------------
-void xxDestroyShaderD3D9S(uint64_t device, uint64_t shader)
+void xxDestroyShaderD3D9PS(uint64_t device, uint64_t shader)
 {
     LPUNKNOWN d3dShader = reinterpret_cast<LPUNKNOWN>(shader);
     if (d3dShader == nullptr)
@@ -197,12 +197,12 @@ void xxDestroyShaderD3D9S(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Command
 //==============================================================================
-void xxSetVertexAttributeD3D9S(uint64_t commandBuffer, uint64_t vertexAttribute)
+void xxSetVertexAttributeD3D9PS(uint64_t commandBuffer, uint64_t vertexAttribute)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
     if (d3dDevice == nullptr)
         return;
-    D3DVERTEXATTRIBUTE9* d3dVertexAttribtue = reinterpret_cast<D3DVERTEXATTRIBUTE9*>(vertexAttribute);
+    D3DVERTEXATTRIBUTE9PS* d3dVertexAttribtue = reinterpret_cast<D3DVERTEXATTRIBUTE9PS*>(vertexAttribute);
     if (d3dVertexAttribtue == nullptr)
         return;
 
@@ -221,7 +221,7 @@ void xxSetVertexAttributeD3D9S(uint64_t commandBuffer, uint64_t vertexAttribute)
     }
 }
 //------------------------------------------------------------------------------
-void xxSetVertexShaderD3D9S(uint64_t commandBuffer, uint64_t shader)
+void xxSetVertexShaderD3D9PS(uint64_t commandBuffer, uint64_t shader)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
     if (d3dDevice == nullptr)
@@ -231,7 +231,7 @@ void xxSetVertexShaderD3D9S(uint64_t commandBuffer, uint64_t shader)
     d3dDevice->SetVertexShader(d3dShader);
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentShaderD3D9S(uint64_t commandBuffer, uint64_t shader)
+void xxSetFragmentShaderD3D9PS(uint64_t commandBuffer, uint64_t shader)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
     if (d3dDevice == nullptr)
@@ -241,7 +241,7 @@ void xxSetFragmentShaderD3D9S(uint64_t commandBuffer, uint64_t shader)
     d3dDevice->SetPixelShader(d3dShader);
 }
 //------------------------------------------------------------------------------
-void xxSetVertexConstantBufferD3D9S(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
+void xxSetVertexConstantBufferD3D9PS(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
     if (d3dDevice == nullptr)
@@ -251,7 +251,7 @@ void xxSetVertexConstantBufferD3D9S(uint64_t commandBuffer, uint64_t buffer, uns
     d3dDevice->SetVertexShaderConstantF(0, d3dBuffer, size / sizeof(float) / 4);
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentConstantBufferD3D9S(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
+void xxSetFragmentConstantBufferD3D9PS(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
     if (d3dDevice == nullptr)
@@ -263,7 +263,7 @@ void xxSetFragmentConstantBufferD3D9S(uint64_t commandBuffer, uint64_t buffer, u
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-void xxSetTransformD3D9S(uint64_t commandBuffer, const float* world, const float* view, const float* projection)
+void xxSetTransformD3D9PS(uint64_t commandBuffer, const float* world, const float* view, const float* projection)
 {
 
 }

@@ -10,9 +10,9 @@
 #include "implement/imgui_impl_win32.h"
 
 #include "graphic/xxGraphicD3D8.h"
-#include "graphic/xxGraphicD3D8S.h"
+#include "graphic/xxGraphicD3D8PS.h"
 #include "graphic/xxGraphicD3D9.h"
-#include "graphic/xxGraphicD3D9S.h"
+#include "graphic/xxGraphicD3D9PS.h"
 
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
@@ -38,7 +38,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     ::RegisterClassExW(&wc);
     HWND hWnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui XX Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280 * scale, 800 * scale, NULL, NULL, wc.hInstance, NULL);
 
-    g_instance = xxCreateInstanceD3D9S();
+    g_instance = xxCreateInstanceD3D9PS();
     g_device = xxCreateDevice(g_instance);
     g_swapchain = xxCreateSwapchain(g_device, hWnd, 0, 0);
     g_renderPass = xxCreateRenderPass(g_device, 0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0);
@@ -169,20 +169,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                 if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
                     createInstance = xxCreateInstanceD3D8;
 
-                deviceStringTarget = xxGetDeviceStringD3D8S(g_device);
+                deviceStringTarget = xxGetDeviceStringD3D8PS(g_device);
                 selected = (deviceStringCurrent == deviceStringTarget);
                 if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
-                    createInstance = xxCreateInstanceD3D8S;
+                    createInstance = xxCreateInstanceD3D8PS;
 
                 deviceStringTarget = xxGetDeviceStringD3D9(g_device);
                 selected = (deviceStringCurrent == deviceStringTarget);
                 if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
                     createInstance = xxCreateInstanceD3D9;
 
-                deviceStringTarget = xxGetDeviceStringD3D9S(g_device);
+                deviceStringTarget = xxGetDeviceStringD3D9PS(g_device);
                 selected = (deviceStringCurrent == deviceStringTarget);
                 if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
-                    createInstance = xxCreateInstanceD3D9S;
+                    createInstance = xxCreateInstanceD3D9PS;
 
                 ImGui::EndMenu();
 

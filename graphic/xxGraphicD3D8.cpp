@@ -143,7 +143,7 @@ bool xxTestDeviceD3D8(uint64_t device)
 //------------------------------------------------------------------------------
 const char* xxGetDeviceStringD3D8(uint64_t device)
 {
-    return "Direct3D 8.0 Fixed-Function";
+    return "Direct3D 8.0 Fixed Function";
 }
 //==============================================================================
 //  Swapchain
