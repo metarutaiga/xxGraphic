@@ -2,36 +2,6 @@
 
 #include "dxsdk/d3d9.h"
 
-typedef enum _D3DVSD_TOKENTYPE
-{
-    D3DVSD_TOKEN_NOP = 0,           // NOP or extension
-    D3DVSD_TOKEN_STREAM,            // stream selector
-    D3DVSD_TOKEN_STREAMDATA,        // stream data definition (map to vertex input memory)
-    D3DVSD_TOKEN_TESSELLATOR,       // vertex input memory from tessellator
-    D3DVSD_TOKEN_CONSTMEM,          // constant memory from shader
-    D3DVSD_TOKEN_EXT,               // extension
-    D3DVSD_TOKEN_END = 7,           // end-of-array (requires all DWORD bits to be 1)
-    D3DVSD_FORCE_DWORD = 0x7fffffff,// force 32-bit size enum
-} D3DVSD_TOKENTYPE;
-
-#define D3DVSD_TOKENTYPESHIFT       29
-#define D3DVSD_TOKENTYPEMASK        (7 << D3DVSD_TOKENTYPESHIFT)
-
-#define D3DVSD_DATATYPESHIFT        16
-#define D3DVSD_DATATYPEMASK         (0xF << D3DVSD_DATATYPESHIFT)
-
-#define D3DVSD_MAKETOKENTYPE(token) ((token << D3DVSD_TOKENTYPESHIFT) & D3DVSD_TOKENTYPEMASK)
-#define D3DVSD_STREAM(num)          (D3DVSD_MAKETOKENTYPE(D3DVSD_TOKEN_STREAM) | (num))
-#define D3DVSD_REG(reg, type)       (D3DVSD_MAKETOKENTYPE(D3DVSD_TOKEN_STREAMDATA) | ((type) << D3DVSD_DATATYPESHIFT) | (reg))
-#define D3DVSD_END()                0xFFFFFFFF
-
-#define D3DVSDT_FLOAT1              0x00    // 1D float expanded to (value, 0., 0., 1.)
-#define D3DVSDT_FLOAT2              0x01    // 2D float expanded to (value, value, 0., 1.)
-#define D3DVSDT_FLOAT3              0x02    // 3D float expanded to (value, value, value, 1.)
-#define D3DVSDT_FLOAT4              0x03    // 4D float
-#define D3DVSDT_D3DCOLOR            0x04    // 4D packed unsigned bytes mapped to 0. to 1. range
-                                            // Input is in D3DCOLOR format (ARGB) expanded to (R, G, B, A)
-
 //==============================================================================
 //  Direct3D Assembly Shader
 //==============================================================================
@@ -52,15 +22,6 @@ typedef enum _D3DVSD_TOKENTYPE
 #define _SRCM(reg, index, m)        _TOKEN2(REGTYPE, D3DSPR_ ## reg) | D3DVS_W_ ## m | D3DVS_Z_ ## m | D3DVS_Y_ ## m | D3DVS_X_ ## m | index
 #define _DST(reg, index)            _TOKEN2(REGTYPE, D3DSPR_ ## reg) | D3DSP_WRITEMASK_ALL   | index
 #define _DSTM(reg, index, m)        _TOKEN2(REGTYPE, D3DSPR_ ## reg) | D3DSP_WRITEMASK_ ## m | index
-//------------------------------------------------------------------------------
-const DWORD vertexShaderCode10Declaration[] =
-{
-    D3DVSD_STREAM(0),
-    D3DVSD_REG(0, D3DVSDT_FLOAT3),
-    D3DVSD_REG(1, D3DVSDT_D3DCOLOR),
-    D3DVSD_REG(2, D3DVSDT_FLOAT2),
-    D3DVSD_END()
-};
 //------------------------------------------------------------------------------
 const DWORD vertexShaderCode10[] =
 { 

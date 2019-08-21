@@ -36,7 +36,9 @@ void        (*xxEndRenderPass)(uint64_t commandBuffer, uint64_t renderPass);
 //==============================================================================
 //  Buffer
 //==============================================================================
-uint64_t    (*xxCreateBuffer)(uint64_t device, unsigned int size, bool indexBuffer);
+uint64_t    (*xxCreateConstantBuffer)(uint64_t device, unsigned int size);
+uint64_t    (*xxCreateIndexBuffer)(uint64_t device, unsigned int size);
+uint64_t    (*xxCreateVertexBuffer)(uint64_t device, unsigned int size);
 void        (*xxDestroyBuffer)(uint64_t buffer);
 void*       (*xxMapBuffer)(uint64_t buffer);
 void        (*xxUnmapBuffer)(uint64_t buffer);
@@ -53,6 +55,12 @@ void        (*xxUnmapTexture)(uint64_t texture, unsigned int mipmap, unsigned in
 uint64_t    (*xxCreateVertexAttribute)(uint64_t device, int count, ...);
 void        (*xxDestroyVertexAttribute)(uint64_t vertexAttribute);
 //==============================================================================
+//  Shader
+//==============================================================================
+uint64_t    (*xxCreateVertexShader)(uint64_t device, const char* shader, uint64_t vertexAttribute);
+uint64_t    (*xxCreateFragmentShader)(uint64_t device, const char* shader);
+void        (*xxDestroyShader)(uint64_t device, uint64_t shader);
+//==============================================================================
 //  Command
 //==============================================================================
 void        (*xxSetViewport)(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ);
@@ -63,8 +71,12 @@ void        (*xxSetFragmentBuffers)(uint64_t commandBuffer, int count, const uin
 void        (*xxSetVertexTextures)(uint64_t commandBuffer, int count, const uint64_t* textures);
 void        (*xxSetFragmentTextures)(uint64_t commandBuffer, int count, const uint64_t* textures);
 void        (*xxSetVertexAttribute)(uint64_t commandBuffer, uint64_t vertexAttribute);
+void        (*xxSetVertexShader)(uint64_t commandBuffer, uint64_t shader);
+void        (*xxSetFragmentShader)(uint64_t commandBuffer, uint64_t shader);
+void        (*xxSetVertexConstantBuffer)(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
+void        (*xxSetFragmentConstantBuffer)(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
 void        (*xxDrawIndexed)(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-void        (*xxSetOrthographicTransform)(uint64_t commandBuffer, float left, float right, float top, float bottom);
+void        (*xxSetTransform)(uint64_t commandBuffer, const float* world, const float* view, const float* projection);

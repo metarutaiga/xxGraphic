@@ -38,7 +38,9 @@ xxAPI void          (*xxEndRenderPass)(uint64_t commandBuffer, uint64_t renderPa
 //==============================================================================
 //  Buffer
 //==============================================================================
-xxAPI uint64_t      (*xxCreateBuffer)(uint64_t device, unsigned int size, bool indexBuffer);
+xxAPI uint64_t      (*xxCreateConstantBuffer)(uint64_t device, unsigned int size);
+xxAPI uint64_t      (*xxCreateIndexBuffer)(uint64_t device, unsigned int size);
+xxAPI uint64_t      (*xxCreateVertexBuffer)(uint64_t device, unsigned int size);
 xxAPI void          (*xxDestroyBuffer)(uint64_t buffer);
 xxAPI void*         (*xxMapBuffer)(uint64_t buffer);
 xxAPI void          (*xxUnmapBuffer)(uint64_t buffer);
@@ -55,6 +57,12 @@ xxAPI void          (*xxUnmapTexture)(uint64_t texture, unsigned int mipmap, uns
 xxAPI uint64_t      (*xxCreateVertexAttribute)(uint64_t device, int count, ...);
 xxAPI void          (*xxDestroyVertexAttribute)(uint64_t vertexAttribute);
 //==============================================================================
+//  Shader
+//==============================================================================
+xxAPI uint64_t      (*xxCreateVertexShader)(uint64_t device, const char* shader, uint64_t vertexAttribute);
+xxAPI uint64_t      (*xxCreateFragmentShader)(uint64_t device, const char* shader);
+xxAPI void          (*xxDestroyShader)(uint64_t device, uint64_t shader);
+//==============================================================================
 //  Command
 //==============================================================================
 xxAPI void          (*xxSetViewport)(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ);
@@ -65,8 +73,12 @@ xxAPI void          (*xxSetFragmentBuffers)(uint64_t commandBuffer, int count, c
 xxAPI void          (*xxSetVertexTextures)(uint64_t commandBuffer, int count, const uint64_t* textures);
 xxAPI void          (*xxSetFragmentTextures)(uint64_t commandBuffer, int count, const uint64_t* textures);
 xxAPI void          (*xxSetVertexAttribute)(uint64_t commandBuffer, uint64_t vertexAttribute);
+xxAPI void          (*xxSetVertexShader)(uint64_t commandBuffer, uint64_t shader);
+xxAPI void          (*xxSetFragmentShader)(uint64_t commandBuffer, uint64_t shader);
+xxAPI void          (*xxSetVertexConstantBuffer)(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
+xxAPI void          (*xxSetFragmentConstantBuffer)(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
 xxAPI void          (*xxDrawIndexed)(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-xxAPI void          (*xxSetOrthographicTransform)(uint64_t commandBuffer, float left, float right, float top, float bottom);
+xxAPI void          (*xxSetTransform)(uint64_t commandBuffer, const float* world, const float* view, const float* projection);

@@ -38,7 +38,9 @@ xxAPI void       xxEndRenderPassD3D8(uint64_t commandBuffer, uint64_t renderPass
 //==============================================================================
 //  Buffer
 //==============================================================================
-xxAPI uint64_t   xxCreateBufferD3D8(uint64_t device, unsigned int size, bool indexBuffer = false);
+xxAPI uint64_t   xxCreateConstantBufferD3D8(uint64_t device, unsigned int size);
+xxAPI uint64_t   xxCreateIndexBufferD3D8(uint64_t device, unsigned int size);
+xxAPI uint64_t   xxCreateVertexBufferD3D8(uint64_t device, unsigned int size);
 xxAPI void       xxDestroyBufferD3D8(uint64_t buffer);
 xxAPI void*      xxMapBufferD3D8(uint64_t buffer);
 xxAPI void       xxUnmapBufferD3D8(uint64_t buffer);
@@ -55,6 +57,12 @@ xxAPI void       xxUnmapTextureD3D8(uint64_t texture, unsigned int mipmap, unsig
 xxAPI uint64_t   xxCreateVertexAttributeD3D8(uint64_t device, int count, ...);
 xxAPI void       xxDestroyVertexAttributeD3D8(uint64_t vertexAttribute);
 //==============================================================================
+//  Shader
+//==============================================================================
+xxAPI uint64_t   xxCreateVertexShaderD3D8(uint64_t device, const char* shader, uint64_t vertexAttribute);
+xxAPI uint64_t   xxCreateFragmentShaderD3D8(uint64_t device, const char* shader);
+xxAPI void       xxDestroyShaderD3D8(uint64_t device, uint64_t shader);
+//==============================================================================
 //  Command
 //==============================================================================
 xxAPI void       xxSetViewportD3D8(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ);
@@ -65,20 +73,12 @@ xxAPI void       xxSetFragmentBuffersD3D8(uint64_t commandBuffer, int count, con
 xxAPI void       xxSetVertexTexturesD3D8(uint64_t commandBuffer, int count, const uint64_t* textures);
 xxAPI void       xxSetFragmentTexturesD3D8(uint64_t commandBuffer, int count, const uint64_t* textures);
 xxAPI void       xxSetVertexAttributeD3D8(uint64_t commandBuffer, uint64_t vertexAttribute);
+xxAPI void       xxSetVertexShaderD3D8(uint64_t commandBuffer, uint64_t shader);
+xxAPI void       xxSetFragmentShaderD3D8(uint64_t commandBuffer, uint64_t shader);
+xxAPI void       xxSetVertexConstantBufferD3D8(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
+xxAPI void       xxSetFragmentConstantBufferD3D8(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
 xxAPI void       xxDrawIndexedD3D8(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-xxAPI void       xxSetOrthographicTransformD3D8(uint64_t commandBuffer, float left, float right, float top, float bottom);
-//==============================================================================
-//  Structure
-//==============================================================================
-union D3DVERTEXATTRIBUTE8
-{
-    uint64_t value;
-    struct
-    {
-        DWORD fvf;
-        int stride;
-    };
-};
+xxAPI void       xxSetTransformD3D8(uint64_t commandBuffer, const float* world, const float* view, const float* projection);

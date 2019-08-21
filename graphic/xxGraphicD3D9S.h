@@ -9,14 +9,27 @@ xxAPI uint64_t   xxCreateInstanceD3D9S();
 //==============================================================================
 //  Device
 //==============================================================================
-xxAPI uint64_t   xxCreateDeviceD3D9S(uint64_t instance);
-xxAPI void       xxDestroyDeviceD3D9S(uint64_t device);
 xxAPI const char*xxGetDeviceStringD3D9S(uint64_t device);
+//==============================================================================
+//  Vertex Attribute
+//==============================================================================
+xxAPI uint64_t   xxCreateVertexAttributeD3D9S(uint64_t device, int count, ...);
+xxAPI void       xxDestroyVertexAttributeD3D9S(uint64_t vertexAttribute);
+//==============================================================================
+//  Shader
+//==============================================================================
+xxAPI uint64_t   xxCreateVertexShaderD3D9S(uint64_t device, const char* shader, uint64_t vertexAttribute);
+xxAPI uint64_t   xxCreateFragmentShaderD3D9S(uint64_t device, const char* shader);
+xxAPI void       xxDestroyShaderD3D9S(uint64_t device, uint64_t shader);
 //==============================================================================
 //  Command
 //==============================================================================
 xxAPI void       xxSetVertexAttributeD3D9S(uint64_t commandBuffer, uint64_t vertexAttribute);
+xxAPI void       xxSetVertexShaderD3D9S(uint64_t commandBuffer, uint64_t shader);
+xxAPI void       xxSetFragmentShaderD3D9S(uint64_t commandBuffer, uint64_t shader);
+xxAPI void       xxSetVertexConstantBufferD3D9S(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
+xxAPI void       xxSetFragmentConstantBufferD3D9S(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-xxAPI void       xxSetOrthographicTransformD3D9S(uint64_t commandBuffer, float left, float right, float top, float bottom);
+xxAPI void       xxSetTransformD3D9S(uint64_t commandBuffer, const float* world, const float* view, const float* projection);

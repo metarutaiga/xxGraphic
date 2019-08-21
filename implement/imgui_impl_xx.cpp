@@ -25,6 +25,9 @@ static uint64_t g_indexBuffers[4] = {};
 static int      g_indexBufferSizes[4] = {};
 static uint64_t g_fontTexture = 0;
 static uint64_t g_vertexAttribute = 0;
+static uint64_t g_vertexShader = 0;
+static uint64_t g_fragmentShader = 0;
+static uint64_t g_constantBuffer = 0;
 
 // Forward Declarations
 static void ImGui_ImplXX_InitPlatformInterface();
@@ -39,14 +42,49 @@ static void ImGui_ImplXX_SetupRenderState(ImDrawData* draw_data, uint64_t comman
     // Setup orthographic projection matrix
     // Our visible imgui space lies from draw_data->DisplayPos (top left) to draw_data->DisplayPos+data_data->DisplaySize (bottom right). DisplayPos is (0,0) for single viewport apps.
     {
-        float L = draw_data->DisplayPos.x + 0.5f;
-        float R = draw_data->DisplayPos.x + draw_data->DisplaySize.x + 0.5f;
-        float T = draw_data->DisplayPos.y + 0.5f;
-        float B = draw_data->DisplayPos.y + draw_data->DisplaySize.y + 0.5f;
-        xxSetOrthographicTransform(commandBuffer, L, R, T, B);
+        float L = draw_data->DisplayPos.x;
+        float R = draw_data->DisplayPos.x + draw_data->DisplaySize.x;
+        float T = draw_data->DisplayPos.y;
+        float B = draw_data->DisplayPos.y + draw_data->DisplaySize.y;
+
+        // Half-Pixel Offset in Direct3D 8.0 / 9.0
+        const char* deviceString = xxGetDeviceString(g_device);
+        if (strncmp(deviceString, "Direct3D 8", 10) == 0 || strncmp(deviceString, "Direct3D 9", 10) == 0)
+        {
+            L += 0.5f;
+            R += 0.5f;
+            T += 0.5f;
+            B += 0.5f;
+        }
+
+        float identity[] =
+        {
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f
+        };
+        float projection[] =
+        {
+            2.0f/(R-L),  0.0f,        0.0f, 0.0f,
+            0.0f,        2.0f/(T-B),  0.0f, 0.0f,
+            0.0f,        0.0f,        0.5f, 0.0f,
+            (L+R)/(L-R), (T+B)/(B-T), 0.5f, 1.0f
+        };
+
+        xxSetTransform(commandBuffer, identity, identity, projection);
+        void* mapConstantBuffer = xxMapBuffer(g_constantBuffer);
+        if (mapConstantBuffer)
+        {
+            memcpy(mapConstantBuffer, projection, 16 * sizeof(float));
+            xxUnmapBuffer(g_constantBuffer);
+        }
     }
 
     xxSetVertexAttribute(commandBuffer, g_vertexAttribute);
+    xxSetVertexShader(commandBuffer, g_vertexShader);
+    xxSetFragmentShader(commandBuffer, g_fragmentShader);
+    xxSetVertexConstantBuffer(commandBuffer, g_constantBuffer, 16 * sizeof(float));
 }
 
 // Render function.
@@ -73,7 +111,7 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
     {
         xxDestroyBuffer(vertexBuffer);
         vertexBufferSize = draw_data->TotalVtxCount + 5000;
-        vertexBuffer = xxCreateBuffer(g_device, vertexBufferSize * sizeof(ImDrawVert), false);
+        vertexBuffer = xxCreateVertexBuffer(g_device, vertexBufferSize * sizeof(ImDrawVert));
         if (vertexBuffer == 0)
             return;
     }
@@ -81,19 +119,21 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
     {
         xxDestroyBuffer(indexBuffer);
         indexBufferSize = draw_data->TotalIdxCount + 10000;
-        indexBuffer = xxCreateBuffer(g_device, indexBufferSize * sizeof(ImDrawIdx), true);
+        indexBuffer = xxCreateIndexBuffer(g_device, indexBufferSize * sizeof(ImDrawIdx));
         if (indexBuffer == 0)
             return;
     }
     if (g_vertexAttribute == 0)
     {
         ImDrawVert vert;
-        g_vertexAttribute = xxCreateVertexAttribute(g_device, 3,
-                                                    xxOffsetOf(vert, pos),  3, xxSizeOf(vert.pos) + xxSizeOf(vert.z),
-                                                    xxOffsetOf(vert, col),  4, xxSizeOf(vert.col),
-                                                    xxOffsetOf(vert, uv),   2, xxSizeOf(vert.uv));
+        g_vertexAttribute = xxCreateVertexAttribute(g_device, 3, 0, xxOffsetOf(vert, pos),  3, xxSizeOf(vert.pos) + xxSizeOf(vert.z),
+                                                                 0, xxOffsetOf(vert, col),  4, xxSizeOf(vert.col),
+                                                                 0, xxOffsetOf(vert, uv),   2, xxSizeOf(vert.uv));
         if (g_vertexAttribute == 0)
             return;
+        g_vertexShader = xxCreateVertexShader(g_device, "default", g_vertexAttribute);
+        g_fragmentShader = xxCreateFragmentShader(g_device, "default");
+        g_constantBuffer = xxCreateConstantBuffer(g_device, 16 * sizeof(float));
     }
 
     // Copy and convert all vertices into a swapped buffer.
@@ -240,9 +280,15 @@ void ImGui_ImplXX_InvalidateDeviceObjects()
         g_indexBuffers[i] = 0;
     }
     xxDestroyTexture(g_fontTexture);
-    g_fontTexture = 0;
     xxDestroyVertexAttribute(g_vertexAttribute);
+    xxDestroyShader(g_device, g_vertexShader);
+    xxDestroyShader(g_device, g_fragmentShader);
+    xxDestroyBuffer(g_constantBuffer);
+    g_fontTexture = 0;
     g_vertexAttribute = 0;
+    g_vertexShader = 0;
+    g_fragmentShader = 0;
+    g_constantBuffer = 0;
     ImGui_ImplXX_InvalidateDeviceObjectsForPlatformWindows();
 }
 

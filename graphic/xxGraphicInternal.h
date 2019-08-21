@@ -24,7 +24,9 @@
     xxBeginRenderPass = xxBeginRenderPass ## API; \
     xxEndRenderPass = xxEndRenderPass ## API; \
 \
-    xxCreateBuffer = xxCreateBuffer ## API; \
+    xxCreateConstantBuffer = xxCreateConstantBuffer ## API; \
+    xxCreateIndexBuffer = xxCreateIndexBuffer ## API; \
+    xxCreateVertexBuffer = xxCreateVertexBuffer ## API; \
     xxDestroyBuffer = xxDestroyBuffer ## API; \
     xxMapBuffer = xxMapBuffer ## API; \
     xxUnmapBuffer = xxUnmapBuffer ## API; \
@@ -37,21 +39,25 @@
     xxCreateVertexAttribute = xxCreateVertexAttribute ## API; \
     xxDestroyVertexAttribute = xxDestroyVertexAttribute ## API; \
 \
+    xxCreateVertexShader = xxCreateVertexShader ## API; \
+    xxCreateFragmentShader = xxCreateFragmentShader ## API; \
+    xxDestroyShader = xxDestroyShader ## API; \
+\
     xxSetViewport = xxSetViewport ## API; \
     xxSetScissor = xxSetScissor ## API; \
-\
     xxSetIndexBuffer = xxSetIndexBuffer ## API; \
     xxSetVertexBuffers = xxSetVertexBuffers ## API; \
     xxSetFragmentBuffers = xxSetFragmentBuffers ## API; \
-\
     xxSetVertexTextures = xxSetVertexTextures ## API; \
     xxSetFragmentTextures = xxSetFragmentTextures ## API; \
-\
     xxSetVertexAttribute = xxSetVertexAttribute ## API; \
-\
+    xxSetVertexShader = xxSetVertexShader ## API; \
+    xxSetFragmentShader = xxSetFragmentShader ## API; \
+    xxSetVertexConstantBuffer = xxSetVertexConstantBuffer ## API; \
+    xxSetFragmentConstantBuffer = xxSetFragmentConstantBuffer ## API; \
     xxDrawIndexed = xxDrawIndexed ## API; \
 \
-    xxSetOrthographicTransform = xxSetOrthographicTransform ## API;
+    xxSetTransform = xxSetTransform ## API;
 
 #define xxUnregisterFunction() \
     xxCreateInstance = nullptr; \
@@ -77,7 +83,9 @@
     xxBeginRenderPass = nullptr; \
     xxEndRenderPass = nullptr; \
 \
-    xxCreateBuffer = nullptr; \
+    xxCreateConstantBuffer = nullptr; \
+    xxCreateIndexBuffer = nullptr; \
+    xxCreateVertexBuffer = nullptr; \
     xxDestroyBuffer = nullptr; \
     xxMapBuffer = nullptr; \
     xxUnmapBuffer = nullptr; \
@@ -90,18 +98,22 @@
     xxCreateVertexAttribute = nullptr; \
     xxDestroyVertexAttribute = nullptr; \
 \
+    xxCreateVertexShader = nullptr; \
+    xxCreateFragmentShader = nullptr; \
+    xxDestroyShader = nullptr; \
+\
     xxSetViewport = nullptr; \
     xxSetScissor = nullptr; \
-\
     xxSetIndexBuffer = nullptr; \
     xxSetVertexBuffers = nullptr; \
     xxSetFragmentBuffers = nullptr; \
-\
     xxSetVertexTextures = nullptr; \
     xxSetFragmentTextures = nullptr; \
-\
     xxSetVertexAttribute = nullptr; \
-\
+    xxSetVertexShader = nullptr; \
+    xxSetFragmentShader = nullptr; \
+    xxSetVertexConstantBuffer = nullptr; \
+    xxSetFragmentConstantBuffer = nullptr; \
     xxDrawIndexed = nullptr; \
 \
-    xxSetOrthographicTransform = nullptr;
+    xxSetTransform = nullptr;
