@@ -13,6 +13,7 @@
 #include "graphic/xxGraphicD3D8PS.h"
 #include "graphic/xxGraphicD3D9.h"
 #include "graphic/xxGraphicD3D9PS.h"
+#include "graphic/xxGraphicNULL.h"
 
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
@@ -183,6 +184,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                 selected = (deviceStringCurrent == deviceStringTarget);
                 if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
                     createInstance = xxCreateInstanceD3D9PS;
+
+                deviceStringTarget = xxGetDeviceStringNULL(g_device);
+                selected = (deviceStringCurrent == deviceStringTarget);
+                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
+                    createInstance = xxCreateInstanceNULL;
 
                 ImGui::EndMenu();
 

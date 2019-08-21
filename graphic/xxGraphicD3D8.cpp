@@ -581,7 +581,7 @@ void xxUnmapTextureD3D8(uint64_t texture, unsigned int mipmap, unsigned int arra
     default:
         break;
     }
- }
+}
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================

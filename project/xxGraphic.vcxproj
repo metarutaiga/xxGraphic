@@ -25,6 +25,7 @@
     <ClCompile Include="..\graphic\xxGraphicD3D9.cpp" />
     <ClCompile Include="..\graphic\xxGraphicD3D9PS.cpp" />
     <ClCompile Include="..\graphic\xxGraphicD3DAsm.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicNULL.cpp" />
     <ClCompile Include="..\graphic\xxSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -35,6 +36,7 @@
     <ClInclude Include="..\graphic\xxGraphicD3D9PS.h" />
     <ClInclude Include="..\graphic\xxGraphicD3DAsm.h" />
     <ClInclude Include="..\graphic\xxGraphicInternal.h" />
+    <ClInclude Include="..\graphic\xxGraphicNULL.h" />
     <ClInclude Include="..\graphic\xxSystem.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
