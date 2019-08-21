@@ -8,6 +8,7 @@
     xxDestroyDevice = xxDestroyDevice ## API; \
     xxResetDevice = xxResetDevice ## API; \
     xxTestDevice = xxTestDevice ## API; \
+    xxGetDeviceString = xxGetDeviceString ## API; \
 \
     xxCreateSwapchain = xxCreateSwapchain ## API; \
     xxDestroySwapchain = xxDestroySwapchain ## API; \
@@ -51,3 +52,56 @@
     xxDrawIndexed = xxDrawIndexed ## API; \
 \
     xxSetOrthographicTransform = xxSetOrthographicTransform ## API;
+
+#define xxUnregisterFunction() \
+    xxCreateInstance = nullptr; \
+    xxDestroyInstance = nullptr; \
+\
+    xxCreateDevice = nullptr; \
+    xxDestroyDevice = nullptr; \
+    xxResetDevice = nullptr; \
+    xxTestDevice = nullptr; \
+    xxGetDeviceString = nullptr; \
+\
+    xxCreateSwapchain = nullptr; \
+    xxDestroySwapchain = nullptr; \
+    xxPresentSwapchain = nullptr; \
+\
+    xxGetCommandBuffer = nullptr; \
+    xxBeginCommandBuffer = nullptr; \
+    xxEndCommandBuffer = nullptr; \
+    xxSubmitCommandBuffer = nullptr; \
+\
+    xxCreateRenderPass = nullptr; \
+    xxDestroyRenderPass = nullptr; \
+    xxBeginRenderPass = nullptr; \
+    xxEndRenderPass = nullptr; \
+\
+    xxCreateBuffer = nullptr; \
+    xxDestroyBuffer = nullptr; \
+    xxMapBuffer = nullptr; \
+    xxUnmapBuffer = nullptr; \
+\
+    xxCreateTexture = nullptr; \
+    xxDestroyTexture = nullptr; \
+    xxMapTexture = nullptr; \
+    xxUnmapTexture = nullptr; \
+\
+    xxCreateVertexAttribute = nullptr; \
+    xxDestroyVertexAttribute = nullptr; \
+\
+    xxSetViewport = nullptr; \
+    xxSetScissor = nullptr; \
+\
+    xxSetIndexBuffer = nullptr; \
+    xxSetVertexBuffers = nullptr; \
+    xxSetFragmentBuffers = nullptr; \
+\
+    xxSetVertexTextures = nullptr; \
+    xxSetFragmentTextures = nullptr; \
+\
+    xxSetVertexAttribute = nullptr; \
+\
+    xxDrawIndexed = nullptr; \
+\
+    xxSetOrthographicTransform = nullptr;

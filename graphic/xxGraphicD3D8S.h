@@ -11,6 +11,7 @@ xxAPI uint64_t   xxCreateInstanceD3D8S();
 //==============================================================================
 xxAPI uint64_t   xxCreateDeviceD3D8S(uint64_t instance);
 xxAPI void       xxDestroyDeviceD3D8S(uint64_t device);
+xxAPI const char*xxGetDeviceStringD3D8S(uint64_t device);
 //==============================================================================
 //  Command
 //==============================================================================

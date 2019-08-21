@@ -14,6 +14,7 @@
 #   define NOMINMAX
 #   define WIN32_LEAN_AND_MEAN
 #   include <windows.h>
+#   pragma warning(disable:4201)
 #endif
 
 #ifndef xxEXTERN

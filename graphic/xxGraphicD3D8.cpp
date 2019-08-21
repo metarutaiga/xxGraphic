@@ -11,6 +11,18 @@ static HWND                     g_hWnd = nullptr;
 static LPDIRECT3DSURFACE8       g_depthStencil = nullptr;
 
 //==============================================================================
+//  Resource Type
+//==============================================================================
+static uint64_t getResourceType(uint64_t resource)
+{
+    return resource & 7;
+}
+//------------------------------------------------------------------------------
+static uint64_t getResourceData(uint64_t resource)
+{
+    return resource & -8;
+}
+//==============================================================================
 //  Instance
 //==============================================================================
 uint64_t xxCreateInstanceD3D8()
@@ -46,6 +58,8 @@ void xxDestroyInstanceD3D8(uint64_t instance)
         FreeLibrary(g_d3dLibrary);
         g_d3dLibrary = nullptr;
     }
+
+    xxUnregisterFunction();
 }
 //==============================================================================
 //  Device
@@ -125,6 +139,11 @@ bool xxTestDeviceD3D8(uint64_t device)
 
     HRESULT hResult = d3dDevice->TestCooperativeLevel();
     return hResult == S_OK;
+}
+//------------------------------------------------------------------------------
+const char* xxGetDeviceStringD3D8(uint64_t device)
+{
+    return "Direct3D 8.0 Fixed-Function";
 }
 //==============================================================================
 //  Swapchain
@@ -225,15 +244,15 @@ bool xxBeginCommandBufferD3D8(uint64_t commandBuffer)
     d3dDevice->SetPixelShader(NULL);
     d3dDevice->SetVertexShader(NULL);
     d3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-    d3dDevice->SetRenderState(D3DRS_LIGHTING, false);
-    d3dDevice->SetRenderState(D3DRS_ZENABLE, false);
-    d3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
-    d3dDevice->SetRenderState(D3DRS_ALPHATESTENABLE, false);
+    d3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+    d3dDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
+    d3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+    d3dDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
     d3dDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
     d3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
     d3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
     d3dDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
-    d3dDevice->SetRenderState(D3DRS_FOGENABLE, false);
+    d3dDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
     d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
     d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
     d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
@@ -320,19 +339,19 @@ uint64_t xxCreateBufferD3D8(uint64_t device, unsigned int size, bool indexBuffer
         HRESULT hResult = d3dDevice->CreateIndexBuffer(size, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX32, D3DPOOL_DEFAULT, &d3dIndexBuffer);
         if (hResult != S_OK)
             return 0;
-        return reinterpret_cast<uint64_t>(d3dIndexBuffer);
+        return reinterpret_cast<uint64_t>(d3dIndexBuffer) | D3DRTYPE_INDEXBUFFER;
     }
 
     LPDIRECT3DVERTEXBUFFER8 d3dVertexBuffer = nullptr;
     HRESULT hResult = d3dDevice->CreateVertexBuffer(size, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &d3dVertexBuffer);
     if (hResult != S_OK)
         return 0;
-    return reinterpret_cast<uint64_t>(d3dVertexBuffer);
+    return reinterpret_cast<uint64_t>(d3dVertexBuffer) | D3DRTYPE_VERTEXBUFFER;
 }
 //------------------------------------------------------------------------------
 void xxDestroyBufferD3D8(uint64_t buffer)
 {
-    LPDIRECT3DRESOURCE8 d3dResource = reinterpret_cast<LPDIRECT3DRESOURCE8>(buffer);
+    LPDIRECT3DRESOURCE8 d3dResource = reinterpret_cast<LPDIRECT3DRESOURCE8>(getResourceData(buffer));
     if (d3dResource == nullptr)
         return;
     d3dResource->Release();
@@ -340,32 +359,34 @@ void xxDestroyBufferD3D8(uint64_t buffer)
 //------------------------------------------------------------------------------
 void* xxMapBufferD3D8(uint64_t buffer)
 {
-    LPDIRECT3DRESOURCE8 d3dResource = reinterpret_cast<LPDIRECT3DRESOURCE8>(buffer);
-    if (d3dResource == nullptr)
-        return nullptr;
-
-    LPDIRECT3DINDEXBUFFER8 d3dIndexBuffer = nullptr;
-    if (d3dResource->QueryInterface(IID_PPV_ARGS(&d3dIndexBuffer)) == S_OK)
+    switch (getResourceType(buffer))
     {
-        d3dIndexBuffer->Release();
-
-        BYTE* ptr = nullptr;
-        HRESULT hResult = d3dIndexBuffer->Lock(0, 0, &ptr, D3DLOCK_NOOVERWRITE);
-        if (hResult != S_OK)
-            return nullptr;
-        return ptr;
-    }
-
-    LPDIRECT3DVERTEXBUFFER8 d3dVertexBuffer = nullptr;
-    if (d3dResource->QueryInterface(IID_PPV_ARGS(&d3dVertexBuffer)) == S_OK)
+    case D3DRTYPE_VERTEXBUFFER:
     {
-        d3dVertexBuffer->Release();
+        LPDIRECT3DVERTEXBUFFER8 d3dVertexBuffer = reinterpret_cast<LPDIRECT3DVERTEXBUFFER8>(getResourceData(buffer));
+        if (d3dVertexBuffer == nullptr)
+            break;
 
         BYTE* ptr = nullptr;
         HRESULT hResult = d3dVertexBuffer->Lock(0, 0, &ptr, D3DLOCK_NOOVERWRITE);
-        if (hResult != S_OK)
-            return nullptr;
-        return ptr;
+        if (hResult == S_OK)
+            return ptr;
+        break;
+    }
+    case D3DRTYPE_INDEXBUFFER:
+    {
+        LPDIRECT3DINDEXBUFFER8 d3dIndexBuffer = reinterpret_cast<LPDIRECT3DINDEXBUFFER8>(getResourceData(buffer));
+        if (d3dIndexBuffer == nullptr)
+            break;
+
+        BYTE* ptr = nullptr;
+        HRESULT hResult = d3dIndexBuffer->Lock(0, 0, &ptr, D3DLOCK_NOOVERWRITE);
+        if (hResult == S_OK)
+            return ptr;
+        break;
+    }
+    default:
+        break;
     }
 
     return nullptr;
@@ -373,24 +394,28 @@ void* xxMapBufferD3D8(uint64_t buffer)
 //------------------------------------------------------------------------------
 void xxUnmapBufferD3D8(uint64_t buffer)
 {
-    LPDIRECT3DRESOURCE8 d3dResource = reinterpret_cast<LPDIRECT3DRESOURCE8>(buffer);
-    if (d3dResource == nullptr)
-        return;
-
-    LPDIRECT3DINDEXBUFFER8 d3dIndexBuffer = nullptr;
-    if (d3dResource->QueryInterface(IID_PPV_ARGS(&d3dIndexBuffer)) == S_OK)
+    switch (getResourceType(buffer))
     {
-        d3dIndexBuffer->Release();
-
-        d3dIndexBuffer->Unlock();
-    }
-
-    LPDIRECT3DVERTEXBUFFER8 d3dVertexBuffer = nullptr;
-    if (d3dResource->QueryInterface(IID_PPV_ARGS(&d3dVertexBuffer)) == S_OK)
+    case D3DRTYPE_VERTEXBUFFER:
     {
-        d3dVertexBuffer->Release();
+        LPDIRECT3DVERTEXBUFFER8 d3dVertexBuffer = reinterpret_cast<LPDIRECT3DVERTEXBUFFER8>(getResourceData(buffer));
+        if (d3dVertexBuffer == nullptr)
+            break;
 
         d3dVertexBuffer->Unlock();
+        return;
+    }
+    case D3DRTYPE_INDEXBUFFER:
+    {
+        LPDIRECT3DINDEXBUFFER8 d3dIndexBuffer = reinterpret_cast<LPDIRECT3DINDEXBUFFER8>(getResourceData(buffer));
+        if (d3dIndexBuffer == nullptr)
+            break;
+
+        d3dIndexBuffer->Unlock();
+        return;
+    }
+    default:
+        break;
     }
 }
 //==============================================================================
@@ -405,13 +430,13 @@ uint64_t xxCreateTextureD3D8(uint64_t device, int format, unsigned int width, un
     if (width == 0 || height == 0 || depth == 0 || mipmap == 0 || array == 0)
         return 0;
 
-    if (depth != 1 && array == 1)
+    if (depth == 1 && array == 1)
     {
-        LPDIRECT3DVOLUMETEXTURE8 d3dVolumeTexture = nullptr;
-        HRESULT hResult = d3dDevice->CreateVolumeTexture(width, height, depth, mipmap, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &d3dVolumeTexture);
+        LPDIRECT3DTEXTURE8 d3dTexture = nullptr;
+        HRESULT hResult = d3dDevice->CreateTexture(width, height, mipmap, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &d3dTexture);
         if (hResult != S_OK)
             return 0;
-        return reinterpret_cast<uint64_t>(d3dVolumeTexture);
+        return reinterpret_cast<uint64_t>(d3dTexture) | D3DRTYPE_TEXTURE;
     }
 
     if (width == height && depth == 1 && array == 6)
@@ -420,16 +445,16 @@ uint64_t xxCreateTextureD3D8(uint64_t device, int format, unsigned int width, un
         HRESULT hResult = d3dDevice->CreateCubeTexture(width, mipmap, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &d3dCubeTexture);
         if (hResult != S_OK)
             return 0;
-        return reinterpret_cast<uint64_t>(d3dCubeTexture);
+        return reinterpret_cast<uint64_t>(d3dCubeTexture) | D3DRTYPE_CUBETEXTURE;
     }
 
-    if (depth == 1 && array == 1)
+    if (depth != 1 && array == 1)
     {
-        LPDIRECT3DTEXTURE8 d3dTexture = nullptr;
-        HRESULT hResult = d3dDevice->CreateTexture(width, height, mipmap, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &d3dTexture);
+        LPDIRECT3DVOLUMETEXTURE8 d3dVolumeTexture = nullptr;
+        HRESULT hResult = d3dDevice->CreateVolumeTexture(width, height, depth, mipmap, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &d3dVolumeTexture);
         if (hResult != S_OK)
             return 0;
-        return reinterpret_cast<uint64_t>(d3dTexture);
+        return reinterpret_cast<uint64_t>(d3dVolumeTexture) | D3DRTYPE_VOLUME;
     }
 
     return 0;
@@ -437,7 +462,7 @@ uint64_t xxCreateTextureD3D8(uint64_t device, int format, unsigned int width, un
 //------------------------------------------------------------------------------
 void xxDestroyTextureD3D8(uint64_t texture)
 {
-    LPDIRECT3DBASETEXTURE8 d3dBaseTexture = reinterpret_cast<LPDIRECT3DBASETEXTURE8>(texture);
+    LPDIRECT3DBASETEXTURE8 d3dBaseTexture = reinterpret_cast<LPDIRECT3DBASETEXTURE8>(getResourceData(texture));
     if (d3dBaseTexture == nullptr)
         return;
     d3dBaseTexture->Release();
@@ -445,41 +470,43 @@ void xxDestroyTextureD3D8(uint64_t texture)
 //------------------------------------------------------------------------------
 void* xxMapTextureD3D8(uint64_t texture, unsigned int& stride, unsigned int mipmap, unsigned int array)
 {
-    LPDIRECT3DBASETEXTURE8 d3dBaseTexture = reinterpret_cast<LPDIRECT3DBASETEXTURE8>(texture);
-    if (d3dBaseTexture == nullptr)
-        return nullptr;
-
-    LPDIRECT3DVOLUMETEXTURE8 d3dVolumeTexture = nullptr;
-    if (d3dBaseTexture->QueryInterface(IID_PPV_ARGS(&d3dVolumeTexture)) == S_OK)
+    switch (getResourceType(texture))
     {
-        d3dVolumeTexture->Release();
+    case D3DRTYPE_TEXTURE:
+    {
+        LPDIRECT3DTEXTURE8 d3dTexture = reinterpret_cast<LPDIRECT3DTEXTURE8>(getResourceData(texture));
+        if (d3dTexture == nullptr)
+            break;
 
-        D3DLOCKED_BOX box = {};
-        d3dVolumeTexture->LockBox(mipmap, &box, nullptr, D3DLOCK_NOSYSLOCK);
-        stride = box.RowPitch;
-        return box.pBits;
+        D3DLOCKED_RECT rect = {};
+        d3dTexture->LockRect(mipmap, &rect, nullptr, D3DLOCK_NOSYSLOCK);
+        stride = rect.Pitch;
+        return rect.pBits;
     }
-
-    LPDIRECT3DCUBETEXTURE8 d3dCubeTexture = nullptr;
-    if (d3dBaseTexture->QueryInterface(IID_PPV_ARGS(&d3dCubeTexture)) == S_OK)
+    case D3DRTYPE_CUBETEXTURE:
     {
-        d3dCubeTexture->Release();
+        LPDIRECT3DCUBETEXTURE8 d3dCubeTexture = reinterpret_cast<LPDIRECT3DCUBETEXTURE8>(getResourceData(texture));
+        if (d3dCubeTexture == nullptr)
+            break;
 
         D3DLOCKED_RECT rect = {};
         d3dCubeTexture->LockRect((D3DCUBEMAP_FACES)array, mipmap, &rect, nullptr, D3DLOCK_NOSYSLOCK);
         stride = rect.Pitch;
         return rect.pBits;
     }
-
-    LPDIRECT3DTEXTURE8 d3dTexture = nullptr;
-    if (d3dBaseTexture->QueryInterface(IID_PPV_ARGS(&d3dTexture)) == S_OK)
+    case D3DRTYPE_VOLUME:
     {
-        d3dTexture->Release();
+        LPDIRECT3DVOLUMETEXTURE8 d3dVolumeTexture = reinterpret_cast<LPDIRECT3DVOLUMETEXTURE8>(getResourceData(texture));
+        if (d3dVolumeTexture == nullptr)
+            break;
 
-        D3DLOCKED_RECT rect = {};
-        d3dTexture->LockRect(mipmap, &rect, nullptr, D3DLOCK_NOSYSLOCK);
-        stride = rect.Pitch;
-        return rect.pBits;
+        D3DLOCKED_BOX box = {};
+        d3dVolumeTexture->LockBox(mipmap, &box, nullptr, D3DLOCK_NOSYSLOCK);
+        stride = box.RowPitch;
+        return box.pBits;
+    }
+    default:
+        break;
     }
 
     return nullptr;
@@ -487,37 +514,39 @@ void* xxMapTextureD3D8(uint64_t texture, unsigned int& stride, unsigned int mipm
 //------------------------------------------------------------------------------
 void xxUnmapTextureD3D8(uint64_t texture, unsigned int mipmap, unsigned int array)
 {
-    LPDIRECT3DBASETEXTURE8 d3dBaseTexture = reinterpret_cast<LPDIRECT3DBASETEXTURE8>(texture);
-    if (d3dBaseTexture == nullptr)
-        return;
-
-    LPDIRECT3DVOLUMETEXTURE8 d3dVolumeTexture = nullptr;
-    if (d3dBaseTexture->QueryInterface(IID_PPV_ARGS(&d3dVolumeTexture)) == S_OK)
+    switch (getResourceType(texture))
     {
-        d3dVolumeTexture->Release();
-
-        d3dVolumeTexture->UnlockBox(mipmap);
-        return;
-    }
-
-    LPDIRECT3DCUBETEXTURE8 d3dCubeTexture = nullptr;
-    if (d3dBaseTexture->QueryInterface(IID_PPV_ARGS(&d3dCubeTexture)) == S_OK)
+    case D3DRTYPE_TEXTURE:
     {
-        d3dCubeTexture->Release();
-
-        d3dCubeTexture->UnlockRect((D3DCUBEMAP_FACES)array, mipmap);
-        return;
-    }
-
-    LPDIRECT3DTEXTURE8 d3dTexture = nullptr;
-    if (d3dBaseTexture->QueryInterface(IID_PPV_ARGS(&d3dTexture)) == S_OK)
-    {
-        d3dTexture->Release();
+        LPDIRECT3DTEXTURE8 d3dTexture = reinterpret_cast<LPDIRECT3DTEXTURE8>(getResourceData(texture));
+        if (d3dTexture == nullptr)
+            break;
 
         d3dTexture->UnlockRect(mipmap);
         return;
     }
-}
+    case D3DRTYPE_CUBETEXTURE:
+    {
+        LPDIRECT3DCUBETEXTURE8 d3dCubeTexture = reinterpret_cast<LPDIRECT3DCUBETEXTURE8>(getResourceData(texture));
+        if (d3dCubeTexture == nullptr)
+            break;
+
+        d3dCubeTexture->UnlockRect((D3DCUBEMAP_FACES)array, mipmap);
+        return;
+    }
+    case D3DRTYPE_VOLUME:
+    {
+        LPDIRECT3DVOLUMETEXTURE8 d3dVolumeTexture = reinterpret_cast<LPDIRECT3DVOLUMETEXTURE8>(getResourceData(texture));
+        if (d3dVolumeTexture == nullptr)
+            break;
+
+        d3dVolumeTexture->UnlockBox(mipmap);
+        return;
+    }
+    default:
+        break;
+    }
+ }
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
@@ -610,7 +639,7 @@ void xxSetIndexBufferD3D8(uint64_t commandBuffer, uint64_t buffer)
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
     if (d3dDevice == nullptr)
         return;
-    LPDIRECT3DINDEXBUFFER8 d3dIndexBuffer = reinterpret_cast<LPDIRECT3DINDEXBUFFER8>(buffer);
+    LPDIRECT3DINDEXBUFFER8 d3dIndexBuffer = reinterpret_cast<LPDIRECT3DINDEXBUFFER8>(getResourceData(buffer));
     if (d3dIndexBuffer == nullptr)
         return;
 
@@ -625,7 +654,7 @@ void xxSetVertexBuffersD3D8(uint64_t commandBuffer, int count, const uint64_t* b
 
     for (int i = 0; i < count; ++i)
     {
-        LPDIRECT3DVERTEXBUFFER8 d3dVertexBuffer = reinterpret_cast<LPDIRECT3DVERTEXBUFFER8>(buffers[i]);
+        LPDIRECT3DVERTEXBUFFER8 d3dVertexBuffer = reinterpret_cast<LPDIRECT3DVERTEXBUFFER8>(getResourceData(buffers[i]));
         d3dDevice->SetStreamSource(i, d3dVertexBuffer, 0);
     }
 }
@@ -648,7 +677,7 @@ void xxSetFragmentTexturesD3D8(uint64_t commandBuffer, int count, const uint64_t
 
     for (int i = 0; i < count; ++i)
     {
-        LPDIRECT3DBASETEXTURE8 d3dBaseTexture = reinterpret_cast<LPDIRECT3DBASETEXTURE8>(textures[i]);
+        LPDIRECT3DBASETEXTURE8 d3dBaseTexture = reinterpret_cast<LPDIRECT3DBASETEXTURE8>(getResourceData(textures[i]));
         d3dDevice->SetTexture(i, d3dBaseTexture);
     }
 }

@@ -153,6 +153,61 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
+        // Renderer
+        if (ImGui::BeginMainMenuBar())
+        {
+            if (ImGui::BeginMenu("Renderer"))
+            {
+                uint64_t(*createInstance)() = nullptr;
+
+                const char* deviceStringCurrent = xxGetDeviceString(g_device);
+                const char* deviceStringTarget;
+                bool selected = false;
+
+                deviceStringTarget = xxGetDeviceStringD3D8(g_device);
+                selected = (deviceStringCurrent == deviceStringTarget);
+                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
+                    createInstance = xxCreateInstanceD3D8;
+
+                deviceStringTarget = xxGetDeviceStringD3D8S(g_device);
+                selected = (deviceStringCurrent == deviceStringTarget);
+                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
+                    createInstance = xxCreateInstanceD3D8S;
+
+                deviceStringTarget = xxGetDeviceStringD3D9(g_device);
+                selected = (deviceStringCurrent == deviceStringTarget);
+                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
+                    createInstance = xxCreateInstanceD3D9;
+
+                deviceStringTarget = xxGetDeviceStringD3D9S(g_device);
+                selected = (deviceStringCurrent == deviceStringTarget);
+                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
+                    createInstance = xxCreateInstanceD3D9S;
+
+                ImGui::EndMenu();
+
+                if (createInstance != nullptr)
+                {
+                    ImGui_ImplXX_Shutdown();
+                    ImGui_ImplWin32_Shutdown();
+                    xxDestroyRenderPass(g_renderPass);
+                    xxDestroySwapchain(g_swapchain);
+                    xxDestroyDevice(g_device);
+                    xxDestroyInstance(g_instance);
+                    g_instance = createInstance();
+                    g_device = xxCreateDevice(g_instance);
+                    g_swapchain = xxCreateSwapchain(g_device, hWnd, 0, 0);
+                    g_renderPass = xxCreateRenderPass(g_device, 0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0);
+                    ImGui_ImplWin32_Init(hWnd);
+                    ImGui_ImplXX_Init(g_instance, 0, g_device);
+                    ImGui::EndMainMenuBar();
+                    ImGui::EndFrame();
+                    continue;
+                }
+            }
+            ImGui::EndMainMenuBar();
+        }
+
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);

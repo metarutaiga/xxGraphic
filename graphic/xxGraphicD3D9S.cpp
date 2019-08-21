@@ -20,6 +20,7 @@ uint64_t xxCreateInstanceD3D9S()
     xxCreateInstance = xxCreateInstanceD3D9S;
     xxCreateDevice = xxCreateDeviceD3D9S;
     xxDestroyDevice = xxDestroyDeviceD3D9S;
+    xxGetDeviceString = xxGetDeviceStringD3D9S;
     xxSetVertexAttribute = xxSetVertexAttributeD3D9S;
     xxSetOrthographicTransform = xxSetOrthographicTransformD3D9S;
 
@@ -99,6 +100,11 @@ void xxDestroyDeviceD3D9S(uint64_t device)
     }
 
     xxDestroyDeviceD3D9(device);
+}
+//------------------------------------------------------------------------------
+const char* xxGetDeviceStringD3D9S(uint64_t device)
+{
+    return "Direct3D 9.0 Shader";
 }
 //==============================================================================
 //  Command
