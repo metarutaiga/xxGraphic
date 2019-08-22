@@ -405,7 +405,6 @@ struct D3D11TEXTURE
     ID3D11Texture2D*            texture2D;
     ID3D11Texture3D*            texture3D;
     ID3D11ShaderResourceView*   resourceView;
-    ID3D11SamplerState*         samplerState;
 };
 //------------------------------------------------------------------------------
 uint64_t xxCreateTextureD3D11(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array)
@@ -469,29 +468,10 @@ uint64_t xxCreateTextureD3D11(uint64_t device, int format, unsigned int width, u
         return 0;
     }
 
-    ID3D11SamplerState* d3dSamplerState = nullptr;
-    {
-        D3D11_SAMPLER_DESC samplerDesc = {};
-        samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-        samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-        samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-        samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-        samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-        HRESULT hResult = d3dDevice->CreateSamplerState(&samplerDesc, &d3dSamplerState);
-        if (hResult != S_OK)
-        {
-            d3dView->Release();
-            d3dResource->Release();
-            delete d3dTexture;
-            return 0;
-        }
-    }
-
     d3dTexture->texture1D = d3dTexture1D;
     d3dTexture->texture2D = d3dTexture2D;
     d3dTexture->texture3D = d3dTexture3D;
     d3dTexture->resourceView = d3dView;
-    d3dTexture->samplerState = d3dSamplerState;
 
     return reinterpret_cast<uint64_t>(d3dTexture);
 }
@@ -510,8 +490,6 @@ void xxDestroyTextureD3D11(uint64_t texture)
         d3dTexture->texture3D->Release();
     if (d3dTexture->resourceView)
         d3dTexture->resourceView->Release();
-    if (d3dTexture->samplerState)
-        d3dTexture->samplerState->Release();
     delete d3dTexture;
 }
 //------------------------------------------------------------------------------
@@ -1019,7 +997,6 @@ void xxSetVertexTexturesD3D11(uint64_t commandBuffer, int count, const uint64_t*
     {
         D3D11TEXTURE* d3dTexture = reinterpret_cast<D3D11TEXTURE*>(textures[i]);
         d3dDeviceContext->VSSetShaderResources(i, 1, &d3dTexture->resourceView);
-        d3dDeviceContext->VSSetSamplers(i, 1, &d3dTexture->samplerState);
     }
 }
 //------------------------------------------------------------------------------
@@ -1031,7 +1008,6 @@ void xxSetFragmentTexturesD3D11(uint64_t commandBuffer, int count, const uint64_
     {
         D3D11TEXTURE* d3dTexture = reinterpret_cast<D3D11TEXTURE*>(textures[i]);
         d3dDeviceContext->PSSetShaderResources(i, 1, &d3dTexture->resourceView);
-        d3dDeviceContext->PSSetSamplers(i, 1, &d3dTexture->samplerState);
     }
 }
 //------------------------------------------------------------------------------

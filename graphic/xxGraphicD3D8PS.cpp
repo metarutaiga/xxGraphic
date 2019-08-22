@@ -9,12 +9,12 @@
 //==============================================================================
 static uint64_t getResourceType(uint64_t resource)
 {
-    return resource & 7ui64;
+    return resource & 7ull;
 }
 //------------------------------------------------------------------------------
 static uint64_t getResourceData(uint64_t resource)
 {
-    return resource & ~7ui64;
+    return resource & ~7ull;
 }
 //==============================================================================
 //  Instance
