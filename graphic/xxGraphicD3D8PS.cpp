@@ -5,6 +5,18 @@
 #include "dxsdk/d3d8.h"
 
 //==============================================================================
+//  Resource Type
+//==============================================================================
+static uint64_t getResourceType(uint64_t resource)
+{
+    return resource & 7;
+}
+//------------------------------------------------------------------------------
+static uint64_t getResourceData(uint64_t resource)
+{
+    return resource & -8;
+}
+//==============================================================================
 //  Instance
 //==============================================================================
 uint64_t xxCreateInstanceD3D8PS()
@@ -20,10 +32,9 @@ uint64_t xxCreateInstanceD3D8PS()
     xxCreateVertexShader = xxCreateVertexShaderD3D8PS;
     xxCreateFragmentShader = xxCreateFragmentShaderD3D8PS;
     xxDestroyShader = xxDestroyShaderD3D8PS;
+    xxCreatePipeline = xxCreatePipelineD3D8PS;
     xxSetScissor = xxSetScissorD3D8PS;
-    xxSetVertexAttribute = xxSetVertexAttributeD3D8PS;
-    xxSetVertexShader = xxSetVertexShaderD3D8PS;
-    xxSetFragmentShader = xxSetFragmentShaderD3D8PS;
+    xxSetVertexBuffers = xxSetVertexBuffersD3D8PS;
     xxSetVertexConstantBuffer = xxSetVertexConstantBufferD3D8PS;
     xxSetFragmentConstantBuffer = xxSetFragmentConstantBufferD3D8PS;
 
@@ -175,6 +186,13 @@ void xxDestroyShaderD3D8PS(uint64_t device, uint64_t shader)
     }
 }
 //==============================================================================
+//  Pipeline
+//==============================================================================
+uint64_t xxCreatePipelineD3D8PS(uint64_t device, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+{
+    return xxCreatePipelineD3D8(device, blendState, depthStencilState, rasterizerState, 0, vertexShader, fragmentShader);
+}
+//==============================================================================
 //  Command
 //==============================================================================
 void xxSetScissorD3D8PS(uint64_t commandBuffer, int x, int y, int width, int height)
@@ -191,7 +209,7 @@ void xxSetScissorD3D8PS(uint64_t commandBuffer, int x, int y, int width, int hei
     d3dDevice->SetVertexShaderConstant(0, projection.m[0], 16);
 }
 //------------------------------------------------------------------------------
-void xxSetVertexAttributeD3D8PS(uint64_t commandBuffer, uint64_t vertexAttribute)
+void xxSetVertexBuffersD3D8PS(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
     if (d3dDevice == nullptr)
@@ -200,36 +218,11 @@ void xxSetVertexAttributeD3D8PS(uint64_t commandBuffer, uint64_t vertexAttribute
     if (d3dVertexAttribute == nullptr)
         return;
 
-    for (int i = 0; i < 8; ++i)
+    for (int i = 0; i < count; ++i)
     {
-        LPDIRECT3DVERTEXBUFFER8 d3dVertexBuffer = nullptr;
-        UINT stride;
-        d3dDevice->GetStreamSource(i, &d3dVertexBuffer, &stride);
-        if (d3dVertexBuffer == nullptr)
-            break;
+        LPDIRECT3DVERTEXBUFFER8 d3dVertexBuffer = reinterpret_cast<LPDIRECT3DVERTEXBUFFER8>(getResourceData(buffers[i]));
         d3dDevice->SetStreamSource(i, d3dVertexBuffer, d3dVertexAttribute->stride);
-        d3dVertexBuffer->Release();
     }
-}
-//------------------------------------------------------------------------------
-void xxSetVertexShaderD3D8PS(uint64_t commandBuffer, uint64_t shader)
-{
-    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
-    DWORD d3dShader = static_cast<DWORD>(shader);
-
-    d3dDevice->SetVertexShader(d3dShader);
-}
-//------------------------------------------------------------------------------
-void xxSetFragmentShaderD3D8PS(uint64_t commandBuffer, uint64_t shader)
-{
-    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
-    DWORD d3dShader = static_cast<DWORD>(shader);
-
-    d3dDevice->SetPixelShader(d3dShader);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferD3D8PS(uint64_t commandBuffer, uint64_t buffer, unsigned int size)

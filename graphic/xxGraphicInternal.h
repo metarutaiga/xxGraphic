@@ -43,16 +43,22 @@
     xxCreateFragmentShader = xxCreateFragmentShader ## API; \
     xxDestroyShader = xxDestroyShader ## API; \
 \
+    xxCreateBlendState = xxCreateBlendState ## API; \
+    xxCreateDepthStencilState = xxCreateDepthStencilState ## API; \
+    xxCreateRasterizerState = xxCreateRasterizerState ## API; \
+    xxCreatePipeline = xxCreatePipeline ## API; \
+    xxDestroyBlendState = xxDestroyBlendState ## API; \
+    xxDestroyDepthStencilState = xxDestroyDepthStencilState ## API; \
+    xxDestroyRasterizerState = xxDestroyRasterizerState ## API; \
+    xxDestroyPipeline = xxDestroyPipeline ## API; \
+\
     xxSetViewport = xxSetViewport ## API; \
     xxSetScissor = xxSetScissor ## API; \
+    xxSetPipeline = xxSetPipeline ## API; \
     xxSetIndexBuffer = xxSetIndexBuffer ## API; \
     xxSetVertexBuffers = xxSetVertexBuffers ## API; \
-    xxSetFragmentBuffers = xxSetFragmentBuffers ## API; \
     xxSetVertexTextures = xxSetVertexTextures ## API; \
     xxSetFragmentTextures = xxSetFragmentTextures ## API; \
-    xxSetVertexAttribute = xxSetVertexAttribute ## API; \
-    xxSetVertexShader = xxSetVertexShader ## API; \
-    xxSetFragmentShader = xxSetFragmentShader ## API; \
     xxSetVertexConstantBuffer = xxSetVertexConstantBuffer ## API; \
     xxSetFragmentConstantBuffer = xxSetFragmentConstantBuffer ## API; \
     xxDrawIndexed = xxDrawIndexed ## API; \
@@ -102,16 +108,22 @@
     xxCreateFragmentShader = nullptr; \
     xxDestroyShader = nullptr; \
 \
+    xxCreateBlendState = nullptr; \
+    xxCreateDepthStencilState = nullptr; \
+    xxCreateRasterizerState = nullptr; \
+    xxCreatePipeline = nullptr; \
+    xxDestroyBlendState = nullptr; \
+    xxDestroyDepthStencilState = nullptr; \
+    xxDestroyRasterizerState = nullptr; \
+    xxDestroyPipeline = nullptr; \
+\
     xxSetViewport = nullptr; \
     xxSetScissor = nullptr; \
+    xxSetPipeline = nullptr; \
     xxSetIndexBuffer = nullptr; \
     xxSetVertexBuffers = nullptr; \
-    xxSetFragmentBuffers = nullptr; \
     xxSetVertexTextures = nullptr; \
     xxSetFragmentTextures = nullptr; \
-    xxSetVertexAttribute = nullptr; \
-    xxSetVertexShader = nullptr; \
-    xxSetFragmentShader = nullptr; \
     xxSetVertexConstantBuffer = nullptr; \
     xxSetFragmentConstantBuffer = nullptr; \
     xxDrawIndexed = nullptr; \

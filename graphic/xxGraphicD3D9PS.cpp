@@ -5,6 +5,18 @@
 #include "dxsdk/d3d9.h"
 
 //==============================================================================
+//  Resource Type
+//==============================================================================
+static uint64_t getResourceType(uint64_t resource)
+{
+    return resource & 7;
+}
+//------------------------------------------------------------------------------
+static uint64_t getResourceData(uint64_t resource)
+{
+    return resource & -8;
+}
+//==============================================================================
 //  Instance
 //==============================================================================
 uint64_t xxCreateInstanceD3D9PS()
@@ -20,9 +32,8 @@ uint64_t xxCreateInstanceD3D9PS()
     xxCreateVertexShader = xxCreateVertexShaderD3D9PS;
     xxCreateFragmentShader = xxCreateFragmentShaderD3D9PS;
     xxDestroyShader = xxDestroyShaderD3D9PS;
-    xxSetVertexAttribute = xxSetVertexAttributeD3D9PS;
-    xxSetVertexShader = xxSetVertexShaderD3D9PS;
-    xxSetFragmentShader = xxSetFragmentShaderD3D9PS;
+    xxCreatePipeline = xxCreatePipelineD3D9PS;
+    xxSetVertexBuffers = xxSetVertexBuffersD3D9PS;
     xxSetVertexConstantBuffer = xxSetVertexConstantBufferD3D9PS;
     xxSetFragmentConstantBuffer = xxSetFragmentConstantBufferD3D9PS;
     xxSetTransform = xxSetTransformD3D9PS;
@@ -53,7 +64,6 @@ uint64_t xxCreateVertexAttributeD3D9PS(uint64_t device, int count, ...)
     D3DVERTEXATTRIBUTE9PS* d3dVertexAttribute = new D3DVERTEXATTRIBUTE9PS;
     if (d3dVertexAttribute == nullptr)
         return 0;
-    d3dVertexAttribute->stride = 0;
 
     D3DVERTEXELEMENT9 vertexElements[32];
     BYTE xyzIndex = 0;
@@ -128,12 +138,14 @@ uint64_t xxCreateVertexAttributeD3D9PS(uint64_t device, int count, ...)
 
     vertexElements[count] = D3DDECL_END();
 
-    HRESULT hResult = d3dDevice->CreateVertexDeclaration(vertexElements, &d3dVertexAttribute->vertexDeclaration);
+    LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = nullptr;
+    HRESULT hResult = d3dDevice->CreateVertexDeclaration(vertexElements, &vertexDeclaration);
     if (hResult != S_OK)
     {
         delete d3dVertexAttribute;
         return 0;
     }
+    d3dVertexAttribute->vertexDeclaration = vertexDeclaration;
     d3dVertexAttribute->stride = stride;
 
     return reinterpret_cast<uint64_t>(d3dVertexAttribute);
@@ -145,6 +157,7 @@ void xxDestroyVertexAttributeD3D9PS(uint64_t vertexAttribute)
     if (d3dVertexAttribute == nullptr)
         return;
 
+    d3dVertexAttribute->vertexDeclaration->Release();
     delete d3dVertexAttribute;
 }
 //==============================================================================
@@ -195,50 +208,39 @@ void xxDestroyShaderD3D9PS(uint64_t device, uint64_t shader)
     d3dShader->Release();
 }
 //==============================================================================
+//  Pipeline
+//==============================================================================
+uint64_t xxCreatePipelineD3D9PS(uint64_t device, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+{
+    uint64_t pipeline = xxCreatePipelineD3D9(device, blendState, depthStencilState, rasterizerState, 0, vertexShader, fragmentShader);
+    if (pipeline == 0)
+        return pipeline;
+    D3DVERTEXATTRIBUTE9PS* d3dVertexAttribute = reinterpret_cast<D3DVERTEXATTRIBUTE9PS*>(vertexAttribute);
+    if (d3dVertexAttribute == nullptr)
+        return pipeline;
+    LPDIRECT3DVERTEXDECLARATION9* d3dVertexDeclaration = reinterpret_cast<LPDIRECT3DVERTEXDECLARATION9*>(pipeline);
+
+    (*d3dVertexDeclaration) = d3dVertexAttribute->vertexDeclaration;
+
+    return pipeline;
+}
+//==============================================================================
 //  Command
 //==============================================================================
-void xxSetVertexAttributeD3D9PS(uint64_t commandBuffer, uint64_t vertexAttribute)
+void xxSetVertexBuffersD3D9PS(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
     if (d3dDevice == nullptr)
         return;
-    D3DVERTEXATTRIBUTE9PS* d3dVertexAttribtue = reinterpret_cast<D3DVERTEXATTRIBUTE9PS*>(vertexAttribute);
-    if (d3dVertexAttribtue == nullptr)
+    D3DVERTEXATTRIBUTE9PS* d3dVertexAttribute = reinterpret_cast<D3DVERTEXATTRIBUTE9PS*>(vertexAttribute);
+    if (d3dVertexAttribute == nullptr)
         return;
 
-    d3dDevice->SetVertexDeclaration(d3dVertexAttribtue->vertexDeclaration);
-
-    for (int i = 0; i < 8; ++i)
+    for (int i = 0; i < count; ++i)
     {
-        LPDIRECT3DVERTEXBUFFER9 d3dVertexBuffer = nullptr;
-        UINT offset;
-        UINT stride;
-        d3dDevice->GetStreamSource(i, &d3dVertexBuffer, &offset, &stride);
-        if (d3dVertexBuffer == nullptr)
-            break;
-        d3dDevice->SetStreamSource(i, d3dVertexBuffer, 0, d3dVertexAttribtue->stride);
-        d3dVertexBuffer->Release();
+        LPDIRECT3DVERTEXBUFFER9 d3dVertexBuffer = reinterpret_cast<LPDIRECT3DVERTEXBUFFER9>(getResourceData(buffers[i]));
+        d3dDevice->SetStreamSource(i, d3dVertexBuffer, 0, d3dVertexAttribute->stride);
     }
-}
-//------------------------------------------------------------------------------
-void xxSetVertexShaderD3D9PS(uint64_t commandBuffer, uint64_t shader)
-{
-    LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
-    LPDIRECT3DVERTEXSHADER9 d3dShader = reinterpret_cast<LPDIRECT3DVERTEXSHADER9>(shader);
-
-    d3dDevice->SetVertexShader(d3dShader);
-}
-//------------------------------------------------------------------------------
-void xxSetFragmentShaderD3D9PS(uint64_t commandBuffer, uint64_t shader)
-{
-    LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
-    LPDIRECT3DPIXELSHADER9 d3dShader = reinterpret_cast<LPDIRECT3DPIXELSHADER9>(shader);
-
-    d3dDevice->SetPixelShader(d3dShader);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferD3D9PS(uint64_t commandBuffer, uint64_t buffer, unsigned int size)

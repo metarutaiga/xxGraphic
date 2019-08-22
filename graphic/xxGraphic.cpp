@@ -40,15 +40,15 @@ uint64_t    (*xxCreateConstantBuffer)(uint64_t device, unsigned int size);
 uint64_t    (*xxCreateIndexBuffer)(uint64_t device, unsigned int size);
 uint64_t    (*xxCreateVertexBuffer)(uint64_t device, unsigned int size);
 void        (*xxDestroyBuffer)(uint64_t buffer);
-void*       (*xxMapBuffer)(uint64_t buffer);
-void        (*xxUnmapBuffer)(uint64_t buffer);
+void*       (*xxMapBuffer)(uint64_t device, uint64_t buffer);
+void        (*xxUnmapBuffer)(uint64_t device, uint64_t buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
 uint64_t    (*xxCreateTexture)(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array);
 void        (*xxDestroyTexture)(uint64_t texture);
-void*       (*xxMapTexture)(uint64_t texture, unsigned int& stride, unsigned int mipmap, unsigned int array);
-void        (*xxUnmapTexture)(uint64_t texture, unsigned int mipmap, unsigned int array);
+void*       (*xxMapTexture)(uint64_t device, uint64_t texture, unsigned int& stride, unsigned int level, unsigned int array, unsigned int mipmap);
+void        (*xxUnmapTexture)(uint64_t device, uint64_t texture, unsigned int level, unsigned int array, unsigned int mipmap);
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
@@ -61,18 +61,26 @@ uint64_t    (*xxCreateVertexShader)(uint64_t device, const char* shader, uint64_
 uint64_t    (*xxCreateFragmentShader)(uint64_t device, const char* shader);
 void        (*xxDestroyShader)(uint64_t device, uint64_t shader);
 //==============================================================================
+//  Pipeline
+//==============================================================================
+uint64_t    (*xxCreateBlendState)(uint64_t device, bool blending);
+uint64_t    (*xxCreateDepthStencilState)(uint64_t device, bool depthTest, bool depthWrite);
+uint64_t    (*xxCreateRasterizerState)(uint64_t device, bool cull, bool scissor);
+uint64_t    (*xxCreatePipeline)(uint64_t device, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
+void        (*xxDestroyBlendState)(uint64_t blendState);
+void        (*xxDestroyDepthStencilState)(uint64_t depthStencilState);
+void        (*xxDestroyRasterizerState)(uint64_t rasterizerState);
+void        (*xxDestroyPipeline)(uint64_t pipeline);
+//==============================================================================
 //  Command
 //==============================================================================
 void        (*xxSetViewport)(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ);
 void        (*xxSetScissor)(uint64_t commandBuffer, int x, int y, int width, int height);
+void        (*xxSetPipeline)(uint64_t commandBuffer, uint64_t pipeline);
 void        (*xxSetIndexBuffer)(uint64_t commandBuffer, uint64_t buffer);
-void        (*xxSetVertexBuffers)(uint64_t commandBuffer, int count, const uint64_t* buffers);
-void        (*xxSetFragmentBuffers)(uint64_t commandBuffer, int count, const uint64_t* buffers);
+void        (*xxSetVertexBuffers)(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute);
 void        (*xxSetVertexTextures)(uint64_t commandBuffer, int count, const uint64_t* textures);
 void        (*xxSetFragmentTextures)(uint64_t commandBuffer, int count, const uint64_t* textures);
-void        (*xxSetVertexAttribute)(uint64_t commandBuffer, uint64_t vertexAttribute);
-void        (*xxSetVertexShader)(uint64_t commandBuffer, uint64_t shader);
-void        (*xxSetFragmentShader)(uint64_t commandBuffer, uint64_t shader);
 void        (*xxSetVertexConstantBuffer)(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
 void        (*xxSetFragmentConstantBuffer)(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
 void        (*xxDrawIndexed)(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);

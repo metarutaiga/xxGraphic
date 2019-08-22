@@ -22,11 +22,13 @@ xxAPI uint64_t   xxCreateVertexShaderD3D9PS(uint64_t device, const char* shader,
 xxAPI uint64_t   xxCreateFragmentShaderD3D9PS(uint64_t device, const char* shader);
 xxAPI void       xxDestroyShaderD3D9PS(uint64_t device, uint64_t shader);
 //==============================================================================
+//  Pipeline
+//==============================================================================
+xxAPI uint64_t   xxCreatePipelineD3D9PS(uint64_t device, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
+//==============================================================================
 //  Command
 //==============================================================================
-xxAPI void       xxSetVertexAttributeD3D9PS(uint64_t commandBuffer, uint64_t vertexAttribute);
-xxAPI void       xxSetVertexShaderD3D9PS(uint64_t commandBuffer, uint64_t shader);
-xxAPI void       xxSetFragmentShaderD3D9PS(uint64_t commandBuffer, uint64_t shader);
+xxAPI void       xxSetVertexBuffersD3D9PS(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute);
 xxAPI void       xxSetVertexConstantBufferD3D9PS(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
 xxAPI void       xxSetFragmentConstantBufferD3D9PS(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
 //==============================================================================

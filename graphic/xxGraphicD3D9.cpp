@@ -245,19 +245,6 @@ bool xxBeginCommandBufferD3D9(uint64_t commandBuffer)
     if (hResult != S_OK)
         return false;
 
-    d3dDevice->SetPixelShader(nullptr);
-    d3dDevice->SetVertexShader(nullptr);
-    d3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-    d3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
-    d3dDevice->SetRenderState(D3DRS_ZENABLE, FALSE);
-    d3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-    d3dDevice->SetRenderState(D3DRS_ALPHATESTENABLE, FALSE);
-    d3dDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-    d3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-    d3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-    d3dDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, TRUE);
-    d3dDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
-    d3dDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
     d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
     d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
     d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
@@ -280,6 +267,7 @@ void xxEndCommandBufferD3D9(uint64_t commandBuffer)
 //------------------------------------------------------------------------------
 void xxSubmitCommandBufferD3D9(uint64_t commandBuffer)
 {
+
 }
 //==============================================================================
 //  Render Pass
@@ -388,7 +376,7 @@ void xxDestroyBufferD3D9(uint64_t buffer)
     }
 }
 //------------------------------------------------------------------------------
-void* xxMapBufferD3D9(uint64_t buffer)
+void* xxMapBufferD3D9(uint64_t device, uint64_t buffer)
 {
     switch (getResourceType(buffer))
     {
@@ -428,7 +416,7 @@ void* xxMapBufferD3D9(uint64_t buffer)
     return nullptr;
 }
 //------------------------------------------------------------------------------
-void xxUnmapBufferD3D9(uint64_t buffer)
+void xxUnmapBufferD3D9(uint64_t device, uint64_t buffer)
 {
     switch (getResourceType(buffer))
     {
@@ -508,7 +496,7 @@ void xxDestroyTextureD3D9(uint64_t texture)
     d3dBaseTexture->Release();
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureD3D9(uint64_t texture, unsigned int& stride, unsigned int mipmap, unsigned int array)
+void* xxMapTextureD3D9(uint64_t device, uint64_t texture, unsigned int& stride, unsigned int level, unsigned int array, unsigned int mipmap)
 {
     switch (getResourceType(texture))
     {
@@ -519,7 +507,7 @@ void* xxMapTextureD3D9(uint64_t texture, unsigned int& stride, unsigned int mipm
             break;
 
         D3DLOCKED_RECT rect = {};
-        d3dTexture->LockRect(mipmap, &rect, nullptr, D3DLOCK_NOSYSLOCK);
+        d3dTexture->LockRect(level, &rect, nullptr, D3DLOCK_DISCARD);
         stride = rect.Pitch;
         return rect.pBits;
     }
@@ -530,7 +518,7 @@ void* xxMapTextureD3D9(uint64_t texture, unsigned int& stride, unsigned int mipm
             break;
 
         D3DLOCKED_RECT rect = {};
-        d3dCubeTexture->LockRect((D3DCUBEMAP_FACES)array, mipmap, &rect, nullptr, D3DLOCK_NOSYSLOCK);
+        d3dCubeTexture->LockRect((D3DCUBEMAP_FACES)array, level, &rect, nullptr, D3DLOCK_DISCARD);
         stride = rect.Pitch;
         return rect.pBits;
     }
@@ -541,7 +529,7 @@ void* xxMapTextureD3D9(uint64_t texture, unsigned int& stride, unsigned int mipm
             break;
 
         D3DLOCKED_BOX box = {};
-        d3dVolumeTexture->LockBox(mipmap, &box, nullptr, D3DLOCK_NOSYSLOCK);
+        d3dVolumeTexture->LockBox(level, &box, nullptr, D3DLOCK_DISCARD);
         stride = box.RowPitch;
         return box.pBits;
     }
@@ -552,7 +540,7 @@ void* xxMapTextureD3D9(uint64_t texture, unsigned int& stride, unsigned int mipm
     return nullptr;
 }
 //------------------------------------------------------------------------------
-void xxUnmapTextureD3D9(uint64_t texture, unsigned int mipmap, unsigned int array)
+void xxUnmapTextureD3D9(uint64_t device, uint64_t texture, unsigned int level, unsigned int array, unsigned int mipmap)
 {
     switch (getResourceType(texture))
     {
@@ -562,7 +550,7 @@ void xxUnmapTextureD3D9(uint64_t texture, unsigned int mipmap, unsigned int arra
         if (d3dTexture == nullptr)
             break;
 
-        d3dTexture->UnlockRect(mipmap);
+        d3dTexture->UnlockRect(level);
         return;
     }
     case D3DRTYPE_CUBETEXTURE:
@@ -571,7 +559,7 @@ void xxUnmapTextureD3D9(uint64_t texture, unsigned int mipmap, unsigned int arra
         if (d3dCubeTexture == nullptr)
             break;
 
-        d3dCubeTexture->UnlockRect((D3DCUBEMAP_FACES)array, mipmap);
+        d3dCubeTexture->UnlockRect((D3DCUBEMAP_FACES)array, level);
         return;
     }
     case D3DRTYPE_VOLUME:
@@ -580,7 +568,7 @@ void xxUnmapTextureD3D9(uint64_t texture, unsigned int mipmap, unsigned int arra
         if (d3dVolumeTexture == nullptr)
             break;
 
-        d3dVolumeTexture->UnlockBox(mipmap);
+        d3dVolumeTexture->UnlockBox(level);
         return;
     }
     default:
@@ -603,7 +591,6 @@ union D3DVERTEXATTRIBUTE9
 uint64_t xxCreateVertexAttributeD3D9(uint64_t device, int count, ...)
 {
     D3DVERTEXATTRIBUTE9 d3dVertexAttribtue = {};
-
     int stride = 0;
 
     va_list args;
@@ -655,6 +642,103 @@ void xxDestroyShaderD3D9(uint64_t device, uint64_t shader)
 
 }
 //==============================================================================
+//  Pipeline
+//==============================================================================
+union D3DRENDERSTATE9
+{
+    uint64_t    value;
+    struct
+    {
+        bool    alphaBlending;
+        bool    alphaTesting;
+        bool    depthTest;
+        bool    depthWrite;
+        bool    cull;
+        bool    scissor;
+    };
+};
+//------------------------------------------------------------------------------
+struct D3DPIPELINE9
+{
+    LPDIRECT3DVERTEXDECLARATION9    vertexDeclaration;
+    DWORD                           fvf;
+    LPDIRECT3DVERTEXSHADER9         vertexShader;
+    LPDIRECT3DPIXELSHADER9          pixelShader;
+    D3DRENDERSTATE9                 renderState;
+};
+//------------------------------------------------------------------------------
+uint64_t xxCreateBlendStateD3D9(uint64_t device, bool blending)
+{
+    D3DRENDERSTATE9 d3dRenderState = {};
+    d3dRenderState.alphaBlending = blending;
+    return d3dRenderState.value;
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateDepthStencilStateD3D9(uint64_t device, bool depthTest, bool depthWrite)
+{
+    D3DRENDERSTATE9 d3dRenderState = {};
+    d3dRenderState.depthTest = depthTest;
+    d3dRenderState.depthWrite = depthWrite;
+    return d3dRenderState.value;
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateRasterizerStateD3D9(uint64_t device, bool cull, bool scissor)
+{
+    D3DRENDERSTATE9 d3dRenderState = {};
+    d3dRenderState.cull = cull;
+    d3dRenderState.scissor = scissor;
+    return d3dRenderState.value;
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreatePipelineD3D9(uint64_t device, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+{
+    D3DPIPELINE9* d3dPipeline = new D3DPIPELINE9;
+    if (d3dPipeline == nullptr)
+        return 0;
+
+    D3DVERTEXATTRIBUTE9 d3dVertexAttribtue = { vertexAttribute };
+    LPDIRECT3DVERTEXSHADER9 d3dVertexShader = reinterpret_cast<LPDIRECT3DVERTEXSHADER9>(vertexShader);
+    LPDIRECT3DPIXELSHADER9 d3dPixelShader = reinterpret_cast<LPDIRECT3DPIXELSHADER9>(fragmentShader);
+    D3DRENDERSTATE9 d3dBlendState = { blendState };
+    D3DRENDERSTATE9 d3dDepthStencilState = { depthStencilState };
+    D3DRENDERSTATE9 d3dRasterizerState = { rasterizerState };
+    d3dPipeline->vertexDeclaration = nullptr;
+    d3dPipeline->fvf = d3dVertexAttribtue.fvf;
+    d3dPipeline->vertexShader = d3dVertexShader;
+    d3dPipeline->pixelShader = d3dPixelShader;
+    d3dPipeline->renderState.alphaBlending  = d3dBlendState.alphaBlending;
+    d3dPipeline->renderState.depthTest      = d3dDepthStencilState.depthTest;
+    d3dPipeline->renderState.depthWrite     = d3dDepthStencilState.depthWrite;
+    d3dPipeline->renderState.cull           = d3dRasterizerState.cull;
+    d3dPipeline->renderState.scissor        = d3dRasterizerState.scissor;
+
+    return reinterpret_cast<uint64_t>(d3dPipeline);
+}
+//------------------------------------------------------------------------------
+void xxDestroyBlendStateD3D9(uint64_t blendState)
+{
+
+}
+//------------------------------------------------------------------------------
+void xxDestroyDepthStencilStateD3D9(uint64_t depthStencilState)
+{
+
+}
+//------------------------------------------------------------------------------
+void xxDestroyRasterizerStateD3D9(uint64_t rasterizerState)
+{
+
+}
+//------------------------------------------------------------------------------
+void xxDestroyPipelineD3D9(uint64_t pipelineState)
+{
+    D3DPIPELINE9* d3dPipeline = new D3DPIPELINE9;
+    if (d3dPipeline == nullptr)
+        return;
+
+    delete d3dPipeline;
+}
+//==============================================================================
 //  Command
 //==============================================================================
 void xxSetViewportD3D9(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ)
@@ -687,6 +771,39 @@ void xxSetScissorD3D9(uint64_t commandBuffer, int x, int y, int width, int heigh
     d3dDevice->SetScissorRect(&rect);
 }
 //------------------------------------------------------------------------------
+void xxSetPipelineD3D9(uint64_t commandBuffer, uint64_t pipeline)
+{
+    LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
+    if (d3dDevice == nullptr)
+        return;
+    D3DPIPELINE9* d3dPipeline = reinterpret_cast<D3DPIPELINE9*>(pipeline);
+    if (d3dPipeline == nullptr)
+        return;
+
+    d3dDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
+    d3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+    d3dDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
+
+    if (d3dPipeline->vertexDeclaration)
+    {
+        d3dDevice->SetVertexDeclaration(d3dPipeline->vertexDeclaration);
+    }
+    else
+    {
+        d3dDevice->SetFVF(d3dPipeline->fvf);
+    }
+    d3dDevice->SetVertexShader(d3dPipeline->vertexShader);
+    d3dDevice->SetPixelShader(d3dPipeline->pixelShader);
+    d3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+    d3dDevice->SetRenderState(D3DRS_ZENABLE, d3dPipeline->renderState.depthWrite);
+    d3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, d3dPipeline->renderState.alphaBlending);
+    d3dDevice->SetRenderState(D3DRS_ALPHATESTENABLE, d3dPipeline->renderState.alphaTesting);
+    d3dDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+    d3dDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+    d3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+    d3dDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, d3dPipeline->renderState.scissor);
+}
+//------------------------------------------------------------------------------
 void xxSetIndexBufferD3D9(uint64_t commandBuffer, uint64_t buffer)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
@@ -699,22 +816,18 @@ void xxSetIndexBufferD3D9(uint64_t commandBuffer, uint64_t buffer)
     d3dDevice->SetIndices(d3dIndexBuffer);
 }
 //------------------------------------------------------------------------------
-void xxSetVertexBuffersD3D9(uint64_t commandBuffer, int count, const uint64_t* buffers)
+void xxSetVertexBuffersD3D9(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
     if (d3dDevice == nullptr)
         return;
+    D3DVERTEXATTRIBUTE9 d3dVertexAttribtue = { vertexAttribute };
 
     for (int i = 0; i < count; ++i)
     {
         LPDIRECT3DVERTEXBUFFER9 d3dVertexBuffer = reinterpret_cast<LPDIRECT3DVERTEXBUFFER9>(getResourceData(buffers[i]));
-        d3dDevice->SetStreamSource(i, d3dVertexBuffer, 0, 0);
+        d3dDevice->SetStreamSource(i, d3dVertexBuffer, 0, d3dVertexAttribtue.stride);
     }
-}
-//------------------------------------------------------------------------------
-void xxSetFragmentBuffersD3D9(uint64_t commandBuffer, int count, const uint64_t* buffers)
-{
-
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesD3D9(uint64_t commandBuffer, int count, const uint64_t* textures)
@@ -741,38 +854,6 @@ void xxSetFragmentTexturesD3D9(uint64_t commandBuffer, int count, const uint64_t
         LPDIRECT3DBASETEXTURE9 d3dBaseTexture = reinterpret_cast<LPDIRECT3DBASETEXTURE9>(getResourceData(textures[i]));
         d3dDevice->SetTexture(i, d3dBaseTexture);
     }
-}
-//------------------------------------------------------------------------------
-void xxSetVertexAttributeD3D9(uint64_t commandBuffer, uint64_t vertexAttribute)
-{
-    LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
-
-    D3DVERTEXATTRIBUTE9 d3dVertexAttribtue = { vertexAttribute };
-    d3dDevice->SetFVF(d3dVertexAttribtue.fvf);
-
-    for (int i = 0; i < 8; ++i)
-    {
-        LPDIRECT3DVERTEXBUFFER9 d3dVertexBuffer = nullptr;
-        UINT offset;
-        UINT stride;
-        d3dDevice->GetStreamSource(i, &d3dVertexBuffer, &offset, &stride);
-        if (d3dVertexBuffer == nullptr)
-            break;
-        d3dDevice->SetStreamSource(i, d3dVertexBuffer, 0, d3dVertexAttribtue.stride);
-        d3dVertexBuffer->Release();
-    }
-}
-//------------------------------------------------------------------------------
-void xxSetVertexShaderD3D9(uint64_t commandBuffer, uint64_t shader)
-{
-
-}
-//------------------------------------------------------------------------------
-void xxSetFragmentShaderD3D9(uint64_t commandBuffer, uint64_t shader)
-{
-
 }
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferD3D9(uint64_t commandBuffer, uint64_t buffer, unsigned int size)

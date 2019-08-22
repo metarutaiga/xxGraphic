@@ -13,6 +13,8 @@
 #include "graphic/xxGraphicD3D8PS.h"
 #include "graphic/xxGraphicD3D9.h"
 #include "graphic/xxGraphicD3D9PS.h"
+#include "graphic/xxGraphicD3D10.h"
+#include "graphic/xxGraphicD3D11.h"
 #include "graphic/xxGraphicNULL.h"
 
 #define NOMINMAX
@@ -39,7 +41,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     ::RegisterClassExW(&wc);
     HWND hWnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui XX Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280 * scale, 800 * scale, NULL, NULL, wc.hInstance, NULL);
 
-    g_instance = xxCreateInstanceD3D9PS();
+    g_instance = xxCreateInstanceD3D11();
     g_device = xxCreateDevice(g_instance);
     g_swapchain = xxCreateSwapchain(g_device, hWnd, 0, 0);
     g_renderPass = xxCreateRenderPass(g_device, 0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0);
@@ -184,6 +186,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                 selected = (deviceStringCurrent == deviceStringTarget);
                 if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
                     createInstance = xxCreateInstanceD3D9PS;
+
+                deviceStringTarget = xxGetDeviceStringD3D10(g_device);
+                selected = (deviceStringCurrent == deviceStringTarget);
+                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
+                    createInstance = xxCreateInstanceD3D10;
+
+                deviceStringTarget = xxGetDeviceStringD3D11(g_device);
+                selected = (deviceStringCurrent == deviceStringTarget);
+                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
+                    createInstance = xxCreateInstanceD3D11;
 
                 deviceStringTarget = xxGetDeviceStringNULL(g_device);
                 selected = (deviceStringCurrent == deviceStringTarget);

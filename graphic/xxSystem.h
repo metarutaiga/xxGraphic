@@ -4,6 +4,8 @@
 #   define _HAS_EXCEPTIONS 0
 #endif
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <float.h>
 #include <intrin.h>
 #include <math.h>
@@ -61,3 +63,8 @@ xxAPI float xxGetCurrentTime();
 xxAPI uint64_t xxGetCurrentProcessId();
 xxAPI uint64_t xxGetCurrentThreadId();
 xxAPI int xxGetIncrementThreadId();
+//==============================================================================
+//  MD5
+//==============================================================================
+xxAPI const uint8_t* xxMD5(const void* data, int len, uint8_t* digest);
+xxAPI const uint8_t* xxDXBCChecksum(const void* data, int len, uint8_t* digest);

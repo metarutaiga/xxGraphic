@@ -76,12 +76,6 @@ typedef struct _D3DRECT {
 #define D3DRECT_DEFINED
 #endif
 
-#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) */
-#pragma endregion
-
-#pragma region App Family
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
-
 #ifndef D3DMATRIX_DEFINED
 typedef struct _D3DMATRIX {
     union {
@@ -97,12 +91,6 @@ typedef struct _D3DMATRIX {
 } D3DMATRIX;
 #define D3DMATRIX_DEFINED
 #endif
-
-#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) */
-#pragma endregion
-
-#pragma region Desktop Family
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 
 typedef struct _D3DVIEWPORT9 {
     DWORD       X;

@@ -23,11 +23,15 @@ static uint64_t g_vertexBuffers[4] = {};
 static int      g_vertexBufferSizes[4] = {};
 static uint64_t g_indexBuffers[4] = {};
 static int      g_indexBufferSizes[4] = {};
+static uint64_t g_constantBuffers[4] = {};
 static uint64_t g_fontTexture = 0;
 static uint64_t g_vertexAttribute = 0;
 static uint64_t g_vertexShader = 0;
 static uint64_t g_fragmentShader = 0;
-static uint64_t g_constantBuffer = 0;
+static uint64_t g_blendState = 0;
+static uint64_t g_depthStencilState = 0;
+static uint64_t g_rasterizerState = 0;
+static uint64_t g_pipeline = 0;
 
 // Forward Declarations
 static void ImGui_ImplXX_InitPlatformInterface();
@@ -35,7 +39,7 @@ static void ImGui_ImplXX_ShutdownPlatformInterface();
 static void ImGui_ImplXX_CreateDeviceObjectsForPlatformWindows();
 static void ImGui_ImplXX_InvalidateDeviceObjectsForPlatformWindows();
 
-static void ImGui_ImplXX_SetupRenderState(ImDrawData* draw_data, uint64_t commandBuffer)
+static void ImGui_ImplXX_SetupRenderState(ImDrawData* draw_data, uint64_t commandBuffer, uint64_t constantBuffer)
 {
     xxSetViewport(commandBuffer, 0, 0, (int)draw_data->DisplaySize.x, (int)draw_data->DisplaySize.y, 0.0f, 1.0f);
 
@@ -57,7 +61,7 @@ static void ImGui_ImplXX_SetupRenderState(ImDrawData* draw_data, uint64_t comman
             B += 0.5f;
         }
 
-        float identity[] =
+        static const float identity[] =
         {
             1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 1.0f, 0.0f, 0.0f,
@@ -73,18 +77,16 @@ static void ImGui_ImplXX_SetupRenderState(ImDrawData* draw_data, uint64_t comman
         };
 
         xxSetTransform(commandBuffer, identity, identity, projection);
-        void* mapConstantBuffer = xxMapBuffer(g_constantBuffer);
+        void* mapConstantBuffer = xxMapBuffer(g_device, constantBuffer);
         if (mapConstantBuffer)
         {
-            memcpy(mapConstantBuffer, projection, 16 * sizeof(float));
-            xxUnmapBuffer(g_constantBuffer);
+            memcpy(mapConstantBuffer, projection, sizeof(projection));
+            xxUnmapBuffer(g_device, constantBuffer);
         }
     }
 
-    xxSetVertexAttribute(commandBuffer, g_vertexAttribute);
-    xxSetVertexShader(commandBuffer, g_vertexShader);
-    xxSetFragmentShader(commandBuffer, g_fragmentShader);
-    xxSetVertexConstantBuffer(commandBuffer, g_constantBuffer, 16 * sizeof(float));
+    xxSetPipeline(commandBuffer, g_pipeline);
+    xxSetVertexConstantBuffer(commandBuffer, constantBuffer, 16 * sizeof(float));
 }
 
 // Render function.
@@ -100,6 +102,7 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
     int&        vertexBufferSize = g_vertexBufferSizes[bufferIndex];
     uint64_t&   indexBuffer = g_indexBuffers[bufferIndex];
     int&        indexBufferSize = g_indexBufferSizes[bufferIndex];
+    uint64_t&   constantBuffer = g_constantBuffers[bufferIndex];
 
     // Swap buffer
     g_bufferIndex++;
@@ -123,22 +126,10 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
         if (indexBuffer == 0)
             return;
     }
-    if (g_vertexAttribute == 0)
-    {
-        ImDrawVert vert;
-        g_vertexAttribute = xxCreateVertexAttribute(g_device, 3, 0, xxOffsetOf(vert, pos),  3, xxSizeOf(vert.pos) + xxSizeOf(vert.z),
-                                                                 0, xxOffsetOf(vert, col),  4, xxSizeOf(vert.col),
-                                                                 0, xxOffsetOf(vert, uv),   2, xxSizeOf(vert.uv));
-        if (g_vertexAttribute == 0)
-            return;
-        g_vertexShader = xxCreateVertexShader(g_device, "default", g_vertexAttribute);
-        g_fragmentShader = xxCreateFragmentShader(g_device, "default");
-        g_constantBuffer = xxCreateConstantBuffer(g_device, 16 * sizeof(float));
-    }
 
     // Copy and convert all vertices into a swapped buffer.
-    ImDrawVert* vtx_dst = (ImDrawVert*)xxMapBuffer(vertexBuffer);
-    ImDrawIdx* idx_dst = (ImDrawIdx*)xxMapBuffer(indexBuffer);
+    ImDrawVert* vtx_dst = (ImDrawVert*)xxMapBuffer(g_device, vertexBuffer);
+    ImDrawIdx* idx_dst = (ImDrawIdx*)xxMapBuffer(g_device, indexBuffer);
     if (vtx_dst == nullptr || idx_dst == nullptr)
         return;
     for (int n = 0; n < draw_data->CmdListsCount; n++)
@@ -149,14 +140,14 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
         memcpy(idx_dst, cmd_list->IdxBuffer.Data, cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx));
         idx_dst += cmd_list->IdxBuffer.Size;
     }
-    xxUnmapBuffer(vertexBuffer);
-    xxUnmapBuffer(indexBuffer);
+    xxUnmapBuffer(g_device, vertexBuffer);
+    xxUnmapBuffer(g_device, indexBuffer);
 
-    xxSetVertexBuffers(commandBuffer, 1, &vertexBuffer);
+    xxSetVertexBuffers(commandBuffer, 1, &vertexBuffer, g_vertexAttribute);
     xxSetIndexBuffer(commandBuffer, indexBuffer);
 
     // Setup desired xx state
-    ImGui_ImplXX_SetupRenderState(draw_data, commandBuffer);
+    ImGui_ImplXX_SetupRenderState(draw_data, commandBuffer, constantBuffer);
 
     // Render command lists
     // (Because we merged all buffers into a single one, we maintain our own offset into them)
@@ -174,7 +165,7 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
                 // User callback, registered via ImDrawList::AddCallback()
                 // (ImDrawCallback_ResetRenderState is a special callback value used by the user to request the renderer to reset render state.)
                 if (pcmd->UserCallback == ImDrawCallback_ResetRenderState)
-                    ImGui_ImplXX_SetupRenderState(draw_data, commandBuffer);
+                    ImGui_ImplXX_SetupRenderState(draw_data, commandBuffer, constantBuffer);
                 else
                     pcmd->UserCallback(cmd_list, pcmd);
             }
@@ -245,12 +236,12 @@ static bool ImGui_ImplXX_CreateFontsTexture()
     if (g_fontTexture == 0)
         return false;
     unsigned int stride = 0;
-    void* map = xxMapTexture(g_fontTexture, stride, 0, 0);
+    void* map = xxMapTexture(g_device, g_fontTexture, stride, 0, 0, 1);
     if (map == nullptr)
         return false;
     for (int y = 0; y < height; y++)
         memcpy((char*)map + stride * y, pixels + (width * bytes_per_pixel) * y, (width * bytes_per_pixel));
-    xxUnmapTexture(g_fontTexture, 0, 0);
+    xxUnmapTexture(g_device, g_fontTexture, 0, 0, 1);
 
     // Store our identifier
     io.Fonts->TexID = (ImTextureID)g_fontTexture;
@@ -265,6 +256,22 @@ bool ImGui_ImplXX_CreateDeviceObjects()
     if (ImGui_ImplXX_CreateFontsTexture() == false)
         return false;
     ImGui_ImplXX_CreateDeviceObjectsForPlatformWindows();
+
+    ImDrawVert vert;
+    g_vertexAttribute = xxCreateVertexAttribute(g_device, 3, 0, xxOffsetOf(vert, pos),  3, xxSizeOf(vert.pos) + xxSizeOf(vert.z),
+                                                             0, xxOffsetOf(vert, col),  4, xxSizeOf(vert.col),
+                                                             0, xxOffsetOf(vert, uv),   2, xxSizeOf(vert.uv));
+    g_vertexShader = xxCreateVertexShader(g_device, "default", g_vertexAttribute);
+    g_fragmentShader = xxCreateFragmentShader(g_device, "default");
+    for (unsigned int i = 0; i < 4; ++i)
+    {
+        g_constantBuffers[i] = xxCreateConstantBuffer(g_device, 16 * sizeof(float));
+    }
+    g_blendState = xxCreateBlendState(g_device, true);
+    g_depthStencilState = xxCreateDepthStencilState(g_device, false, false);
+    g_rasterizerState = xxCreateRasterizerState(g_device, false, true);
+    g_pipeline = xxCreatePipeline(g_device, g_blendState, g_depthStencilState, g_rasterizerState, g_vertexAttribute, g_vertexShader, g_fragmentShader);
+
     return true;
 }
 
@@ -276,19 +283,27 @@ void ImGui_ImplXX_InvalidateDeviceObjects()
     {
         xxDestroyBuffer(g_vertexBuffers[i]);
         xxDestroyBuffer(g_indexBuffers[i]);
+        xxDestroyBuffer(g_constantBuffers[i]);
         g_vertexBuffers[i] = 0;
         g_indexBuffers[i] = 0;
+        g_constantBuffers[i] = 0;
     }
     xxDestroyTexture(g_fontTexture);
     xxDestroyVertexAttribute(g_vertexAttribute);
     xxDestroyShader(g_device, g_vertexShader);
     xxDestroyShader(g_device, g_fragmentShader);
-    xxDestroyBuffer(g_constantBuffer);
+    xxDestroyBlendState(g_blendState);
+    xxDestroyDepthStencilState(g_depthStencilState);
+    xxDestroyRasterizerState(g_rasterizerState);
+    xxDestroyPipeline(g_pipeline);
     g_fontTexture = 0;
     g_vertexAttribute = 0;
     g_vertexShader = 0;
     g_fragmentShader = 0;
-    g_constantBuffer = 0;
+    g_blendState = 0;
+    g_depthStencilState = 0;
+    g_rasterizerState = 0;
+    g_pipeline = 0;
     ImGui_ImplXX_InvalidateDeviceObjectsForPlatformWindows();
 }
 

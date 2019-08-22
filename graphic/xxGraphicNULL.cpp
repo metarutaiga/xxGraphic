@@ -1,5 +1,4 @@
 #include "xxGraphicNULL.h"
-#include "xxGraphicD3DAsm.h"
 #include "xxGraphicInternal.h"
 
 //==============================================================================
@@ -125,12 +124,12 @@ void xxDestroyBufferNULL(uint64_t buffer)
 
 }
 //------------------------------------------------------------------------------
-void* xxMapBufferNULL(uint64_t buffer)
+void* xxMapBufferNULL(uint64_t device, uint64_t buffer)
 {
     return nullptr;
 }
 //------------------------------------------------------------------------------
-void xxUnmapBufferNULL(uint64_t buffer)
+void xxUnmapBufferNULL(uint64_t device, uint64_t buffer)
 {
 
 }
@@ -147,12 +146,12 @@ void xxDestroyTextureNULL(uint64_t texture)
 
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureNULL(uint64_t texture, unsigned int& stride, unsigned int mipmap, unsigned int array)
+void* xxMapTextureNULL(uint64_t device, uint64_t texture, unsigned int& stride, unsigned int level, unsigned int array, unsigned int mipmap)
 {
     return nullptr;
 }
 //------------------------------------------------------------------------------
-void xxUnmapTextureNULL(uint64_t texture, unsigned int mipmap, unsigned int array)
+void xxUnmapTextureNULL(uint64_t device, uint64_t texture, unsigned int level, unsigned int array, unsigned int mipmap)
 {
 
 }
@@ -165,6 +164,48 @@ uint64_t xxCreateVertexAttributeNULL(uint64_t device, int count, ...)
 }
 //------------------------------------------------------------------------------
 void xxDestroyVertexAttributeNULL(uint64_t vertexAttribute)
+{
+
+}
+//==============================================================================
+//  Pipeline
+//==============================================================================
+uint64_t xxCreateBlendStateNULL(uint64_t device, bool blending)
+{
+    return 0;
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateDepthStencilStateNULL(uint64_t device, bool depthTest, bool depthWrite)
+{
+    return 0;
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateRasterizerStateNULL(uint64_t device, bool cull, bool scissor)
+{
+    return 0;
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreatePipelineNULL(uint64_t device, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+{
+    return 0;
+}
+//------------------------------------------------------------------------------
+void xxDestroyBlendStateNULL(uint64_t blendState)
+{
+
+}
+//------------------------------------------------------------------------------
+void xxDestroyDepthStencilStateNULL(uint64_t depthStencilState)
+{
+
+}
+//------------------------------------------------------------------------------
+void xxDestroyRasterizerStateNULL(uint64_t rasterizerState)
+{
+
+}
+//------------------------------------------------------------------------------
+void xxDestroyPipelineNULL(uint64_t pipelineState)
 {
 
 }
@@ -198,17 +239,17 @@ void xxSetScissorNULL(uint64_t commandBuffer, int x, int y, int width, int heigh
 
 }
 //------------------------------------------------------------------------------
+void xxSetPipelineNULL(uint64_t commandBuffer, uint64_t pipeline)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetIndexBufferNULL(uint64_t commandBuffer, uint64_t buffer)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetVertexBuffersNULL(uint64_t commandBuffer, int count, const uint64_t* buffers)
-{
-
-}
-//------------------------------------------------------------------------------
-void xxSetFragmentBuffersNULL(uint64_t commandBuffer, int count, const uint64_t* buffers)
+void xxSetVertexBuffersNULL(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
 
 }
@@ -219,21 +260,6 @@ void xxSetVertexTexturesNULL(uint64_t commandBuffer, int count, const uint64_t* 
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentTexturesNULL(uint64_t commandBuffer, int count, const uint64_t* textures)
-{
-
-}
-//------------------------------------------------------------------------------
-void xxSetVertexAttributeNULL(uint64_t commandBuffer, uint64_t vertexAttribute)
-{
-
-}
-//------------------------------------------------------------------------------
-void xxSetVertexShaderNULL(uint64_t commandBuffer, uint64_t shader)
-{
-
-}
-//------------------------------------------------------------------------------
-void xxSetFragmentShaderNULL(uint64_t commandBuffer, uint64_t shader)
 {
 
 }
