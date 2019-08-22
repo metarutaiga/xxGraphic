@@ -136,7 +136,7 @@ uint64_t xxCreateSwapchainD3D11(uint64_t device, void* view, unsigned int width,
     DXGI_SWAP_CHAIN_DESC desc = {};
     desc.BufferDesc.Width = width;
     desc.BufferDesc.Height = height;
-    desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
     desc.SampleDesc.Count = 1;
     desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     desc.BufferCount = 1;

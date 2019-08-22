@@ -166,7 +166,7 @@ static void MD5_transform(MD5_CTX* ctx)
         tmp = D;
         D = C;
         C = B;
-        B = B + _rotl((A + f + KK[t] + W[g]), Kr[t]);
+        B = B + xxRotateLeft((A + f + KK[t] + W[g]), Kr[t]);
         A = tmp;
     }
 

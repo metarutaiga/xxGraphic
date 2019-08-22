@@ -52,6 +52,9 @@
 #define xxAlloc(T, count)   (T*)_aligned_malloc(sizeof(T) * count, 16)
 #define xxFree(ptr)         _aligned_free(ptr)
 
+#define xxRotateLeft(v, s)  _rotl(v, s)
+#define xxRotateRight(v, s) _rotr(v, s)
+
 //==============================================================================
 //  TSC
 //==============================================================================
