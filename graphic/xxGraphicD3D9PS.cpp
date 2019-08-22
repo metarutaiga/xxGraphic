@@ -9,12 +9,12 @@
 //==============================================================================
 static uint64_t getResourceType(uint64_t resource)
 {
-    return resource & 7;
+    return resource & 7ui64;
 }
 //------------------------------------------------------------------------------
 static uint64_t getResourceData(uint64_t resource)
 {
-    return resource & -8;
+    return resource & ~7ui64;
 }
 //==============================================================================
 //  Instance
@@ -230,11 +230,7 @@ uint64_t xxCreatePipelineD3D9PS(uint64_t device, uint64_t blendState, uint64_t d
 void xxSetVertexBuffersD3D9PS(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
     D3DVERTEXATTRIBUTE9PS* d3dVertexAttribute = reinterpret_cast<D3DVERTEXATTRIBUTE9PS*>(vertexAttribute);
-    if (d3dVertexAttribute == nullptr)
-        return;
 
     for (int i = 0; i < count; ++i)
     {
@@ -246,8 +242,6 @@ void xxSetVertexBuffersD3D9PS(uint64_t commandBuffer, int count, const uint64_t*
 void xxSetVertexConstantBufferD3D9PS(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
     const float* d3dBuffer = reinterpret_cast<float*>(buffer);
 
     d3dDevice->SetVertexShaderConstantF(0, d3dBuffer, size / sizeof(float) / 4);
@@ -256,8 +250,6 @@ void xxSetVertexConstantBufferD3D9PS(uint64_t commandBuffer, uint64_t buffer, un
 void xxSetFragmentConstantBufferD3D9PS(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
     const float* d3dBuffer = reinterpret_cast<float*>(buffer);
 
     d3dDevice->SetPixelShaderConstantF(0, d3dBuffer, size / sizeof(float) / 4);

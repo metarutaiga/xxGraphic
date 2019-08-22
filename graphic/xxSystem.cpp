@@ -78,7 +78,8 @@ int xxGetIncrementThreadId()
     return threadId - 1;
 }
 //==============================================================================
-//  MD5
+//  MD5 - omaha
+//  Copyright 2007-2009 Google Inc.
 //==============================================================================
 static const char Kr[64] =
 {
@@ -240,6 +241,8 @@ const uint8_t* xxMD5(const void* data, int len, uint8_t* digest)
     memcpy(digest, MD5_final(&ctx), MD5_CTX::MD5_DIGEST_SIZE);
     return digest;
 }
+//------------------------------------------------------------------------------
+// Copyright 2008-2016 (c), Advanced Micro Devices, Inc. All rights reserved.
 //------------------------------------------------------------------------------
 const uint8_t* xxDXBCChecksum(const void* data, int len, uint8_t* digest)
 {

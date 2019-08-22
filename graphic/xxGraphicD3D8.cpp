@@ -15,12 +15,12 @@ static LPDIRECT3DSURFACE8       g_depthStencil = nullptr;
 //==============================================================================
 static uint64_t getResourceType(uint64_t resource)
 {
-    return resource & 7;
+    return resource & 7ui64;
 }
 //------------------------------------------------------------------------------
 static uint64_t getResourceData(uint64_t resource)
 {
-    return resource & -8;
+    return resource & ~7ui64;
 }
 //==============================================================================
 //  Instance
@@ -642,15 +642,15 @@ void xxDestroyShaderD3D8(uint64_t device, uint64_t shader)
 //==============================================================================
 union D3DRENDERSTATE8
 {
-    uint64_t    value;
+    uint64_t        value;
     struct
     {
-        bool    alphaBlending;
-        bool    alphaTesting;
-        bool    depthTest;
-        bool    depthWrite;
-        bool    cull;
-        bool    scissor;
+        uint64_t    alphaBlending:1;
+        uint64_t    alphaTesting:1;
+        uint64_t    depthTest:1;
+        uint64_t    depthWrite:1;
+        uint64_t    cull:1;
+        uint64_t    scissor:1;
     };
 };
 //------------------------------------------------------------------------------
@@ -690,14 +690,14 @@ uint64_t xxCreatePipelineD3D8(uint64_t device, uint64_t blendState, uint64_t dep
     if (d3dPipeline == nullptr)
         return 0;
 
-    DWORD d3dVertexShader = static_cast<DWORD>(vertexShader);
-    DWORD d3dPixelShader = static_cast<DWORD>(fragmentShader);
-    D3DRENDERSTATE8 d3dBlendState = { blendState };
-    D3DRENDERSTATE8 d3dDepthStencilState = { depthStencilState };
-    D3DRENDERSTATE8 d3dRasterizerState = { rasterizerState };
-    D3DVERTEXATTRIBUTE8 d3dVertexAttribtue = { vertexAttribute };
-    d3dPipeline->vertexShader = d3dVertexShader ? d3dVertexShader : d3dVertexAttribtue.fvf;
-    d3dPipeline->pixelShader = d3dPixelShader;
+    D3DVERTEXATTRIBUTE8 d3dVertexAttribtue  = { vertexAttribute };
+    DWORD d3dVertexShader                   = static_cast<DWORD>(vertexShader);
+    DWORD d3dPixelShader                    = static_cast<DWORD>(fragmentShader);
+    D3DRENDERSTATE8 d3dBlendState           = { blendState };
+    D3DRENDERSTATE8 d3dDepthStencilState    = { depthStencilState };
+    D3DRENDERSTATE8 d3dRasterizerState      = { rasterizerState };
+    d3dPipeline->vertexShader               = d3dVertexShader ? d3dVertexShader : d3dVertexAttribtue.fvf;
+    d3dPipeline->pixelShader                = d3dPixelShader;
     d3dPipeline->renderState.alphaBlending  = d3dBlendState.alphaBlending;
     d3dPipeline->renderState.depthTest      = d3dDepthStencilState.depthTest;
     d3dPipeline->renderState.depthWrite     = d3dDepthStencilState.depthWrite;
@@ -736,8 +736,6 @@ void xxDestroyPipelineD3D8(uint64_t pipelineState)
 void xxSetViewportD3D8(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
 
     D3DVIEWPORT8 vp;
     vp.X = x;
@@ -752,8 +750,6 @@ void xxSetViewportD3D8(uint64_t commandBuffer, int x, int y, int width, int heig
 void xxSetScissorD3D8(uint64_t commandBuffer, int x, int y, int width, int height)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
 
     D3DVIEWPORT8 vp;
     d3dDevice->GetViewport(&vp);
@@ -785,16 +781,14 @@ void xxSetScissorD3D8(uint64_t commandBuffer, int x, int y, int width, int heigh
 void xxSetPipelineD3D8(uint64_t commandBuffer, uint64_t pipeline)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
     D3DPIPELINE8* d3dPipeline = reinterpret_cast<D3DPIPELINE8*>(pipeline);
-    if (d3dPipeline == nullptr)
-        return;
 
-    d3dDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
-    d3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+    if (d3dPipeline->pixelShader == 0)
+    {
+        d3dDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
+        d3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+    }
     d3dDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
-
     d3dDevice->SetVertexShader(d3dPipeline->vertexShader);
     d3dDevice->SetPixelShader(d3dPipeline->pixelShader);
     d3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
@@ -809,11 +803,7 @@ void xxSetPipelineD3D8(uint64_t commandBuffer, uint64_t pipeline)
 void xxSetIndexBufferD3D8(uint64_t commandBuffer, uint64_t buffer)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
     LPDIRECT3DINDEXBUFFER8 d3dIndexBuffer = reinterpret_cast<LPDIRECT3DINDEXBUFFER8>(getResourceData(buffer));
-    if (d3dIndexBuffer == nullptr)
-        return;
 
     d3dDevice->SetIndices(d3dIndexBuffer, 0);
 }
@@ -821,8 +811,6 @@ void xxSetIndexBufferD3D8(uint64_t commandBuffer, uint64_t buffer)
 void xxSetVertexBuffersD3D8(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
     D3DVERTEXATTRIBUTE8 d3dVertexAttribtue = { vertexAttribute };
 
     for (int i = 0; i < count; ++i)
@@ -840,8 +828,6 @@ void xxSetVertexTexturesD3D8(uint64_t commandBuffer, int count, const uint64_t* 
 void xxSetFragmentTexturesD3D8(uint64_t commandBuffer, int count, const uint64_t* textures)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
 
     for (int i = 0; i < count; ++i)
     {
@@ -863,8 +849,6 @@ void xxSetFragmentConstantBufferD3D8(uint64_t commandBuffer, uint64_t buffer, un
 void xxDrawIndexedD3D8(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
 
     LPDIRECT3DINDEXBUFFER8 d3dIndexBuffer = nullptr;
     UINT d3dBaseVertexIndex = 0;
@@ -881,8 +865,6 @@ void xxDrawIndexedD3D8(uint64_t commandBuffer, int indexCount, int instanceCount
 void xxSetTransformD3D8(uint64_t commandBuffer, const float* world, const float* view, const float* projection)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
 
     if (world)
         d3dDevice->SetTransform(D3DTS_WORLD, (const D3DMATRIX*)world);

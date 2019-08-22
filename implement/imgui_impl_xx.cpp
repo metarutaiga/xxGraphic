@@ -97,7 +97,7 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
     if (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f)
         return;
 
-    int         bufferIndex = g_bufferIndex;
+    int&        bufferIndex = g_bufferIndex;
     uint64_t&   vertexBuffer = g_vertexBuffers[bufferIndex];
     int&        vertexBufferSize = g_vertexBufferSizes[bufferIndex];
     uint64_t&   indexBuffer = g_indexBuffers[bufferIndex];
@@ -105,9 +105,9 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
     uint64_t&   constantBuffer = g_constantBuffers[bufferIndex];
 
     // Swap buffer
-    g_bufferIndex++;
-    if (g_bufferIndex >= 3)
-        g_bufferIndex = 0;
+    bufferIndex++;
+    if (bufferIndex >= 3)
+        bufferIndex = 0;
 
     // Create and grow buffers if needed
     if (vertexBuffer == 0 || vertexBufferSize < draw_data->TotalVtxCount)

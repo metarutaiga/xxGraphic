@@ -9,12 +9,12 @@
 //==============================================================================
 static uint64_t getResourceType(uint64_t resource)
 {
-    return resource & 7;
+    return resource & 7ui64;
 }
 //------------------------------------------------------------------------------
 static uint64_t getResourceData(uint64_t resource)
 {
-    return resource & -8;
+    return resource & ~7ui64;
 }
 //==============================================================================
 //  Instance
@@ -81,22 +81,24 @@ uint64_t xxCreateVertexAttributeD3D8PS(uint64_t device, int count, ...)
 
         stride += size;
 
+        DWORD& declaration = d3dVertexAttribute->declaration[i + 1];
+
         if (element == 3 && size == sizeof(float) * 3)
         {
-            d3dVertexAttribute->declaration[i + 1] = D3DVSD_REG(i, D3DVSDT_FLOAT3);
+            declaration = D3DVSD_REG(i, D3DVSDT_FLOAT3);
             xyzIndex++;
             continue;
         }
 
         if (element == 4 && size == sizeof(char) * 4)
         {
-            d3dVertexAttribute->declaration[i + 1] = D3DVSD_REG(i, D3DVSDT_D3DCOLOR);
+            declaration = D3DVSD_REG(i, D3DVSDT_D3DCOLOR);
             continue;
         }
 
         if (element == 2 && size == sizeof(float) * 2)
         {
-            d3dVertexAttribute->declaration[i + 1] = D3DVSD_REG(i, D3DVSDT_FLOAT2);
+            declaration = D3DVSD_REG(i, D3DVSDT_FLOAT2);
             textureIndex++;
             continue;
         }
@@ -200,8 +202,6 @@ void xxSetScissorD3D8PS(uint64_t commandBuffer, int x, int y, int width, int hei
     xxSetScissorD3D8(commandBuffer, x, y, width, height);
 
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
 
     D3DMATRIX projection;
     d3dDevice->GetTransform(D3DTS_PROJECTION, &projection);
@@ -212,11 +212,7 @@ void xxSetScissorD3D8PS(uint64_t commandBuffer, int x, int y, int width, int hei
 void xxSetVertexBuffersD3D8PS(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
     D3DVERTEXATTRIBUTE8PS* d3dVertexAttribute = reinterpret_cast<D3DVERTEXATTRIBUTE8PS*>(vertexAttribute);
-    if (d3dVertexAttribute == nullptr)
-        return;
 
     for (int i = 0; i < count; ++i)
     {
@@ -228,8 +224,6 @@ void xxSetVertexBuffersD3D8PS(uint64_t commandBuffer, int count, const uint64_t*
 void xxSetVertexConstantBufferD3D8PS(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
     const float* d3dBuffer = reinterpret_cast<float*>(buffer);
 
     d3dDevice->SetVertexShaderConstant(0, d3dBuffer, size / sizeof(float));
@@ -238,8 +232,6 @@ void xxSetVertexConstantBufferD3D8PS(uint64_t commandBuffer, uint64_t buffer, un
 void xxSetFragmentConstantBufferD3D8PS(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
-    if (d3dDevice == nullptr)
-        return;
     const float* d3dBuffer = reinterpret_cast<float*>(buffer);
 
     d3dDevice->SetPixelShaderConstant(0, d3dBuffer, size / sizeof(float));
