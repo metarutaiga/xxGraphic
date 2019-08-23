@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\graphic\xxGraphic.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicD3D10.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicD3D11.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicD3D8.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicD3D8PS.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicD3D9.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicD3D9PS.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicD3DAsm.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicNULL.cpp" />
+    <ClCompile Include="..\graphic\xxSystem.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\graphic\xxGraphic.h" />
+    <ClInclude Include="..\graphic\xxGraphicD3D10.h" />
+    <ClInclude Include="..\graphic\xxGraphicD3D11.h" />
+    <ClInclude Include="..\graphic\xxGraphicD3D8.h" />
+    <ClInclude Include="..\graphic\xxGraphicD3D8PS.h" />
+    <ClInclude Include="..\graphic\xxGraphicD3D9.h" />
+    <ClInclude Include="..\graphic\xxGraphicD3D9PS.h" />
+    <ClInclude Include="..\graphic\xxGraphicD3DAsm.h" />
+    <ClInclude Include="..\graphic\xxGraphicInternal.h" />
+    <ClInclude Include="..\graphic\xxGraphicNULL.h" />
+    <ClInclude Include="..\graphic\xxSystem.h" />
+    <ClInclude Include="..\graphic\dxsdk\d3d8.h">
+      <Filter>dxsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\dxsdk\d3d8caps.h">
+      <Filter>dxsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\dxsdk\d3d8types.h">
+      <Filter>dxsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\dxsdk\d3d9.h">
+      <Filter>dxsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\dxsdk\d3d9caps.h">
+      <Filter>dxsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\dxsdk\d3d9types.h">
+      <Filter>dxsdk</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\dxsdk\d3d10TokenizedProgramFormat.hpp">
+      <Filter>dxsdk</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="dxsdk">
+      <UniqueIdentifier>{743e9f93-6f7d-4cf2-95d1-af73bd4d2e05}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

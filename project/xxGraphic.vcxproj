@@ -31,6 +31,13 @@
     <ClCompile Include="..\graphic\xxSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\graphic\dxsdk\d3d10TokenizedProgramFormat.hpp" />
+    <ClInclude Include="..\graphic\dxsdk\d3d8.h" />
+    <ClInclude Include="..\graphic\dxsdk\d3d8caps.h" />
+    <ClInclude Include="..\graphic\dxsdk\d3d8types.h" />
+    <ClInclude Include="..\graphic\dxsdk\d3d9.h" />
+    <ClInclude Include="..\graphic\dxsdk\d3d9caps.h" />
+    <ClInclude Include="..\graphic\dxsdk\d3d9types.h" />
     <ClInclude Include="..\graphic\xxGraphic.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D10.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D11.h" />
