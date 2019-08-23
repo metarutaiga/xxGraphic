@@ -110,9 +110,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     {
         struct stat st;
         if (stat("C:\\Windows\\Fonts\\msgothic.ttc", &st) == 0)
-            io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\msgothic.ttc", 13.0f * io.FontGlobalScale, &font_config, io.Fonts->GetGlyphRangesJapanese());
+            io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\msgothic.ttc", 13.0f, &font_config, io.Fonts->GetGlyphRangesJapanese());
         else if (stat("C:\\Windows\\Fonts\\mingliu.ttc", &st) == 0)
-            io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\mingliu.ttc", 13.0f * io.FontGlobalScale, &font_config, io.Fonts->GetGlyphRangesJapanese());
+            io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\mingliu.ttc", 13.0f, &font_config, io.Fonts->GetGlyphRangesJapanese());
     }
     else
     {
