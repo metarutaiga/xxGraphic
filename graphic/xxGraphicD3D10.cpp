@@ -5,10 +5,12 @@
 #include <d3d10.h>
 typedef HRESULT (WINAPI *PFN_D3D10_CREATE_DEVICE)(IDXGIAdapter*, D3D10_DRIVER_TYPE, HMODULE, UINT, UINT, ID3D10Device**);
 
-static HMODULE                  g_d3dLibrary = nullptr;
-static IDXGIFactory*            g_dxgiFactory = nullptr;
-static ID3D10Texture2D*         g_depthStencilTexture = nullptr;
-static ID3D10DepthStencilView*  g_depthStencilView = nullptr;
+static HMODULE                      g_d3dLibrary = nullptr;
+static IDXGIFactory*                g_dxgiFactory = nullptr;
+static ID3D10Texture2D*             g_depthStencilTexture = nullptr;
+static ID3D10DepthStencilView*      g_depthStencilView = nullptr;
+static bool                         g_supportBGRA = true;
+#define DXGI_FORMAT_B8G8R8A8_UNORM  g_supportBGRA ? DXGI_FORMAT_B8G8R8A8_UNORM : DXGI_FORMAT_R8G8B8A8_UNORM
 
 //==============================================================================
 //  Instance
@@ -50,36 +52,19 @@ uint64_t xxCreateDeviceD3D10(uint64_t instance)
         return 0;
 
     ID3D10Device* d3dDevice = nullptr;
-    HRESULT hResult = D3D10CreateDevice(nullptr, D3D10_DRIVER_TYPE_HARDWARE, nullptr, 0, D3D10_SDK_VERSION, &d3dDevice);
+    HRESULT hResult = D3D10CreateDevice(nullptr, D3D10_DRIVER_TYPE_HARDWARE, nullptr, D3D10_CREATE_DEVICE_ALLOW_NULL_FROM_MAP, D3D10_SDK_VERSION, &d3dDevice);
     if (hResult != S_OK)
         return 0;
 
-    IDXGIDevice* dxgiDevice = nullptr;
-    if (d3dDevice->QueryInterface(IID_PPV_ARGS(&dxgiDevice)) == S_OK)
-    {
-        IDXGIAdapter* dxgiAdapter = nullptr;
-        if (dxgiDevice->GetParent(IID_PPV_ARGS(&dxgiAdapter)) == S_OK)
-        {
-            IDXGIFactory* dxgiFactory = nullptr;
-            if (dxgiAdapter->GetParent(IID_PPV_ARGS(&dxgiFactory)) == S_OK)
-            {
-                g_dxgiFactory = dxgiFactory;
-            }
-            dxgiAdapter->Release();
-        }
-        dxgiDevice->Release();
-    }
-    if (g_dxgiFactory == nullptr)
-    {
-        d3dDevice->Release();
-        return 0;
-    }
+    g_supportBGRA = false;
 
     return reinterpret_cast<uint64_t>(d3dDevice);
 }
 //------------------------------------------------------------------------------
 void xxDestroyDeviceD3D10(uint64_t device)
 {
+    g_supportBGRA = true;
+
     if (g_dxgiFactory)
     {
         g_dxgiFactory->Release();
@@ -134,6 +119,30 @@ uint64_t xxCreateSwapchainD3D10(uint64_t device, void* view, unsigned int width,
     if (d3dDevice == nullptr)
         return 0;
 
+    if (g_dxgiFactory == nullptr)
+    {
+        IDXGIDevice* dxgiDevice = nullptr;
+        if (d3dDevice->QueryInterface(IID_PPV_ARGS(&dxgiDevice)) == S_OK)
+        {
+            IDXGIAdapter* dxgiAdapter = nullptr;
+            if (dxgiDevice->GetParent(IID_PPV_ARGS(&dxgiAdapter)) == S_OK)
+            {
+                IDXGIFactory* dxgiFactory = nullptr;
+                if (dxgiAdapter->GetParent(IID_PPV_ARGS(&dxgiFactory)) == S_OK)
+                {
+                    g_dxgiFactory = dxgiFactory;
+                }
+                dxgiAdapter->Release();
+            }
+            dxgiDevice->Release();
+        }
+        if (g_dxgiFactory == nullptr)
+        {
+            d3dDevice->Release();
+            return 0;
+        }
+    }
+
     HWND hWnd = (HWND)view;
     if (width == 0 || height == 0)
     {
@@ -148,7 +157,7 @@ uint64_t xxCreateSwapchainD3D10(uint64_t device, void* view, unsigned int width,
     DXGI_SWAP_CHAIN_DESC desc = {};
     desc.BufferDesc.Width = width;
     desc.BufferDesc.Height = height;
-    desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
     desc.SampleDesc.Count = 1;
     desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     desc.BufferCount = 1;
@@ -445,7 +454,7 @@ uint64_t xxCreateTextureD3D10(uint64_t device, int format, unsigned int width, u
         texture2DDesc.Height = height;
         texture2DDesc.MipLevels = mipmap;
         texture2DDesc.ArraySize = array;
-        texture2DDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        texture2DDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
         texture2DDesc.SampleDesc.Count = 1;
         texture2DDesc.Usage = D3D10_USAGE_DYNAMIC;
         texture2DDesc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
@@ -471,7 +480,7 @@ uint64_t xxCreateTextureD3D10(uint64_t device, int format, unsigned int width, u
         texture2DDesc.Height = height;
         texture2DDesc.MipLevels = mipmap;
         texture2DDesc.ArraySize = array;
-        texture2DDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        texture2DDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
         texture2DDesc.SampleDesc.Count = 1;
         texture2DDesc.Usage = D3D10_USAGE_DYNAMIC;
         texture2DDesc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
@@ -498,7 +507,7 @@ uint64_t xxCreateTextureD3D10(uint64_t device, int format, unsigned int width, u
         texture3DDesc.Height = height;
         texture3DDesc.Depth = depth;
         texture3DDesc.MipLevels = mipmap;
-        texture3DDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        texture3DDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
         texture3DDesc.Usage = D3D10_USAGE_DYNAMIC;
         texture3DDesc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
         texture3DDesc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
@@ -691,7 +700,7 @@ uint64_t xxCreateVertexAttributeD3D10(uint64_t device, int count, ...)
 
         if (element == 4 && size == sizeof(char) * 4)
         {
-            inputElement.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+            inputElement.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
             inputElement.SemanticName = "COLOR";
             inputElement.SemanticIndex = 0;
             continue;

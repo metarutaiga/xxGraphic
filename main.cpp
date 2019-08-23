@@ -14,6 +14,7 @@
 #include "graphic/xxGraphicD3D9.h"
 #include "graphic/xxGraphicD3D9PS.h"
 #include "graphic/xxGraphicD3D10.h"
+#include "graphic/xxGraphicD3D10_1.h"
 #include "graphic/xxGraphicD3D11.h"
 #include "graphic/xxGraphicNULL.h"
 
@@ -191,6 +192,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                 selected = (deviceStringCurrent == deviceStringTarget);
                 if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
                     createInstance = xxCreateInstanceD3D10;
+
+                deviceStringTarget = xxGetDeviceStringD3D10_1(g_device);
+                selected = (deviceStringCurrent == deviceStringTarget);
+                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
+                    createInstance = xxCreateInstanceD3D10_1;
 
                 deviceStringTarget = xxGetDeviceStringD3D11(g_device);
                 selected = (deviceStringCurrent == deviceStringTarget);

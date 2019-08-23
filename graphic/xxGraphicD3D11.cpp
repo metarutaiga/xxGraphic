@@ -56,27 +56,6 @@ uint64_t xxCreateDeviceD3D11(uint64_t instance)
         return 0;
     d3dDeviceContext->Release();
 
-    IDXGIDevice* dxgiDevice = nullptr;
-    if (d3dDevice->QueryInterface(IID_PPV_ARGS(&dxgiDevice)) == S_OK)
-    {
-        IDXGIAdapter* dxgiAdapter = nullptr;
-        if (dxgiDevice->GetParent(IID_PPV_ARGS(&dxgiAdapter)) == S_OK)
-        {
-            IDXGIFactory* dxgiFactory = nullptr;
-            if (dxgiAdapter->GetParent(IID_PPV_ARGS(&dxgiFactory)) == S_OK)
-            {
-                g_dxgiFactory = dxgiFactory;
-            }
-            dxgiAdapter->Release();
-        }
-        dxgiDevice->Release();
-    }
-    if (g_dxgiFactory == nullptr)
-    {
-        d3dDevice->Release();
-        return 0;
-    }
-
     return reinterpret_cast<uint64_t>(d3dDevice);
 }
 //------------------------------------------------------------------------------
@@ -136,6 +115,30 @@ uint64_t xxCreateSwapchainD3D11(uint64_t device, void* view, unsigned int width,
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
     if (d3dDevice == nullptr)
         return 0;
+
+    if (g_dxgiFactory == nullptr)
+    {
+        IDXGIDevice* dxgiDevice = nullptr;
+        if (d3dDevice->QueryInterface(IID_PPV_ARGS(&dxgiDevice)) == S_OK)
+        {
+            IDXGIAdapter* dxgiAdapter = nullptr;
+            if (dxgiDevice->GetParent(IID_PPV_ARGS(&dxgiAdapter)) == S_OK)
+            {
+                IDXGIFactory* dxgiFactory = nullptr;
+                if (dxgiAdapter->GetParent(IID_PPV_ARGS(&dxgiFactory)) == S_OK)
+                {
+                    g_dxgiFactory = dxgiFactory;
+                }
+                dxgiAdapter->Release();
+            }
+            dxgiDevice->Release();
+        }
+        if (g_dxgiFactory == nullptr)
+        {
+            d3dDevice->Release();
+            return 0;
+        }
+    }
 
     HWND hWnd = (HWND)view;
     if (width == 0 || height == 0)
