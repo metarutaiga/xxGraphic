@@ -48,13 +48,15 @@ uint64_t xxCreateDeviceD3D11(uint64_t instance)
     if (D3D11CreateDevice == nullptr)
         return 0;
 
+    UINT flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+#if defined(_DEBUG)
+    flags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
     ID3D11Device* d3dDevice = nullptr;
     D3D_FEATURE_LEVEL d3dFeatureLevel;
-    ID3D11DeviceContext* d3dDeviceContext = nullptr;
-    HRESULT hResult = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION, &d3dDevice, &d3dFeatureLevel, &d3dDeviceContext);
+    HRESULT hResult = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, flags, nullptr, 0, D3D11_SDK_VERSION, &d3dDevice, &d3dFeatureLevel, nullptr);
     if (hResult != S_OK)
         return 0;
-    d3dDeviceContext->Release();
 
     return reinterpret_cast<uint64_t>(d3dDevice);
 }

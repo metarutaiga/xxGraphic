@@ -50,8 +50,22 @@ uint64_t xxCreateDeviceD3D10_1(uint64_t instance)
     if (D3D10CreateDevice1 == nullptr)
         return 0;
 
+    UINT flags = D3D10_CREATE_DEVICE_ALLOW_NULL_FROM_MAP | D3D10_CREATE_DEVICE_BGRA_SUPPORT;
+#if defined(_DEBUG)
+    flags |= D3D10_CREATE_DEVICE_DEBUG;
+#endif
     ID3D10Device1* d3dDevice = nullptr;
-    HRESULT hResult = D3D10CreateDevice1(nullptr, D3D10_DRIVER_TYPE_HARDWARE, nullptr, D3D10_CREATE_DEVICE_ALLOW_NULL_FROM_MAP | D3D10_CREATE_DEVICE_BGRA_SUPPORT, D3D10_FEATURE_LEVEL_10_1, D3D10_1_SDK_VERSION, &d3dDevice);
+    HRESULT hResult = E_NOTIMPL;
+    if (hResult != S_OK)
+        hResult = D3D10CreateDevice1(nullptr, D3D10_DRIVER_TYPE_HARDWARE, nullptr, flags, D3D10_FEATURE_LEVEL_10_1, D3D10_1_SDK_VERSION, &d3dDevice);
+    if (hResult != S_OK)
+        hResult = D3D10CreateDevice1(nullptr, D3D10_DRIVER_TYPE_HARDWARE, nullptr, flags, D3D10_FEATURE_LEVEL_10_0, D3D10_1_SDK_VERSION, &d3dDevice);
+    if (hResult != S_OK)
+        hResult = D3D10CreateDevice1(nullptr, D3D10_DRIVER_TYPE_HARDWARE, nullptr, flags, D3D10_FEATURE_LEVEL_9_3, D3D10_1_SDK_VERSION, &d3dDevice);
+    if (hResult != S_OK)
+        hResult = D3D10CreateDevice1(nullptr, D3D10_DRIVER_TYPE_HARDWARE, nullptr, flags, D3D10_FEATURE_LEVEL_9_2, D3D10_1_SDK_VERSION, &d3dDevice);
+    if (hResult != S_OK)
+        hResult = D3D10CreateDevice1(nullptr, D3D10_DRIVER_TYPE_HARDWARE, nullptr, flags, D3D10_FEATURE_LEVEL_9_1, D3D10_1_SDK_VERSION, &d3dDevice);
     if (hResult != S_OK)
         return 0;
 

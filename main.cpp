@@ -16,6 +16,7 @@
 #include "graphic/xxGraphicD3D10.h"
 #include "graphic/xxGraphicD3D10_1.h"
 #include "graphic/xxGraphicD3D11.h"
+#include "graphic/xxGraphicD3D11_1.h"
 #include "graphic/xxGraphicNULL.h"
 
 #define NOMINMAX
@@ -202,6 +203,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                 selected = (deviceStringCurrent == deviceStringTarget);
                 if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
                     createInstance = xxCreateInstanceD3D11;
+
+                deviceStringTarget = xxGetDeviceStringD3D11_1(g_device);
+                selected = (deviceStringCurrent == deviceStringTarget);
+                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
+                    createInstance = xxCreateInstanceD3D11_1;
 
                 deviceStringTarget = xxGetDeviceStringNULL(g_device);
                 selected = (deviceStringCurrent == deviceStringTarget);

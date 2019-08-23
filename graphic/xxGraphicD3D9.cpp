@@ -2,6 +2,9 @@
 #include "xxGraphicD3DAsm.h"
 #include "xxGraphicInternal.h"
 
+#if defined(_DEBUG)
+#define D3D_DEBUG_INFO 1
+#endif
 #include "dxsdk/d3d9.h"
 typedef LPDIRECT3D9 (WINAPI *PFN_DIRECT3D_CREATE9)(UINT);
 typedef HRESULT (WINAPI *PFN_DIRECT3D_CREATE9EX)(UINT, LPDIRECT3D9EX*);

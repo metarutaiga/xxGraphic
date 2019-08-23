@@ -51,8 +51,12 @@ uint64_t xxCreateDeviceD3D10(uint64_t instance)
     if (D3D10CreateDevice == nullptr)
         return 0;
 
+    UINT flags = D3D10_CREATE_DEVICE_ALLOW_NULL_FROM_MAP;
+#if defined(_DEBUG)
+    flags |= D3D10_CREATE_DEVICE_DEBUG;
+#endif
     ID3D10Device* d3dDevice = nullptr;
-    HRESULT hResult = D3D10CreateDevice(nullptr, D3D10_DRIVER_TYPE_HARDWARE, nullptr, D3D10_CREATE_DEVICE_ALLOW_NULL_FROM_MAP, D3D10_SDK_VERSION, &d3dDevice);
+    HRESULT hResult = D3D10CreateDevice(nullptr, D3D10_DRIVER_TYPE_HARDWARE, nullptr, flags, D3D10_SDK_VERSION, &d3dDevice);
     if (hResult != S_OK)
         return 0;
 
