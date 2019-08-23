@@ -5,10 +5,10 @@
 #include "dxsdk/d3d8.h"
 typedef LPDIRECT3D8 (WINAPI *PFN_DIRECT3D_CREATE8)(UINT);
 
-static const wchar_t* const     g_dummy = L"xxGraphicDummyWindow";
-static HMODULE                  g_d3dLibrary = nullptr;
-static HWND                     g_hWnd = nullptr;
-static LPDIRECT3DSURFACE8       g_depthStencil = nullptr;
+static const wchar_t* const g_dummy = L"xxGraphicDummyWindow";
+static HMODULE              g_d3dLibrary = nullptr;
+static HWND                 g_hWnd = nullptr;
+static LPDIRECT3DSURFACE8   g_depthStencil = nullptr;
 
 //==============================================================================
 //  Resource Type

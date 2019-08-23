@@ -5,8 +5,10 @@
 #include <d3d10.h>
 typedef HRESULT (WINAPI *PFN_D3D10_CREATE_DEVICE)(IDXGIAdapter*, D3D10_DRIVER_TYPE, HMODULE, UINT, UINT, ID3D10Device**);
 
-static HMODULE                      g_d3dLibrary = nullptr;
-static IDXGIFactory*                g_dxgiFactory = nullptr;
+static HMODULE                  g_d3dLibrary = nullptr;
+static IDXGIFactory*            g_dxgiFactory = nullptr;
+static ID3D10Texture2D*         g_depthStencilTexture = nullptr;
+static ID3D10DepthStencilView*  g_depthStencilView = nullptr;
 
 //==============================================================================
 //  Instance
@@ -84,6 +86,18 @@ void xxDestroyDeviceD3D10(uint64_t device)
         g_dxgiFactory = nullptr;
     }
 
+    if (g_depthStencilTexture)
+    {
+        g_depthStencilTexture->Release();
+        g_depthStencilTexture = nullptr;
+    }
+
+    if (g_depthStencilView)
+    {
+        g_depthStencilView->Release();
+        g_depthStencilView = nullptr;
+    }
+
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(device);
     if (d3dDevice == nullptr)
         return;
@@ -156,6 +170,35 @@ uint64_t xxCreateSwapchainD3D10(uint64_t device, void* view, unsigned int width,
         d3dTexture->Release();
     }
 
+    D3D10_TEXTURE2D_DESC textureDesc = {};
+    if (g_depthStencilTexture)
+        g_depthStencilTexture->GetDesc(&textureDesc);
+    if (textureDesc.Width < width || textureDesc.Height < height)
+    {
+        if (g_depthStencilTexture)
+            g_depthStencilTexture->Release();
+        if (g_depthStencilView)
+            g_depthStencilView->Release();
+        g_depthStencilTexture = nullptr;
+        g_depthStencilView = nullptr;
+
+        if (textureDesc.Width < width)
+            textureDesc.Width = width;
+        if (textureDesc.Height < height)
+            textureDesc.Height = height;
+        textureDesc.MipLevels = 1;
+        textureDesc.ArraySize = 1;
+        textureDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+        textureDesc.SampleDesc.Count = 1;
+        textureDesc.BindFlags = D3D10_BIND_DEPTH_STENCIL | D3D10_BIND_SHADER_RESOURCE;
+        d3dDevice->CreateTexture2D(&textureDesc, nullptr, &g_depthStencilTexture);
+
+        D3D10_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
+        depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        depthStencilViewDesc.ViewDimension = D3D10_DSV_DIMENSION_TEXTURE2D;
+        d3dDevice->CreateDepthStencilView(g_depthStencilTexture, &depthStencilViewDesc, &g_depthStencilView);
+    }
+
     D3D10SWAPCHAIN* d3dSwapchain = new D3D10SWAPCHAIN;
     d3dSwapchain->dxgiSwapchain = dxgiSwapchain;
     d3dSwapchain->renderTargetView = renderTargetView;
@@ -196,7 +239,7 @@ uint64_t xxGetCommandBufferD3D10(uint64_t device, uint64_t swapchain)
     if (d3dSwapchain == nullptr)
         return 0;
 
-    d3dDevice->OMSetRenderTargets(1, &d3dSwapchain->renderTargetView, nullptr);
+    d3dDevice->OMSetRenderTargets(1, &d3dSwapchain->renderTargetView, g_depthStencilView);
 
     return reinterpret_cast<uint64_t>(d3dDevice);
 }
@@ -258,14 +301,11 @@ bool xxBeginRenderPassD3D10(uint64_t commandBuffer, uint64_t renderPass)
         return false;
 
     ID3D10RenderTargetView* renderTargetView = nullptr;
-    ID3D10DepthStencilView* depthStencilView = nullptr;
-    d3dDevice->OMGetRenderTargets(1, &renderTargetView, &depthStencilView);
+    d3dDevice->OMGetRenderTargets(1, &renderTargetView, nullptr);
     d3dDevice->ClearRenderTargetView(renderTargetView, d3dRenderPass->color);
-    d3dDevice->ClearDepthStencilView(depthStencilView, D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, d3dRenderPass->depth, d3dRenderPass->stencil);
+    d3dDevice->ClearDepthStencilView(g_depthStencilView, D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, d3dRenderPass->depth, d3dRenderPass->stencil);
     if (renderTargetView)
         renderTargetView->Release();
-    if (depthStencilView)
-        depthStencilView->Release();
 
     return true;
 }
@@ -422,7 +462,58 @@ uint64_t xxCreateTextureD3D10(uint64_t device, int format, unsigned int width, u
         viewDesc.Format = texture2DDesc.Format;
         viewDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
         viewDesc.Texture2D.MipLevels = mipmap;
-        viewDesc.Texture2D.MostDetailedMip = 0;
+    }
+
+    if (width == height && depth == 1 && array == 6)
+    {
+        D3D10_TEXTURE2D_DESC texture2DDesc = {};
+        texture2DDesc.Width = width;
+        texture2DDesc.Height = height;
+        texture2DDesc.MipLevels = mipmap;
+        texture2DDesc.ArraySize = array;
+        texture2DDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        texture2DDesc.SampleDesc.Count = 1;
+        texture2DDesc.Usage = D3D10_USAGE_DYNAMIC;
+        texture2DDesc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
+        texture2DDesc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
+        texture2DDesc.MiscFlags = D3D10_RESOURCE_MISC_TEXTURECUBE;
+
+        HRESULT hResult = d3dDevice->CreateTexture2D(&texture2DDesc, nullptr, &d3dTexture2D);
+        if (hResult != S_OK)
+        {
+            delete d3dTexture;
+            return 0;
+        }
+        d3dResource = d3dTexture2D;
+
+        viewDesc.Format = texture2DDesc.Format;
+        viewDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
+        viewDesc.Texture2D.MipLevels = mipmap;
+    }
+
+    if (depth != 1 && array == 1)
+    {
+        D3D10_TEXTURE3D_DESC texture3DDesc = {};
+        texture3DDesc.Width = width;
+        texture3DDesc.Height = height;
+        texture3DDesc.Depth = depth;
+        texture3DDesc.MipLevels = mipmap;
+        texture3DDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        texture3DDesc.Usage = D3D10_USAGE_DYNAMIC;
+        texture3DDesc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
+        texture3DDesc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
+
+        HRESULT hResult = d3dDevice->CreateTexture3D(&texture3DDesc, nullptr, &d3dTexture3D);
+        if (hResult != S_OK)
+        {
+            delete d3dTexture;
+            return 0;
+        }
+        d3dResource = d3dTexture3D;
+
+        viewDesc.Format = texture3DDesc.Format;
+        viewDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE3D;
+        viewDesc.Texture3D.MipLevels = mipmap;
     }
 
     if (d3dResource == nullptr)

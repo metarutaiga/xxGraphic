@@ -4,11 +4,12 @@
 
 #include "dxsdk/d3d9.h"
 typedef LPDIRECT3D9 (WINAPI *PFN_DIRECT3D_CREATE9)(UINT);
+typedef HRESULT (WINAPI *PFN_DIRECT3D_CREATE9EX)(UINT, LPDIRECT3D9EX*);
 
-static const wchar_t* const         g_dummy = L"xxGraphicDummyWindow";
-static HMODULE                      g_d3dLibrary = nullptr;
-static HWND                         g_hWnd = nullptr;
-static LPDIRECT3DSURFACE9           g_depthStencil = nullptr;
+static const wchar_t* const g_dummy = L"xxGraphicDummyWindow";
+static HMODULE              g_d3dLibrary = nullptr;
+static HWND                 g_hWnd = nullptr;
+static LPDIRECT3DSURFACE9   g_depthStencil = nullptr;
 
 //==============================================================================
 //  Resource Type
@@ -32,12 +33,31 @@ uint64_t xxCreateInstanceD3D9()
     if (g_d3dLibrary == nullptr)
         return 0;
 
+    PFN_DIRECT3D_CREATE9EX Direct3DCreate9Ex;
+    (void*&)Direct3DCreate9Ex = GetProcAddress(g_d3dLibrary, "Direct3DCreate9Ex");
+    if (Direct3DCreate9Ex)
+    {
+        LPDIRECT3D9EX d3d = nullptr;
+        HRESULT hResult = Direct3DCreate9Ex(D3D_SDK_VERSION, &d3d);
+        if (hResult == S_OK)
+        {
+            xxRegisterFunction(D3D9);
+            return reinterpret_cast<uint64_t>(d3d);
+        }
+    }
+
     PFN_DIRECT3D_CREATE9 Direct3DCreate9;
     (void*&)Direct3DCreate9 = GetProcAddress(g_d3dLibrary, "Direct3DCreate9");
     if (Direct3DCreate9 == nullptr)
         return 0;
 
-    LPDIRECT3D9 d3d = Direct3DCreate9(D3D_SDK_VERSION);
+    LPDIRECT3D9 d3d = nullptr;
+    if (d3d == nullptr)
+        d3d = Direct3DCreate9(D3D_SDK_VERSION);
+    if (d3d == nullptr)
+        d3d = Direct3DCreate9(D3D9b_SDK_VERSION);
+    if (d3d == nullptr)
+        d3d = Direct3DCreate9(30/*D3D_SDK_VERSION*/);
     if (d3d == nullptr)
         return 0;
 
