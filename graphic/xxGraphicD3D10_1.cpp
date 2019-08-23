@@ -1,6 +1,5 @@
 #include "xxGraphicD3D10.h"
 #include "xxGraphicD3D10_1.h"
-#include "xxGraphicD3DAsm.h"
 #include "xxGraphicInternal.h"
 
 #include <d3d10_1.h>

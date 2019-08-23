@@ -7,7 +7,6 @@
 #endif
 #include "dxsdk/d3d9.h"
 typedef LPDIRECT3D9 (WINAPI *PFN_DIRECT3D_CREATE9)(UINT);
-typedef HRESULT (WINAPI *PFN_DIRECT3D_CREATE9EX)(UINT, LPDIRECT3D9EX*);
 
 static const wchar_t* const g_dummy = L"xxGraphicDummyWindow";
 static HMODULE              g_d3dLibrary = nullptr;
@@ -35,19 +34,6 @@ uint64_t xxCreateInstanceD3D9()
         g_d3dLibrary = LoadLibraryW(L"d3d9.dll");
     if (g_d3dLibrary == nullptr)
         return 0;
-
-    PFN_DIRECT3D_CREATE9EX Direct3DCreate9Ex;
-    (void*&)Direct3DCreate9Ex = GetProcAddress(g_d3dLibrary, "Direct3DCreate9Ex");
-    if (Direct3DCreate9Ex)
-    {
-        LPDIRECT3D9EX d3d = nullptr;
-        HRESULT hResult = Direct3DCreate9Ex(D3D_SDK_VERSION, &d3d);
-        if (hResult == S_OK)
-        {
-            xxRegisterFunction(D3D9);
-            return reinterpret_cast<uint64_t>(d3d);
-        }
-    }
 
     PFN_DIRECT3D_CREATE9 Direct3DCreate9;
     (void*&)Direct3DCreate9 = GetProcAddress(g_d3dLibrary, "Direct3DCreate9");

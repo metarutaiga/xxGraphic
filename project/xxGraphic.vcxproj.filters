@@ -13,6 +13,7 @@
     <ClCompile Include="..\graphic\xxSystem.cpp" />
     <ClCompile Include="..\graphic\xxGraphicD3D10_1.cpp" />
     <ClCompile Include="..\graphic\xxGraphicD3D11_1.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicD3D9Ex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\graphic\xxGraphic.h" />
@@ -49,6 +50,7 @@
     </ClInclude>
     <ClInclude Include="..\graphic\xxGraphicD3D10_1.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D11_1.h" />
+    <ClInclude Include="..\graphic\xxGraphicD3D9Ex.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="dxsdk">

@@ -13,6 +13,7 @@
 #include "graphic/xxGraphicD3D8PS.h"
 #include "graphic/xxGraphicD3D9.h"
 #include "graphic/xxGraphicD3D9PS.h"
+#include "graphic/xxGraphicD3D9Ex.h"
 #include "graphic/xxGraphicD3D10.h"
 #include "graphic/xxGraphicD3D10_1.h"
 #include "graphic/xxGraphicD3D11.h"
@@ -188,6 +189,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                 selected = (deviceStringCurrent == deviceStringTarget);
                 if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
                     createInstance = xxCreateInstanceD3D9PS;
+
+                deviceStringTarget = xxGetDeviceStringD3D9Ex(g_device);
+                selected = (deviceStringCurrent == deviceStringTarget);
+                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
+                    createInstance = xxCreateInstanceD3D9Ex;
+
+                deviceStringTarget = xxGetDeviceStringD3D9ExPS(g_device);
+                selected = (deviceStringCurrent == deviceStringTarget);
+                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
+                    createInstance = xxCreateInstanceD3D9ExPS;
 
                 deviceStringTarget = xxGetDeviceStringD3D10(g_device);
                 selected = (deviceStringCurrent == deviceStringTarget);

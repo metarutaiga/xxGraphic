@@ -1,6 +1,5 @@
 #include "xxGraphicD3D11.h"
 #include "xxGraphicD3D11_1.h"
-#include "xxGraphicD3DAsm.h"
 #include "xxGraphicInternal.h"
 
 #include <d3d11_1.h>
