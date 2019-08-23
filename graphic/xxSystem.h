@@ -67,6 +67,10 @@ xxAPI uint64_t xxGetCurrentProcessId();
 xxAPI uint64_t xxGetCurrentThreadId();
 xxAPI int xxGetIncrementThreadId();
 //==============================================================================
+//  Logger
+//==============================================================================
+xxAPI int xxLog(const char* format, ...);
+//==============================================================================
 //  MD5
 //==============================================================================
 xxAPI const uint8_t* xxMD5(const void* data, int len, uint8_t* digest);

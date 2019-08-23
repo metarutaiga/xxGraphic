@@ -78,6 +78,31 @@ int xxGetIncrementThreadId()
     return threadId - 1;
 }
 //==============================================================================
+//  Logger
+//==============================================================================
+int xxLog(const char* format, ...)
+{
+    va_list first;
+    va_list second;
+
+    va_start(first, format);
+    va_copy(second, first);
+    int length = vsnprintf(nullptr, 0, format, first) + 1;
+    va_end(first);
+
+    char* buffer = xxAlloc(char, length);
+    if (buffer)
+    {
+        length = vsnprintf(buffer, length, format, second) + 1;
+        OutputDebugStringA(buffer);
+        OutputDebugStringA("\n");
+        xxFree(buffer);
+    }
+    va_end(second);
+
+    return length - 1;
+}
+//==============================================================================
 //  MD5 - omaha
 //  Copyright 2007-2009 Google Inc.
 //==============================================================================
