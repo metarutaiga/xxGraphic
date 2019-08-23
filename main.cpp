@@ -14,6 +14,7 @@
 #include "graphic/xxGraphicD3D9.h"
 #include "graphic/xxGraphicD3D9PS.h"
 #include "graphic/xxGraphicD3D9Ex.h"
+#include "graphic/xxGraphicD3D9On12.h"
 #include "graphic/xxGraphicD3D10.h"
 #include "graphic/xxGraphicD3D10_1.h"
 #include "graphic/xxGraphicD3D11.h"
@@ -199,6 +200,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                 selected = (deviceStringCurrent == deviceStringTarget);
                 if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
                     createInstance = xxCreateInstanceD3D9ExPS;
+
+                deviceStringTarget = xxGetDeviceStringD3D9On12(g_device);
+                selected = (deviceStringCurrent == deviceStringTarget);
+                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
+                    createInstance = xxCreateInstanceD3D9On12;
+
+                deviceStringTarget = xxGetDeviceStringD3D9On12PS(g_device);
+                selected = (deviceStringCurrent == deviceStringTarget);
+                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
+                    createInstance = xxCreateInstanceD3D9On12PS;
+
+                deviceStringTarget = xxGetDeviceStringD3D9On12Ex(g_device);
+                selected = (deviceStringCurrent == deviceStringTarget);
+                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
+                    createInstance = xxCreateInstanceD3D9On12Ex;
+
+                deviceStringTarget = xxGetDeviceStringD3D9On12ExPS(g_device);
+                selected = (deviceStringCurrent == deviceStringTarget);
+                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
+                    createInstance = xxCreateInstanceD3D9On12ExPS;
 
                 deviceStringTarget = xxGetDeviceStringD3D10(g_device);
                 selected = (deviceStringCurrent == deviceStringTarget);

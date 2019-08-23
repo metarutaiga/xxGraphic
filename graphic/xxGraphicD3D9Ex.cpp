@@ -91,11 +91,11 @@ bool xxTestDeviceD3D9Ex(uint64_t device)
 //------------------------------------------------------------------------------
 const char* xxGetDeviceStringD3D9Ex(uint64_t device)
 {
-    return "Direct3D 9.0Ex Fixed Function";
+    return "Direct3D 9Ex Fixed Function";
 }
 //------------------------------------------------------------------------------
 const char* xxGetDeviceStringD3D9ExPS(uint64_t device)
 {
-    return "Direct3D 9.0Ex Programmable Shader";
+    return "Direct3D 9Ex Programmable Shader";
 }
 //------------------------------------------------------------------------------
