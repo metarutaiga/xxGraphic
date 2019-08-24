@@ -52,6 +52,11 @@ xxAPI void          (*xxDestroyTexture)(uint64_t texture);
 xxAPI void*         (*xxMapTexture)(uint64_t device, uint64_t texture, unsigned int& stride, unsigned int level, unsigned int array, unsigned int mipmap);
 xxAPI void          (*xxUnmapTexture)(uint64_t device, uint64_t texture, unsigned int level, unsigned int array, unsigned int mipmap);
 //==============================================================================
+//  Sampler
+//==============================================================================
+xxAPI uint64_t      (*xxCreateSampler)(uint64_t device, bool linearMag, bool linearMin, bool linearMip);
+xxAPI void          (*xxDestroySampler)(uint64_t sampler);
+//==============================================================================
 //  Vertex Attribute
 //==============================================================================
 xxAPI uint64_t      (*xxCreateVertexAttribute)(uint64_t device, int count, ...);
@@ -83,6 +88,8 @@ xxAPI void          (*xxSetIndexBuffer)(uint64_t commandBuffer, uint64_t buffer)
 xxAPI void          (*xxSetVertexBuffers)(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute);
 xxAPI void          (*xxSetVertexTextures)(uint64_t commandBuffer, int count, const uint64_t* textures);
 xxAPI void          (*xxSetFragmentTextures)(uint64_t commandBuffer, int count, const uint64_t* textures);
+xxAPI void          (*xxSetVertexSamplers)(uint64_t commandBuffer, int count, const uint64_t* samplers);
+xxAPI void          (*xxSetFragmentSamplers)(uint64_t commandBuffer, int count, const uint64_t* samplers);
 xxAPI void          (*xxSetVertexConstantBuffer)(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
 xxAPI void          (*xxSetFragmentConstantBuffer)(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
 xxAPI void          (*xxDrawIndexed)(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);

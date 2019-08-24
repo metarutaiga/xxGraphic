@@ -156,6 +156,18 @@ void xxUnmapTextureNULL(uint64_t device, uint64_t texture, unsigned int level, u
 
 }
 //==============================================================================
+//  Sampler
+//==============================================================================
+uint64_t xxCreateSamplerNULL(uint64_t device, bool linearMag, bool linearMin, bool linearMip)
+{
+    return 0;
+}
+//------------------------------------------------------------------------------
+void xxDestroySamplerNULL(uint64_t sampler)
+{
+
+}
+//==============================================================================
 //  Vertex Attribute
 //==============================================================================
 uint64_t xxCreateVertexAttributeNULL(uint64_t device, int count, ...)
@@ -260,6 +272,16 @@ void xxSetVertexTexturesNULL(uint64_t commandBuffer, int count, const uint64_t* 
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentTexturesNULL(uint64_t commandBuffer, int count, const uint64_t* textures)
+{
+
+}
+//------------------------------------------------------------------------------
+void xxSetVertexSamplersNULL(uint64_t commandBuffer, int count, const uint64_t* samplers)
+{
+
+}
+//------------------------------------------------------------------------------
+void xxSetFragmentSamplersNULL(uint64_t commandBuffer, int count, const uint64_t* samplers)
 {
 
 }

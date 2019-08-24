@@ -669,6 +669,36 @@ void xxUnmapTextureD3D11(uint64_t device, uint64_t texture, unsigned int level, 
     }
 }
 //==============================================================================
+//  Sampler
+//==============================================================================
+uint64_t xxCreateSamplerD3D11(uint64_t device, bool linearMag, bool linearMin, bool linearMip)
+{
+    ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
+    if (d3dDevice == nullptr)
+        return 0;
+
+    D3D11_SAMPLER_DESC desc = {};
+    desc.Filter = D3D11_ENCODE_BASIC_FILTER(linearMin ? D3D11_FILTER_TYPE_LINEAR : D3D11_FILTER_TYPE_POINT,
+                                            linearMag ? D3D11_FILTER_TYPE_LINEAR : D3D11_FILTER_TYPE_POINT,
+                                            linearMip ? D3D11_FILTER_TYPE_LINEAR : D3D11_FILTER_TYPE_POINT, FALSE);
+
+    ID3D11SamplerState* d3dSamplerState = nullptr;
+    HRESULT hResult = d3dDevice->CreateSamplerState(&desc, &d3dSamplerState);
+    if (hResult != S_OK)
+        return 0;
+
+    return reinterpret_cast<uint64_t>(d3dSamplerState);
+}
+//------------------------------------------------------------------------------
+void xxDestroySamplerD3D11(uint64_t sampler)
+{
+    ID3D11SamplerState* d3dSamplerState = reinterpret_cast<ID3D11SamplerState*>(sampler);
+    if (d3dSamplerState == nullptr)
+        return;
+
+    d3dSamplerState->Release();
+}
+//==============================================================================
 //  Vertex Attribute
 //==============================================================================
 struct D3D11VERTEXATTRIBUTE
@@ -1104,6 +1134,28 @@ void xxSetFragmentTexturesD3D11(uint64_t commandBuffer, int count, const uint64_
     {
         D3D11TEXTURE* d3dTexture = reinterpret_cast<D3D11TEXTURE*>(textures[i]);
         d3dDeviceContext->PSSetShaderResources(i, 1, &d3dTexture->resourceView);
+    }
+}
+//------------------------------------------------------------------------------
+void xxSetVertexSamplersD3D11(uint64_t commandBuffer, int count, const uint64_t* samplers)
+{
+    ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandBuffer);
+
+    for (int i = 0; i < count; ++i)
+    {
+        ID3D11SamplerState* d3dSamplerState = reinterpret_cast<ID3D11SamplerState*>(samplers[i]);
+        d3dDeviceContext->VSSetSamplers(i, 1, &d3dSamplerState);
+    }
+}
+//------------------------------------------------------------------------------
+void xxSetFragmentSamplersD3D11(uint64_t commandBuffer, int count, const uint64_t* samplers)
+{
+    ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandBuffer);
+
+    for (int i = 0; i < count; ++i)
+    {
+        ID3D11SamplerState* d3dSamplerState = reinterpret_cast<ID3D11SamplerState*>(samplers[i]);
+        d3dDeviceContext->PSSetSamplers(i, 1, &d3dSamplerState);
     }
 }
 //------------------------------------------------------------------------------

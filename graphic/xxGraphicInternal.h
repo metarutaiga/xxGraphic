@@ -36,6 +36,9 @@
     xxMapTexture = xxMapTexture ## API; \
     xxUnmapTexture = xxUnmapTexture ## API; \
 \
+    xxCreateSampler = xxCreateSampler ## API; \
+    xxDestroySampler = xxDestroySampler ## API; \
+\
     xxCreateVertexAttribute = xxCreateVertexAttribute ## API; \
     xxDestroyVertexAttribute = xxDestroyVertexAttribute ## API; \
 \
@@ -59,6 +62,8 @@
     xxSetVertexBuffers = xxSetVertexBuffers ## API; \
     xxSetVertexTextures = xxSetVertexTextures ## API; \
     xxSetFragmentTextures = xxSetFragmentTextures ## API; \
+    xxSetVertexSamplers = xxSetVertexSamplers ## API; \
+    xxSetFragmentSamplers = xxSetFragmentSamplers ## API; \
     xxSetVertexConstantBuffer = xxSetVertexConstantBuffer ## API; \
     xxSetFragmentConstantBuffer = xxSetFragmentConstantBuffer ## API; \
     xxDrawIndexed = xxDrawIndexed ## API; \
@@ -101,6 +106,9 @@
     xxMapTexture = nullptr; \
     xxUnmapTexture = nullptr; \
 \
+    xxCreateSampler = nullptr; \
+    xxDestroySampler = nullptr; \
+\
     xxCreateVertexAttribute = nullptr; \
     xxDestroyVertexAttribute = nullptr; \
 \
@@ -124,6 +132,8 @@
     xxSetVertexBuffers = nullptr; \
     xxSetVertexTextures = nullptr; \
     xxSetFragmentTextures = nullptr; \
+    xxSetVertexSamplers = nullptr; \
+    xxSetFragmentSamplers = nullptr; \
     xxSetVertexConstantBuffer = nullptr; \
     xxSetFragmentConstantBuffer = nullptr; \
     xxDrawIndexed = nullptr; \

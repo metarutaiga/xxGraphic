@@ -260,8 +260,6 @@ bool xxBeginCommandBufferD3D9(uint64_t commandBuffer)
     d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
     d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
     d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-    d3dDevice->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-    d3dDevice->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
 
     return true;
 }
@@ -585,6 +583,35 @@ void xxUnmapTextureD3D9(uint64_t device, uint64_t texture, unsigned int level, u
     }
 }
 //==============================================================================
+//  Sampler
+//==============================================================================
+union D3DSAMPLER9
+{
+    uint64_t value;
+    struct
+    {
+        uint8_t magFilter;
+        uint8_t minFilter;
+        uint8_t mipFilter;
+    };
+};
+//------------------------------------------------------------------------------
+uint64_t xxCreateSamplerD3D9(uint64_t device, bool linearMag, bool linearMin, bool linearMip)
+{
+    D3DSAMPLER9 d3dSampler = {};
+
+    d3dSampler.magFilter = linearMag ? D3DTEXF_LINEAR : D3DTEXF_POINT;
+    d3dSampler.minFilter = linearMin ? D3DTEXF_LINEAR : D3DTEXF_POINT;
+    d3dSampler.mipFilter = linearMip ? D3DTEXF_LINEAR : D3DTEXF_POINT;
+
+    return d3dSampler.value;
+}
+//------------------------------------------------------------------------------
+void xxDestroySamplerD3D9(uint64_t sampler)
+{
+
+}
+//==============================================================================
 //  Vertex Attribute
 //==============================================================================
 union D3DVERTEXATTRIBUTE9
@@ -843,6 +870,24 @@ void xxSetFragmentTexturesD3D9(uint64_t commandBuffer, int count, const uint64_t
     {
         LPDIRECT3DBASETEXTURE9 d3dBaseTexture = reinterpret_cast<LPDIRECT3DBASETEXTURE9>(getResourceData(textures[i]));
         d3dDevice->SetTexture(i, d3dBaseTexture);
+    }
+}
+//------------------------------------------------------------------------------
+void xxSetVertexSamplersD3D9(uint64_t commandBuffer, int count, const uint64_t* samplers)
+{
+
+}
+//------------------------------------------------------------------------------
+void xxSetFragmentSamplersD3D9(uint64_t commandBuffer, int count, const uint64_t* samplers)
+{
+    LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
+
+    for (int i = 0; i < count; ++i)
+    {
+        D3DSAMPLER9 d3dSampler = { samplers[i] };
+        d3dDevice->SetSamplerState(i, D3DSAMP_MAGFILTER, d3dSampler.magFilter);
+        d3dDevice->SetSamplerState(i, D3DSAMP_MINFILTER, d3dSampler.minFilter);
+        d3dDevice->SetSamplerState(i, D3DSAMP_MIPFILTER, d3dSampler.mipFilter);
     }
 }
 //------------------------------------------------------------------------------

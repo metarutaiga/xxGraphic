@@ -52,6 +52,11 @@ xxAPI void          xxDestroyTextureD3D8(uint64_t texture);
 xxAPI void*         xxMapTextureD3D8(uint64_t device, uint64_t texture, unsigned int& stride, unsigned int level, unsigned int array, unsigned int mipmap);
 xxAPI void          xxUnmapTextureD3D8(uint64_t device, uint64_t texture, unsigned int level, unsigned int array, unsigned int mipmap);
 //==============================================================================
+//  Sampler
+//==============================================================================
+xxAPI uint64_t      xxCreateSamplerD3D8(uint64_t device, bool linearMag, bool linearMin, bool linearMip);
+xxAPI void          xxDestroySamplerD3D8(uint64_t sampler);
+//==============================================================================
 //  Vertex Attribute
 //==============================================================================
 xxAPI uint64_t      xxCreateVertexAttributeD3D8(uint64_t device, int count, ...);
@@ -83,6 +88,8 @@ xxAPI void          xxSetIndexBufferD3D8(uint64_t commandBuffer, uint64_t buffer
 xxAPI void          xxSetVertexBuffersD3D8(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute);
 xxAPI void          xxSetVertexTexturesD3D8(uint64_t commandBuffer, int count, const uint64_t* textures);
 xxAPI void          xxSetFragmentTexturesD3D8(uint64_t commandBuffer, int count, const uint64_t* textures);
+xxAPI void          xxSetVertexSamplersD3D8(uint64_t commandBuffer, int count, const uint64_t* samplers);
+xxAPI void          xxSetFragmentSamplersD3D8(uint64_t commandBuffer, int count, const uint64_t* samplers);
 xxAPI void          xxSetVertexConstantBufferD3D8(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
 xxAPI void          xxSetFragmentConstantBufferD3D8(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
 xxAPI void          xxDrawIndexedD3D8(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
