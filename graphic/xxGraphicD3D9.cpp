@@ -11,7 +11,6 @@ typedef LPDIRECT3D9 (WINAPI *PFN_DIRECT3D_CREATE9)(UINT);
 static const wchar_t* const g_dummy = L"xxGraphicDummyWindow";
 static HMODULE              g_d3dLibrary = nullptr;
 static HWND                 g_hWnd = nullptr;
-static LPDIRECT3DSURFACE9   g_depthStencil = nullptr;
 
 //==============================================================================
 //  Resource Type
@@ -103,12 +102,6 @@ uint64_t xxCreateDeviceD3D9(uint64_t instance)
 //------------------------------------------------------------------------------
 void xxDestroyDeviceD3D9(uint64_t device)
 {
-    if (g_depthStencil)
-    {
-        g_depthStencil->Release();
-        g_depthStencil = nullptr;
-    }
-
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
     if (d3dDevice == nullptr)
         return;
@@ -127,10 +120,6 @@ void xxResetDeviceD3D9(uint64_t device)
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
     if (d3dDevice == nullptr)
         return;
-
-    if (g_depthStencil)
-        g_depthStencil->Release();
-    g_depthStencil = nullptr;
 
     D3DPRESENT_PARAMETERS d3dPresentParameters = {};
     d3dPresentParameters.BackBufferFormat = D3DFMT_UNKNOWN;
@@ -159,10 +148,19 @@ const char* xxGetDeviceStringD3D9(uint64_t device)
 //==============================================================================
 //  Swapchain
 //==============================================================================
+struct D3DSWAPCHAIN9
+{
+    LPDIRECT3DSWAPCHAIN9    swapchain;
+    LPDIRECT3DSURFACE9      depthStencil;
+};
+//------------------------------------------------------------------------------
 uint64_t xxCreateSwapchainD3D9(uint64_t device, void* view, unsigned int width, unsigned int height)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
     if (d3dDevice == nullptr)
+        return 0;
+    D3DSWAPCHAIN9* swapchain = new D3DSWAPCHAIN9;
+    if (swapchain == nullptr)
         return 0;
 
     HWND hWnd = (HWND)view;
@@ -188,39 +186,38 @@ uint64_t xxCreateSwapchainD3D9(uint64_t device, void* view, unsigned int width, 
     LPDIRECT3DSWAPCHAIN9 d3dSwapchain = nullptr;
     HRESULT hResult = d3dDevice->CreateAdditionalSwapChain(&d3dPresentParameters, &d3dSwapchain);
     if (hResult != S_OK)
-        return 0;
-
-    D3DSURFACE_DESC desc = {};
-    if (g_depthStencil)
-        g_depthStencil->GetDesc(&desc);
-    if (desc.Width < width || desc.Height < height)
     {
-        if (desc.Width < width)
-            desc.Width = width;
-        if (desc.Height < height)
-            desc.Height = height;
-        if (g_depthStencil)
-            g_depthStencil->Release();
-        d3dDevice->CreateDepthStencilSurface(desc.Width, desc.Height, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, FALSE, &g_depthStencil, nullptr);
+        delete swapchain;
+        return 0;
     }
 
-    return reinterpret_cast<uint64_t>(d3dSwapchain);
+    LPDIRECT3DSURFACE9 d3dDepthStencil = nullptr;
+    d3dDevice->CreateDepthStencilSurface(width, height, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, FALSE, &d3dDepthStencil, nullptr);
+
+    swapchain->swapchain = d3dSwapchain;
+    swapchain->depthStencil = d3dDepthStencil;
+
+    return reinterpret_cast<uint64_t>(swapchain);
 }
 //------------------------------------------------------------------------------
 void xxDestroySwapchainD3D9(uint64_t swapchain)
 {
-    LPDIRECT3DSWAPCHAIN9 d3dSwapchain = reinterpret_cast<LPDIRECT3DSWAPCHAIN9>(swapchain);
+    D3DSWAPCHAIN9* d3dSwapchain = reinterpret_cast<D3DSWAPCHAIN9*>(swapchain);
     if (d3dSwapchain == nullptr)
         return;
-    d3dSwapchain->Release();
+
+    d3dSwapchain->swapchain->Release();
+    if (d3dSwapchain->depthStencil)
+        d3dSwapchain->depthStencil->Release();
 }
 //------------------------------------------------------------------------------
 void xxPresentSwapchainD3D9(uint64_t swapchain, void* view)
 {
-    LPDIRECT3DSWAPCHAIN9 d3dSwapchain = reinterpret_cast<LPDIRECT3DSWAPCHAIN9>(swapchain);
+    D3DSWAPCHAIN9* d3dSwapchain = reinterpret_cast<D3DSWAPCHAIN9*>(swapchain);
     if (d3dSwapchain == nullptr)
         return;
-    d3dSwapchain->Present(nullptr, nullptr, (HWND)view, nullptr, 0);
+
+    d3dSwapchain->swapchain->Present(nullptr, nullptr, (HWND)view, nullptr, 0);
 }
 //==============================================================================
 //  Command Buffer
@@ -230,15 +227,14 @@ uint64_t xxGetCommandBufferD3D9(uint64_t device, uint64_t swapchain)
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
     if (d3dDevice == nullptr)
         return 0;
-
-    LPDIRECT3DSWAPCHAIN9 d3dSwapchain = reinterpret_cast<LPDIRECT3DSWAPCHAIN9>(swapchain);
+    D3DSWAPCHAIN9* d3dSwapchain = reinterpret_cast<D3DSWAPCHAIN9*>(swapchain);
     if (d3dSwapchain == nullptr)
         return 0;
 
     LPDIRECT3DSURFACE9 surface = nullptr;
-    d3dSwapchain->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &surface);
+    d3dSwapchain->swapchain->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &surface);
     d3dDevice->SetRenderTarget(0, surface);
-    d3dDevice->SetDepthStencilSurface(g_depthStencil);
+    d3dDevice->SetDepthStencilSurface(d3dSwapchain->depthStencil);
     if (surface)
         surface->Release();
 
@@ -253,13 +249,6 @@ bool xxBeginCommandBufferD3D9(uint64_t commandBuffer)
     HRESULT hResult = d3dDevice->BeginScene();
     if (hResult != S_OK)
         return false;
-
-    d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
-    d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
-    d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
-    d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-    d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
-    d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
 
     return true;
 }
@@ -281,13 +270,13 @@ void xxSubmitCommandBufferD3D9(uint64_t commandBuffer)
 //==============================================================================
 union D3DRENDERPASS9
 {
-    uint64_t value;
+    uint64_t        value;
     struct
     {
-        D3DCOLOR color;
-        uint16_t depth;
-        uint8_t stencil;
-        uint8_t flags;
+        D3DCOLOR    color;
+        uint16_t    depth;
+        uint8_t     stencil;
+        uint8_t     flags;
     };
 };
 //------------------------------------------------------------------------------
@@ -587,22 +576,36 @@ void xxUnmapTextureD3D9(uint64_t device, uint64_t texture, unsigned int level, u
 //==============================================================================
 union D3DSAMPLER9
 {
-    uint64_t value;
+    uint64_t    value;
     struct
     {
+        uint8_t addressU;
+        uint8_t addressV;
+        uint8_t addressW;
         uint8_t magFilter;
         uint8_t minFilter;
         uint8_t mipFilter;
+        uint8_t anisotropy;
     };
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateSamplerD3D9(uint64_t device, bool linearMag, bool linearMin, bool linearMip)
+uint64_t xxCreateSamplerD3D9(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy)
 {
     D3DSAMPLER9 d3dSampler = {};
 
+    d3dSampler.addressU = clampU ? D3DTADDRESS_CLAMP : D3DTADDRESS_WRAP;
+    d3dSampler.addressV = clampV ? D3DTADDRESS_CLAMP : D3DTADDRESS_WRAP;
+    d3dSampler.addressW = clampW ? D3DTADDRESS_CLAMP : D3DTADDRESS_WRAP;
     d3dSampler.magFilter = linearMag ? D3DTEXF_LINEAR : D3DTEXF_POINT;
     d3dSampler.minFilter = linearMin ? D3DTEXF_LINEAR : D3DTEXF_POINT;
     d3dSampler.mipFilter = linearMip ? D3DTEXF_LINEAR : D3DTEXF_POINT;
+    d3dSampler.anisotropy = anisotropy;
+    if (anisotropy > 1)
+    {
+        d3dSampler.magFilter = linearMag ? D3DTEXF_ANISOTROPIC : D3DTEXF_POINT;
+        d3dSampler.minFilter = linearMin ? D3DTEXF_ANISOTROPIC : D3DTEXF_POINT;
+        d3dSampler.mipFilter = linearMip ? D3DTEXF_ANISOTROPIC : D3DTEXF_POINT;
+    }
 
     return d3dSampler.value;
 }
@@ -616,11 +619,11 @@ void xxDestroySamplerD3D9(uint64_t sampler)
 //==============================================================================
 union D3DVERTEXATTRIBUTE9
 {
-    uint64_t value;
+    uint64_t    value;
     struct
     {
-        DWORD fvf;
-        int stride;
+        DWORD   fvf;
+        int     stride;
     };
 };
 //------------------------------------------------------------------------------
@@ -810,6 +813,13 @@ void xxSetPipelineD3D9(uint64_t commandBuffer, uint64_t pipeline)
 
     if (d3dPipeline->vertexDeclaration == nullptr)
     {
+        d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
+        d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG1, D3DTA_TEXTURE);
+        d3dDevice->SetTextureStageState(0, D3DTSS_COLORARG2, D3DTA_DIFFUSE);
+        d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
+        d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
+        d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
+
         d3dDevice->SetFVF(d3dPipeline->fvf);
         d3dDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
         d3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
@@ -885,9 +895,13 @@ void xxSetFragmentSamplersD3D9(uint64_t commandBuffer, int count, const uint64_t
     for (int i = 0; i < count; ++i)
     {
         D3DSAMPLER9 d3dSampler = { samplers[i] };
+        d3dDevice->SetSamplerState(i, D3DSAMP_ADDRESSU, d3dSampler.addressU);
+        d3dDevice->SetSamplerState(i, D3DSAMP_ADDRESSV, d3dSampler.addressV);
+        d3dDevice->SetSamplerState(i, D3DSAMP_ADDRESSW, d3dSampler.addressW);
         d3dDevice->SetSamplerState(i, D3DSAMP_MAGFILTER, d3dSampler.magFilter);
         d3dDevice->SetSamplerState(i, D3DSAMP_MINFILTER, d3dSampler.minFilter);
         d3dDevice->SetSamplerState(i, D3DSAMP_MIPFILTER, d3dSampler.mipFilter);
+        d3dDevice->SetSamplerState(i, D3DSAMP_MAXANISOTROPY, d3dSampler.anisotropy);
     }
 }
 //------------------------------------------------------------------------------

@@ -54,7 +54,7 @@ xxAPI void          xxUnmapTextureD3D11(uint64_t device, uint64_t texture, unsig
 //==============================================================================
 //  Sampler
 //==============================================================================
-xxAPI uint64_t      xxCreateSamplerD3D11(uint64_t device, bool linearMag, bool linearMin, bool linearMip);
+xxAPI uint64_t      xxCreateSamplerD3D11(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy);
 xxAPI void          xxDestroySamplerD3D11(uint64_t sampler);
 //==============================================================================
 //  Vertex Attribute

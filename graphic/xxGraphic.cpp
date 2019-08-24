@@ -52,7 +52,7 @@ void        (*xxUnmapTexture)(uint64_t device, uint64_t texture, unsigned int le
 //==============================================================================
 //  Sampler
 //==============================================================================
-uint64_t    (*xxCreateSampler)(uint64_t device, bool linearMag, bool linearMin, bool linearMip);
+uint64_t    (*xxCreateSampler)(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy);
 void        (*xxDestroySampler)(uint64_t sampler);
 //==============================================================================
 //  Vertex Attribute

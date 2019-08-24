@@ -158,7 +158,7 @@ void xxUnmapTextureNULL(uint64_t device, uint64_t texture, unsigned int level, u
 //==============================================================================
 //  Sampler
 //==============================================================================
-uint64_t xxCreateSamplerNULL(uint64_t device, bool linearMag, bool linearMin, bool linearMip)
+uint64_t xxCreateSamplerNULL(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy)
 {
     return 0;
 }

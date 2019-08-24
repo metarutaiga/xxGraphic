@@ -52,8 +52,8 @@ const char* xxGetDeviceStringD3D8PS(uint64_t device)
 //==============================================================================
 struct D3DVERTEXATTRIBUTE8PS
 {
-    DWORD declaration[16];
-    int stride;
+    DWORD   declaration[16];
+    int     stride;
 };
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeD3D8PS(uint64_t device, int count, ...)

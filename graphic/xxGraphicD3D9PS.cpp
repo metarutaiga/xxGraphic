@@ -52,8 +52,8 @@ const char* xxGetDeviceStringD3D9PS(uint64_t device)
 //==============================================================================
 struct D3DVERTEXATTRIBUTE9PS
 {
-    LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration;
-    int stride;
+    LPDIRECT3DVERTEXDECLARATION9    vertexDeclaration;
+    int                             stride;
 };
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeD3D9PS(uint64_t device, int count, ...)

@@ -6,8 +6,6 @@
 
 static HMODULE                  g_d3dLibrary = nullptr;
 static IDXGIFactory*            g_dxgiFactory = nullptr;
-static ID3D11Texture2D*         g_depthStencilTexture = nullptr;
-static ID3D11DepthStencilView*  g_depthStencilView = nullptr;
 
 //==============================================================================
 //  Instance
@@ -69,18 +67,6 @@ void xxDestroyDeviceD3D11(uint64_t device)
         g_dxgiFactory = nullptr;
     }
 
-    if (g_depthStencilTexture)
-    {
-        g_depthStencilTexture->Release();
-        g_depthStencilTexture = nullptr;
-    }
-
-    if (g_depthStencilView)
-    {
-        g_depthStencilView->Release();
-        g_depthStencilView = nullptr;
-    }
-
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
     if (d3dDevice == nullptr)
         return;
@@ -109,6 +95,8 @@ struct D3D11SWAPCHAIN
 {
     IDXGISwapChain*         dxgiSwapchain;
     ID3D11RenderTargetView* renderTargetView;
+    ID3D11Texture2D*        depthStencilTexture;
+    ID3D11DepthStencilView* depthStencilView;
     ID3D11DeviceContext*    deviceContext;
 };
 //------------------------------------------------------------------------------
@@ -182,37 +170,29 @@ uint64_t xxCreateSwapchainD3D11(uint64_t device, void* view, unsigned int width,
     d3dDevice->GetImmediateContext(&d3dDeviceContext);
 
     D3D11_TEXTURE2D_DESC textureDesc = {};
-    if (g_depthStencilTexture)
-        g_depthStencilTexture->GetDesc(&textureDesc);
-    if (textureDesc.Width < width || textureDesc.Height < height)
-    {
-        if (g_depthStencilTexture)
-            g_depthStencilTexture->Release();
-        if (g_depthStencilView)
-            g_depthStencilView->Release();
-        g_depthStencilTexture = nullptr;
-        g_depthStencilView = nullptr;
+    textureDesc.Width = width;
+    textureDesc.Height = height;
+    textureDesc.MipLevels = 1;
+    textureDesc.ArraySize = 1;
+    textureDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+    textureDesc.SampleDesc.Count = 1;
+    textureDesc.BindFlags = D3D10_BIND_DEPTH_STENCIL | D3D10_BIND_SHADER_RESOURCE;
 
-        if (textureDesc.Width < width)
-            textureDesc.Width = width;
-        if (textureDesc.Height < height)
-            textureDesc.Height = height;
-        textureDesc.MipLevels = 1;
-        textureDesc.ArraySize = 1;
-        textureDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
-        textureDesc.SampleDesc.Count = 1;
-        textureDesc.BindFlags = D3D10_BIND_DEPTH_STENCIL | D3D10_BIND_SHADER_RESOURCE;
-        d3dDevice->CreateTexture2D(&textureDesc, nullptr, &g_depthStencilTexture);
+    ID3D11Texture2D* depthStencilTexture = nullptr;
+    d3dDevice->CreateTexture2D(&textureDesc, nullptr, &depthStencilTexture);
 
-        D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
-        depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-        depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-        d3dDevice->CreateDepthStencilView(g_depthStencilTexture, &depthStencilViewDesc, &g_depthStencilView);
-    }
+    D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
+    depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+
+    ID3D11DepthStencilView* depthStencilView = nullptr;
+    d3dDevice->CreateDepthStencilView(depthStencilTexture, &depthStencilViewDesc, &depthStencilView);
 
     D3D11SWAPCHAIN* d3dSwapchain = new D3D11SWAPCHAIN;
     d3dSwapchain->dxgiSwapchain = dxgiSwapchain;
     d3dSwapchain->renderTargetView = renderTargetView;
+    d3dSwapchain->depthStencilTexture = depthStencilTexture;
+    d3dSwapchain->depthStencilView = depthStencilView;
     d3dSwapchain->deviceContext = d3dDeviceContext;
 
     return reinterpret_cast<uint64_t>(d3dSwapchain);
@@ -228,6 +208,10 @@ void xxDestroySwapchainD3D11(uint64_t swapchain)
         d3dSwapchain->dxgiSwapchain->Release();
     if (d3dSwapchain->renderTargetView)
         d3dSwapchain->renderTargetView->Release();
+    if (d3dSwapchain->depthStencilTexture)
+        d3dSwapchain->depthStencilTexture->Release();
+    if (d3dSwapchain->depthStencilView)
+        d3dSwapchain->depthStencilView->Release();
     if (d3dSwapchain->deviceContext)
         d3dSwapchain->deviceContext->Release();
     delete d3dSwapchain;
@@ -256,7 +240,7 @@ uint64_t xxGetCommandBufferD3D11(uint64_t device, uint64_t swapchain)
     if (d3dDeviceContext == nullptr)
         return 0;
 
-    d3dDeviceContext->OMSetRenderTargets(1, &d3dSwapchain->renderTargetView, g_depthStencilView);
+    d3dDeviceContext->OMSetRenderTargets(1, &d3dSwapchain->renderTargetView, d3dSwapchain->depthStencilView);
 
     return reinterpret_cast<uint64_t>(d3dDeviceContext);
 }
@@ -283,8 +267,8 @@ void xxSubmitCommandBufferD3D11(uint64_t commandBuffer)
 //==============================================================================
 struct D3D11RENDERPASS
 {
-    float color[4];
-    float depth;
+    float   color[4];
+    float   depth;
     uint8_t stencil;
 };
 //------------------------------------------------------------------------------
@@ -318,11 +302,14 @@ bool xxBeginRenderPassD3D11(uint64_t commandBuffer, uint64_t renderPass)
         return false;
 
     ID3D11RenderTargetView* renderTargetView = nullptr;
-    d3dDeviceContext->OMGetRenderTargets(1, &renderTargetView, nullptr);
+    ID3D11DepthStencilView* depthStencilView = nullptr;
+    d3dDeviceContext->OMGetRenderTargets(1, &renderTargetView, &depthStencilView);
     d3dDeviceContext->ClearRenderTargetView(renderTargetView, d3dRenderPass->color);
-    d3dDeviceContext->ClearDepthStencilView(g_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, d3dRenderPass->depth, d3dRenderPass->stencil);
+    d3dDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, d3dRenderPass->depth, d3dRenderPass->stencil);
     if (renderTargetView)
         renderTargetView->Release();
+    if (depthStencilView)
+        depthStencilView->Release();
 
     return true;
 }
@@ -671,7 +658,7 @@ void xxUnmapTextureD3D11(uint64_t device, uint64_t texture, unsigned int level, 
 //==============================================================================
 //  Sampler
 //==============================================================================
-uint64_t xxCreateSamplerD3D11(uint64_t device, bool linearMag, bool linearMin, bool linearMip)
+uint64_t xxCreateSamplerD3D11(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy)
 {
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
     if (d3dDevice == nullptr)
@@ -680,7 +667,16 @@ uint64_t xxCreateSamplerD3D11(uint64_t device, bool linearMag, bool linearMin, b
     D3D11_SAMPLER_DESC desc = {};
     desc.Filter = D3D11_ENCODE_BASIC_FILTER(linearMin ? D3D11_FILTER_TYPE_LINEAR : D3D11_FILTER_TYPE_POINT,
                                             linearMag ? D3D11_FILTER_TYPE_LINEAR : D3D11_FILTER_TYPE_POINT,
-                                            linearMip ? D3D11_FILTER_TYPE_LINEAR : D3D11_FILTER_TYPE_POINT, FALSE);
+                                            linearMip ? D3D11_FILTER_TYPE_LINEAR : D3D11_FILTER_TYPE_POINT, D3D11_FILTER_REDUCTION_TYPE_STANDARD);
+    desc.AddressU = clampU ? D3D11_TEXTURE_ADDRESS_CLAMP : D3D11_TEXTURE_ADDRESS_WRAP;
+    desc.AddressV = clampV ? D3D11_TEXTURE_ADDRESS_CLAMP : D3D11_TEXTURE_ADDRESS_WRAP;
+    desc.AddressW = clampW ? D3D11_TEXTURE_ADDRESS_CLAMP : D3D11_TEXTURE_ADDRESS_WRAP;
+    desc.MaxAnisotropy = anisotropy;
+    desc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+    if (anisotropy > 1)
+    {
+        desc.Filter = D3D11_ENCODE_ANISOTROPIC_FILTER(D3D11_FILTER_REDUCTION_TYPE_STANDARD);
+    }
 
     ID3D11SamplerState* d3dSamplerState = nullptr;
     HRESULT hResult = d3dDevice->CreateSamplerState(&desc, &d3dSamplerState);
@@ -913,12 +909,12 @@ void xxDestroyShaderD3D11(uint64_t device, uint64_t shader)
 //==============================================================================
 struct D3D11PIPELINE
 {
-    ID3D11VertexShader* vertexShader;
-    ID3D11PixelShader* pixelShader;
-    ID3D11BlendState* blendState;
-    ID3D11DepthStencilState* depthStencilState;
-    ID3D11RasterizerState* rasterizerState;
-    ID3D11InputLayout* inputLayout;
+    ID3D11VertexShader*         vertexShader;
+    ID3D11PixelShader*          pixelShader;
+    ID3D11BlendState*           blendState;
+    ID3D11DepthStencilState*    depthStencilState;
+    ID3D11RasterizerState*      rasterizerState;
+    ID3D11InputLayout*          inputLayout;
 };
 //------------------------------------------------------------------------------
 uint64_t xxCreateBlendStateD3D11(uint64_t device, bool blending)

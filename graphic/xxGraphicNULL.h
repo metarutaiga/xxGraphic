@@ -54,7 +54,7 @@ xxAPI void          xxUnmapTextureNULL(uint64_t device, uint64_t texture, unsign
 //==============================================================================
 //  Sampler
 //==============================================================================
-xxAPI uint64_t      xxCreateSamplerNULL(uint64_t device, bool linearMag, bool linearMin, bool linearMip);
+xxAPI uint64_t      xxCreateSamplerNULL(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy);
 xxAPI void          xxDestroySamplerNULL(uint64_t sampler);
 //==============================================================================
 //  Vertex Attribute

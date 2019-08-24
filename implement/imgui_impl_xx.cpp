@@ -25,6 +25,7 @@ static uint64_t g_indexBuffers[4] = {};
 static int      g_indexBufferSizes[4] = {};
 static uint64_t g_constantBuffers[4] = {};
 static uint64_t g_fontTexture = 0;
+static uint64_t g_fontSampler = 0;
 static uint64_t g_vertexAttribute = 0;
 static uint64_t g_vertexShader = 0;
 static uint64_t g_fragmentShader = 0;
@@ -187,6 +188,7 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
 
                 // Draw
                 xxSetFragmentTextures(commandBuffer, 1, &pcmd->TextureId);
+                xxSetFragmentSamplers(commandBuffer, 1, &g_fontSampler);
                 xxDrawIndexed(commandBuffer, pcmd->ElemCount, 1, pcmd->IdxOffset + global_idx_offset, pcmd->VtxOffset + global_vtx_offset, 0);
             }
         }
@@ -258,6 +260,7 @@ bool ImGui_ImplXX_CreateDeviceObjects()
     ImGui_ImplXX_CreateDeviceObjectsForPlatformWindows();
 
     ImDrawVert vert;
+    g_fontSampler = xxCreateSampler(g_device, false, false, false, true, true, true, 1);
     g_vertexAttribute = xxCreateVertexAttribute(g_device, 3, 0, xxOffsetOf(vert, pos),  3, xxSizeOf(vert.pos) + xxSizeOf(vert.z),
                                                              0, xxOffsetOf(vert, col),  4, xxSizeOf(vert.col),
                                                              0, xxOffsetOf(vert, uv),   2, xxSizeOf(vert.uv));
@@ -289,6 +292,7 @@ void ImGui_ImplXX_InvalidateDeviceObjects()
         g_constantBuffers[i] = 0;
     }
     xxDestroyTexture(g_fontTexture);
+    xxDestroySampler(g_fontSampler);
     xxDestroyVertexAttribute(g_vertexAttribute);
     xxDestroyShader(g_device, g_vertexShader);
     xxDestroyShader(g_device, g_fragmentShader);
@@ -297,6 +301,7 @@ void ImGui_ImplXX_InvalidateDeviceObjects()
     xxDestroyRasterizerState(g_rasterizerState);
     xxDestroyPipeline(g_pipeline);
     g_fontTexture = 0;
+    g_fontSampler = 0;
     g_vertexAttribute = 0;
     g_vertexShader = 0;
     g_fragmentShader = 0;
