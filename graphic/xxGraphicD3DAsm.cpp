@@ -70,11 +70,6 @@ const DWORD pixelShaderCode20[] =
     _SIO(MOV, 2), _DST(COLOROUT, 0), _SRC(TEMP, 0),                                 // mov oC0, r0
     _SIO(END, 0)
 };
-//------------------------------------------------------------------------------
-#undef _SRC
-#undef _SRCM
-#undef _DST
-#undef _DSTM
 //==============================================================================
 //  Direct3D 10.0 Assembly Shader
 //==============================================================================
@@ -82,20 +77,17 @@ const DWORD pixelShaderCode20[] =
 #define _ISGN                                   0x4e475349
 #define _OSGN                                   0x4e47534f
 #define _SHDR                                   0x52444853
-#define D3D10_SB_4_COMPONENT_XXXX               0x00
-#define D3D10_SB_4_COMPONENT_XYXX               0x04
-#define D3D10_SB_4_COMPONENT_XYZW               0xe4
-#define D3D10_SB_4_COMPONENT_YYYY               0x55
-#define D3D10_SB_4_COMPONENT_ZZZZ               0xaa
-#define D3D10_SB_4_COMPONENT_WWWW               0xff
-#define D3D10_SB_OPERAND_4_COMPONENT_MASK_XY    0x30
-#define D3D10_SB_OPERAND_4_COMPONENT_MASK_XYZ   0x70
-#define D3D10_SB_OPERAND_4_COMPONENT_MASK_XYZW  0xf0
-#define D3D10_SB_RETURN_TYPE_FLOAT4             (D3D10_SB_RETURN_TYPE_FLOAT << 0) | \
-                                                (D3D10_SB_RETURN_TYPE_FLOAT << 4) | \
-                                                (D3D10_SB_RETURN_TYPE_FLOAT << 8) | \
-                                                (D3D10_SB_RETURN_TYPE_FLOAT << 12)
-#define _VER(type, major, minor)                (ENCODE_D3D10_SB_TOKENIZED_PROGRAM_VERSION_TOKEN(D3D10_SB_ ## type, major, minor))
+#define D3D10_SB_4_COMPONENT_XXXX               ((D3D10_SB_4_COMPONENT_X << 0) | (D3D10_SB_4_COMPONENT_X << 2) | (D3D10_SB_4_COMPONENT_X << 4) | (D3D10_SB_4_COMPONENT_X << 6))
+#define D3D10_SB_4_COMPONENT_XYXX               ((D3D10_SB_4_COMPONENT_X << 0) | (D3D10_SB_4_COMPONENT_Y << 2) | (D3D10_SB_4_COMPONENT_X << 4) | (D3D10_SB_4_COMPONENT_X << 6))
+#define D3D10_SB_4_COMPONENT_XYZW               ((D3D10_SB_4_COMPONENT_X << 0) | (D3D10_SB_4_COMPONENT_Y << 2) | (D3D10_SB_4_COMPONENT_Z << 4) | (D3D10_SB_4_COMPONENT_W << 6))
+#define D3D10_SB_4_COMPONENT_YYYY               ((D3D10_SB_4_COMPONENT_Y << 0) | (D3D10_SB_4_COMPONENT_Y << 2) | (D3D10_SB_4_COMPONENT_Y << 4) | (D3D10_SB_4_COMPONENT_Y << 6))
+#define D3D10_SB_4_COMPONENT_ZZZZ               ((D3D10_SB_4_COMPONENT_Z << 0) | (D3D10_SB_4_COMPONENT_Z << 2) | (D3D10_SB_4_COMPONENT_Z << 4) | (D3D10_SB_4_COMPONENT_Z << 6))
+#define D3D10_SB_4_COMPONENT_WWWW               ((D3D10_SB_4_COMPONENT_W << 0) | (D3D10_SB_4_COMPONENT_W << 2) | (D3D10_SB_4_COMPONENT_W << 4) | (D3D10_SB_4_COMPONENT_W << 6))
+#define D3D10_SB_OPERAND_4_COMPONENT_MASK_XY    (D3D10_SB_OPERAND_4_COMPONENT_MASK_X | D3D10_SB_OPERAND_4_COMPONENT_MASK_Y)
+#define D3D10_SB_OPERAND_4_COMPONENT_MASK_XYZ   (D3D10_SB_OPERAND_4_COMPONENT_MASK_XY | D3D10_SB_OPERAND_4_COMPONENT_MASK_Z)
+#define D3D10_SB_OPERAND_4_COMPONENT_MASK_XYZW  (D3D10_SB_OPERAND_4_COMPONENT_MASK_XYZ | D3D10_SB_OPERAND_4_COMPONENT_MASK_W)
+#define D3D10_SB_RETURN_TYPE_FLOAT4             ((D3D10_SB_RETURN_TYPE_FLOAT << 0) | (D3D10_SB_RETURN_TYPE_FLOAT << 4) | (D3D10_SB_RETURN_TYPE_FLOAT << 8) | (D3D10_SB_RETURN_TYPE_FLOAT << 12))
+#define _VER(type, major, minor)                ENCODE_D3D10_SB_TOKENIZED_PROGRAM_VERSION_TOKEN(D3D10_SB_ ## type, major, minor)
 #define _OP(opcode, length)                     (D3D10_SB_OPCODE_ ## opcode | ENCODE_D3D10_SB_TOKENIZED_INSTRUCTION_LENGTH(length))
 #define _OPDIM(opcode, length, dim)             (_OP(opcode, length) | ENCODE_D3D10_SB_RESOURCE_DIMENSION(D3D10_SB_RESOURCE_DIMENSION_ ## dim))
 #define _OPINT(opcode, length, int)             (_OP(opcode, length) | ENCODE_D3D10_SB_INPUT_INTERPOLATION_MODE(D3D10_SB_INTERPOLATION_ ## int))
@@ -117,7 +109,7 @@ const DWORD pixelShaderCode20[] =
 //------------------------------------------------------------------------------
 const DWORD vertexShaderCode40[] =
 {
-    _DXBC, 0x9a0f2d68, 0xbab577b2, 0x8ebde0a7, 0x55fa921a,
+    _DXBC, 0xcfae7b3b, 0x43ebb6a0, 0x0acaeefb, 0x9d526f8a,
     0x00000001, 0x00000240, 3,
     0x0000002c, 0x0000009c, 0x00000110,
     _ISGN, 0x00000068, 3, 0x00000008,
@@ -129,13 +121,13 @@ const DWORD vertexShaderCode40[] =
     0x00000050, 0, 1, 3, 0, 0x000f,
     0x0000005c, 0, 0, 3, 1, 0x000f,
     0x00000062, 0, 0, 3, 2, 0x0c03,
-    0x505f5653, 0x5449534f, 0x004e4f49, 0x4f4c4f43, 0x45540052, 0x4f4f4358, 0xab004452,
+    0x505f5653, 0x5449534f, 0x004e4f49, 0x4f4c4f43, 0x45540052, 0x4f4f4358, 0x00004452,
     _SHDR, 0x00000128, _VER(VERTEX_SHADER, 4, 0), 0x0000004a,
     _OP(DCL_CONSTANT_BUFFER, 4), _4S(2D, CONSTANT_BUFFER), D3D10_SB_CONSTANT_BUFFER_IMMEDIATE_INDEXED, 4,       // dcl_constantbuffer CB0[4], immediateIndexed
     _OP(DCL_INPUT, 3), _4MM(1D, INPUT, XYZ), 0,                                                                 // dcl_input v0.xyz
     _OP(DCL_INPUT, 3), _4M(1D, INPUT), 1,                                                                       // dcl_input v1.xyzw
     _OP(DCL_INPUT, 3), _4MM(1D, INPUT, XY), 2,                                                                  // dcl_input v2.xy
-    _OP(DCL_OUTPUT_SIV, 4), _4M(1D, OUTPUT), 0, 1,                                                              // dcl_output o0.xyzw
+    _OP(DCL_OUTPUT_SIV, 4), _4M(1D, OUTPUT), 0, 1,                                                              // dcl_output_siv o0.xyzw
     _OP(DCL_OUTPUT, 3), _4M(1D, OUTPUT), 1,                                                                     // dcl_output o1.xyzw
     _OP(DCL_OUTPUT, 3), _4MM(1D, OUTPUT, XY), 2,                                                                // dcl_output o2.xy
     _OP(DCL_TEMPS, 2), 1,                                                                                       // dcl_temps 1
@@ -150,17 +142,17 @@ const DWORD vertexShaderCode40[] =
 //------------------------------------------------------------------------------
 const DWORD pixelShaderCode40[] =
 {
-    _DXBC, 0xa5e778be, 0xeb700c19, 0x1facb14c, 0x97e98416,
+    _DXBC, 0xdb70d4ab, 0x2f38da8d, 0xd5a0ddf2, 0xfed338c8,
     0x00000001, 0x00000170, 3,
     0x0000002c, 0x000000a0, 0x000000d4,
     _ISGN, 0x0000006c, 3, 0x00000008,
     0x00000050, 0, 1, 3, 0, 0x000f,
     0x0000005c, 0, 0, 3, 1, 0x0f0f,
     0x00000062, 0, 0, 3, 2, 0x0303,
-    0x505f5653, 0x5449534f, 0x004e4f49, 0x4f4c4f43, 0x45540052, 0x4f4f4358, 0xab004452,
+    0x505f5653, 0x5449534f, 0x004e4f49, 0x4f4c4f43, 0x45540052, 0x4f4f4358, 0x00004452,
     _OSGN, 0x0000002c, 1, 0x00000008,
     0x00000020, 0, 0, 3, 0, 0x000f,
-    0x545f5653, 0x45475241, 0xabab0054,
+    0x545f5653, 0x45475241, 0x00000054,
     _SHDR, 0x00000094, _VER(PIXEL_SHADER, 4, 0), 0x00000025,
     _OP(DCL_SAMPLER, 3), _0(1D, SAMPLER), D3D10_SB_SAMPLER_MODE_DEFAULT,                                        // dcl_sampler s0, mode_default
     _OPDIM(DCL_RESOURCE, 4, TEXTURE2D), _0(1D, RESOURCE), 0, D3D10_SB_RETURN_TYPE_FLOAT4,                       // dcl_resource_texture2d(float,float,float,float) t0
