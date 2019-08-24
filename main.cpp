@@ -164,7 +164,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
         // Renderer
         if (ImGui::BeginMainMenuBar())
         {
-            if (ImGui::BeginMenu("Renderer"))
+            if (ImGui::BeginMenu("Graphic"))
             {
                 uint64_t(*createInstance)() = nullptr;
 
