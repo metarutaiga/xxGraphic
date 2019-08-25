@@ -122,6 +122,7 @@ uint64_t xxCreateDeviceD3D11On12(uint64_t instance)
         HRESULT hResult = g_d3d12Device->CreateFence(g_d3d12FenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&g_d3d12Fence));
         if (hResult != S_OK)
             return 0;
+
         g_d3d12FenceValue++;
         memset(g_d3d12FenceValues, 0, sizeof(g_d3d12FenceValues));
     }

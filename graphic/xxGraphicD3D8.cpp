@@ -4,6 +4,7 @@
 
 #include "dxsdk/d3d8.h"
 typedef LPDIRECT3D8 (WINAPI *PFN_DIRECT3D_CREATE8)(UINT);
+#define D3DRTYPE_CONSTANTBUFFER 0
 
 static const wchar_t* const g_dummy = L"xxGraphicDummyWindow";
 static HMODULE              g_d3dLibrary = nullptr;
@@ -245,6 +246,7 @@ void xxEndCommandBufferD3D8(uint64_t commandBuffer)
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
     if (d3dDevice == nullptr)
         return;
+
     d3dDevice->EndScene();
 }
 //------------------------------------------------------------------------------
@@ -306,7 +308,8 @@ void xxEndRenderPassD3D8(uint64_t commandBuffer, uint64_t renderPass)
 uint64_t xxCreateConstantBufferD3D8(uint64_t device, unsigned int size)
 {
     char* d3dBuffer = xxAlloc(char, size);
-    return reinterpret_cast<uint64_t>(d3dBuffer);
+
+    return reinterpret_cast<uint64_t>(d3dBuffer) | D3DRTYPE_CONSTANTBUFFER;
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateIndexBufferD3D8(uint64_t device, unsigned int size)
@@ -319,6 +322,7 @@ uint64_t xxCreateIndexBufferD3D8(uint64_t device, unsigned int size)
     HRESULT hResult = d3dDevice->CreateIndexBuffer(size, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX32, D3DPOOL_DEFAULT, &d3dIndexBuffer);
     if (hResult != S_OK)
         return 0;
+
     return reinterpret_cast<uint64_t>(d3dIndexBuffer) | D3DRTYPE_INDEXBUFFER;
 }
 //------------------------------------------------------------------------------
@@ -332,6 +336,7 @@ uint64_t xxCreateVertexBufferD3D8(uint64_t device, unsigned int size)
     HRESULT hResult = d3dDevice->CreateVertexBuffer(size, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_DEFAULT, &d3dVertexBuffer);
     if (hResult != S_OK)
         return 0;
+
     return reinterpret_cast<uint64_t>(d3dVertexBuffer) | D3DRTYPE_VERTEXBUFFER;
 }
 //------------------------------------------------------------------------------
@@ -339,9 +344,10 @@ void xxDestroyBufferD3D8(uint64_t buffer)
 {
     switch (getResourceType(buffer))
     {
-    case 0:
+    case D3DRTYPE_CONSTANTBUFFER:
     {
         char* d3dBuffer = reinterpret_cast<char*>(buffer);
+
         xxFree(d3dBuffer);
         break;
     }
@@ -351,6 +357,7 @@ void xxDestroyBufferD3D8(uint64_t buffer)
         LPDIRECT3DRESOURCE8 d3dResource = reinterpret_cast<LPDIRECT3DRESOURCE8>(getResourceData(buffer));
         if (d3dResource == nullptr)
             return;
+
         d3dResource->Release();
         break;
     }
@@ -363,9 +370,12 @@ void* xxMapBufferD3D8(uint64_t device, uint64_t buffer)
 {
     switch (getResourceType(buffer))
     {
-    case 0:
+    case D3DRTYPE_CONSTANTBUFFER:
     {
-        BYTE* ptr = reinterpret_cast<BYTE*>(buffer);
+        char* ptr = reinterpret_cast<char*>(buffer);
+        if (ptr == nullptr)
+            break;
+
         return ptr;
     }
     case D3DRTYPE_VERTEXBUFFER:
@@ -376,9 +386,10 @@ void* xxMapBufferD3D8(uint64_t device, uint64_t buffer)
 
         BYTE* ptr = nullptr;
         HRESULT hResult = d3dVertexBuffer->Lock(0, 0, &ptr, D3DLOCK_NOOVERWRITE);
-        if (hResult == S_OK)
-            return ptr;
-        break;
+        if (hResult != S_OK)
+            break;
+
+        return ptr;
     }
     case D3DRTYPE_INDEXBUFFER:
     {
@@ -388,9 +399,10 @@ void* xxMapBufferD3D8(uint64_t device, uint64_t buffer)
 
         BYTE* ptr = nullptr;
         HRESULT hResult = d3dIndexBuffer->Lock(0, 0, &ptr, D3DLOCK_NOOVERWRITE);
-        if (hResult == S_OK)
-            return ptr;
-        break;
+        if (hResult != S_OK)
+            break;
+
+        return ptr;
     }
     default:
         break;
@@ -403,7 +415,7 @@ void xxUnmapBufferD3D8(uint64_t device, uint64_t buffer)
 {
     switch (getResourceType(buffer))
     {
-    case 0:
+    case D3DRTYPE_CONSTANTBUFFER:
     {
         return;
     }
@@ -447,6 +459,7 @@ uint64_t xxCreateTextureD3D8(uint64_t device, int format, unsigned int width, un
         HRESULT hResult = d3dDevice->CreateTexture(width, height, mipmap, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &d3dTexture);
         if (hResult != S_OK)
             return 0;
+
         return reinterpret_cast<uint64_t>(d3dTexture) | D3DRTYPE_TEXTURE;
     }
 
@@ -456,6 +469,7 @@ uint64_t xxCreateTextureD3D8(uint64_t device, int format, unsigned int width, un
         HRESULT hResult = d3dDevice->CreateCubeTexture(width, mipmap, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &d3dCubeTexture);
         if (hResult != S_OK)
             return 0;
+
         return reinterpret_cast<uint64_t>(d3dCubeTexture) | D3DRTYPE_CUBETEXTURE;
     }
 
@@ -465,6 +479,7 @@ uint64_t xxCreateTextureD3D8(uint64_t device, int format, unsigned int width, un
         HRESULT hResult = d3dDevice->CreateVolumeTexture(width, height, depth, mipmap, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &d3dVolumeTexture);
         if (hResult != S_OK)
             return 0;
+
         return reinterpret_cast<uint64_t>(d3dVolumeTexture) | D3DRTYPE_VOLUME;
     }
 
@@ -476,6 +491,7 @@ void xxDestroyTextureD3D8(uint64_t texture)
     LPDIRECT3DBASETEXTURE8 d3dBaseTexture = reinterpret_cast<LPDIRECT3DBASETEXTURE8>(getResourceData(texture));
     if (d3dBaseTexture == nullptr)
         return;
+
     d3dBaseTexture->Release();
 }
 //------------------------------------------------------------------------------
@@ -490,7 +506,10 @@ void* xxMapTextureD3D8(uint64_t device, uint64_t texture, unsigned int& stride, 
             break;
 
         D3DLOCKED_RECT rect = {};
-        d3dTexture->LockRect(level, &rect, nullptr, D3DLOCK_DISCARD);
+        HRESULT hResult = d3dTexture->LockRect(level, &rect, nullptr, D3DLOCK_DISCARD);
+        if (hResult != S_OK)
+            break;
+
         stride = rect.Pitch;
         return rect.pBits;
     }
@@ -501,7 +520,10 @@ void* xxMapTextureD3D8(uint64_t device, uint64_t texture, unsigned int& stride, 
             break;
 
         D3DLOCKED_RECT rect = {};
-        d3dCubeTexture->LockRect((D3DCUBEMAP_FACES)array, level, &rect, nullptr, D3DLOCK_DISCARD);
+        HRESULT hResult = d3dCubeTexture->LockRect((D3DCUBEMAP_FACES)array, level, &rect, nullptr, D3DLOCK_DISCARD);
+        if (hResult != S_OK)
+            break;
+
         stride = rect.Pitch;
         return rect.pBits;
     }
@@ -512,7 +534,10 @@ void* xxMapTextureD3D8(uint64_t device, uint64_t texture, unsigned int& stride, 
             break;
 
         D3DLOCKED_BOX box = {};
-        d3dVolumeTexture->LockBox(level, &box, nullptr, D3DLOCK_DISCARD);
+        HRESULT hResult = d3dVolumeTexture->LockBox(level, &box, nullptr, D3DLOCK_DISCARD);
+        if (hResult != S_OK)
+            break;
+
         stride = box.RowPitch;
         return box.pBits;
     }
@@ -533,7 +558,10 @@ void xxUnmapTextureD3D8(uint64_t device, uint64_t texture, unsigned int level, u
         if (d3dTexture == nullptr)
             break;
 
-        d3dTexture->UnlockRect(level);
+        HRESULT hResult = d3dTexture->UnlockRect(level);
+        if (hResult != S_OK)
+            break;
+
         return;
     }
     case D3DRTYPE_CUBETEXTURE:
@@ -542,7 +570,10 @@ void xxUnmapTextureD3D8(uint64_t device, uint64_t texture, unsigned int level, u
         if (d3dCubeTexture == nullptr)
             break;
 
-        d3dCubeTexture->UnlockRect((D3DCUBEMAP_FACES)array, level);
+        HRESULT hResult = d3dCubeTexture->UnlockRect((D3DCUBEMAP_FACES)array, level);
+        if (hResult != S_OK)
+            break;
+
         return;
     }
     case D3DRTYPE_VOLUME:
@@ -551,7 +582,10 @@ void xxUnmapTextureD3D8(uint64_t device, uint64_t texture, unsigned int level, u
         if (d3dVolumeTexture == nullptr)
             break;
 
-        d3dVolumeTexture->UnlockBox(level);
+        HRESULT hResult = d3dVolumeTexture->UnlockBox(level);
+        if (hResult != S_OK)
+            break;
+
         return;
     }
     default:
@@ -813,6 +847,11 @@ void xxSetPipelineD3D8(uint64_t commandBuffer, uint64_t pipeline)
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
     D3DPIPELINE8* d3dPipeline = reinterpret_cast<D3DPIPELINE8*>(pipeline);
 
+    if ((d3dPipeline->vertexShader & D3DFVF_RESERVED0) == 0)
+    {
+        d3dDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
+        d3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
+    }
     if (d3dPipeline->pixelShader == 0)
     {
         d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
@@ -821,13 +860,10 @@ void xxSetPipelineD3D8(uint64_t commandBuffer, uint64_t pipeline)
         d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAOP, D3DTOP_MODULATE);
         d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
         d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
-
-        d3dDevice->SetRenderState(D3DRS_SHADEMODE, D3DSHADE_GOURAUD);
-        d3dDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
     }
-    d3dDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
     d3dDevice->SetVertexShader(d3dPipeline->vertexShader);
     d3dDevice->SetPixelShader(d3dPipeline->pixelShader);
+    d3dDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
     d3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
     d3dDevice->SetRenderState(D3DRS_ZENABLE, d3dPipeline->renderState.depthWrite);
     d3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, d3dPipeline->renderState.alphaBlending);

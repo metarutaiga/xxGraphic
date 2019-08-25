@@ -105,6 +105,9 @@ uint64_t xxCreateSwapchainD3D11(uint64_t device, void* view, unsigned int width,
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
     if (d3dDevice == nullptr)
         return 0;
+    D3D11SWAPCHAIN* d3dSwapchain = new D3D11SWAPCHAIN;
+    if (d3dSwapchain == nullptr)
+        return 0;
 
     if (g_dxgiFactory == nullptr)
     {
@@ -125,7 +128,7 @@ uint64_t xxCreateSwapchainD3D11(uint64_t device, void* view, unsigned int width,
         }
         if (g_dxgiFactory == nullptr)
         {
-            d3dDevice->Release();
+            delete d3dSwapchain;
             return 0;
         }
     }
@@ -155,7 +158,10 @@ uint64_t xxCreateSwapchainD3D11(uint64_t device, void* view, unsigned int width,
     IDXGISwapChain* dxgiSwapchain = nullptr;
     HRESULT hResult = g_dxgiFactory->CreateSwapChain(d3dDevice, &desc, &dxgiSwapchain);
     if (hResult != S_OK)
+    {
+        delete d3dSwapchain;
         return 0;
+    }
 
     ID3D11RenderTargetView* renderTargetView = nullptr;
     ID3D11Texture2D* d3dTexture = nullptr;
@@ -165,9 +171,6 @@ uint64_t xxCreateSwapchainD3D11(uint64_t device, void* view, unsigned int width,
         d3dDevice->CreateRenderTargetView(d3dTexture, nullptr, &renderTargetView);
         d3dTexture->Release();
     }
-
-    ID3D11DeviceContext* d3dDeviceContext = nullptr;
-    d3dDevice->GetImmediateContext(&d3dDeviceContext);
 
     D3D11_TEXTURE2D_DESC textureDesc = {};
     textureDesc.Width = width;
@@ -188,7 +191,9 @@ uint64_t xxCreateSwapchainD3D11(uint64_t device, void* view, unsigned int width,
     ID3D11DepthStencilView* depthStencilView = nullptr;
     d3dDevice->CreateDepthStencilView(depthStencilTexture, &depthStencilViewDesc, &depthStencilView);
 
-    D3D11SWAPCHAIN* d3dSwapchain = new D3D11SWAPCHAIN;
+    ID3D11DeviceContext* d3dDeviceContext = nullptr;
+    d3dDevice->GetImmediateContext(&d3dDeviceContext);
+
     d3dSwapchain->dxgiSwapchain = dxgiSwapchain;
     d3dSwapchain->renderTargetView = renderTargetView;
     d3dSwapchain->depthStencilTexture = depthStencilTexture;
@@ -596,6 +601,7 @@ void* xxMapTextureD3D11(uint64_t device, uint64_t texture, unsigned int& stride,
         HRESULT hResult = d3dDeviceContext->Map(d3dTexture->texture1D, D3D11CalcSubresource(level, array, mipmap), D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
         if (hResult != S_OK)
             return nullptr;
+
         stride = mappedSubresource.RowPitch;
         return mappedSubresource.pData;
     }
@@ -606,6 +612,7 @@ void* xxMapTextureD3D11(uint64_t device, uint64_t texture, unsigned int& stride,
         HRESULT hResult = d3dDeviceContext->Map(d3dTexture->texture2D, D3D11CalcSubresource(level, array, mipmap), D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
         if (hResult != S_OK)
             return nullptr;
+
         stride = mappedSubresource.RowPitch;
         return mappedSubresource.pData;
     }
@@ -616,6 +623,7 @@ void* xxMapTextureD3D11(uint64_t device, uint64_t texture, unsigned int& stride,
         HRESULT hResult = d3dDeviceContext->Map(d3dTexture->texture3D, D3D11CalcSubresource(level, array, mipmap), D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
         if (hResult != S_OK)
             return nullptr;
+
         stride = mappedSubresource.RowPitch;
         return mappedSubresource.pData;
     }
@@ -872,6 +880,7 @@ uint64_t xxCreateVertexShaderD3D11(uint64_t device, const char* shader, uint64_t
         HRESULT hResult = d3dDevice->CreateVertexShader(vertexShaderCode40, vertexShaderCode40[6], nullptr, &d3dShader);
         if (hResult != S_OK)
             return 0;
+
         return reinterpret_cast<uint64_t>(d3dShader);
     }
 
@@ -890,6 +899,7 @@ uint64_t xxCreateFragmentShaderD3D11(uint64_t device, const char* shader)
         HRESULT hResult = d3dDevice->CreatePixelShader(pixelShaderCode40, pixelShaderCode40[6], nullptr, &d3dShader);
         if (hResult != S_OK)
             return 0;
+
         return reinterpret_cast<uint64_t>(d3dShader);
     }
 
@@ -1077,7 +1087,6 @@ void xxSetPipelineD3D11(uint64_t commandBuffer, uint64_t pipeline)
 {
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandBuffer);
     D3D11PIPELINE* d3dPipeline = reinterpret_cast<D3D11PIPELINE*>(pipeline);
-
     static const float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
     d3dDeviceContext->VSSetShader(d3dPipeline->vertexShader, nullptr, 0);
@@ -1101,58 +1110,72 @@ void xxSetVertexBuffersD3D11(uint64_t commandBuffer, int count, const uint64_t* 
 {
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandBuffer);
     D3D11VERTEXATTRIBUTE* d3dVertexAttribute = reinterpret_cast<D3D11VERTEXATTRIBUTE*>(vertexAttribute);
+    ID3D11Buffer* d3dBuffers[D3D11_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT];
+    UINT offsets[D3D11_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT];
+    UINT strides[D3D11_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT];
 
     for (int i = 0; i < count; ++i)
     {
-        ID3D11Buffer* d3dVertexBuffer = reinterpret_cast<ID3D11Buffer*>(buffers[i]);
-        UINT offset = 0;
-        UINT stride = d3dVertexAttribute->stride;
-        d3dDeviceContext->IASetVertexBuffers(i, 1, &d3dVertexBuffer, &stride, &offset);
+        d3dBuffers[i] = reinterpret_cast<ID3D11Buffer*>(buffers[i]);
+        offsets[i] = 0;
+        strides[i] = d3dVertexAttribute->stride;
     }
+
+    d3dDeviceContext->IASetVertexBuffers(0, count, d3dBuffers, strides, offsets);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesD3D11(uint64_t commandBuffer, int count, const uint64_t* textures)
 {
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandBuffer);
+    ID3D11ShaderResourceView* d3dTextures[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT];
 
     for (int i = 0; i < count; ++i)
     {
         D3D11TEXTURE* d3dTexture = reinterpret_cast<D3D11TEXTURE*>(textures[i]);
-        d3dDeviceContext->VSSetShaderResources(i, 1, &d3dTexture->resourceView);
+        d3dTextures[i] = d3dTexture->resourceView;
     }
+
+    d3dDeviceContext->VSSetShaderResources(0, count, d3dTextures);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentTexturesD3D11(uint64_t commandBuffer, int count, const uint64_t* textures)
 {
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandBuffer);
+    ID3D11ShaderResourceView* d3dTextures[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT];
 
     for (int i = 0; i < count; ++i)
     {
         D3D11TEXTURE* d3dTexture = reinterpret_cast<D3D11TEXTURE*>(textures[i]);
-        d3dDeviceContext->PSSetShaderResources(i, 1, &d3dTexture->resourceView);
+        d3dTextures[i] = d3dTexture->resourceView;
     }
+
+    d3dDeviceContext->PSSetShaderResources(0, count, d3dTextures);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersD3D11(uint64_t commandBuffer, int count, const uint64_t* samplers)
 {
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandBuffer);
+    ID3D11SamplerState* d3dSamplerStates[D3D10_COMMONSHADER_SAMPLER_SLOT_COUNT];
 
     for (int i = 0; i < count; ++i)
     {
-        ID3D11SamplerState* d3dSamplerState = reinterpret_cast<ID3D11SamplerState*>(samplers[i]);
-        d3dDeviceContext->VSSetSamplers(i, 1, &d3dSamplerState);
+        d3dSamplerStates[i] = reinterpret_cast<ID3D11SamplerState*>(samplers[i]);
     }
+
+    d3dDeviceContext->VSSetSamplers(0, count, d3dSamplerStates);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentSamplersD3D11(uint64_t commandBuffer, int count, const uint64_t* samplers)
 {
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandBuffer);
+    ID3D11SamplerState* d3dSamplerStates[D3D10_COMMONSHADER_SAMPLER_SLOT_COUNT];
 
     for (int i = 0; i < count; ++i)
     {
-        ID3D11SamplerState* d3dSamplerState = reinterpret_cast<ID3D11SamplerState*>(samplers[i]);
-        d3dDeviceContext->PSSetSamplers(i, 1, &d3dSamplerState);
+        d3dSamplerStates[i] = reinterpret_cast<ID3D11SamplerState*>(samplers[i]);
     }
+
+    d3dDeviceContext->PSSetSamplers(0, count, d3dSamplerStates);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferD3D11(uint64_t commandBuffer, uint64_t buffer, unsigned int size)

@@ -175,6 +175,7 @@ uint64_t xxCreateVertexShaderD3D9PS(uint64_t device, const char* shader, uint64_
         HRESULT hResult = d3dDevice->CreateVertexShader(vertexShaderCode11, &d3dShader);
         if (hResult != S_OK)
             return 0;
+
         return reinterpret_cast<uint64_t>(d3dShader);
     }
 
@@ -193,6 +194,7 @@ uint64_t xxCreateFragmentShaderD3D9PS(uint64_t device, const char* shader)
         HRESULT hResult = d3dDevice->CreatePixelShader(pixelShaderCode11, &d3dShader);
         if (hResult != S_OK)
             return 0;
+
         return reinterpret_cast<uint64_t>(d3dShader);
     }
 

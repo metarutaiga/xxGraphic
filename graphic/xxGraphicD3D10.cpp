@@ -110,6 +110,9 @@ uint64_t xxCreateSwapchainD3D10(uint64_t device, void* view, unsigned int width,
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(device);
     if (d3dDevice == nullptr)
         return 0;
+    D3D10SWAPCHAIN* d3dSwapchain = new D3D10SWAPCHAIN;
+    if (d3dSwapchain == nullptr)
+        return 0;
 
     if (g_dxgiFactory == nullptr)
     {
@@ -130,7 +133,7 @@ uint64_t xxCreateSwapchainD3D10(uint64_t device, void* view, unsigned int width,
         }
         if (g_dxgiFactory == nullptr)
         {
-            d3dDevice->Release();
+            delete d3dSwapchain;
             return 0;
         }
     }
@@ -160,7 +163,10 @@ uint64_t xxCreateSwapchainD3D10(uint64_t device, void* view, unsigned int width,
     IDXGISwapChain* dxgiSwapchain = nullptr;
     HRESULT hResult = g_dxgiFactory->CreateSwapChain(d3dDevice, &desc, &dxgiSwapchain);
     if (hResult != S_OK)
+    {
+        delete d3dSwapchain;
         return 0;
+    }
 
     ID3D10RenderTargetView* renderTargetView = nullptr;
     ID3D10Texture2D* d3dTexture = nullptr;
@@ -190,7 +196,6 @@ uint64_t xxCreateSwapchainD3D10(uint64_t device, void* view, unsigned int width,
     ID3D10DepthStencilView* depthStencilView = nullptr;
     d3dDevice->CreateDepthStencilView(depthStencilTexture, &depthStencilViewDesc, &depthStencilView);
 
-    D3D10SWAPCHAIN* d3dSwapchain = new D3D10SWAPCHAIN;
     d3dSwapchain->dxgiSwapchain = dxgiSwapchain;
     d3dSwapchain->renderTargetView = renderTargetView;
     d3dSwapchain->depthStencilTexture = depthStencilTexture;
@@ -568,6 +573,7 @@ void* xxMapTextureD3D10(uint64_t device, uint64_t texture, unsigned int& stride,
         HRESULT hResult = d3dTexture->texture1D->Map(D3D10CalcSubresource(level, array, mipmap), D3D10_MAP_WRITE_DISCARD, 0, &ptr);
         if (hResult != S_OK)
             return nullptr;
+
         return ptr;
     }
 
@@ -577,6 +583,7 @@ void* xxMapTextureD3D10(uint64_t device, uint64_t texture, unsigned int& stride,
         HRESULT hResult = d3dTexture->texture2D->Map(D3D10CalcSubresource(level, array, mipmap), D3D10_MAP_WRITE_DISCARD, 0, &mappedTexture2D);
         if (hResult != S_OK)
             return nullptr;
+
         stride = mappedTexture2D.RowPitch;
         return mappedTexture2D.pData;
     }
@@ -587,6 +594,7 @@ void* xxMapTextureD3D10(uint64_t device, uint64_t texture, unsigned int& stride,
         HRESULT hResult = d3dTexture->texture3D->Map(D3D10CalcSubresource(level, array, mipmap), D3D10_MAP_WRITE_DISCARD, 0, &mappedTexture3D);
         if (hResult != S_OK)
             return nullptr;
+
         stride = mappedTexture3D.RowPitch;
         return mappedTexture3D.pData;
     }
@@ -835,6 +843,7 @@ uint64_t xxCreateVertexShaderD3D10(uint64_t device, const char* shader, uint64_t
         HRESULT hResult = d3dDevice->CreateVertexShader(vertexShaderCode40, vertexShaderCode40[6], &d3dShader);
         if (hResult != S_OK)
             return 0;
+
         return reinterpret_cast<uint64_t>(d3dShader);
     }
 
@@ -853,6 +862,7 @@ uint64_t xxCreateFragmentShaderD3D10(uint64_t device, const char* shader)
         HRESULT hResult = d3dDevice->CreatePixelShader(pixelShaderCode40, pixelShaderCode40[6], &d3dShader);
         if (hResult != S_OK)
             return 0;
+
         return reinterpret_cast<uint64_t>(d3dShader);
     }
 
@@ -1063,58 +1073,72 @@ void xxSetVertexBuffersD3D10(uint64_t commandBuffer, int count, const uint64_t* 
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
     D3D10VERTEXATTRIBUTE* d3dVertexAttribute = reinterpret_cast<D3D10VERTEXATTRIBUTE*>(vertexAttribute);
+    ID3D10Buffer* d3dBuffers[D3D10_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT];
+    UINT offsets[D3D10_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT];
+    UINT strides[D3D10_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT];
 
     for (int i = 0; i < count; ++i)
     {
-        ID3D10Buffer* d3dVertexBuffer = reinterpret_cast<ID3D10Buffer*>(buffers[i]);
-        UINT offset = 0;
-        UINT stride = d3dVertexAttribute->stride;
-        d3dDevice->IASetVertexBuffers(i, 1, &d3dVertexBuffer, &stride, &offset);
+        d3dBuffers[i] = reinterpret_cast<ID3D10Buffer*>(buffers[i]);
+        offsets[i] = 0;
+        strides[i] = d3dVertexAttribute->stride;
     }
+
+    d3dDevice->IASetVertexBuffers(0, count, d3dBuffers, strides, offsets);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesD3D10(uint64_t commandBuffer, int count, const uint64_t* textures)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
+    ID3D10ShaderResourceView* d3dTextures[D3D10_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT];
 
     for (int i = 0; i < count; ++i)
     {
         D3D10TEXTURE* d3dTexture = reinterpret_cast<D3D10TEXTURE*>(textures[i]);
-        d3dDevice->VSSetShaderResources(i, 1, &d3dTexture->resourceView);
+        d3dTextures[i] = d3dTexture->resourceView;
     }
+
+    d3dDevice->VSSetShaderResources(0, count, d3dTextures);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentTexturesD3D10(uint64_t commandBuffer, int count, const uint64_t* textures)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
+    ID3D10ShaderResourceView* d3dTextures[D3D10_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT];
 
     for (int i = 0; i < count; ++i)
     {
         D3D10TEXTURE* d3dTexture = reinterpret_cast<D3D10TEXTURE*>(textures[i]);
-        d3dDevice->PSSetShaderResources(i, 1, &d3dTexture->resourceView);
+        d3dTextures[i] = d3dTexture->resourceView;
     }
+
+    d3dDevice->PSSetShaderResources(0, count, d3dTextures);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersD3D10(uint64_t commandBuffer, int count, const uint64_t* samplers)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
+    ID3D10SamplerState* d3dSamplerStates[D3D10_COMMONSHADER_SAMPLER_SLOT_COUNT];
 
     for (int i = 0; i < count; ++i)
     {
-        ID3D10SamplerState* d3dSamplerState = reinterpret_cast<ID3D10SamplerState*>(samplers[i]);
-        d3dDevice->VSSetSamplers(i, 1, &d3dSamplerState);
+        d3dSamplerStates[i] = reinterpret_cast<ID3D10SamplerState*>(samplers[i]);
     }
+
+    d3dDevice->VSSetSamplers(0, count, d3dSamplerStates);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentSamplersD3D10(uint64_t commandBuffer, int count, const uint64_t* samplers)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
+    ID3D10SamplerState* d3dSamplerStates[D3D10_COMMONSHADER_SAMPLER_SLOT_COUNT];
 
     for (int i = 0; i < count; ++i)
     {
-        ID3D10SamplerState* d3dSamplerState = reinterpret_cast<ID3D10SamplerState*>(samplers[i]);
-        d3dDevice->PSSetSamplers(i, 1, &d3dSamplerState);
+        d3dSamplerStates[i] = reinterpret_cast<ID3D10SamplerState*>(samplers[i]);
     }
+
+    d3dDevice->PSSetSamplers(0, count, d3dSamplerStates);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferD3D10(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
