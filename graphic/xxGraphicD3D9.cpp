@@ -414,7 +414,7 @@ void* xxMapBufferD3D9(uint64_t device, uint64_t buffer)
             break;
 
         void* ptr = nullptr;
-        HRESULT hResult = d3dVertexBuffer->Lock(0, 0, &ptr, D3DLOCK_NOOVERWRITE);
+        HRESULT hResult = d3dVertexBuffer->Lock(0, 0, &ptr, D3DLOCK_DISCARD);
         if (hResult != S_OK)
             break;
 
@@ -427,7 +427,7 @@ void* xxMapBufferD3D9(uint64_t device, uint64_t buffer)
             break;
 
         void* ptr = nullptr;
-        HRESULT hResult = d3dIndexBuffer->Lock(0, 0, &ptr, D3DLOCK_NOOVERWRITE);
+        HRESULT hResult = d3dIndexBuffer->Lock(0, 0, &ptr, D3DLOCK_DISCARD);
         if (hResult != S_OK)
             break;
 

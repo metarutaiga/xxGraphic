@@ -157,6 +157,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
             continue;
         }
 
+        // Recreate window when SwapEffect is changed.
         if (recreateWindow == true)
         {
             recreateWindow = false;
@@ -190,8 +191,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                         break; \
                     }
 
+#if defined(_M_IX86)
                     GRAPHIC(D3D8);
                     GRAPHIC(D3D8PS);
+#endif
                     GRAPHIC(D3D9);
                     GRAPHIC(D3D9PS);
                     GRAPHIC(D3D9Ex);
