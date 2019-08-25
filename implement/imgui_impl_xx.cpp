@@ -152,6 +152,7 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
 
     // Render command lists
     // (Because we merged all buffers into a single one, we maintain our own offset into them)
+    bool boundTexture = false;
     int global_vtx_offset = 0;
     int global_idx_offset = 0;
     ImVec2 clip_off = draw_data->DisplayPos;
@@ -163,6 +164,8 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
             const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[cmd_i];
             if (pcmd->UserCallback != NULL)
             {
+                boundTexture = false;
+
                 // User callback, registered via ImDrawList::AddCallback()
                 // (ImDrawCallback_ResetRenderState is a special callback value used by the user to request the renderer to reset render state.)
                 if (pcmd->UserCallback == ImDrawCallback_ResetRenderState)
@@ -186,9 +189,15 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
                 int clip_height = (int)(clip_rect.w - clip_rect.y);
                 xxSetScissor(commandBuffer, clip_x, clip_y, clip_width, clip_height);
 
+                // Texture
+                if (boundTexture == false)
+                {
+                    boundTexture = true;
+                    xxSetFragmentTextures(commandBuffer, 1, &pcmd->TextureId);
+                    xxSetFragmentSamplers(commandBuffer, 1, &g_fontSampler);
+                }
+
                 // Draw
-                xxSetFragmentTextures(commandBuffer, 1, &pcmd->TextureId);
-                xxSetFragmentSamplers(commandBuffer, 1, &g_fontSampler);
                 xxDrawIndexed(commandBuffer, pcmd->ElemCount, 1, pcmd->IdxOffset + global_idx_offset, pcmd->VtxOffset + global_vtx_offset, 0);
             }
         }

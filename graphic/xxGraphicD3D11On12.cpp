@@ -7,8 +7,8 @@
 #include <dxgi1_4.h>
 #define NUM_BACK_BUFFERS 3
 
-static HMODULE              g_d3d12Library = nullptr;
 static HMODULE              g_d3d11Library = nullptr;
+static HMODULE              g_d3d12Library = nullptr;
 static ID3D12Device*        g_d3d12Device = nullptr;
 static ID3D12CommandQueue*  g_d3d12CommandQueue = nullptr;
 static ID3D12Fence*         g_d3d12Fence = nullptr;
@@ -34,14 +34,14 @@ static void signalFence(bool wait)
 //==============================================================================
 uint64_t xxCreateInstanceD3D11On12()
 {
-    if (g_d3d12Library == nullptr)
-        g_d3d12Library = LoadLibraryW(L"d3d12.dll");
-    if (g_d3d12Library == nullptr)
-        return 0;
-
     if (g_d3d11Library == nullptr)
         g_d3d11Library = LoadLibraryW(L"d3d11.dll");
     if (g_d3d11Library == nullptr)
+        return 0;
+
+    if (g_d3d12Library == nullptr)
+        g_d3d12Library = LoadLibraryW(L"d3d12.dll");
+    if (g_d3d12Library == nullptr)
         return 0;
 
     xxRegisterFunction(D3D11);
@@ -178,8 +178,6 @@ struct D3D11ON12SWAPCHAIN
 //------------------------------------------------------------------------------
 void xxPresentSwapchainD3D11On12(uint64_t swapchain, void* view)
 {
-    xxPresentSwapchainD3D11(swapchain, view);
-
     D3D11ON12SWAPCHAIN* d3dSwapchain = reinterpret_cast<D3D11ON12SWAPCHAIN*>(swapchain);
     if (d3dSwapchain == nullptr)
         return;
@@ -187,6 +185,8 @@ void xxPresentSwapchainD3D11On12(uint64_t swapchain, void* view)
     int bufferIndex = d3dSwapchain->dxgiSwapchain->GetCurrentBackBufferIndex();
     g_d3d12FenceValues[bufferIndex] = g_d3d12FenceValue;
     signalFence(false);
+
+    xxPresentSwapchainD3D11(swapchain, view);
 }
 //==============================================================================
 //  Command Buffer

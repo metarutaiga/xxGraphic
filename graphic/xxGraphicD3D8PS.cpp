@@ -114,8 +114,6 @@ uint64_t xxCreateVertexAttributeD3D8PS(uint64_t device, int count, ...)
 void xxDestroyVertexAttributeD3D8PS(uint64_t vertexAttribute)
 {
     D3DVERTEXATTRIBUTE8PS* d3dVertexAttribute = reinterpret_cast<D3DVERTEXATTRIBUTE8PS*>(vertexAttribute);
-    if (d3dVertexAttribute == nullptr)
-        return;
 
     delete d3dVertexAttribute;
 }

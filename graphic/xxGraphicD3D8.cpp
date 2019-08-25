@@ -796,8 +796,6 @@ void xxDestroyRasterizerStateD3D8(uint64_t rasterizerState)
 void xxDestroyPipelineD3D8(uint64_t pipeline)
 {
     D3DPIPELINE8* d3dPipeline = reinterpret_cast<D3DPIPELINE8*>(pipeline);
-    if (d3dPipeline == nullptr)
-        return;
 
     delete d3dPipeline;
 }

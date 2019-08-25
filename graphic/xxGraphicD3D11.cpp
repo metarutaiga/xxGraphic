@@ -1064,8 +1064,6 @@ void xxDestroyRasterizerStateD3D11(uint64_t rasterizerState)
 void xxDestroyPipelineD3D11(uint64_t pipeline)
 {
     D3D11PIPELINE* d3dPipeline = reinterpret_cast<D3D11PIPELINE*>(pipeline);
-    if (d3dPipeline == nullptr)
-        return;
 
     delete d3dPipeline;
 }

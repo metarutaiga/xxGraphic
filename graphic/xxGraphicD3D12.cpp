@@ -56,11 +56,11 @@ static void destroyShaderHeap(D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle, D3D12_GPU_
         return;
     if (cpuHandle.ptr == 0)
     {
-        cpuHandle.ptr = g_shaderHeap->GetCPUDescriptorHandleForHeapStart().ptr + (gpuHandle.ptr - g_shaderHeap->GetGPUDescriptorHandleForHeapStart().ptr);
+        cpuHandle.ptr = g_shaderHeap->GetCPUDescriptorHandleForHeapStart().ptr + (SIZE_T)(gpuHandle.ptr - g_shaderHeap->GetGPUDescriptorHandleForHeapStart().ptr);
     }
     if (gpuHandle.ptr == 0)
     {
-        gpuHandle.ptr = g_shaderHeap->GetGPUDescriptorHandleForHeapStart().ptr + (cpuHandle.ptr - g_shaderHeap->GetCPUDescriptorHandleForHeapStart().ptr);
+        gpuHandle.ptr = g_shaderHeap->GetGPUDescriptorHandleForHeapStart().ptr + (UINT64)(cpuHandle.ptr - g_shaderHeap->GetCPUDescriptorHandleForHeapStart().ptr);
     }
     g_shaderCPUHandles[g_shaderAvailableHandle] = cpuHandle;
     g_shaderGPUHandles[g_shaderAvailableHandle] = gpuHandle;
@@ -80,11 +80,11 @@ static void destroySamplerHeap(D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle, D3D12_GPU
         return;
     if (cpuHandle.ptr == 0)
     {
-        cpuHandle.ptr = g_samplerHeap->GetCPUDescriptorHandleForHeapStart().ptr + (gpuHandle.ptr - g_samplerHeap->GetGPUDescriptorHandleForHeapStart().ptr);
+        cpuHandle.ptr = g_samplerHeap->GetCPUDescriptorHandleForHeapStart().ptr + (SIZE_T)(gpuHandle.ptr - g_samplerHeap->GetGPUDescriptorHandleForHeapStart().ptr);
     }
     if (gpuHandle.ptr == 0)
     {
-        gpuHandle.ptr = g_samplerHeap->GetGPUDescriptorHandleForHeapStart().ptr + (cpuHandle.ptr - g_samplerHeap->GetCPUDescriptorHandleForHeapStart().ptr);
+        gpuHandle.ptr = g_samplerHeap->GetGPUDescriptorHandleForHeapStart().ptr + (UINT64)(cpuHandle.ptr - g_samplerHeap->GetCPUDescriptorHandleForHeapStart().ptr);
     }
     g_samplerCPUHandles[g_samplerAvailableHandle] = cpuHandle;
     g_samplerGPUHandles[g_samplerAvailableHandle] = gpuHandle;
@@ -558,11 +558,11 @@ void xxPresentSwapchainD3D12(uint64_t swapchain, void* view)
     if (d3dSwapchain == nullptr)
         return;
 
-    d3dSwapchain->dxgiSwapchain->Present(0, 0);
-
     int bufferIndex = d3dSwapchain->dxgiSwapchain->GetCurrentBackBufferIndex();
     g_fenceValues[bufferIndex] = g_fenceValue;
     signalFence(false);
+
+    d3dSwapchain->dxgiSwapchain->Present(0, 0);
 }
 //------------------------------------------------------------------------------
 uint64_t xxGetFramebufferD3D12(uint64_t device, uint64_t swapchain)
@@ -1196,8 +1196,6 @@ uint64_t xxCreateVertexAttributeD3D12(uint64_t device, int count, ...)
 void xxDestroyVertexAttributeD3D12(uint64_t vertexAttribute)
 {
     D3D12VERTEXATTRIBUTE* d3dVertexAttribute = reinterpret_cast<D3D12VERTEXATTRIBUTE*>(vertexAttribute);
-    if (d3dVertexAttribute == nullptr)
-        return;
 
     delete d3dVertexAttribute;
 }
