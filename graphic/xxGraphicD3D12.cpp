@@ -16,12 +16,15 @@ static HANDLE                       g_fenceEvent = nullptr;
 static UINT64                       g_fenceValue = 0;
 static UINT64                       g_fenceValues[NUM_BACK_BUFFERS] = {};
 static ID3D12DescriptorHeap*        g_shaderHeap = nullptr;
-static D3D12_CPU_DESCRIPTOR_HANDLE  g_shaderHandle = {};
 static UINT                         g_shaderDescriptorSize = 0;
+static UINT                         g_shaderAvailableHandle = 0;
+static D3D12_CPU_DESCRIPTOR_HANDLE  g_shaderCPUHandles[256] = {};
+static D3D12_GPU_DESCRIPTOR_HANDLE  g_shaderGPUHandles[256] = {};
 static ID3D12DescriptorHeap*        g_samplerHeap = nullptr;
-static D3D12_CPU_DESCRIPTOR_HANDLE  g_samplerCPUHandle = {};
-static D3D12_GPU_DESCRIPTOR_HANDLE  g_samplerGPUHandle = {};
 static UINT                         g_samplerDescriptorSize = 0;
+static UINT                         g_samplerAvailableHandle = 0;
+static D3D12_CPU_DESCRIPTOR_HANDLE  g_samplerCPUHandles[256] = {};
+static D3D12_GPU_DESCRIPTOR_HANDLE  g_samplerGPUHandles[256] = {};
 static ID3D12RootSignature*         g_rootSignature = nullptr;
 
 //==============================================================================
@@ -36,6 +39,56 @@ static void signalFence(bool wait)
         WaitForSingleObjectEx(g_fenceEvent, 1000, FALSE);
     }
     g_fenceValue++;
+}
+//==============================================================================
+//  Heap
+//==============================================================================
+static void createShaderHeap(D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle)
+{
+    g_shaderAvailableHandle--;
+    cpuHandle = g_shaderCPUHandles[g_shaderAvailableHandle];
+    gpuHandle = g_shaderGPUHandles[g_shaderAvailableHandle];
+}
+//------------------------------------------------------------------------------
+static void destroyShaderHeap(D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle)
+{
+    if (cpuHandle.ptr == 0 && gpuHandle.ptr == 0)
+        return;
+    if (cpuHandle.ptr == 0)
+    {
+        cpuHandle.ptr = g_shaderHeap->GetCPUDescriptorHandleForHeapStart().ptr + (gpuHandle.ptr - g_shaderHeap->GetGPUDescriptorHandleForHeapStart().ptr);
+    }
+    if (gpuHandle.ptr == 0)
+    {
+        gpuHandle.ptr = g_shaderHeap->GetGPUDescriptorHandleForHeapStart().ptr + (cpuHandle.ptr - g_shaderHeap->GetCPUDescriptorHandleForHeapStart().ptr);
+    }
+    g_shaderCPUHandles[g_shaderAvailableHandle] = cpuHandle;
+    g_shaderGPUHandles[g_shaderAvailableHandle] = gpuHandle;
+    g_shaderAvailableHandle++;
+}
+//------------------------------------------------------------------------------
+static void createSamplerHeap(D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle)
+{
+    g_samplerAvailableHandle--;
+    cpuHandle = g_samplerCPUHandles[g_samplerAvailableHandle];
+    gpuHandle = g_samplerGPUHandles[g_samplerAvailableHandle];
+}
+//------------------------------------------------------------------------------
+static void destroySamplerHeap(D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle, D3D12_GPU_DESCRIPTOR_HANDLE& gpuHandle)
+{
+    if (cpuHandle.ptr == 0 && gpuHandle.ptr == 0)
+        return;
+    if (cpuHandle.ptr == 0)
+    {
+        cpuHandle.ptr = g_samplerHeap->GetCPUDescriptorHandleForHeapStart().ptr + (gpuHandle.ptr - g_samplerHeap->GetGPUDescriptorHandleForHeapStart().ptr);
+    }
+    if (gpuHandle.ptr == 0)
+    {
+        gpuHandle.ptr = g_samplerHeap->GetGPUDescriptorHandleForHeapStart().ptr + (cpuHandle.ptr - g_samplerHeap->GetCPUDescriptorHandleForHeapStart().ptr);
+    }
+    g_samplerCPUHandles[g_samplerAvailableHandle] = cpuHandle;
+    g_samplerGPUHandles[g_samplerAvailableHandle] = gpuHandle;
+    g_samplerAvailableHandle++;
 }
 //==============================================================================
 //  Instance
@@ -142,22 +195,32 @@ uint64_t xxCreateDeviceD3D12(uint64_t instance)
     {
         D3D12_DESCRIPTOR_HEAP_DESC desc = {};
         desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-        desc.NumDescriptors = 2;
+        desc.NumDescriptors = 256;
+        desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
         desc.NodeMask = 1;
 
         HRESULT hResult = d3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&g_shaderHeap));
         if (hResult != S_OK)
             return 0;
 
-        g_shaderHandle = g_shaderHeap->GetCPUDescriptorHandleForHeapStart();
+        D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = g_shaderHeap->GetCPUDescriptorHandleForHeapStart();
+        D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = g_shaderHeap->GetGPUDescriptorHandleForHeapStart();
         g_shaderDescriptorSize = d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        g_shaderAvailableHandle = 256;
+        for (int i = 0; i < 256; ++i)
+        {
+            g_shaderCPUHandles[i] = cpuHandle;
+            g_shaderGPUHandles[i] = gpuHandle;
+            cpuHandle.ptr += g_shaderDescriptorSize;
+            gpuHandle.ptr += g_shaderDescriptorSize;
+        }
     }
 
     if (g_samplerHeap == nullptr)
     {
         D3D12_DESCRIPTOR_HEAP_DESC desc = {};
         desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
-        desc.NumDescriptors = 1;
+        desc.NumDescriptors = 256;
         desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
         desc.NodeMask = 1;
 
@@ -165,9 +228,17 @@ uint64_t xxCreateDeviceD3D12(uint64_t instance)
         if (hResult != S_OK)
             return 0;
 
-        g_samplerCPUHandle = g_samplerHeap->GetCPUDescriptorHandleForHeapStart();
-        g_samplerGPUHandle = g_samplerHeap->GetGPUDescriptorHandleForHeapStart();
-        g_samplerDescriptorSize = d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+        D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = g_samplerHeap->GetCPUDescriptorHandleForHeapStart();
+        D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = g_samplerHeap->GetGPUDescriptorHandleForHeapStart();
+        g_samplerDescriptorSize = d3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        g_samplerAvailableHandle = 256;
+        for (int i = 0; i < 256; ++i)
+        {
+            g_samplerCPUHandles[i] = cpuHandle;
+            g_samplerGPUHandles[i] = gpuHandle;
+            cpuHandle.ptr += g_samplerDescriptorSize;
+            gpuHandle.ptr += g_samplerDescriptorSize;
+        }
     }
 
     if (g_rootSignature == nullptr)
@@ -399,7 +470,10 @@ uint64_t xxCreateSwapchainD3D12(uint64_t device, void* view, unsigned int width,
 
         HRESULT hResult = d3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&renderTargetHeap));
         if (hResult != S_OK)
+        {
+            delete d3dSwapchain;
             return 0;
+        }
     }
     d3dSwapchain->renderTargetHeap = renderTargetHeap;
 
@@ -427,13 +501,16 @@ uint64_t xxCreateSwapchainD3D12(uint64_t device, void* view, unsigned int width,
             if (hResult == S_OK)
             {
                 d3dSwapchain->commandAllocators[i] = commandAllocator;
-                continue;
             }
         }
 
-        dxgiSwapchain3->Release();
-        delete d3dSwapchain;
-        return 0;
+        if (d3dSwapchain->renderTargetResources[i] == nullptr || d3dSwapchain->commandAllocators[i] == nullptr)
+        {
+            dxgiSwapchain3->Release();
+            renderTargetHeap->Release();
+            delete d3dSwapchain;
+            return 0;
+        }
     }
 
     int bufferIndex = dxgiSwapchain3->GetCurrentBackBufferIndex();
@@ -520,6 +597,9 @@ uint64_t xxGetCommandBufferD3D12(uint64_t device, uint64_t swapchain)
     ID3D12GraphicsCommandList* commandList = d3dSwapchain->commandList;
     commandAllocator->Reset();
     commandList->Reset(commandAllocator, nullptr);
+
+    ID3D12DescriptorHeap* heaps[] = { g_shaderHeap, g_samplerHeap };
+    commandList->SetDescriptorHeaps(xxCountOf(heaps), heaps);
 
     return reinterpret_cast<uint64_t>(commandList);
 }
@@ -792,7 +872,6 @@ void xxUnmapBufferD3D12(uint64_t device, uint64_t buffer)
 struct D3D12TEXTURE
 {
     ID3D12Resource*             texture;
-    ID3D12DescriptorHeap*       textureHeap;
     D3D12_CPU_DESCRIPTOR_HANDLE textureCPUHandle;
     D3D12_GPU_DESCRIPTOR_HANDLE textureGPUHandle;
     UINT                        width;
@@ -856,26 +935,8 @@ uint64_t xxCreateTextureD3D12(uint64_t device, int format, unsigned int width, u
         return 0;
     }
 
-    ID3D12DescriptorHeap* heap = nullptr;
-    if (heap == nullptr)
-    {
-        D3D12_DESCRIPTOR_HEAP_DESC desc = {};
-        desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-        desc.NumDescriptors = 1;
-        desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-        desc.NodeMask = 1;
-
-        HRESULT hResult = d3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&heap));
-        if (hResult != S_OK)
-        {
-            delete d3dTexture;
-            return 0;
-        }
-    }
     d3dTexture->texture = d3dResource;
-    d3dTexture->textureHeap = heap;
-    d3dTexture->textureCPUHandle = heap->GetCPUDescriptorHandleForHeapStart();
-    d3dTexture->textureGPUHandle = heap->GetGPUDescriptorHandleForHeapStart();
+    createShaderHeap(d3dTexture->textureCPUHandle, d3dTexture->textureGPUHandle);
     d3dDevice->CreateShaderResourceView(d3dResource, &viewDesc, d3dTexture->textureCPUHandle);
     d3dTexture->width = width;
     d3dTexture->height = height;
@@ -895,8 +956,8 @@ void xxDestroyTextureD3D12(uint64_t texture)
 
     if (d3dTexture->texture)
         d3dTexture->texture->Release();
-    if (d3dTexture->textureHeap)
-        d3dTexture->textureHeap->Release();
+    if (d3dTexture->textureCPUHandle.ptr && d3dTexture->textureGPUHandle.ptr)
+        destroyShaderHeap(d3dTexture->textureCPUHandle, d3dTexture->textureGPUHandle);
     if (d3dTexture->upload)
         d3dTexture->upload->Release();
     delete d3dTexture;
@@ -1020,10 +1081,9 @@ uint64_t xxCreateSamplerD3D12(uint64_t device, bool clampU, bool clampV, bool cl
         desc.Filter = D3D12_ENCODE_ANISOTROPIC_FILTER(D3D12_FILTER_REDUCTION_TYPE_STANDARD);
     }
 
-    D3D12_CPU_DESCRIPTOR_HANDLE samplerCPUHandle = g_samplerCPUHandle;
-    D3D12_GPU_DESCRIPTOR_HANDLE samplerGPUHandle = g_samplerGPUHandle;
-    g_samplerCPUHandle.ptr += g_samplerDescriptorSize;
-    g_samplerGPUHandle.ptr += g_samplerDescriptorSize;
+    D3D12_CPU_DESCRIPTOR_HANDLE samplerCPUHandle;
+    D3D12_GPU_DESCRIPTOR_HANDLE samplerGPUHandle;
+    createSamplerHeap(samplerCPUHandle, samplerGPUHandle);
 
     d3dDevice->CreateSampler(&desc, samplerCPUHandle);
 
@@ -1032,7 +1092,12 @@ uint64_t xxCreateSamplerD3D12(uint64_t device, bool clampU, bool clampV, bool cl
 //------------------------------------------------------------------------------
 void xxDestroySamplerD3D12(uint64_t sampler)
 {
+    D3D12_CPU_DESCRIPTOR_HANDLE samplerCPUHandle = { 0 };
+    D3D12_GPU_DESCRIPTOR_HANDLE samplerGPUHandle = { sampler };
+    if (samplerGPUHandle.ptr == 0)
+        return;
 
+    destroySamplerHeap(samplerCPUHandle, samplerGPUHandle);
 }
 //==============================================================================
 //  Vertex Attribute
@@ -1385,7 +1450,6 @@ void xxSetFragmentTexturesD3D12(uint64_t commandBuffer, int count, const uint64_
     for (int i = 0; i < count; ++i)
     {
         D3D12TEXTURE* d3dTexture = reinterpret_cast<D3D12TEXTURE*>(textures[i]);
-        d3dCommandList->SetDescriptorHeaps(1, &d3dTexture->textureHeap);
         d3dCommandList->SetGraphicsRootDescriptorTable(1, d3dTexture->textureGPUHandle);
     }
 }
@@ -1402,7 +1466,6 @@ void xxSetFragmentSamplersD3D12(uint64_t commandBuffer, int count, const uint64_
     for (int i = 0; i < count; ++i)
     {
         D3D12_GPU_DESCRIPTOR_HANDLE d3dHandle = { samplers[i] };
-        d3dCommandList->SetDescriptorHeaps(1, &g_samplerHeap);
         d3dCommandList->SetGraphicsRootDescriptorTable(2, d3dHandle);
     }
 }

@@ -50,7 +50,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     g_instance = xxCreateInstanceD3D11();
     g_device = xxCreateDevice(g_instance);
     g_swapchain = xxCreateSwapchain(g_device, hWnd, 0, 0);
-    g_renderPass = xxCreateRenderPass(g_device, 0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0);
+    g_renderPass = xxCreateRenderPass(g_device, 0.45f, 0.55f, 0.60f, 1.0f, 1.0f, 0);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -243,7 +243,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     g_instance = createInstance();
                     g_device = xxCreateDevice(g_instance);
                     g_swapchain = xxCreateSwapchain(g_device, hWnd, 0, 0);
-                    g_renderPass = xxCreateRenderPass(g_device, 0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0);
+                    g_renderPass = xxCreateRenderPass(g_device, 0.45f, 0.55f, 0.60f, 1.0f, 1.0f, 0);
                     ImGui_ImplWin32_Init(hWnd);
                     ImGui_ImplXX_Init(g_instance, 0, g_device);
                     ImGui::EndMainMenuBar();
