@@ -136,6 +136,13 @@ const char* xxGetDeviceStringD3D8(uint64_t device)
     return "Direct3D 8.0 Fixed Function";
 }
 //==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t xxGetFramebufferD3D8(uint64_t device, uint64_t swapchain)
+{
+    return 0;
+}
+//==============================================================================
 //  Swapchain
 //==============================================================================
 struct D3DSWAPCHAIN8
@@ -286,7 +293,7 @@ void xxDestroyRenderPassD3D8(uint64_t renderPass)
 
 }
 //------------------------------------------------------------------------------
-bool xxBeginRenderPassD3D8(uint64_t commandBuffer, uint64_t renderPass)
+bool xxBeginRenderPassD3D8(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
     if (d3dDevice == nullptr)
@@ -298,7 +305,7 @@ bool xxBeginRenderPassD3D8(uint64_t commandBuffer, uint64_t renderPass)
     return hResult == S_OK;
 }
 //------------------------------------------------------------------------------
-void xxEndRenderPassD3D8(uint64_t commandBuffer, uint64_t renderPass)
+void xxEndRenderPassD3D8(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
 {
 
 }
@@ -786,9 +793,9 @@ void xxDestroyRasterizerStateD3D8(uint64_t rasterizerState)
 
 }
 //------------------------------------------------------------------------------
-void xxDestroyPipelineD3D8(uint64_t pipelineState)
+void xxDestroyPipelineD3D8(uint64_t pipeline)
 {
-    D3DPIPELINE8* d3dPipeline = new D3DPIPELINE8;
+    D3DPIPELINE8* d3dPipeline = reinterpret_cast<D3DPIPELINE8*>(pipeline);
     if (d3dPipeline == nullptr)
         return;
 

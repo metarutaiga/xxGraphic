@@ -3,9 +3,10 @@
 #include "xxGraphicInternal.h"
 
 #include <d3d11.h>
+#define NUM_BACK_BUFFERS 3
 
-static HMODULE                  g_d3dLibrary = nullptr;
-static IDXGIFactory*            g_dxgiFactory = nullptr;
+static HMODULE          g_d3dLibrary = nullptr;
+static IDXGIFactory*    g_dxgiFactory = nullptr;
 
 //==============================================================================
 //  Instance
@@ -89,6 +90,13 @@ const char* xxGetDeviceStringD3D11(uint64_t device)
     return "Direct3D 11.0";
 }
 //==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t xxGetFramebufferD3D11(uint64_t device, uint64_t swapchain)
+{
+    return 0;
+}
+//==============================================================================
 //  Swapchain
 //==============================================================================
 struct D3D11SWAPCHAIN
@@ -150,17 +158,23 @@ uint64_t xxCreateSwapchainD3D11(uint64_t device, void* view, unsigned int width,
     desc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
     desc.SampleDesc.Count = 1;
     desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    desc.BufferCount = 1;
+    desc.BufferCount = NUM_BACK_BUFFERS;
     desc.OutputWindow = hWnd;
     desc.Windowed = TRUE;
-    desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+    desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
     IDXGISwapChain* dxgiSwapchain = nullptr;
     HRESULT hResult = g_dxgiFactory->CreateSwapChain(d3dDevice, &desc, &dxgiSwapchain);
     if (hResult != S_OK)
     {
-        delete d3dSwapchain;
-        return 0;
+        desc.BufferCount = 1;
+        desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+        HRESULT hResult = g_dxgiFactory->CreateSwapChain(d3dDevice, &desc, &dxgiSwapchain);
+        if (hResult != S_OK)
+        {
+            delete d3dSwapchain;
+            return 0;
+        }
     }
 
     ID3D11RenderTargetView* renderTargetView = nullptr;
@@ -294,10 +308,11 @@ uint64_t xxCreateRenderPassD3D11(uint64_t device, float r, float g, float b, flo
 void xxDestroyRenderPassD3D11(uint64_t renderPass)
 {
     D3D11RENDERPASS* d3dRenderPass = reinterpret_cast<D3D11RENDERPASS*>(renderPass);
+
     delete d3dRenderPass;
 }
 //------------------------------------------------------------------------------
-bool xxBeginRenderPassD3D11(uint64_t commandBuffer, uint64_t renderPass)
+bool xxBeginRenderPassD3D11(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
 {
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandBuffer);
     if (d3dDeviceContext == nullptr)
@@ -319,7 +334,7 @@ bool xxBeginRenderPassD3D11(uint64_t commandBuffer, uint64_t renderPass)
     return true;
 }
 //------------------------------------------------------------------------------
-void xxEndRenderPassD3D11(uint64_t commandBuffer, uint64_t renderPass)
+void xxEndRenderPassD3D11(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
 {
 
 }

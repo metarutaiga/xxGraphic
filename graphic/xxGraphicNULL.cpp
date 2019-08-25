@@ -42,6 +42,13 @@ const char* xxGetDeviceStringNULL(uint64_t device)
     return "NULL";
 }
 //==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t xxGetFramebufferNULL(uint64_t device, uint64_t swapchain)
+{
+    return 0;
+}
+//==============================================================================
 //  Swapchain
 //==============================================================================
 uint64_t xxCreateSwapchainNULL(uint64_t device, void* view, unsigned int width, unsigned int height)
@@ -92,12 +99,12 @@ void xxDestroyRenderPassNULL(uint64_t renderPass)
 
 }
 //------------------------------------------------------------------------------
-bool xxBeginRenderPassNULL(uint64_t commandBuffer, uint64_t renderPass)
+bool xxBeginRenderPassNULL(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
 {
     return true;
 }
 //------------------------------------------------------------------------------
-void xxEndRenderPassNULL(uint64_t commandBuffer, uint64_t renderPass)
+void xxEndRenderPassNULL(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
 {
 
 }
@@ -180,6 +187,23 @@ void xxDestroyVertexAttributeNULL(uint64_t vertexAttribute)
 
 }
 //==============================================================================
+//  Shader
+//==============================================================================
+uint64_t xxCreateVertexShaderNULL(uint64_t device, const char* shader, uint64_t vertexAttribute)
+{
+    return 0;
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateFragmentShaderNULL(uint64_t device, const char* shader)
+{
+    return 0;
+}
+//------------------------------------------------------------------------------
+void xxDestroyShaderNULL(uint64_t device, uint64_t shader)
+{
+
+}
+//==============================================================================
 //  Pipeline
 //==============================================================================
 uint64_t xxCreateBlendStateNULL(uint64_t device, bool blending)
@@ -217,24 +241,7 @@ void xxDestroyRasterizerStateNULL(uint64_t rasterizerState)
 
 }
 //------------------------------------------------------------------------------
-void xxDestroyPipelineNULL(uint64_t pipelineState)
-{
-
-}
-//==============================================================================
-//  Shader
-//==============================================================================
-uint64_t xxCreateVertexShaderNULL(uint64_t device, const char* shader, uint64_t vertexAttribute)
-{
-    return 0;
-}
-//------------------------------------------------------------------------------
-uint64_t xxCreateFragmentShaderNULL(uint64_t device, const char* shader)
-{
-    return 0;
-}
-//------------------------------------------------------------------------------
-void xxDestroyShaderNULL(uint64_t device, uint64_t shader)
+void xxDestroyPipelineNULL(uint64_t pipeline)
 {
 
 }

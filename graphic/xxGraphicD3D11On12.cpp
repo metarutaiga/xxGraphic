@@ -5,6 +5,7 @@
 #include <d3d12.h>
 #include <d3d11on12.h>
 #include <dxgi1_4.h>
+#define NUM_BACK_BUFFERS 3
 
 static HMODULE              g_d3d12Library = nullptr;
 static HMODULE              g_d3d11Library = nullptr;
@@ -15,6 +16,19 @@ static HANDLE               g_d3d12FenceEvent = nullptr;
 static UINT64               g_d3d12FenceValue = 0;
 static UINT64               g_d3d12FenceValues[4] = {};
 
+//==============================================================================
+//  Fence
+//==============================================================================
+static void signalFence(bool wait)
+{
+    g_d3d12CommandQueue->Signal(g_d3d12Fence, g_d3d12FenceValue);
+    if (wait)
+    {
+        g_d3d12Fence->SetEventOnCompletion(g_d3d12FenceValue, g_d3d12FenceEvent);
+        WaitForSingleObjectEx(g_d3d12FenceEvent, 1000, FALSE);
+    }
+    g_d3d12FenceValue++;
+}
 //==============================================================================
 //  Instance
 //==============================================================================
@@ -45,9 +59,8 @@ void xxDestroyInstanceD3D11On12(uint64_t instance)
 {
     if (g_d3d12Fence)
     {
-        g_d3d12CommandQueue->Signal(g_d3d12Fence, g_d3d12FenceValue);
-        g_d3d12Fence->SetEventOnCompletion(g_d3d12FenceValue, g_d3d12FenceEvent);
-        WaitForSingleObjectEx(g_d3d12FenceEvent, 1000, FALSE);
+        for (int i = 0; i < NUM_BACK_BUFFERS; ++i)
+            signalFence(true);
 
         g_d3d12Fence->Release();
         g_d3d12Fence = nullptr;
@@ -143,6 +156,9 @@ uint64_t xxCreateDeviceD3D11On12(uint64_t instance)
     if (hResult != S_OK)
         return 0;
 
+    for (int i = 0; i < NUM_BACK_BUFFERS; ++i)
+        signalFence(true);
+
     return reinterpret_cast<uint64_t>(d3dDevice);
 }
 //------------------------------------------------------------------------------
@@ -170,8 +186,7 @@ void xxPresentSwapchainD3D11On12(uint64_t swapchain, void* view)
 
     int bufferIndex = d3dSwapchain->dxgiSwapchain->GetCurrentBackBufferIndex();
     g_d3d12FenceValues[bufferIndex] = g_d3d12FenceValue;
-    g_d3d12CommandQueue->Signal(g_d3d12Fence, g_d3d12FenceValue);
-    g_d3d12FenceValue++;
+    signalFence(false);
 }
 //==============================================================================
 //  Command Buffer

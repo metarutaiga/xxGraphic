@@ -14,6 +14,10 @@ void        (*xxResetDevice)(uint64_t device);
 bool        (*xxTestDevice)(uint64_t device);
 const char* (*xxGetDeviceString)(uint64_t device);
 //==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t    (*xxGetFramebuffer)(uint64_t device, uint64_t swapchain);
+//==============================================================================
 //  Swapchain
 //==============================================================================
 uint64_t    (*xxCreateSwapchain)(uint64_t device, void* view, unsigned int width, unsigned int height);
@@ -31,8 +35,8 @@ void        (*xxSubmitCommandBuffer)(uint64_t commandBuffer);
 //==============================================================================
 uint64_t    (*xxCreateRenderPass)(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil);
 void        (*xxDestroyRenderPass)(uint64_t renderPass);
-bool        (*xxBeginRenderPass)(uint64_t commandBuffer, uint64_t renderPass);
-void        (*xxEndRenderPass)(uint64_t commandBuffer, uint64_t renderPass);
+bool        (*xxBeginRenderPass)(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
+void        (*xxEndRenderPass)(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
 //==============================================================================
 //  Buffer
 //==============================================================================

@@ -16,6 +16,10 @@ xxAPI void          (*xxResetDevice)(uint64_t device);
 xxAPI bool          (*xxTestDevice)(uint64_t device);
 xxAPI const char*   (*xxGetDeviceString)(uint64_t device);
 //==============================================================================
+//  Framebuffer
+//==============================================================================
+xxAPI uint64_t      (*xxGetFramebuffer)(uint64_t device, uint64_t swapchain);
+//==============================================================================
 //  Swapchain
 //==============================================================================
 xxAPI uint64_t      (*xxCreateSwapchain)(uint64_t device, void* view, unsigned int width, unsigned int height);
@@ -33,8 +37,8 @@ xxAPI void          (*xxSubmitCommandBuffer)(uint64_t commandBuffer);
 //==============================================================================
 xxAPI uint64_t      (*xxCreateRenderPass)(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil);
 xxAPI void          (*xxDestroyRenderPass)(uint64_t renderPass);
-xxAPI bool          (*xxBeginRenderPass)(uint64_t commandBuffer, uint64_t renderPass);
-xxAPI void          (*xxEndRenderPass)(uint64_t commandBuffer, uint64_t renderPass);
+xxAPI bool          (*xxBeginRenderPass)(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
+xxAPI void          (*xxEndRenderPass)(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
 //==============================================================================
 //  Buffer
 //==============================================================================

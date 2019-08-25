@@ -378,12 +378,13 @@ static void ImGui_ImplXX_RenderWindow(ImGuiViewport* viewport, void*)
     ImGuiViewportDataXX* data = (ImGuiViewportDataXX*)viewport->RendererUserData;
 
     uint64_t commandBuffer = xxGetCommandBuffer(g_device, data->Swapchain);
+    uint64_t framebuffer = xxGetFramebuffer(g_device, data->Swapchain);
     xxBeginCommandBuffer(commandBuffer);
-    xxBeginRenderPass(commandBuffer, data->RenderPass);
+    xxBeginRenderPass(commandBuffer, framebuffer, data->RenderPass);
 
     ImGui_ImplXX_RenderDrawData(viewport->DrawData, commandBuffer);
 
-    xxEndRenderPass(commandBuffer, data->RenderPass);
+    xxEndRenderPass(commandBuffer, framebuffer, data->RenderPass);
     xxEndCommandBuffer(commandBuffer);
     xxSubmitCommandBuffer(commandBuffer);
 }

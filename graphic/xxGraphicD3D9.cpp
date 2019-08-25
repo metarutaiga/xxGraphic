@@ -147,12 +147,20 @@ const char* xxGetDeviceStringD3D9(uint64_t device)
     return "Direct3D 9.0 Fixed Function";
 }
 //==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t xxGetFramebufferD3D9(uint64_t device, uint64_t swapchain)
+{
+    return 0;
+}
+//==============================================================================
 //  Swapchain
 //==============================================================================
 struct D3DSWAPCHAIN9
 {
     LPDIRECT3DSWAPCHAIN9    swapchain;
     LPDIRECT3DSURFACE9      depthStencil;
+    bool                    flipEx;
 };
 //------------------------------------------------------------------------------
 uint64_t xxCreateSwapchainD3D9(uint64_t device, void* view, unsigned int width, unsigned int height)
@@ -179,7 +187,8 @@ uint64_t xxCreateSwapchainD3D9(uint64_t device, void* view, unsigned int width, 
     d3dPresentParameters.BackBufferWidth = width;
     d3dPresentParameters.BackBufferHeight = height;
     d3dPresentParameters.BackBufferFormat = D3DFMT_UNKNOWN;
-    d3dPresentParameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
+    d3dPresentParameters.BackBufferCount = 3;
+    d3dPresentParameters.SwapEffect = D3DSWAPEFFECT_FLIPEX;
     d3dPresentParameters.hDeviceWindow = hWnd;
     d3dPresentParameters.Windowed = TRUE;
     d3dPresentParameters.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
@@ -188,8 +197,14 @@ uint64_t xxCreateSwapchainD3D9(uint64_t device, void* view, unsigned int width, 
     HRESULT hResult = d3dDevice->CreateAdditionalSwapChain(&d3dPresentParameters, &d3dSwapchain);
     if (hResult != S_OK)
     {
-        delete swapchain;
-        return 0;
+        d3dPresentParameters.BackBufferCount = 0;
+        d3dPresentParameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
+        HRESULT hResult = d3dDevice->CreateAdditionalSwapChain(&d3dPresentParameters, &d3dSwapchain);
+        if (hResult != S_OK)
+        {
+            delete swapchain;
+            return 0;
+        }
     }
 
     LPDIRECT3DSURFACE9 d3dDepthStencil = nullptr;
@@ -197,6 +212,7 @@ uint64_t xxCreateSwapchainD3D9(uint64_t device, void* view, unsigned int width, 
 
     swapchain->swapchain = d3dSwapchain;
     swapchain->depthStencil = d3dDepthStencil;
+    swapchain->flipEx = (d3dPresentParameters.SwapEffect == D3DSWAPEFFECT_FLIPEX);
 
     return reinterpret_cast<uint64_t>(swapchain);
 }
@@ -218,7 +234,7 @@ void xxPresentSwapchainD3D9(uint64_t swapchain, void* view)
     if (d3dSwapchain == nullptr)
         return;
 
-    d3dSwapchain->swapchain->Present(nullptr, nullptr, (HWND)view, nullptr, 0);
+    d3dSwapchain->swapchain->Present(nullptr, nullptr, d3dSwapchain->flipEx ? nullptr : (HWND)view, nullptr, 0);
 }
 //==============================================================================
 //  Command Buffer
@@ -299,7 +315,7 @@ void xxDestroyRenderPassD3D9(uint64_t renderPass)
 
 }
 //------------------------------------------------------------------------------
-bool xxBeginRenderPassD3D9(uint64_t commandBuffer, uint64_t renderPass)
+bool xxBeginRenderPassD3D9(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
     if (d3dDevice == nullptr)
@@ -311,7 +327,7 @@ bool xxBeginRenderPassD3D9(uint64_t commandBuffer, uint64_t renderPass)
     return hResult == S_OK;
 }
 //------------------------------------------------------------------------------
-void xxEndRenderPassD3D9(uint64_t commandBuffer, uint64_t renderPass)
+void xxEndRenderPassD3D9(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
 {
 
 }
@@ -803,9 +819,9 @@ void xxDestroyRasterizerStateD3D9(uint64_t rasterizerState)
 
 }
 //------------------------------------------------------------------------------
-void xxDestroyPipelineD3D9(uint64_t pipelineState)
+void xxDestroyPipelineD3D9(uint64_t pipeline)
 {
-    D3DPIPELINE9* d3dPipeline = new D3DPIPELINE9;
+    D3DPIPELINE9* d3dPipeline = reinterpret_cast<D3DPIPELINE9*>(pipeline);
     if (d3dPipeline == nullptr)
         return;
 

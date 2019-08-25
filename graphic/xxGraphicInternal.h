@@ -10,6 +10,8 @@
     xxTestDevice = xxTestDevice ## API; \
     xxGetDeviceString = xxGetDeviceString ## API; \
 \
+    xxGetFramebuffer = xxGetFramebuffer ## API; \
+\
     xxCreateSwapchain = xxCreateSwapchain ## API; \
     xxDestroySwapchain = xxDestroySwapchain ## API; \
     xxPresentSwapchain = xxPresentSwapchain ## API; \
@@ -79,6 +81,8 @@
     xxResetDevice = nullptr; \
     xxTestDevice = nullptr; \
     xxGetDeviceString = nullptr; \
+\
+    xxGetFramebuffer = nullptr; \
 \
     xxCreateSwapchain = nullptr; \
     xxDestroySwapchain = nullptr; \

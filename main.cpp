@@ -20,6 +20,7 @@
 #include "graphic/xxGraphicD3D11.h"
 #include "graphic/xxGraphicD3D11_1.h"
 #include "graphic/xxGraphicD3D11On12.h"
+#include "graphic/xxGraphicD3D12.h"
 #include "graphic/xxGraphicNULL.h"
 
 #define NOMINMAX
@@ -140,9 +141,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
-    MSG msg;
-    ZeroMemory(&msg, sizeof(msg));
-    while (msg.message != WM_QUIT)
+    MSG msg = {};
+    bool recreateWindow = false;
+    while (msg.message != WM_QUIT || recreateWindow == true)
     {
         // Poll and handle messages (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
@@ -153,6 +154,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
         {
             ::TranslateMessage(&msg);
             ::DispatchMessageW(&msg);
+            continue;
+        }
+
+        if (recreateWindow == true)
+        {
+            recreateWindow = false;
             continue;
         }
 
@@ -169,99 +176,70 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                 uint64_t(*createInstance)() = nullptr;
 
                 const char* deviceStringCurrent = xxGetDeviceString(g_device);
-                const char* deviceStringTarget;
+                const char* deviceStringTarget = "";
                 bool selected = false;
 
-                deviceStringTarget = xxGetDeviceStringD3D8(g_device);
-                selected = (deviceStringCurrent == deviceStringTarget);
-                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
-                    createInstance = xxCreateInstanceD3D8;
+                switch (0) case 0:
+                {
+#define GRAPHIC(api) \
+                    deviceStringTarget = xxGetDeviceString ## api(g_device); \
+                    selected = (deviceStringCurrent == deviceStringTarget); \
+                    if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected)) \
+                    { \
+                        createInstance = xxCreateInstance ## api; \
+                        break; \
+                    }
 
-                deviceStringTarget = xxGetDeviceStringD3D8PS(g_device);
-                selected = (deviceStringCurrent == deviceStringTarget);
-                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
-                    createInstance = xxCreateInstanceD3D8PS;
-
-                deviceStringTarget = xxGetDeviceStringD3D9(g_device);
-                selected = (deviceStringCurrent == deviceStringTarget);
-                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
-                    createInstance = xxCreateInstanceD3D9;
-
-                deviceStringTarget = xxGetDeviceStringD3D9PS(g_device);
-                selected = (deviceStringCurrent == deviceStringTarget);
-                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
-                    createInstance = xxCreateInstanceD3D9PS;
-
-                deviceStringTarget = xxGetDeviceStringD3D9Ex(g_device);
-                selected = (deviceStringCurrent == deviceStringTarget);
-                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
-                    createInstance = xxCreateInstanceD3D9Ex;
-
-                deviceStringTarget = xxGetDeviceStringD3D9ExPS(g_device);
-                selected = (deviceStringCurrent == deviceStringTarget);
-                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
-                    createInstance = xxCreateInstanceD3D9ExPS;
-
-                deviceStringTarget = xxGetDeviceStringD3D9On12(g_device);
-                selected = (deviceStringCurrent == deviceStringTarget);
-                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
-                    createInstance = xxCreateInstanceD3D9On12;
-
-                deviceStringTarget = xxGetDeviceStringD3D9On12PS(g_device);
-                selected = (deviceStringCurrent == deviceStringTarget);
-                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
-                    createInstance = xxCreateInstanceD3D9On12PS;
-
-                deviceStringTarget = xxGetDeviceStringD3D9On12Ex(g_device);
-                selected = (deviceStringCurrent == deviceStringTarget);
-                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
-                    createInstance = xxCreateInstanceD3D9On12Ex;
-
-                deviceStringTarget = xxGetDeviceStringD3D9On12ExPS(g_device);
-                selected = (deviceStringCurrent == deviceStringTarget);
-                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
-                    createInstance = xxCreateInstanceD3D9On12ExPS;
-
-                deviceStringTarget = xxGetDeviceStringD3D10(g_device);
-                selected = (deviceStringCurrent == deviceStringTarget);
-                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
-                    createInstance = xxCreateInstanceD3D10;
-
-                deviceStringTarget = xxGetDeviceStringD3D10_1(g_device);
-                selected = (deviceStringCurrent == deviceStringTarget);
-                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
-                    createInstance = xxCreateInstanceD3D10_1;
-
-                deviceStringTarget = xxGetDeviceStringD3D11(g_device);
-                selected = (deviceStringCurrent == deviceStringTarget);
-                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
-                    createInstance = xxCreateInstanceD3D11;
-
-                deviceStringTarget = xxGetDeviceStringD3D11_1(g_device);
-                selected = (deviceStringCurrent == deviceStringTarget);
-                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
-                    createInstance = xxCreateInstanceD3D11_1;
-
-                deviceStringTarget = xxGetDeviceStringD3D11On12(g_device);
-                selected = (deviceStringCurrent == deviceStringTarget);
-                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
-                    createInstance = xxCreateInstanceD3D11On12;
-
-                deviceStringTarget = xxGetDeviceStringNULL(g_device);
-                selected = (deviceStringCurrent == deviceStringTarget);
-                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected))
-                    createInstance = xxCreateInstanceNULL;
+                    GRAPHIC(D3D8);
+                    GRAPHIC(D3D8PS);
+                    GRAPHIC(D3D9);
+                    GRAPHIC(D3D9PS);
+                    GRAPHIC(D3D9Ex);
+                    GRAPHIC(D3D9ExPS);
+                    GRAPHIC(D3D9On12);
+                    GRAPHIC(D3D9On12PS);
+                    GRAPHIC(D3D9On12Ex);
+                    GRAPHIC(D3D9On12ExPS);
+                    GRAPHIC(D3D10);
+                    GRAPHIC(D3D10_1);
+                    GRAPHIC(D3D11);
+                    GRAPHIC(D3D11_1);
+                    GRAPHIC(D3D11On12);
+                    GRAPHIC(D3D12);
+                    GRAPHIC(NULL);
+#undef GRAPHIC
+                }
 
                 ImGui::EndMenu();
 
                 if (createInstance != nullptr)
                 {
+                    bool flipCurrent =  strstr(deviceStringCurrent, "Ex") || \
+                                        strstr(deviceStringCurrent, "10") || \
+                                        strstr(deviceStringCurrent, "11") || \
+                                        strstr(deviceStringCurrent, "12.");
+                    bool flipTarget =   strstr(deviceStringTarget, "Ex") || \
+                                        strstr(deviceStringTarget, "10") || \
+                                        strstr(deviceStringTarget, "11") || \
+                                        strstr(deviceStringTarget, "12.");
+                    recreateWindow = (flipCurrent && flipTarget == false);
                     ImGui_ImplXX_Shutdown();
                     ImGui_ImplWin32_Shutdown();
                     xxDestroyRenderPass(g_renderPass);
                     xxDestroySwapchain(g_swapchain);
                     xxDestroyDevice(g_device);
                     xxDestroyInstance(g_instance);
+                    g_instance = 0;
+                    g_device = 0;
+                    g_swapchain = 0;
+                    g_renderPass = 0;
+                    if (recreateWindow)
+                    {
+                        ::DestroyWindow(hWnd);
+                        hWnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui XX Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280 * scale, 800 * scale, NULL, NULL, wc.hInstance, NULL);
+                        ::ShowWindow(hWnd, SW_SHOWDEFAULT);
+                        ::UpdateWindow(hWnd);
+                    }
                     g_instance = createInstance();
                     g_device = xxCreateDevice(g_instance);
                     g_swapchain = xxCreateSwapchain(g_device, hWnd, 0, 0);
@@ -318,12 +296,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
         ImGui::Render();
 
         uint64_t commandBuffer = xxGetCommandBuffer(g_device, g_swapchain);
+        uint64_t framebuffer = xxGetFramebuffer(g_device, g_swapchain);
         xxBeginCommandBuffer(commandBuffer);
-        xxBeginRenderPass(commandBuffer, g_renderPass);
+        xxBeginRenderPass(commandBuffer, framebuffer, g_renderPass);
 
         ImGui_ImplXX_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
 
-        xxEndRenderPass(commandBuffer, g_renderPass);
+        xxEndRenderPass(commandBuffer, framebuffer, g_renderPass);
         xxEndCommandBuffer(commandBuffer);
         xxSubmitCommandBuffer(commandBuffer);
 
@@ -375,7 +354,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     switch (msg)
     {
     case WM_SIZE:
-        if (wParam != SIZE_MINIMIZED)
+        if (wParam != SIZE_MINIMIZED && g_swapchain)
         {
             xxDestroySwapchain(g_swapchain);
             g_swapchain = xxCreateSwapchain(g_device, hWnd, LOWORD(lParam), HIWORD(lParam));

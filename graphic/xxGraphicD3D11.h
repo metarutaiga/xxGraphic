@@ -16,6 +16,10 @@ xxAPI void          xxResetDeviceD3D11(uint64_t device);
 xxAPI bool          xxTestDeviceD3D11(uint64_t device);
 xxAPI const char*   xxGetDeviceStringD3D11(uint64_t device);
 //==============================================================================
+//  Framebuffer
+//==============================================================================
+xxAPI uint64_t      xxGetFramebufferD3D11(uint64_t device, uint64_t swapchain);
+//==============================================================================
 //  Swapchain
 //==============================================================================
 xxAPI uint64_t      xxCreateSwapchainD3D11(uint64_t device, void* view, unsigned int width, unsigned int height);
@@ -33,8 +37,8 @@ xxAPI void          xxSubmitCommandBufferD3D11(uint64_t commandBuffer);
 //==============================================================================
 xxAPI uint64_t      xxCreateRenderPassD3D11(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil);
 xxAPI void          xxDestroyRenderPassD3D11(uint64_t renderPass);
-xxAPI bool          xxBeginRenderPassD3D11(uint64_t commandBuffer, uint64_t renderPass);
-xxAPI void          xxEndRenderPassD3D11(uint64_t commandBuffer, uint64_t renderPass);
+xxAPI bool          xxBeginRenderPassD3D11(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
+xxAPI void          xxEndRenderPassD3D11(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
 //==============================================================================
 //  Buffer
 //==============================================================================
@@ -77,7 +81,7 @@ xxAPI uint64_t      xxCreatePipelineD3D11(uint64_t device, uint64_t blendState, 
 xxAPI void          xxDestroyBlendStateD3D11(uint64_t blendState);
 xxAPI void          xxDestroyDepthStencilStateD3D11(uint64_t depthStencilState);
 xxAPI void          xxDestroyRasterizerStateD3D11(uint64_t rasterizerState);
-xxAPI void          xxDestroyPipelineD3D11(uint64_t pipelineState);
+xxAPI void          xxDestroyPipelineD3D11(uint64_t pipeline);
 //==============================================================================
 //  Command
 //==============================================================================
