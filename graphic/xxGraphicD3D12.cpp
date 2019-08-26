@@ -307,8 +307,7 @@ uint64_t xxCreateDeviceD3D12(uint64_t instance)
         }
     }
 
-    for (int i = 0; i < NUM_BACK_BUFFERS; ++i)
-        signalFence(true);
+    signalFence(true);
 
     return reinterpret_cast<uint64_t>(d3dDevice);
 }
@@ -352,6 +351,12 @@ void xxDestroyDeviceD3D12(uint64_t device)
     {
         g_commandQueue->Release();
         g_commandQueue = nullptr;
+    }
+
+    if (g_dxgiFactory)
+    {
+        g_dxgiFactory->Release();
+        g_dxgiFactory = nullptr;
     }
 
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
@@ -543,7 +548,8 @@ void xxDestroySwapchainD3D12(uint64_t swapchain)
     if (d3dSwapchain == nullptr)
         return;
 
-    signalFence(true);
+    for (int i = 0; i < NUM_BACK_BUFFERS; ++i)
+        signalFence(true);
 
     if (d3dSwapchain->dxgiSwapchain)
         d3dSwapchain->dxgiSwapchain->Release();
@@ -860,7 +866,8 @@ void xxDestroyBufferD3D12(uint64_t buffer)
     if (d3dResource == nullptr)
         return;
 
-    signalFence(true);
+    for (int i = 0; i < NUM_BACK_BUFFERS; ++i)
+        signalFence(true);
 
     if (d3dResource->resource)
     {
@@ -990,6 +997,9 @@ void xxDestroyTextureD3D12(uint64_t texture)
     D3D12TEXTURE* d3dTexture = reinterpret_cast<D3D12TEXTURE*>(texture);
     if (d3dTexture == nullptr)
         return;
+
+    for (int i = 0; i < NUM_BACK_BUFFERS; ++i)
+        signalFence(true);
 
     if (d3dTexture->texture)
         d3dTexture->texture->Release();
