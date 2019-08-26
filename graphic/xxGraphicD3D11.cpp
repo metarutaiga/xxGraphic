@@ -3,6 +3,11 @@
 #include "xxGraphicInternal.h"
 
 #include <d3d11.h>
+interface DECLSPEC_UUID("a04bfb29-08ef-43d6-a49c-a9bdbdcbe686") ID3D11Device1;
+interface DECLSPEC_UUID("9d06dffa-d1e5-4d07-83a8-1bb123f2f841") ID3D11Device2;
+interface DECLSPEC_UUID("a05c8c37-d2c6-4732-b3a0-9ce0b0dc9ae6") ID3D11Device3;
+interface DECLSPEC_UUID("8992ab71-02e6-4b8d-ba48-b056dcda42c4") ID3D11Device4;
+interface DECLSPEC_UUID("8ffde202-a0e7-45df-9e01-e837801b5ea0") ID3D11Device5;
 #define NUM_BACK_BUFFERS 3
 
 static HMODULE          g_d3dLibrary = nullptr;
@@ -56,6 +61,43 @@ uint64_t xxCreateDeviceD3D11(uint64_t instance)
     HRESULT hResult = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, flags, nullptr, 0, D3D11_SDK_VERSION, &d3dDevice, &d3dFeatureLevel, nullptr);
     if (hResult != S_OK)
         return 0;
+
+    IUnknown* unknown = nullptr;
+    xxLocalBreak()
+    {
+        if (d3dDevice->QueryInterface(__uuidof(ID3D11Device5*), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic : Direct3D 11.5 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            break;
+        }
+        if (d3dDevice->QueryInterface(__uuidof(ID3D11Device4*), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic : Direct3D 11.4 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            break;
+        }
+        if (d3dDevice->QueryInterface(__uuidof(ID3D11Device3*), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic : Direct3D 11.3 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            break;
+        }
+        if (d3dDevice->QueryInterface(__uuidof(ID3D11Device2*), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic : Direct3D 11.2 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            break;
+        }
+        if (d3dDevice->QueryInterface(__uuidof(ID3D11Device1*), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic : Direct3D 11.1 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            break;
+        }
+        if (d3dDevice->QueryInterface(__uuidof(ID3D11Device*), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic : Direct3D 11.0 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            break;
+        }
+    }
+    if (unknown)
+        unknown->Release();
 
     return reinterpret_cast<uint64_t>(d3dDevice);
 }

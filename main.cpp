@@ -18,7 +18,6 @@
 #include "graphic/xxGraphicD3D10.h"
 #include "graphic/xxGraphicD3D10_1.h"
 #include "graphic/xxGraphicD3D11.h"
-#include "graphic/xxGraphicD3D11_1.h"
 #include "graphic/xxGraphicD3D11On12.h"
 #include "graphic/xxGraphicD3D12.h"
 #include "graphic/xxGraphicNULL.h"
@@ -180,7 +179,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                 const char* deviceStringTarget = "";
                 bool selected = false;
 
-                switch (0) case 0:
+                xxLocalBreak()
                 {
 #define GRAPHIC(api) \
                     deviceStringTarget = xxGetDeviceString ## api(g_device); \
@@ -206,7 +205,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                     GRAPHIC(D3D10);
                     GRAPHIC(D3D10_1);
                     GRAPHIC(D3D11);
-                    GRAPHIC(D3D11_1);
                     GRAPHIC(D3D11On12);
                     GRAPHIC(D3D12);
                     GRAPHIC(NULL);

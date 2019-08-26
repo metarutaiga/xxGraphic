@@ -88,6 +88,18 @@ uint64_t xxCreateDeviceD3D8(uint64_t instance)
     if (hResult != S_OK)
         return 0;
 
+    IUnknown* unknown = nullptr;
+    xxLocalBreak()
+    {
+        if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice8), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic : Direct3D 8.0 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            break;
+        }
+    }
+    if (unknown)
+        unknown->Release();
+
     return reinterpret_cast<uint64_t>(d3dDevice);
 }
 //------------------------------------------------------------------------------

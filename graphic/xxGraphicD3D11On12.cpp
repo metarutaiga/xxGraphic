@@ -5,6 +5,8 @@
 #include <d3d12.h>
 #include <d3d11on12.h>
 #include <dxgi1_4.h>
+interface DECLSPEC_UUID("bdb64df4-ea2f-4c70-b861-aaab1258bb5d") ID3D11On12Device1;
+interface DECLSPEC_UUID("dc90f331-4740-43fa-866e-67f12cb58223") ID3D11On12Device2;
 #define NUM_BACK_BUFFERS 3
 
 static HMODULE              g_d3d11Library = nullptr;
@@ -156,8 +158,27 @@ uint64_t xxCreateDeviceD3D11On12(uint64_t instance)
     if (hResult != S_OK)
         return 0;
 
-    for (int i = 0; i < NUM_BACK_BUFFERS; ++i)
-        signalFence(true);
+    IUnknown* unknown = nullptr;
+    xxLocalBreak()
+    {
+        if (d3dDevice->QueryInterface(__uuidof(ID3D11On12Device2*), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic : Direct3D 11On12.2 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            break;
+        }
+        if (d3dDevice->QueryInterface(__uuidof(ID3D11On12Device1*), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic : Direct3D 11On12.1 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            break;
+        }
+        if (d3dDevice->QueryInterface(__uuidof(ID3D11On12Device*), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic : Direct3D 11On12.0 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            break;
+        }
+    }
+    if (unknown)
+        unknown->Release();
 
     return reinterpret_cast<uint64_t>(d3dDevice);
 }

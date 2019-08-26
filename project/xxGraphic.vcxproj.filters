@@ -12,7 +12,6 @@
     <ClCompile Include="..\graphic\xxGraphicNULL.cpp" />
     <ClCompile Include="..\graphic\xxSystem.cpp" />
     <ClCompile Include="..\graphic\xxGraphicD3D10_1.cpp" />
-    <ClCompile Include="..\graphic\xxGraphicD3D11_1.cpp" />
     <ClCompile Include="..\graphic\xxGraphicD3D9Ex.cpp" />
     <ClCompile Include="..\graphic\xxGraphicD3D9On12.cpp" />
     <ClCompile Include="..\graphic\xxGraphicD3D11On12.cpp" />
@@ -52,7 +51,6 @@
       <Filter>dxsdk</Filter>
     </ClInclude>
     <ClInclude Include="..\graphic\xxGraphicD3D10_1.h" />
-    <ClInclude Include="..\graphic\xxGraphicD3D11_1.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D9Ex.h" />
     <ClInclude Include="..\graphic\dxsdk\d3d9on12.h">
       <Filter>dxsdk</Filter>

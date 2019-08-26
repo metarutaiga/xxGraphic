@@ -3,6 +3,7 @@
 #include "xxGraphicInternal.h"
 
 #include <d3d10.h>
+interface DECLSPEC_UUID("9b7e4c8f-342c-4106-a19f-4f2704f689f0") ID3D10Device1;
 typedef HRESULT (WINAPI *PFN_D3D10_CREATE_DEVICE)(IDXGIAdapter*, D3D10_DRIVER_TYPE, HMODULE, UINT, UINT, ID3D10Device**);
 #define NUM_BACK_BUFFERS 3
 
@@ -58,6 +59,23 @@ uint64_t xxCreateDeviceD3D10(uint64_t instance)
     HRESULT hResult = D3D10CreateDevice(nullptr, D3D10_DRIVER_TYPE_HARDWARE, nullptr, flags, D3D10_SDK_VERSION, &d3dDevice);
     if (hResult != S_OK)
         return 0;
+
+    IUnknown* unknown = nullptr;
+    xxLocalBreak()
+    {
+        if (d3dDevice->QueryInterface(__uuidof(ID3D10Device1*), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic : Direct3D 10.1 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            break;
+        }
+        if (d3dDevice->QueryInterface(__uuidof(ID3D10Device*), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic : Direct3D 10.0 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            break;
+        }
+    }
+    if (unknown)
+        unknown->Release();
 
     g_supportBGRA = false;
 

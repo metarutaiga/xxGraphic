@@ -24,7 +24,6 @@
     <ClCompile Include="..\graphic\xxGraphicD3D10_1.cpp" />
     <ClCompile Include="..\graphic\xxGraphicD3D11.cpp" />
     <ClCompile Include="..\graphic\xxGraphicD3D11On12.cpp" />
-    <ClCompile Include="..\graphic\xxGraphicD3D11_1.cpp" />
     <ClCompile Include="..\graphic\xxGraphicD3D12.cpp" />
     <ClCompile Include="..\graphic\xxGraphicD3D8.cpp" />
     <ClCompile Include="..\graphic\xxGraphicD3D8PS.cpp" />
@@ -50,7 +49,6 @@
     <ClInclude Include="..\graphic\xxGraphicD3D10_1.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D11.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D11On12.h" />
-    <ClInclude Include="..\graphic\xxGraphicD3D11_1.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D12.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D8.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D8PS.h" />

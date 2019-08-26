@@ -6,6 +6,7 @@
 #define D3D_DEBUG_INFO 1
 #endif
 #include "dxsdk/d3d9.h"
+interface DECLSPEC_UUID("e7fda234-b589-4049-940d-8878977531c8") IDirect3DDevice9On12;
 typedef LPDIRECT3D9 (WINAPI *PFN_DIRECT3D_CREATE9)(UINT);
 #define D3DRTYPE_CONSTANTBUFFER 0
 
@@ -97,6 +98,28 @@ uint64_t xxCreateDeviceD3D9(uint64_t instance)
     HRESULT hResult = d3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, nullptr, D3DCREATE_MULTITHREADED | D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dPresentParameters, &d3dDevice);
     if (hResult != S_OK)
         return 0;
+
+    IUnknown* unknown = nullptr;
+    xxLocalBreak()
+    {
+        if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice9On12), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic : Direct3D 9On12 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            break;
+        }
+        if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice9Ex), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic : Direct3D 9Ex (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            break;
+        }
+        if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice9), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic : Direct3D 9.0 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            break;
+        }
+    }
+    if (unknown)
+        unknown->Release();
 
     return reinterpret_cast<uint64_t>(d3dDevice);
 }
