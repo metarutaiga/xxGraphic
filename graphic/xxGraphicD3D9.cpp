@@ -104,17 +104,17 @@ uint64_t xxCreateDeviceD3D9(uint64_t instance)
     {
         if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice9On12), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic : Direct3D 9On12 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("%s : %s %s (%s)", "xxGraphic", "Direct3D", "9On12", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice9Ex), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic : Direct3D 9Ex (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("%s : %s %s (%s)", "xxGraphic", "Direct3D", "9Ex", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice9), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic : Direct3D 9.0 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("%s : %s %s (%s)", "xxGraphic", "Direct3D", "9.0", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
             break;
         }
     }

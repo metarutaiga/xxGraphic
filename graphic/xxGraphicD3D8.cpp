@@ -93,7 +93,7 @@ uint64_t xxCreateDeviceD3D8(uint64_t instance)
     {
         if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice8), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic : Direct3D 8.0 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("%s : %s %s (%s)", "xxGraphic", "Direct3D", "8.0", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
             break;
         }
     }

@@ -67,32 +67,32 @@ uint64_t xxCreateDeviceD3D11(uint64_t instance)
     {
         if (d3dDevice->QueryInterface(__uuidof(ID3D11Device5*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic : Direct3D 11.5 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("%s : %s %s (%s)", "xxGraphic", "Direct3D", "11.5", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D11Device4*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic : Direct3D 11.4 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("%s : %s %s (%s)", "xxGraphic", "Direct3D", "11.4", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D11Device3*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic : Direct3D 11.3 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("%s : %s %s (%s)", "xxGraphic", "Direct3D", "11.3", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D11Device2*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic : Direct3D 11.2 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("%s : %s %s (%s)", "xxGraphic", "Direct3D", "11.2", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D11Device1*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic : Direct3D 11.1 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("%s : %s %s (%s)", "xxGraphic", "Direct3D", "11.1", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D11Device*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic : Direct3D 11.0 (%s)", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("%s : %s %s (%s)", "xxGraphic", "Direct3D", "11.0", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
             break;
         }
     }
