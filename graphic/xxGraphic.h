@@ -45,7 +45,7 @@ xxAPI void          (*xxEndRenderPass)(uint64_t commandBuffer, uint64_t framebuf
 xxAPI uint64_t      (*xxCreateConstantBuffer)(uint64_t device, unsigned int size);
 xxAPI uint64_t      (*xxCreateIndexBuffer)(uint64_t device, unsigned int size);
 xxAPI uint64_t      (*xxCreateVertexBuffer)(uint64_t device, unsigned int size);
-xxAPI void          (*xxDestroyBuffer)(uint64_t buffer);
+xxAPI void          (*xxDestroyBuffer)(uint64_t device, uint64_t buffer);
 xxAPI void*         (*xxMapBuffer)(uint64_t device, uint64_t buffer);
 xxAPI void          (*xxUnmapBuffer)(uint64_t device, uint64_t buffer);
 //==============================================================================

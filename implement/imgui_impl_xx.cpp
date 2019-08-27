@@ -107,13 +107,13 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
 
     // Swap buffer
     bufferIndex++;
-    if (bufferIndex >= 3)
+    if (bufferIndex >= 4)
         bufferIndex = 0;
 
     // Create and grow buffers if needed
     if (vertexBuffer == 0 || vertexBufferSize < draw_data->TotalVtxCount)
     {
-        xxDestroyBuffer(vertexBuffer);
+        xxDestroyBuffer(g_device, vertexBuffer);
         vertexBufferSize = draw_data->TotalVtxCount + 5000;
         vertexBuffer = xxCreateVertexBuffer(g_device, vertexBufferSize * sizeof(ImDrawVert));
         if (vertexBuffer == 0)
@@ -121,7 +121,7 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer)
     }
     if (indexBuffer == 0 || indexBufferSize < draw_data->TotalIdxCount)
     {
-        xxDestroyBuffer(indexBuffer);
+        xxDestroyBuffer(g_device, indexBuffer);
         indexBufferSize = draw_data->TotalIdxCount + 10000;
         indexBuffer = xxCreateIndexBuffer(g_device, indexBufferSize * sizeof(ImDrawIdx));
         if (indexBuffer == 0)
@@ -293,9 +293,9 @@ void ImGui_ImplXX_InvalidateDeviceObjects()
         return;
     for (unsigned int i = 0; i < 4; ++i)
     {
-        xxDestroyBuffer(g_vertexBuffers[i]);
-        xxDestroyBuffer(g_indexBuffers[i]);
-        xxDestroyBuffer(g_constantBuffers[i]);
+        xxDestroyBuffer(g_device, g_vertexBuffers[i]);
+        xxDestroyBuffer(g_device, g_indexBuffers[i]);
+        xxDestroyBuffer(g_device, g_constantBuffers[i]);
         g_vertexBuffers[i] = 0;
         g_indexBuffers[i] = 0;
         g_constantBuffers[i] = 0;

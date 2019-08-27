@@ -104,17 +104,17 @@ uint64_t xxCreateDeviceD3D9(uint64_t instance)
     {
         if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice9On12), (void**)&unknown) == S_OK)
         {
-            xxLog("%s : %s %s (%s)", "xxGraphic", "Direct3D", "9On12", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "9On12", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice9Ex), (void**)&unknown) == S_OK)
         {
-            xxLog("%s : %s %s (%s)", "xxGraphic", "Direct3D", "9Ex", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "9Ex", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice9), (void**)&unknown) == S_OK)
         {
-            xxLog("%s : %s %s (%s)", "xxGraphic", "Direct3D", "9.0", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "9.0", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
             break;
         }
     }
@@ -392,7 +392,7 @@ uint64_t xxCreateVertexBufferD3D9(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(d3dVertexBuffer) | D3DRTYPE_VERTEXBUFFER;
 }
 //------------------------------------------------------------------------------
-void xxDestroyBufferD3D9(uint64_t buffer)
+void xxDestroyBufferD3D9(uint64_t device, uint64_t buffer)
 {
     switch (getResourceType(buffer))
     {
@@ -437,7 +437,7 @@ void* xxMapBufferD3D9(uint64_t device, uint64_t buffer)
             break;
 
         void* ptr = nullptr;
-        HRESULT hResult = d3dVertexBuffer->Lock(0, 0, &ptr, D3DLOCK_DISCARD);
+        HRESULT hResult = d3dVertexBuffer->Lock(0, 0, &ptr, D3DLOCK_NOOVERWRITE);
         if (hResult != S_OK)
             break;
 
@@ -450,7 +450,7 @@ void* xxMapBufferD3D9(uint64_t device, uint64_t buffer)
             break;
 
         void* ptr = nullptr;
-        HRESULT hResult = d3dIndexBuffer->Lock(0, 0, &ptr, D3DLOCK_DISCARD);
+        HRESULT hResult = d3dIndexBuffer->Lock(0, 0, &ptr, D3DLOCK_NOOVERWRITE);
         if (hResult != S_OK)
             break;
 

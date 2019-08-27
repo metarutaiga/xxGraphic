@@ -80,27 +80,30 @@ int xxGetIncrementThreadId()
 //==============================================================================
 //  Logger
 //==============================================================================
-int xxLog(const char* format, ...)
+int xxLog(const char* tag, const char* format, ...)
 {
     va_list first;
     va_list second;
 
     va_start(first, format);
     va_copy(second, first);
-    int length = vsnprintf(nullptr, 0, format, first) + 1;
+    int tagLength = snprintf(nullptr, 0, "[%s]", tag) + 1;
+    int formatLength = vsnprintf(nullptr, 0, format, first) + 1;
     va_end(first);
 
-    char* buffer = xxAlloc(char, length);
+    char* buffer = xxAlloc(char, tagLength + formatLength);
     if (buffer)
     {
-        length = vsnprintf(buffer, length, format, second) + 1;
+        snprintf(buffer, tagLength + formatLength, "[%s]", tag);
+        vsnprintf(buffer + tagLength, formatLength, format, second);
+        buffer[tagLength - 1] = ' ';
         OutputDebugStringA(buffer);
         OutputDebugStringA("\n");
         xxFree(buffer);
     }
     va_end(second);
 
-    return length - 1;
+    return formatLength - 1;
 }
 //==============================================================================
 //  MD5 - omaha

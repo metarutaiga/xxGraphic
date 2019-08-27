@@ -126,7 +126,7 @@ uint64_t xxCreateVertexBufferNULL(uint64_t device, unsigned int size)
     return 0;
 }
 //------------------------------------------------------------------------------
-void xxDestroyBufferNULL(uint64_t buffer)
+void xxDestroyBufferNULL(uint64_t device, uint64_t buffer)
 {
 
 }

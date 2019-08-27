@@ -45,7 +45,7 @@ xxAPI void          xxEndRenderPassD3D12(uint64_t commandBuffer, uint64_t frameb
 xxAPI uint64_t      xxCreateConstantBufferD3D12(uint64_t device, unsigned int size);
 xxAPI uint64_t      xxCreateIndexBufferD3D12(uint64_t device, unsigned int size);
 xxAPI uint64_t      xxCreateVertexBufferD3D12(uint64_t device, unsigned int size);
-xxAPI void          xxDestroyBufferD3D12(uint64_t buffer);
+xxAPI void          xxDestroyBufferD3D12(uint64_t device, uint64_t buffer);
 xxAPI void*         xxMapBufferD3D12(uint64_t device, uint64_t buffer);
 xxAPI void          xxUnmapBufferD3D12(uint64_t device, uint64_t buffer);
 //==============================================================================

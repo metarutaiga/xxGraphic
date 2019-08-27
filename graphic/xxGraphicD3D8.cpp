@@ -93,7 +93,7 @@ uint64_t xxCreateDeviceD3D8(uint64_t instance)
     {
         if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice8), (void**)&unknown) == S_OK)
         {
-            xxLog("%s : %s %s (%s)", "xxGraphic", "Direct3D", "8.0", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "8.0", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
             break;
         }
     }
@@ -359,7 +359,7 @@ uint64_t xxCreateVertexBufferD3D8(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(d3dVertexBuffer) | D3DRTYPE_VERTEXBUFFER;
 }
 //------------------------------------------------------------------------------
-void xxDestroyBufferD3D8(uint64_t buffer)
+void xxDestroyBufferD3D8(uint64_t device, uint64_t buffer)
 {
     switch (getResourceType(buffer))
     {
