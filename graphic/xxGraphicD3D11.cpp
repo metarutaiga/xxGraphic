@@ -9,7 +9,9 @@ interface DECLSPEC_UUID("a05c8c37-d2c6-4732-b3a0-9ce0b0dc9ae6") ID3D11Device3;
 interface DECLSPEC_UUID("8992ab71-02e6-4b8d-ba48-b056dcda42c4") ID3D11Device4;
 interface DECLSPEC_UUID("8ffde202-a0e7-45df-9e01-e837801b5ea0") ID3D11Device5;
 #define NUM_BACK_BUFFERS 3
+#ifndef _DEBUG
 #define PERSISTENT_BUFFER 1
+#endif
 
 static HMODULE          g_d3dLibrary = nullptr;
 static IDXGIFactory*    g_dxgiFactory = nullptr;
@@ -135,19 +137,18 @@ const char* xxGetDeviceStringD3D11(uint64_t device)
 //==============================================================================
 //  Framebuffer
 //==============================================================================
-uint64_t xxGetFramebufferD3D11(uint64_t device, uint64_t swapchain)
+struct D3D11FRAMEBUFFER
 {
-    return 0;
-}
+    ID3D11RenderTargetView* renderTargetView;
+    ID3D11DepthStencilView* depthStencilView;
+};
 //==============================================================================
 //  Swapchain
 //==============================================================================
-struct D3D11SWAPCHAIN
+struct D3D11SWAPCHAIN : public D3D11FRAMEBUFFER
 {
     IDXGISwapChain*         dxgiSwapchain;
-    ID3D11RenderTargetView* renderTargetView;
     ID3D11Texture2D*        depthStencilTexture;
-    ID3D11DepthStencilView* depthStencilView;
     ID3D11DeviceContext*    deviceContext;
 };
 //------------------------------------------------------------------------------
@@ -251,10 +252,10 @@ uint64_t xxCreateSwapchainD3D11(uint64_t device, void* view, unsigned int width,
     ID3D11DeviceContext* d3dDeviceContext = nullptr;
     d3dDevice->GetImmediateContext(&d3dDeviceContext);
 
-    d3dSwapchain->dxgiSwapchain = dxgiSwapchain;
     d3dSwapchain->renderTargetView = renderTargetView;
-    d3dSwapchain->depthStencilTexture = depthStencilTexture;
     d3dSwapchain->depthStencilView = depthStencilView;
+    d3dSwapchain->dxgiSwapchain = dxgiSwapchain;
+    d3dSwapchain->depthStencilTexture = depthStencilTexture;
     d3dSwapchain->deviceContext = d3dDeviceContext;
 
     return reinterpret_cast<uint64_t>(d3dSwapchain);
@@ -266,14 +267,14 @@ void xxDestroySwapchainD3D11(uint64_t swapchain)
     if (d3dSwapchain == nullptr)
         return;
 
-    if (d3dSwapchain->dxgiSwapchain)
-        d3dSwapchain->dxgiSwapchain->Release();
     if (d3dSwapchain->renderTargetView)
         d3dSwapchain->renderTargetView->Release();
-    if (d3dSwapchain->depthStencilTexture)
-        d3dSwapchain->depthStencilTexture->Release();
     if (d3dSwapchain->depthStencilView)
         d3dSwapchain->depthStencilView->Release();
+    if (d3dSwapchain->dxgiSwapchain)
+        d3dSwapchain->dxgiSwapchain->Release();
+    if (d3dSwapchain->depthStencilTexture)
+        d3dSwapchain->depthStencilTexture->Release();
     if (d3dSwapchain->deviceContext)
         d3dSwapchain->deviceContext->Release();
     delete d3dSwapchain;
@@ -287,22 +288,22 @@ void xxPresentSwapchainD3D11(uint64_t swapchain, void* view)
 
     d3dSwapchain->dxgiSwapchain->Present(0, 0);
 }
+//------------------------------------------------------------------------------
+uint64_t xxGetFramebufferD3D11(uint64_t device, uint64_t swapchain)
+{
+    return swapchain;
+}
 //==============================================================================
 //  Command Buffer
 //==============================================================================
 uint64_t xxGetCommandBufferD3D11(uint64_t device, uint64_t swapchain)
 {
-    ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
-    if (d3dDevice == nullptr)
-        return 0;
     D3D11SWAPCHAIN* d3dSwapchain = reinterpret_cast<D3D11SWAPCHAIN*>(swapchain);
     if (d3dSwapchain == nullptr)
         return 0;
     ID3D11DeviceContext* d3dDeviceContext = d3dSwapchain->deviceContext;
     if (d3dDeviceContext == nullptr)
         return 0;
-
-    d3dDeviceContext->OMSetRenderTargets(1, &d3dSwapchain->renderTargetView, d3dSwapchain->depthStencilView);
 
     return reinterpret_cast<uint64_t>(d3dDeviceContext);
 }
@@ -360,19 +361,16 @@ bool xxBeginRenderPassD3D11(uint64_t commandBuffer, uint64_t framebuffer, uint64
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandBuffer);
     if (d3dDeviceContext == nullptr)
         return false;
+    D3D11FRAMEBUFFER* d3dFramebuffer = reinterpret_cast<D3D11FRAMEBUFFER*>(framebuffer);
+    if (d3dFramebuffer == nullptr)
+        return false;
     D3D11RENDERPASS* d3dRenderPass = reinterpret_cast<D3D11RENDERPASS*>(renderPass);
     if (d3dRenderPass == nullptr)
         return false;
 
-    ID3D11RenderTargetView* renderTargetView = nullptr;
-    ID3D11DepthStencilView* depthStencilView = nullptr;
-    d3dDeviceContext->OMGetRenderTargets(1, &renderTargetView, &depthStencilView);
-    d3dDeviceContext->ClearRenderTargetView(renderTargetView, d3dRenderPass->color);
-    d3dDeviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, d3dRenderPass->depth, d3dRenderPass->stencil);
-    if (renderTargetView)
-        renderTargetView->Release();
-    if (depthStencilView)
-        depthStencilView->Release();
+    d3dDeviceContext->OMSetRenderTargets(1, &d3dFramebuffer->renderTargetView, d3dFramebuffer->depthStencilView);
+    d3dDeviceContext->ClearRenderTargetView(d3dFramebuffer->renderTargetView, d3dRenderPass->color);
+    d3dDeviceContext->ClearDepthStencilView(d3dFramebuffer->depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, d3dRenderPass->depth, d3dRenderPass->stencil);
 
     return true;
 }

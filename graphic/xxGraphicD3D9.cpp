@@ -172,17 +172,17 @@ const char* xxGetDeviceStringD3D9(uint64_t device)
 //==============================================================================
 //  Framebuffer
 //==============================================================================
-uint64_t xxGetFramebufferD3D9(uint64_t device, uint64_t swapchain)
+struct D3DFRAMEBUFFER9
 {
-    return 0;
-}
+    LPDIRECT3DSURFACE9      backBuffer;
+    LPDIRECT3DSURFACE9      depthStencil;
+};
 //==============================================================================
 //  Swapchain
 //==============================================================================
-struct D3DSWAPCHAIN9
+struct D3DSWAPCHAIN9 : public D3DFRAMEBUFFER9
 {
     LPDIRECT3DSWAPCHAIN9    swapchain;
-    LPDIRECT3DSURFACE9      depthStencil;
     bool                    flipEx;
 };
 //------------------------------------------------------------------------------
@@ -233,8 +233,9 @@ uint64_t xxCreateSwapchainD3D9(uint64_t device, void* view, unsigned int width, 
     LPDIRECT3DSURFACE9 d3dDepthStencil = nullptr;
     d3dDevice->CreateDepthStencilSurface(width, height, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, FALSE, &d3dDepthStencil, nullptr);
 
-    swapchain->swapchain = d3dSwapchain;
+    swapchain->backBuffer = nullptr;
     swapchain->depthStencil = d3dDepthStencil;
+    swapchain->swapchain = d3dSwapchain;
     swapchain->flipEx = (d3dPresentParameters.SwapEffect == D3DSWAPEFFECT_FLIPEX);
 
     return reinterpret_cast<uint64_t>(swapchain);
@@ -246,9 +247,12 @@ void xxDestroySwapchainD3D9(uint64_t swapchain)
     if (d3dSwapchain == nullptr)
         return;
 
-    d3dSwapchain->swapchain->Release();
+    if (d3dSwapchain->backBuffer)
+        d3dSwapchain->backBuffer->Release();
     if (d3dSwapchain->depthStencil)
         d3dSwapchain->depthStencil->Release();
+    if (d3dSwapchain->swapchain)
+        d3dSwapchain->swapchain->Release();
 }
 //------------------------------------------------------------------------------
 void xxPresentSwapchainD3D9(uint64_t swapchain, void* view)
@@ -259,25 +263,26 @@ void xxPresentSwapchainD3D9(uint64_t swapchain, void* view)
 
     d3dSwapchain->swapchain->Present(nullptr, nullptr, d3dSwapchain->flipEx ? nullptr : (HWND)view, nullptr, 0);
 }
-//==============================================================================
-//  Command Buffer
-//==============================================================================
-uint64_t xxGetCommandBufferD3D9(uint64_t device, uint64_t swapchain)
+//------------------------------------------------------------------------------
+uint64_t xxGetFramebufferD3D9(uint64_t device, uint64_t swapchain)
 {
-    LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
-    if (d3dDevice == nullptr)
-        return 0;
     D3DSWAPCHAIN9* d3dSwapchain = reinterpret_cast<D3DSWAPCHAIN9*>(swapchain);
     if (d3dSwapchain == nullptr)
         return 0;
 
     LPDIRECT3DSURFACE9 surface = nullptr;
     d3dSwapchain->swapchain->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &surface);
-    d3dDevice->SetRenderTarget(0, surface);
-    d3dDevice->SetDepthStencilSurface(d3dSwapchain->depthStencil);
-    if (surface)
-        surface->Release();
+    if (d3dSwapchain->backBuffer)
+        d3dSwapchain->backBuffer->Release();
+    d3dSwapchain->backBuffer = surface;
 
+    return swapchain;
+}
+//==============================================================================
+//  Command Buffer
+//==============================================================================
+uint64_t xxGetCommandBufferD3D9(uint64_t device, uint64_t swapchain)
+{
     return device;
 }
 //------------------------------------------------------------------------------
@@ -343,7 +348,13 @@ bool xxBeginRenderPassD3D9(uint64_t commandBuffer, uint64_t framebuffer, uint64_
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
     if (d3dDevice == nullptr)
         return false;
+    D3DFRAMEBUFFER9* d3dFramebuffer = reinterpret_cast<D3DFRAMEBUFFER9*>(framebuffer);
+    if (d3dFramebuffer == nullptr)
+        return false;
     D3DRENDERPASS9 d3dRenderPass = { renderPass };
+
+    d3dDevice->SetRenderTarget(0, d3dFramebuffer->backBuffer);
+    d3dDevice->SetDepthStencilSurface(d3dFramebuffer->depthStencil);
 
     float depth = d3dRenderPass.depth / (float)UINT16_MAX;
     HRESULT hResult = d3dDevice->Clear(0, nullptr, d3dRenderPass.flags, d3dRenderPass.color, depth, d3dRenderPass.stencil);
