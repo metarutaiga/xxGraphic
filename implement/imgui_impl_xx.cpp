@@ -33,6 +33,7 @@ static uint64_t g_blendState = 0;
 static uint64_t g_depthStencilState = 0;
 static uint64_t g_rasterizerState = 0;
 static uint64_t g_pipeline = 0;
+static bool     g_halfPixel = false;
 
 // Forward Declarations
 static void ImGui_ImplXX_InitPlatformInterface();
@@ -53,8 +54,7 @@ static void ImGui_ImplXX_SetupRenderState(ImDrawData* draw_data, uint64_t comman
         float B = draw_data->DisplayPos.y + draw_data->DisplaySize.y;
 
         // Half-Pixel Offset in Direct3D 8.0 / 9.0
-        const char* deviceString = xxGetDeviceString(g_device);
-        if (strncmp(deviceString, "Direct3D 8", 10) == 0 || strncmp(deviceString, "Direct3D 9", 10) == 0)
+        if (g_halfPixel)
         {
             L += 0.5f;
             R += 0.5f;
@@ -211,6 +211,9 @@ bool ImGui_ImplXX_Init(uint64_t instance, uint64_t physicalDevice, uint64_t devi
     g_instance = instance;
     g_physicalDevice = physicalDevice;
     g_device = device;
+
+    const char* deviceString = xxGetDeviceString(device);
+    g_halfPixel = (strncmp(deviceString, "Direct3D 8", 10) == 0 || strncmp(deviceString, "Direct3D 9", 10) == 0);
 
     // Setup back-end capabilities flags
     ImGuiIO& io = ImGui::GetIO();
