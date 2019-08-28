@@ -264,6 +264,11 @@ void xxPresentSwapchainD3D10(uint64_t swapchain, void* view)
     d3dSwapchain->dxgiSwapchain->Present(0, 0);
 }
 //------------------------------------------------------------------------------
+uint64_t xxGetCommandBufferD3D10(uint64_t device, uint64_t swapchain)
+{
+    return device;
+}
+//------------------------------------------------------------------------------
 uint64_t xxGetFramebufferD3D10(uint64_t device, uint64_t swapchain)
 {
     return swapchain;
@@ -271,11 +276,6 @@ uint64_t xxGetFramebufferD3D10(uint64_t device, uint64_t swapchain)
 //==============================================================================
 //  Command Buffer
 //==============================================================================
-uint64_t xxGetCommandBufferD3D10(uint64_t device, uint64_t swapchain)
-{
-    return device;
-}
-//------------------------------------------------------------------------------
 bool xxBeginCommandBufferD3D10(uint64_t commandBuffer)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);

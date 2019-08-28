@@ -18,17 +18,17 @@ xxAPI const char*   xxGetDeviceStringD3D8(uint64_t device);
 //==============================================================================
 //  Framebuffer
 //==============================================================================
-xxAPI uint64_t      xxGetFramebufferD3D8(uint64_t device, uint64_t swapchain);
 //==============================================================================
 //  Swapchain
 //==============================================================================
 xxAPI uint64_t      xxCreateSwapchainD3D8(uint64_t device, void* view, unsigned int width, unsigned int height);
 xxAPI void          xxDestroySwapchainD3D8(uint64_t swapchain);
 xxAPI void          xxPresentSwapchainD3D8(uint64_t swapchain, void* view);
+xxAPI uint64_t      xxGetCommandBufferD3D8(uint64_t device, uint64_t swapchain);
+xxAPI uint64_t      xxGetFramebufferD3D8(uint64_t device, uint64_t swapchain);
 //==============================================================================
 //  Command Buffer
 //==============================================================================
-xxAPI uint64_t      xxGetCommandBufferD3D8(uint64_t device, uint64_t swapchain);
 xxAPI bool          xxBeginCommandBufferD3D8(uint64_t commandBuffer);
 xxAPI void          xxEndCommandBufferD3D8(uint64_t commandBuffer);
 xxAPI void          xxSubmitCommandBufferD3D8(uint64_t commandBuffer);

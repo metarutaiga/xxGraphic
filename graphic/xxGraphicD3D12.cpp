@@ -640,21 +640,6 @@ void xxPresentSwapchainD3D12(uint64_t swapchain, void* view)
     d3dSwapchain->dxgiSwapchain->Present(0, 0);
 }
 //------------------------------------------------------------------------------
-uint64_t xxGetFramebufferD3D12(uint64_t device, uint64_t swapchain)
-{
-    D3D12SWAPCHAIN* d3dSwapchain = reinterpret_cast<D3D12SWAPCHAIN*>(swapchain);
-    if (d3dSwapchain == nullptr)
-        return 0;
-
-    int bufferIndex = d3dSwapchain->dxgiSwapchain->GetCurrentBackBufferIndex();
-    d3dSwapchain->renderTargetResource = d3dSwapchain->renderTargetResources[bufferIndex];
-    d3dSwapchain->renderTargetHandle = d3dSwapchain->renderTargetHandles[bufferIndex];
-
-    return swapchain;
-}
-//==============================================================================
-//  Command Buffer
-//==============================================================================
 uint64_t xxGetCommandBufferD3D12(uint64_t device, uint64_t swapchain)
 {
     D3D12SWAPCHAIN* d3dSwapchain = reinterpret_cast<D3D12SWAPCHAIN*>(swapchain);
@@ -679,6 +664,21 @@ uint64_t xxGetCommandBufferD3D12(uint64_t device, uint64_t swapchain)
     return reinterpret_cast<uint64_t>(commandList);
 }
 //------------------------------------------------------------------------------
+uint64_t xxGetFramebufferD3D12(uint64_t device, uint64_t swapchain)
+{
+    D3D12SWAPCHAIN* d3dSwapchain = reinterpret_cast<D3D12SWAPCHAIN*>(swapchain);
+    if (d3dSwapchain == nullptr)
+        return 0;
+
+    int bufferIndex = d3dSwapchain->dxgiSwapchain->GetCurrentBackBufferIndex();
+    d3dSwapchain->renderTargetResource = d3dSwapchain->renderTargetResources[bufferIndex];
+    d3dSwapchain->renderTargetHandle = d3dSwapchain->renderTargetHandles[bufferIndex];
+
+    return swapchain;
+}
+//==============================================================================
+//  Command Buffer
+//==============================================================================
 bool xxBeginCommandBufferD3D12(uint64_t commandBuffer)
 {
     ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandBuffer);

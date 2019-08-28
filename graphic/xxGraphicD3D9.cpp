@@ -264,6 +264,11 @@ void xxPresentSwapchainD3D9(uint64_t swapchain, void* view)
     d3dSwapchain->swapchain->Present(nullptr, nullptr, d3dSwapchain->flipEx ? nullptr : (HWND)view, nullptr, 0);
 }
 //------------------------------------------------------------------------------
+uint64_t xxGetCommandBufferD3D9(uint64_t device, uint64_t swapchain)
+{
+    return device;
+}
+//------------------------------------------------------------------------------
 uint64_t xxGetFramebufferD3D9(uint64_t device, uint64_t swapchain)
 {
     D3DSWAPCHAIN9* d3dSwapchain = reinterpret_cast<D3DSWAPCHAIN9*>(swapchain);
@@ -281,11 +286,6 @@ uint64_t xxGetFramebufferD3D9(uint64_t device, uint64_t swapchain)
 //==============================================================================
 //  Command Buffer
 //==============================================================================
-uint64_t xxGetCommandBufferD3D9(uint64_t device, uint64_t swapchain)
-{
-    return device;
-}
-//------------------------------------------------------------------------------
 bool xxBeginCommandBufferD3D9(uint64_t commandBuffer)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);

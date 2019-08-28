@@ -16,17 +16,17 @@ const char* (*xxGetDeviceString)(uint64_t device);
 //==============================================================================
 //  Framebuffer
 //==============================================================================
-uint64_t    (*xxGetFramebuffer)(uint64_t device, uint64_t swapchain);
 //==============================================================================
 //  Swapchain
 //==============================================================================
 uint64_t    (*xxCreateSwapchain)(uint64_t device, void* view, unsigned int width, unsigned int height);
 void        (*xxDestroySwapchain)(uint64_t swapchain);
 void        (*xxPresentSwapchain)(uint64_t swapchain, void* view);
+uint64_t    (*xxGetCommandBuffer)(uint64_t device, uint64_t swapchain);
+uint64_t    (*xxGetFramebuffer)(uint64_t device, uint64_t swapchain);
 //==============================================================================
 //  Command Buffer
 //==============================================================================
-uint64_t    (*xxGetCommandBuffer)(uint64_t device, uint64_t swapchain);
 bool        (*xxBeginCommandBuffer)(uint64_t commandBuffer);
 void        (*xxEndCommandBuffer)(uint64_t commandBuffer);
 void        (*xxSubmitCommandBuffer)(uint64_t commandBuffer);

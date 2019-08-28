@@ -232,6 +232,11 @@ void xxPresentSwapchainD3D8(uint64_t swapchain, void* view)
     d3dSwapchain->swapchain->Present(nullptr, nullptr, (HWND)view, nullptr);
 }
 //------------------------------------------------------------------------------
+uint64_t xxGetCommandBufferD3D8(uint64_t device, uint64_t swapchain)
+{
+    return device;
+}
+//------------------------------------------------------------------------------
 uint64_t xxGetFramebufferD3D8(uint64_t device, uint64_t swapchain)
 {
     D3DSWAPCHAIN8* d3dSwapchain = reinterpret_cast<D3DSWAPCHAIN8*>(swapchain);
@@ -249,11 +254,6 @@ uint64_t xxGetFramebufferD3D8(uint64_t device, uint64_t swapchain)
 //==============================================================================
 //  Command Buffer
 //==============================================================================
-uint64_t xxGetCommandBufferD3D8(uint64_t device, uint64_t swapchain)
-{
-    return device;
-}
-//------------------------------------------------------------------------------
 bool xxBeginCommandBufferD3D8(uint64_t commandBuffer)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);

@@ -289,13 +289,6 @@ void xxPresentSwapchainD3D11(uint64_t swapchain, void* view)
     d3dSwapchain->dxgiSwapchain->Present(0, 0);
 }
 //------------------------------------------------------------------------------
-uint64_t xxGetFramebufferD3D11(uint64_t device, uint64_t swapchain)
-{
-    return swapchain;
-}
-//==============================================================================
-//  Command Buffer
-//==============================================================================
 uint64_t xxGetCommandBufferD3D11(uint64_t device, uint64_t swapchain)
 {
     D3D11SWAPCHAIN* d3dSwapchain = reinterpret_cast<D3D11SWAPCHAIN*>(swapchain);
@@ -308,6 +301,13 @@ uint64_t xxGetCommandBufferD3D11(uint64_t device, uint64_t swapchain)
     return reinterpret_cast<uint64_t>(d3dDeviceContext);
 }
 //------------------------------------------------------------------------------
+uint64_t xxGetFramebufferD3D11(uint64_t device, uint64_t swapchain)
+{
+    return swapchain;
+}
+//==============================================================================
+//  Command Buffer
+//==============================================================================
 bool xxBeginCommandBufferD3D11(uint64_t commandBuffer)
 {
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandBuffer);
