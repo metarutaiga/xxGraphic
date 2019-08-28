@@ -9,6 +9,7 @@
 //  [X] Platform: Multi-viewport support (multiple windows). Enable with 'io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable'.
 
 #include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 #include "imgui_impl_win32.h"
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -819,10 +820,11 @@ static void ImGui_ImplWin32_InitPlatformInterface()
 #endif
 
     // Register main window handle (which is owned by the main application, not by us)
-    ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+    ImGuiViewportP* main_viewport = (ImGuiViewportP*)ImGui::GetMainViewport();
     ImGuiViewportDataWin32* data = IM_NEW(ImGuiViewportDataWin32)();
     data->Hwnd = g_hWnd;
     data->HwndOwned = false;
+    main_viewport->PlatformWindowCreated = true;
     main_viewport->PlatformUserData = data;
     main_viewport->PlatformHandle = (void*)g_hWnd;
 }

@@ -168,13 +168,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
-        // Renderer
+        // Graphic API
+        uint64_t(*createInstance)() = nullptr;
         if (ImGui::BeginMainMenuBar())
         {
             if (ImGui::BeginMenu("Graphic"))
             {
-                uint64_t(*createInstance)() = nullptr;
-
                 const char* deviceStringCurrent = xxGetDeviceString(g_device);
                 const char* deviceStringTarget = "";
                 bool selected = false;
@@ -211,8 +210,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #undef GRAPHIC
                 }
 
-                ImGui::EndMenu();
-
                 if (createInstance != nullptr)
                 {
                     bool flipCurrent =  strstr(deviceStringCurrent, "Ex") || \
@@ -224,33 +221,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
                                         strstr(deviceStringTarget, "11") || \
                                         strstr(deviceStringTarget, "12.");
                     recreateWindow = (flipCurrent && flipTarget == false);
-                    ImGui_ImplXX_Shutdown();
-                    ImGui_ImplWin32_Shutdown();
-                    xxDestroyRenderPass(g_renderPass);
-                    xxDestroySwapchain(g_swapchain);
-                    xxDestroyDevice(g_device);
-                    xxDestroyInstance(g_instance);
-                    g_instance = 0;
-                    g_device = 0;
-                    g_swapchain = 0;
-                    g_renderPass = 0;
-                    if (recreateWindow)
-                    {
-                        ::DestroyWindow(hWnd);
-                        hWnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui XX Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280 * scale, 800 * scale, NULL, NULL, wc.hInstance, NULL);
-                        ::ShowWindow(hWnd, SW_SHOWDEFAULT);
-                        ::UpdateWindow(hWnd);
-                    }
-                    g_instance = createInstance();
-                    g_device = xxCreateDevice(g_instance);
-                    g_swapchain = xxCreateSwapchain(g_device, hWnd, 0, 0);
-                    g_renderPass = xxCreateRenderPass(g_device, 0.45f, 0.55f, 0.60f, 1.0f, 1.0f, 0);
-                    ImGui_ImplWin32_Init(hWnd);
-                    ImGui_ImplXX_Init(g_instance, 0, g_device);
-                    ImGui::EndMainMenuBar();
-                    ImGui::EndFrame();
-                    continue;
                 }
+
+                ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();
         }
@@ -323,6 +296,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
         {
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
+        }
+
+        // Recreate Graphic API
+        if (createInstance != nullptr)
+        {
+            ImGui_ImplXX_Shutdown();
+            ImGui_ImplWin32_Shutdown();
+            xxDestroyRenderPass(g_renderPass);
+            xxDestroySwapchain(g_swapchain);
+            xxDestroyDevice(g_device);
+            xxDestroyInstance(g_instance);
+            g_renderPass = 0;
+            g_swapchain = 0;
+            g_device = 0;
+            g_instance = 0;
+            if (recreateWindow)
+            {
+                ::DestroyWindow(hWnd);
+                hWnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui XX Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280 * scale, 800 * scale, NULL, NULL, wc.hInstance, NULL);
+                ::ShowWindow(hWnd, SW_SHOWDEFAULT);
+                ::UpdateWindow(hWnd);
+            }
+            g_instance = createInstance();
+            g_device = xxCreateDevice(g_instance);
+            g_swapchain = xxCreateSwapchain(g_device, hWnd, 0, 0);
+            g_renderPass = xxCreateRenderPass(g_device, 0.45f, 0.55f, 0.60f, 1.0f, 1.0f, 0);
+            ImGui_ImplWin32_Init(hWnd);
+            ImGui_ImplXX_Init(g_instance, 0, g_device);
         }
     }
 

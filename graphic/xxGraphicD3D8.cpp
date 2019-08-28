@@ -381,7 +381,7 @@ void xxDestroyBufferD3D8(uint64_t device, uint64_t buffer)
     {
     case D3DRTYPE_CONSTANTBUFFER:
     {
-        char* d3dBuffer = reinterpret_cast<char*>(buffer);
+        char* d3dBuffer = reinterpret_cast<char*>(getResourceData(buffer));
 
         xxFree(d3dBuffer);
         break;
@@ -407,7 +407,7 @@ void* xxMapBufferD3D8(uint64_t device, uint64_t buffer)
     {
     case D3DRTYPE_CONSTANTBUFFER:
     {
-        char* ptr = reinterpret_cast<char*>(buffer);
+        char* ptr = reinterpret_cast<char*>(getResourceData(buffer));
         if (ptr == nullptr)
             break;
 
