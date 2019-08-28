@@ -202,7 +202,7 @@ struct D3D11ON12SWAPCHAIN : public D3D11ON12FRAMEBUFFER
     ID3D11DeviceContext*    deviceContext;
 };
 //------------------------------------------------------------------------------
-void xxPresentSwapchainD3D11On12(uint64_t swapchain, void* view)
+void xxPresentSwapchainD3D11On12(uint64_t swapchain)
 {
     D3D11ON12SWAPCHAIN* d3dSwapchain = reinterpret_cast<D3D11ON12SWAPCHAIN*>(swapchain);
     if (d3dSwapchain == nullptr)
@@ -212,7 +212,7 @@ void xxPresentSwapchainD3D11On12(uint64_t swapchain, void* view)
     g_d3d12FenceValues[bufferIndex] = g_d3d12FenceValue;
     signalFence(false);
 
-    xxPresentSwapchainD3D11(swapchain, view);
+    xxPresentSwapchainD3D11(swapchain);
 }
 //==============================================================================
 //  Command Buffer

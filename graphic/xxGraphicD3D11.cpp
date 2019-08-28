@@ -290,7 +290,7 @@ void xxDestroySwapchainD3D11(uint64_t swapchain)
     delete d3dSwapchain;
 }
 //------------------------------------------------------------------------------
-void xxPresentSwapchainD3D11(uint64_t swapchain, void* view)
+void xxPresentSwapchainD3D11(uint64_t swapchain)
 {
     D3D11SWAPCHAIN* d3dSwapchain = reinterpret_cast<D3D11SWAPCHAIN*>(swapchain);
     if (d3dSwapchain == nullptr)

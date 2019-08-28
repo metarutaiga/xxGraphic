@@ -404,7 +404,7 @@ static void ImGui_ImplXX_RenderWindow(ImGuiViewport* viewport, void*)
 static void ImGui_ImplXX_SwapBuffers(ImGuiViewport* viewport, void*)
 {
     ImGuiViewportDataXX* data = (ImGuiViewportDataXX*)viewport->RendererUserData;
-    xxPresentSwapchain(data->Swapchain, data->Handle);
+    xxPresentSwapchain(data->Swapchain);
 }
 
 static void ImGui_ImplXX_InitPlatformInterface()

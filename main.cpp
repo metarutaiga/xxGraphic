@@ -36,7 +36,7 @@ static uint64_t g_swapchain = 0;
 static uint64_t g_renderPass = 0;
 
 // Main code
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
+int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
 {
     ImGui_ImplWin32_EnableDpiAwareness();
     float scale = ImGui_ImplWin32_GetDpiScaleForHwnd(nullptr);
@@ -280,7 +280,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
         xxEndCommandBuffer(commandBuffer);
         xxSubmitCommandBuffer(commandBuffer);
 
-        xxPresentSwapchain(g_swapchain, hWnd);
+        xxPresentSwapchain(g_swapchain);
 
         if (xxTestDevice(g_device) == false)
         {

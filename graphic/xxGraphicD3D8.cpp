@@ -159,6 +159,7 @@ struct D3DFRAMEBUFFER8
 struct D3DSWAPCHAIN8 : public D3DFRAMEBUFFER8
 {
     LPDIRECT3DSWAPCHAIN8    swapchain;
+    HWND                    hWnd;
 };
 //------------------------------------------------------------------------------
 uint64_t xxCreateSwapchainD3D8(uint64_t device, void* view, unsigned int width, unsigned int height)
@@ -212,6 +213,7 @@ uint64_t xxCreateSwapchainD3D8(uint64_t device, void* view, unsigned int width, 
     swapchain->backBuffer = nullptr;
     swapchain->depthStencil = d3dDepthStencil;
     swapchain->swapchain = d3dSwapchain;
+    swapchain->hWnd = hWnd;
 
     return reinterpret_cast<uint64_t>(swapchain);
 }
@@ -228,13 +230,13 @@ void xxDestroySwapchainD3D8(uint64_t swapchain)
     delete d3dSwapchain;
 }
 //------------------------------------------------------------------------------
-void xxPresentSwapchainD3D8(uint64_t swapchain, void* view)
+void xxPresentSwapchainD3D8(uint64_t swapchain)
 {
     D3DSWAPCHAIN8* d3dSwapchain = reinterpret_cast<D3DSWAPCHAIN8*>(swapchain);
     if (d3dSwapchain == nullptr)
         return;
 
-    d3dSwapchain->swapchain->Present(nullptr, nullptr, (HWND)view, nullptr);
+    d3dSwapchain->swapchain->Present(nullptr, nullptr, d3dSwapchain->hWnd, nullptr);
 }
 //------------------------------------------------------------------------------
 uint64_t xxGetCommandBufferD3D8(uint64_t device, uint64_t swapchain)

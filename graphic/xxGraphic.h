@@ -23,7 +23,7 @@ xxAPI const char*   (*xxGetDeviceString)(uint64_t device);
 //==============================================================================
 xxAPI uint64_t      (*xxCreateSwapchain)(uint64_t device, void* view, unsigned int width, unsigned int height);
 xxAPI void          (*xxDestroySwapchain)(uint64_t swapchain);
-xxAPI void          (*xxPresentSwapchain)(uint64_t swapchain, void* view);
+xxAPI void          (*xxPresentSwapchain)(uint64_t swapchain);
 xxAPI uint64_t      (*xxGetCommandBuffer)(uint64_t device, uint64_t swapchain);
 xxAPI uint64_t      (*xxGetFramebuffer)(uint64_t device, uint64_t swapchain);
 //==============================================================================

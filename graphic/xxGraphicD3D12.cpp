@@ -601,7 +601,7 @@ void xxDestroySwapchainD3D12(uint64_t swapchain)
     delete d3dSwapchain;
 }
 //------------------------------------------------------------------------------
-void xxPresentSwapchainD3D12(uint64_t swapchain, void* view)
+void xxPresentSwapchainD3D12(uint64_t swapchain)
 {
     D3D12SWAPCHAIN* d3dSwapchain = reinterpret_cast<D3D12SWAPCHAIN*>(swapchain);
     if (d3dSwapchain == nullptr)

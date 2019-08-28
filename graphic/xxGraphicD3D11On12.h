@@ -16,7 +16,7 @@ xxAPI const char*   xxGetDeviceStringD3D11On12(uint64_t device);
 //==============================================================================
 //  Swapchain
 //==============================================================================
-xxAPI void          xxPresentSwapchainD3D11On12(uint64_t swapchain, void* view);
+xxAPI void          xxPresentSwapchainD3D11On12(uint64_t swapchain);
 //==============================================================================
 //  Command Buffer
 //==============================================================================

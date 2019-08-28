@@ -23,7 +23,7 @@ xxAPI const char*   xxGetDeviceStringNULL(uint64_t device);
 //==============================================================================
 xxAPI uint64_t      xxCreateSwapchainNULL(uint64_t device, void* view, unsigned int width, unsigned int height);
 xxAPI void          xxDestroySwapchainNULL(uint64_t swapchain);
-xxAPI void          xxPresentSwapchainNULL(uint64_t swapchain, void* view);
+xxAPI void          xxPresentSwapchainNULL(uint64_t swapchain);
 xxAPI uint64_t      xxGetCommandBufferNULL(uint64_t device, uint64_t swapchain);
 xxAPI uint64_t      xxGetFramebufferNULL(uint64_t device, uint64_t swapchain);
 //==============================================================================

@@ -57,7 +57,7 @@ void xxDestroySwapchainNULL(uint64_t swapchain)
 
 }
 //------------------------------------------------------------------------------
-void xxPresentSwapchainNULL(uint64_t swapchain, void* view)
+void xxPresentSwapchainNULL(uint64_t swapchain)
 {
 
 }

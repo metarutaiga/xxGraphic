@@ -23,7 +23,7 @@ xxAPI const char*   xxGetDeviceStringD3D10(uint64_t device);
 //==============================================================================
 xxAPI uint64_t      xxCreateSwapchainD3D10(uint64_t device, void* view, unsigned int width, unsigned int height);
 xxAPI void          xxDestroySwapchainD3D10(uint64_t swapchain);
-xxAPI void          xxPresentSwapchainD3D10(uint64_t swapchain, void* view);
+xxAPI void          xxPresentSwapchainD3D10(uint64_t swapchain);
 xxAPI uint64_t      xxGetCommandBufferD3D10(uint64_t device, uint64_t swapchain);
 xxAPI uint64_t      xxGetFramebufferD3D10(uint64_t device, uint64_t swapchain);
 //==============================================================================
