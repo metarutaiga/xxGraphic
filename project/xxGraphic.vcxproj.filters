@@ -58,6 +58,7 @@
     <ClInclude Include="..\graphic\xxGraphicD3D9On12.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D11On12.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D12.h" />
+    <ClInclude Include="..\graphic\xxGraphicD3D.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="dxsdk">

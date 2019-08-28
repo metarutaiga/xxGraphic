@@ -1,6 +1,7 @@
+#include "xxGraphicInternal.h"
+#include "xxGraphicD3D.h"
 #include "xxGraphicD3D11.h"
 #include "xxGraphicD3D11On12.h"
-#include "xxGraphicInternal.h"
 
 #include <d3d12.h>
 #include <d3d11on12.h>
@@ -50,6 +51,7 @@ uint64_t xxCreateInstanceD3D11On12()
 
     xxDestroyInstance = xxDestroyInstanceD3D11On12;
     xxCreateDevice = xxCreateDeviceD3D11On12;
+    xxDestroyDevice = xxDestroyDeviceD3D11On12;
     xxGetDeviceString = xxGetDeviceStringD3D11On12;
     xxPresentSwapchain = xxPresentSwapchainD3D11On12;
     xxGetCommandBuffer = xxGetCommandBufferD3D11On12;
@@ -59,33 +61,6 @@ uint64_t xxCreateInstanceD3D11On12()
 //------------------------------------------------------------------------------
 void xxDestroyInstanceD3D11On12(uint64_t instance)
 {
-    if (g_d3d12Fence)
-    {
-        for (int i = 0; i < NUM_BACK_BUFFERS; ++i)
-            signalFence(true);
-
-        g_d3d12Fence->Release();
-        g_d3d12Fence = nullptr;
-    }
-
-    if (g_d3d12FenceEvent)
-    {
-        CloseHandle(g_d3d12FenceEvent);
-        g_d3d12FenceEvent = nullptr;
-    }
-
-    if (g_d3d12CommandQueue)
-    {
-        g_d3d12CommandQueue->Release();
-        g_d3d12CommandQueue = nullptr;
-    }
-
-    if (g_d3d12Device)
-    {
-        g_d3d12Device->Release();
-        g_d3d12Device = nullptr;
-    }
-
     if (g_d3d12Library)
     {
         FreeLibrary(g_d3d12Library);
@@ -177,10 +152,32 @@ uint64_t xxCreateDeviceD3D11On12(uint64_t instance)
             break;
         }
     }
-    if (unknown)
-        unknown->Release();
+    SafeRelease(unknown);
 
     return reinterpret_cast<uint64_t>(d3dDevice);
+}
+//------------------------------------------------------------------------------
+void xxDestroyDeviceD3D11On12(uint64_t device)
+{
+    xxDestroyDeviceD3D11(device);
+
+    if (g_d3d12Fence)
+    {
+        for (int i = 0; i < NUM_BACK_BUFFERS; ++i)
+            signalFence(true);
+
+        g_d3d12Fence->Release();
+        g_d3d12Fence = nullptr;
+    }
+
+    if (g_d3d12FenceEvent)
+    {
+        CloseHandle(g_d3d12FenceEvent);
+        g_d3d12FenceEvent = nullptr;
+    }
+
+    SafeRelease(g_d3d12CommandQueue);
+    SafeRelease(g_d3d12Device);
 }
 //------------------------------------------------------------------------------
 const char* xxGetDeviceStringD3D11On12(uint64_t device)

@@ -1,7 +1,8 @@
+#include "xxGraphicInternal.h"
+#include "xxGraphicD3D.h"
 #include "xxGraphicD3D9.h"
 #include "xxGraphicD3D9PS.h"
 #include "xxGraphicD3D9On12.h"
-#include "xxGraphicInternal.h"
 
 #if defined(_DEBUG)
 #define D3D_DEBUG_INFO 1
@@ -123,9 +124,8 @@ uint64_t xxCreateInstanceD3D9On12ExPS()
 void xxDestroyInstanceD3D9On12(uint64_t instance)
 {
     LPDIRECT3D9 d3d = reinterpret_cast<LPDIRECT3D9>(instance);
-    if (d3d == nullptr)
-        return;
-    d3d->Release();
+
+    SafeRelease(d3d);
 
     if (g_d3dLibrary)
     {

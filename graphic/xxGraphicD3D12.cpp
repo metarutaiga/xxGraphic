@@ -1,6 +1,7 @@
-#include "xxGraphicD3D12.h"
-#include "xxGraphicD3DAsm.h"
 #include "xxGraphicInternal.h"
+#include "xxGraphicD3D.h"
+#include "xxGraphicD3DAsm.h"
+#include "xxGraphicD3D12.h"
 
 #include <d3d12.h>
 #include <dxgi1_4.h>
@@ -378,8 +379,7 @@ uint64_t xxCreateDeviceD3D12(uint64_t instance)
             break;
         }
     }
-    if (unknown)
-        unknown->Release();
+    SafeRelease(unknown);
 
     signalFence(true);
 
@@ -388,6 +388,8 @@ uint64_t xxCreateDeviceD3D12(uint64_t instance)
 //------------------------------------------------------------------------------
 void xxDestroyDeviceD3D12(uint64_t device)
 {
+    ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
+
     if (g_fence)
     {
         for (int i = 0; i < NUM_BACK_BUFFERS; ++i)
@@ -403,41 +405,12 @@ void xxDestroyDeviceD3D12(uint64_t device)
         g_fenceEvent = nullptr;
     }
 
-    if (g_shaderHeap)
-    {
-        g_shaderHeap->Release();
-        g_shaderHeap = nullptr;
-    }
-
-    if (g_samplerHeap)
-    {
-        g_samplerHeap->Release();
-        g_samplerHeap = nullptr;
-    }
-
-    if (g_rootSignature)
-    {
-        g_rootSignature->Release();
-        g_rootSignature = nullptr;
-    }
-
-    if (g_commandQueue)
-    {
-        g_commandQueue->Release();
-        g_commandQueue = nullptr;
-    }
-
-    if (g_dxgiFactory)
-    {
-        g_dxgiFactory->Release();
-        g_dxgiFactory = nullptr;
-    }
-
-    ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
-    if (d3dDevice == nullptr)
-        return;
-
-    d3dDevice->Release();
+    SafeRelease(g_shaderHeap);
+    SafeRelease(g_samplerHeap);
+    SafeRelease(g_rootSignature);
+    SafeRelease(g_commandQueue);
+    SafeRelease(g_dxgiFactory);
+    SafeRelease(d3dDevice);
 }
 //------------------------------------------------------------------------------
 void xxResetDeviceD3D12(uint64_t device)
@@ -575,30 +548,22 @@ uint64_t xxCreateSwapchainD3D12(uint64_t device, void* view, unsigned int width,
         if (backBuffer == nullptr)
         {
             HRESULT hResult = dxgiSwapchain3->GetBuffer(i, IID_PPV_ARGS(&backBuffer));
-            if (hResult == S_OK)
+            if (hResult != S_OK)
             {
-                d3dDevice->CreateRenderTargetView(backBuffer, nullptr, d3dSwapchain->renderTargetHandles[i]);
-                d3dSwapchain->renderTargetResources[i] = backBuffer;
             }
         }
+        d3dDevice->CreateRenderTargetView(backBuffer, nullptr, d3dSwapchain->renderTargetHandles[i]);
+        d3dSwapchain->renderTargetResources[i] = backBuffer;
 
         ID3D12CommandAllocator* commandAllocator = nullptr;
         if (commandAllocator == nullptr)
         {
             HRESULT hResult = d3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator));
-            if (hResult == S_OK)
+            if (hResult != S_OK)
             {
-                d3dSwapchain->commandAllocators[i] = commandAllocator;
             }
         }
-
-        if (d3dSwapchain->renderTargetResources[i] == nullptr || d3dSwapchain->commandAllocators[i] == nullptr)
-        {
-            dxgiSwapchain3->Release();
-            renderTargetHeap->Release();
-            delete d3dSwapchain;
-            return 0;
-        }
+        d3dSwapchain->commandAllocators[i] = commandAllocator;
     }
 
     int bufferIndex = dxgiSwapchain3->GetCurrentBackBufferIndex();
@@ -607,11 +572,11 @@ uint64_t xxCreateSwapchainD3D12(uint64_t device, void* view, unsigned int width,
     if (hResult == S_OK)
     {
         HRESULT hResult = commandList->Close();
-        if (hResult == S_OK)
+        if (hResult != S_OK)
         {
-            d3dSwapchain->commandList = commandList;
         }
     }
+    d3dSwapchain->commandList = commandList;
 
     return reinterpret_cast<uint64_t>(d3dSwapchain);
 }
@@ -625,19 +590,14 @@ void xxDestroySwapchainD3D12(uint64_t swapchain)
     for (int i = 0; i < NUM_BACK_BUFFERS; ++i)
         signalFence(true);
 
-    if (d3dSwapchain->dxgiSwapchain)
-        d3dSwapchain->dxgiSwapchain->Release();
-    if (d3dSwapchain->commandList)
-        d3dSwapchain->commandList->Release();
+    SafeRelease(d3dSwapchain->dxgiSwapchain);
+    SafeRelease(d3dSwapchain->commandList);
     for (int i = 0; i < NUM_BACK_BUFFERS; ++i)
     {
-        if (d3dSwapchain->renderTargetResources[i])
-            d3dSwapchain->renderTargetResources[i]->Release();
-        if (d3dSwapchain->commandAllocators[i])
-            d3dSwapchain->commandAllocators[i]->Release();
+        SafeRelease(d3dSwapchain->renderTargetResources[i]);
+        SafeRelease(d3dSwapchain->commandAllocators[i]);
     }
-    if (d3dSwapchain->renderTargetHeap)
-        d3dSwapchain->renderTargetHeap->Release();
+    SafeRelease(d3dSwapchain->renderTargetHeap);
     delete d3dSwapchain;
 }
 //------------------------------------------------------------------------------
@@ -1075,12 +1035,11 @@ void xxDestroyTextureD3D12(uint64_t texture)
     for (int i = 0; i < NUM_BACK_BUFFERS; ++i)
         signalFence(true);
 
-    if (d3dTexture->texture)
-        d3dTexture->texture->Release();
     if (d3dTexture->textureCPUHandle.ptr && d3dTexture->textureGPUHandle.ptr)
         destroyShaderHeap(d3dTexture->textureCPUHandle, d3dTexture->textureGPUHandle);
-    if (d3dTexture->upload)
-        d3dTexture->upload->Release();
+
+    SafeRelease(d3dTexture->texture);
+    SafeRelease(d3dTexture->upload);
     delete d3dTexture;
 }
 //------------------------------------------------------------------------------
@@ -1484,10 +1443,8 @@ void xxDestroyRasterizerStateD3D12(uint64_t rasterizerState)
 void xxDestroyPipelineD3D12(uint64_t pipeline)
 {
     ID3D12PipelineState* d3dPipelineState = reinterpret_cast<ID3D12PipelineState*>(pipeline);
-    if (d3dPipelineState == nullptr)
-        return;
 
-    d3dPipelineState->Release();
+    SafeRelease(d3dPipelineState);
 }
 //==============================================================================
 //  Command

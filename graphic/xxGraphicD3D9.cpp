@@ -1,6 +1,7 @@
-#include "xxGraphicD3D9.h"
-#include "xxGraphicD3DAsm.h"
 #include "xxGraphicInternal.h"
+#include "xxGraphicD3D.h"
+#include "xxGraphicD3DAsm.h"
+#include "xxGraphicD3D9.h"
 
 #if defined(_DEBUG)
 #define D3D_DEBUG_INFO 1
@@ -59,9 +60,8 @@ uint64_t xxCreateInstanceD3D9()
 void xxDestroyInstanceD3D9(uint64_t instance)
 {
     LPDIRECT3D9 d3d = reinterpret_cast<LPDIRECT3D9>(instance);
-    if (d3d == nullptr)
-        return;
-    d3d->Release();
+
+    SafeRelease(d3d);
 
     if (g_d3dLibrary)
     {
@@ -118,8 +118,7 @@ uint64_t xxCreateDeviceD3D9(uint64_t instance)
             break;
         }
     }
-    if (unknown)
-        unknown->Release();
+    SafeRelease(unknown);
 
     return reinterpret_cast<uint64_t>(d3dDevice);
 }
@@ -127,9 +126,8 @@ uint64_t xxCreateDeviceD3D9(uint64_t instance)
 void xxDestroyDeviceD3D9(uint64_t device)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
-    if (d3dDevice == nullptr)
-        return;
-    d3dDevice->Release();
+
+    SafeRelease(d3dDevice);
 
     if (g_hWnd)
     {
@@ -217,21 +215,30 @@ uint64_t xxCreateSwapchainD3D9(uint64_t device, void* view, unsigned int width, 
     d3dPresentParameters.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
     LPDIRECT3DSWAPCHAIN9 d3dSwapchain = nullptr;
-    HRESULT hResult = d3dDevice->CreateAdditionalSwapChain(&d3dPresentParameters, &d3dSwapchain);
-    if (hResult != S_OK)
+    if (d3dSwapchain == nullptr)
     {
-        d3dPresentParameters.BackBufferCount = 0;
-        d3dPresentParameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
         HRESULT hResult = d3dDevice->CreateAdditionalSwapChain(&d3dPresentParameters, &d3dSwapchain);
         if (hResult != S_OK)
         {
-            delete swapchain;
-            return 0;
+            d3dPresentParameters.BackBufferCount = 0;
+            d3dPresentParameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
+            HRESULT hResult = d3dDevice->CreateAdditionalSwapChain(&d3dPresentParameters, &d3dSwapchain);
+            if (hResult != S_OK)
+            {
+                delete swapchain;
+                return 0;
+            }
         }
     }
 
     LPDIRECT3DSURFACE9 d3dDepthStencil = nullptr;
-    d3dDevice->CreateDepthStencilSurface(width, height, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, FALSE, &d3dDepthStencil, nullptr);
+    if (d3dDepthStencil == nullptr)
+    {
+        HRESULT hResult = d3dDevice->CreateDepthStencilSurface(width, height, D3DFMT_D24S8, D3DMULTISAMPLE_NONE, 0, FALSE, &d3dDepthStencil, nullptr);
+        if (hResult != S_OK)
+        {
+        }
+    }
 
     swapchain->backBuffer = nullptr;
     swapchain->depthStencil = d3dDepthStencil;
@@ -247,12 +254,10 @@ void xxDestroySwapchainD3D9(uint64_t swapchain)
     if (d3dSwapchain == nullptr)
         return;
 
-    if (d3dSwapchain->backBuffer)
-        d3dSwapchain->backBuffer->Release();
-    if (d3dSwapchain->depthStencil)
-        d3dSwapchain->depthStencil->Release();
-    if (d3dSwapchain->swapchain)
-        d3dSwapchain->swapchain->Release();
+    SafeRelease(d3dSwapchain->backBuffer);
+    SafeRelease(d3dSwapchain->depthStencil);
+    SafeRelease(d3dSwapchain->swapchain);
+    delete d3dSwapchain;
 }
 //------------------------------------------------------------------------------
 void xxPresentSwapchainD3D9(uint64_t swapchain, void* view)
@@ -276,9 +281,11 @@ uint64_t xxGetFramebufferD3D9(uint64_t device, uint64_t swapchain)
         return 0;
 
     LPDIRECT3DSURFACE9 surface = nullptr;
-    d3dSwapchain->swapchain->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &surface);
-    if (d3dSwapchain->backBuffer)
-        d3dSwapchain->backBuffer->Release();
+    HRESULT hResult = d3dSwapchain->swapchain->GetBackBuffer(0, D3DBACKBUFFER_TYPE_MONO, &surface);
+    if (hResult != S_OK)
+        return 0;
+
+    SafeRelease(d3dSwapchain->backBuffer);
     d3dSwapchain->backBuffer = surface;
 
     return swapchain;
@@ -291,11 +298,9 @@ bool xxBeginCommandBufferD3D9(uint64_t commandBuffer)
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
     if (d3dDevice == nullptr)
         return false;
-    HRESULT hResult = d3dDevice->BeginScene();
-    if (hResult != S_OK)
-        return false;
 
-    return true;
+    HRESULT hResult = d3dDevice->BeginScene();
+    return (hResult == S_OK);
 }
 //------------------------------------------------------------------------------
 void xxEndCommandBufferD3D9(uint64_t commandBuffer)
@@ -304,7 +309,7 @@ void xxEndCommandBufferD3D9(uint64_t commandBuffer)
     if (d3dDevice == nullptr)
         return;
 
-    d3dDevice->EndScene();
+    HRESULT hResult = d3dDevice->EndScene();
 }
 //------------------------------------------------------------------------------
 void xxSubmitCommandBufferD3D9(uint64_t commandBuffer)
@@ -552,10 +557,8 @@ uint64_t xxCreateTextureD3D9(uint64_t device, int format, unsigned int width, un
 void xxDestroyTextureD3D9(uint64_t texture)
 {
     LPDIRECT3DBASETEXTURE9 d3dBaseTexture = reinterpret_cast<LPDIRECT3DBASETEXTURE9>(getResourceData(texture));
-    if (d3dBaseTexture == nullptr)
-        return;
 
-    d3dBaseTexture->Release();
+    SafeRelease(d3dBaseTexture);
 }
 //------------------------------------------------------------------------------
 void* xxMapTextureD3D9(uint64_t device, uint64_t texture, unsigned int& stride, unsigned int level, unsigned int array, unsigned int mipmap)

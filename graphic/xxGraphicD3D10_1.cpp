@@ -1,6 +1,7 @@
+#include "xxGraphicInternal.h"
+#include "xxGraphicD3D.h"
 #include "xxGraphicD3D10.h"
 #include "xxGraphicD3D10_1.h"
-#include "xxGraphicInternal.h"
 
 #include <d3d10_1.h>
 
@@ -82,8 +83,7 @@ uint64_t xxCreateDeviceD3D10_1(uint64_t instance)
             break;
         }
     }
-    if (unknown)
-        unknown->Release();
+    SafeRelease(unknown);
 
     return reinterpret_cast<uint64_t>(d3dDevice);
 }

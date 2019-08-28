@@ -45,6 +45,7 @@
     <ClInclude Include="..\graphic\dxsdk\d3d9on12.h" />
     <ClInclude Include="..\graphic\dxsdk\d3d9types.h" />
     <ClInclude Include="..\graphic\xxGraphic.h" />
+    <ClInclude Include="..\graphic\xxGraphicD3D.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D10.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D10_1.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D11.h" />

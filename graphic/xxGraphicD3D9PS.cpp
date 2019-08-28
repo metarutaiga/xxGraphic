@@ -1,6 +1,7 @@
-#include "xxGraphicD3D9PS.h"
-#include "xxGraphicD3DAsm.h"
 #include "xxGraphicInternal.h"
+#include "xxGraphicD3D.h"
+#include "xxGraphicD3DAsm.h"
+#include "xxGraphicD3D9PS.h"
 
 #include "dxsdk/d3d9.h"
 
@@ -204,10 +205,8 @@ uint64_t xxCreateFragmentShaderD3D9PS(uint64_t device, const char* shader)
 void xxDestroyShaderD3D9PS(uint64_t device, uint64_t shader)
 {
     LPUNKNOWN d3dShader = reinterpret_cast<LPUNKNOWN>(shader);
-    if (d3dShader == nullptr)
-        return;
 
-    d3dShader->Release();
+    SafeRelease(d3dShader);
 }
 //==============================================================================
 //  Pipeline

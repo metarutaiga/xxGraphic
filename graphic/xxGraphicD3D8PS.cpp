@@ -1,6 +1,6 @@
-#include "xxGraphicD3D8PS.h"
-#include "xxGraphicD3DAsm.h"
 #include "xxGraphicInternal.h"
+#include "xxGraphicD3DAsm.h"
+#include "xxGraphicD3D8PS.h"
 
 #include "dxsdk/d3d8.h"
 

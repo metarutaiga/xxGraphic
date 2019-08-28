@@ -1,6 +1,7 @@
-#include "xxGraphicD3D11.h"
-#include "xxGraphicD3DAsm.h"
 #include "xxGraphicInternal.h"
+#include "xxGraphicD3D.h"
+#include "xxGraphicD3DAsm.h"
+#include "xxGraphicD3D11.h"
 
 #include <d3d11.h>
 interface DECLSPEC_UUID("a04bfb29-08ef-43d6-a49c-a9bdbdcbe686") ID3D11Device1;
@@ -99,25 +100,17 @@ uint64_t xxCreateDeviceD3D11(uint64_t instance)
             break;
         }
     }
-    if (unknown)
-        unknown->Release();
+    SafeRelease(unknown);
 
     return reinterpret_cast<uint64_t>(d3dDevice);
 }
 //------------------------------------------------------------------------------
 void xxDestroyDeviceD3D11(uint64_t device)
 {
-    if (g_dxgiFactory)
-    {
-        g_dxgiFactory->Release();
-        g_dxgiFactory = nullptr;
-    }
-
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
-    if (d3dDevice == nullptr)
-        return;
 
-    d3dDevice->Release();
+    SafeRelease(g_dxgiFactory);
+    SafeRelease(d3dDevice);
 }
 //------------------------------------------------------------------------------
 void xxResetDeviceD3D11(uint64_t device)
@@ -208,46 +201,68 @@ uint64_t xxCreateSwapchainD3D11(uint64_t device, void* view, unsigned int width,
     desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
     IDXGISwapChain* dxgiSwapchain = nullptr;
-    HRESULT hResult = g_dxgiFactory->CreateSwapChain(d3dDevice, &desc, &dxgiSwapchain);
-    if (hResult != S_OK)
+    if (dxgiSwapchain == nullptr)
     {
-        desc.BufferCount = 1;
-        desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
         HRESULT hResult = g_dxgiFactory->CreateSwapChain(d3dDevice, &desc, &dxgiSwapchain);
         if (hResult != S_OK)
         {
-            delete d3dSwapchain;
-            return 0;
+            desc.BufferCount = 1;
+            desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+            HRESULT hResult = g_dxgiFactory->CreateSwapChain(d3dDevice, &desc, &dxgiSwapchain);
+            if (hResult != S_OK)
+            {
+                delete d3dSwapchain;
+                return 0;
+            }
         }
     }
 
     ID3D11RenderTargetView* renderTargetView = nullptr;
-    ID3D11Texture2D* d3dTexture = nullptr;
-    dxgiSwapchain->GetBuffer(0, IID_PPV_ARGS(&d3dTexture));
-    if (d3dTexture)
+    if (renderTargetView == nullptr)
     {
-        d3dDevice->CreateRenderTargetView(d3dTexture, nullptr, &renderTargetView);
-        d3dTexture->Release();
+        ID3D11Texture2D* d3dTexture = nullptr;
+        dxgiSwapchain->GetBuffer(0, IID_PPV_ARGS(&d3dTexture));
+        if (d3dTexture)
+        {
+            d3dTexture->Release();
+
+            HRESULT hResult = d3dDevice->CreateRenderTargetView(d3dTexture, nullptr, &renderTargetView);
+            if (hResult != S_OK)
+            {
+            }
+        }
     }
 
-    D3D11_TEXTURE2D_DESC textureDesc = {};
-    textureDesc.Width = width;
-    textureDesc.Height = height;
-    textureDesc.MipLevels = 1;
-    textureDesc.ArraySize = 1;
-    textureDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
-    textureDesc.SampleDesc.Count = 1;
-    textureDesc.BindFlags = D3D10_BIND_DEPTH_STENCIL | D3D10_BIND_SHADER_RESOURCE;
-
     ID3D11Texture2D* depthStencilTexture = nullptr;
-    d3dDevice->CreateTexture2D(&textureDesc, nullptr, &depthStencilTexture);
+    if (depthStencilTexture == nullptr)
+    {
+        D3D11_TEXTURE2D_DESC textureDesc = {};
+        textureDesc.Width = width;
+        textureDesc.Height = height;
+        textureDesc.MipLevels = 1;
+        textureDesc.ArraySize = 1;
+        textureDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+        textureDesc.SampleDesc.Count = 1;
+        textureDesc.BindFlags = D3D10_BIND_DEPTH_STENCIL | D3D10_BIND_SHADER_RESOURCE;
 
-    D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
-    depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+        HRESULT hResult = d3dDevice->CreateTexture2D(&textureDesc, nullptr, &depthStencilTexture);
+        if (hResult != S_OK)
+        {
+        }
+    }
 
     ID3D11DepthStencilView* depthStencilView = nullptr;
-    d3dDevice->CreateDepthStencilView(depthStencilTexture, &depthStencilViewDesc, &depthStencilView);
+    if (depthStencilView == nullptr)
+    {
+        D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
+        depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+
+        HRESULT hResult = d3dDevice->CreateDepthStencilView(depthStencilTexture, &depthStencilViewDesc, &depthStencilView);
+        if (hResult != S_OK)
+        {
+        }
+    }
 
     ID3D11DeviceContext* d3dDeviceContext = nullptr;
     d3dDevice->GetImmediateContext(&d3dDeviceContext);
@@ -267,16 +282,11 @@ void xxDestroySwapchainD3D11(uint64_t swapchain)
     if (d3dSwapchain == nullptr)
         return;
 
-    if (d3dSwapchain->renderTargetView)
-        d3dSwapchain->renderTargetView->Release();
-    if (d3dSwapchain->depthStencilView)
-        d3dSwapchain->depthStencilView->Release();
-    if (d3dSwapchain->dxgiSwapchain)
-        d3dSwapchain->dxgiSwapchain->Release();
-    if (d3dSwapchain->depthStencilTexture)
-        d3dSwapchain->depthStencilTexture->Release();
-    if (d3dSwapchain->deviceContext)
-        d3dSwapchain->deviceContext->Release();
+    SafeRelease(d3dSwapchain->renderTargetView);
+    SafeRelease(d3dSwapchain->depthStencilView);
+    SafeRelease(d3dSwapchain->dxgiSwapchain);
+    SafeRelease(d3dSwapchain->depthStencilTexture);
+    SafeRelease(d3dSwapchain->deviceContext);
     delete d3dSwapchain;
 }
 //------------------------------------------------------------------------------
@@ -683,14 +693,10 @@ void xxDestroyTextureD3D11(uint64_t texture)
     if (d3dTexture == nullptr)
         return;
 
-    if (d3dTexture->texture1D)
-        d3dTexture->texture1D->Release();
-    if (d3dTexture->texture2D)
-        d3dTexture->texture2D->Release();
-    if (d3dTexture->texture3D)
-        d3dTexture->texture3D->Release();
-    if (d3dTexture->resourceView)
-        d3dTexture->resourceView->Release();
+    SafeRelease(d3dTexture->texture1D);
+    SafeRelease(d3dTexture->texture2D);
+    SafeRelease(d3dTexture->texture3D);
+    SafeRelease(d3dTexture->resourceView);
     delete d3dTexture;
 }
 //------------------------------------------------------------------------------
@@ -810,10 +816,8 @@ uint64_t xxCreateSamplerD3D11(uint64_t device, bool clampU, bool clampV, bool cl
 void xxDestroySamplerD3D11(uint64_t sampler)
 {
     ID3D11SamplerState* d3dSamplerState = reinterpret_cast<ID3D11SamplerState*>(sampler);
-    if (d3dSamplerState == nullptr)
-        return;
 
-    d3dSamplerState->Release();
+    SafeRelease(d3dSamplerState);
 }
 //==============================================================================
 //  Vertex Attribute
@@ -1022,10 +1026,8 @@ uint64_t xxCreateFragmentShaderD3D11(uint64_t device, const char* shader)
 void xxDestroyShaderD3D11(uint64_t device, uint64_t shader)
 {
     IUnknown* d3dShader = reinterpret_cast<IUnknown*>(shader);
-    if (d3dShader == nullptr)
-        return;
 
-    d3dShader->Release();
+    SafeRelease(d3dShader);
 }
 //==============================================================================
 //  Pipeline
@@ -1135,28 +1137,22 @@ uint64_t xxCreatePipelineD3D11(uint64_t device, uint64_t blendState, uint64_t de
 void xxDestroyBlendStateD3D11(uint64_t blendState)
 {
     IUnknown* d3dBlendState = reinterpret_cast<IUnknown*>(blendState);
-    if (d3dBlendState == nullptr)
-        return;
 
-    d3dBlendState->Release();
+    SafeRelease(d3dBlendState);
 }
 //------------------------------------------------------------------------------
 void xxDestroyDepthStencilStateD3D11(uint64_t depthStencilState)
 {
     IUnknown* d3dDepthStencilState = reinterpret_cast<IUnknown*>(depthStencilState);
-    if (d3dDepthStencilState == nullptr)
-        return;
 
-    d3dDepthStencilState->Release();
+    SafeRelease(d3dDepthStencilState);
 }
 //------------------------------------------------------------------------------
 void xxDestroyRasterizerStateD3D11(uint64_t rasterizerState)
 {
     IUnknown* d3dRasterizerState = reinterpret_cast<IUnknown*>(rasterizerState);
-    if (d3dRasterizerState == nullptr)
-        return;
 
-    d3dRasterizerState->Release();
+    SafeRelease(d3dRasterizerState);
 }
 //------------------------------------------------------------------------------
 void xxDestroyPipelineD3D11(uint64_t pipeline)

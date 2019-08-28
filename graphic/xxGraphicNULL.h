@@ -18,17 +18,17 @@ xxAPI const char*   xxGetDeviceStringNULL(uint64_t device);
 //==============================================================================
 //  Framebuffer
 //==============================================================================
-xxAPI uint64_t      xxGetFramebufferNULL(uint64_t device, uint64_t swapchain);
 //==============================================================================
 //  Swapchain
 //==============================================================================
 xxAPI uint64_t      xxCreateSwapchainNULL(uint64_t device, void* view, unsigned int width, unsigned int height);
 xxAPI void          xxDestroySwapchainNULL(uint64_t swapchain);
 xxAPI void          xxPresentSwapchainNULL(uint64_t swapchain, void* view);
+xxAPI uint64_t      xxGetCommandBufferNULL(uint64_t device, uint64_t swapchain);
+xxAPI uint64_t      xxGetFramebufferNULL(uint64_t device, uint64_t swapchain);
 //==============================================================================
 //  Command Buffer
 //==============================================================================
-xxAPI uint64_t      xxGetCommandBufferNULL(uint64_t device, uint64_t swapchain);
 xxAPI bool          xxBeginCommandBufferNULL(uint64_t commandBuffer);
 xxAPI void          xxEndCommandBufferNULL(uint64_t commandBuffer);
 xxAPI void          xxSubmitCommandBufferNULL(uint64_t commandBuffer);
