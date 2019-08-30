@@ -82,7 +82,7 @@ uint64_t xxCreateDeviceD3D9(uint64_t instance)
 
     if (g_hWnd == nullptr)
     {
-        WNDCLASSEXW wc = { sizeof(WNDCLASSEXW), CS_CLASSDC, DefWindowProcW, 0, 0, GetModuleHandleW(nullptr), nullptr, nullptr, nullptr, nullptr, g_dummy, nullptr };
+        WNDCLASSEXW wc = { sizeof(WNDCLASSEXW), CS_OWNDC, DefWindowProcW, 0, 0, GetModuleHandleW(nullptr), nullptr, nullptr, nullptr, nullptr, g_dummy, nullptr };
         RegisterClassExW(&wc);
         g_hWnd = CreateWindowW(g_dummy, g_dummy, WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 0, 0, 1, 1, nullptr, nullptr, wc.hInstance, nullptr);
     }
@@ -720,7 +720,7 @@ union D3DVERTEXATTRIBUTE9
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeD3D9(uint64_t device, int count, ...)
 {
-    D3DVERTEXATTRIBUTE9 d3dVertexAttribtue = {};
+    D3DVERTEXATTRIBUTE9 d3dVertexAttribute = {};
     int stride = 0;
 
     va_list args;
@@ -735,19 +735,19 @@ uint64_t xxCreateVertexAttributeD3D9(uint64_t device, int count, ...)
         stride += size;
 
         if (offset == 0 && element == 3 && size == sizeof(float) * 3)
-            d3dVertexAttribtue.fvf |= D3DFVF_XYZ;
+            d3dVertexAttribute.fvf |= D3DFVF_XYZ;
         if (offset != 0 && element == 3 && size == sizeof(float) * 3)
-            d3dVertexAttribtue.fvf |= D3DFVF_NORMAL;
+            d3dVertexAttribute.fvf |= D3DFVF_NORMAL;
         if (offset != 0 && element == 4 && size == sizeof(char) * 4)
-            d3dVertexAttribtue.fvf |= D3DFVF_DIFFUSE;
+            d3dVertexAttribute.fvf |= D3DFVF_DIFFUSE;
         if (offset != 0 && element == 2 && size == sizeof(float) * 2)
-            d3dVertexAttribtue.fvf += D3DFVF_TEX1;
+            d3dVertexAttribute.fvf += D3DFVF_TEX1;
     }
     va_end(args);
 
-    d3dVertexAttribtue.stride = stride;
+    d3dVertexAttribute.stride = stride;
 
-    return d3dVertexAttribtue.value;
+    return d3dVertexAttribute.value;
 }
 //------------------------------------------------------------------------------
 void xxDestroyVertexAttributeD3D9(uint64_t vertexAttribute)
@@ -826,14 +826,14 @@ uint64_t xxCreatePipelineD3D9(uint64_t device, uint64_t blendState, uint64_t dep
     if (d3dPipeline == nullptr)
         return 0;
 
-    D3DVERTEXATTRIBUTE9 d3dVertexAttribtue  = { vertexAttribute };
+    D3DVERTEXATTRIBUTE9 d3dVertexAttribute  = { vertexAttribute };
     LPDIRECT3DVERTEXSHADER9 d3dVertexShader = reinterpret_cast<LPDIRECT3DVERTEXSHADER9>(vertexShader);
     LPDIRECT3DPIXELSHADER9 d3dPixelShader   = reinterpret_cast<LPDIRECT3DPIXELSHADER9>(fragmentShader);
     D3DRENDERSTATE9 d3dBlendState           = { blendState };
     D3DRENDERSTATE9 d3dDepthStencilState    = { depthStencilState };
     D3DRENDERSTATE9 d3dRasterizerState      = { rasterizerState };
     d3dPipeline->vertexDeclaration          = nullptr;
-    d3dPipeline->fvf                        = d3dVertexAttribtue.fvf;
+    d3dPipeline->fvf                        = d3dVertexAttribute.fvf;
     d3dPipeline->vertexShader               = d3dVertexShader;
     d3dPipeline->pixelShader                = d3dPixelShader;
     d3dPipeline->renderState.alphaBlending  = d3dBlendState.alphaBlending;
@@ -943,12 +943,12 @@ void xxSetIndexBufferD3D9(uint64_t commandBuffer, uint64_t buffer)
 void xxSetVertexBuffersD3D9(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
-    D3DVERTEXATTRIBUTE9 d3dVertexAttribtue = { vertexAttribute };
+    D3DVERTEXATTRIBUTE9 d3dVertexAttribute = { vertexAttribute };
 
     for (int i = 0; i < count; ++i)
     {
         LPDIRECT3DVERTEXBUFFER9 d3dVertexBuffer = reinterpret_cast<LPDIRECT3DVERTEXBUFFER9>(getResourceData(buffers[i]));
-        d3dDevice->SetStreamSource(i, d3dVertexBuffer, 0, d3dVertexAttribtue.stride);
+        d3dDevice->SetStreamSource(i, d3dVertexBuffer, 0, d3dVertexAttribute.stride);
     }
 }
 //------------------------------------------------------------------------------

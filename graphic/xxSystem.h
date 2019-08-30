@@ -15,7 +15,21 @@
 #if defined(_MSC_VER)
 #   define NOMINMAX
 #   define WIN32_LEAN_AND_MEAN
+#   define wglCreateContext wglCreateContext_unused
+#   define wglDeleteContext wglDeleteContext_unused
+#   define wglGetCurrentContext wglGetCurrentContext_unused
+#   define wglGetCurrentDC wglGetCurrentDC_unused
+#   define wglGetProcAddress wglGetProcAddress_unused
+#   define wglMakeCurrent wglMakeCurrent_unused
+#   define wglShareLists wglShareLists_unused
 #   include <windows.h>
+#   undef wglCreateContext
+#   undef wglDeleteContext
+#   undef wglGetCurrentContext
+#   undef wglGetCurrentDC
+#   undef wglGetProcAddress
+#   undef wglMakeCurrent
+#   undef wglShareLists
 #   pragma warning(disable:4201)
 #endif
 
@@ -38,24 +52,25 @@
 #endif
 
 #if defined(__GNUC__)
-#   define xxLikely(x)      __builtin_expect((x), 1)
-#   define xxUnlikely(x)    __builtin_expect((x), 0)
+#   define xxLikely(x)              __builtin_expect((x), 1)
+#   define xxUnlikely(x)            __builtin_expect((x), 0)
 #else
-#   define xxLikely(x)      (x)
-#   define xxUnlikely(x)    (x)
+#   define xxLikely(x)              (x)
+#   define xxUnlikely(x)            (x)
 #endif
 
-#define xxSizeOf(var)       (sizeof(var))
-#define xxCountOf(var)      (sizeof(var) / sizeof(*var))
-#define xxOffsetOf(st, m)   (offsetof(st, m))
+#define xxSizeOf(var)               (sizeof(var))
+#define xxCountOf(var)              (sizeof(var) / sizeof(*var))
+#define xxOffsetOf(st, m)           (offsetof(st, m))
 
-#define xxAlloc(T, count)   (T*)_aligned_malloc(sizeof(T) * count, 16)
-#define xxFree(ptr)         _aligned_free(ptr)
+#define xxAlloc(T, count)           (T*)_aligned_malloc(sizeof(T) * count, 16)
+#define xxRealloc(T, count, ptr)    (T*)_aligned_realloc(ptr, sizeof(T) * count, 16)
+#define xxFree(ptr)                 _aligned_free(ptr)
 
-#define xxRotateLeft(v, s)  _rotl(v, s)
-#define xxRotateRight(v, s) _rotr(v, s)
+#define xxRotateLeft(v, s)          _rotl(v, s)
+#define xxRotateRight(v, s)         _rotr(v, s)
 
-#define xxLocalBreak()      switch (0) case 0:
+#define xxLocalBreak()              switch (0) case 0:
 
 //==============================================================================
 //  TSC

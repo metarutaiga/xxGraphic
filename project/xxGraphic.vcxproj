@@ -32,6 +32,8 @@
     <ClCompile Include="..\graphic\xxGraphicD3D9On12.cpp" />
     <ClCompile Include="..\graphic\xxGraphicD3D9PS.cpp" />
     <ClCompile Include="..\graphic\xxGraphicD3DAsm.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicGL.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicGLES2.cpp" />
     <ClCompile Include="..\graphic\xxGraphicNULL.cpp" />
     <ClCompile Include="..\graphic\xxSystem.cpp" />
   </ItemGroup>
@@ -58,6 +60,8 @@
     <ClInclude Include="..\graphic\xxGraphicD3D9On12.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D9PS.h" />
     <ClInclude Include="..\graphic\xxGraphicD3DAsm.h" />
+    <ClInclude Include="..\graphic\xxGraphicGL.h" />
+    <ClInclude Include="..\graphic\xxGraphicGLES2.h" />
     <ClInclude Include="..\graphic\xxGraphicInternal.h" />
     <ClInclude Include="..\graphic\xxGraphicNULL.h" />
     <ClInclude Include="..\graphic\xxSystem.h" />

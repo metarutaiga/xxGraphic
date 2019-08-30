@@ -2,67 +2,135 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="..\graphic\xxGraphic.cpp" />
-    <ClCompile Include="..\graphic\xxGraphicD3D10.cpp" />
-    <ClCompile Include="..\graphic\xxGraphicD3D11.cpp" />
-    <ClCompile Include="..\graphic\xxGraphicD3D8.cpp" />
-    <ClCompile Include="..\graphic\xxGraphicD3D8PS.cpp" />
-    <ClCompile Include="..\graphic\xxGraphicD3D9.cpp" />
-    <ClCompile Include="..\graphic\xxGraphicD3D9PS.cpp" />
-    <ClCompile Include="..\graphic\xxGraphicD3DAsm.cpp" />
     <ClCompile Include="..\graphic\xxGraphicNULL.cpp" />
     <ClCompile Include="..\graphic\xxSystem.cpp" />
-    <ClCompile Include="..\graphic\xxGraphicD3D10_1.cpp" />
-    <ClCompile Include="..\graphic\xxGraphicD3D9Ex.cpp" />
-    <ClCompile Include="..\graphic\xxGraphicD3D9On12.cpp" />
-    <ClCompile Include="..\graphic\xxGraphicD3D11On12.cpp" />
-    <ClCompile Include="..\graphic\xxGraphicD3D12.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicD3D8.cpp">
+      <Filter>Direct3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\graphic\xxGraphicD3D8PS.cpp">
+      <Filter>Direct3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\graphic\xxGraphicD3D9.cpp">
+      <Filter>Direct3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\graphic\xxGraphicD3D9Ex.cpp">
+      <Filter>Direct3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\graphic\xxGraphicD3D9On12.cpp">
+      <Filter>Direct3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\graphic\xxGraphicD3D9PS.cpp">
+      <Filter>Direct3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\graphic\xxGraphicD3D10.cpp">
+      <Filter>Direct3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\graphic\xxGraphicD3D10_1.cpp">
+      <Filter>Direct3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\graphic\xxGraphicD3D11.cpp">
+      <Filter>Direct3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\graphic\xxGraphicD3D11On12.cpp">
+      <Filter>Direct3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\graphic\xxGraphicD3D12.cpp">
+      <Filter>Direct3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\graphic\xxGraphicD3DAsm.cpp">
+      <Filter>Direct3D</Filter>
+    </ClCompile>
+    <ClCompile Include="..\graphic\xxGraphicGLES2.cpp">
+      <Filter>OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\graphic\xxGraphicGL.cpp">
+      <Filter>OpenGL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\graphic\xxGraphic.h" />
-    <ClInclude Include="..\graphic\xxGraphicD3D10.h" />
-    <ClInclude Include="..\graphic\xxGraphicD3D11.h" />
-    <ClInclude Include="..\graphic\xxGraphicD3D8.h" />
-    <ClInclude Include="..\graphic\xxGraphicD3D8PS.h" />
-    <ClInclude Include="..\graphic\xxGraphicD3D9.h" />
-    <ClInclude Include="..\graphic\xxGraphicD3D9PS.h" />
-    <ClInclude Include="..\graphic\xxGraphicD3DAsm.h" />
     <ClInclude Include="..\graphic\xxGraphicInternal.h" />
     <ClInclude Include="..\graphic\xxGraphicNULL.h" />
     <ClInclude Include="..\graphic\xxSystem.h" />
     <ClInclude Include="..\graphic\dxsdk\d3d8.h">
-      <Filter>dxsdk</Filter>
+      <Filter>Direct3D\dxsdk</Filter>
     </ClInclude>
     <ClInclude Include="..\graphic\dxsdk\d3d8caps.h">
-      <Filter>dxsdk</Filter>
+      <Filter>Direct3D\dxsdk</Filter>
     </ClInclude>
     <ClInclude Include="..\graphic\dxsdk\d3d8types.h">
-      <Filter>dxsdk</Filter>
+      <Filter>Direct3D\dxsdk</Filter>
     </ClInclude>
     <ClInclude Include="..\graphic\dxsdk\d3d9.h">
-      <Filter>dxsdk</Filter>
+      <Filter>Direct3D\dxsdk</Filter>
     </ClInclude>
     <ClInclude Include="..\graphic\dxsdk\d3d9caps.h">
-      <Filter>dxsdk</Filter>
+      <Filter>Direct3D\dxsdk</Filter>
     </ClInclude>
     <ClInclude Include="..\graphic\dxsdk\d3d9types.h">
-      <Filter>dxsdk</Filter>
+      <Filter>Direct3D\dxsdk</Filter>
     </ClInclude>
     <ClInclude Include="..\graphic\dxsdk\d3d10TokenizedProgramFormat.hpp">
-      <Filter>dxsdk</Filter>
+      <Filter>Direct3D\dxsdk</Filter>
     </ClInclude>
-    <ClInclude Include="..\graphic\xxGraphicD3D10_1.h" />
-    <ClInclude Include="..\graphic\xxGraphicD3D9Ex.h" />
     <ClInclude Include="..\graphic\dxsdk\d3d9on12.h">
-      <Filter>dxsdk</Filter>
+      <Filter>Direct3D\dxsdk</Filter>
     </ClInclude>
-    <ClInclude Include="..\graphic\xxGraphicD3D9On12.h" />
-    <ClInclude Include="..\graphic\xxGraphicD3D11On12.h" />
-    <ClInclude Include="..\graphic\xxGraphicD3D12.h" />
-    <ClInclude Include="..\graphic\xxGraphicD3D.h" />
+    <ClInclude Include="..\graphic\xxGraphicD3D.h">
+      <Filter>Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\xxGraphicD3D8.h">
+      <Filter>Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\xxGraphicD3D8PS.h">
+      <Filter>Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\xxGraphicD3D9.h">
+      <Filter>Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\xxGraphicD3D9Ex.h">
+      <Filter>Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\xxGraphicD3D9On12.h">
+      <Filter>Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\xxGraphicD3D9PS.h">
+      <Filter>Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\xxGraphicD3D10.h">
+      <Filter>Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\xxGraphicD3D10_1.h">
+      <Filter>Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\xxGraphicD3D11.h">
+      <Filter>Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\xxGraphicD3D11On12.h">
+      <Filter>Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\xxGraphicD3D12.h">
+      <Filter>Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\xxGraphicD3DAsm.h">
+      <Filter>Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\xxGraphicGLES2.h">
+      <Filter>OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\xxGraphicGL.h">
+      <Filter>OpenGL</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="dxsdk">
+    <Filter Include="Direct3D">
+      <UniqueIdentifier>{b55567fd-4eb0-4b5f-ae71-9392c3043f10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Direct3D\dxsdk">
       <UniqueIdentifier>{743e9f93-6f7d-4cf2-95d1-af73bd4d2e05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OpenGL">
+      <UniqueIdentifier>{dcd1130b-5f4e-45f7-ae84-6d72e9f96808}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

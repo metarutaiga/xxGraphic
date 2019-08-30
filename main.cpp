@@ -20,6 +20,7 @@
 #include "graphic/xxGraphicD3D11.h"
 #include "graphic/xxGraphicD3D11On12.h"
 #include "graphic/xxGraphicD3D12.h"
+#include "graphic/xxGraphicGLES2.h"
 #include "graphic/xxGraphicNULL.h"
 
 #define NOMINMAX
@@ -42,7 +43,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
     float scale = ImGui_ImplWin32_GetDpiScaleForHwnd(nullptr);
 
     // Create application window
-    WNDCLASSEXW wc = { sizeof(WNDCLASSEXW), CS_CLASSDC, WndProc, 0, 0, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"ImGui Example", NULL };
+    WNDCLASSEXW wc = { sizeof(WNDCLASSEXW), CS_OWNDC, WndProc, 0, 0, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, L"ImGui Example", NULL };
     ::RegisterClassExW(&wc);
     HWND hWnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui XX Example", WS_OVERLAPPEDWINDOW, 100, 100, 1280 * scale, 800 * scale, NULL, NULL, wc.hInstance, NULL);
 
@@ -206,6 +207,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
                     GRAPHIC(D3D11);
                     GRAPHIC(D3D11On12);
                     GRAPHIC(D3D12);
+                    GRAPHIC(GLES2);
                     GRAPHIC(NULL);
 #undef GRAPHIC
                 }

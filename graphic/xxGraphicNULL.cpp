@@ -1,5 +1,5 @@
-#include "xxGraphicNULL.h"
 #include "xxGraphicInternal.h"
+#include "xxGraphicNULL.h"
 
 //==============================================================================
 //  Instance
