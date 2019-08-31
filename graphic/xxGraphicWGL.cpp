@@ -129,6 +129,8 @@ void glDestroyContextWGL(uint64_t context, void* view, void* display)
     if (hDC == nullptr)
         hDC = GetDC(hWnd);
 
+    wglMakeCurrent(hDC, hGLRC);
+
     if (glGetIntegerv && glDeleteVertexArrays)
     {
         GLuint vao = 0;

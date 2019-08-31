@@ -4,7 +4,7 @@
 #include "xxGraphicGLES2.h"
 
 #include "gl/gl2.h"
-#define GL_CONSTANT_BUFFER  0
+#define GL_UNIFORM_BUFFER   0
 
 //==============================================================================
 //  Instance
@@ -69,6 +69,7 @@ struct SWAPCHAINGL
     uint64_t    pipeline;
     uint64_t    vertexBuffers[8];
     GLenum      textureTypes[8];
+    bool        textureMipmaps[8];
 };
 //------------------------------------------------------------------------------
 uint64_t xxCreateSwapchainGLES2(uint64_t device, void* view, unsigned int width, unsigned int height)
@@ -104,6 +105,7 @@ uint64_t xxCreateSwapchainGLES2(uint64_t device, void* view, unsigned int width,
     glSwapchain->pipeline = 0;
     memset(glSwapchain->vertexBuffers, 0, sizeof(glSwapchain->vertexBuffers));
     memset(glSwapchain->textureTypes, 0, sizeof(glSwapchain->textureTypes));
+    memset(glSwapchain->textureMipmaps, 0, sizeof(glSwapchain->textureMipmaps));
 
     return reinterpret_cast<uint64_t>(glSwapchain);
 }
@@ -140,6 +142,7 @@ uint64_t xxGetCommandBufferGLES2(uint64_t device, uint64_t swapchain)
     glSwapchain->pipeline = 0;
     memset(glSwapchain->vertexBuffers, 0, sizeof(glSwapchain->vertexBuffers));
     memset(glSwapchain->textureTypes, 0, sizeof(glSwapchain->textureTypes));
+    memset(glSwapchain->textureMipmaps, 0, sizeof(glSwapchain->textureMipmaps));
 
     return reinterpret_cast<uint64_t>(glSwapchain);
 }
@@ -230,7 +233,7 @@ uint64_t xxCreateConstantBufferGLES2(uint64_t device, unsigned int size)
     if (glBuffer == nullptr)
         return 0;
 
-    glBuffer->type = GL_CONSTANT_BUFFER;
+    glBuffer->type = GL_UNIFORM_BUFFER;
     glBuffer->buffer = 0;
     glBuffer->memory = xxAlloc(char, size);
     glBuffer->size = size;
@@ -298,7 +301,7 @@ void xxUnmapBufferGLES2(uint64_t device, uint64_t buffer)
     BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(buffer);
     if (glBuffer == nullptr)
         return;
-    if (glBuffer->type == GL_CONSTANT_BUFFER)
+    if (glBuffer->type == GL_UNIFORM_BUFFER)
         return;
 
     glBindBuffer(glBuffer->type, glBuffer->buffer);
@@ -389,20 +392,26 @@ void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, unsigned int level, 
 
     if (glTexture->depth == 1 && glTexture->array == 1)
     {
-        glTexture->type = GL_TEXTURE_2D;
         glBindTexture(GL_TEXTURE_2D, glTexture->texture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        if (glTexture->type == 0)
+        {
+            glTexture->type = GL_TEXTURE_2D;
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glTexture->mipmap > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+        }
         glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, glTexture->width, glTexture->height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, glTexture->memory);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     if (glTexture->width == glTexture->height && glTexture->depth == 1 && glTexture->array == 6)
     {
-        glTexture->type = GL_TEXTURE_CUBE_MAP;
         glBindTexture(GL_TEXTURE_CUBE_MAP, glTexture->texture);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        if (glTexture->type == 0)
+        {
+            glTexture->type = GL_TEXTURE_CUBE_MAP;
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, glTexture->mipmap > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+        }
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + array, level, GL_RGBA, glTexture->width, glTexture->height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, glTexture->memory);
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
@@ -817,6 +826,7 @@ void xxSetFragmentTexturesGLES2(uint64_t commandBuffer, int count, const uint64_
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(glTexture->type, glTexture->texture);
         glSwapchain->textureTypes[i] = glTexture->type;
+        glSwapchain->textureMipmaps[i] = (glTexture->mipmap > 1);
     }
 }
 //------------------------------------------------------------------------------
@@ -836,7 +846,17 @@ void xxSetFragmentSamplersGLES2(uint64_t commandBuffer, int count, const uint64_
         glTexParameteri(glSwapchain->textureTypes[i], GL_TEXTURE_WRAP_S, glSampler.addressU ? GL_CLAMP_TO_EDGE : GL_REPEAT);
         glTexParameteri(glSwapchain->textureTypes[i], GL_TEXTURE_WRAP_T, glSampler.addressV ? GL_CLAMP_TO_EDGE : GL_REPEAT);
         glTexParameteri(glSwapchain->textureTypes[i], GL_TEXTURE_MAG_FILTER, glSampler.magFilter ? GL_LINEAR : GL_NEAREST);
-        glTexParameteri(glSwapchain->textureTypes[i], GL_TEXTURE_MIN_FILTER, glSampler.minFilter ? GL_LINEAR : GL_NEAREST);
+
+        GLenum minFilter;
+        if (glSwapchain->textureMipmaps[i])
+        {
+            minFilter = glSampler.minFilter ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_NEAREST;
+        }
+        else
+        {
+            minFilter = glSampler.minFilter ? GL_LINEAR : GL_NEAREST;
+        }
+        glTexParameteri(glSwapchain->textureTypes[i], GL_TEXTURE_MIN_FILTER, minFilter);
     }
 }
 //------------------------------------------------------------------------------
