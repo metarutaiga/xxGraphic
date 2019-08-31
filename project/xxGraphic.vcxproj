@@ -35,6 +35,7 @@
     <ClCompile Include="..\graphic\xxGraphicGL.cpp" />
     <ClCompile Include="..\graphic\xxGraphicGLES2.cpp" />
     <ClCompile Include="..\graphic\xxGraphicNULL.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicWGL.cpp" />
     <ClCompile Include="..\graphic\xxSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -64,6 +65,7 @@
     <ClInclude Include="..\graphic\xxGraphicGLES2.h" />
     <ClInclude Include="..\graphic\xxGraphicInternal.h" />
     <ClInclude Include="..\graphic\xxGraphicNULL.h" />
+    <ClInclude Include="..\graphic\xxGraphicWGL.h" />
     <ClInclude Include="..\graphic\xxSystem.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

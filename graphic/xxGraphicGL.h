@@ -7,14 +7,9 @@
 #include "gl/gl2ext.h"
 
 //==============================================================================
-//  Initialize - WGL
+//  Initialize
 //==============================================================================
-uint64_t xxGraphicCreateWGL();
-void xxGraphicDestroyWGL(uint64_t context, void* view, void* display);
-//==============================================================================
-//  Initialize - GL
-//==============================================================================
-bool xxGraphicCreateGL(void* (*getSymbol)(const char* name, bool& failed));
+bool xxGraphicCreateGL(void* (*getSymbol)(const char* name, bool* failed));
 void xxGraphicDestroyGL();
 //==============================================================================
 //  GLSL Shader
@@ -24,10 +19,10 @@ xxEXTERN const char*                                    fragmentShaderCode;
 //==============================================================================
 //  Function
 //==============================================================================
-xxEXTERN uint64_t                                       (*xxglCreateContext)(uint64_t device, void* view, void** display);
-xxEXTERN void                                           (*xxglDestroyContext)(uint64_t context, void* view, void* display);
-xxEXTERN void                                           (*xxglMakeCurrentContext)(uint64_t context, void* display);
-xxEXTERN void                                           (*xxglPresentContext)(uint64_t context, void* display);
+xxEXTERN uint64_t                                       (*glCreateContext)(uint64_t device, void* view, void** display);
+xxEXTERN void                                           (*glDestroyContext)(uint64_t context, void* view, void* display);
+xxEXTERN void                                           (*glMakeCurrentContext)(uint64_t context, void* display);
+xxEXTERN void                                           (*glPresentContext)(uint64_t context, void* display);
 //------------------------------------------------------------------------------
 xxEXTERN PFNGLACTIVETEXTUREPROC                         glActiveTexture;
 xxEXTERN PFNGLATTACHSHADERPROC                          glAttachShader;

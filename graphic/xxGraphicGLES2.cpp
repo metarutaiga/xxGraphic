@@ -1,5 +1,6 @@
 #include "xxGraphicInternal.h"
 #include "xxGraphicGL.h"
+#include "xxGraphicWGL.h"
 #include "xxGraphicGLES2.h"
 
 #include "gl/gl2.h"
@@ -21,7 +22,7 @@ uint64_t xxCreateInstanceGLES2()
 //------------------------------------------------------------------------------
 void xxDestroyInstanceGLES2(uint64_t instance)
 {
-    xxGraphicDestroyWGL(instance, nullptr, nullptr);
+    xxGraphicDestroyWGL(instance);
 
     xxUnregisterFunction();
 }
@@ -77,7 +78,7 @@ uint64_t xxCreateSwapchainGLES2(uint64_t device, void* view, unsigned int width,
         return 0;
 
     void* display = nullptr;
-    uint64_t context = xxglCreateContext(device, view, &display);
+    uint64_t context = glCreateContext(device, view, &display);
     if (context == 0)
     {
         delete glSwapchain;
@@ -113,7 +114,7 @@ void xxDestroySwapchainGLES2(uint64_t swapchain)
     if (glSwapchain == nullptr)
         return;
 
-    xxglDestroyContext(glSwapchain->context, glSwapchain->view, glSwapchain->display);
+    glDestroyContext(glSwapchain->context, glSwapchain->view, glSwapchain->display);
     delete glSwapchain;
 }
 //------------------------------------------------------------------------------
@@ -123,7 +124,7 @@ void xxPresentSwapchainGLES2(uint64_t swapchain)
     if (glSwapchain == nullptr)
         return;
 
-    xxglPresentContext(glSwapchain->context, glSwapchain->display);
+    glPresentContext(glSwapchain->context, glSwapchain->display);
 }
 //------------------------------------------------------------------------------
 uint64_t xxGetCommandBufferGLES2(uint64_t device, uint64_t swapchain)
@@ -132,7 +133,7 @@ uint64_t xxGetCommandBufferGLES2(uint64_t device, uint64_t swapchain)
     if (glSwapchain == nullptr)
         return 0;
 
-    xxglMakeCurrentContext(glSwapchain->context, glSwapchain->display);
+    glMakeCurrentContext(glSwapchain->context, glSwapchain->display);
     glViewport(0, 0, glSwapchain->width, glSwapchain->height);
     glScissor(0, 0, glSwapchain->width, glSwapchain->height);
 

@@ -46,6 +46,9 @@
     <ClCompile Include="..\graphic\xxGraphicGL.cpp">
       <Filter>OpenGL</Filter>
     </ClCompile>
+    <ClCompile Include="..\graphic\xxGraphicWGL.cpp">
+      <Filter>OpenGL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\graphic\xxGraphic.h" />
@@ -119,6 +122,9 @@
       <Filter>OpenGL</Filter>
     </ClInclude>
     <ClInclude Include="..\graphic\xxGraphicGL.h">
+      <Filter>OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\xxGraphicWGL.h">
       <Filter>OpenGL</Filter>
     </ClInclude>
   </ItemGroup>

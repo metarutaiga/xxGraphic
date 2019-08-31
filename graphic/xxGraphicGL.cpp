@@ -1,247 +1,13 @@
 #include "xxGraphicGL.h"
 
-#include "gl/wgl.h"
-static const wchar_t* const                 g_dummy = L"xxGraphicDummyWindow";
-static HMODULE                              g_glLibrary = nullptr;
-static HWND                                 g_hWnd = nullptr;
-
-static PFNWGLCREATECONTEXTPROC              wglCreateContext;
-static PFNWGLDELETECONTEXTPROC              wglDeleteContext;
-static PFNWGLGETCURRENTCONTEXTPROC          wglGetCurrentContext;
-static PFNWGLGETCURRENTDCPROC               wglGetCurrentDC;
-static PFNWGLGETPROCADDRESSPROC             wglGetProcAddress;
-static PFNWGLMAKECURRENTPROC                wglMakeCurrent;
-static PFNWGLSHARELISTSPROC                 wglShareLists;
-static PFNWGLCREATECONTEXTATTRIBSARBPROC    wglCreateContextAttribsARB;
-
-//==============================================================================
-//  Initialize - WGL
-//==============================================================================
-static void* getWGLSymbol(const char* name, bool& failed)
-{
-    void* ptr = nullptr;
-
-    if (ptr == nullptr && wglGetProcAddress)
-        ptr = wglGetProcAddress(name);
-
-    if (ptr == nullptr && g_glLibrary)
-        ptr = GetProcAddress(g_glLibrary, name);
-
-    if (ptr == nullptr)
-        xxLog("WGL", "%s is not found", name);
-
-    failed |= (ptr == nullptr);
-    return ptr;
-}
-//------------------------------------------------------------------------------
-uint64_t xxglCreateContextWGL(uint64_t instance, void* view, void** display)
-{
-    HGLRC hInstance = reinterpret_cast<HGLRC>(instance);
-    HWND hWnd = reinterpret_cast<HWND>(view);
-    HDC hDC = GetDC(hWnd);
-
-    PIXELFORMATDESCRIPTOR desc = {};
-    desc.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-    desc.nVersion = 1;
-    desc.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    desc.iPixelType = PFD_TYPE_RGBA;
-    desc.cColorBits = 32;
-    desc.cDepthBits = 24;
-    desc.cStencilBits = 8;
-    desc.iLayerType = PFD_MAIN_PLANE;
-
-    int pixelFormat = ChoosePixelFormat(hDC, &desc);
-    SetPixelFormat(hDC, pixelFormat, &desc);
-
-    HGLRC hGLRC;
-    if (wglCreateContextAttribsARB)
-    {
-        int attribs[] =
-        {
-            WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-            WGL_CONTEXT_MINOR_VERSION_ARB, 2,
-            WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-            0,
-        };
-
-        hGLRC = wglCreateContextAttribsARB(hDC, hInstance, attribs);
-        if (hGLRC == nullptr)
-        {
-            ReleaseDC(hWnd, hDC);
-            return 0;
-        }
-    }
-    else
-    {
-        hGLRC = wglCreateContext(hDC);
-        if (hGLRC == nullptr)
-        {
-            ReleaseDC(hWnd, hDC);
-            return 0;
-        }
-
-        if (hInstance)
-        {
-            if (wglShareLists(hInstance, hGLRC) == FALSE)
-            {
-                xxLog("xxGraphic", "%s is failed", "wglShareLists");
-            }
-        }
-    }
-    if (wglMakeCurrent(hDC, hGLRC) == FALSE)
-    {
-        xxLog("xxGraphic", "%s is failed", "wglMakeCurrent");
-    }
-
-    PFNGLGENVERTEXARRAYSOESPROC glGenVertexArrays;
-    PFNGLBINDVERTEXARRAYOESPROC glBindVertexArray;
-    glGenVertexArrays = (PFNGLGENVERTEXARRAYSOESPROC)wglGetProcAddress("glGenVertexArrays");
-    glBindVertexArray = (PFNGLBINDVERTEXARRAYOESPROC)wglGetProcAddress("glBindVertexArray");
-    if (glGenVertexArrays && glBindVertexArray)
-    {
-        GLuint vao = 0;
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
-    }
-
-    if (display)
-    {
-        (*display) = hDC;
-    }
-    else
-    {
-        ReleaseDC(hWnd, hDC);
-    }
-
-    return reinterpret_cast<uint64_t>(hGLRC);
-}
-//------------------------------------------------------------------------------
-void xxglDestroyContextWGL(uint64_t context, void* view, void* display)
-{
-    HGLRC hGLRC = reinterpret_cast<HGLRC>(context);
-    if (hGLRC == nullptr)
-        return;
-    HWND hWnd = reinterpret_cast<HWND>(view);
-    HDC hDC = reinterpret_cast<HDC>(display);
-
-    wglMakeCurrent(hDC, hGLRC);
-
-    PFNGLGETINTEGERVPROC glGetIntegerv;
-    PFNGLDELETEVERTEXARRAYSOESPROC glDeleteVertexArrays;
-    glGetIntegerv = (PFNGLGETINTEGERVPROC)wglGetProcAddress("glGetIntegerv");
-    glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSOESPROC)wglGetProcAddress("glDeleteVertexArrays");
-    if (glGetIntegerv && glDeleteVertexArrays)
-    {
-        GLuint vao = 0;
-        glGetIntegerv(GL_VERTEX_ARRAY_BINDING_OES, (GLint*)&vao);
-        glDeleteVertexArrays(1, &vao);
-    }
-
-    wglMakeCurrent(hDC, nullptr);
-    wglDeleteContext(hGLRC);
-    ReleaseDC(hWnd, hDC);
-}
-//------------------------------------------------------------------------------
-void xxglMakeCurrentContextWGL(uint64_t context, void* display)
-{
-    HGLRC hGLRC = reinterpret_cast<HGLRC>(context);
-    HDC hDC = reinterpret_cast<HDC>(display);
-
-    if (wglMakeCurrent(hDC, hGLRC) == FALSE)
-    {
-        xxLog("xxGraphic", "%s is failed", "wglMakeCurrent");
-    }
-}
-//------------------------------------------------------------------------------
-void xxglPresentContextWGL(uint64_t context, void* display)
-{
-    HDC hDC = reinterpret_cast<HDC>(display);
-
-    if (SwapBuffers(hDC) == FALSE)
-    {
-        xxLog("xxGraphic", "%s is failed", "SwapBuffers");
-    }
-}
-//------------------------------------------------------------------------------
-uint64_t xxGraphicCreateWGL()
-{
-    if (g_glLibrary == nullptr)
-        g_glLibrary = LoadLibraryW(L"opengl32.dll");
-    if (g_glLibrary == nullptr)
-        return 0;
-
-    if (g_hWnd == nullptr)
-    {
-        WNDCLASSEXW wc = { sizeof(WNDCLASSEXW), CS_OWNDC, DefWindowProcW, 0, 0, GetModuleHandleW(nullptr), nullptr, nullptr, nullptr, nullptr, g_dummy, nullptr };
-        RegisterClassExW(&wc);
-        g_hWnd = CreateWindowW(g_dummy, g_dummy, WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 0, 0, 1, 1, nullptr, nullptr, wc.hInstance, nullptr);
-    }
-
-    bool failed = false;
-
-#define symbol(var) (void*&)var = getWGLSymbol(#var, failed);
-    failed = false;
-    symbol(wglCreateContext);
-    symbol(wglDeleteContext);
-    symbol(wglGetCurrentContext);
-    symbol(wglGetCurrentDC);
-    symbol(wglGetProcAddress);
-    symbol(wglMakeCurrent);
-    symbol(wglShareLists);
-#undef symbol
-    if (failed)
-        return 0;
-
-    void* display = nullptr;
-    uint64_t context = xxglCreateContextWGL(0, g_hWnd, &display);
-    if (context == 0)
-        return 0;
-
-#define symbol(var) (void*&)var = getWGLSymbol(#var, failed);
-    failed = false;
-    symbol(wglCreateContextAttribsARB);
-#undef symbol
-    if (failed == false)
-    {
-        xxglDestroyContextWGL(context, g_hWnd, display);
-        context = xxglCreateContextWGL(0, g_hWnd, &display);
-    }
-
-    if (xxGraphicCreateGL(getWGLSymbol) == false)
-    {
-        xxGraphicDestroyWGL(context, g_hWnd, display);
-        return 0;
-    }
-
-    xxglCreateContext = xxglCreateContextWGL;
-    xxglDestroyContext = xxglDestroyContextWGL;
-    xxglMakeCurrentContext = xxglMakeCurrentContextWGL;
-    xxglPresentContext = xxglPresentContextWGL;
-
-    return context;
-}
-//------------------------------------------------------------------------------
-void xxGraphicDestroyWGL(uint64_t context, void* view, void* display)
-{
-    xxglDestroyContextWGL(context, view, display);
-    xxGraphicDestroyGL();
-
-    if (g_hWnd)
-    {
-        DestroyWindow(g_hWnd);
-        UnregisterClassW(g_dummy, GetModuleHandleW(nullptr));
-        g_hWnd = nullptr;
-    }
-}
 //==============================================================================
 //  Initialize
 //==============================================================================
-bool xxGraphicCreateGL(void* (*getSymbol)(const char* name, bool& failed))
+bool xxGraphicCreateGL(void* (*getSymbol)(const char* name, bool* failed))
 {
     bool failed = false;
 
-#define symbol(var) (void*&)var = getSymbol(#var, failed);
-    failed = false;
+#define symbol(var) (void*&)var = getSymbol(#var, &failed);
     symbol(glActiveTexture);
     symbol(glAttachShader);
     symbol(glBindAttribLocation);
@@ -389,7 +155,7 @@ bool xxGraphicCreateGL(void* (*getSymbol)(const char* name, bool& failed))
     return (failed == false);
 }
 //------------------------------------------------------------------------------
-static void* getNULLSymbol(const char* name, bool& failed)
+static void* getNULLSymbol(const char* name, bool* failed)
 {
     return nullptr;
 }
@@ -431,10 +197,10 @@ const char* fragmentShaderCode =
 //==============================================================================
 //  Function
 //==============================================================================
-uint64_t                                        (*xxglCreateContext)(uint64_t instance, void* view, void** display);
-void                                            (*xxglDestroyContext)(uint64_t context, void* view, void* display);
-void                                            (*xxglMakeCurrentContext)(uint64_t context, void* display);
-void                                            (*xxglPresentContext)(uint64_t context, void* display);
+uint64_t                                        (*glCreateContext)(uint64_t instance, void* view, void** display);
+void                                            (*glDestroyContext)(uint64_t context, void* view, void* display);
+void                                            (*glMakeCurrentContext)(uint64_t context, void* display);
+void                                            (*glPresentContext)(uint64_t context, void* display);
 //------------------------------------------------------------------------------
 PFNGLACTIVETEXTUREPROC                          glActiveTexture;
 PFNGLATTACHSHADERPROC                           glAttachShader;
