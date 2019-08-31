@@ -171,9 +171,3 @@ xxEXTERN PFNGLVERTEXATTRIB4FPROC                        glVertexAttrib4f;
 xxEXTERN PFNGLVERTEXATTRIB4FVPROC                       glVertexAttrib4fv;
 xxEXTERN PFNGLVERTEXATTRIBPOINTERPROC                   glVertexAttribPointer;
 xxEXTERN PFNGLVIEWPORTPROC                              glViewport;
-
-xxEXTERN PFNGLDRAWELEMENTSBASEVERTEXEXTPROC             glDrawElementsBaseVertex;
-
-xxEXTERN PFNGLGENVERTEXARRAYSOESPROC                    glGenVertexArrays;
-xxEXTERN PFNGLDELETEVERTEXARRAYSOESPROC                 glDeleteVertexArrays;
-xxEXTERN PFNGLBINDVERTEXARRAYOESPROC                    glBindVertexArray;

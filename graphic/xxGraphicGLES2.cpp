@@ -65,7 +65,9 @@ struct SWAPCHAINGL
     void*       display;
     int         width;
     int         height;
-    GLuint      vao;
+    uint64_t    pipeline;
+    uint64_t    vertexBuffers[8];
+    GLenum      textureTypes[8];
 };
 //------------------------------------------------------------------------------
 uint64_t xxCreateSwapchainGLES2(uint64_t device, void* view, unsigned int width, unsigned int height)
@@ -93,16 +95,14 @@ uint64_t xxCreateSwapchainGLES2(uint64_t device, void* view, unsigned int width,
         }
     }
 
-    GLuint vao = 0;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
     glSwapchain->context = context;
     glSwapchain->view = view;
     glSwapchain->display = display;
     glSwapchain->width = width;
     glSwapchain->height = height;
-    glSwapchain->vao = vao;
+    glSwapchain->pipeline = 0;
+    memset(glSwapchain->vertexBuffers, 0, sizeof(glSwapchain->vertexBuffers));
+    memset(glSwapchain->textureTypes, 0, sizeof(glSwapchain->textureTypes));
 
     return reinterpret_cast<uint64_t>(glSwapchain);
 }
@@ -113,11 +113,6 @@ void xxDestroySwapchainGLES2(uint64_t swapchain)
     if (glSwapchain == nullptr)
         return;
 
-    xxglMakeCurrentContext(glSwapchain->context, glSwapchain->display);
-    if (glSwapchain->vao)
-    {
-        glDeleteVertexArrays(1, &glSwapchain->vao);
-    }
     xxglDestroyContext(glSwapchain->context, glSwapchain->view, glSwapchain->display);
     delete glSwapchain;
 }
@@ -138,8 +133,14 @@ uint64_t xxGetCommandBufferGLES2(uint64_t device, uint64_t swapchain)
         return 0;
 
     xxglMakeCurrentContext(glSwapchain->context, glSwapchain->display);
+    glViewport(0, 0, glSwapchain->width, glSwapchain->height);
+    glScissor(0, 0, glSwapchain->width, glSwapchain->height);
 
-    return device;
+    glSwapchain->pipeline = 0;
+    memset(glSwapchain->vertexBuffers, 0, sizeof(glSwapchain->vertexBuffers));
+    memset(glSwapchain->textureTypes, 0, sizeof(glSwapchain->textureTypes));
+
+    return reinterpret_cast<uint64_t>(glSwapchain);
 }
 //------------------------------------------------------------------------------
 uint64_t xxGetFramebufferGLES2(uint64_t device, uint64_t swapchain)
@@ -151,13 +152,6 @@ uint64_t xxGetFramebufferGLES2(uint64_t device, uint64_t swapchain)
 //==============================================================================
 bool xxBeginCommandBufferGLES2(uint64_t commandBuffer)
 {
-    glEnable(GL_BLEND);
-    glBlendEquation(GL_FUNC_ADD);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_SCISSOR_TEST);
-
     return true;
 }
 //------------------------------------------------------------------------------
@@ -421,9 +415,34 @@ void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, unsigned int level, 
 //==============================================================================
 //  Sampler
 //==============================================================================
+union SAMPLERGL
+{
+    uint64_t    value;
+    struct
+    {
+        uint8_t addressU;
+        uint8_t addressV;
+        uint8_t addressW;
+        uint8_t magFilter;
+        uint8_t minFilter;
+        uint8_t mipFilter;
+        uint8_t anisotropy;
+    };
+};
+//------------------------------------------------------------------------------
 uint64_t xxCreateSamplerGLES2(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy)
 {
-    return 0;
+    SAMPLERGL d3dSampler = {};
+
+    d3dSampler.addressU = clampU;
+    d3dSampler.addressV = clampV;
+    d3dSampler.addressW = clampW;
+    d3dSampler.magFilter = linearMag;
+    d3dSampler.minFilter = linearMin;
+    d3dSampler.mipFilter = linearMip;
+    d3dSampler.anisotropy = anisotropy;
+
+    return d3dSampler.value;
 }
 //------------------------------------------------------------------------------
 void xxDestroySamplerGLES2(uint64_t sampler)
@@ -437,12 +456,13 @@ struct VERTEXATTRIBUTEGL
 {
     struct Attribute
     {
-        GLuint index;
-        GLint size;
-        GLenum type;
-        GLboolean normalized;
-        GLsizei stride;
-        const GLvoid* pointer;
+        GLuint      index;
+        GLint       size;
+        GLenum      type;
+        GLboolean   normalized;
+        GLsizei     stride;
+        const char* pointer;
+        int         stream;
         const char* name;
     } attributes[16];
     int count;
@@ -474,6 +494,7 @@ uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, ...)
         attributes[i].normalized = GL_FALSE;
         attributes[i].stride = 0;
         attributes[i].pointer = (char*)nullptr + offset;
+        attributes[i].stream = stream;
 
         if (offset == 0 && element == 3 && size == sizeof(float) * 3)
         {
@@ -582,10 +603,26 @@ void xxDestroyShaderGLES2(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-struct PIPELINEGL : public VERTEXATTRIBUTEGL
+union STATEGL
 {
-    GLuint  program;
-    GLint   texture;
+    uint64_t        value;
+    struct
+    {
+        uint64_t    alphaBlending:1;
+        uint64_t    alphaTesting:1;
+        uint64_t    depthTest:1;
+        uint64_t    depthWrite:1;
+        uint64_t    cull:1;
+        uint64_t    scissor:1;
+    };
+};
+//------------------------------------------------------------------------------
+struct PIPELINEGL
+{
+    GLuint              program;
+    VERTEXATTRIBUTEGL*  vertexAttribute;
+    GLint               texture;
+    STATEGL             state;
 };
 //------------------------------------------------------------------------------
 static void checkProgram(GLuint glProgram)
@@ -611,17 +648,25 @@ static void checkProgram(GLuint glProgram)
 //------------------------------------------------------------------------------
 uint64_t xxCreateBlendStateGLES2(uint64_t device, bool blending)
 {
-    return 0;
+    STATEGL glState = {};
+    glState.alphaBlending = blending;
+    return glState.value;
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateDepthStencilStateGLES2(uint64_t device, bool depthTest, bool depthWrite)
 {
-    return 0;
+    STATEGL glState = {};
+    glState.depthTest = depthTest;
+    glState.depthWrite = depthWrite;
+    return glState.value;
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateRasterizerStateGLES2(uint64_t device, bool cull, bool scissor)
 {
-    return 0;
+    STATEGL glState = {};
+    glState.cull = cull;
+    glState.scissor = scissor;
+    return glState.value;
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
@@ -633,27 +678,34 @@ uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t blendState, uint64_t de
     if (glPipeline == nullptr)
         return 0;
 
+    STATEGL glBlendState = { blendState };
+    STATEGL glDepthStencilState = { depthStencilState };
+    STATEGL glRasterizerState = { rasterizerState };
+
+    GLuint glProgram = glCreateProgram();
+
+    VERTEXATTRIBUTEGL::Attribute* attributes = glVertexAttribute->attributes;
+    for (int i = 0; i < glVertexAttribute->count; ++i)
+    {
+        VERTEXATTRIBUTEGL::Attribute& attribute = attributes[i];
+        glBindAttribLocation(glProgram, attribute.index, attribute.name);
+    }
+
     GLuint glVertexShader = static_cast<GLuint>(vertexShader);
     GLuint glFragmentShader = static_cast<GLuint>(fragmentShader);
-    GLuint glProgram = glCreateProgram();
     glAttachShader(glProgram, glVertexShader);
     glAttachShader(glProgram, glFragmentShader);
     glLinkProgram(glProgram);
     checkProgram(glProgram);
 
-    VERTEXATTRIBUTEGL::Attribute* sources = glVertexAttribute->attributes;
-    VERTEXATTRIBUTEGL::Attribute* targets = glPipeline->attributes;
-    for (int i = 0; i < glVertexAttribute->count; ++i)
-    {
-        VERTEXATTRIBUTEGL::Attribute& source = sources[i];
-        VERTEXATTRIBUTEGL::Attribute& target = targets[i];
-        target = source;
-        target.index = glGetAttribLocation(glProgram, target.name);
-    }
-
-    glPipeline->count = glVertexAttribute->count;
     glPipeline->program = glProgram;
+    glPipeline->vertexAttribute = glVertexAttribute;
     glPipeline->texture = glGetUniformLocation(glProgram, "tex");
+    glPipeline->state.alphaBlending = glBlendState.alphaBlending;
+    glPipeline->state.depthTest = glDepthStencilState.depthTest;
+    glPipeline->state.depthWrite = glDepthStencilState.depthWrite;
+    glPipeline->state.cull = glRasterizerState.cull;
+    glPipeline->state.scissor = glRasterizerState.scissor;
 
     return reinterpret_cast<uint64_t>(glPipeline);
 }
@@ -692,23 +744,42 @@ void xxSetViewportGLES2(uint64_t commandBuffer, int x, int y, int width, int hei
 //------------------------------------------------------------------------------
 void xxSetScissorGLES2(uint64_t commandBuffer, int x, int y, int width, int height)
 {
-    glScissor(x, y, width, height);
+    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandBuffer);
+
+    glScissor(x, glSwapchain->height - y - height, width, height);
 }
 //------------------------------------------------------------------------------
 void xxSetPipelineGLES2(uint64_t commandBuffer, uint64_t pipeline)
 {
+    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandBuffer);
     PIPELINEGL* glPipeline = reinterpret_cast<PIPELINEGL*>(pipeline);
-    VERTEXATTRIBUTEGL::Attribute* attributes = glPipeline->attributes;
+    VERTEXATTRIBUTEGL* vertexAttribute = glPipeline->vertexAttribute;
+    VERTEXATTRIBUTEGL::Attribute* attributes = vertexAttribute->attributes;
 
-    for (int i = 0; i < glPipeline->count; ++i)
+    for (int i = 0; i < vertexAttribute->count; ++i)
     {
         VERTEXATTRIBUTEGL::Attribute& attribute = attributes[i];
         glEnableVertexAttribArray(attribute.index);
-        glVertexAttribPointer(attribute.index, attribute.size, attribute.type, attribute.normalized, attribute.stride, attribute.pointer);
     }
+
+    if (glPipeline->state.alphaBlending)
+    {
+        glEnable(GL_BLEND);
+        glBlendEquation(GL_FUNC_ADD);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+    else
+    {
+        glDisable(GL_BLEND);
+    }
+    glPipeline->state.cull ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
+    glPipeline->state.depthTest ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+    glDepthMask(glPipeline->state.depthWrite ? GL_TRUE : GL_FALSE);
+    glPipeline->state.scissor ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST);
 
     glUseProgram(glPipeline->program);
     glUniform1i(glPipeline->texture, 0);
+    glSwapchain->pipeline = pipeline;
 }
 //------------------------------------------------------------------------------
 void xxSetIndexBufferGLES2(uint64_t commandBuffer, uint64_t buffer)
@@ -720,9 +791,12 @@ void xxSetIndexBufferGLES2(uint64_t commandBuffer, uint64_t buffer)
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersGLES2(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
-    BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(buffers[0]);
-
-    glBindBuffer(GL_ARRAY_BUFFER, glBuffer->buffer);
+    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandBuffer);
+ 
+    for (int i = 0; i < count; ++i)
+    {
+        glSwapchain->vertexBuffers[i] = buffers[i];
+    }
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesGLES2(uint64_t commandBuffer, int count, const uint64_t* textures)
@@ -732,6 +806,8 @@ void xxSetVertexTexturesGLES2(uint64_t commandBuffer, int count, const uint64_t*
 //------------------------------------------------------------------------------
 void xxSetFragmentTexturesGLES2(uint64_t commandBuffer, int count, const uint64_t* textures)
 {
+    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandBuffer);
+
     for (int i = 0; i < count; ++i)
     {
         TEXTUREGL* glTexture = reinterpret_cast<TEXTUREGL*>(textures[i]);
@@ -739,6 +815,7 @@ void xxSetFragmentTexturesGLES2(uint64_t commandBuffer, int count, const uint64_
             continue;
         glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(glTexture->type, glTexture->texture);
+        glSwapchain->textureTypes[i] = glTexture->type;
     }
 }
 //------------------------------------------------------------------------------
@@ -749,7 +826,17 @@ void xxSetVertexSamplersGLES2(uint64_t commandBuffer, int count, const uint64_t*
 //------------------------------------------------------------------------------
 void xxSetFragmentSamplersGLES2(uint64_t commandBuffer, int count, const uint64_t* samplers)
 {
+    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandBuffer);
 
+    for (int i = 0; i < count; ++i)
+    {
+        SAMPLERGL glSampler = { samplers[i] };
+        glActiveTexture(GL_TEXTURE0 + i);
+        glTexParameteri(glSwapchain->textureTypes[i], GL_TEXTURE_WRAP_S, glSampler.addressU ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+        glTexParameteri(glSwapchain->textureTypes[i], GL_TEXTURE_WRAP_T, glSampler.addressV ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+        glTexParameteri(glSwapchain->textureTypes[i], GL_TEXTURE_MAG_FILTER, glSampler.magFilter ? GL_LINEAR : GL_NEAREST);
+        glTexParameteri(glSwapchain->textureTypes[i], GL_TEXTURE_MIN_FILTER, glSampler.minFilter ? GL_LINEAR : GL_NEAREST);
+    }
 }
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferGLES2(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
@@ -766,8 +853,26 @@ void xxSetFragmentConstantBufferGLES2(uint64_t commandBuffer, uint64_t buffer, u
 //------------------------------------------------------------------------------
 void xxDrawIndexedGLES2(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
-    //glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, (char*)nullptr + firstIndex * sizeof(int));
-    glDrawElementsBaseVertex(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, (char*)nullptr + firstIndex * sizeof(int), vertexOffset);
+    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandBuffer);
+    PIPELINEGL* glPipeline = reinterpret_cast<PIPELINEGL*>(glSwapchain->pipeline);
+    VERTEXATTRIBUTEGL* vertexAttribute = glPipeline->vertexAttribute;
+    VERTEXATTRIBUTEGL::Attribute* attributes = vertexAttribute->attributes;
+
+    int currentStream = -1;
+    for (int i = 0; i < vertexAttribute->count; ++i)
+    {
+        VERTEXATTRIBUTEGL::Attribute& attribute = attributes[i];
+        if (currentStream != attribute.stream)
+        {
+            currentStream = attribute.stream;
+            BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(glSwapchain->vertexBuffers[attribute.stream]);
+
+            glBindBuffer(GL_ARRAY_BUFFER, glBuffer->buffer);
+        }
+        glVertexAttribPointer(attribute.index, attribute.size, attribute.type, attribute.normalized, attribute.stride, attribute.pointer + vertexOffset * attribute.stride);
+    }
+
+    glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, (char*)nullptr + firstIndex * sizeof(int));
 }
 //==============================================================================
 //  Fixed-Function

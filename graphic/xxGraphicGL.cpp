@@ -1,34 +1,18 @@
 #include "xxGraphicGL.h"
 
-static const wchar_t* const g_dummy = L"xxGraphicDummyWindow";
-static HMODULE              g_glLibrary = nullptr;
-static HWND                 g_hWnd = nullptr;
+#include "gl/wgl.h"
+static const wchar_t* const                 g_dummy = L"xxGraphicDummyWindow";
+static HMODULE                              g_glLibrary = nullptr;
+static HWND                                 g_hWnd = nullptr;
 
-static HGLRC                (WINAPI *wglCreateContext)(HDC);
-static BOOL                 (WINAPI *wglDeleteContext)(HGLRC);
-static HGLRC                (WINAPI *wglGetCurrentContext)(VOID);
-static HDC                  (WINAPI *wglGetCurrentDC)(VOID);
-static PROC                 (WINAPI *wglGetProcAddress)(LPCSTR);
-static BOOL                 (WINAPI *wglMakeCurrent)(HDC, HGLRC);
-static BOOL                 (WINAPI *wglShareLists)(HGLRC, HGLRC);
-static HGLRC                (WINAPI *wglCreateContextAttribsARB)(HDC, HGLRC, const int*);
-static BOOL                 (WINAPI *wglChoosePixelFormatARB)(HDC, const int*, const FLOAT*, UINT, int*, UINT*);
-#define WGL_CONTEXT_MAJOR_VERSION_ARB               0x2091
-#define WGL_CONTEXT_MINOR_VERSION_ARB               0x2092
-#define WGL_CONTEXT_PROFILE_MASK_ARB                0x9126
-#define WGL_CONTEXT_CORE_PROFILE_BIT_ARB            0x00000001
-#define WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB   0x00000002
-#define WGL_CONTEXT_ES2_PROFILE_BIT_EXT             0x00000004
-#define WGL_DRAW_TO_WINDOW_ARB                      0x2001
-#define WGL_ACCELERATION_ARB                        0x2003
-#define WGL_SUPPORT_OPENGL_ARB                      0x2010
-#define WGL_DOUBLE_BUFFER_ARB                       0x2011
-#define WGL_PIXEL_TYPE_ARB                          0x2013
-#define WGL_COLOR_BITS_ARB                          0x2014
-#define WGL_DEPTH_BITS_ARB                          0x2022
-#define WGL_STENCIL_BITS_ARB                        0x2023
-#define WGL_FULL_ACCELERATION_ARB                   0x2027
-#define WGL_TYPE_RGBA_ARB                           0x202B
+static PFNWGLCREATECONTEXTPROC              wglCreateContext;
+static PFNWGLDELETECONTEXTPROC              wglDeleteContext;
+static PFNWGLGETCURRENTCONTEXTPROC          wglGetCurrentContext;
+static PFNWGLGETCURRENTDCPROC               wglGetCurrentDC;
+static PFNWGLGETPROCADDRESSPROC             wglGetProcAddress;
+static PFNWGLMAKECURRENTPROC                wglMakeCurrent;
+static PFNWGLSHARELISTSPROC                 wglShareLists;
+static PFNWGLCREATECONTEXTATTRIBSARBPROC    wglCreateContextAttribsARB;
 
 //==============================================================================
 //  Initialize - WGL
@@ -66,34 +50,11 @@ uint64_t xxglCreateContextWGL(uint64_t instance, void* view, void** display)
     desc.cStencilBits = 8;
     desc.iLayerType = PFD_MAIN_PLANE;
 
-    int pixelFormat;
-    if (wglChoosePixelFormatARB)
-    {
-        int pixelFormatAttribs[] =
-        {
-            WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
-            WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
-            WGL_DOUBLE_BUFFER_ARB,  GL_TRUE,
-            WGL_ACCELERATION_ARB,   WGL_FULL_ACCELERATION_ARB,
-            WGL_PIXEL_TYPE_ARB,     WGL_TYPE_RGBA_ARB,
-            WGL_COLOR_BITS_ARB,     32,
-            WGL_DEPTH_BITS_ARB,     24,
-            WGL_STENCIL_BITS_ARB,   8,
-            0
-        };
-
-        UINT numFormats;
-        wglChoosePixelFormatARB(hDC, pixelFormatAttribs, 0, 1, &pixelFormat, &numFormats);
-        DescribePixelFormat(hDC, pixelFormat, sizeof(desc), &desc);
-    }
-    else
-    {
-        pixelFormat = ChoosePixelFormat(hDC, &desc);
-    }
+    int pixelFormat = ChoosePixelFormat(hDC, &desc);
     SetPixelFormat(hDC, pixelFormat, &desc);
 
     HGLRC hGLRC;
-    if (wglChoosePixelFormatARB)
+    if (wglCreateContextAttribsARB)
     {
         int attribs[] =
         {
@@ -132,6 +93,17 @@ uint64_t xxglCreateContextWGL(uint64_t instance, void* view, void** display)
         xxLog("xxGraphic", "%s is failed", "wglMakeCurrent");
     }
 
+    PFNGLGENVERTEXARRAYSOESPROC glGenVertexArrays;
+    PFNGLBINDVERTEXARRAYOESPROC glBindVertexArray;
+    glGenVertexArrays = (PFNGLGENVERTEXARRAYSOESPROC)wglGetProcAddress("glGenVertexArrays");
+    glBindVertexArray = (PFNGLBINDVERTEXARRAYOESPROC)wglGetProcAddress("glBindVertexArray");
+    if (glGenVertexArrays && glBindVertexArray)
+    {
+        GLuint vao = 0;
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
+    }
+
     if (display)
     {
         (*display) = hDC;
@@ -151,6 +123,19 @@ void xxglDestroyContextWGL(uint64_t context, void* view, void* display)
         return;
     HWND hWnd = reinterpret_cast<HWND>(view);
     HDC hDC = reinterpret_cast<HDC>(display);
+
+    wglMakeCurrent(hDC, hGLRC);
+
+    PFNGLGETINTEGERVPROC glGetIntegerv;
+    PFNGLDELETEVERTEXARRAYSOESPROC glDeleteVertexArrays;
+    glGetIntegerv = (PFNGLGETINTEGERVPROC)wglGetProcAddress("glGetIntegerv");
+    glDeleteVertexArrays = (PFNGLDELETEVERTEXARRAYSOESPROC)wglGetProcAddress("glDeleteVertexArrays");
+    if (glGetIntegerv && glDeleteVertexArrays)
+    {
+        GLuint vao = 0;
+        glGetIntegerv(GL_VERTEX_ARRAY_BINDING_OES, (GLint*)&vao);
+        glDeleteVertexArrays(1, &vao);
+    }
 
     wglMakeCurrent(hDC, nullptr);
     wglDeleteContext(hGLRC);
@@ -215,7 +200,6 @@ uint64_t xxGraphicCreateWGL()
 #define symbol(var) (void*&)var = getWGLSymbol(#var, failed);
     failed = false;
     symbol(wglCreateContextAttribsARB);
-    symbol(wglChoosePixelFormatARB);
 #undef symbol
     if (failed == false)
     {
@@ -400,12 +384,6 @@ bool xxGraphicCreateGL(void* (*getSymbol)(const char* name, bool& failed))
     symbol(glVertexAttrib4fv);
     symbol(glVertexAttribPointer);
     symbol(glViewport);
-
-    symbol(glDrawElementsBaseVertex);
-
-    symbol(glGenVertexArrays);
-    symbol(glDeleteVertexArrays);
-    symbol(glBindVertexArray);
 #undef symbol
 
     return (failed == false);
@@ -600,10 +578,4 @@ PFNGLVERTEXATTRIB4FPROC                         glVertexAttrib4f;
 PFNGLVERTEXATTRIB4FVPROC                        glVertexAttrib4fv;
 PFNGLVERTEXATTRIBPOINTERPROC                    glVertexAttribPointer;
 PFNGLVIEWPORTPROC                               glViewport;
-
-PFNGLDRAWELEMENTSBASEVERTEXEXTPROC              glDrawElementsBaseVertex;
-
-PFNGLGENVERTEXARRAYSOESPROC                     glGenVertexArrays;
-PFNGLDELETEVERTEXARRAYSOESPROC                  glDeleteVertexArrays;
-PFNGLBINDVERTEXARRAYOESPROC                     glBindVertexArray;
 //==============================================================================
