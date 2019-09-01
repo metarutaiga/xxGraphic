@@ -136,9 +136,11 @@ typedef struct _GR_WSI_WIN_PRESENTABLE_IMAGE_PROPERTIES
 
 typedef GR_RESULT (GR_STDCALL *PFN_grWsiWinGetDisplays)(GR_DEVICE device, GR_UINT* pDisplayCount, GR_WSI_WIN_DISPLAY* pDisplayList);
 typedef GR_RESULT (GR_STDCALL *PFN_grWsiWinGetDisplayModeList)(GR_WSI_WIN_DISPLAY display, GR_UINT* pDisplayModeCount, GR_WSI_WIN_DISPLAY_MODE* pDisplayModeList);
-typedef GR_RESULT (GR_STDCALL *PFN_grWsiWinTakeFullscreenOwnership)(GR_WSI_WIN_DISPLAY display, GR_IMAGE image);typedef GR_RESULT (GR_STDCALL *PFN_grWsiWinReleaseFullscreenOwnership)(GR_WSI_WIN_DISPLAY display);
+typedef GR_RESULT (GR_STDCALL *PFN_grWsiWinTakeFullscreenOwnership)(GR_WSI_WIN_DISPLAY display, GR_IMAGE image);
+typedef GR_RESULT (GR_STDCALL *PFN_grWsiWinReleaseFullscreenOwnership)(GR_WSI_WIN_DISPLAY display);
 typedef GR_RESULT (GR_STDCALL *PFN_grWsiWinSetGammaRamp)(GR_WSI_WIN_DISPLAY display, const GR_WSI_WIN_GAMMA_RAMP* pGammaRamp);
-typedef GR_RESULT (GR_STDCALL *PFN_grWsiWinWaitForVerticalBlank)(GR_WSI_WIN_DISPLAY display);typedef GR_RESULT (GR_STDCALL *PFN_grWsiWinGetScanLine)(GR_WSI_WIN_DISPLAY display, GR_INT* pScanLine);
+typedef GR_RESULT (GR_STDCALL *PFN_grWsiWinWaitForVerticalBlank)(GR_WSI_WIN_DISPLAY display);
+typedef GR_RESULT (GR_STDCALL *PFN_grWsiWinGetScanLine)(GR_WSI_WIN_DISPLAY display, GR_INT* pScanLine);
 typedef GR_RESULT (GR_STDCALL *PFN_grWsiWinCreatePresentableImage)(GR_DEVICE device, const GR_WSI_WIN_PRESENTABLE_IMAGE_CREATE_INFO* pCreateInfo, GR_IMAGE* pImage, GR_GPU_MEMORY* pMem);
 typedef GR_RESULT (GR_STDCALL *PFN_grWsiWinQueuePresent)(GR_QUEUE queue, const GR_WSI_WIN_PRESENT_INFO* pPresentInfo);
 typedef GR_RESULT (GR_STDCALL *PFN_grWsiWinSetMaxQueuedFrames)(GR_DEVICE device, GR_UINT maxFrames);
@@ -146,9 +148,11 @@ typedef GR_RESULT (GR_STDCALL *PFN_grWsiWinSetMaxQueuedFrames)(GR_DEVICE device,
 #if GR_PROTOTYPES
 PFN_grWsiWinGetDisplays                 grWsiWinGetDisplays;
 PFN_grWsiWinGetDisplayModeList          grWsiWinGetDisplayModeList;
-PFN_grWsiWinTakeFullscreenOwnership     grWsiWinTakeFullscreenOwnership;PFN_grWsiWinReleaseFullscreenOwnership  grWsiWinReleaseFullscreenOwnership;
+PFN_grWsiWinTakeFullscreenOwnership     grWsiWinTakeFullscreenOwnership;
+PFN_grWsiWinReleaseFullscreenOwnership  grWsiWinReleaseFullscreenOwnership;
 PFN_grWsiWinSetGammaRamp                grWsiWinSetGammaRamp;
-PFN_grWsiWinWaitForVerticalBlank        grWsiWinWaitForVerticalBlank;PFN_grWsiWinGetScanLine                 grWsiWinGetScanLine;
+PFN_grWsiWinWaitForVerticalBlank        grWsiWinWaitForVerticalBlank;
+PFN_grWsiWinGetScanLine                 grWsiWinGetScanLine;
 PFN_grWsiWinCreatePresentableImage      grWsiWinCreatePresentableImage;
 PFN_grWsiWinQueuePresent                grWsiWinQueuePresent;
 PFN_grWsiWinSetMaxQueuedFrames          grWsiWinSetMaxQueuedFrames;
