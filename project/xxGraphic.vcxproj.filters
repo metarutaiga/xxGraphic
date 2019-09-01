@@ -49,6 +49,12 @@
     <ClCompile Include="..\graphic\xxGraphicWGL.cpp">
       <Filter>OpenGL</Filter>
     </ClCompile>
+    <ClCompile Include="..\graphic\xxGraphicMantleAsm.cpp">
+      <Filter>Mantle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\graphic\xxGraphicMantle.cpp">
+      <Filter>Mantle</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\graphic\xxGraphic.h" />
@@ -127,6 +133,30 @@
     <ClInclude Include="..\graphic\xxGraphicWGL.h">
       <Filter>OpenGL</Filter>
     </ClInclude>
+    <ClInclude Include="..\graphic\gl\gl2.h">
+      <Filter>OpenGL\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\gl\gl2ext.h">
+      <Filter>OpenGL\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\gl\gl2platform.h">
+      <Filter>OpenGL\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\gl\khrplatform.h">
+      <Filter>OpenGL\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\gl\wgl.h">
+      <Filter>OpenGL\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\gr\amdil.h">
+      <Filter>Mantle\gr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\xxGraphicMantleAsm.h">
+      <Filter>Mantle</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\xxGraphicMantle.h">
+      <Filter>Mantle</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Direct3D">
@@ -137,6 +167,15 @@
     </Filter>
     <Filter Include="OpenGL">
       <UniqueIdentifier>{dcd1130b-5f4e-45f7-ae84-6d72e9f96808}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OpenGL\gl">
+      <UniqueIdentifier>{2bf6ec00-620f-4b5d-8cdf-bb83773b0fa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Mantle">
+      <UniqueIdentifier>{b7ba013f-7e83-410a-83e6-c2e67eb3bd3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Mantle\gr">
+      <UniqueIdentifier>{6b56a916-2f88-43f6-913c-5e562bda5292}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

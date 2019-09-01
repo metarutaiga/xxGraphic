@@ -7,6 +7,7 @@
 uint64_t xxCreateInstanceNULL()
 {
     xxRegisterFunction(NULL);
+
     return 0;
 }
 //------------------------------------------------------------------------------
