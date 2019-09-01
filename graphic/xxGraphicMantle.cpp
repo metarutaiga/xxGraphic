@@ -152,9 +152,11 @@ uint64_t xxCreateInstanceMantle()
     grSymbolFailed = false;
     grSymbol(grWsiWinGetDisplays);
     grSymbol(grWsiWinGetDisplayModeList);
-    grSymbol(grWsiWinTakeFullscreenOwnership);    grSymbol(grWsiWinReleaseFullscreenOwnership);
+    grSymbol(grWsiWinTakeFullscreenOwnership);
+    grSymbol(grWsiWinReleaseFullscreenOwnership);
     grSymbol(grWsiWinSetGammaRamp);
-    grSymbol(grWsiWinWaitForVerticalBlank);    grSymbol(grWsiWinGetScanLine);
+    grSymbol(grWsiWinWaitForVerticalBlank);
+    grSymbol(grWsiWinGetScanLine);
     grSymbol(grWsiWinCreatePresentableImage);
     grSymbol(grWsiWinQueuePresent);
     grSymbol(grWsiWinSetMaxQueuedFrames);
