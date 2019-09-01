@@ -55,6 +55,8 @@
     <ClInclude Include="..\graphic\gl\khrplatform.h" />
     <ClInclude Include="..\graphic\gl\wgl.h" />
     <ClInclude Include="..\graphic\gr\amdil.h" />
+    <ClInclude Include="..\graphic\gr\mantle.h" />
+    <ClInclude Include="..\graphic\gr\mantleWsiWinExt.h" />
     <ClInclude Include="..\graphic\xxGraphic.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D10.h" />

@@ -4,12 +4,13 @@
 
 #define GR_PROTOTYPES 1
 #include "gr/mantle.h"
+#include "gr/mantleWsiWinExt.h"
 #define NUM_BACK_BUFFERS 3
 
-static HMODULE              g_mantleLibrary = nullptr;
-static GR_QUEUE             g_queue = GR_NULL_HANDLE;
-static GR_FENCE             g_fences[NUM_BACK_BUFFERS] = {};
-static int                  g_fenceIndex;
+static HMODULE  g_mantleLibrary = nullptr;
+static GR_QUEUE g_queue = GR_NULL_HANDLE;
+static GR_FENCE g_fences[NUM_BACK_BUFFERS] = {};
+static int      g_fenceIndex;
 
 //==============================================================================
 //  Instance
@@ -43,69 +44,120 @@ uint64_t xxCreateInstanceMantle()
         return 0;
 
     grSymbolFailed = false;
-    grSymbol(grDbgRegisterMsgCallback);
     grSymbol(grInitAndEnumerateGpus);
     grSymbol(grGetGpuInfo);
-    grSymbol(grGetExtensionSupport);
     grSymbol(grCreateDevice);
     grSymbol(grDestroyDevice);
+    grSymbol(grGetExtensionSupport);
     grSymbol(grGetDeviceQueue);
-    grSymbol(grCreateCommandBuffer);
-    grSymbol(grResetCommandBuffer);
-    grSymbol(grBeginCommandBuffer);
-    grSymbol(grEndCommandBuffer);
+    grSymbol(grQueueWaitIdle);
+    grSymbol(grDeviceWaitIdle);
     grSymbol(grQueueSubmit);
-    grSymbol(grGetObjectInfo);
-    grSymbol(grDestroyObject);
+    grSymbol(grQueueSetGlobalMemReferences);
     grSymbol(grGetMemoryHeapCount);
     grSymbol(grGetMemoryHeapInfo);
     grSymbol(grAllocMemory);
     grSymbol(grFreeMemory);
+    grSymbol(grSetMemoryPriority);
     grSymbol(grMapMemory);
     grSymbol(grUnmapMemory);
+    grSymbol(grRemapVirtualMemoryPages);
+    grSymbol(grPinSystemMemory);
+    grSymbol(grDestroyObject);
+    grSymbol(grGetObjectInfo);
     grSymbol(grBindObjectMemory);
+    grSymbol(grGetFormatInfo);
     grSymbol(grCreateImage);
+    grSymbol(grGetImageSubresourceInfo);
+    grSymbol(grCreateSampler);
     grSymbol(grCreateImageView);
     grSymbol(grCreateColorTargetView);
-    grSymbol(grGetImageSubresourceInfo);
+    grSymbol(grCreateShader);
+    grSymbol(grCreateGraphicsPipeline);
+    grSymbol(grCreateComputePipeline);
+    grSymbol(grStorePipeline);
+    grSymbol(grLoadPipeline);
     grSymbol(grCreateDescriptorSet);
-    grSymbol(grClearDescriptorSetSlots);
     grSymbol(grBeginDescriptorSetUpdate);
     grSymbol(grEndDescriptorSetUpdate);
     grSymbol(grAttachSamplerDescriptors);
-    grSymbol(grAttachMemoryViewDescriptors);
     grSymbol(grAttachImageViewDescriptors);
+    grSymbol(grAttachMemoryViewDescriptors);
     grSymbol(grAttachNestedDescriptors);
+    grSymbol(grClearDescriptorSetSlots);
+    grSymbol(grCreateViewportState);
+    grSymbol(grCreateRasterState);
     grSymbol(grCreateColorBlendState);
     grSymbol(grCreateDepthStencilState);
     grSymbol(grCreateMsaaState);
-    grSymbol(grCreateRasterState);
-    grSymbol(grCreateSampler);
-    grSymbol(grCreateShader);
-    grSymbol(grCreateViewportState);
-    grSymbol(grCreateGraphicsPipeline);
-    grSymbol(grCreateComputePipeline);
+    grSymbol(grCreateQueryPool);
+    grSymbol(grGetQueryPoolResults);
     grSymbol(grCreateFence);
+    grSymbol(grGetFenceStatus);
     grSymbol(grWaitForFences);
+    grSymbol(grCreateQueueSemaphore);
+    grSymbol(grSignalQueueSemaphore);
+    grSymbol(grWaitQueueSemaphore);
+    grSymbol(grCreateEvent);
+    grSymbol(grGetEventStatus);
+    grSymbol(grSetEvent);
+    grSymbol(grResetEvent);
+    grSymbol(grGetMultiGpuCompatibility);
+    grSymbol(grOpenSharedMemory);
+    grSymbol(grOpenSharedQueueSemaphore);
+    grSymbol(grOpenPeerMemory);
+    grSymbol(grOpenPeerImage);
+    grSymbol(grCreateCommandBuffer);
+    grSymbol(grBeginCommandBuffer);
+    grSymbol(grEndCommandBuffer);
+    grSymbol(grResetCommandBuffer);
+    grSymbol(grCmdBindPipeline);
+    grSymbol(grCmdBindStateObject);
     grSymbol(grCmdBindDescriptorSet);
     grSymbol(grCmdBindDynamicMemoryView);
     grSymbol(grCmdBindIndexData);
-    grSymbol(grCmdBindPipeline);
-    grSymbol(grCmdBindStateObject);
     grSymbol(grCmdBindTargets);
-    grSymbol(grCmdClearColorImage);
-    grSymbol(grCmdCopyImage);
-    grSymbol(grCmdCopyMemory);
-    grSymbol(grCmdCopyMemoryToImage);
-    grSymbol(grCmdDispatch);
+    grSymbol(grCmdPrepareMemoryRegions);
+    grSymbol(grCmdPrepareImages);
     grSymbol(grCmdDraw);
     grSymbol(grCmdDrawIndexed);
-    grSymbol(grCmdPrepareImages);
-    grSymbol(grCmdPrepareMemoryRegions);
+    grSymbol(grCmdDrawIndirect);
+    grSymbol(grCmdDrawIndexedIndirect);
+    grSymbol(grCmdDispatch);
+    grSymbol(grCmdDispatchIndirect);
+    grSymbol(grCmdCopyMemory);
+    grSymbol(grCmdCopyImage);
+    grSymbol(grCmdCopyMemoryToImage);
+    grSymbol(grCmdCopyImageToMemory);
+    grSymbol(grCmdResolveImage);
+    grSymbol(grCmdCloneImageData);
+    grSymbol(grCmdUpdateMemory);
+    grSymbol(grCmdFillMemory);
+    grSymbol(grCmdClearColorImage);
+    grSymbol(grCmdClearColorImageRaw);
+    grSymbol(grCmdClearDepthStencil);
+    grSymbol(grCmdSetEvent);
+    grSymbol(grCmdResetEvent);
+    grSymbol(grCmdMemoryAtomic);
+    grSymbol(grCmdBeginQuery);
+    grSymbol(grCmdEndQuery);
+    grSymbol(grCmdResetQueryPool);
+    grSymbol(grCmdWriteTimestamp);
+    grSymbol(grCmdInitAtomicCounters);
+    grSymbol(grCmdLoadAtomicCounters);
+    grSymbol(grCmdSaveAtomicCounters);
+    if (grSymbolFailed)
+        return 0;
+
+    grSymbolFailed = false;
     grSymbol(grWsiWinGetDisplays);
     grSymbol(grWsiWinGetDisplayModeList);
+    grSymbol(grWsiWinTakeFullscreenOwnership);    grSymbol(grWsiWinReleaseFullscreenOwnership);
+    grSymbol(grWsiWinSetGammaRamp);
+    grSymbol(grWsiWinWaitForVerticalBlank);    grSymbol(grWsiWinGetScanLine);
     grSymbol(grWsiWinCreatePresentableImage);
     grSymbol(grWsiWinQueuePresent);
+    grSymbol(grWsiWinSetMaxQueuedFrames);
     if (grSymbolFailed)
         return 0;
 
@@ -120,7 +172,7 @@ uint64_t xxCreateInstanceMantle()
 
     xxRegisterFunction(Mantle);
 
-    return static_cast<uint64_t>(gpus[0]);
+    return reinterpret_cast<uint64_t>(gpus[0]);
 }
 //------------------------------------------------------------------------------
 void xxDestroyInstanceMantle(uint64_t instance)
@@ -138,7 +190,7 @@ void xxDestroyInstanceMantle(uint64_t instance)
 //==============================================================================
 uint64_t xxCreateDeviceMantle(uint64_t instance)
 {
-    GR_PHYSICAL_GPU gpu = static_cast<GR_PHYSICAL_GPU>(instance);
+    GR_PHYSICAL_GPU gpu = reinterpret_cast<GR_PHYSICAL_GPU>(instance);
 
     GR_DEVICE_QUEUE_CREATE_INFO queueInfo = {};
     queueInfo.queueType = GR_QUEUE_UNIVERSAL;
@@ -169,12 +221,12 @@ uint64_t xxCreateDeviceMantle(uint64_t instance)
         g_fences[i] = fence;
     }
 
-    return static_cast<uint64_t>(device);
+    return reinterpret_cast<uint64_t>(device);
 }
 //------------------------------------------------------------------------------
 void xxDestroyDeviceMantle(uint64_t device)
 {
-    GR_DEVICE grDevice = static_cast<GR_DEVICE>(device);
+    GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
         return;
 
@@ -222,7 +274,7 @@ struct SWAPCHAINGR : public FRAMEBUFFERGR
 //------------------------------------------------------------------------------
 uint64_t xxCreateSwapchainMantle(uint64_t device, void* view, unsigned int width, unsigned int height)
 {
-    GR_DEVICE grDevice = static_cast<GR_DEVICE>(device);
+    GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
         return 0;
     SWAPCHAINGR* grSwapchain = new SWAPCHAINGR;
@@ -342,7 +394,7 @@ void xxPresentSwapchainMantle(uint64_t swapchain)
 //------------------------------------------------------------------------------
 uint64_t xxGetCommandBufferMantle(uint64_t device, uint64_t swapchain)
 {
-    GR_DEVICE grDevice = static_cast<GR_DEVICE>(device);
+    GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
         return 0;
     SWAPCHAINGR* grSwapchain = reinterpret_cast<SWAPCHAINGR*>(swapchain);
@@ -359,7 +411,7 @@ uint64_t xxGetCommandBufferMantle(uint64_t device, uint64_t swapchain)
     GR_CMD_BUFFER commandBuffer = grSwapchain->commandBuffers[grSwapchain->commandBufferIndex];
     grResetCommandBuffer(commandBuffer);
 
-    return static_cast<uint64_t>(commandBuffer);
+    return reinterpret_cast<uint64_t>(commandBuffer);
 }
 //------------------------------------------------------------------------------
 uint64_t xxGetFramebufferMantle(uint64_t device, uint64_t swapchain)
@@ -375,7 +427,7 @@ uint64_t xxGetFramebufferMantle(uint64_t device, uint64_t swapchain)
 //==============================================================================
 bool xxBeginCommandBufferMantle(uint64_t commandBuffer)
 {
-    GR_CMD_BUFFER grCommandBuffer = static_cast<GR_CMD_BUFFER>(commandBuffer);
+    GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandBuffer);
     if (grCommandBuffer == GR_NULL_HANDLE)
         return false;
 
@@ -386,14 +438,14 @@ bool xxBeginCommandBufferMantle(uint64_t commandBuffer)
 //------------------------------------------------------------------------------
 void xxEndCommandBufferMantle(uint64_t commandBuffer)
 {
-    GR_CMD_BUFFER grCommandBuffer = static_cast<GR_CMD_BUFFER>(commandBuffer);
+    GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandBuffer);
 
     grEndCommandBuffer(grCommandBuffer);
 }
 //------------------------------------------------------------------------------
 void xxSubmitCommandBufferMantle(uint64_t commandBuffer)
 {
-    GR_CMD_BUFFER grCommandBuffer = static_cast<GR_CMD_BUFFER>(commandBuffer);
+    GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandBuffer);
 
     grQueueSubmit(g_queue, 1, &grCommandBuffer, 0, nullptr, g_fences[g_fenceIndex]);
 }
@@ -430,7 +482,7 @@ void xxDestroyRenderPassMantle(uint64_t renderPass)
 //------------------------------------------------------------------------------
 bool xxBeginRenderPassMantle(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
 {
-    GR_CMD_BUFFER grCommandBuffer = static_cast<GR_CMD_BUFFER>(commandBuffer);
+    GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandBuffer);
     if (grCommandBuffer == GR_NULL_HANDLE)
         return false;
     FRAMEBUFFERGR* grFramebuffer = reinterpret_cast<SWAPCHAINGR*>(framebuffer);
@@ -508,7 +560,7 @@ void xxUnmapTextureMantle(uint64_t device, uint64_t texture, unsigned int level,
 //==============================================================================
 uint64_t xxCreateSamplerMantle(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy)
 {
-    GR_DEVICE grDevice = static_cast<GR_DEVICE>(device);
+    GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
         return 0;
 
@@ -534,12 +586,12 @@ uint64_t xxCreateSamplerMantle(uint64_t device, bool clampU, bool clampV, bool c
     GR_SAMPLER sampler = GR_NULL_HANDLE;
     grCreateSampler(grDevice, &info, &sampler);
 
-    return static_cast<uint64_t>(sampler);
+    return reinterpret_cast<uint64_t>(sampler);
 }
 //------------------------------------------------------------------------------
 void xxDestroySamplerMantle(uint64_t sampler)
 {
-    GR_SAMPLER grSampler = static_cast<GR_SAMPLER>(sampler);
+    GR_SAMPLER grSampler = reinterpret_cast<GR_SAMPLER>(sampler);
     if (grSampler == GR_NULL_HANDLE)
         return;
 
@@ -562,7 +614,7 @@ void xxDestroyVertexAttributeMantle(uint64_t vertexAttribute)
 //==============================================================================
 uint64_t xxCreateVertexShaderMantle(uint64_t device, const char* shader, uint64_t vertexAttribute)
 {
-    GR_DEVICE grDevice = static_cast<GR_DEVICE>(device);
+    GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
         return 0;
 
@@ -575,7 +627,7 @@ uint64_t xxCreateVertexShaderMantle(uint64_t device, const char* shader, uint64_
         GR_SHADER grShader = GR_NULL_HANDLE;
         grCreateShader(grDevice, &info, &grShader);
 
-        return static_cast<uint64_t>(grShader);
+        return reinterpret_cast<uint64_t>(grShader);
     }
 
     return 0;
@@ -583,7 +635,7 @@ uint64_t xxCreateVertexShaderMantle(uint64_t device, const char* shader, uint64_
 //------------------------------------------------------------------------------
 uint64_t xxCreateFragmentShaderMantle(uint64_t device, const char* shader)
 {
-    GR_DEVICE grDevice = static_cast<GR_DEVICE>(device);
+    GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
         return 0;
 
@@ -596,7 +648,7 @@ uint64_t xxCreateFragmentShaderMantle(uint64_t device, const char* shader)
         GR_SHADER grShader = GR_NULL_HANDLE;
         grCreateShader(grDevice, &info, &grShader);
 
-        return static_cast<uint64_t>(grShader);
+        return reinterpret_cast<uint64_t>(grShader);
     }
 
     return 0;
@@ -604,7 +656,7 @@ uint64_t xxCreateFragmentShaderMantle(uint64_t device, const char* shader)
 //------------------------------------------------------------------------------
 void xxDestroyShaderMantle(uint64_t device, uint64_t shader)
 {
-    GR_SHADER grShader = static_cast<GR_SHADER>(shader);
+    GR_SHADER grShader = reinterpret_cast<GR_SHADER>(shader);
     if (grShader == GR_NULL_HANDLE)
         return;
 
@@ -615,7 +667,7 @@ void xxDestroyShaderMantle(uint64_t device, uint64_t shader)
 //==============================================================================
 uint64_t xxCreateBlendStateMantle(uint64_t device, bool blending)
 {
-    GR_DEVICE grDevice = static_cast<GR_DEVICE>(device);
+    GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
         return 0;
 
@@ -631,12 +683,12 @@ uint64_t xxCreateBlendStateMantle(uint64_t device, bool blending)
     GR_COLOR_BLEND_STATE_OBJECT blendState = GR_NULL_HANDLE;
     grCreateColorBlendState(grDevice, &info, &blendState);
 
-    return static_cast<uint64_t>(blendState);
+    return reinterpret_cast<uint64_t>(blendState);
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateDepthStencilStateMantle(uint64_t device, bool depthTest, bool depthWrite)
 {
-    GR_DEVICE grDevice = static_cast<GR_DEVICE>(device);
+    GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
         return 0;
 
@@ -648,12 +700,12 @@ uint64_t xxCreateDepthStencilStateMantle(uint64_t device, bool depthTest, bool d
     GR_DEPTH_STENCIL_STATE_OBJECT depthStencilState = GR_NULL_HANDLE;
     grCreateDepthStencilState(grDevice, &info, &depthStencilState);
 
-    return static_cast<uint64_t>(depthStencilState);
+    return reinterpret_cast<uint64_t>(depthStencilState);
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateRasterizerStateMantle(uint64_t device, bool cull, bool scissor)
 {
-    GR_DEVICE grDevice = static_cast<GR_DEVICE>(device);
+    GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
         return 0;
 
@@ -665,18 +717,18 @@ uint64_t xxCreateRasterizerStateMantle(uint64_t device, bool cull, bool scissor)
     GR_RASTER_STATE_OBJECT rasterizerState = GR_NULL_HANDLE;
     grCreateRasterState(grDevice, &info, &rasterizerState);
 
-    return static_cast<uint64_t>(rasterizerState);
+    return reinterpret_cast<uint64_t>(rasterizerState);
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreatePipelineMantle(uint64_t device, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
 {
-    GR_DEVICE grDevice = static_cast<GR_DEVICE>(device);
+    GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
         return 0;
-    GR_SHADER grVertexShader = static_cast<GR_SHADER>(vertexShader);
+    GR_SHADER grVertexShader = reinterpret_cast<GR_SHADER>(vertexShader);
     if (grVertexShader == GR_NULL_HANDLE)
         return 0;
-    GR_SHADER grPixelShader = static_cast<GR_SHADER>(fragmentShader);
+    GR_SHADER grPixelShader = reinterpret_cast<GR_SHADER>(fragmentShader);
     if (grPixelShader == GR_NULL_HANDLE)
         return 0;
 
@@ -705,12 +757,12 @@ uint64_t xxCreatePipelineMantle(uint64_t device, uint64_t blendState, uint64_t d
     GR_PIPELINE pipeline = GR_NULL_HANDLE;
     grCreateGraphicsPipeline(grDevice, &pipelineInfo, &pipeline);
 
-    return static_cast<uint64_t>(pipeline);
+    return reinterpret_cast<uint64_t>(pipeline);
 }
 //------------------------------------------------------------------------------
 void xxDestroyBlendStateMantle(uint64_t blendState)
 {
-    GR_COLOR_BLEND_STATE_OBJECT grBlendState = static_cast<GR_COLOR_BLEND_STATE_OBJECT>(blendState);
+    GR_COLOR_BLEND_STATE_OBJECT grBlendState = reinterpret_cast<GR_COLOR_BLEND_STATE_OBJECT>(blendState);
     if (grBlendState == GR_NULL_HANDLE)
         return;
 
@@ -719,7 +771,7 @@ void xxDestroyBlendStateMantle(uint64_t blendState)
 //------------------------------------------------------------------------------
 void xxDestroyDepthStencilStateMantle(uint64_t depthStencilState)
 {
-    GR_DEPTH_STENCIL_STATE_OBJECT grDepthStencilState = static_cast<GR_DEPTH_STENCIL_STATE_OBJECT>(depthStencilState);
+    GR_DEPTH_STENCIL_STATE_OBJECT grDepthStencilState = reinterpret_cast<GR_DEPTH_STENCIL_STATE_OBJECT>(depthStencilState);
     if (grDepthStencilState == GR_NULL_HANDLE)
         return;
 
@@ -728,7 +780,7 @@ void xxDestroyDepthStencilStateMantle(uint64_t depthStencilState)
 //------------------------------------------------------------------------------
 void xxDestroyRasterizerStateMantle(uint64_t rasterizerState)
 {
-    GR_RASTER_STATE_OBJECT grRasterizerState = static_cast<GR_PIPELINE>(rasterizerState);
+    GR_RASTER_STATE_OBJECT grRasterizerState = reinterpret_cast<GR_PIPELINE>(rasterizerState);
     if (grRasterizerState == GR_NULL_HANDLE)
         return;
 
@@ -737,7 +789,7 @@ void xxDestroyRasterizerStateMantle(uint64_t rasterizerState)
 //------------------------------------------------------------------------------
 void xxDestroyPipelineMantle(uint64_t pipeline)
 {
-    GR_PIPELINE grPipeline = static_cast<GR_PIPELINE>(pipeline);
+    GR_PIPELINE grPipeline = reinterpret_cast<GR_PIPELINE>(pipeline);
     if (grPipeline == GR_NULL_HANDLE)
         return;
 
@@ -758,16 +810,16 @@ void xxSetScissorMantle(uint64_t commandBuffer, int x, int y, int width, int hei
 //------------------------------------------------------------------------------
 void xxSetPipelineMantle(uint64_t commandBuffer, uint64_t pipeline)
 {
-    GR_CMD_BUFFER grCommandBuffer = static_cast<GR_CMD_BUFFER>(commandBuffer);
-    GR_PIPELINE grPipeline = static_cast<GR_PIPELINE>(pipeline);
+    GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandBuffer);
+    GR_PIPELINE grPipeline = reinterpret_cast<GR_PIPELINE>(pipeline);
 
     grCmdBindPipeline(grCommandBuffer, GR_PIPELINE_BIND_POINT_GRAPHICS, grPipeline);
 }
 //------------------------------------------------------------------------------
 void xxSetIndexBufferMantle(uint64_t commandBuffer, uint64_t buffer)
 {
-    GR_CMD_BUFFER grCommandBuffer = static_cast<GR_CMD_BUFFER>(commandBuffer);
-    GR_GPU_MEMORY grMemory = static_cast<GR_CMD_BUFFER>(buffer);
+    GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandBuffer);
+    GR_GPU_MEMORY grMemory = reinterpret_cast<GR_CMD_BUFFER>(buffer);
 
     grCmdBindIndexData(grCommandBuffer, grMemory, 0, GR_INDEX_32);
 }
@@ -809,7 +861,7 @@ void xxSetFragmentConstantBufferMantle(uint64_t commandBuffer, uint64_t buffer, 
 //------------------------------------------------------------------------------
 void xxDrawIndexedMantle(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
-    GR_CMD_BUFFER grCommandBuffer = static_cast<GR_CMD_BUFFER>(commandBuffer);
+    GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandBuffer);
 
     grCmdDrawIndexed(grCommandBuffer, firstIndex, indexCount, vertexOffset, firstInstance, instanceCount);
 }

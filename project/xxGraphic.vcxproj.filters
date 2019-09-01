@@ -157,6 +157,12 @@
     <ClInclude Include="..\graphic\xxGraphicMantle.h">
       <Filter>Mantle</Filter>
     </ClInclude>
+    <ClInclude Include="..\graphic\gr\mantleWsiWinExt.h">
+      <Filter>Mantle\gr</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\gr\mantle.h">
+      <Filter>Mantle\gr</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Direct3D">
