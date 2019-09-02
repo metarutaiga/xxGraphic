@@ -16,14 +16,14 @@ interface DECLSPEC_UUID("4393134F-CF31-41F7-BC51-F2DE938B4374") ID3D12Device8;
 typedef HRESULT (WINAPI *PFN_CREATE_DXGI_FACTORY1)(REFIID, void**);
 #define NUM_BACK_BUFFERS 3
 #define PERSISTENT_BUFFER 1
-#define NUM_DESCRIPTOR_COUNT    (8)
-#define BASE_VERTEX_CONSTANT    (0)
-#define BASE_PIXEL_CONSTANT     (1)
-#define BASE_VERTEX_TEXTURE     (2)
-#define BASE_PIXEL_TEXTURE      (2 + NUM_DESCRIPTOR_COUNT * 1)
-#define BASE_VERTEX_SAMPLER     (2 + NUM_DESCRIPTOR_COUNT * 2)
-#define BASE_PIXEL_SAMPLER      (2 + NUM_DESCRIPTOR_COUNT * 3)
-#define TOTAL_DESCRIPTOR_COUNT  (2 + NUM_DESCRIPTOR_COUNT * 4)
+#define NUM_DESCRIPTOR_COUNT        (8)
+#define BASE_VERTEX_CONSTANT        (0)
+#define BASE_PIXEL_CONSTANT         (1)
+#define BASE_VERTEX_TEXTURE         (2)
+#define BASE_PIXEL_TEXTURE          (2 + NUM_DESCRIPTOR_COUNT * 1)
+#define BASE_VERTEX_SAMPLER         (2 + NUM_DESCRIPTOR_COUNT * 2)
+#define BASE_PIXEL_SAMPLER          (2 + NUM_DESCRIPTOR_COUNT * 3)
+#define TOTAL_DESCRIPTOR_COUNT      (2 + NUM_DESCRIPTOR_COUNT * 4)
 
 static HMODULE                      g_d3dLibrary = nullptr;
 static HMODULE                      g_dxgiLibrary = nullptr;

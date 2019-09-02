@@ -540,7 +540,7 @@ uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, ...)
 //------------------------------------------------------------------------------
 void xxDestroyVertexAttributeGLES2(uint64_t vertexAttribute)
 {
-    VERTEXATTRIBUTEGL* glVertexAttribute = new VERTEXATTRIBUTEGL;
+    VERTEXATTRIBUTEGL* glVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEGL*>(vertexAttribute);
 
     delete glVertexAttribute;
 }

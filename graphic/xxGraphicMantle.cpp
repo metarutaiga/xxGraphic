@@ -6,11 +6,21 @@
 #include "gr/mantle.h"
 #include "gr/mantleWsiWinExt.h"
 #define NUM_BACK_BUFFERS 3
+#define NUM_DESCRIPTOR_COUNT        (8)
+#define BASE_VERTEX_CONSTANT        (0)
+#define BASE_PIXEL_CONSTANT         (1)
+#define BASE_VERTEX_ATTRIBUTE       (2)
+#define BASE_VERTEX_TEXTURE         (2 + 16)
+#define BASE_PIXEL_TEXTURE          (2 + 16 + NUM_DESCRIPTOR_COUNT * 2)
+#define BASE_VERTEX_SAMPLER         (2 + 16 + NUM_DESCRIPTOR_COUNT * 3)
+#define BASE_PIXEL_SAMPLER          (2 + 16 + NUM_DESCRIPTOR_COUNT * 4)
 
-static HMODULE  g_mantleLibrary = nullptr;
-static GR_QUEUE g_queue = GR_NULL_HANDLE;
-static GR_FENCE g_fences[NUM_BACK_BUFFERS] = {};
-static int      g_fenceIndex;
+static HMODULE                      g_mantleLibrary = nullptr;
+static GR_QUEUE                     g_queue = GR_NULL_HANDLE;
+static GR_FENCE                     g_fences[NUM_BACK_BUFFERS] = {};
+static int                          g_fenceIndex = 0;
+static GR_MEMORY_HEAP_PROPERTIES    g_heapProps = {};
+static GR_UINT                      g_suitableHeap = 0;
 
 //==============================================================================
 //  Instance
@@ -223,6 +233,22 @@ uint64_t xxCreateDeviceMantle(uint64_t instance)
         g_fences[i] = fence;
     }
 
+    GR_UINT heapCount;
+    grGetMemoryHeapCount(device, &heapCount);
+
+    for (GR_UINT i = 0; i < heapCount; i++)
+    {
+        g_heapProps = {};
+        GR_SIZE heapPropSize = sizeof(g_heapProps);
+
+        grGetMemoryHeapInfo(device, i, GR_INFO_TYPE_MEMORY_HEAP_PROPERTIES, &heapPropSize, &g_heapProps);
+        if (g_heapProps.flags & GR_MEMORY_HEAP_CPU_VISIBLE)
+        {
+            g_suitableHeap = i;
+            break;
+        }
+    }
+
     return reinterpret_cast<uint64_t>(device);
 }
 //------------------------------------------------------------------------------
@@ -263,6 +289,9 @@ struct FRAMEBUFFERGR
     GR_IMAGE                colorImage;
     GR_GPU_MEMORY           colorMemory;
     GR_COLOR_TARGET_VIEW    colorTargetView;
+    GR_IMAGE                depthStencilImage;
+    GR_GPU_MEMORY           depthStencilMemory;
+    GR_COLOR_TARGET_VIEW    depthStencilTargetView;
 };
 //==============================================================================
 //  Swapchain
@@ -295,7 +324,7 @@ uint64_t xxCreateSwapchainMantle(uint64_t device, void* view, unsigned int width
     }
 
     GR_WSI_WIN_PRESENTABLE_IMAGE_CREATE_INFO imageCreateInfo = {};
-    imageCreateInfo.format.channelFormat = GR_CH_FMT_R8G8B8A8;
+    imageCreateInfo.format.channelFormat = GR_CH_FMT_B8G8R8A8;
     imageCreateInfo.format.numericFormat = GR_NUM_FMT_UNORM;
     imageCreateInfo.usage = GR_IMAGE_USAGE_COLOR_TARGET;
     imageCreateInfo.extent.width = width;
@@ -311,7 +340,7 @@ uint64_t xxCreateSwapchainMantle(uint64_t device, void* view, unsigned int width
     colorTargetViewCreateInfo.arraySize = 1;
     colorTargetViewCreateInfo.baseArraySlice = 0;
     colorTargetViewCreateInfo.mipLevel = 0;
-    colorTargetViewCreateInfo.format.channelFormat = GR_CH_FMT_R8G8B8A8;
+    colorTargetViewCreateInfo.format.channelFormat = GR_CH_FMT_B8G8R8A8;
     colorTargetViewCreateInfo.format.numericFormat = GR_NUM_FMT_UNORM;
 
     GR_COLOR_TARGET_VIEW colorTargetView = GR_NULL_HANDLE;
@@ -433,7 +462,7 @@ bool xxBeginCommandBufferMantle(uint64_t commandBuffer)
     if (grCommandBuffer == GR_NULL_HANDLE)
         return false;
 
-    grBeginCommandBuffer(grCommandBuffer, GR_CMD_BUFFER_OPTIMIZE_ONE_TIME_SUBMIT);
+    grBeginCommandBuffer(grCommandBuffer, 0);
 
     return true;
 }
@@ -495,6 +524,7 @@ bool xxBeginRenderPassMantle(uint64_t commandBuffer, uint64_t framebuffer, uint6
         return false;
 
     grCmdClearColorImage(grCommandBuffer, grFramebuffer->colorImage, grRenderPass->color, 0, nullptr);
+    grCmdClearDepthStencil(grCommandBuffer, grFramebuffer->depthStencilImage, grRenderPass->depth, grRenderPass->stencil, 0, nullptr);
 
     return true;
 }
@@ -508,32 +538,87 @@ void xxEndRenderPassMantle(uint64_t commandBuffer, uint64_t framebuffer, uint64_
 //==============================================================================
 uint64_t xxCreateConstantBufferMantle(uint64_t device, unsigned int size)
 {
-    return 0;
+    GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
+    if (grDevice == GR_NULL_HANDLE)
+        return 0;
+
+    GR_GPU_MEMORY memory;
+    GR_MEMORY_ALLOC_INFO allocInfo = {};
+    allocInfo.size = (1 + size / g_heapProps.pageSize) * g_heapProps.pageSize;
+    allocInfo.alignment = 0;
+    allocInfo.memPriority = GR_MEMORY_PRIORITY_HIGH;
+    allocInfo.heapCount = 1;
+    allocInfo.heaps[0] = g_suitableHeap;
+    grAllocMemory(grDevice, &allocInfo, &memory);
+
+    return reinterpret_cast<uint64_t>(memory);
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateIndexBufferMantle(uint64_t device, unsigned int size)
 {
-    return 0;
+    GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
+    if (grDevice == GR_NULL_HANDLE)
+        return 0;
+
+    GR_GPU_MEMORY memory;
+    GR_MEMORY_ALLOC_INFO allocInfo = {};
+    allocInfo.size = (1 + size / g_heapProps.pageSize) * g_heapProps.pageSize;
+    allocInfo.alignment = 0;
+    allocInfo.memPriority = GR_MEMORY_PRIORITY_HIGH;
+    allocInfo.heapCount = 1;
+    allocInfo.heaps[0] = g_suitableHeap;
+    grAllocMemory(grDevice, &allocInfo, &memory);
+
+    return reinterpret_cast<uint64_t>(memory);
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexBufferMantle(uint64_t device, unsigned int size)
 {
-    return 0;
+    GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
+    if (grDevice == GR_NULL_HANDLE)
+        return 0;
+
+    GR_MEMORY_ALLOC_INFO allocInfo = {};
+    allocInfo.size = (1 + size / g_heapProps.pageSize) * g_heapProps.pageSize;
+    allocInfo.alignment = 0;
+    allocInfo.memPriority = GR_MEMORY_PRIORITY_HIGH;
+    allocInfo.heapCount = 1;
+    allocInfo.heaps[0] = g_suitableHeap;
+
+    GR_GPU_MEMORY memory = GR_NULL_HANDLE;
+    grAllocMemory(grDevice, &allocInfo, &memory);
+
+    return reinterpret_cast<uint64_t>(memory);
 }
 //------------------------------------------------------------------------------
 void xxDestroyBufferMantle(uint64_t device, uint64_t buffer)
 {
+    GR_GPU_MEMORY memory = reinterpret_cast<GR_GPU_MEMORY>(buffer);
+    if (memory == GR_NULL_HANDLE)
+        return;
 
+    grFreeMemory(memory);
 }
 //------------------------------------------------------------------------------
 void* xxMapBufferMantle(uint64_t device, uint64_t buffer)
 {
-    return nullptr;
+    GR_GPU_MEMORY memory = reinterpret_cast<GR_GPU_MEMORY>(buffer);
+    if (memory == GR_NULL_HANDLE)
+        return nullptr;
+
+    void* ptr = nullptr;
+    grMapMemory(memory, 0, &ptr);
+
+    return ptr;
 }
 //------------------------------------------------------------------------------
 void xxUnmapBufferMantle(uint64_t device, uint64_t buffer)
 {
+    GR_GPU_MEMORY memory = reinterpret_cast<GR_GPU_MEMORY>(buffer);
+    if (memory == GR_NULL_HANDLE)
+        return;
 
+    grUnmapMemory(memory);
 }
 //==============================================================================
 //  Texture
@@ -602,14 +687,80 @@ void xxDestroySamplerMantle(uint64_t sampler)
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
+struct VERTEXATTRIBUTEGR
+{
+    GR_MEMORY_VIEW_ATTACH_INFO  infos[16];
+    int                         count;
+    int                         stride;
+};
+//------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeMantle(uint64_t device, int count, ...)
 {
-    return 0;
+    VERTEXATTRIBUTEGR* grVertexAttribute = new VERTEXATTRIBUTEGR;
+    if (grVertexAttribute == nullptr)
+        return 0;
+
+    GR_MEMORY_VIEW_ATTACH_INFO* infos = grVertexAttribute->infos;
+    int stride = 0;
+
+    va_list args;
+    va_start(args, count);
+    for (int i = 0; i < count; ++i)
+    {
+        int stream = va_arg(args, int);
+        int offset = va_arg(args, int);
+        int element = va_arg(args, int);
+        int size = va_arg(args, int);
+
+        stride += size;
+
+        GR_MEMORY_VIEW_ATTACH_INFO& info = infos[i];
+
+        info.mem = GR_NULL_HANDLE;
+        info.offset = offset;
+        info.range = size;
+        info.stride = 0;
+        info.format.channelFormat = GR_CH_FMT_R32;
+        info.format.numericFormat = GR_NUM_FMT_FLOAT;
+        info.state = GR_MEMORY_STATE_GRAPHICS_SHADER_READ_ONLY;
+
+        if (element == 3 && size == sizeof(float) * 3)
+        {
+            info.format.channelFormat = GR_CH_FMT_R32G32B32;
+            continue;
+        }
+
+        if (element == 4 && size == sizeof(char) * 4)
+        {
+            info.format.channelFormat = GR_CH_FMT_B8G8R8A8;
+            info.format.numericFormat = GR_NUM_FMT_UNORM;
+            continue;
+        }
+
+        if (element == 2 && size == sizeof(float) * 2)
+        {
+            info.format.channelFormat = GR_CH_FMT_R32G32;
+            continue;
+        }
+    }
+    va_end(args);
+
+    for (int i = 0; i < count; ++i)
+    {
+        infos[i].stride = stride;
+    }
+
+    grVertexAttribute->count = count;
+    grVertexAttribute->stride = stride;
+
+    return reinterpret_cast<uint64_t>(grVertexAttribute);
 }
 //------------------------------------------------------------------------------
 void xxDestroyVertexAttributeMantle(uint64_t vertexAttribute)
 {
+    VERTEXATTRIBUTEGR* grVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEGR*>(vertexAttribute);
 
+    delete grVertexAttribute;
 }
 //==============================================================================
 //  Shader
@@ -751,7 +902,7 @@ uint64_t xxCreatePipelineMantle(uint64_t device, uint64_t blendState, uint64_t d
     pipelineInfo.cbState.logicOp = GR_LOGIC_OP_COPY;
     pipelineInfo.cbState.target[0].blendEnable = GR_FALSE;
     pipelineInfo.cbState.target[0].channelWriteMask = 0xF;
-    pipelineInfo.cbState.target[0].format.channelFormat = GR_CH_FMT_R8G8B8A8;
+    pipelineInfo.cbState.target[0].format.channelFormat = GR_CH_FMT_B8G8R8A8;
     pipelineInfo.cbState.target[0].format.numericFormat = GR_NUM_FMT_UNORM;
     pipelineInfo.dbState.format.channelFormat = GR_CH_FMT_R32G8;
     pipelineInfo.dbState.format.numericFormat = GR_NUM_FMT_DS;
@@ -821,44 +972,110 @@ void xxSetPipelineMantle(uint64_t commandBuffer, uint64_t pipeline)
 void xxSetIndexBufferMantle(uint64_t commandBuffer, uint64_t buffer)
 {
     GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandBuffer);
-    GR_GPU_MEMORY grMemory = reinterpret_cast<GR_CMD_BUFFER>(buffer);
+    GR_GPU_MEMORY grMemory = reinterpret_cast<GR_GPU_MEMORY>(buffer);
 
     grCmdBindIndexData(grCommandBuffer, grMemory, 0, GR_INDEX_32);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersMantle(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
+    VERTEXATTRIBUTEGR* grVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEGR*>(vertexAttribute);
+    GR_MEMORY_VIEW_ATTACH_INFO* infos = grVertexAttribute->infos;
 
+    for (int i = 0; i < count; ++i)
+    {
+        GR_GPU_MEMORY grMemory = reinterpret_cast<GR_GPU_MEMORY>(buffers[i]);
+        GR_MEMORY_VIEW_ATTACH_INFO& info = infos[i];
+        info.mem = grMemory;
+    }
+
+    grAttachMemoryViewDescriptors(0, BASE_VERTEX_ATTRIBUTE, count, infos);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesMantle(uint64_t commandBuffer, int count, const uint64_t* textures)
 {
+    GR_IMAGE_VIEW_ATTACH_INFO infos[8];
 
+    for (int i = 0; i < count; ++i)
+    {
+        GR_IMAGE_VIEW_ATTACH_INFO& info = infos[i];
+        info.view;
+        info.state = GR_MEMORY_STATE_GRAPHICS_SHADER_READ_ONLY;
+    }
+
+    grAttachImageViewDescriptors(0, BASE_VERTEX_TEXTURE, count, infos);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentTexturesMantle(uint64_t commandBuffer, int count, const uint64_t* textures)
 {
+    GR_IMAGE_VIEW_ATTACH_INFO infos[8];
 
+    for (int i = 0; i < count; ++i)
+    {
+        GR_IMAGE_VIEW_ATTACH_INFO& info = infos[i];
+        info.view;
+        info.state = GR_MEMORY_STATE_GRAPHICS_SHADER_READ_ONLY;
+    }
+
+    grAttachImageViewDescriptors(0, BASE_PIXEL_TEXTURE, count, infos);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersMantle(uint64_t commandBuffer, int count, const uint64_t* samplers)
 {
+    GR_SAMPLER grSamplers[8];
 
+    for (int i = 0; i < count; ++i)
+    {
+        GR_SAMPLER grSampler = reinterpret_cast<GR_SAMPLER>(samplers[i]);
+        grSamplers[i] = grSampler;
+    }
+
+    grAttachSamplerDescriptors(0, BASE_VERTEX_SAMPLER, count, grSamplers);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentSamplersMantle(uint64_t commandBuffer, int count, const uint64_t* samplers)
 {
+    GR_SAMPLER grSamplers[8];
 
+    for (int i = 0; i < count; ++i)
+    {
+        GR_SAMPLER grSampler = reinterpret_cast<GR_SAMPLER>(samplers[i]);
+        grSamplers[i] = grSampler;
+    }
+
+    grAttachSamplerDescriptors(0, BASE_PIXEL_SAMPLER, count, grSamplers);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferMantle(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
 {
+    GR_GPU_MEMORY grMemory = reinterpret_cast<GR_GPU_MEMORY>(buffer);
 
+    GR_MEMORY_VIEW_ATTACH_INFO info = {};
+    info.mem = grMemory;
+    info.offset = 0;
+    info.range = size;
+    info.stride = 0;
+    info.format.channelFormat = GR_CH_FMT_R32G32B32A32;
+    info.format.numericFormat = GR_NUM_FMT_FLOAT;
+    info.state = GR_MEMORY_STATE_GRAPHICS_SHADER_READ_ONLY;
+
+    grAttachMemoryViewDescriptors(0, BASE_VERTEX_CONSTANT, 1, &info);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferMantle(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
 {
+    GR_GPU_MEMORY grMemory = reinterpret_cast<GR_GPU_MEMORY>(buffer);
 
+    GR_MEMORY_VIEW_ATTACH_INFO info = {};
+    info.mem = grMemory;
+    info.offset = 0;
+    info.range = size;
+    info.stride = 0;
+    info.format.channelFormat = GR_CH_FMT_R32G32B32A32;
+    info.format.numericFormat = GR_NUM_FMT_FLOAT;
+    info.state = GR_MEMORY_STATE_GRAPHICS_SHADER_READ_ONLY;
+
+    grAttachMemoryViewDescriptors(0, BASE_PIXEL_CONSTANT, 1, &info);
 }
 //------------------------------------------------------------------------------
 void xxDrawIndexedMantle(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
