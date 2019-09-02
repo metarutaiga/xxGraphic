@@ -3,8 +3,8 @@
 #include "xxGraphicMantle.h"
 
 #define GR_PROTOTYPES 1
-#include "gr/mantle.h"
-#include "gr/mantleWsiWinExt.h"
+#include "mantle/mantle.h"
+#include "mantle/mantleWsiWinExt.h"
 #define NUM_BACK_BUFFERS 3
 #define NUM_DESCRIPTOR_COUNT        (8)
 #define BASE_VERTEX_CONSTANT        (0)

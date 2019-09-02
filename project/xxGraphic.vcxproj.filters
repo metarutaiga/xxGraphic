@@ -149,7 +149,7 @@
       <Filter>OpenGL\gl</Filter>
     </ClInclude>
     <ClInclude Include="..\graphic\gr\amdil.h">
-      <Filter>Mantle\gr</Filter>
+      <Filter>Mantle\mantle</Filter>
     </ClInclude>
     <ClInclude Include="..\graphic\xxGraphicMantleAsm.h">
       <Filter>Mantle</Filter>
@@ -158,10 +158,10 @@
       <Filter>Mantle</Filter>
     </ClInclude>
     <ClInclude Include="..\graphic\gr\mantleWsiWinExt.h">
-      <Filter>Mantle\gr</Filter>
+      <Filter>Mantle\mantle</Filter>
     </ClInclude>
     <ClInclude Include="..\graphic\gr\mantle.h">
-      <Filter>Mantle\gr</Filter>
+      <Filter>Mantle\mantle</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -180,7 +180,7 @@
     <Filter Include="Mantle">
       <UniqueIdentifier>{b7ba013f-7e83-410a-83e6-c2e67eb3bd3d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Mantle\gr">
+    <Filter Include="Mantle\mantle">
       <UniqueIdentifier>{6b56a916-2f88-43f6-913c-5e562bda5292}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
