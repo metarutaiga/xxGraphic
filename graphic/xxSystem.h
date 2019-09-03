@@ -7,12 +7,28 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <float.h>
-#include <intrin.h>
 #include <math.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
+#if defined(__APPLE__)
+#   include <pthread.h>
+#   include <sys/syscall.h>
+#   include <sys/time.h>
+#   include <TargetConditionals.h>
+#   if TARGET_OS_IPHONE
+#       define xxIOS 1
+#   elif TARGET_OS_OSX
+#       define xxMACOS 1
+#   endif
+#   include <unistd.h>
+#endif
 
 #if defined(_MSC_VER)
+#   include <intrin.h>
 #   define NOMINMAX
 #   define WIN32_LEAN_AND_MEAN
 #   define wglCreateContext wglCreateContext_unused
@@ -31,6 +47,7 @@
 #   undef wglMakeCurrent
 #   undef wglShareLists
 #   pragma warning(disable:4201)
+#   define xxWINDOWS 1
 #endif
 
 #ifndef xxEXTERN
@@ -63,12 +80,18 @@
 #define xxCountOf(var)              (sizeof(var) / sizeof(*var))
 #define xxOffsetOf(st, m)           (offsetof(st, m))
 
-#define xxAlloc(T, count)           (T*)_aligned_malloc(sizeof(T) * count, 16)
-#define xxRealloc(T, count, ptr)    (T*)_aligned_realloc(ptr, sizeof(T) * count, 16)
-#define xxFree(ptr)                 _aligned_free(ptr)
+#if defined(__APPLE__)
+#   define xxAlloc(T, count)        (T*)malloc(sizeof(T) * count)
+#   define xxRealloc(T, count, ptr) (T*)realloc(ptr, sizeof(T) * count)
+#   define xxFree(ptr)              free(ptr)
+#else
+#   define xxAlloc(T, count)        (T*)_aligned_malloc(sizeof(T) * count, 16)
+#   define xxRealloc(T, count, ptr) (T*)_aligned_realloc(ptr, sizeof(T) * count, 16)
+#   define xxFree(ptr)              _aligned_free(ptr)
+#endif
 
-#define xxRotateLeft(v, s)          _rotl(v, s)
-#define xxRotateRight(v, s)         _rotr(v, s)
+#define xxRotateLeft(v, s)          (v << s) | (v >> (sizeof(v) * 8 - s))
+#define xxRotateRight(v, s)         (v >> s) | (v << (sizeof(v) * 8 - s))
 
 #define xxLocalBreak()              switch (0) case 0:
 

@@ -273,9 +273,9 @@ bool ImGui_ImplXX_CreateDeviceObjects()
 
     ImDrawVert vert;
     g_fontSampler = xxCreateSampler(g_device, false, false, false, true, true, true, 1);
-    g_vertexAttribute = xxCreateVertexAttribute(g_device, 3, 0, xxOffsetOf(vert, pos),  3, xxSizeOf(vert.pos) + xxSizeOf(vert.z),
-                                                             0, xxOffsetOf(vert, col),  4, xxSizeOf(vert.col),
-                                                             0, xxOffsetOf(vert, uv),   2, xxSizeOf(vert.uv));
+    g_vertexAttribute = xxCreateVertexAttribute(g_device, 3, 0, xxOffsetOf(ImDrawVert, pos),  3, xxSizeOf(vert.pos) + xxSizeOf(vert.z),
+                                                             0, xxOffsetOf(ImDrawVert, col),  4, xxSizeOf(vert.col),
+                                                             0, xxOffsetOf(ImDrawVert, uv),   2, xxSizeOf(vert.uv));
     g_vertexShader = xxCreateVertexShader(g_device, "default", g_vertexAttribute);
     g_fragmentShader = xxCreateFragmentShader(g_device, "default");
     for (unsigned int i = 0; i < 4; ++i)
@@ -340,7 +340,7 @@ struct ImGuiViewportDataXX
 {
     uint64_t                Swapchain;
     uint64_t                RenderPass;
-    HWND                    Handle;
+    void*                   Handle;
 
     ImGuiViewportDataXX()   { Swapchain = 0; Handle = nullptr; }
     ~ImGuiViewportDataXX()  { IM_ASSERT(Swapchain == 0); IM_ASSERT(RenderPass == 0); }
@@ -353,12 +353,12 @@ static void ImGui_ImplXX_CreateWindow(ImGuiViewport* viewport)
 
     // PlatformHandleRaw should always be a HWND, whereas PlatformHandle might be a higher-level handle (e.g. GLFWWindow*, SDL_Window*).
     // Some back-ends will leave PlatformHandleRaw NULL, in which case we assume PlatformHandle will contain the HWND.
-    HWND hWnd = viewport->PlatformHandleRaw ? (HWND)viewport->PlatformHandleRaw : (HWND)viewport->PlatformHandle;
-    IM_ASSERT(hWnd != 0);
+    void* handle = viewport->PlatformHandleRaw ? viewport->PlatformHandleRaw : viewport->PlatformHandle;
+    IM_ASSERT(handle != 0);
 
-    data->Swapchain = xxCreateSwapchain(g_device, hWnd, (int)viewport->Size.x, (int)viewport->Size.y);
+    data->Swapchain = xxCreateSwapchain(g_device, handle, (int)viewport->Size.x, (int)viewport->Size.y);
     data->RenderPass = xxCreateRenderPass(g_device, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0);
-    data->Handle = hWnd;
+    data->Handle = handle;
     IM_ASSERT(data->Swapchain != 0);
     IM_ASSERT(data->RenderPass != 0);
 }

@@ -1,7 +1,10 @@
 #include "xxGraphicInternal.h"
 #include "xxGraphicGL.h"
-#include "xxGraphicWGL.h"
 #include "xxGraphicGLES2.h"
+
+#if defined(xxWINDOWS)
+#include "xxGraphicWGL.h"
+#endif
 
 #include "gl/gl2.h"
 #define GL_UNIFORM_BUFFER   0
@@ -11,7 +14,12 @@
 //==============================================================================
 uint64_t xxCreateInstanceGLES2()
 {
-    uint64_t instance = xxGraphicCreateWGL();
+    uint64_t instance = 0;
+
+#if defined(xxWINDOWS)
+    instance = xxGraphicCreateWGL();
+#endif
+
     if (instance == 0)
         return 0;
 
@@ -22,7 +30,9 @@ uint64_t xxCreateInstanceGLES2()
 //------------------------------------------------------------------------------
 void xxDestroyInstanceGLES2(uint64_t instance)
 {
+#if defined(xxWINDOWS)
     xxGraphicDestroyWGL(instance);
+#endif
 
     xxUnregisterFunction();
 }
@@ -86,15 +96,9 @@ uint64_t xxCreateSwapchainGLES2(uint64_t device, void* view, unsigned int width,
         return 0;
     }
 
-    HWND hWnd = (HWND)view;
     if (width == 0 || height == 0)
     {
-        RECT rect = {};
-        if (GetClientRect(hWnd, &rect) == TRUE)
-        {
-            width = rect.right - rect.left;
-            height = rect.bottom - rect.top;
-        }
+        glGetViewSize(view, &width, &height);
     }
 
     glSwapchain->context = context;

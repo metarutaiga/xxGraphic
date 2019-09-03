@@ -1,0 +1,350 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D644A0AA231EDE9B00B75B77 /* xxGraphicNULL.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0A0231EDE9A00B75B77 /* xxGraphicNULL.h */; };
+		D644A0AB231EDE9B00B75B77 /* xxGraphicGL.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0A1231EDE9A00B75B77 /* xxGraphicGL.h */; };
+		D644A0AC231EDE9B00B75B77 /* xxSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0A2231EDE9A00B75B77 /* xxSystem.cpp */; };
+		D644A0AD231EDE9B00B75B77 /* xxGraphic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0A3231EDE9A00B75B77 /* xxGraphic.cpp */; };
+		D644A0AE231EDE9B00B75B77 /* xxGraphic.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0A4231EDE9B00B75B77 /* xxGraphic.h */; };
+		D644A0AF231EDE9B00B75B77 /* xxGraphicGLES2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0A5231EDE9B00B75B77 /* xxGraphicGLES2.cpp */; };
+		D644A0B0231EDE9B00B75B77 /* xxGraphicNULL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0A6231EDE9B00B75B77 /* xxGraphicNULL.cpp */; };
+		D644A0B1231EDE9B00B75B77 /* xxGraphicGLES2.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0A7231EDE9B00B75B77 /* xxGraphicGLES2.h */; };
+		D644A0B2231EDE9B00B75B77 /* xxSystem.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0A8231EDE9B00B75B77 /* xxSystem.h */; };
+		D644A0B3231EDE9B00B75B77 /* xxGraphicGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0A9231EDE9B00B75B77 /* xxGraphicGL.cpp */; };
+		D644A0B9231EDEBB00B75B77 /* gl2.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0B5231EDEBB00B75B77 /* gl2.h */; };
+		D644A0BA231EDEBB00B75B77 /* gl2platform.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0B6231EDEBB00B75B77 /* gl2platform.h */; };
+		D644A0BB231EDEBB00B75B77 /* khrplatform.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0B7231EDEBB00B75B77 /* khrplatform.h */; };
+		D644A0BC231EDEBB00B75B77 /* gl2ext.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0B8231EDEBB00B75B77 /* gl2ext.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		D644A092231EDDFA00B75B77 /* libxxGraphic.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libxxGraphic.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		D644A0A0231EDE9A00B75B77 /* xxGraphicNULL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxGraphicNULL.h; path = ../graphic/xxGraphicNULL.h; sourceTree = "<group>"; };
+		D644A0A1231EDE9A00B75B77 /* xxGraphicGL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxGraphicGL.h; path = ../graphic/xxGraphicGL.h; sourceTree = "<group>"; };
+		D644A0A2231EDE9A00B75B77 /* xxSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xxSystem.cpp; path = ../graphic/xxSystem.cpp; sourceTree = "<group>"; };
+		D644A0A3231EDE9A00B75B77 /* xxGraphic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xxGraphic.cpp; path = ../graphic/xxGraphic.cpp; sourceTree = "<group>"; };
+		D644A0A4231EDE9B00B75B77 /* xxGraphic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxGraphic.h; path = ../graphic/xxGraphic.h; sourceTree = "<group>"; };
+		D644A0A5231EDE9B00B75B77 /* xxGraphicGLES2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xxGraphicGLES2.cpp; path = ../graphic/xxGraphicGLES2.cpp; sourceTree = "<group>"; };
+		D644A0A6231EDE9B00B75B77 /* xxGraphicNULL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xxGraphicNULL.cpp; path = ../graphic/xxGraphicNULL.cpp; sourceTree = "<group>"; };
+		D644A0A7231EDE9B00B75B77 /* xxGraphicGLES2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxGraphicGLES2.h; path = ../graphic/xxGraphicGLES2.h; sourceTree = "<group>"; };
+		D644A0A8231EDE9B00B75B77 /* xxSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxSystem.h; path = ../graphic/xxSystem.h; sourceTree = "<group>"; };
+		D644A0A9231EDE9B00B75B77 /* xxGraphicGL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xxGraphicGL.cpp; path = ../graphic/xxGraphicGL.cpp; sourceTree = "<group>"; };
+		D644A0B5231EDEBB00B75B77 /* gl2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gl2.h; path = ../graphic/gl/gl2.h; sourceTree = "<group>"; };
+		D644A0B6231EDEBB00B75B77 /* gl2platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gl2platform.h; path = ../graphic/gl/gl2platform.h; sourceTree = "<group>"; };
+		D644A0B7231EDEBB00B75B77 /* khrplatform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = khrplatform.h; path = ../graphic/gl/khrplatform.h; sourceTree = "<group>"; };
+		D644A0B8231EDEBB00B75B77 /* gl2ext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gl2ext.h; path = ../graphic/gl/gl2ext.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D644A090231EDDFA00B75B77 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D644A089231EDDFA00B75B77 = {
+			isa = PBXGroup;
+			children = (
+				D644A0B4231EDEA400B75B77 /* gl */,
+				D644A0A3231EDE9A00B75B77 /* xxGraphic.cpp */,
+				D644A0A4231EDE9B00B75B77 /* xxGraphic.h */,
+				D644A0A9231EDE9B00B75B77 /* xxGraphicGL.cpp */,
+				D644A0A1231EDE9A00B75B77 /* xxGraphicGL.h */,
+				D644A0A5231EDE9B00B75B77 /* xxGraphicGLES2.cpp */,
+				D644A0A7231EDE9B00B75B77 /* xxGraphicGLES2.h */,
+				D644A0A6231EDE9B00B75B77 /* xxGraphicNULL.cpp */,
+				D644A0A0231EDE9A00B75B77 /* xxGraphicNULL.h */,
+				D644A0A2231EDE9A00B75B77 /* xxSystem.cpp */,
+				D644A0A8231EDE9B00B75B77 /* xxSystem.h */,
+				D644A093231EDDFA00B75B77 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D644A093231EDDFA00B75B77 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D644A092231EDDFA00B75B77 /* libxxGraphic.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D644A0B4231EDEA400B75B77 /* gl */ = {
+			isa = PBXGroup;
+			children = (
+				D644A0B5231EDEBB00B75B77 /* gl2.h */,
+				D644A0B8231EDEBB00B75B77 /* gl2ext.h */,
+				D644A0B6231EDEBB00B75B77 /* gl2platform.h */,
+				D644A0B7231EDEBB00B75B77 /* khrplatform.h */,
+			);
+			name = gl;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		D644A08E231EDDFA00B75B77 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D644A0B9231EDEBB00B75B77 /* gl2.h in Headers */,
+				D644A0AB231EDE9B00B75B77 /* xxGraphicGL.h in Headers */,
+				D644A0B1231EDE9B00B75B77 /* xxGraphicGLES2.h in Headers */,
+				D644A0AA231EDE9B00B75B77 /* xxGraphicNULL.h in Headers */,
+				D644A0BC231EDEBB00B75B77 /* gl2ext.h in Headers */,
+				D644A0B2231EDE9B00B75B77 /* xxSystem.h in Headers */,
+				D644A0BB231EDEBB00B75B77 /* khrplatform.h in Headers */,
+				D644A0BA231EDEBB00B75B77 /* gl2platform.h in Headers */,
+				D644A0AE231EDE9B00B75B77 /* xxGraphic.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		D644A091231EDDFA00B75B77 /* xxGraphic */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D644A09D231EDDFA00B75B77 /* Build configuration list for PBXNativeTarget "xxGraphic" */;
+			buildPhases = (
+				D644A08E231EDDFA00B75B77 /* Headers */,
+				D644A08F231EDDFA00B75B77 /* Sources */,
+				D644A090231EDDFA00B75B77 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = xxGraphic;
+			productName = xxGraphic;
+			productReference = D644A092231EDDFA00B75B77 /* libxxGraphic.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D644A08A231EDDFA00B75B77 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1030;
+				TargetAttributes = {
+					D644A091231EDDFA00B75B77 = {
+						CreatedOnToolsVersion = 10.3;
+					};
+				};
+			};
+			buildConfigurationList = D644A08D231EDDFA00B75B77 /* Build configuration list for PBXProject "xxGraphic" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = D644A089231EDDFA00B75B77;
+			productRefGroup = D644A093231EDDFA00B75B77 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D644A091231EDDFA00B75B77 /* xxGraphic */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D644A08F231EDDFA00B75B77 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D644A0AD231EDE9B00B75B77 /* xxGraphic.cpp in Sources */,
+				D644A0AF231EDE9B00B75B77 /* xxGraphicGLES2.cpp in Sources */,
+				D644A0B3231EDE9B00B75B77 /* xxGraphicGL.cpp in Sources */,
+				D644A0AC231EDE9B00B75B77 /* xxSystem.cpp in Sources */,
+				D644A0B0231EDE9B00B75B77 /* xxGraphicNULL.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		D644A09B231EDDFA00B75B77 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		D644A09C231EDDFA00B75B77 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		D644A09E231EDDFA00B75B77 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Manual;
+				CONFIGURATION_BUILD_DIR = ../bin;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				OBJROOT = ../temp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		D644A09F231EDDFA00B75B77 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Manual;
+				CONFIGURATION_BUILD_DIR = ../bin;
+				DEVELOPMENT_TEAM = "";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				OBJROOT = ../temp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D644A08D231EDDFA00B75B77 /* Build configuration list for PBXProject "xxGraphic" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D644A09B231EDDFA00B75B77 /* Debug */,
+				D644A09C231EDDFA00B75B77 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D644A09D231EDDFA00B75B77 /* Build configuration list for PBXNativeTarget "xxGraphic" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D644A09E231EDDFA00B75B77 /* Debug */,
+				D644A09F231EDDFA00B75B77 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D644A08A231EDDFA00B75B77 /* Project object */;
+}

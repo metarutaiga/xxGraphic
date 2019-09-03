@@ -10,6 +10,29 @@ uint64_t xxTSC()
 //------------------------------------------------------------------------------
 uint64_t xxTSCFrequencyImpl()
 {
+#if defined(xxMACOS)
+    timeval tmBegin;
+    timeval tmDelta;
+    timeval tmEnd;
+
+    timespec ts;
+    ts.tv_sec = 0;
+    ts.tv_nsec = 100 * 1000000;
+
+    gettimeofday(&tmBegin, nullptr);
+    uint64_t tscBegin = xxTSC();
+    nanosleep(&ts, nullptr);
+    uint64_t tscEnd = xxTSC();
+    gettimeofday(&tmEnd, nullptr);
+
+    tmDelta.tv_sec = tmEnd.tv_sec - tmBegin.tv_sec;
+    tmDelta.tv_usec = tmEnd.tv_usec - tmBegin.tv_usec;
+    uint64_t delta = (tmDelta.tv_sec * 1000000000 + tmDelta.tv_usec) * 1000 / 1000000000;
+    if (delta == 0)
+        delta = 100;
+
+    uint64_t frequency = (tscEnd - tscBegin) * 1000 / delta;
+#elif defined(xxWINDOWS)
     LARGE_INTEGER performanceBegin;
     LARGE_INTEGER performanceDelta;
     LARGE_INTEGER performanceEnd;
@@ -29,6 +52,7 @@ uint64_t xxTSCFrequencyImpl()
         performanceDelta.QuadPart = 100;
 
     uint64_t frequency = (tscEnd - tscBegin) * 1000 / performanceDelta.QuadPart;
+#endif
 
     float mhz = frequency / 1000000.0f;
     frequency = llroundf(mhz / 100.0f) * 100 * 1000000;
@@ -49,31 +73,49 @@ float xxGetCurrentTime()
 //==============================================================================
 uint64_t xxGetCurrentProcessId()
 {
+#if defined(xxMACOS) || defined(xxIOS)
+    return getpid();
+#elif defined(xxWINDOWS)
 #if defined(_M_IX86)
     return __readfsdword(0x20);
 #elif defined(_M_AMD64)
     return __readgsqword(0x40);
 #endif
     return GetCurrentProcessId();
+#endif
 }
 //------------------------------------------------------------------------------
 uint64_t xxGetCurrentThreadId()
 {
+#if defined(xxMACOS) || defined(xxIOS)
+    uint64_t tid;
+    pthread_threadid_np(NULL, &tid);
+    return tid;
+#elif defined(xxWINDOWS)
 #if defined(_M_IX86)
     return __readfsdword(0x24);
 #elif defined(_M_AMD64)
     return __readgsqword(0x48);
 #endif
     return GetCurrentThreadId();
+#endif
 }
 //------------------------------------------------------------------------------
 int xxGetIncrementThreadId()
 {
     static int increment;
+#if defined(__GNUC__)
+    static int __thread threadId;
+#elif defined(_MSC_VER)
     static int __declspec(thread) threadId;
+#endif
     if (xxUnlikely(threadId == 0))
     {
+#if defined(__GNUC__)
+        threadId = __sync_fetch_and_add(&increment, 1);
+#elif defined(_MSC_VER)
         threadId = _InterlockedIncrement((unsigned int*)&increment);
+#endif
     }
     return threadId - 1;
 }
@@ -97,8 +139,12 @@ int xxLog(const char* tag, const char* format, ...)
         snprintf(buffer, tagLength + formatLength, "[%s]", tag);
         vsnprintf(buffer + tagLength, formatLength, format, second);
         buffer[tagLength - 1] = ' ';
+#if defined(xxMACOS) || defined(xxIOS)
+        printf("%s\n", buffer);
+#elif defined(xxWINDOWS)
         OutputDebugStringA(buffer);
         OutputDebugStringA("\n");
+#endif
         xxFree(buffer);
     }
     va_end(second);
@@ -117,7 +163,7 @@ static const char Kr[64] =
     6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21
 };
 //------------------------------------------------------------------------------
-static const int KK[64] =
+static const unsigned int KK[64] =
 {
     0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
     0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
