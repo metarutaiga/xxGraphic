@@ -139,7 +139,7 @@ static uint64_t g_renderPass = 0;
         ImGui_ImplXX_InvalidateDeviceObjects();
         xxDestroySwapchain(g_swapchain);
         xxResetDevice(g_device);
-        g_swapchain = xxCreateSwapchain(g_device, 0, 0, 0);
+        g_swapchain = xxCreateSwapchain(g_device, (__bridge void*)self.window, 0, 0);
         ImGui_ImplXX_CreateDeviceObjects();
     }
 
@@ -189,7 +189,7 @@ static uint64_t g_renderPass = 0;
 // Flip coordinate system upside down on Y
 -(BOOL)isFlipped
 {
-    return (YES);
+    return (NO);
 }
 
 -(void)dealloc
@@ -203,6 +203,8 @@ static uint64_t g_renderPass = 0;
 -(void)flagsChanged:(NSEvent *)event    { ImGui_ImplOSX_HandleEvent(event, self); }
 -(void)mouseDown:(NSEvent *)event       { ImGui_ImplOSX_HandleEvent(event, self); }
 -(void)mouseUp:(NSEvent *)event         { ImGui_ImplOSX_HandleEvent(event, self); }
+-(void)mouseMoved:(NSEvent *)event      { ImGui_ImplOSX_HandleEvent(event, self); }
+-(void)mouseDragged:(NSEvent *)event    { ImGui_ImplOSX_HandleEvent(event, self); }
 -(void)scrollWheel:(NSEvent *)event     { ImGui_ImplOSX_HandleEvent(event, self); }
 
 @end
@@ -264,7 +266,7 @@ static uint64_t g_renderPass = 0;
 
 -(void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-    float scale = 1.0f;
+    float scale = [self.window backingScaleFactor];
 
     // Make the application a foreground application (else it won't receive keyboard events)
     ProcessSerialNumber psn = {0, kCurrentProcess};
@@ -274,7 +276,12 @@ static uint64_t g_renderPass = 0;
     [self setupMenu];
 
     ImGuiExampleView* view = [[ImGuiExampleView alloc] initWithFrame:self.window.frame];
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6)
+        [view setWantsBestResolutionOpenGLSurface:YES];
+#endif // MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
     [self.window setContentView:view];
+    [self.window setAcceptsMouseMovedEvents:YES];
 
     g_instance = xxCreateInstanceGLES2();
     g_device = xxCreateDevice(g_instance);
@@ -329,7 +336,7 @@ static uint64_t g_renderPass = 0;
     font_config.SizePixels          = 13.0f * io.FontGlobalScale;
     font_config.RasterizerMultiply  = 1.0f;
     io.Fonts->AddFontDefault(&font_config);
-    
+
     font_config.OversampleH         = 1;
     font_config.OversampleV         = 1;
     font_config.PixelSnapH          = true;

@@ -92,6 +92,10 @@ uint64_t glCreateContextCGL(uint64_t instance, void* view, void** display)
     [nsContext makeCurrentContext];
     [nsView setOpenGLContext:nsContext];
 
+    int swapInterval = 0;
+    CGLSetParameter([nsContext CGLContextObj], kCGLCPSwapInterval, &swapInterval);
+    CGLEnable([nsContext CGLContextObj], kCGLCEMPEngine);
+
     cglSymbol(glGetIntegerv);
     cglSymbol(glGenVertexArrays);
     cglSymbol(glDeleteVertexArrays);
@@ -126,6 +130,7 @@ void glDestroyContextCGL(uint64_t context, void* view, void* display)
     }
 
     [nsView setOpenGLContext:nil];
+    [NSOpenGLContext clearCurrentContext];
 }
 //------------------------------------------------------------------------------
 void glMakeCurrentContextCGL(uint64_t context, void* display)
@@ -213,7 +218,6 @@ uint64_t xxGraphicCreateCGL()
                                          pixelFormat:pixelFormat];
     if (g_rootView == nil)
         return 0;
-    [g_rootView setWantsBestResolutionOpenGLSurface:YES];
     [[g_rootView openGLContext] makeCurrentContext];
     NSOpenGLContext* rootContext = [g_rootView openGLContext];
 

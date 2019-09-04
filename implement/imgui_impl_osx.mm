@@ -151,9 +151,8 @@ void ImGui_ImplOSX_NewFrame(NSView* view)
 {
     // Setup display size
     ImGuiIO& io = ImGui::GetIO();
-    const float dpi = [view.window backingScaleFactor];
-    io.DisplaySize = ImVec2((float)view.bounds.size.width, (float)view.bounds.size.height);
-    io.DisplayFramebufferScale = ImVec2(dpi, dpi);
+    NSSize size = [view convertRectToBacking:[view bounds]].size;
+    io.DisplaySize = ImVec2((float)size.width, (float)size.height);
 
     // Setup time step
     if (g_Time == 0.0)
@@ -207,9 +206,10 @@ bool ImGui_ImplOSX_HandleEvent(NSEvent* event, NSView* view)
 
     if (event.type == NSEventTypeMouseMoved || event.type == NSEventTypeLeftMouseDragged)
     {
+        NSSize size = [view convertRectToBacking:[view bounds]].size;
         NSPoint mousePoint = event.locationInWindow;
-        mousePoint = [view convertPoint:mousePoint fromView:nil];
-        mousePoint = NSMakePoint(mousePoint.x, view.bounds.size.height - mousePoint.y);
+        mousePoint = [view convertPointToBacking:mousePoint];
+        mousePoint = NSMakePoint(mousePoint.x, size.height - mousePoint.y);
         io.MousePos = ImVec2(mousePoint.x, mousePoint.y);
     }
 

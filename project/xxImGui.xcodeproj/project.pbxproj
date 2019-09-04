@@ -13,6 +13,7 @@
 		D644A0EF231F117E00B75B77 /* libxxGraphic.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D644A0EE231F117E00B75B77 /* libxxGraphic.dylib */; };
 		D644A0F1231F119400B75B77 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D644A0F0231F119400B75B77 /* Cocoa.framework */; };
 		D644A0F3231F12BE00B75B77 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = D644A0F2231F12BE00B75B77 /* main.mm */; };
+		D6B3385F23205C810096D02F /* info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D6B3385E23205C810096D02F /* info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +26,7 @@
 		D644A0EE231F117E00B75B77 /* libxxGraphic.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libxxGraphic.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		D644A0F0231F119400B75B77 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		D644A0F2231F12BE00B75B77 /* main.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = main.mm; path = ../main.mm; sourceTree = "<group>"; };
+		D6B3385E23205C810096D02F /* info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = info.plist; path = ../info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,6 +46,7 @@
 		D644A0BD231F021F00B75B77 = {
 			isa = PBXGroup;
 			children = (
+				D6B3385E23205C810096D02F /* info.plist */,
 				D644A0F2231F12BE00B75B77 /* main.mm */,
 				D644A0DA231F107D00B75B77 /* implement */,
 				D644A0C7231F021F00B75B77 /* Products */,
@@ -136,6 +139,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6B3385F23205C810096D02F /* info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -273,12 +277,13 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = ../bin;
+				INFOPLIST_FILE = "$(SRCROOT)/../info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				OBJROOT = ../temp;
-				PRODUCT_BUNDLE_IDENTIFIER = xx.xxImGui;
+				PRODUCT_BUNDLE_IDENTIFIER = xx.imgui;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -288,12 +293,13 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = ../bin;
+				INFOPLIST_FILE = "$(SRCROOT)/../info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				OBJROOT = ../temp;
-				PRODUCT_BUNDLE_IDENTIFIER = xx.xxImGui;
+				PRODUCT_BUNDLE_IDENTIFIER = xx.imgui;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
