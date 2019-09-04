@@ -1,13 +1,25 @@
 // dear imgui: standalone example application for OSX + OpenGL2, using legacy fixed pipeline
 // If you are new to dear imgui, see examples/README.txt and documentation at the top of imgui.cpp.
 
+#include <sys/stat.h>
+
 #include "imgui/imgui.h"
+#include "imgui/misc/freetype/imgui_freetype.h"
+
 #include "implement/imgui_impl_osx.h"
 #include "implement/imgui_impl_xx.h"
+
+#include "graphic/xxGraphicGLES2.h"
+#include "graphic/xxGraphicNULL.h"
+
 #include <stdio.h>
 #import <Cocoa/Cocoa.h>
-#import <OpenGL/gl.h>
-#import <OpenGL/glu.h>
+
+// Graphic data
+static uint64_t g_instance = 0;
+static uint64_t g_device = 0;
+static uint64_t g_swapchain = 0;
+static uint64_t g_renderPass = 0;
 
 //-----------------------------------------------------------------------------------
 // ImGuiExampleView
@@ -26,24 +38,42 @@
     [self setNeedsDisplay:YES];
 }
 
--(void)prepareOpenGL
-{
-    [super prepareOpenGL];
-
-#ifndef DEBUG
-    GLint swapInterval = 1;
-    [[self openGLContext] setValues:&swapInterval forParameter:NSOpenGLCPSwapInterval];
-    if (swapInterval == 0)
-        NSLog(@"Error: Cannot set swap interval.");
-#endif
-}
-
 -(void)updateAndDrawDemoView
 {
     // Start the Dear ImGui frame
     ImGui_ImplXX_NewFrame();
     ImGui_ImplOSX_NewFrame(self);
     ImGui::NewFrame();
+
+    // Graphic API
+    uint64_t(*createInstance)() = nullptr;
+    if (ImGui::BeginMainMenuBar())
+    {
+        if (ImGui::BeginMenu("Graphic"))
+        {
+            const char* deviceStringCurrent = xxGetDeviceString(g_device);
+            const char* deviceStringTarget = "";
+            bool selected = false;
+
+            xxLocalBreak()
+            {
+#define GRAPHIC(api) \
+                deviceStringTarget = xxGetDeviceString ## api(g_device); \
+                selected = (deviceStringCurrent == deviceStringTarget); \
+                if (ImGui::MenuItem(deviceStringTarget, nullptr, &selected)) \
+                { \
+                    createInstance = xxCreateInstance ## api; \
+                    break; \
+                }
+
+                GRAPHIC(GLES2);
+                GRAPHIC(NULL);
+#undef GRAPHIC
+            }
+            ImGui::EndMenu();
+        }
+        ImGui::EndMainMenuBar();
+    }
 
     // Global data for the demo
     static bool show_demo_window = true;
@@ -88,22 +118,52 @@
     }
 
     // Rendering
+    ImGui::EndFrame();
     ImGui::Render();
 
-    ImDrawData* draw_data = ImGui::GetDrawData();
-    ImGui_ImplXX_RenderDrawData(draw_data, 0);
+    uint64_t commandBuffer = xxGetCommandBuffer(g_device, g_swapchain);
+    uint64_t framebuffer = xxGetFramebuffer(g_device, g_swapchain);
+    xxBeginCommandBuffer(commandBuffer);
+    xxBeginRenderPass(commandBuffer, framebuffer, g_renderPass);
 
-    // Present
-    [[self openGLContext] flushBuffer];
+    ImGui_ImplXX_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+
+    xxEndRenderPass(commandBuffer, framebuffer, g_renderPass);
+    xxEndCommandBuffer(commandBuffer);
+    xxSubmitCommandBuffer(commandBuffer);
+
+    xxPresentSwapchain(g_swapchain);
+
+    if (xxTestDevice(g_device) == false)
+    {
+        ImGui_ImplXX_InvalidateDeviceObjects();
+        xxDestroySwapchain(g_swapchain);
+        xxResetDevice(g_device);
+        g_swapchain = xxCreateSwapchain(g_device, 0, 0, 0);
+        ImGui_ImplXX_CreateDeviceObjects();
+    }
+
+    // Update and Render additional Platform Windows
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+    }
 
     if (!animationTimer)
-        animationTimer = [NSTimer scheduledTimerWithTimeInterval:0.017 target:self selector:@selector(animationTimerFired:) userInfo:nil repeats:YES];
+        animationTimer = [NSTimer scheduledTimerWithTimeInterval:0.001 target:self selector:@selector(animationTimerFired:) userInfo:nil repeats:YES];
 }
 
 -(void)reshape
 {
-    [[self openGLContext] update];
-    [self updateAndDrawDemoView];
+    [super reshape];
+    if (g_swapchain)
+    {
+        xxDestroySwapchain(g_swapchain);
+        g_swapchain = 0;
+        g_swapchain = xxCreateSwapchain(g_device, (__bridge void*)[self window], 0, 0);
+    }
 }
 
 -(void)drawRect:(NSRect)bounds
@@ -171,7 +231,7 @@
     NSRect viewRect = NSMakeRect(100.0, 100.0, 100.0 + 1280.0, 100 + 720.0);
 
     _window = [[NSWindow alloc] initWithContentRect:viewRect styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskResizable|NSWindowStyleMaskClosable backing:NSBackingStoreBuffered defer:YES];
-    [_window setTitle:@"Dear ImGui OSX+OpenGL2 Example"];
+    [_window setTitle:@"Dear ImGui XX Example"];
     [_window setOpaque:YES];
     [_window makeKeyAndOrderFront:NSApp];
 
@@ -184,8 +244,8 @@
     NSMenu* appMenu;
     NSMenuItem* menuItem;
 
-    appMenu = [[NSMenu alloc] initWithTitle:@"Dear ImGui OSX+OpenGL2 Example"];
-    menuItem = [appMenu addItemWithTitle:@"Quit Dear ImGui OSX+OpenGL2 Example" action:@selector(terminate:) keyEquivalent:@"q"];
+    appMenu = [[NSMenu alloc] initWithTitle:@"Dear ImGui XX Example"];
+    menuItem = [appMenu addItemWithTitle:@"Quit Dear ImGui XX Example" action:@selector(terminate:) keyEquivalent:@"q"];
     [menuItem setKeyEquivalentModifierMask:NSEventModifierFlagCommand];
 
     menuItem = [[NSMenuItem alloc] init];
@@ -204,46 +264,50 @@
 
 -(void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-	// Make the application a foreground application (else it won't receive keyboard events)
-	ProcessSerialNumber psn = {0, kCurrentProcess};
-	TransformProcessType(&psn, kProcessTransformToForegroundApplication);
+    float scale = 1.0f;
 
-	// Menu
+    // Make the application a foreground application (else it won't receive keyboard events)
+    ProcessSerialNumber psn = {0, kCurrentProcess};
+    TransformProcessType(&psn, kProcessTransformToForegroundApplication);
+
+    // Menu
     [self setupMenu];
 
-    NSOpenGLPixelFormatAttribute attrs[] =
-    {
-        NSOpenGLPFADoubleBuffer,
-        NSOpenGLPFADepthSize, 32,
-        0
-    };
-
-    NSOpenGLPixelFormat* format = [[NSOpenGLPixelFormat alloc] initWithAttributes:attrs];
-    ImGuiExampleView* view = [[ImGuiExampleView alloc] initWithFrame:self.window.frame pixelFormat:format];
-    format = nil;
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6)
-        [view setWantsBestResolutionOpenGLSurface:YES];
-#endif // MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
+    ImGuiExampleView* view = [[ImGuiExampleView alloc] initWithFrame:self.window.frame];
     [self.window setContentView:view];
 
-    if ([view openGLContext] == nil)
-        NSLog(@"No OpenGL Context!");
+    g_instance = xxCreateInstanceGLES2();
+    g_device = xxCreateDevice(g_instance);
+    g_swapchain = xxCreateSwapchain(g_device, (__bridge void*)self.window, 0, 0);
+    g_renderPass = xxCreateRenderPass(g_device, 0.45f, 0.55f, 0.60f, 1.0f, 1.0f, 0);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+    io.IniFilename = NULL;
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsClassic();
 
+    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+    ImGuiStyle& style = ImGui::GetStyle();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
+    io.FontGlobalScale = scale;
+    style.ScaleAllSizes(scale);
+
     // Setup Platform/Renderer bindings
     ImGui_ImplOSX_Init();
-    ImGui_ImplXX_Init(0, 0, 0);
+    ImGui_ImplXX_Init(g_instance, 0, g_device);
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -259,6 +323,25 @@
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
+
+    // Load / Merge Fonts
+    ImFontConfig font_config;
+    font_config.SizePixels          = 13.0f * io.FontGlobalScale;
+    font_config.RasterizerMultiply  = 1.0f;
+    io.Fonts->AddFontDefault(&font_config);
+    
+    font_config.OversampleH         = 1;
+    font_config.OversampleV         = 1;
+    font_config.PixelSnapH          = true;
+    font_config.MergeMode           = true;
+#if defined(xxMACOS)
+    font_config.SizePixels          = 13.0f * io.FontGlobalScale;
+    font_config.RasterizerMultiply  = 2.0f / io.FontGlobalScale;
+    font_config.RasterizerFlags     = ImGuiFreeType::Bitmap;
+    io.Fonts->AddFontFromFileTTF("/System/Library/Fonts/PingFang.ttc", 16.0f * io.FontGlobalScale, &font_config, io.Fonts->GetGlyphRangesJapanese());
+#endif
+    io.FontGlobalScale = 1.0f;
+    ImGuiFreeType::BuildFontAtlas(io.Fonts);
 }
 
 @end

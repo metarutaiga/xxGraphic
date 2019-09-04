@@ -2,8 +2,12 @@
 #include "xxGraphicGL.h"
 #include "xxGraphicGLES2.h"
 
+#if defined(xxMACOS)
+#   include "xxGraphicCGL.h"
+#endif
+
 #if defined(xxWINDOWS)
-#include "xxGraphicWGL.h"
+#   include "xxGraphicWGL.h"
 #endif
 
 #include "gl/gl2.h"
@@ -15,6 +19,10 @@
 uint64_t xxCreateInstanceGLES2()
 {
     uint64_t instance = 0;
+
+#if defined(xxMACOS)
+    instance = xxGraphicCreateCGL();
+#endif
 
 #if defined(xxWINDOWS)
     instance = xxGraphicCreateWGL();
@@ -30,6 +38,10 @@ uint64_t xxCreateInstanceGLES2()
 //------------------------------------------------------------------------------
 void xxDestroyInstanceGLES2(uint64_t instance)
 {
+#if defined(xxMACOS)
+    xxGraphicDestroyCGL(instance);
+#endif
+
 #if defined(xxWINDOWS)
     xxGraphicDestroyWGL(instance);
 #endif
@@ -337,7 +349,7 @@ uint64_t xxCreateTextureGLES2(uint64_t device, int format, unsigned int width, u
 
     GLuint texture = 0;
     glGenTextures(1, &texture);
-    if (glGetError() != 0)
+    if (texture == 0)
     {
         delete glTexture;
         return 0;
@@ -403,7 +415,11 @@ void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, unsigned int level, 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glTexture->mipmap > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
         }
+#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
         glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, glTexture->width, glTexture->height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, glTexture->memory);
+#else
+        glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, glTexture->width, glTexture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, glTexture->memory);
+#endif
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
@@ -416,7 +432,11 @@ void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, unsigned int level, 
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, glTexture->mipmap > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
         }
+#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + array, level, GL_RGBA, glTexture->width, glTexture->height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, glTexture->memory);
+#else
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + array, level, GL_RGBA, glTexture->width, glTexture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, glTexture->memory);
+#endif
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
 
@@ -520,7 +540,11 @@ uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, ...)
         }
         if (offset != 0 && element == 4 && size == sizeof(char) * 4)
         {
+#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
             attributes[i].size = GL_BGRA_EXT;
+#else
+            attributes[i].size = 4;
+#endif
             attributes[i].type = GL_UNSIGNED_BYTE;
             attributes[i].normalized = GL_TRUE;
             attributes[i].name = "color";

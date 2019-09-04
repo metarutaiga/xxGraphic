@@ -21,6 +21,10 @@
 		D644A0BA231EDEBB00B75B77 /* gl2platform.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0B6231EDEBB00B75B77 /* gl2platform.h */; };
 		D644A0BB231EDEBB00B75B77 /* khrplatform.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0B7231EDEBB00B75B77 /* khrplatform.h */; };
 		D644A0BC231EDEBB00B75B77 /* gl2ext.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0B8231EDEBB00B75B77 /* gl2ext.h */; };
+		D6B338562320209A0096D02F /* xxGraphicCGL.mm in Sources */ = {isa = PBXBuildFile; fileRef = D6B33854232020990096D02F /* xxGraphicCGL.mm */; };
+		D6B338572320209A0096D02F /* xxGraphicCGL.h in Headers */ = {isa = PBXBuildFile; fileRef = D6B33855232020990096D02F /* xxGraphicCGL.h */; };
+		D6B3385B232043FE0096D02F /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6B3385A232043FE0096D02F /* OpenGL.framework */; };
+		D6B3385D232044100096D02F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6B3385C232044100096D02F /* Cocoa.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +43,10 @@
 		D644A0B6231EDEBB00B75B77 /* gl2platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gl2platform.h; path = ../graphic/gl/gl2platform.h; sourceTree = "<group>"; };
 		D644A0B7231EDEBB00B75B77 /* khrplatform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = khrplatform.h; path = ../graphic/gl/khrplatform.h; sourceTree = "<group>"; };
 		D644A0B8231EDEBB00B75B77 /* gl2ext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gl2ext.h; path = ../graphic/gl/gl2ext.h; sourceTree = "<group>"; };
+		D6B33854232020990096D02F /* xxGraphicCGL.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = xxGraphicCGL.mm; path = ../graphic/xxGraphicCGL.mm; sourceTree = "<group>"; };
+		D6B33855232020990096D02F /* xxGraphicCGL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxGraphicCGL.h; path = ../graphic/xxGraphicCGL.h; sourceTree = "<group>"; };
+		D6B3385A232043FE0096D02F /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		D6B3385C232044100096D02F /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,6 +54,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6B3385D232044100096D02F /* Cocoa.framework in Frameworks */,
+				D6B3385B232043FE0096D02F /* OpenGL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -55,18 +65,15 @@
 		D644A089231EDDFA00B75B77 = {
 			isa = PBXGroup;
 			children = (
-				D644A0B4231EDEA400B75B77 /* gl */,
+				D6B338582320214C0096D02F /* OpenGL */,
 				D644A0A3231EDE9A00B75B77 /* xxGraphic.cpp */,
 				D644A0A4231EDE9B00B75B77 /* xxGraphic.h */,
-				D644A0A9231EDE9B00B75B77 /* xxGraphicGL.cpp */,
-				D644A0A1231EDE9A00B75B77 /* xxGraphicGL.h */,
-				D644A0A5231EDE9B00B75B77 /* xxGraphicGLES2.cpp */,
-				D644A0A7231EDE9B00B75B77 /* xxGraphicGLES2.h */,
 				D644A0A6231EDE9B00B75B77 /* xxGraphicNULL.cpp */,
 				D644A0A0231EDE9A00B75B77 /* xxGraphicNULL.h */,
 				D644A0A2231EDE9A00B75B77 /* xxSystem.cpp */,
 				D644A0A8231EDE9B00B75B77 /* xxSystem.h */,
 				D644A093231EDDFA00B75B77 /* Products */,
+				D6B33859232043FD0096D02F /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -89,6 +96,29 @@
 			name = gl;
 			sourceTree = "<group>";
 		};
+		D6B338582320214C0096D02F /* OpenGL */ = {
+			isa = PBXGroup;
+			children = (
+				D644A0B4231EDEA400B75B77 /* gl */,
+				D6B33855232020990096D02F /* xxGraphicCGL.h */,
+				D6B33854232020990096D02F /* xxGraphicCGL.mm */,
+				D644A0A9231EDE9B00B75B77 /* xxGraphicGL.cpp */,
+				D644A0A1231EDE9A00B75B77 /* xxGraphicGL.h */,
+				D644A0A5231EDE9B00B75B77 /* xxGraphicGLES2.cpp */,
+				D644A0A7231EDE9B00B75B77 /* xxGraphicGLES2.h */,
+			);
+			name = OpenGL;
+			sourceTree = "<group>";
+		};
+		D6B33859232043FD0096D02F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D6B3385C232044100096D02F /* Cocoa.framework */,
+				D6B3385A232043FE0096D02F /* OpenGL.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -104,6 +134,7 @@
 				D644A0B2231EDE9B00B75B77 /* xxSystem.h in Headers */,
 				D644A0BB231EDEBB00B75B77 /* khrplatform.h in Headers */,
 				D644A0BA231EDEBB00B75B77 /* gl2platform.h in Headers */,
+				D6B338572320209A0096D02F /* xxGraphicCGL.h in Headers */,
 				D644A0AE231EDE9B00B75B77 /* xxGraphic.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -168,6 +199,7 @@
 				D644A0B3231EDE9B00B75B77 /* xxGraphicGL.cpp in Sources */,
 				D644A0AC231EDE9B00B75B77 /* xxSystem.cpp in Sources */,
 				D644A0B0231EDE9B00B75B77 /* xxGraphicNULL.cpp in Sources */,
+				D6B338562320209A0096D02F /* xxGraphicCGL.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

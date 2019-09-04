@@ -51,7 +51,7 @@
 //#define IMGUI_INCLUDE_IMGUI_USER_H
 
 //---- Pack colors to BGRA8 instead of RGBA8 (to avoid converting from one to another)
-#if defined(_MSC_VER)
+#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
 #define IMGUI_USE_BGRA_PACKED_COLOR
 #endif
 
