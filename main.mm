@@ -151,6 +151,27 @@ static uint64_t g_renderPass = 0;
         ImGui::RenderPlatformWindowsDefault();
     }
 
+    // Recreate Graphic API
+    if (createInstance != nullptr)
+    {
+        ImGui_ImplXX_Shutdown();
+        ImGui_ImplOSX_Shutdown();
+        xxDestroyRenderPass(g_renderPass);
+        xxDestroySwapchain(g_swapchain);
+        xxDestroyDevice(g_device);
+        xxDestroyInstance(g_instance);
+        g_renderPass = 0;
+        g_swapchain = 0;
+        g_device = 0;
+        g_instance = 0;
+        g_instance = createInstance();
+        g_device = xxCreateDevice(g_instance);
+        g_swapchain = xxCreateSwapchain(g_device, (__bridge void*)[self window], 0, 0);
+        g_renderPass = xxCreateRenderPass(g_device, 0.45f, 0.55f, 0.60f, 1.0f, 1.0f, 0);
+        ImGui_ImplOSX_Init([self window]);
+        ImGui_ImplXX_Init(g_instance, 0, g_device);
+    }
+
     if (!animationTimer)
         animationTimer = [NSTimer scheduledTimerWithTimeInterval:0 target:self selector:@selector(animationTimerFired:) userInfo:nil repeats:YES];
 }
@@ -356,7 +377,7 @@ static uint64_t g_renderPass = 0;
     ImGui_ImplXX_Shutdown();
     ImGui_ImplOSX_Shutdown();
     ImGui::DestroyContext();
-    
+
     xxDestroyRenderPass(g_renderPass);
     xxDestroySwapchain(g_swapchain);
     xxDestroyDevice(g_device);

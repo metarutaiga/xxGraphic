@@ -340,8 +340,9 @@ bool ImGui_ImplOSX_HandleEvent(NSEvent* event, NSView* view)
 struct ImGuiViewportDataOSX
 {
     NSWindow*               window;
+    bool                    windowOwned;
 
-    ImGuiViewportDataOSX()  {}
+    ImGuiViewportDataOSX()  { windowOwned = false; }
     ~ImGuiViewportDataOSX() { IM_ASSERT(window == nil); }
 };
 
@@ -384,6 +385,7 @@ static void ImGui_ImplOSX_CreateWindow(ImGuiViewport* viewport)
     [window setContentView:view];
 
     data->window = window;
+    data->windowOwned = true;
     viewport->PlatformRequestResize = false;
     viewport->PlatformHandle = viewport->PlatformHandleRaw = (__bridge void*)window;
 }
@@ -392,8 +394,12 @@ static void ImGui_ImplOSX_DestroyWindow(ImGuiViewport* viewport)
 {
     if (ImGuiViewportDataOSX* data = (ImGuiViewportDataOSX*)viewport->PlatformUserData)
     {
-        [data->window setContentView:nil];
-        [data->window orderOut:nil];
+        NSWindow* window = data->window;
+        if (window != nil && data->windowOwned)
+        {
+            [window setContentView:nil];
+            [window orderOut:nil];
+        }
         data->window = nil;
         IM_DELETE(data);
     }
@@ -442,7 +448,8 @@ static ImVec2 ImGui_ImplOSX_GetWindowSize(ImGuiViewport* viewport)
     ImGuiViewportDataOSX* data = (ImGuiViewportDataOSX*)viewport->PlatformUserData;
     IM_ASSERT(data->window != 0);
 
-    NSSize size = [data->window convertRectToBacking:[data->window contentLayoutRect]].size;
+    NSWindow* window = data->window;
+    NSSize size = [window convertRectToBacking:[window contentLayoutRect]].size;
     return ImVec2(size.width, size.width);
 }
 
@@ -451,9 +458,13 @@ static void ImGui_ImplOSX_SetWindowSize(ImGuiViewport* viewport, ImVec2 size)
     ImGuiViewportDataOSX* data = (ImGuiViewportDataOSX*)viewport->PlatformUserData;
     IM_ASSERT(data->window != 0);
 
-    NSRect rect = NSMakeRect(0, 0, size.x, size.y);
-    rect = [data->window convertRectFromBacking:rect];
-    [data->window setContentSize:rect.size];
+    NSWindow* window = data->window;
+    NSRect rect = [window convertRectToBacking:[window frame]];
+    rect.origin.y -= (size.y - rect.size.height);
+    rect.size.width = size.x;
+    rect.size.height = size.y;
+    rect = [window convertRectFromBacking:rect];
+    [window setFrame:rect display:YES];
 }
 
 static void ImGui_ImplOSX_SetWindowFocus(ImGuiViewport* viewport)
@@ -572,6 +583,7 @@ static void ImGui_ImplOSX_InitPlatformInterface()
     ImGuiViewportP* main_viewport = (ImGuiViewportP*)ImGui::GetMainViewport();
     ImGuiViewportDataOSX* data = IM_NEW(ImGuiViewportDataOSX)();
     data->window = g_Window;
+    data->windowOwned = false;
     main_viewport->PlatformWindowCreated = true;
     main_viewport->PlatformUserData = data;
     main_viewport->PlatformHandle = (__bridge void*)g_Window;
