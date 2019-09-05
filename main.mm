@@ -207,7 +207,7 @@ static uint64_t g_renderPass = 0;
 // ImGuiExampleAppDelegate
 //-----------------------------------------------------------------------------------
 
-@interface ImGuiExampleAppDelegate : NSObject <NSApplicationDelegate>
+@interface ImGuiExampleAppDelegate : NSObject <NSApplicationDelegate, NSWindowDelegate>
 @property (nonatomic, readonly) NSWindow* window;
 @end
 
@@ -231,8 +231,14 @@ static uint64_t g_renderPass = 0;
     [_window setAcceptsMouseMovedEvents:YES];
     [_window setOpaque:YES];
     [_window makeKeyAndOrderFront:NSApp];
+    [_window setDelegate:self];
 
     return (_window);
+}
+
+-(void)windowWillClose:(NSNotification *)notification
+{
+    [NSApp terminate:self];
 }
 
 -(void)setupMenu
@@ -307,7 +313,7 @@ static uint64_t g_renderPass = 0;
     style.ScaleAllSizes(scale);
 
     // Setup Platform/Renderer bindings
-    ImGui_ImplOSX_Init((__bridge void*)self.window);
+    ImGui_ImplOSX_Init(self.window);
     ImGui_ImplXX_Init(g_instance, 0, g_device);
 
     // Load Fonts
@@ -343,6 +349,18 @@ static uint64_t g_renderPass = 0;
 #endif
     io.FontGlobalScale              = 1.0f;
     ImGuiFreeType::BuildFontAtlas(io.Fonts);
+}
+
+-(void)applicationWillTerminate:(NSNotification *)notification;
+{
+    ImGui_ImplXX_Shutdown();
+    ImGui_ImplOSX_Shutdown();
+    ImGui::DestroyContext();
+    
+    xxDestroyRenderPass(g_renderPass);
+    xxDestroySwapchain(g_swapchain);
+    xxDestroyDevice(g_device);
+    xxDestroyInstance(g_instance);
 }
 
 @end
