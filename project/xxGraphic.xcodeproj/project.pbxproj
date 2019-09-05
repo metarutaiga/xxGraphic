@@ -23,7 +23,6 @@
 		D644A0BC231EDEBB00B75B77 /* gl2ext.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0B8231EDEBB00B75B77 /* gl2ext.h */; };
 		D6B338562320209A0096D02F /* xxGraphicCGL.mm in Sources */ = {isa = PBXBuildFile; fileRef = D6B33854232020990096D02F /* xxGraphicCGL.mm */; };
 		D6B338572320209A0096D02F /* xxGraphicCGL.h in Headers */ = {isa = PBXBuildFile; fileRef = D6B33855232020990096D02F /* xxGraphicCGL.h */; };
-		D6B3385B232043FE0096D02F /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6B3385A232043FE0096D02F /* OpenGL.framework */; };
 		D6B3385D232044100096D02F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6B3385C232044100096D02F /* Cocoa.framework */; };
 /* End PBXBuildFile section */
 
@@ -55,7 +54,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D6B3385D232044100096D02F /* Cocoa.framework in Frameworks */,
-				D6B3385B232043FE0096D02F /* OpenGL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

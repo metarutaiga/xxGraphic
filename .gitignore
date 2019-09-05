@@ -2,3 +2,9 @@
 bin/
 temp/
 project/build/
+*.xcscheme
+*.xcuserstate
+*.xcbkptlist
+xcschememanagement.plist
+IDEWorkspaceChecks.plist
+

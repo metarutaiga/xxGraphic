@@ -36,19 +36,6 @@
 #include <AppKit/NSOpenGLView.h>
 static void*                                g_glLibrary = nullptr;
 static NSOpenGLView*                        g_rootView = nil;
-static CGLError                             (*CGLCreateContext)(CGLPixelFormatObj, CGLContextObj, CGLContextObj*);
-static CGLError                             (*CGLDestroyContext)(CGLContextObj);
-static CGLPixelFormatObj                    (*CGLGetPixelFormat)(CGLContextObj);
-static CGLError                             (*CGLChoosePixelFormat)(const CGLPixelFormatAttribute*, CGLPixelFormatObj*, GLint*);
-static CGLError                             (*CGLDestroyPixelFormat)(CGLPixelFormatObj);
-static CGLError                             (*CGLDescribePixelFormat)(CGLPixelFormatObj, GLint, CGLPixelFormatAttribute, GLint*);
-static CGLError                             (*CGLSetCurrentContext)(CGLContextObj);
-static CGLContextObj                        (*CGLGetCurrentContext)();
-static CGLError                             (*CGLFlushDrawable)(CGLContextObj);
-static CGLError                             (*CGLDisable)(CGLContextObj, CGLContextEnable);
-static CGLError                             (*CGLEnable)(CGLContextObj, CGLContextEnable);
-static CGLError                             (*CGLSetParameter)(CGLContextObj, CGLContextParameter, const GLint*);
-static CGLError                             (*CGLGetParameter)(CGLContextObj, CGLContextParameter, GLint*);
 static PFNGLGENVERTEXARRAYSOESPROC          glGenVertexArrays;
 static PFNGLDELETEVERTEXARRAYSOESPROC       glDeleteVertexArrays;
 static PFNGLBINDVERTEXARRAYOESPROC          glBindVertexArray;
@@ -93,8 +80,7 @@ uint64_t glCreateContextCGL(uint64_t instance, void* view, void** display)
     [nsView setOpenGLContext:nsContext];
 
     int swapInterval = 0;
-    CGLSetParameter([nsContext CGLContextObj], kCGLCPSwapInterval, &swapInterval);
-    CGLEnable([nsContext CGLContextObj], kCGLCEMPEngine);
+    [nsContext setValues:&swapInterval forParameter:NSOpenGLContextParameterSwapInterval];
 
     cglSymbol(glGetIntegerv);
     cglSymbol(glGenVertexArrays);
@@ -181,23 +167,6 @@ uint64_t xxGraphicCreateCGL()
     if (g_glLibrary == nullptr)
         g_glLibrary = dlopen("/System/Library/Frameworks/OpenGL.framework/OpenGL", RTLD_LAZY);
     if (g_glLibrary == nullptr)
-        return 0;
-
-    cglSymbolFailed = false;
-    cglSymbol(CGLCreateContext);
-    cglSymbol(CGLDestroyContext);
-    cglSymbol(CGLGetPixelFormat);
-    cglSymbol(CGLChoosePixelFormat);
-    cglSymbol(CGLDestroyPixelFormat);
-    cglSymbol(CGLDescribePixelFormat);
-    cglSymbol(CGLSetCurrentContext);
-    cglSymbol(CGLGetCurrentContext);
-    cglSymbol(CGLFlushDrawable);
-    cglSymbol(CGLDisable);
-    cglSymbol(CGLEnable);
-    cglSymbol(CGLSetParameter);
-    cglSymbol(CGLGetParameter);
-    if (cglSymbolFailed)
         return 0;
 
     NSOpenGLPixelFormatAttribute attributes[] =
