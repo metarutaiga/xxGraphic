@@ -46,7 +46,7 @@ static uint64_t g_renderPass = 0;
     ImGui::NewFrame();
 
     // Graphic API
-    uint64_t(*createInstance)() = nullptr;
+    uint64_t (*createInstance)() = nullptr;
     if (ImGui::BeginMainMenuBar())
     {
         if (ImGui::BeginMenu("Graphic"))
@@ -152,7 +152,7 @@ static uint64_t g_renderPass = 0;
     }
 
     if (!animationTimer)
-        animationTimer = [NSTimer scheduledTimerWithTimeInterval:0.001 target:self selector:@selector(animationTimerFired:) userInfo:nil repeats:YES];
+        animationTimer = [NSTimer scheduledTimerWithTimeInterval:0 target:self selector:@selector(animationTimerFired:) userInfo:nil repeats:YES];
 }
 
 -(void)reshape
@@ -184,12 +184,6 @@ static uint64_t g_renderPass = 0;
 -(BOOL)resignFirstResponder
 {
     return (YES);
-}
-
-// Flip coordinate system upside down on Y
--(BOOL)isFlipped
-{
-    return (NO);
 }
 
 -(void)dealloc
@@ -234,6 +228,7 @@ static uint64_t g_renderPass = 0;
 
     _window = [[NSWindow alloc] initWithContentRect:viewRect styleMask:NSWindowStyleMaskTitled|NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskResizable|NSWindowStyleMaskClosable backing:NSBackingStoreBuffered defer:YES];
     [_window setTitle:@"Dear ImGui XX Example"];
+    [_window setAcceptsMouseMovedEvents:YES];
     [_window setOpaque:YES];
     [_window makeKeyAndOrderFront:NSApp];
 
@@ -281,7 +276,6 @@ static uint64_t g_renderPass = 0;
         [view setWantsBestResolutionOpenGLSurface:YES];
 #endif // MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
     [self.window setContentView:view];
-    [self.window setAcceptsMouseMovedEvents:YES];
 
     g_instance = xxCreateInstanceGLES2();
     g_device = xxCreateDevice(g_instance);
@@ -313,7 +307,7 @@ static uint64_t g_renderPass = 0;
     style.ScaleAllSizes(scale);
 
     // Setup Platform/Renderer bindings
-    ImGui_ImplOSX_Init();
+    ImGui_ImplOSX_Init((__bridge void*)self.window);
     ImGui_ImplXX_Init(g_instance, 0, g_device);
 
     // Load Fonts
@@ -347,7 +341,7 @@ static uint64_t g_renderPass = 0;
     font_config.RasterizerFlags     = ImGuiFreeType::Bitmap;
     io.Fonts->AddFontFromFileTTF("/System/Library/Fonts/PingFang.ttc", 16.0f * io.FontGlobalScale, &font_config, io.Fonts->GetGlyphRangesJapanese());
 #endif
-    io.FontGlobalScale = 1.0f;
+    io.FontGlobalScale              = 1.0f;
     ImGuiFreeType::BuildFontAtlas(io.Fonts);
 }
 

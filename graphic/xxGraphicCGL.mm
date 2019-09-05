@@ -34,11 +34,11 @@
 #include <AppKit/NSWindow.h>
 #include <AppKit/NSOpenGL.h>
 #include <AppKit/NSOpenGLView.h>
-static void*                                g_glLibrary = nullptr;
-static NSOpenGLView*                        g_rootView = nil;
-static PFNGLGENVERTEXARRAYSOESPROC          glGenVertexArrays;
-static PFNGLDELETEVERTEXARRAYSOESPROC       glDeleteVertexArrays;
-static PFNGLBINDVERTEXARRAYOESPROC          glBindVertexArray;
+static void*                            g_glLibrary = nullptr;
+static NSOpenGLView*                    g_rootView = nil;
+static PFNGLGENVERTEXARRAYSOESPROC      glGenVertexArrays;
+static PFNGLDELETEVERTEXARRAYSOESPROC   glDeleteVertexArrays;
+static PFNGLBINDVERTEXARRAYOESPROC      glBindVertexArray;
 
 //==============================================================================
 //  Initialize - CGL
@@ -71,7 +71,10 @@ uint64_t glCreateContextCGL(uint64_t instance, void* view, void** display)
     NSOpenGLView* nsView = (NSOpenGLView*)[nsWindow contentView];
     if (nsView == nil)
         return 0;
-    [nsView setWantsBestResolutionOpenGLSurface:YES];
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
+    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6)
+        [nsView setWantsBestResolutionOpenGLSurface:YES];
+#endif // MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
     NSOpenGLContext* nsContext = [[NSOpenGLContext alloc] initWithFormat:[g_rootView pixelFormat]
                                                             shareContext:[g_rootView openGLContext]];
     if (nsContext == nil)
