@@ -374,6 +374,7 @@ static void ImGui_ImplOSX_CreateWindow(ImGuiViewport* viewport)
     [window setAcceptsMouseMovedEvents:YES];
     [window setOpaque:NO];
     [window orderFront:NSApp];
+    [window setLevel:NSFloatingWindowLevel];
 
     ImGui_ImplOSX_View* view = [[ImGui_ImplOSX_View alloc] initWithFrame:window.frame];
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
