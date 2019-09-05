@@ -387,7 +387,7 @@ static void ImGui_ImplOSX_CreateWindow(ImGuiViewport* viewport)
     data->window = window;
     data->windowOwned = true;
     viewport->PlatformRequestResize = false;
-    viewport->PlatformHandle = viewport->PlatformHandleRaw = (__bridge void*)window;
+    viewport->PlatformHandle = viewport->PlatformHandleRaw = (__bridge_retained void*)window;
 }
 
 static void ImGui_ImplOSX_DestroyWindow(ImGuiViewport* viewport)
@@ -399,6 +399,8 @@ static void ImGui_ImplOSX_DestroyWindow(ImGuiViewport* viewport)
         {
             [window setContentView:nil];
             [window orderOut:nil];
+            window = (__bridge_transfer NSWindow*)viewport->PlatformHandleRaw;
+            viewport->PlatformHandleRaw = NULL;
         }
         data->window = nil;
         IM_DELETE(data);
