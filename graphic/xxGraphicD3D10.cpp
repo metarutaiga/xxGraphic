@@ -335,26 +335,26 @@ void xxDestroyRenderPassD3D10(uint64_t renderPass)
     delete d3dRenderPass;
 }
 //------------------------------------------------------------------------------
-bool xxBeginRenderPassD3D10(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+uint64_t xxBeginRenderPassD3D10(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
     if (d3dDevice == nullptr)
-        return false;
+        return 0;
     D3D10FRAMEBUFFER* d3dFramebuffer = reinterpret_cast<D3D10FRAMEBUFFER*>(framebuffer);
     if (d3dFramebuffer == nullptr)
-        return false;
+        return 0;
     D3D10RENDERPASS* d3dRenderPass = reinterpret_cast<D3D10RENDERPASS*>(renderPass);
     if (d3dRenderPass == nullptr)
-        return false;
+        return 0;
 
     d3dDevice->OMSetRenderTargets(1, &d3dFramebuffer->renderTargetView, d3dFramebuffer->depthStencilView);
     d3dDevice->ClearRenderTargetView(d3dFramebuffer->renderTargetView, d3dRenderPass->color);
     d3dDevice->ClearDepthStencilView(d3dFramebuffer->depthStencilView, D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, d3dRenderPass->depth, d3dRenderPass->stencil);
 
-    return true;
+    return commandBuffer;
 }
 //------------------------------------------------------------------------------
-void xxEndRenderPassD3D10(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+void xxEndRenderPassD3D10(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass)
 {
 
 }
@@ -1092,9 +1092,9 @@ void xxDestroyPipelineD3D10(uint64_t pipeline)
 //==============================================================================
 //  Command
 //==============================================================================
-void xxSetViewportD3D10(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ)
+void xxSetViewportD3D10(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ)
 {
-    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
+    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
 
     D3D10_VIEWPORT vp;
     vp.TopLeftX = x;
@@ -1106,9 +1106,9 @@ void xxSetViewportD3D10(uint64_t commandBuffer, int x, int y, int width, int hei
     d3dDevice->RSSetViewports(1, &vp);
 }
 //------------------------------------------------------------------------------
-void xxSetScissorD3D10(uint64_t commandBuffer, int x, int y, int width, int height)
+void xxSetScissorD3D10(uint64_t commandEncoder, int x, int y, int width, int height)
 {
-    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
+    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
 
     D3D10_RECT rect;
     rect.left = x;
@@ -1118,9 +1118,9 @@ void xxSetScissorD3D10(uint64_t commandBuffer, int x, int y, int width, int heig
     d3dDevice->RSSetScissorRects(1, &rect);
 }
 //------------------------------------------------------------------------------
-void xxSetPipelineD3D10(uint64_t commandBuffer, uint64_t pipeline)
+void xxSetPipelineD3D10(uint64_t commandEncoder, uint64_t pipeline)
 {
-    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
+    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
     D3D10PIPELINE* d3dPipeline = reinterpret_cast<D3D10PIPELINE*>(pipeline);
     static const float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
@@ -1133,17 +1133,17 @@ void xxSetPipelineD3D10(uint64_t commandBuffer, uint64_t pipeline)
     d3dDevice->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 //------------------------------------------------------------------------------
-void xxSetIndexBufferD3D10(uint64_t commandBuffer, uint64_t buffer)
+void xxSetIndexBufferD3D10(uint64_t commandEncoder, uint64_t buffer)
 {
-    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
+    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
     D3D10BUFFER* d3dBuffer = reinterpret_cast<D3D10BUFFER*>(buffer);
 
     d3dDevice->IASetIndexBuffer(d3dBuffer->buffer, DXGI_FORMAT_R32_UINT, 0);
 }
 //------------------------------------------------------------------------------
-void xxSetVertexBuffersD3D10(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute)
+void xxSetVertexBuffersD3D10(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
-    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
+    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
     D3D10VERTEXATTRIBUTE* d3dVertexAttribute = reinterpret_cast<D3D10VERTEXATTRIBUTE*>(vertexAttribute);
     ID3D10Buffer* d3dBuffers[D3D10_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT];
     UINT offsets[D3D10_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT];
@@ -1160,9 +1160,9 @@ void xxSetVertexBuffersD3D10(uint64_t commandBuffer, int count, const uint64_t* 
     d3dDevice->IASetVertexBuffers(0, count, d3dBuffers, strides, offsets);
 }
 //------------------------------------------------------------------------------
-void xxSetVertexTexturesD3D10(uint64_t commandBuffer, int count, const uint64_t* textures)
+void xxSetVertexTexturesD3D10(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
-    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
+    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
     ID3D10ShaderResourceView* d3dTextures[D3D10_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT];
 
     for (int i = 0; i < count; ++i)
@@ -1174,9 +1174,9 @@ void xxSetVertexTexturesD3D10(uint64_t commandBuffer, int count, const uint64_t*
     d3dDevice->VSSetShaderResources(0, count, d3dTextures);
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentTexturesD3D10(uint64_t commandBuffer, int count, const uint64_t* textures)
+void xxSetFragmentTexturesD3D10(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
-    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
+    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
     ID3D10ShaderResourceView* d3dTextures[D3D10_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT];
 
     for (int i = 0; i < count; ++i)
@@ -1188,9 +1188,9 @@ void xxSetFragmentTexturesD3D10(uint64_t commandBuffer, int count, const uint64_
     d3dDevice->PSSetShaderResources(0, count, d3dTextures);
 }
 //------------------------------------------------------------------------------
-void xxSetVertexSamplersD3D10(uint64_t commandBuffer, int count, const uint64_t* samplers)
+void xxSetVertexSamplersD3D10(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
-    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
+    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
     ID3D10SamplerState* d3dSamplerStates[D3D10_COMMONSHADER_SAMPLER_SLOT_COUNT];
 
     for (int i = 0; i < count; ++i)
@@ -1201,9 +1201,9 @@ void xxSetVertexSamplersD3D10(uint64_t commandBuffer, int count, const uint64_t*
     d3dDevice->VSSetSamplers(0, count, d3dSamplerStates);
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentSamplersD3D10(uint64_t commandBuffer, int count, const uint64_t* samplers)
+void xxSetFragmentSamplersD3D10(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
-    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
+    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
     ID3D10SamplerState* d3dSamplerStates[D3D10_COMMONSHADER_SAMPLER_SLOT_COUNT];
 
     for (int i = 0; i < count; ++i)
@@ -1214,32 +1214,32 @@ void xxSetFragmentSamplersD3D10(uint64_t commandBuffer, int count, const uint64_
     d3dDevice->PSSetSamplers(0, count, d3dSamplerStates);
 }
 //------------------------------------------------------------------------------
-void xxSetVertexConstantBufferD3D10(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
+void xxSetVertexConstantBufferD3D10(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
 {
-    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
+    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
     D3D10BUFFER* d3dBuffer = reinterpret_cast<D3D10BUFFER*>(buffer);
 
     d3dDevice->VSSetConstantBuffers(0, 1, &d3dBuffer->buffer);
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentConstantBufferD3D10(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
+void xxSetFragmentConstantBufferD3D10(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
 {
-    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
+    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
     D3D10BUFFER* d3dBuffer = reinterpret_cast<D3D10BUFFER*>(buffer);
 
     d3dDevice->PSSetConstantBuffers(0, 1, &d3dBuffer->buffer);
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedD3D10(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawIndexedD3D10(uint64_t commandEncoder, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
-    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
+    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
 
     d3dDevice->DrawIndexedInstanced(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-void xxSetTransformD3D10(uint64_t commandBuffer, const float* world, const float* view, const float* projection)
+void xxSetTransformD3D10(uint64_t commandEncoder, const float* world, const float* view, const float* projection)
 {
 
 }

@@ -106,7 +106,7 @@ uint64_t xxBeginRenderPassNULL(uint64_t commandBuffer, uint64_t framebuffer, uin
     return 0;
 }
 //------------------------------------------------------------------------------
-void xxEndRenderPassNULL(uint64_t commandEncoder)
+void xxEndRenderPassNULL(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass)
 {
 
 }

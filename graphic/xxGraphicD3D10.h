@@ -37,8 +37,8 @@ xxAPI void          xxSubmitCommandBufferD3D10(uint64_t commandBuffer);
 //==============================================================================
 xxAPI uint64_t      xxCreateRenderPassD3D10(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil);
 xxAPI void          xxDestroyRenderPassD3D10(uint64_t renderPass);
-xxAPI bool          xxBeginRenderPassD3D10(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
-xxAPI void          xxEndRenderPassD3D10(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
+xxAPI uint64_t      xxBeginRenderPassD3D10(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
+xxAPI void          xxEndRenderPassD3D10(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass);
 //==============================================================================
 //  Buffer
 //==============================================================================
@@ -85,19 +85,19 @@ xxAPI void          xxDestroyPipelineD3D10(uint64_t pipeline);
 //==============================================================================
 //  Command
 //==============================================================================
-xxAPI void          xxSetViewportD3D10(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ);
-xxAPI void          xxSetScissorD3D10(uint64_t commandBuffer, int x, int y, int width, int height);
-xxAPI void          xxSetPipelineD3D10(uint64_t commandBuffer, uint64_t pipeline);
-xxAPI void          xxSetIndexBufferD3D10(uint64_t commandBuffer, uint64_t buffer);
-xxAPI void          xxSetVertexBuffersD3D10(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute);
-xxAPI void          xxSetVertexTexturesD3D10(uint64_t commandBuffer, int count, const uint64_t* textures);
-xxAPI void          xxSetFragmentTexturesD3D10(uint64_t commandBuffer, int count, const uint64_t* textures);
-xxAPI void          xxSetVertexSamplersD3D10(uint64_t commandBuffer, int count, const uint64_t* samplers);
-xxAPI void          xxSetFragmentSamplersD3D10(uint64_t commandBuffer, int count, const uint64_t* samplers);
-xxAPI void          xxSetVertexConstantBufferD3D10(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
-xxAPI void          xxSetFragmentConstantBufferD3D10(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
-xxAPI void          xxDrawIndexedD3D10(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+xxAPI void          xxSetViewportD3D10(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
+xxAPI void          xxSetScissorD3D10(uint64_t commandEncoder, int x, int y, int width, int height);
+xxAPI void          xxSetPipelineD3D10(uint64_t commandEncoder, uint64_t pipeline);
+xxAPI void          xxSetIndexBufferD3D10(uint64_t commandEncoder, uint64_t buffer);
+xxAPI void          xxSetVertexBuffersD3D10(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
+xxAPI void          xxSetVertexTexturesD3D10(uint64_t commandEncoder, int count, const uint64_t* textures);
+xxAPI void          xxSetFragmentTexturesD3D10(uint64_t commandEncoder, int count, const uint64_t* textures);
+xxAPI void          xxSetVertexSamplersD3D10(uint64_t commandEncoder, int count, const uint64_t* samplers);
+xxAPI void          xxSetFragmentSamplersD3D10(uint64_t commandEncoder, int count, const uint64_t* samplers);
+xxAPI void          xxSetVertexConstantBufferD3D10(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          xxSetFragmentConstantBufferD3D10(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          xxDrawIndexedD3D10(uint64_t commandEncoder, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-xxAPI void          xxSetTransformD3D10(uint64_t commandBuffer, const float* world, const float* view, const float* projection);
+xxAPI void          xxSetTransformD3D10(uint64_t commandEncoder, const float* world, const float* view, const float* projection);

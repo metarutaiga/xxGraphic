@@ -318,24 +318,27 @@ void xxDestroyRenderPassD3D8(uint64_t renderPass)
 
 }
 //------------------------------------------------------------------------------
-bool xxBeginRenderPassD3D8(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+uint64_t xxBeginRenderPassD3D8(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
     if (d3dDevice == nullptr)
-        return false;
+        return 0;
     D3DFRAMEBUFFER8* d3dFramebuffer = reinterpret_cast<D3DFRAMEBUFFER8*>(framebuffer);
     if (d3dFramebuffer == nullptr)
-        return false;
+        return 0;
     D3DRENDERPASS8 d3dRenderPass = { renderPass };
 
     d3dDevice->SetRenderTarget(d3dFramebuffer->backBuffer, d3dFramebuffer->depthStencil);
 
     float depth = d3dRenderPass.depth / (float)UINT16_MAX;
     HRESULT hResult = d3dDevice->Clear(0, nullptr, d3dRenderPass.flags, d3dRenderPass.color, depth, d3dRenderPass.stencil);
-    return hResult == S_OK;
+    if (hResult != S_OK)
+        return 0;
+
+    return commandBuffer;
 }
 //------------------------------------------------------------------------------
-void xxEndRenderPassD3D8(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+void xxEndRenderPassD3D8(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass)
 {
 
 }
@@ -830,9 +833,9 @@ void xxDestroyPipelineD3D8(uint64_t pipeline)
 //==============================================================================
 //  Command
 //==============================================================================
-void xxSetViewportD3D8(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ)
+void xxSetViewportD3D8(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ)
 {
-    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
+    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
 
     D3DVIEWPORT8 vp;
     vp.X = x;
@@ -844,9 +847,9 @@ void xxSetViewportD3D8(uint64_t commandBuffer, int x, int y, int width, int heig
     d3dDevice->SetViewport(&vp);
 }
 //------------------------------------------------------------------------------
-void xxSetScissorD3D8(uint64_t commandBuffer, int x, int y, int width, int height)
+void xxSetScissorD3D8(uint64_t commandEncoder, int x, int y, int width, int height)
 {
-    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
+    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
 
     D3DVIEWPORT8 vp;
     d3dDevice->GetViewport(&vp);
@@ -875,9 +878,9 @@ void xxSetScissorD3D8(uint64_t commandBuffer, int x, int y, int width, int heigh
     d3dDevice->SetViewport(&vp);
 }
 //------------------------------------------------------------------------------
-void xxSetPipelineD3D8(uint64_t commandBuffer, uint64_t pipeline)
+void xxSetPipelineD3D8(uint64_t commandEncoder, uint64_t pipeline)
 {
-    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
+    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
     D3DPIPELINE8* d3dPipeline = reinterpret_cast<D3DPIPELINE8*>(pipeline);
 
     if ((d3dPipeline->vertexShader & D3DFVF_RESERVED0) == 0)
@@ -906,17 +909,17 @@ void xxSetPipelineD3D8(uint64_t commandBuffer, uint64_t pipeline)
     d3dDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 }
 //------------------------------------------------------------------------------
-void xxSetIndexBufferD3D8(uint64_t commandBuffer, uint64_t buffer)
+void xxSetIndexBufferD3D8(uint64_t commandEncoder, uint64_t buffer)
 {
-    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
+    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
     LPDIRECT3DINDEXBUFFER8 d3dIndexBuffer = reinterpret_cast<LPDIRECT3DINDEXBUFFER8>(getResourceData(buffer));
 
     d3dDevice->SetIndices(d3dIndexBuffer, 0);
 }
 //------------------------------------------------------------------------------
-void xxSetVertexBuffersD3D8(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute)
+void xxSetVertexBuffersD3D8(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
-    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
+    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
     D3DVERTEXATTRIBUTE8 d3dVertexAttribute = { vertexAttribute };
 
     for (int i = 0; i < count; ++i)
@@ -926,14 +929,14 @@ void xxSetVertexBuffersD3D8(uint64_t commandBuffer, int count, const uint64_t* b
     }
 }
 //------------------------------------------------------------------------------
-void xxSetVertexTexturesD3D8(uint64_t commandBuffer, int count, const uint64_t* textures)
+void xxSetVertexTexturesD3D8(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentTexturesD3D8(uint64_t commandBuffer, int count, const uint64_t* textures)
+void xxSetFragmentTexturesD3D8(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
-    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
+    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
 
     for (int i = 0; i < count; ++i)
     {
@@ -942,14 +945,14 @@ void xxSetFragmentTexturesD3D8(uint64_t commandBuffer, int count, const uint64_t
     }
 }
 //------------------------------------------------------------------------------
-void xxSetVertexSamplersD3D8(uint64_t commandBuffer, int count, const uint64_t* samplers)
+void xxSetVertexSamplersD3D8(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentSamplersD3D8(uint64_t commandBuffer, int count, const uint64_t* samplers)
+void xxSetFragmentSamplersD3D8(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
-    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
+    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
 
     for (int i = 0; i < count; ++i)
     {
@@ -964,19 +967,19 @@ void xxSetFragmentSamplersD3D8(uint64_t commandBuffer, int count, const uint64_t
     }
 }
 //------------------------------------------------------------------------------
-void xxSetVertexConstantBufferD3D8(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
+void xxSetVertexConstantBufferD3D8(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentConstantBufferD3D8(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
+void xxSetFragmentConstantBufferD3D8(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedD3D8(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawIndexedD3D8(uint64_t commandEncoder, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
-    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
+    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
 
     LPDIRECT3DINDEXBUFFER8 d3dIndexBuffer = nullptr;
     UINT d3dBaseVertexIndex = 0;
@@ -989,9 +992,9 @@ void xxDrawIndexedD3D8(uint64_t commandBuffer, int indexCount, int instanceCount
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-void xxSetTransformD3D8(uint64_t commandBuffer, const float* world, const float* view, const float* projection)
+void xxSetTransformD3D8(uint64_t commandEncoder, const float* world, const float* view, const float* projection)
 {
-    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
+    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
 
     if (world)
         d3dDevice->SetTransform(D3DTS_WORLD, (const D3DMATRIX*)world);

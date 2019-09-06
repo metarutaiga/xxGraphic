@@ -710,17 +710,17 @@ void xxDestroyRenderPassD3D12(uint64_t renderPass)
     delete d3dRenderPass;
 }
 //------------------------------------------------------------------------------
-bool xxBeginRenderPassD3D12(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+uint64_t xxBeginRenderPassD3D12(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
 {
     ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandBuffer);
     if (d3dCommandList == nullptr)
-        return false;
+        return 0;
     D3D12FRAMEBUFFER* d3dFramebuffer = reinterpret_cast<D3D12FRAMEBUFFER*>(framebuffer);
     if (d3dFramebuffer == nullptr)
-        return false;
+        return 0;
     D3D12RENDERPASS* d3dRenderPass = reinterpret_cast<D3D12RENDERPASS*>(renderPass);
     if (d3dRenderPass == nullptr)
-        return false;
+        return 0;
 
     D3D12_RESOURCE_BARRIER barrier = {};
     barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -734,12 +734,12 @@ bool xxBeginRenderPassD3D12(uint64_t commandBuffer, uint64_t framebuffer, uint64
     d3dCommandList->ClearRenderTargetView(d3dFramebuffer->renderTargetHandle, d3dRenderPass->color, 0, nullptr);
     d3dCommandList->OMSetRenderTargets(1, &d3dFramebuffer->renderTargetHandle, FALSE, nullptr);
 
-    return true;
+    return commandBuffer;
 }
 //------------------------------------------------------------------------------
-void xxEndRenderPassD3D12(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+void xxEndRenderPassD3D12(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass)
 {
-    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandBuffer);
+    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
     if (d3dCommandList == nullptr)
         return;
     D3D12FRAMEBUFFER* d3dFramebuffer = reinterpret_cast<D3D12FRAMEBUFFER*>(framebuffer);
@@ -1449,9 +1449,9 @@ void xxDestroyPipelineD3D12(uint64_t pipeline)
 //==============================================================================
 //  Command
 //==============================================================================
-void xxSetViewportD3D12(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ)
+void xxSetViewportD3D12(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ)
 {
-    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandBuffer);
+    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
 
     D3D12_VIEWPORT vp;
     vp.TopLeftX = (FLOAT)x;
@@ -1463,9 +1463,9 @@ void xxSetViewportD3D12(uint64_t commandBuffer, int x, int y, int width, int hei
     d3dCommandList->RSSetViewports(1, &vp);
 }
 //------------------------------------------------------------------------------
-void xxSetScissorD3D12(uint64_t commandBuffer, int x, int y, int width, int height)
+void xxSetScissorD3D12(uint64_t commandEncoder, int x, int y, int width, int height)
 {
-    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandBuffer);
+    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
 
     D3D12_RECT rect;
     rect.left = x;
@@ -1475,9 +1475,9 @@ void xxSetScissorD3D12(uint64_t commandBuffer, int x, int y, int width, int heig
     d3dCommandList->RSSetScissorRects(1, &rect);
 }
 //------------------------------------------------------------------------------
-void xxSetPipelineD3D12(uint64_t commandBuffer, uint64_t pipeline)
+void xxSetPipelineD3D12(uint64_t commandEncoder, uint64_t pipeline)
 {
-    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandBuffer);
+    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
     ID3D12PipelineState* d3dPipelineState = reinterpret_cast<ID3D12PipelineState*>(pipeline);
 
     d3dCommandList->SetGraphicsRootSignature(g_rootSignature);
@@ -1485,9 +1485,9 @@ void xxSetPipelineD3D12(uint64_t commandBuffer, uint64_t pipeline)
     d3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 //------------------------------------------------------------------------------
-void xxSetIndexBufferD3D12(uint64_t commandBuffer, uint64_t buffer)
+void xxSetIndexBufferD3D12(uint64_t commandEncoder, uint64_t buffer)
 {
-    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandBuffer);
+    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
     D3D12RESOURCE* d3dBuffer = reinterpret_cast<D3D12RESOURCE*>(buffer);
 
     D3D12_INDEX_BUFFER_VIEW view = {};
@@ -1497,9 +1497,9 @@ void xxSetIndexBufferD3D12(uint64_t commandBuffer, uint64_t buffer)
     d3dCommandList->IASetIndexBuffer(&view);
 }
 //------------------------------------------------------------------------------
-void xxSetVertexBuffersD3D12(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute)
+void xxSetVertexBuffersD3D12(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
-    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandBuffer);
+    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
     D3D12VERTEXATTRIBUTE* d3dVertexAttribute = reinterpret_cast<D3D12VERTEXATTRIBUTE*>(vertexAttribute);
     D3D12_VERTEX_BUFFER_VIEW views[16];
 
@@ -1514,9 +1514,9 @@ void xxSetVertexBuffersD3D12(uint64_t commandBuffer, int count, const uint64_t* 
     d3dCommandList->IASetVertexBuffers(0, count, views);
 }
 //------------------------------------------------------------------------------
-void xxSetVertexTexturesD3D12(uint64_t commandBuffer, int count, const uint64_t* textures)
+void xxSetVertexTexturesD3D12(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
-    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandBuffer);
+    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
 
     for (int i = 0; i < count; ++i)
     {
@@ -1525,9 +1525,9 @@ void xxSetVertexTexturesD3D12(uint64_t commandBuffer, int count, const uint64_t*
     }
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentTexturesD3D12(uint64_t commandBuffer, int count, const uint64_t* textures)
+void xxSetFragmentTexturesD3D12(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
-    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandBuffer);
+    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
 
     for (int i = 0; i < count; ++i)
     {
@@ -1536,9 +1536,9 @@ void xxSetFragmentTexturesD3D12(uint64_t commandBuffer, int count, const uint64_
     }
 }
 //------------------------------------------------------------------------------
-void xxSetVertexSamplersD3D12(uint64_t commandBuffer, int count, const uint64_t* samplers)
+void xxSetVertexSamplersD3D12(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
-    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandBuffer);
+    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
 
     for (int i = 0; i < count; ++i)
     {
@@ -1547,9 +1547,9 @@ void xxSetVertexSamplersD3D12(uint64_t commandBuffer, int count, const uint64_t*
     }
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentSamplersD3D12(uint64_t commandBuffer, int count, const uint64_t* samplers)
+void xxSetFragmentSamplersD3D12(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
-    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandBuffer);
+    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
 
     for (int i = 0; i < count; ++i)
     {
@@ -1558,32 +1558,32 @@ void xxSetFragmentSamplersD3D12(uint64_t commandBuffer, int count, const uint64_
     }
 }
 //------------------------------------------------------------------------------
-void xxSetVertexConstantBufferD3D12(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
+void xxSetVertexConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
 {
-    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandBuffer);
+    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
     D3D12RESOURCE* d3dBuffer = reinterpret_cast<D3D12RESOURCE*>(buffer);
 
     d3dCommandList->SetGraphicsRootDescriptorTable(BASE_VERTEX_CONSTANT, d3dBuffer->resourceGPUHandle);
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentConstantBufferD3D12(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
+void xxSetFragmentConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
 {
-    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandBuffer);
+    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
     D3D12RESOURCE* d3dBuffer = reinterpret_cast<D3D12RESOURCE*>(buffer);
 
     d3dCommandList->SetGraphicsRootDescriptorTable(BASE_PIXEL_CONSTANT, d3dBuffer->resourceGPUHandle);
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedD3D12(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawIndexedD3D12(uint64_t commandEncoder, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
-    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandBuffer);
+    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
 
     d3dCommandList->DrawIndexedInstanced(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-void xxSetTransformD3D12(uint64_t commandBuffer, const float* world, const float* view, const float* projection)
+void xxSetTransformD3D12(uint64_t commandEncoder, const float* world, const float* view, const float* projection)
 {
 
 }

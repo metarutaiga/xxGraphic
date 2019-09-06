@@ -36,7 +36,7 @@ void        (*xxSubmitCommandBuffer)(uint64_t commandBuffer);
 uint64_t    (*xxCreateRenderPass)(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil);
 void        (*xxDestroyRenderPass)(uint64_t renderPass);
 uint64_t    (*xxBeginRenderPass)(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
-void        (*xxEndRenderPass)(uint64_t commandEncoder);
+void        (*xxEndRenderPass)(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass);
 //==============================================================================
 //  Buffer
 //==============================================================================

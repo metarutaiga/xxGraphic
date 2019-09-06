@@ -28,10 +28,10 @@ xxAPI uint64_t      xxCreatePipelineD3D9PS(uint64_t device, uint64_t blendState,
 //==============================================================================
 //  Command
 //==============================================================================
-xxAPI void          xxSetVertexBuffersD3D9PS(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute);
-xxAPI void          xxSetVertexConstantBufferD3D9PS(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
-xxAPI void          xxSetFragmentConstantBufferD3D9PS(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
+xxAPI void          xxSetVertexBuffersD3D9PS(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
+xxAPI void          xxSetVertexConstantBufferD3D9PS(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          xxSetFragmentConstantBufferD3D9PS(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-xxAPI void          xxSetTransformD3D9PS(uint64_t commandBuffer, const float* world, const float* view, const float* projection);
+xxAPI void          xxSetTransformD3D9PS(uint64_t commandEncoder, const float* world, const float* view, const float* projection);

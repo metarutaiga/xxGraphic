@@ -228,9 +228,9 @@ uint64_t xxCreatePipelineD3D9PS(uint64_t device, uint64_t blendState, uint64_t d
 //==============================================================================
 //  Command
 //==============================================================================
-void xxSetVertexBuffersD3D9PS(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute)
+void xxSetVertexBuffersD3D9PS(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
-    LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
+    LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandEncoder);
     D3DVERTEXATTRIBUTE9PS* d3dVertexAttribute = reinterpret_cast<D3DVERTEXATTRIBUTE9PS*>(vertexAttribute);
 
     for (int i = 0; i < count; ++i)
@@ -240,17 +240,17 @@ void xxSetVertexBuffersD3D9PS(uint64_t commandBuffer, int count, const uint64_t*
     }
 }
 //------------------------------------------------------------------------------
-void xxSetVertexConstantBufferD3D9PS(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
+void xxSetVertexConstantBufferD3D9PS(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
 {
-    LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
+    LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandEncoder);
     const float* d3dBuffer = reinterpret_cast<float*>(buffer);
 
     d3dDevice->SetVertexShaderConstantF(0, d3dBuffer, size / sizeof(float) / 4);
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentConstantBufferD3D9PS(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
+void xxSetFragmentConstantBufferD3D9PS(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
 {
-    LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
+    LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandEncoder);
     const float* d3dBuffer = reinterpret_cast<float*>(buffer);
 
     d3dDevice->SetPixelShaderConstantF(0, d3dBuffer, size / sizeof(float) / 4);
@@ -258,7 +258,7 @@ void xxSetFragmentConstantBufferD3D9PS(uint64_t commandBuffer, uint64_t buffer, 
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-void xxSetTransformD3D9PS(uint64_t commandBuffer, const float* world, const float* view, const float* projection)
+void xxSetTransformD3D9PS(uint64_t commandEncoder, const float* world, const float* view, const float* projection)
 {
 
 }

@@ -38,7 +38,7 @@ xxAPI void          xxSubmitCommandBufferNULL(uint64_t commandBuffer);
 xxAPI uint64_t      xxCreateRenderPassNULL(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil);
 xxAPI void          xxDestroyRenderPassNULL(uint64_t renderPass);
 xxAPI uint64_t      xxBeginRenderPassNULL(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
-xxAPI void          xxEndRenderPassNULL(uint64_t commandEncoder);
+xxAPI void          xxEndRenderPassNULL(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass);
 //==============================================================================
 //  Buffer
 //==============================================================================

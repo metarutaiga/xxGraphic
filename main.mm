@@ -134,7 +134,7 @@ static uint64_t g_renderPass = 0;
 
     uint64_t commandEncoder = xxBeginRenderPass(commandBuffer, framebuffer, g_renderPass);
     ImGui_ImplXX_RenderDrawData(ImGui::GetDrawData(), commandEncoder);
-    xxEndRenderPass(commandEncoder);
+    xxEndRenderPass(commandEncoder, framebuffer, g_renderPass);
 
     xxEndCommandBuffer(commandBuffer);
     xxSubmitCommandBuffer(commandBuffer);

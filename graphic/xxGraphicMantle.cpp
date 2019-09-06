@@ -511,25 +511,25 @@ void xxDestroyRenderPassMantle(uint64_t renderPass)
     delete grRenderPass;
 }
 //------------------------------------------------------------------------------
-bool xxBeginRenderPassMantle(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+uint64_t xxBeginRenderPassMantle(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
 {
     GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandBuffer);
     if (grCommandBuffer == GR_NULL_HANDLE)
-        return false;
+        return 0;
     FRAMEBUFFERGR* grFramebuffer = reinterpret_cast<SWAPCHAINGR*>(framebuffer);
     if (grFramebuffer == nullptr)
-        return false;
+        return 0;
     RENDERPASSGR* grRenderPass = reinterpret_cast<RENDERPASSGR*>(renderPass);
     if (grRenderPass == nullptr)
-        return false;
+        return 0;
 
     grCmdClearColorImage(grCommandBuffer, grFramebuffer->colorImage, grRenderPass->color, 0, nullptr);
     grCmdClearDepthStencil(grCommandBuffer, grFramebuffer->depthStencilImage, grRenderPass->depth, grRenderPass->stencil, 0, nullptr);
 
-    return true;
+    return commandBuffer;
 }
 //------------------------------------------------------------------------------
-void xxEndRenderPassMantle(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+void xxEndRenderPassMantle(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass)
 {
 
 }
@@ -951,33 +951,33 @@ void xxDestroyPipelineMantle(uint64_t pipeline)
 //==============================================================================
 //  Command
 //==============================================================================
-void xxSetViewportMantle(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ)
+void xxSetViewportMantle(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetScissorMantle(uint64_t commandBuffer, int x, int y, int width, int height)
+void xxSetScissorMantle(uint64_t commandEncoder, int x, int y, int width, int height)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetPipelineMantle(uint64_t commandBuffer, uint64_t pipeline)
+void xxSetPipelineMantle(uint64_t commandEncoder, uint64_t pipeline)
 {
-    GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandBuffer);
+    GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandEncoder);
     GR_PIPELINE grPipeline = reinterpret_cast<GR_PIPELINE>(pipeline);
 
     grCmdBindPipeline(grCommandBuffer, GR_PIPELINE_BIND_POINT_GRAPHICS, grPipeline);
 }
 //------------------------------------------------------------------------------
-void xxSetIndexBufferMantle(uint64_t commandBuffer, uint64_t buffer)
+void xxSetIndexBufferMantle(uint64_t commandEncoder, uint64_t buffer)
 {
-    GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandBuffer);
+    GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandEncoder);
     GR_GPU_MEMORY grMemory = reinterpret_cast<GR_GPU_MEMORY>(buffer);
 
     grCmdBindIndexData(grCommandBuffer, grMemory, 0, GR_INDEX_32);
 }
 //------------------------------------------------------------------------------
-void xxSetVertexBuffersMantle(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute)
+void xxSetVertexBuffersMantle(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     VERTEXATTRIBUTEGR* grVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEGR*>(vertexAttribute);
     GR_MEMORY_VIEW_ATTACH_INFO* infos = grVertexAttribute->infos;
@@ -992,7 +992,7 @@ void xxSetVertexBuffersMantle(uint64_t commandBuffer, int count, const uint64_t*
     grAttachMemoryViewDescriptors(0, BASE_VERTEX_ATTRIBUTE, count, infos);
 }
 //------------------------------------------------------------------------------
-void xxSetVertexTexturesMantle(uint64_t commandBuffer, int count, const uint64_t* textures)
+void xxSetVertexTexturesMantle(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
     GR_IMAGE_VIEW_ATTACH_INFO infos[8];
 
@@ -1006,7 +1006,7 @@ void xxSetVertexTexturesMantle(uint64_t commandBuffer, int count, const uint64_t
     grAttachImageViewDescriptors(0, BASE_VERTEX_TEXTURE, count, infos);
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentTexturesMantle(uint64_t commandBuffer, int count, const uint64_t* textures)
+void xxSetFragmentTexturesMantle(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
     GR_IMAGE_VIEW_ATTACH_INFO infos[8];
 
@@ -1020,7 +1020,7 @@ void xxSetFragmentTexturesMantle(uint64_t commandBuffer, int count, const uint64
     grAttachImageViewDescriptors(0, BASE_PIXEL_TEXTURE, count, infos);
 }
 //------------------------------------------------------------------------------
-void xxSetVertexSamplersMantle(uint64_t commandBuffer, int count, const uint64_t* samplers)
+void xxSetVertexSamplersMantle(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
     GR_SAMPLER grSamplers[8];
 
@@ -1033,7 +1033,7 @@ void xxSetVertexSamplersMantle(uint64_t commandBuffer, int count, const uint64_t
     grAttachSamplerDescriptors(0, BASE_VERTEX_SAMPLER, count, grSamplers);
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentSamplersMantle(uint64_t commandBuffer, int count, const uint64_t* samplers)
+void xxSetFragmentSamplersMantle(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
     GR_SAMPLER grSamplers[8];
 
@@ -1046,7 +1046,7 @@ void xxSetFragmentSamplersMantle(uint64_t commandBuffer, int count, const uint64
     grAttachSamplerDescriptors(0, BASE_PIXEL_SAMPLER, count, grSamplers);
 }
 //------------------------------------------------------------------------------
-void xxSetVertexConstantBufferMantle(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
+void xxSetVertexConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
 {
     GR_GPU_MEMORY grMemory = reinterpret_cast<GR_GPU_MEMORY>(buffer);
 
@@ -1062,7 +1062,7 @@ void xxSetVertexConstantBufferMantle(uint64_t commandBuffer, uint64_t buffer, un
     grAttachMemoryViewDescriptors(0, BASE_VERTEX_CONSTANT, 1, &info);
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentConstantBufferMantle(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
+void xxSetFragmentConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
 {
     GR_GPU_MEMORY grMemory = reinterpret_cast<GR_GPU_MEMORY>(buffer);
 
@@ -1078,16 +1078,16 @@ void xxSetFragmentConstantBufferMantle(uint64_t commandBuffer, uint64_t buffer, 
     grAttachMemoryViewDescriptors(0, BASE_PIXEL_CONSTANT, 1, &info);
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedMantle(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawIndexedMantle(uint64_t commandEncoder, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
-    GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandBuffer);
+    GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandEncoder);
 
     grCmdDrawIndexed(grCommandBuffer, firstIndex, indexCount, vertexOffset, firstInstance, instanceCount);
 }
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-void xxSetTransformMantle(uint64_t commandBuffer, const float* world, const float* view, const float* projection)
+void xxSetTransformMantle(uint64_t commandEncoder, const float* world, const float* view, const float* projection)
 {
 
 }

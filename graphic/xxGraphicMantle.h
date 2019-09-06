@@ -37,8 +37,8 @@ xxAPI void          xxSubmitCommandBufferMantle(uint64_t commandBuffer);
 //==============================================================================
 xxAPI uint64_t      xxCreateRenderPassMantle(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil);
 xxAPI void          xxDestroyRenderPassMantle(uint64_t renderPass);
-xxAPI bool          xxBeginRenderPassMantle(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
-xxAPI void          xxEndRenderPassMantle(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
+xxAPI uint64_t      xxBeginRenderPassMantle(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
+xxAPI void          xxEndRenderPassMantle(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass);
 //==============================================================================
 //  Buffer
 //==============================================================================
@@ -85,19 +85,19 @@ xxAPI void          xxDestroyPipelineMantle(uint64_t pipeline);
 //==============================================================================
 //  Command
 //==============================================================================
-xxAPI void          xxSetViewportMantle(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ);
-xxAPI void          xxSetScissorMantle(uint64_t commandBuffer, int x, int y, int width, int height);
-xxAPI void          xxSetPipelineMantle(uint64_t commandBuffer, uint64_t pipeline);
-xxAPI void          xxSetIndexBufferMantle(uint64_t commandBuffer, uint64_t buffer);
-xxAPI void          xxSetVertexBuffersMantle(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute);
-xxAPI void          xxSetVertexTexturesMantle(uint64_t commandBuffer, int count, const uint64_t* textures);
-xxAPI void          xxSetFragmentTexturesMantle(uint64_t commandBuffer, int count, const uint64_t* textures);
-xxAPI void          xxSetVertexSamplersMantle(uint64_t commandBuffer, int count, const uint64_t* samplers);
-xxAPI void          xxSetFragmentSamplersMantle(uint64_t commandBuffer, int count, const uint64_t* samplers);
-xxAPI void          xxSetVertexConstantBufferMantle(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
-xxAPI void          xxSetFragmentConstantBufferMantle(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
-xxAPI void          xxDrawIndexedMantle(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+xxAPI void          xxSetViewportMantle(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
+xxAPI void          xxSetScissorMantle(uint64_t commandEncoder, int x, int y, int width, int height);
+xxAPI void          xxSetPipelineMantle(uint64_t commandEncoder, uint64_t pipeline);
+xxAPI void          xxSetIndexBufferMantle(uint64_t commandEncoder, uint64_t buffer);
+xxAPI void          xxSetVertexBuffersMantle(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
+xxAPI void          xxSetVertexTexturesMantle(uint64_t commandEncoder, int count, const uint64_t* textures);
+xxAPI void          xxSetFragmentTexturesMantle(uint64_t commandEncoder, int count, const uint64_t* textures);
+xxAPI void          xxSetVertexSamplersMantle(uint64_t commandEncoder, int count, const uint64_t* samplers);
+xxAPI void          xxSetFragmentSamplersMantle(uint64_t commandEncoder, int count, const uint64_t* samplers);
+xxAPI void          xxSetVertexConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          xxSetFragmentConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          xxDrawIndexedMantle(uint64_t commandEncoder, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-xxAPI void          xxSetTransformMantle(uint64_t commandBuffer, const float* world, const float* view, const float* projection);
+xxAPI void          xxSetTransformMantle(uint64_t commandEncoder, const float* world, const float* view, const float* projection);

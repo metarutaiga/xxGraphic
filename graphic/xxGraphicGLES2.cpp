@@ -228,7 +228,7 @@ uint64_t xxBeginRenderPassGLES2(uint64_t commandBuffer, uint64_t framebuffer, ui
     return commandBuffer;
 }
 //------------------------------------------------------------------------------
-void xxEndRenderPassGLES2(uint64_t commandEncoder)
+void xxEndRenderPassGLES2(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass)
 {
 
 }

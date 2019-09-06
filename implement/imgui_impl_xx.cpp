@@ -395,7 +395,7 @@ static void ImGui_ImplXX_RenderWindow(ImGuiViewport* viewport, void*)
 
     uint64_t commandEncoder = xxBeginRenderPass(commandBuffer, framebuffer, data->RenderPass);
     ImGui_ImplXX_RenderDrawData(viewport->DrawData, commandEncoder);
-    xxEndRenderPass(commandEncoder);
+    xxEndRenderPass(commandEncoder, framebuffer, data->RenderPass);
 
     xxEndCommandBuffer(commandBuffer);
     xxSubmitCommandBuffer(commandBuffer);
