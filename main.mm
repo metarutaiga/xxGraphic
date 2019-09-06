@@ -36,7 +36,6 @@ static uint64_t g_renderPass = 0;
 -(instancetype)initWithFrame:(NSRect)frameRect
 {
     [self setPostsFrameChangedNotifications:YES];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reshape) name:NSViewGlobalFrameDidChangeNotification object:self];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reshape) name:NSViewFrameDidChangeNotification object:self];
     return [super initWithFrame:frameRect];
 }
@@ -176,7 +175,7 @@ static uint64_t g_renderPass = 0;
         g_device = xxCreateDevice(g_instance);
         g_swapchain = xxCreateSwapchain(g_device, (__bridge void*)[self window], 0, 0);
         g_renderPass = xxCreateRenderPass(g_device, 0.45f, 0.55f, 0.60f, 1.0f, 1.0f, 0);
-        ImGui_ImplOSX_Init([self window]);
+        ImGui_ImplOSX_Init(self);
         ImGui_ImplXX_Init(g_instance, 0, g_device);
     }
 
@@ -305,10 +304,6 @@ static uint64_t g_renderPass = 0;
     [self setupMenu];
 
     ImGuiExampleView* view = [[ImGuiExampleView alloc] initWithFrame:self.window.frame];
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6)
-        [view setWantsBestResolutionOpenGLSurface:YES];
-#endif // MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
     [self.window setContentView:view];
 
     g_instance = xxCreateInstanceGLES2();
@@ -341,7 +336,7 @@ static uint64_t g_renderPass = 0;
     style.ScaleAllSizes(scale);
 
     // Setup Platform/Renderer bindings
-    ImGui_ImplOSX_Init(self.window);
+    ImGui_ImplOSX_Init(view);
     ImGui_ImplXX_Init(g_instance, 0, g_device);
 
     // Load Fonts

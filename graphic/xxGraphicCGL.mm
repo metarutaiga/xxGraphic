@@ -111,7 +111,7 @@ void glDestroyContextCGL(uint64_t context, void* view, void* display)
     if (nsContext == nil)
         return;
     [nsContext makeCurrentContext];
-    [nsContext setView:nil];
+    [nsContext clearDrawable];
 
     if (glGetIntegerv && glDeleteVertexArrays)
     {

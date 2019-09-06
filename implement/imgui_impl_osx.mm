@@ -44,7 +44,7 @@ static void ImGui_ImplOSX_UpdateMonitors();
 @end
 
 // Functions
-bool ImGui_ImplOSX_Init(NSWindow* window)
+bool ImGui_ImplOSX_Init(NSView* view)
 {
     ImGuiIO& io = ImGui::GetIO();
 
@@ -56,7 +56,7 @@ bool ImGui_ImplOSX_Init(NSWindow* window)
     io.BackendPlatformName = "imgui_impl_osx";
 
     // Our mouse update function expect PlatformHandle to be filled for the main viewport
-    g_Window = window;
+    g_Window = [view window];
     ImGuiViewport* main_viewport = ImGui::GetMainViewport();
     main_viewport->PlatformHandle = main_viewport->PlatformHandleRaw = (__bridge_retained void*)g_Window;
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -378,10 +378,6 @@ static void ImGui_ImplOSX_CreateWindow(ImGuiViewport* viewport)
     [window setLevel:NSFloatingWindowLevel];
 
     ImGui_ImplOSX_View* view = [[ImGui_ImplOSX_View alloc] initWithFrame:window.frame];
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
-    if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6)
-        [view setWantsBestResolutionOpenGLSurface:YES];
-#endif // MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
     [window setContentView:view];
 
     data->window = window;
