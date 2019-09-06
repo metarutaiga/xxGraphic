@@ -37,8 +37,8 @@ xxAPI void          xxSubmitCommandBufferGLES2(uint64_t commandBuffer);
 //==============================================================================
 xxAPI uint64_t      xxCreateRenderPassGLES2(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil);
 xxAPI void          xxDestroyRenderPassGLES2(uint64_t renderPass);
-xxAPI bool          xxBeginRenderPassGLES2(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
-xxAPI void          xxEndRenderPassGLES2(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
+xxAPI uint64_t      xxBeginRenderPassGLES2(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
+xxAPI void          xxEndRenderPassGLES2(uint64_t commandEncoder);
 //==============================================================================
 //  Buffer
 //==============================================================================
@@ -85,19 +85,19 @@ xxAPI void          xxDestroyPipelineGLES2(uint64_t pipeline);
 //==============================================================================
 //  Command
 //==============================================================================
-xxAPI void          xxSetViewportGLES2(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ);
-xxAPI void          xxSetScissorGLES2(uint64_t commandBuffer, int x, int y, int width, int height);
-xxAPI void          xxSetPipelineGLES2(uint64_t commandBuffer, uint64_t pipeline);
-xxAPI void          xxSetIndexBufferGLES2(uint64_t commandBuffer, uint64_t buffer);
-xxAPI void          xxSetVertexBuffersGLES2(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute);
-xxAPI void          xxSetVertexTexturesGLES2(uint64_t commandBuffer, int count, const uint64_t* textures);
-xxAPI void          xxSetFragmentTexturesGLES2(uint64_t commandBuffer, int count, const uint64_t* textures);
-xxAPI void          xxSetVertexSamplersGLES2(uint64_t commandBuffer, int count, const uint64_t* samplers);
-xxAPI void          xxSetFragmentSamplersGLES2(uint64_t commandBuffer, int count, const uint64_t* samplers);
-xxAPI void          xxSetVertexConstantBufferGLES2(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
-xxAPI void          xxSetFragmentConstantBufferGLES2(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
-xxAPI void          xxDrawIndexedGLES2(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+xxAPI void          xxSetViewportGLES2(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
+xxAPI void          xxSetScissorGLES2(uint64_t commandEncoder, int x, int y, int width, int height);
+xxAPI void          xxSetPipelineGLES2(uint64_t commandEncoder, uint64_t pipeline);
+xxAPI void          xxSetIndexBufferGLES2(uint64_t commandEncoder, uint64_t buffer);
+xxAPI void          xxSetVertexBuffersGLES2(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
+xxAPI void          xxSetVertexTexturesGLES2(uint64_t commandEncoder, int count, const uint64_t* textures);
+xxAPI void          xxSetFragmentTexturesGLES2(uint64_t commandEncoder, int count, const uint64_t* textures);
+xxAPI void          xxSetVertexSamplersGLES2(uint64_t commandEncoder, int count, const uint64_t* samplers);
+xxAPI void          xxSetFragmentSamplersGLES2(uint64_t commandEncoder, int count, const uint64_t* samplers);
+xxAPI void          xxSetVertexConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          xxSetFragmentConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          xxDrawIndexedGLES2(uint64_t commandEncoder, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-xxAPI void          xxSetTransformGLES2(uint64_t commandBuffer, const float* world, const float* view, const float* projection);
+xxAPI void          xxSetTransformGLES2(uint64_t commandEncoder, const float* world, const float* view, const float* projection);

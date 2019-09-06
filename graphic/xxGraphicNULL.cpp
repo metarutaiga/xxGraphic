@@ -101,12 +101,12 @@ void xxDestroyRenderPassNULL(uint64_t renderPass)
 
 }
 //------------------------------------------------------------------------------
-bool xxBeginRenderPassNULL(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+uint64_t xxBeginRenderPassNULL(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
 {
-    return true;
+    return 0;
 }
 //------------------------------------------------------------------------------
-void xxEndRenderPassNULL(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+void xxEndRenderPassNULL(uint64_t commandEncoder)
 {
 
 }
@@ -250,69 +250,69 @@ void xxDestroyPipelineNULL(uint64_t pipeline)
 //==============================================================================
 //  Command
 //==============================================================================
-void xxSetViewportNULL(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ)
+void xxSetViewportNULL(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetScissorNULL(uint64_t commandBuffer, int x, int y, int width, int height)
+void xxSetScissorNULL(uint64_t commandEncoder, int x, int y, int width, int height)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetPipelineNULL(uint64_t commandBuffer, uint64_t pipeline)
+void xxSetPipelineNULL(uint64_t commandEncoder, uint64_t pipeline)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetIndexBufferNULL(uint64_t commandBuffer, uint64_t buffer)
+void xxSetIndexBufferNULL(uint64_t commandEncoder, uint64_t buffer)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetVertexBuffersNULL(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute)
+void xxSetVertexBuffersNULL(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetVertexTexturesNULL(uint64_t commandBuffer, int count, const uint64_t* textures)
+void xxSetVertexTexturesNULL(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentTexturesNULL(uint64_t commandBuffer, int count, const uint64_t* textures)
+void xxSetFragmentTexturesNULL(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetVertexSamplersNULL(uint64_t commandBuffer, int count, const uint64_t* samplers)
+void xxSetVertexSamplersNULL(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentSamplersNULL(uint64_t commandBuffer, int count, const uint64_t* samplers)
+void xxSetFragmentSamplersNULL(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetVertexConstantBufferNULL(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
+void xxSetVertexConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentConstantBufferNULL(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
+void xxSetFragmentConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedNULL(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawIndexedNULL(uint64_t commandEncoder, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
 
 }
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-void xxSetTransformNULL(uint64_t commandBuffer, const float* world, const float* view, const float* projection)
+void xxSetTransformNULL(uint64_t commandEncoder, const float* world, const float* view, const float* projection)
 {
 
 }

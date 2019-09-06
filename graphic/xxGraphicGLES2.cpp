@@ -214,7 +214,7 @@ void xxDestroyRenderPassGLES2(uint64_t renderPass)
     delete glRenderPass;
 }
 //------------------------------------------------------------------------------
-bool xxBeginRenderPassGLES2(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+uint64_t xxBeginRenderPassGLES2(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
 {
     RENDERPASSGL* glRenderPass = reinterpret_cast<RENDERPASSGL*>(renderPass);
     if (glRenderPass == nullptr)
@@ -225,10 +225,10 @@ bool xxBeginRenderPassGLES2(uint64_t commandBuffer, uint64_t framebuffer, uint64
     glClearStencil(glRenderPass->stencil);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    return true;
+    return commandBuffer;
 }
 //------------------------------------------------------------------------------
-void xxEndRenderPassGLES2(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+void xxEndRenderPassGLES2(uint64_t commandEncoder)
 {
 
 }
@@ -775,21 +775,21 @@ void xxDestroyPipelineGLES2(uint64_t pipeline)
 //==============================================================================
 //  Command
 //==============================================================================
-void xxSetViewportGLES2(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ)
+void xxSetViewportGLES2(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ)
 {
     glViewport(x, y, width, height);
 }
 //------------------------------------------------------------------------------
-void xxSetScissorGLES2(uint64_t commandBuffer, int x, int y, int width, int height)
+void xxSetScissorGLES2(uint64_t commandEncoder, int x, int y, int width, int height)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandBuffer);
+    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
 
     glScissor(x, glSwapchain->height - y - height, width, height);
 }
 //------------------------------------------------------------------------------
-void xxSetPipelineGLES2(uint64_t commandBuffer, uint64_t pipeline)
+void xxSetPipelineGLES2(uint64_t commandEncoder, uint64_t pipeline)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandBuffer);
+    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
     PIPELINEGL* glPipeline = reinterpret_cast<PIPELINEGL*>(pipeline);
     VERTEXATTRIBUTEGL* vertexAttribute = glPipeline->vertexAttribute;
     VERTEXATTRIBUTEGL::Attribute* attributes = vertexAttribute->attributes;
@@ -820,16 +820,16 @@ void xxSetPipelineGLES2(uint64_t commandBuffer, uint64_t pipeline)
     glSwapchain->pipeline = pipeline;
 }
 //------------------------------------------------------------------------------
-void xxSetIndexBufferGLES2(uint64_t commandBuffer, uint64_t buffer)
+void xxSetIndexBufferGLES2(uint64_t commandEncoder, uint64_t buffer)
 {
     BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(buffer);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glBuffer->buffer);
 }
 //------------------------------------------------------------------------------
-void xxSetVertexBuffersGLES2(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute)
+void xxSetVertexBuffersGLES2(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandBuffer);
+    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
  
     for (int i = 0; i < count; ++i)
     {
@@ -837,14 +837,14 @@ void xxSetVertexBuffersGLES2(uint64_t commandBuffer, int count, const uint64_t* 
     }
 }
 //------------------------------------------------------------------------------
-void xxSetVertexTexturesGLES2(uint64_t commandBuffer, int count, const uint64_t* textures)
+void xxSetVertexTexturesGLES2(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentTexturesGLES2(uint64_t commandBuffer, int count, const uint64_t* textures)
+void xxSetFragmentTexturesGLES2(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandBuffer);
+    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
 
     for (int i = 0; i < count; ++i)
     {
@@ -858,14 +858,14 @@ void xxSetFragmentTexturesGLES2(uint64_t commandBuffer, int count, const uint64_
     }
 }
 //------------------------------------------------------------------------------
-void xxSetVertexSamplersGLES2(uint64_t commandBuffer, int count, const uint64_t* samplers)
+void xxSetVertexSamplersGLES2(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentSamplersGLES2(uint64_t commandBuffer, int count, const uint64_t* samplers)
+void xxSetFragmentSamplersGLES2(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandBuffer);
+    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
 
     for (int i = 0; i < count; ++i)
     {
@@ -888,21 +888,21 @@ void xxSetFragmentSamplersGLES2(uint64_t commandBuffer, int count, const uint64_
     }
 }
 //------------------------------------------------------------------------------
-void xxSetVertexConstantBufferGLES2(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
+void xxSetVertexConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
 {
     BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(buffer);
 
     glUniform4fv(0, size / sizeof(float) / 4, (GLfloat*)glBuffer->memory);
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentConstantBufferGLES2(uint64_t commandBuffer, uint64_t buffer, unsigned int size)
+void xxSetFragmentConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedGLES2(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawIndexedGLES2(uint64_t commandEncoder, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandBuffer);
+    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
     PIPELINEGL* glPipeline = reinterpret_cast<PIPELINEGL*>(glSwapchain->pipeline);
     VERTEXATTRIBUTEGL* vertexAttribute = glPipeline->vertexAttribute;
     VERTEXATTRIBUTEGL::Attribute* attributes = vertexAttribute->attributes;
@@ -926,7 +926,7 @@ void xxDrawIndexedGLES2(uint64_t commandBuffer, int indexCount, int instanceCoun
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-void xxSetTransformGLES2(uint64_t commandBuffer, const float* world, const float* view, const float* projection)
+void xxSetTransformGLES2(uint64_t commandEncoder, const float* world, const float* view, const float* projection)
 {
 
 }

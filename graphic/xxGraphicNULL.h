@@ -37,8 +37,8 @@ xxAPI void          xxSubmitCommandBufferNULL(uint64_t commandBuffer);
 //==============================================================================
 xxAPI uint64_t      xxCreateRenderPassNULL(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil);
 xxAPI void          xxDestroyRenderPassNULL(uint64_t renderPass);
-xxAPI bool          xxBeginRenderPassNULL(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
-xxAPI void          xxEndRenderPassNULL(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
+xxAPI uint64_t      xxBeginRenderPassNULL(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
+xxAPI void          xxEndRenderPassNULL(uint64_t commandEncoder);
 //==============================================================================
 //  Buffer
 //==============================================================================
@@ -85,19 +85,19 @@ xxAPI void          xxDestroyPipelineNULL(uint64_t pipeline);
 //==============================================================================
 //  Command
 //==============================================================================
-xxAPI void          xxSetViewportNULL(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ);
-xxAPI void          xxSetScissorNULL(uint64_t commandBuffer, int x, int y, int width, int height);
-xxAPI void          xxSetPipelineNULL(uint64_t commandBuffer, uint64_t pipeline);
-xxAPI void          xxSetIndexBufferNULL(uint64_t commandBuffer, uint64_t buffer);
-xxAPI void          xxSetVertexBuffersNULL(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute);
-xxAPI void          xxSetVertexTexturesNULL(uint64_t commandBuffer, int count, const uint64_t* textures);
-xxAPI void          xxSetFragmentTexturesNULL(uint64_t commandBuffer, int count, const uint64_t* textures);
-xxAPI void          xxSetVertexSamplersNULL(uint64_t commandBuffer, int count, const uint64_t* samplers);
-xxAPI void          xxSetFragmentSamplersNULL(uint64_t commandBuffer, int count, const uint64_t* samplers);
-xxAPI void          xxSetVertexConstantBufferNULL(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
-xxAPI void          xxSetFragmentConstantBufferNULL(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
-xxAPI void          xxDrawIndexedNULL(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+xxAPI void          xxSetViewportNULL(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
+xxAPI void          xxSetScissorNULL(uint64_t commandEncoder, int x, int y, int width, int height);
+xxAPI void          xxSetPipelineNULL(uint64_t commandEncoder, uint64_t pipeline);
+xxAPI void          xxSetIndexBufferNULL(uint64_t commandEncoder, uint64_t buffer);
+xxAPI void          xxSetVertexBuffersNULL(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
+xxAPI void          xxSetVertexTexturesNULL(uint64_t commandEncoder, int count, const uint64_t* textures);
+xxAPI void          xxSetFragmentTexturesNULL(uint64_t commandEncoder, int count, const uint64_t* textures);
+xxAPI void          xxSetVertexSamplersNULL(uint64_t commandEncoder, int count, const uint64_t* samplers);
+xxAPI void          xxSetFragmentSamplersNULL(uint64_t commandEncoder, int count, const uint64_t* samplers);
+xxAPI void          xxSetVertexConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          xxSetFragmentConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          xxDrawIndexedNULL(uint64_t commandEncoder, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-xxAPI void          xxSetTransformNULL(uint64_t commandBuffer, const float* world, const float* view, const float* projection);
+xxAPI void          xxSetTransformNULL(uint64_t commandEncoder, const float* world, const float* view, const float* projection);

@@ -35,8 +35,8 @@ void        (*xxSubmitCommandBuffer)(uint64_t commandBuffer);
 //==============================================================================
 uint64_t    (*xxCreateRenderPass)(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil);
 void        (*xxDestroyRenderPass)(uint64_t renderPass);
-bool        (*xxBeginRenderPass)(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
-void        (*xxEndRenderPass)(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
+uint64_t    (*xxBeginRenderPass)(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
+void        (*xxEndRenderPass)(uint64_t commandEncoder);
 //==============================================================================
 //  Buffer
 //==============================================================================
@@ -83,19 +83,19 @@ void        (*xxDestroyPipeline)(uint64_t pipeline);
 //==============================================================================
 //  Command
 //==============================================================================
-void        (*xxSetViewport)(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ);
-void        (*xxSetScissor)(uint64_t commandBuffer, int x, int y, int width, int height);
-void        (*xxSetPipeline)(uint64_t commandBuffer, uint64_t pipeline);
-void        (*xxSetIndexBuffer)(uint64_t commandBuffer, uint64_t buffer);
-void        (*xxSetVertexBuffers)(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute);
-void        (*xxSetVertexTextures)(uint64_t commandBuffer, int count, const uint64_t* textures);
-void        (*xxSetFragmentTextures)(uint64_t commandBuffer, int count, const uint64_t* textures);
-void        (*xxSetVertexSamplers)(uint64_t commandBuffer, int count, const uint64_t* samplers);
-void        (*xxSetFragmentSamplers)(uint64_t commandBuffer, int count, const uint64_t* samplers);
-void        (*xxSetVertexConstantBuffer)(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
-void        (*xxSetFragmentConstantBuffer)(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
-void        (*xxDrawIndexed)(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+void        (*xxSetViewport)(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
+void        (*xxSetScissor)(uint64_t commandEncoder, int x, int y, int width, int height);
+void        (*xxSetPipeline)(uint64_t commandEncoder, uint64_t pipeline);
+void        (*xxSetIndexBuffer)(uint64_t commandEncoder, uint64_t buffer);
+void        (*xxSetVertexBuffers)(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
+void        (*xxSetVertexTextures)(uint64_t commandEncoder, int count, const uint64_t* textures);
+void        (*xxSetFragmentTextures)(uint64_t commandEncoder, int count, const uint64_t* textures);
+void        (*xxSetVertexSamplers)(uint64_t commandEncoder, int count, const uint64_t* samplers);
+void        (*xxSetFragmentSamplers)(uint64_t commandEncoder, int count, const uint64_t* samplers);
+void        (*xxSetVertexConstantBuffer)(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+void        (*xxSetFragmentConstantBuffer)(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+void        (*xxDrawIndexed)(uint64_t commandEncoder, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-void        (*xxSetTransform)(uint64_t commandBuffer, const float* world, const float* view, const float* projection);
+void        (*xxSetTransform)(uint64_t commandEncoder, const float* world, const float* view, const float* projection);

@@ -131,11 +131,11 @@ static uint64_t g_renderPass = 0;
     uint64_t commandBuffer = xxGetCommandBuffer(g_device, g_swapchain);
     uint64_t framebuffer = xxGetFramebuffer(g_device, g_swapchain);
     xxBeginCommandBuffer(commandBuffer);
-    xxBeginRenderPass(commandBuffer, framebuffer, g_renderPass);
 
-    ImGui_ImplXX_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+    uint64_t commandEncoder = xxBeginRenderPass(commandBuffer, framebuffer, g_renderPass);
+    ImGui_ImplXX_RenderDrawData(ImGui::GetDrawData(), commandEncoder);
+    xxEndRenderPass(commandEncoder);
 
-    xxEndRenderPass(commandBuffer, framebuffer, g_renderPass);
     xxEndCommandBuffer(commandBuffer);
     xxSubmitCommandBuffer(commandBuffer);
 

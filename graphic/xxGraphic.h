@@ -37,8 +37,8 @@ xxAPI void          (*xxSubmitCommandBuffer)(uint64_t commandBuffer);
 //==============================================================================
 xxAPI uint64_t      (*xxCreateRenderPass)(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil);
 xxAPI void          (*xxDestroyRenderPass)(uint64_t renderPass);
-xxAPI bool          (*xxBeginRenderPass)(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
-xxAPI void          (*xxEndRenderPass)(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
+xxAPI uint64_t      (*xxBeginRenderPass)(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
+xxAPI void          (*xxEndRenderPass)(uint64_t commandEncoder);
 //==============================================================================
 //  Buffer
 //==============================================================================
@@ -85,19 +85,19 @@ xxAPI void          (*xxDestroyPipeline)(uint64_t pipeline);
 //==============================================================================
 //  Command
 //==============================================================================
-xxAPI void          (*xxSetViewport)(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ);
-xxAPI void          (*xxSetScissor)(uint64_t commandBuffer, int x, int y, int width, int height);
-xxAPI void          (*xxSetPipeline)(uint64_t commandBuffer, uint64_t pipeline);
-xxAPI void          (*xxSetIndexBuffer)(uint64_t commandBuffer, uint64_t buffer);
-xxAPI void          (*xxSetVertexBuffers)(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute);
-xxAPI void          (*xxSetVertexTextures)(uint64_t commandBuffer, int count, const uint64_t* textures);
-xxAPI void          (*xxSetFragmentTextures)(uint64_t commandBuffer, int count, const uint64_t* textures);
-xxAPI void          (*xxSetVertexSamplers)(uint64_t commandBuffer, int count, const uint64_t* samplers);
-xxAPI void          (*xxSetFragmentSamplers)(uint64_t commandBuffer, int count, const uint64_t* samplers);
-xxAPI void          (*xxSetVertexConstantBuffer)(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
-xxAPI void          (*xxSetFragmentConstantBuffer)(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
-xxAPI void          (*xxDrawIndexed)(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+xxAPI void          (*xxSetViewport)(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
+xxAPI void          (*xxSetScissor)(uint64_t commandEncoder, int x, int y, int width, int height);
+xxAPI void          (*xxSetPipeline)(uint64_t commandEncoder, uint64_t pipeline);
+xxAPI void          (*xxSetIndexBuffer)(uint64_t commandEncoder, uint64_t buffer);
+xxAPI void          (*xxSetVertexBuffers)(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
+xxAPI void          (*xxSetVertexTextures)(uint64_t commandEncoder, int count, const uint64_t* textures);
+xxAPI void          (*xxSetFragmentTextures)(uint64_t commandEncoder, int count, const uint64_t* textures);
+xxAPI void          (*xxSetVertexSamplers)(uint64_t commandEncoder, int count, const uint64_t* samplers);
+xxAPI void          (*xxSetFragmentSamplers)(uint64_t commandEncoder, int count, const uint64_t* samplers);
+xxAPI void          (*xxSetVertexConstantBuffer)(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          (*xxSetFragmentConstantBuffer)(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          (*xxDrawIndexed)(uint64_t commandEncoder, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-xxAPI void          (*xxSetTransform)(uint64_t commandBuffer, const float* world, const float* view, const float* projection);
+xxAPI void          (*xxSetTransform)(uint64_t commandEncoder, const float* world, const float* view, const float* projection);

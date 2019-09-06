@@ -17,7 +17,7 @@
 IMGUI_IMPL_API bool     ImGui_ImplXX_Init(uint64_t instance, uint64_t physicalDevice, uint64_t device);
 IMGUI_IMPL_API void     ImGui_ImplXX_Shutdown();
 IMGUI_IMPL_API void     ImGui_ImplXX_NewFrame();
-IMGUI_IMPL_API void     ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandBuffer);
+IMGUI_IMPL_API void     ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandEncoder);
 
 // Use if you want to reset your rendering device without losing ImGui state.
 IMGUI_IMPL_API bool     ImGui_ImplXX_CreateDeviceObjects();
