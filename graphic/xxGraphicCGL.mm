@@ -66,9 +66,10 @@ uint64_t glCreateContextCGL(uint64_t instance, void* view, void** display)
 {
     if (g_rootView == nil)
         return 0;
-
-    NSWindow* __unsafe_unretained nsWindow = (__bridge NSWindow*)view;
-    NSOpenGLView* nsView = (NSOpenGLView*)[nsWindow contentView];
+    NSWindow* nsWindow = (__bridge NSWindow*)view;
+    if (nsWindow == nil)
+        return 0;
+    NSView* nsView = [nsWindow contentView];
     if (nsView == nil)
         return 0;
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
@@ -79,8 +80,8 @@ uint64_t glCreateContextCGL(uint64_t instance, void* view, void** display)
                                                             shareContext:[g_rootView openGLContext]];
     if (nsContext == nil)
         return 0;
+    [nsContext setView:nsView];
     [nsContext makeCurrentContext];
-    [nsView setOpenGLContext:nsContext];
 
     int swapInterval = 0;
     [nsContext setValues:&swapInterval forParameter:NSOpenGLContextParameterSwapInterval];
@@ -101,15 +102,16 @@ uint64_t glCreateContextCGL(uint64_t instance, void* view, void** display)
         (*display) = (__bridge void*)nsView;
     }
 
-    return reinterpret_cast<uint64_t>(nsContext);
+    return reinterpret_cast<uint64_t>((__bridge_retained void*)nsContext);
 }
 //------------------------------------------------------------------------------
 void glDestroyContextCGL(uint64_t context, void* view, void* display)
 {
-    NSOpenGLContext* __unsafe_unretained nsContext = (__bridge NSOpenGLContext*)reinterpret_cast<void*>(context);
-    NSOpenGLView* __unsafe_unretained nsView = (__bridge NSOpenGLView*)display;
-
+    NSOpenGLContext* nsContext = (__bridge_transfer NSOpenGLContext*)reinterpret_cast<void*>(context);
+    if (nsContext == nil)
+        return;
     [nsContext makeCurrentContext];
+    [nsContext setView:nil];
 
     if (glGetIntegerv && glDeleteVertexArrays)
     {
@@ -118,7 +120,6 @@ void glDestroyContextCGL(uint64_t context, void* view, void* display)
         glDeleteVertexArrays(1, &vao);
     }
 
-    [nsView setOpenGLContext:nil];
     [NSOpenGLContext clearCurrentContext];
 }
 //------------------------------------------------------------------------------
@@ -138,8 +139,8 @@ void glPresentContextCGL(uint64_t context, void* display)
 //------------------------------------------------------------------------------
 void glGetViewSizeCGL(void* view, unsigned int* width, unsigned int* height)
 {
-    NSWindow* __unsafe_unretained nsWindow = (__bridge NSWindow*)view;
-    NSView* __unsafe_unretained nsView = [nsWindow contentView];
+    NSWindow* nsWindow = (__bridge NSWindow*)view;
+    NSView* nsView = [nsWindow contentView];
 
     NSSize size = [nsView convertRectToBacking:[nsView bounds]].size;
     (*width) = size.width;
@@ -208,7 +209,7 @@ uint64_t xxGraphicCreateCGL()
     glShaderSource_ = glShaderSource;
     glShaderSource = glShaderSourceCGL;
 
-    return reinterpret_cast<uint64_t>(rootContext);
+    return reinterpret_cast<uint64_t>((__bridge_retained void*)rootContext);
 }
 //------------------------------------------------------------------------------
 void xxGraphicDestroyCGL(uint64_t context)

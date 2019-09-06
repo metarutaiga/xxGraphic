@@ -25,13 +25,21 @@ static uint64_t g_renderPass = 0;
 // ImGuiExampleView
 //-----------------------------------------------------------------------------------
 
-@interface ImGuiExampleView : NSOpenGLView
+@interface ImGuiExampleView : NSView
 {
     NSTimer*    animationTimer;
 }
 @end
 
 @implementation ImGuiExampleView
+
+-(instancetype)initWithFrame:(NSRect)frameRect
+{
+    [self setPostsFrameChangedNotifications:YES];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reshape) name:NSViewGlobalFrameDidChangeNotification object:self];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reshape) name:NSViewFrameDidChangeNotification object:self];
+    return [super initWithFrame:frameRect];
+}
 
 -(void)animationTimerFired:(NSTimer*)timer
 {
@@ -178,7 +186,6 @@ static uint64_t g_renderPass = 0;
 
 -(void)reshape
 {
-    [super reshape];
     if (g_swapchain)
     {
         xxDestroySwapchain(g_swapchain);

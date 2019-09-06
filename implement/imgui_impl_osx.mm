@@ -346,7 +346,7 @@ struct ImGuiViewportDataOSX
     ~ImGuiViewportDataOSX() { IM_ASSERT(window == nil); }
 };
 
-@interface ImGui_ImplOSX_View : NSOpenGLView
+@interface ImGui_ImplOSX_View : NSView
 @end
 
 @implementation ImGui_ImplOSX_View
