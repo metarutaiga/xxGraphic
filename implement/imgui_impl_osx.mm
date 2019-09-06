@@ -58,7 +58,7 @@ bool ImGui_ImplOSX_Init(NSWindow* window)
     // Our mouse update function expect PlatformHandle to be filled for the main viewport
     g_Window = window;
     ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-    main_viewport->PlatformHandle = main_viewport->PlatformHandleRaw = (__bridge void*)g_Window;
+    main_viewport->PlatformHandle = main_viewport->PlatformHandleRaw = (__bridge_retained void*)g_Window;
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         ImGui_ImplOSX_InitPlatformInterface();
 
@@ -392,6 +392,9 @@ static void ImGui_ImplOSX_CreateWindow(ImGuiViewport* viewport)
 
 static void ImGui_ImplOSX_DestroyWindow(ImGuiViewport* viewport)
 {
+    NSWindow* window = (__bridge_transfer NSWindow*)viewport->PlatformHandleRaw;
+    window = nil;
+
     if (ImGuiViewportDataOSX* data = (ImGuiViewportDataOSX*)viewport->PlatformUserData)
     {
         NSWindow* window = data->window;
@@ -399,13 +402,11 @@ static void ImGui_ImplOSX_DestroyWindow(ImGuiViewport* viewport)
         {
             [window setContentView:nil];
             [window orderOut:nil];
-            window = (__bridge_transfer NSWindow*)viewport->PlatformHandleRaw;
-            viewport->PlatformHandleRaw = NULL;
         }
         data->window = nil;
         IM_DELETE(data);
     }
-    viewport->PlatformUserData = viewport->PlatformHandle = NULL;
+    viewport->PlatformUserData = viewport->PlatformHandle = viewport->PlatformHandleRaw = NULL;
 }
 
 static void ImGui_ImplOSX_ShowWindow(ImGuiViewport* viewport)
@@ -440,9 +441,9 @@ static void ImGui_ImplOSX_SetWindowPos(ImGuiViewport* viewport, ImVec2 pos)
     NSScreen* screen = [window screen];
     NSSize size = [screen convertRectToBacking:[screen frame]].size;
     NSRect rect = [window convertRectToBacking:[window contentLayoutRect]];
-    NSPoint origin = NSMakePoint(pos.x, size.height - pos.y - rect.size.height);
-    origin = [window convertPointFromBacking:origin];
-    [window setFrameOrigin:origin];
+    NSRect origin = NSMakeRect(pos.x, size.height - pos.y - rect.size.height, 0, 0);
+    origin = [window convertRectFromBacking:origin];
+    [window setFrameOrigin:origin.origin];
 }
 
 static ImVec2 ImGui_ImplOSX_GetWindowSize(ImGuiViewport* viewport)
