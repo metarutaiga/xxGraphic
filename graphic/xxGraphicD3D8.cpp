@@ -977,7 +977,7 @@ void xxSetFragmentConstantBufferD3D8(uint64_t commandEncoder, uint64_t buffer, u
 
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedD3D8(uint64_t commandEncoder, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawIndexedD3D8(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
 

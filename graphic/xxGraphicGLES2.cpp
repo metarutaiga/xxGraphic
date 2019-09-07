@@ -900,7 +900,7 @@ void xxSetFragmentConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, 
 
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedGLES2(uint64_t commandEncoder, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawIndexedGLES2(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
     PIPELINEGL* glPipeline = reinterpret_cast<PIPELINEGL*>(glSwapchain->pipeline);

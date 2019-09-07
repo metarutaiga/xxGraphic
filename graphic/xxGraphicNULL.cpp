@@ -305,7 +305,7 @@ void xxSetFragmentConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, u
 
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedNULL(uint64_t commandEncoder, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawIndexedNULL(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
 
 }

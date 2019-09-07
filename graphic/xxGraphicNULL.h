@@ -96,7 +96,7 @@ xxAPI void          xxSetVertexSamplersNULL(uint64_t commandEncoder, int count, 
 xxAPI void          xxSetFragmentSamplersNULL(uint64_t commandEncoder, int count, const uint64_t* samplers);
 xxAPI void          xxSetVertexConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
 xxAPI void          xxSetFragmentConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
-xxAPI void          xxDrawIndexedNULL(uint64_t commandEncoder, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+xxAPI void          xxDrawIndexedNULL(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function
 //==============================================================================

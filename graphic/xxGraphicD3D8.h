@@ -96,7 +96,7 @@ xxAPI void          xxSetVertexSamplersD3D8(uint64_t commandEncoder, int count, 
 xxAPI void          xxSetFragmentSamplersD3D8(uint64_t commandEncoder, int count, const uint64_t* samplers);
 xxAPI void          xxSetVertexConstantBufferD3D8(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
 xxAPI void          xxSetFragmentConstantBufferD3D8(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
-xxAPI void          xxDrawIndexedD3D8(uint64_t commandEncoder, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+xxAPI void          xxDrawIndexedD3D8(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function
 //==============================================================================

@@ -96,7 +96,7 @@ xxAPI void          xxSetVertexSamplersMantle(uint64_t commandEncoder, int count
 xxAPI void          xxSetFragmentSamplersMantle(uint64_t commandEncoder, int count, const uint64_t* samplers);
 xxAPI void          xxSetVertexConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
 xxAPI void          xxSetFragmentConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
-xxAPI void          xxDrawIndexedMantle(uint64_t commandEncoder, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+xxAPI void          xxDrawIndexedMantle(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
