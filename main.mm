@@ -10,6 +10,7 @@
 #include "implement/imgui_impl_xx.h"
 
 #include "graphic/xxGraphicGLES2.h"
+#include "graphic/xxGraphicMetal.h"
 #include "graphic/xxGraphicNULL.h"
 
 #include <stdio.h>
@@ -35,17 +36,18 @@ static uint64_t g_renderPass = 0;
 
 -(instancetype)initWithFrame:(NSRect)frameRect
 {
+    self = [super initWithFrame:frameRect];
+
+    [self setWantsLayer:YES];
     [self setPostsFrameChangedNotifications:YES];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reshape) name:NSViewFrameDidChangeNotification object:self];
-    return [super initWithFrame:frameRect];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reset) name:NSViewFrameDidChangeNotification object:self];
+
+    animationTimer = [NSTimer scheduledTimerWithTimeInterval:0 target:self selector:@selector(updateAndDraw) userInfo:nil repeats:YES];
+
+    return self;
 }
 
--(void)animationTimerFired:(NSTimer*)timer
-{
-    [self setNeedsDisplay:YES];
-}
-
--(void)updateAndDrawDemoView
+-(void)updateAndDraw
 {
     // Start the Dear ImGui frame
     ImGui_ImplXX_NewFrame();
@@ -74,6 +76,7 @@ static uint64_t g_renderPass = 0;
                 }
 
                 GRAPHIC(GLES2);
+                GRAPHIC(Metal);
                 GRAPHIC(NULL);
 #undef GRAPHIC
             }
@@ -178,12 +181,9 @@ static uint64_t g_renderPass = 0;
         ImGui_ImplOSX_Init(self);
         ImGui_ImplXX_Init(g_instance, 0, g_device);
     }
-
-    if (!animationTimer)
-        animationTimer = [NSTimer scheduledTimerWithTimeInterval:0 target:self selector:@selector(animationTimerFired:) userInfo:nil repeats:YES];
 }
 
--(void)reshape
+-(void)reset
 {
     if (g_swapchain)
     {
@@ -191,11 +191,6 @@ static uint64_t g_renderPass = 0;
         g_swapchain = 0;
         g_swapchain = xxCreateSwapchain(g_device, (__bridge void*)[self window], 0, 0);
     }
-}
-
--(void)drawRect:(NSRect)bounds
-{
-    [self updateAndDrawDemoView];
 }
 
 -(BOOL)acceptsFirstResponder
