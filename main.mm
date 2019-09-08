@@ -14,7 +14,12 @@
 #include "graphic/xxGraphicNULL.h"
 
 #include <stdio.h>
+
+#if defined(xxMACOS)
 #import <Cocoa/Cocoa.h>
+#elif defined(xxIOS)
+#import <UIKit/UIKit.h>
+#endif
 
 // Graphic data
 static uint64_t g_instance = 0;
@@ -26,14 +31,18 @@ static uint64_t g_renderPass = 0;
 // ImGuiExampleView
 //-----------------------------------------------------------------------------------
 
+#if defined(xxMACOS)
 @interface ImGuiExampleView : NSView
-{
-    NSTimer*    animationTimer;
-}
+@property (nonatomic) NSTimer* animationTimer;
 @end
+#elif defined(xxIOS)
+@interface ImGuiExampleView : UIView
+@end
+#endif
 
 @implementation ImGuiExampleView
 
+#if defined(xxMACOS)
 -(instancetype)initWithFrame:(NSRect)frameRect
 {
     self = [super initWithFrame:frameRect];
@@ -42,16 +51,34 @@ static uint64_t g_renderPass = 0;
     [self setPostsFrameChangedNotifications:YES];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reset) name:NSViewFrameDidChangeNotification object:self];
 
-    animationTimer = [NSTimer scheduledTimerWithTimeInterval:0 target:self selector:@selector(updateAndDraw) userInfo:nil repeats:YES];
+    self.animationTimer = [NSTimer scheduledTimerWithTimeInterval:0 target:self selector:@selector(updateAndDraw) userInfo:nil repeats:YES];
 
     return self;
 }
+#elif defined(xxIOS)
++(Class)layerClass
+{
+    return [CAMetalLayer class];
+}
+
+-(id)initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+
+    CADisplayLink* displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(updateAndDraw)];
+    [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
+
+    return self;
+}
+#endif
 
 -(void)updateAndDraw
 {
     // Start the Dear ImGui frame
     ImGui_ImplXX_NewFrame();
+#if defined(xxMACOS)
     ImGui_ImplOSX_NewFrame(self);
+#endif
     ImGui::NewFrame();
 
     // Graphic API
@@ -161,6 +188,7 @@ static uint64_t g_renderPass = 0;
         ImGui::RenderPlatformWindowsDefault();
     }
 
+#if defined(xxMACOS)
     // Recreate Graphic API
     if (createInstance != nullptr)
     {
@@ -181,6 +209,7 @@ static uint64_t g_renderPass = 0;
         ImGui_ImplOSX_Init(self);
         ImGui_ImplXX_Init(g_instance, 0, g_device);
     }
+#endif
 }
 
 -(void)reset
@@ -208,11 +237,7 @@ static uint64_t g_renderPass = 0;
     return (YES);
 }
 
--(void)dealloc
-{
-    animationTimer = nil;
-}
-
+#if defined(xxMACOS)
 // Forward Mouse/Keyboard events to dear imgui OSX back-end. It returns true when imgui is expecting to use the event.
 -(void)keyUp:(NSEvent *)event           { ImGui_ImplOSX_HandleEvent(event, self); }
 -(void)keyDown:(NSEvent *)event         { ImGui_ImplOSX_HandleEvent(event, self); }
@@ -222,6 +247,7 @@ static uint64_t g_renderPass = 0;
 -(void)mouseMoved:(NSEvent *)event      { ImGui_ImplOSX_HandleEvent(event, self); }
 -(void)mouseDragged:(NSEvent *)event    { ImGui_ImplOSX_HandleEvent(event, self); }
 -(void)scrollWheel:(NSEvent *)event     { ImGui_ImplOSX_HandleEvent(event, self); }
+#endif
 
 @end
 
@@ -229,13 +255,20 @@ static uint64_t g_renderPass = 0;
 // ImGuiExampleAppDelegate
 //-----------------------------------------------------------------------------------
 
+#if defined(xxMACOS)
 @interface ImGuiExampleAppDelegate : NSObject <NSApplicationDelegate, NSWindowDelegate>
 @property (nonatomic, readonly) NSWindow* window;
 @end
+#elif defined(xxIOS)
+@interface ImGuiExampleAppDelegate : UIResponder <UIApplicationDelegate>
+@property (nonatomic, strong) UIWindow* window;
+@end
+#endif
 
 @implementation ImGuiExampleAppDelegate
 @synthesize window = _window;
 
+#if defined(xxMACOS)
 -(BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication
 {
     return YES;
@@ -289,6 +322,28 @@ static uint64_t g_renderPass = 0;
 
 -(void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
+    [self initialize];
+}
+
+-(void)applicationWillTerminate:(NSNotification *)notification
+{
+    [self shutdown];
+}
+#elif defined(xxIOS)
+-(void)applicationDidFinishLaunching:(UIApplication *)application;
+{
+    [self initialize];
+}
+
+-(void)applicationWillTerminate:(UIApplication *)application;
+{
+    [self shutdown];
+}
+#endif
+
+-(void)initialize
+{
+#if defined(xxMACOS)
     float scale = [self.window backingScaleFactor];
 
     // Make the application a foreground application (else it won't receive keyboard events)
@@ -297,9 +352,19 @@ static uint64_t g_renderPass = 0;
 
     // Menu
     [self setupMenu];
+#elif defined(xxIOS)
+    float scale = 1.0f;
+#endif
 
     ImGuiExampleView* view = [[ImGuiExampleView alloc] initWithFrame:self.window.frame];
+#if defined(xxMACOS)
     [self.window setContentView:view];
+#elif defined(xxIOS)
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    self.window.rootViewController = [[UIViewController alloc] init];
+    self.window.rootViewController.view = view;
+    [self.window makeKeyAndVisible];
+#endif
 
     g_instance = xxCreateInstanceMetal();
     g_device = xxCreateDevice(g_instance);
@@ -331,7 +396,12 @@ static uint64_t g_renderPass = 0;
     style.ScaleAllSizes(scale);
 
     // Setup Platform/Renderer bindings
+#if defined(xxMACOS)
     ImGui_ImplOSX_Init(view);
+#elif defined(xxIOS)
+    CGSize size = [[UIScreen mainScreen] nativeBounds].size;
+    io.DisplaySize = ImVec2(size.width, size.height);
+#endif
     ImGui_ImplXX_Init(g_instance, 0, g_device);
 
     // Load Fonts
@@ -369,10 +439,12 @@ static uint64_t g_renderPass = 0;
     ImGuiFreeType::BuildFontAtlas(io.Fonts);
 }
 
--(void)applicationWillTerminate:(NSNotification *)notification;
+-(void)shutdown
 {
     ImGui_ImplXX_Shutdown();
+#if defined(xxMACOS)
     ImGui_ImplOSX_Shutdown();
+#endif
     ImGui::DestroyContext();
 
     xxDestroyRenderPass(g_renderPass);
@@ -383,14 +455,21 @@ static uint64_t g_renderPass = 0;
 
 @end
 
-int main(int argc, const char* argv[])
+int main(int argc, char* argv[])
 {
-	@autoreleasepool
-	{
-		NSApp = [NSApplication sharedApplication];
-		ImGuiExampleAppDelegate* delegate = [[ImGuiExampleAppDelegate alloc] init];
-		[[NSApplication sharedApplication] setDelegate:delegate];
-		[NSApp run];
-	}
-	return NSApplicationMain(argc, argv);
+#if defined(xxMACOS)
+    @autoreleasepool
+    {
+        NSApp = [NSApplication sharedApplication];
+        ImGuiExampleAppDelegate* delegate = [[ImGuiExampleAppDelegate alloc] init];
+        [[NSApplication sharedApplication] setDelegate:delegate];
+        [NSApp run];
+    }
+    return NSApplicationMain(argc, (const char**)argv);
+#elif defined(xxIOS)
+    @autoreleasepool
+    {
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([ImGuiExampleAppDelegate class]));
+    }
+#endif
 }

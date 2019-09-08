@@ -5,7 +5,11 @@
 //==============================================================================
 uint64_t xxTSC()
 {
+#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
     return __rdtsc();
+#else
+    return 0;
+#endif
 }
 //------------------------------------------------------------------------------
 uint64_t xxTSCFrequencyImpl()
@@ -103,6 +107,9 @@ uint64_t xxGetCurrentThreadId()
 //------------------------------------------------------------------------------
 int xxGetIncrementThreadId()
 {
+#if defined(xxIOS)
+    return 0;
+#else
     static int increment;
 #if defined(__GNUC__)
     static int __thread threadId;
@@ -118,6 +125,7 @@ int xxGetIncrementThreadId()
 #endif
     }
     return threadId - 1;
+#endif
 }
 //==============================================================================
 //  Logger

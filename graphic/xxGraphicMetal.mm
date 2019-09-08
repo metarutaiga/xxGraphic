@@ -53,13 +53,22 @@ uint64_t xxCreateInstanceMetal()
 
     MTLSymbolFailed = false;
     MTLSymbol(MTLCreateSystemDefaultDevice);
+#if defined(xxMACOS)
     MTLSymbol(MTLCopyAllDevices);
+#endif
     if (MTLSymbolFailed)
         return 0;
 
+#if defined(xxMACOS)
     NSArray* allDevices = (__bridge NSArray*)MTLCopyAllDevices();
     if (allDevices == nil)
         return 0;
+#elif defined(xxIOS)
+    id <MTLDevice> device = MTLCreateSystemDefaultDevice();
+    if (device == nil)
+        return 0;
+    NSArray* allDevices = [[NSArray alloc] initWithObjects:&device count:1];
+#endif
 
     xxRegisterFunction(Metal);
 
@@ -157,27 +166,31 @@ uint64_t xxCreateSwapchainMetal(uint64_t device, void* view, unsigned int width,
         return 0;
     float contentsScale = [nsWindow backingScaleFactor];
 #elif defined(xxIOS)
-    UIView* nsView = (__bridge UIView*)view;
+    UIWindow* nsWindow = (__bridge UIWindow*)view;
+    if (nsWindow == nil)
+        return 0;
+    UIView* nsView = [nsWindow subviews].firstObject;
     if (nsView == nil)
         return 0;
-    float contentsScale = 1.0f;
+    float contentsScale = [[nsWindow screen] nativeScale];
 #endif
 
     MTLSWAPCHAIN* swapchain = new MTLSWAPCHAIN;
     if (swapchain == nullptr)
         return 0;
 
+#if defined(xxMACOS)
     CAMetalLayer* layer = [CAMetalLayer layer];
+    layer.displaySyncEnabled = NO;
+    [nsView setLayer:layer];
+    [nsView setWantsLayer:YES];
+#elif defined(xxIOS)
+    CAMetalLayer* layer = (CAMetalLayer*)[nsView layer];
+#endif
     layer.contentsScale = contentsScale;
     layer.device = mtlDevice;
     layer.framebufferOnly = YES;
     layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
-    layer.displaySyncEnabled = NO;
-
-#if defined(xxMACOS)
-    [nsView setLayer:layer];
-    [nsView setWantsLayer:YES];
-#endif
 
     swapchain->view = nsView;
     swapchain->metalLayer = layer;
@@ -359,12 +372,20 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, unsigned int width, u
     if (mtlTexture == nullptr)
         return 0;
 
+#if defined(xxMACOS) || (TARGET_OS_SIMULATOR) || (TARGET_OS_MACCATALYST)
+    MTLPixelFormat pixelFormat = MTLPixelFormatBGRA8Unorm;
+    MTLResourceOptions options = MTLResourceStorageModeManaged;
+#elif defined(xxIOS)
+    MTLPixelFormat pixelFormat = MTLPixelFormatRGBA8Unorm;
+    MTLResourceOptions options = MTLResourceStorageModeShared;
+#endif
+
     int stride = width * sizeof(int);
     stride = (stride + 63) & ~63;
-    id <MTLBuffer> buffer = [mtlDevice newBufferWithLength:stride * height options:MTLResourceStorageModeManaged];
+    id <MTLBuffer> buffer = [mtlDevice newBufferWithLength:stride * height options:options];
 
-    MTLTextureDescriptor* desc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm width:width height:height mipmapped:NO];
-    desc.resourceOptions = MTLResourceStorageModeManaged;
+    MTLTextureDescriptor* desc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:pixelFormat width:width height:height mipmapped:NO];
+    desc.resourceOptions = options;
     id <MTLTexture> texture = [buffer newTextureWithDescriptor:desc offset:0 bytesPerRow:stride];
 
     mtlTexture->texture = texture;
@@ -391,9 +412,11 @@ void* xxMapTextureMetal(uint64_t device, uint64_t texture, unsigned int& stride,
 //------------------------------------------------------------------------------
 void xxUnmapTextureMetal(uint64_t device, uint64_t texture, unsigned int level, unsigned int array, unsigned int mipmap)
 {
+#if defined(xxMACOS)
     MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);
 
     [mtlTexture->buffer didModifyRange:NSMakeRange(0, [mtlTexture->buffer length])];
+#endif
 }
 //==============================================================================
 //  Sampler
@@ -453,7 +476,7 @@ uint64_t xxCreateVertexAttributeMetal(uint64_t device, int count, ...)
             switch (element)
             {
             case 1:
-                attribute.format = MTLVertexFormatUCharNormalized;
+                attribute.format = MTLVertexFormat(47)/*MTLVertexFormatUCharNormalized*/;
                 break;
             case 2:
                 attribute.format = MTLVertexFormatUChar2Normalized;
@@ -462,7 +485,11 @@ uint64_t xxCreateVertexAttributeMetal(uint64_t device, int count, ...)
                 attribute.format = MTLVertexFormatUChar3Normalized;
                 break;
             case 4:
+#if defined(xxMACOS) || defined(TARGET_OS_MACCATALYST)
                 attribute.format = MTLVertexFormatUChar4Normalized_BGRA;
+#elif defined(xxIOS)
+                attribute.format = MTLVertexFormatUChar4Normalized;
+#endif
                 break;
             }
             break;
