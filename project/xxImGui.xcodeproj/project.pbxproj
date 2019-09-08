@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D6022C6823258E9500B9BFB8 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = D644A0F2231F12BE00B75B77 /* main.mm */; };
+		D6022C6923258E9500B9BFB8 /* imgui_impl_osx.mm in Sources */ = {isa = PBXBuildFile; fileRef = D644A0E6231F109C00B75B77 /* imgui_impl_osx.mm */; };
+		D6022C6A23258E9500B9BFB8 /* imgui_impl_xx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0E7231F109C00B75B77 /* imgui_impl_xx.cpp */; };
+		D6022C6C23258EB800B9BFB8 /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6022C6B23258EB800B9BFB8 /* libfreetype.a */; };
+		D6022C6E23258EB800B9BFB8 /* libimgui.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6022C6D23258EB800B9BFB8 /* libimgui.a */; };
+		D6022C7023258EB800B9BFB8 /* libxxGraphic.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D6022C6F23258EB800B9BFB8 /* libxxGraphic.a */; };
 		D644A0E9231F109D00B75B77 /* imgui_impl_osx.mm in Sources */ = {isa = PBXBuildFile; fileRef = D644A0E6231F109C00B75B77 /* imgui_impl_osx.mm */; };
 		D644A0EA231F109D00B75B77 /* imgui_impl_xx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0E7231F109C00B75B77 /* imgui_impl_xx.cpp */; };
 		D644A0ED231F116C00B75B77 /* libimgui.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D644A0EC231F116C00B75B77 /* libimgui.dylib */; };
@@ -17,6 +23,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D6022C4F23258C4E00B9BFB8 /* xxImGui.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = xxImGui.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D6022C6B23258EB800B9BFB8 /* libfreetype.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libfreetype.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		D6022C6D23258EB800B9BFB8 /* libimgui.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libimgui.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		D6022C6F23258EB800B9BFB8 /* libxxGraphic.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libxxGraphic.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		D644A0C6231F021F00B75B77 /* xxImGui.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = xxImGui.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D644A0E5231F109C00B75B77 /* imgui_impl_osx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imgui_impl_osx.h; path = ../implement/imgui_impl_osx.h; sourceTree = "<group>"; };
 		D644A0E6231F109C00B75B77 /* imgui_impl_osx.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = imgui_impl_osx.mm; path = ../implement/imgui_impl_osx.mm; sourceTree = "<group>"; };
@@ -33,6 +43,16 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		D6022C4C23258C4E00B9BFB8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D6022C6C23258EB800B9BFB8 /* libfreetype.a in Frameworks */,
+				D6022C6E23258EB800B9BFB8 /* libimgui.a in Frameworks */,
+				D6022C7023258EB800B9BFB8 /* libxxGraphic.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D644A0C3231F021F00B75B77 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -62,6 +82,7 @@
 			isa = PBXGroup;
 			children = (
 				D644A0C6231F021F00B75B77 /* xxImGui.app */,
+				D6022C4F23258C4E00B9BFB8 /* xxImGui.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -80,6 +101,9 @@
 		D644A0EB231F116C00B75B77 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D6022C6B23258EB800B9BFB8 /* libfreetype.a */,
+				D6022C6D23258EB800B9BFB8 /* libimgui.a */,
+				D6022C6F23258EB800B9BFB8 /* libxxGraphic.a */,
 				D6A7280223243208009981AD /* QuartzCore.framework */,
 				D6A72800232425C1009981AD /* CoreVideo.framework */,
 				D6A727F82324181D009981AD /* Metal.framework */,
@@ -93,9 +117,26 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D644A0C5231F021F00B75B77 /* xxImGui */ = {
+		D6022C4E23258C4E00B9BFB8 /* xxImGui (iOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D644A0D7231F022200B75B77 /* Build configuration list for PBXNativeTarget "xxImGui" */;
+			buildConfigurationList = D6022C6523258C5600B9BFB8 /* Build configuration list for PBXNativeTarget "xxImGui (iOS)" */;
+			buildPhases = (
+				D6022C4B23258C4E00B9BFB8 /* Sources */,
+				D6022C4C23258C4E00B9BFB8 /* Frameworks */,
+				D6022C4D23258C4E00B9BFB8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "xxImGui (iOS)";
+			productName = "xxImGui (iOS)";
+			productReference = D6022C4F23258C4E00B9BFB8 /* xxImGui.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D644A0C5231F021F00B75B77 /* xxImGui (macOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D644A0D7231F022200B75B77 /* Build configuration list for PBXNativeTarget "xxImGui (macOS)" */;
 			buildPhases = (
 				D644A0C2231F021F00B75B77 /* Sources */,
 				D644A0C3231F021F00B75B77 /* Frameworks */,
@@ -105,7 +146,7 @@
 			);
 			dependencies = (
 			);
-			name = xxImGui;
+			name = "xxImGui (macOS)";
 			productName = xxImGui;
 			productReference = D644A0C6231F021F00B75B77 /* xxImGui.app */;
 			productType = "com.apple.product-type.application";
@@ -118,6 +159,9 @@
 			attributes = {
 				LastUpgradeCheck = 1030;
 				TargetAttributes = {
+					D6022C4E23258C4E00B9BFB8 = {
+						CreatedOnToolsVersion = 11.0;
+					};
 					D644A0C5231F021F00B75B77 = {
 						CreatedOnToolsVersion = 10.3;
 					};
@@ -136,12 +180,20 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D644A0C5231F021F00B75B77 /* xxImGui */,
+				D644A0C5231F021F00B75B77 /* xxImGui (macOS) */,
+				D6022C4E23258C4E00B9BFB8 /* xxImGui (iOS) */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		D6022C4D23258C4E00B9BFB8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D644A0C4231F021F00B75B77 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -152,6 +204,16 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		D6022C4B23258C4E00B9BFB8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D6022C6823258E9500B9BFB8 /* main.mm in Sources */,
+				D6022C6923258E9500B9BFB8 /* imgui_impl_osx.mm in Sources */,
+				D6022C6A23258E9500B9BFB8 /* imgui_impl_xx.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D644A0C2231F021F00B75B77 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -165,6 +227,35 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		D6022C6623258C5600B9BFB8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "xxImGui (iOS)/xxImGui.entitlements";
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = YES;
+			};
+			name = Debug;
+		};
+		D6022C6723258C5600B9BFB8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "xxImGui (iOS)/xxImGui.entitlements";
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = YES;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		D644A0D5231F022200B75B77 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -217,11 +308,16 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = ..;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/../info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				OBJROOT = ../temp;
 				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xx.imgui;
+				PRODUCT_NAME = xxImGui;
 				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -271,48 +367,52 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = ..;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/../info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				OBJROOT = ../temp;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xx.imgui;
+				PRODUCT_NAME = xxImGui;
 				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
 		D644A0D8231F022200B75B77 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
-				CONFIGURATION_BUILD_DIR = ../bin;
-				INFOPLIST_FILE = "$(SRCROOT)/../info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				OBJROOT = ../temp;
-				PRODUCT_BUNDLE_IDENTIFIER = xx.imgui;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				SYMROOT = ../bin;
 			};
 			name = Debug;
 		};
 		D644A0D9231F022200B75B77 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
-				CONFIGURATION_BUILD_DIR = ../bin;
-				INFOPLIST_FILE = "$(SRCROOT)/../info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				OBJROOT = ../temp;
-				PRODUCT_BUNDLE_IDENTIFIER = xx.imgui;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				SYMROOT = ../bin;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		D6022C6523258C5600B9BFB8 /* Build configuration list for PBXNativeTarget "xxImGui (iOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D6022C6623258C5600B9BFB8 /* Debug */,
+				D6022C6723258C5600B9BFB8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		D644A0C1231F021F00B75B77 /* Build configuration list for PBXProject "xxImGui" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -322,7 +422,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D644A0D7231F022200B75B77 /* Build configuration list for PBXNativeTarget "xxImGui" */ = {
+		D644A0D7231F022200B75B77 /* Build configuration list for PBXNativeTarget "xxImGui (macOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D644A0D8231F022200B75B77 /* Debug */,

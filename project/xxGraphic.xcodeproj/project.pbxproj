@@ -56,9 +56,28 @@
 		D6B338562320209A0096D02F /* xxGraphicCGL.mm in Sources */ = {isa = PBXBuildFile; fileRef = D6B33854232020990096D02F /* xxGraphicCGL.mm */; };
 		D6B338572320209A0096D02F /* xxGraphicCGL.h in Headers */ = {isa = PBXBuildFile; fileRef = D6B33855232020990096D02F /* xxGraphicCGL.h */; };
 		D6B3385D232044100096D02F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6B3385C232044100096D02F /* Cocoa.framework */; };
+		D6DA664B23258F6F00953C5B /* xxGraphicMetal.mm in Sources */ = {isa = PBXBuildFile; fileRef = D6A727F1232318E4009981AD /* xxGraphicMetal.mm */; };
+		D6DA664C23258F6F00953C5B /* xxGraphicGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0A9231EDE9B00B75B77 /* xxGraphicGL.cpp */; };
+		D6DA664D23258F6F00953C5B /* xxGraphicGLES2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0A5231EDE9B00B75B77 /* xxGraphicGLES2.cpp */; };
+		D6DA664E23258F6F00953C5B /* xxGraphic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0A3231EDE9A00B75B77 /* xxGraphic.cpp */; };
+		D6DA664F23258F7A00953C5B /* xxGraphicNULL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0A6231EDE9B00B75B77 /* xxGraphicNULL.cpp */; };
+		D6DA665023258F8E00953C5B /* xxSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0A2231EDE9A00B75B77 /* xxSystem.cpp */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		D6022C4023258BB600B9BFB8 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		D6022C4223258BB600B9BFB8 /* libxxGraphic.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libxxGraphic.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		D644A092231EDDFA00B75B77 /* libxxGraphic.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libxxGraphic.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		D644A0A0231EDE9A00B75B77 /* xxGraphicNULL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxGraphicNULL.h; path = ../graphic/xxGraphicNULL.h; sourceTree = "<group>"; };
 		D644A0A1231EDE9A00B75B77 /* xxGraphicGL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxGraphicGL.h; path = ../graphic/xxGraphicGL.h; sourceTree = "<group>"; };
@@ -130,6 +149,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		D6022C3F23258BB600B9BFB8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D644A090231EDDFA00B75B77 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -166,6 +192,7 @@
 			isa = PBXGroup;
 			children = (
 				D644A092231EDDFA00B75B77 /* libxxGraphic.dylib */,
+				D6022C4223258BB600B9BFB8 /* libxxGraphic.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -341,9 +368,26 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		D644A091231EDDFA00B75B77 /* xxGraphic */ = {
+		D6022C4123258BB600B9BFB8 /* xxGraphic (iOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D644A09D231EDDFA00B75B77 /* Build configuration list for PBXNativeTarget "xxGraphic" */;
+			buildConfigurationList = D6022C4823258BB600B9BFB8 /* Build configuration list for PBXNativeTarget "xxGraphic (iOS)" */;
+			buildPhases = (
+				D6022C3E23258BB600B9BFB8 /* Sources */,
+				D6022C3F23258BB600B9BFB8 /* Frameworks */,
+				D6022C4023258BB600B9BFB8 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "xxGraphic (iOS)";
+			productName = "xxGraphic (iOS)";
+			productReference = D6022C4223258BB600B9BFB8 /* libxxGraphic.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		D644A091231EDDFA00B75B77 /* xxGraphic (macOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D644A09D231EDDFA00B75B77 /* Build configuration list for PBXNativeTarget "xxGraphic (macOS)" */;
 			buildPhases = (
 				D644A08E231EDDFA00B75B77 /* Headers */,
 				D644A08F231EDDFA00B75B77 /* Sources */,
@@ -353,7 +397,7 @@
 			);
 			dependencies = (
 			);
-			name = xxGraphic;
+			name = "xxGraphic (macOS)";
 			productName = xxGraphic;
 			productReference = D644A092231EDDFA00B75B77 /* libxxGraphic.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
@@ -366,6 +410,9 @@
 			attributes = {
 				LastUpgradeCheck = 1030;
 				TargetAttributes = {
+					D6022C4123258BB600B9BFB8 = {
+						CreatedOnToolsVersion = 11.0;
+					};
 					D644A091231EDDFA00B75B77 = {
 						CreatedOnToolsVersion = 10.3;
 					};
@@ -377,18 +424,33 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = D644A089231EDDFA00B75B77;
 			productRefGroup = D644A093231EDDFA00B75B77 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D644A091231EDDFA00B75B77 /* xxGraphic */,
+				D644A091231EDDFA00B75B77 /* xxGraphic (macOS) */,
+				D6022C4123258BB600B9BFB8 /* xxGraphic (iOS) */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		D6022C3E23258BB600B9BFB8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D6DA664E23258F6F00953C5B /* xxGraphic.cpp in Sources */,
+				D6DA664C23258F6F00953C5B /* xxGraphicGL.cpp in Sources */,
+				D6DA664D23258F6F00953C5B /* xxGraphicGLES2.cpp in Sources */,
+				D6DA664B23258F6F00953C5B /* xxGraphicMetal.mm in Sources */,
+				D6DA664F23258F7A00953C5B /* xxGraphicNULL.cpp in Sources */,
+				D6DA665023258F8E00953C5B /* xxSystem.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D644A08F231EDDFA00B75B77 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -406,6 +468,23 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		D6022C4923258BB600B9BFB8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				SDKROOT = iphoneos;
+				SYMROOT = ../lib;
+			};
+			name = Debug;
+		};
+		D6022C4A23258BB600B9BFB8 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				SDKROOT = iphoneos;
+				SYMROOT = ../lib;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		D644A09B231EDDFA00B75B77 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -457,11 +536,14 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				OBJROOT = ../temp;
 				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = xxGraphic;
 				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -510,10 +592,13 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				OBJROOT = ../temp;
+				PRODUCT_NAME = xxGraphic;
 				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -521,7 +606,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Manual;
-				CONFIGURATION_BUILD_DIR = ../bin;
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -529,10 +613,9 @@
 				GCC_ENABLE_CPP_EXCEPTIONS = YES;
 				GCC_ENABLE_CPP_RTTI = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				OBJROOT = ../temp;
-				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
+				SYMROOT = ../bin;
 			};
 			name = Debug;
 		};
@@ -540,7 +623,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Manual;
-				CONFIGURATION_BUILD_DIR = ../bin;
 				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -548,16 +630,24 @@
 				GCC_ENABLE_CPP_EXCEPTIONS = YES;
 				GCC_ENABLE_CPP_RTTI = YES;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				OBJROOT = ../temp;
-				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
+				SYMROOT = ../bin;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		D6022C4823258BB600B9BFB8 /* Build configuration list for PBXNativeTarget "xxGraphic (iOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D6022C4923258BB600B9BFB8 /* Debug */,
+				D6022C4A23258BB600B9BFB8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		D644A08D231EDDFA00B75B77 /* Build configuration list for PBXProject "xxGraphic" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -567,7 +657,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D644A09D231EDDFA00B75B77 /* Build configuration list for PBXNativeTarget "xxGraphic" */ = {
+		D644A09D231EDDFA00B75B77 /* Build configuration list for PBXNativeTarget "xxGraphic (macOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D644A09E231EDDFA00B75B77 /* Debug */,

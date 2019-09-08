@@ -7,7 +7,11 @@
 #define MTLCopyAllDevices MTLCopyAllDevices_unused
 #include <Metal/Metal.h>
 #include <QuartzCore/CAMetalLayer.h>
+#if defined(xxMACOS)
 #include <Cocoa/Cocoa.h>
+#elif defined(xxIOS)
+#include <UIKit/UIKit.h>
+#endif
 #undef MTLCreateSystemDefaultDevice
 #undef MTLCopyAllDevices
 static void*                        g_metalLibrary = nullptr;
@@ -128,7 +132,11 @@ struct MTLFRAMEBUFFER
 //==============================================================================
 struct MTLSWAPCHAIN : public MTLFRAMEBUFFER
 {
+#if defined(xxMACOS)
     NSView*                 view;
+#elif defined(xxIOS)
+    UIView*                 view;
+#endif
     CAMetalLayer*           metalLayer;
     id <CAMetalDrawable>    drawable;
     id <MTLCommandQueue>    commandQueue;
@@ -140,25 +148,36 @@ uint64_t xxCreateSwapchainMetal(uint64_t device, void* view, unsigned int width,
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
     if (mtlDevice == nil)
         return 0;
+#if defined(xxMACOS)
     NSWindow* nsWindow = (__bridge NSWindow*)view;
     if (nsWindow == nil)
         return 0;
     NSView* nsView = [nsWindow contentView];
     if (nsView == nil)
         return 0;
+    float contentsScale = [nsWindow backingScaleFactor];
+#elif defined(xxIOS)
+    UIView* nsView = (__bridge UIView*)view;
+    if (nsView == nil)
+        return 0;
+    float contentsScale = 1.0f;
+#endif
 
     MTLSWAPCHAIN* swapchain = new MTLSWAPCHAIN;
     if (swapchain == nullptr)
         return 0;
 
     CAMetalLayer* layer = [CAMetalLayer layer];
-    layer.contentsScale = [nsWindow backingScaleFactor];
+    layer.contentsScale = contentsScale;
     layer.device = mtlDevice;
     layer.framebufferOnly = YES;
     layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
+    layer.displaySyncEnabled = NO;
 
+#if defined(xxMACOS)
     [nsView setLayer:layer];
     [nsView setWantsLayer:YES];
+#endif
 
     swapchain->view = nsView;
     swapchain->metalLayer = layer;

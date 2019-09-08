@@ -301,7 +301,7 @@ static uint64_t g_renderPass = 0;
     ImGuiExampleView* view = [[ImGuiExampleView alloc] initWithFrame:self.window.frame];
     [self.window setContentView:view];
 
-    g_instance = xxCreateInstanceGLES2();
+    g_instance = xxCreateInstanceMetal();
     g_device = xxCreateDevice(g_instance);
     g_swapchain = xxCreateSwapchain(g_device, (__bridge void*)self.window, 0, 0);
     g_renderPass = xxCreateRenderPass(g_device, 0.45f, 0.55f, 0.60f, 1.0f, 1.0f, 0);

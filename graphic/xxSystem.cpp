@@ -10,7 +10,7 @@ uint64_t xxTSC()
 //------------------------------------------------------------------------------
 uint64_t xxTSCFrequencyImpl()
 {
-#if defined(xxMACOS)
+#if defined(xxMACOS) || defined(xxIOS)
     timeval tmBegin;
     timeval tmDelta;
     timeval tmEnd;
