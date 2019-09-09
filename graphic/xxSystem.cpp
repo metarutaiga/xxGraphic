@@ -14,7 +14,27 @@ uint64_t xxTSC()
 //------------------------------------------------------------------------------
 uint64_t xxTSCFrequencyImpl()
 {
-#if defined(xxMACOS) || defined(xxIOS)
+#if defined(xxWINDOWS)
+    LARGE_INTEGER performanceBegin;
+    LARGE_INTEGER performanceDelta;
+    LARGE_INTEGER performanceEnd;
+    LARGE_INTEGER performanceFrequency;
+
+    QueryPerformanceCounter(&performanceBegin);
+    uint64_t tscBegin = xxTSC();
+    Sleep(100);
+    uint64_t tscEnd = xxTSC();
+    QueryPerformanceCounter(&performanceEnd);
+
+    QueryPerformanceFrequency(&performanceFrequency);
+    if (performanceFrequency.QuadPart == 0)
+        performanceFrequency.QuadPart = 1;
+    performanceDelta.QuadPart = (performanceEnd.QuadPart - performanceBegin.QuadPart) * 1000 / performanceFrequency.QuadPart;
+    if (performanceDelta.QuadPart == 0)
+        performanceDelta.QuadPart = 100;
+
+    uint64_t frequency = (tscEnd - tscBegin) * 1000 / performanceDelta.QuadPart;
+#else
     timeval tmBegin;
     timeval tmDelta;
     timeval tmEnd;
@@ -36,26 +56,6 @@ uint64_t xxTSCFrequencyImpl()
         delta = 100;
 
     uint64_t frequency = (tscEnd - tscBegin) * 1000 / delta;
-#elif defined(xxWINDOWS)
-    LARGE_INTEGER performanceBegin;
-    LARGE_INTEGER performanceDelta;
-    LARGE_INTEGER performanceEnd;
-    LARGE_INTEGER performanceFrequency;
-
-    QueryPerformanceCounter(&performanceBegin);
-    uint64_t tscBegin = xxTSC();
-    Sleep(100);
-    uint64_t tscEnd = xxTSC();
-    QueryPerformanceCounter(&performanceEnd);
-
-    QueryPerformanceFrequency(&performanceFrequency);
-    if (performanceFrequency.QuadPart == 0)
-        performanceFrequency.QuadPart = 1;
-    performanceDelta.QuadPart = (performanceEnd.QuadPart - performanceBegin.QuadPart) * 1000 / performanceFrequency.QuadPart;
-    if (performanceDelta.QuadPart == 0)
-        performanceDelta.QuadPart = 100;
-
-    uint64_t frequency = (tscEnd - tscBegin) * 1000 / performanceDelta.QuadPart;
 #endif
 
     float mhz = frequency / 1000000.0f;
@@ -77,55 +77,66 @@ float xxGetCurrentTime()
 //==============================================================================
 uint64_t xxGetCurrentProcessId()
 {
-#if defined(xxMACOS) || defined(xxIOS)
-    return getpid();
-#elif defined(xxWINDOWS)
 #if defined(_M_IX86)
     return __readfsdword(0x20);
 #elif defined(_M_AMD64)
     return __readgsqword(0x40);
-#endif
+#elif defined(xxWINDOWS)
     return GetCurrentProcessId();
+#else
+    return getpid();
 #endif
 }
 //------------------------------------------------------------------------------
 uint64_t xxGetCurrentThreadId()
 {
-#if defined(xxMACOS) || defined(xxIOS)
-    uint64_t tid;
-    pthread_threadid_np(NULL, &tid);
-    return tid;
-#elif defined(xxWINDOWS)
 #if defined(_M_IX86)
     return __readfsdword(0x24);
 #elif defined(_M_AMD64)
     return __readgsqword(0x48);
-#endif
+#elif defined(xxWINDOWS)
     return GetCurrentThreadId();
+#elif defined(__APPLE__)
+    uint64_t tid;
+    pthread_threadid_np(NULL, &tid);
+    return tid;
+#else
+    return gettid();
 #endif
 }
+//------------------------------------------------------------------------------
+#if defined(xxIOS)
+static pthread_key_t pthread_keycreate()
+{
+    pthread_key_t key;
+    pthread_key_create(&key, nullptr);
+    return key;
+}
+static pthread_key_t keyThreadId = pthread_keycreate();
+#endif
 //------------------------------------------------------------------------------
 int xxGetIncrementThreadId()
 {
 #if defined(xxIOS)
-    return 0;
-#else
-    static int increment;
-#if defined(__GNUC__)
+    int threadId = (int)(size_t)pthread_getspecific(keyThreadId);
+#elif defined(__GNUC__)
     static int __thread threadId;
 #elif defined(_MSC_VER)
     static int __declspec(thread) threadId;
 #endif
     if (xxUnlikely(threadId == 0))
     {
+        static int increment;
 #if defined(__GNUC__)
         threadId = __sync_fetch_and_add(&increment, 1);
 #elif defined(_MSC_VER)
         threadId = _InterlockedIncrement((unsigned int*)&increment);
 #endif
+#if defined(xxIOS)
+        pthread_setspecific(keyThreadId, (void*)(size_t)threadId);
+#endif
     }
     return threadId - 1;
-#endif
 }
 //==============================================================================
 //  Logger
@@ -147,11 +158,11 @@ int xxLog(const char* tag, const char* format, ...)
         snprintf(buffer, tagLength + formatLength, "[%s]", tag);
         vsnprintf(buffer + tagLength, formatLength, format, second);
         buffer[tagLength - 1] = ' ';
-#if defined(xxMACOS) || defined(xxIOS)
-        printf("%s\n", buffer);
-#elif defined(xxWINDOWS)
+#if defined(xxWINDOWS)
         OutputDebugStringA(buffer);
         OutputDebugStringA("\n");
+#else
+        printf("%s\n", buffer);
 #endif
         xxFree(buffer);
     }
