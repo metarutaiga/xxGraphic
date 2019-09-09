@@ -78,6 +78,12 @@ static uint64_t g_renderPass = 0;
     ImGui_ImplXX_NewFrame();
 #if defined(xxMACOS)
     ImGui_ImplOSX_NewFrame(self);
+#elif defined(xxIOS)
+    float contentScaleFactor = [self contentScaleFactor];
+    CGSize size = [self bounds].size;
+    size.width *= contentScaleFactor;
+    size.height *= contentScaleFactor;
+    ImGui::GetIO().DisplaySize = ImVec2(size.width, size.height);
 #endif
     ImGui::NewFrame();
 
@@ -237,16 +243,68 @@ static uint64_t g_renderPass = 0;
     return (YES);
 }
 
+@end
+
+//-----------------------------------------------------------------------------------
+// ImGuiExampleViewController
+//-----------------------------------------------------------------------------------
+
 #if defined(xxMACOS)
-// Forward Mouse/Keyboard events to dear imgui OSX back-end. It returns true when imgui is expecting to use the event.
--(void)keyUp:(NSEvent *)event           { ImGui_ImplOSX_HandleEvent(event, self); }
--(void)keyDown:(NSEvent *)event         { ImGui_ImplOSX_HandleEvent(event, self); }
--(void)flagsChanged:(NSEvent *)event    { ImGui_ImplOSX_HandleEvent(event, self); }
--(void)mouseDown:(NSEvent *)event       { ImGui_ImplOSX_HandleEvent(event, self); }
--(void)mouseUp:(NSEvent *)event         { ImGui_ImplOSX_HandleEvent(event, self); }
--(void)mouseMoved:(NSEvent *)event      { ImGui_ImplOSX_HandleEvent(event, self); }
--(void)mouseDragged:(NSEvent *)event    { ImGui_ImplOSX_HandleEvent(event, self); }
--(void)scrollWheel:(NSEvent *)event     { ImGui_ImplOSX_HandleEvent(event, self); }
+@interface ImGuiExampleViewController : NSViewController
+@end
+#elif defined(xxIOS)
+@interface ImGuiExampleViewController : UIViewController
+@end
+#endif
+
+@implementation ImGuiExampleViewController
+
+#if TARGET_OS_OSX
+
+-(void)loadView                         { self.view = [[NSView alloc] init];            }
+-(void)keyUp:(NSEvent *)event           { ImGui_ImplOSX_HandleEvent(event, self.view);  }
+-(void)keyDown:(NSEvent *)event         { ImGui_ImplOSX_HandleEvent(event, self.view);  }
+-(void)flagsChanged:(NSEvent *)event    { ImGui_ImplOSX_HandleEvent(event, self.view);  }
+-(void)mouseDown:(NSEvent *)event       { ImGui_ImplOSX_HandleEvent(event, self.view);  }
+-(void)mouseUp:(NSEvent *)event         { ImGui_ImplOSX_HandleEvent(event, self.view);  }
+-(void)mouseMoved:(NSEvent *)event      { ImGui_ImplOSX_HandleEvent(event, self.view);  }
+-(void)mouseDragged:(NSEvent *)event    { ImGui_ImplOSX_HandleEvent(event, self.view);  }
+-(void)scrollWheel:(NSEvent *)event     { ImGui_ImplOSX_HandleEvent(event, self.view);  }
+
+#elif TARGET_OS_IOS
+
+// This touch mapping is super cheesy/hacky. We treat any touch on the screen
+// as if it were a depressed left mouse button, and we don't bother handling
+// multitouch correctly at all. This causes the "cursor" to behave very erratically
+// when there are multiple active touches. But for demo purposes, single-touch
+// interaction actually works surprisingly well.
+-(void)updateIOWithTouchEvent:(UIEvent *)event
+{
+    float scale = [self.view contentScaleFactor];
+    UITouch* anyTouch = event.allTouches.anyObject;
+    CGPoint touchLocation = [anyTouch locationInView:self.view];
+    touchLocation.x *= scale;
+    touchLocation.y *= scale;
+    ImGuiIO& io = ImGui::GetIO();
+    io.MousePos = ImVec2(touchLocation.x, touchLocation.y);
+
+    BOOL hasActiveTouch = NO;
+    for (UITouch* touch in event.allTouches)
+    {
+        if (touch.phase != UITouchPhaseEnded && touch.phase != UITouchPhaseCancelled)
+        {
+            hasActiveTouch = YES;
+            break;
+        }
+    }
+    io.MouseDown[0] = hasActiveTouch;
+}
+
+-(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event      { [self updateIOWithTouchEvent:event];  }
+-(void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event      { [self updateIOWithTouchEvent:event];  }
+-(void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event  { [self updateIOWithTouchEvent:event];  }
+-(void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event      { [self updateIOWithTouchEvent:event];  }
+
 #endif
 
 @end
@@ -269,11 +327,6 @@ static uint64_t g_renderPass = 0;
 @synthesize window = _window;
 
 #if defined(xxMACOS)
--(BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication
-{
-    return YES;
-}
-
 -(NSWindow*)window
 {
     if (_window != nil)
@@ -320,6 +373,11 @@ static uint64_t g_renderPass = 0;
     _window = nil;
 }
 
+-(BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication
+{
+    return YES;
+}
+
 -(void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
     [self initialize];
@@ -330,6 +388,16 @@ static uint64_t g_renderPass = 0;
     [self shutdown];
 }
 #elif defined(xxIOS)
+-(UIWindow*)window
+{
+    if (_window != nil)
+        return (_window);
+
+    _window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+
+    return (_window);
+}
+
 -(void)applicationDidFinishLaunching:(UIApplication *)application;
 {
     [self initialize];
@@ -353,15 +421,16 @@ static uint64_t g_renderPass = 0;
     // Menu
     [self setupMenu];
 #elif defined(xxIOS)
-    float scale = 1.0f;
+    float scale = [[UIScreen mainScreen] nativeScale];
 #endif
 
     ImGuiExampleView* view = [[ImGuiExampleView alloc] initWithFrame:self.window.frame];
 #if defined(xxMACOS)
-    [self.window setContentView:view];
+    self.window.contentViewController = [[ImGuiExampleViewController alloc] init];
+    self.window.contentViewController.view = view;
+    [self.window makeKeyAndOrderFront:NSApp];
 #elif defined(xxIOS)
-    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    self.window.rootViewController = [[UIViewController alloc] init];
+    self.window.rootViewController = [[ImGuiExampleViewController alloc] init];
     self.window.rootViewController.view = view;
     [self.window makeKeyAndVisible];
 #endif
@@ -398,9 +467,6 @@ static uint64_t g_renderPass = 0;
     // Setup Platform/Renderer bindings
 #if defined(xxMACOS)
     ImGui_ImplOSX_Init(view);
-#elif defined(xxIOS)
-    CGSize size = [[UIScreen mainScreen] nativeBounds].size;
-    io.DisplaySize = ImVec2(size.width, size.height);
 #endif
     ImGui_ImplXX_Init(g_instance, 0, g_device);
 
@@ -451,6 +517,10 @@ static uint64_t g_renderPass = 0;
     xxDestroySwapchain(g_swapchain);
     xxDestroyDevice(g_device);
     xxDestroyInstance(g_instance);
+    g_renderPass = 0;
+    g_swapchain = 0;
+    g_device = 0;
+    g_instance = 0;
 }
 
 @end

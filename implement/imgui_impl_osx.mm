@@ -346,18 +346,19 @@ struct ImGuiViewportDataOSX
     ~ImGuiViewportDataOSX() { IM_ASSERT(window == nil); }
 };
 
-@interface ImGui_ImplOSX_View : NSView
+@interface ImGui_ImplOSX_ViewController : NSViewController
 @end
 
-@implementation ImGui_ImplOSX_View
--(void)keyUp:(NSEvent *)event           { ImGui_ImplOSX_HandleEvent(event, self); }
--(void)keyDown:(NSEvent *)event         { ImGui_ImplOSX_HandleEvent(event, self); }
--(void)flagsChanged:(NSEvent *)event    { ImGui_ImplOSX_HandleEvent(event, self); }
--(void)mouseDown:(NSEvent *)event       { ImGui_ImplOSX_HandleEvent(event, self); }
--(void)mouseUp:(NSEvent *)event         { ImGui_ImplOSX_HandleEvent(event, self); }
--(void)mouseMoved:(NSEvent *)event      { ImGui_ImplOSX_HandleEvent(event, self); }
--(void)mouseDragged:(NSEvent *)event    { ImGui_ImplOSX_HandleEvent(event, self); }
--(void)scrollWheel:(NSEvent *)event     { ImGui_ImplOSX_HandleEvent(event, self); }
+@implementation ImGui_ImplOSX_ViewController
+-(void)loadView                         { self.view = [[NSView alloc] init];            }
+-(void)keyUp:(NSEvent *)event           { ImGui_ImplOSX_HandleEvent(event, self.view);  }
+-(void)keyDown:(NSEvent *)event         { ImGui_ImplOSX_HandleEvent(event, self.view);  }
+-(void)flagsChanged:(NSEvent *)event    { ImGui_ImplOSX_HandleEvent(event, self.view);  }
+-(void)mouseDown:(NSEvent *)event       { ImGui_ImplOSX_HandleEvent(event, self.view);  }
+-(void)mouseUp:(NSEvent *)event         { ImGui_ImplOSX_HandleEvent(event, self.view);  }
+-(void)mouseMoved:(NSEvent *)event      { ImGui_ImplOSX_HandleEvent(event, self.view);  }
+-(void)mouseDragged:(NSEvent *)event    { ImGui_ImplOSX_HandleEvent(event, self.view);  }
+-(void)scrollWheel:(NSEvent *)event     { ImGui_ImplOSX_HandleEvent(event, self.view);  }
 @end
 
 static void ImGui_ImplOSX_CreateWindow(ImGuiViewport* viewport)
@@ -377,8 +378,9 @@ static void ImGui_ImplOSX_CreateWindow(ImGuiViewport* viewport)
     [window orderFront:NSApp];
     [window setLevel:NSFloatingWindowLevel];
 
-    ImGui_ImplOSX_View* view = [[ImGui_ImplOSX_View alloc] initWithFrame:window.frame];
-    [window setContentView:view];
+    ImGui_ImplOSX_ViewController* viewController = [[ImGui_ImplOSX_ViewController alloc] init];
+    window.contentViewController = viewController;
+    window.contentViewController.view = [[NSView alloc] initWithFrame:rect];
 
     data->window = window;
     data->windowOwned = true;
@@ -397,6 +399,7 @@ static void ImGui_ImplOSX_DestroyWindow(ImGuiViewport* viewport)
         if (window != nil && data->windowOwned)
         {
             [window setContentView:nil];
+            [window setContentViewController:nil];
             [window orderOut:nil];
         }
         data->window = nil;

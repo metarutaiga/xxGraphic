@@ -17,7 +17,8 @@
 #define CGLEnable CGLEnable_unused
 #define CGLSetParameter CGLSetParameter_unused
 #define CGLGetParameter CGLGetParameter_unused
-#include <OpenGL/OpenGL.h>
+#import <Cocoa/Cocoa.h>
+#import <OpenGL/OpenGL.h>
 #undef CGLCreateContext
 #undef CGLDestroyContext
 #undef CGLGetPixelFormat
@@ -69,7 +70,7 @@ uint64_t glCreateContextCGL(uint64_t instance, void* view, void** display)
     NSWindow* nsWindow = (__bridge NSWindow*)view;
     if (nsWindow == nil)
         return 0;
-    NSView* nsView = [nsWindow contentView];
+    NSView* nsView = [[nsWindow contentViewController] view];
     if (nsView == nil)
         return 0;
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070

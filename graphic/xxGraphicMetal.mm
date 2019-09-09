@@ -5,12 +5,12 @@
 
 #define MTLCreateSystemDefaultDevice MTLCreateSystemDefaultDevice_unused
 #define MTLCopyAllDevices MTLCopyAllDevices_unused
-#include <Metal/Metal.h>
-#include <QuartzCore/CAMetalLayer.h>
+#import <Metal/Metal.h>
+#import <QuartzCore/CAMetalLayer.h>
 #if defined(xxMACOS)
-#include <Cocoa/Cocoa.h>
+#import <Cocoa/Cocoa.h>
 #elif defined(xxIOS)
-#include <UIKit/UIKit.h>
+#import <UIKit/UIKit.h>
 #endif
 #undef MTLCreateSystemDefaultDevice
 #undef MTLCopyAllDevices
@@ -94,7 +94,7 @@ void xxDestroyInstanceMetal(uint64_t instance)
 //==============================================================================
 uint64_t xxCreateDeviceMetal(uint64_t instance)
 {
-    NSArray* allDevices = (__bridge_transfer NSArray*)reinterpret_cast<void*>(instance);
+    NSArray* allDevices = (__bridge NSArray*)reinterpret_cast<void*>(instance);
     if (allDevices.count == 0)
         return 0;
 
@@ -161,7 +161,7 @@ uint64_t xxCreateSwapchainMetal(uint64_t device, void* view, unsigned int width,
     NSWindow* nsWindow = (__bridge NSWindow*)view;
     if (nsWindow == nil)
         return 0;
-    NSView* nsView = [nsWindow contentView];
+    NSView* nsView = [[nsWindow contentViewController] view];
     if (nsView == nil)
         return 0;
     float contentsScale = [nsWindow backingScaleFactor];
@@ -169,7 +169,7 @@ uint64_t xxCreateSwapchainMetal(uint64_t device, void* view, unsigned int width,
     UIWindow* nsWindow = (__bridge UIWindow*)view;
     if (nsWindow == nil)
         return 0;
-    UIView* nsView = [nsWindow subviews].firstObject;
+    UIView* nsView = [[nsWindow rootViewController] view];
     if (nsView == nil)
         return 0;
     float contentsScale = [[nsWindow screen] nativeScale];
@@ -372,7 +372,7 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, unsigned int width, u
     if (mtlTexture == nullptr)
         return 0;
 
-#if defined(xxMACOS) || (TARGET_OS_SIMULATOR) || (TARGET_OS_MACCATALYST)
+#if defined(xxMACOS) || defined(xxMACCATALYST)
     MTLPixelFormat pixelFormat = MTLPixelFormatBGRA8Unorm;
     MTLResourceOptions options = MTLResourceStorageModeManaged;
 #elif defined(xxIOS)
@@ -412,7 +412,7 @@ void* xxMapTextureMetal(uint64_t device, uint64_t texture, unsigned int& stride,
 //------------------------------------------------------------------------------
 void xxUnmapTextureMetal(uint64_t device, uint64_t texture, unsigned int level, unsigned int array, unsigned int mipmap)
 {
-#if defined(xxMACOS)
+#if defined(xxMACOS) || defined(xxMACCATALYST)
     MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);
 
     [mtlTexture->buffer didModifyRange:NSMakeRange(0, [mtlTexture->buffer length])];
@@ -485,7 +485,7 @@ uint64_t xxCreateVertexAttributeMetal(uint64_t device, int count, ...)
                 attribute.format = MTLVertexFormatUChar3Normalized;
                 break;
             case 4:
-#if defined(xxMACOS) || defined(TARGET_OS_MACCATALYST)
+#if defined(xxMACOS) || defined(xxMACCATALYST)
                 attribute.format = MTLVertexFormatUChar4Normalized_BGRA;
 #elif defined(xxIOS)
                 attribute.format = MTLVertexFormatUChar4Normalized;

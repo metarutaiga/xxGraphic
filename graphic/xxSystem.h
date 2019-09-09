@@ -24,6 +24,9 @@
 #   elif TARGET_OS_OSX
 #       define xxMACOS 1
 #   endif
+#   if TARGET_OS_MACCATALYST
+#       define xxMACCATALYST 1
+#   endif
 #   include <unistd.h>
 #endif
 
