@@ -147,6 +147,7 @@ static uint64_t g_renderPass = 0;
         ImGui::Text("counter = %d", counter);
 
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::Text("Time : %.3f", xxGetCurrentTime());
         ImGui::End();
     }
 

@@ -1,19 +1,36 @@
 #include "xxSystem.h"
 
+#if defined(__APPLE__)
+#   include <mach/mach_time.h>
+#endif
+
 //==============================================================================
 //  TSC
 //==============================================================================
 uint64_t xxTSC()
 {
-#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
+#if defined(__aarch64__)
+    unsigned long cntpct;
+    asm volatile("mrs %0, cntpct_el0" : "=r" (cntpct));
+    return cntpct;
+#elif defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
     return __rdtsc();
+#elif defined(__APPLE__)
+    return mach_absolute_time();
 #else
-    return 0;
+    timeval tm;
+    gettimeofday(&tm, nullptr);
+    return (tm.tv_sec * 1000000 + tm.tv_usec) * 1000;
 #endif
 }
 //------------------------------------------------------------------------------
 uint64_t xxTSCFrequencyImpl()
 {
+#if defined(__aarch64__)
+    unsigned long cntfrq;
+    asm volatile("mrs %0, cntfrq_el0" : "=r" (cntfrq));
+    return cntfrq;
+#else
 #if defined(xxWINDOWS)
     LARGE_INTEGER performanceBegin;
     LARGE_INTEGER performanceDelta;
@@ -33,7 +50,7 @@ uint64_t xxTSCFrequencyImpl()
     if (performanceDelta.QuadPart == 0)
         performanceDelta.QuadPart = 100;
 
-    uint64_t frequency = (tscEnd - tscBegin) * 1000 / performanceDelta.QuadPart;
+    uint64_t counter = (tscEnd - tscBegin) * 1000 / performanceDelta.QuadPart;
 #else
     timeval tmBegin;
     timeval tmDelta;
@@ -49,19 +66,21 @@ uint64_t xxTSCFrequencyImpl()
     uint64_t tscEnd = xxTSC();
     gettimeofday(&tmEnd, nullptr);
 
+    uint64_t frequency = 1000000;
     tmDelta.tv_sec = tmEnd.tv_sec - tmBegin.tv_sec;
     tmDelta.tv_usec = tmEnd.tv_usec - tmBegin.tv_usec;
-    uint64_t delta = (tmDelta.tv_sec * 1000000000 + tmDelta.tv_usec) * 1000 / 1000000000;
+    uint64_t delta = (tmDelta.tv_sec * 1000000 + tmDelta.tv_usec) * 1000 / frequency;
     if (delta == 0)
         delta = 100;
 
-    uint64_t frequency = (tscEnd - tscBegin) * 1000 / delta;
+    uint64_t counter = (tscEnd - tscBegin) * 1000 / delta;
 #endif
 
-    float mhz = frequency / 1000000.0f;
-    frequency = llroundf(mhz / 100.0f) * 100 * 1000000;
+    float mhz = counter / 1000000.0f;
+    counter = llroundf(mhz / 100.0f) * 100 * 1000000;
 
-    return frequency;
+    return counter;
+#endif
 }
 //------------------------------------------------------------------------------
 uint64_t xxTSCFrequency = xxTSCFrequencyImpl();
