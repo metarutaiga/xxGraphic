@@ -69,8 +69,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D6A727F92324181D009981AD /* Metal.framework in Frameworks */,
 				D644A0F1231F119400B75B77 /* Cocoa.framework in Frameworks */,
+				D6A727F92324181D009981AD /* Metal.framework in Frameworks */,
 				D644A0ED231F116C00B75B77 /* libimgui.dylib in Frameworks */,
 				D644A0EF231F117E00B75B77 /* libxxGraphic.dylib in Frameworks */,
 			);

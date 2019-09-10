@@ -47,11 +47,11 @@ static uint64_t g_renderPass = 0;
 {
     self = [super initWithFrame:frameRect];
 
+    self.animationTimer = [NSTimer scheduledTimerWithTimeInterval:0 target:self selector:@selector(updateAndDraw) userInfo:nil repeats:YES];
+
     [self setWantsLayer:YES];
     [self setPostsFrameChangedNotifications:YES];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reset) name:NSViewFrameDidChangeNotification object:self];
-
-    self.animationTimer = [NSTimer scheduledTimerWithTimeInterval:0 target:self selector:@selector(updateAndDraw) userInfo:nil repeats:YES];
 
     return self;
 }
@@ -328,6 +328,26 @@ static uint64_t g_renderPass = 0;
 @synthesize window = _window;
 
 #if defined(xxMACOS)
+-(void)setupMenu
+{
+    NSMenu* mainMenuBar = [[NSMenu alloc] init];
+    NSMenu* appMenu;
+    NSMenuItem* menuItem;
+
+    appMenu = [[NSMenu alloc] initWithTitle:@"Dear ImGui XX Example"];
+    menuItem = [appMenu addItemWithTitle:@"Quit Dear ImGui XX Example" action:@selector(terminate:) keyEquivalent:@"q"];
+    [menuItem setKeyEquivalentModifierMask:NSEventModifierFlagCommand];
+
+    menuItem = [[NSMenuItem alloc] init];
+    [menuItem setSubmenu:appMenu];
+
+    [mainMenuBar addItem:menuItem];
+
+    appMenu = nil;
+    [NSApp setMainMenu:mainMenuBar];
+}
+
+
 -(NSWindow*)window
 {
     if (_window != nil)
@@ -348,30 +368,6 @@ static uint64_t g_renderPass = 0;
 -(void)windowWillClose:(NSNotification *)notification
 {
     [NSApp terminate:self];
-}
-
--(void)setupMenu
-{
-	NSMenu* mainMenuBar = [[NSMenu alloc] init];
-    NSMenu* appMenu;
-    NSMenuItem* menuItem;
-
-    appMenu = [[NSMenu alloc] initWithTitle:@"Dear ImGui XX Example"];
-    menuItem = [appMenu addItemWithTitle:@"Quit Dear ImGui XX Example" action:@selector(terminate:) keyEquivalent:@"q"];
-    [menuItem setKeyEquivalentModifierMask:NSEventModifierFlagCommand];
-
-    menuItem = [[NSMenuItem alloc] init];
-    [menuItem setSubmenu:appMenu];
-
-    [mainMenuBar addItem:menuItem];
-
-    appMenu = nil;
-    [NSApp setMainMenu:mainMenuBar];
-}
-
--(void)dealloc
-{
-    _window = nil;
 }
 
 -(BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication
@@ -535,8 +531,8 @@ int main(int argc, char* argv[])
         ImGuiExampleAppDelegate* delegate = [[ImGuiExampleAppDelegate alloc] init];
         [[NSApplication sharedApplication] setDelegate:delegate];
         [NSApp run];
+        return NSApplicationMain(argc, (const char**)argv);
     }
-    return NSApplicationMain(argc, (const char**)argv);
 #elif defined(xxIOS)
     @autoreleasepool
     {

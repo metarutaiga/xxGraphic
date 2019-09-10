@@ -124,35 +124,16 @@ uint64_t xxGetCurrentThreadId()
 #endif
 }
 //------------------------------------------------------------------------------
-#if defined(xxIOS)
-static pthread_key_t pthread_keycreate()
-{
-    pthread_key_t key;
-    pthread_key_create(&key, nullptr);
-    return key;
-}
-static pthread_key_t keyThreadId = pthread_keycreate();
-#endif
-//------------------------------------------------------------------------------
 int xxGetIncrementThreadId()
 {
-#if defined(xxIOS)
-    int threadId = (int)(size_t)pthread_getspecific(keyThreadId);
-#elif defined(__GNUC__)
-    static int __thread threadId;
-#elif defined(_MSC_VER)
-    static int __declspec(thread) threadId;
-#endif
+    static int thread_local threadId;
     if (xxUnlikely(threadId == 0))
     {
-        static int increment;
+        static int increment = 0;
 #if defined(__GNUC__)
         threadId = __sync_fetch_and_add(&increment, 1);
 #elif defined(_MSC_VER)
         threadId = _InterlockedIncrement((unsigned int*)&increment);
-#endif
-#if defined(xxIOS)
-        pthread_setspecific(keyThreadId, (void*)(size_t)threadId);
 #endif
     }
     return threadId - 1;

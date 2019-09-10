@@ -175,12 +175,11 @@
 				D6A72795232310E1009981AD /* Direct3D */,
 				D6A727D92323113F009981AD /* Mantle */,
 				D6A727EF232318C7009981AD /* Metal */,
+				D6CA4E292327F563008FFA94 /* NULL */,
 				D6B338582320214C0096D02F /* OpenGL */,
 				D644A0A3231EDE9A00B75B77 /* xxGraphic.cpp */,
 				D644A0A4231EDE9B00B75B77 /* xxGraphic.h */,
 				D6A727E92323117F009981AD /* xxGraphicInternal.h */,
-				D644A0A6231EDE9B00B75B77 /* xxGraphicNULL.cpp */,
-				D644A0A0231EDE9A00B75B77 /* xxGraphicNULL.h */,
 				D644A0A2231EDE9A00B75B77 /* xxSystem.cpp */,
 				D644A0A8231EDE9B00B75B77 /* xxSystem.h */,
 				D644A093231EDDFA00B75B77 /* Products */,
@@ -314,6 +313,15 @@
 				D6B3385A232043FE0096D02F /* OpenGL.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D6CA4E292327F563008FFA94 /* NULL */ = {
+			isa = PBXGroup;
+			children = (
+				D644A0A6231EDE9B00B75B77 /* xxGraphicNULL.cpp */,
+				D644A0A0231EDE9A00B75B77 /* xxGraphicNULL.h */,
+			);
+			name = NULL;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
