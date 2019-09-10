@@ -12,7 +12,7 @@ A simulate Next-Generation Graphic API for ImGui
 | Direct3D 11.0   |         |     |       | ⭕      | 07-22-2008 |
 | Direct3D 11On12 |         |     |       | ⭕      |            |
 | Direct3D 12.0   |         |     |       | ⭕      | 09-30-2014 |
-| OpenGL ES 2.0   | ❌      | ❌  | ⭕   | ⭕      | 03-05-2007 |
+| OpenGL ES 2.0   | ❌      | ⭕  | ⭕   | ⭕      | 03-05-2007 |
 | Mantle          |         |     |       | 🚑      | 09-25-2013 |
 | Metal           |         | ⭕  | ⭕    |         | 06-02-2014 |
 | Vulkan          | ❌      | ❌  | ❌    | ❌     | 12-18-2015 |
