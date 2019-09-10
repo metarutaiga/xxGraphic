@@ -41,6 +41,8 @@
 		D6B338562320209A0096D02F /* xxGraphicCGL.mm in Sources */ = {isa = PBXBuildFile; fileRef = D6B33854232020990096D02F /* xxGraphicCGL.mm */; };
 		D6B338572320209A0096D02F /* xxGraphicCGL.h in Headers */ = {isa = PBXBuildFile; fileRef = D6B33855232020990096D02F /* xxGraphicCGL.h */; };
 		D6B3385D232044100096D02F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6B3385C232044100096D02F /* Cocoa.framework */; };
+		D6B70EC823283AEC000FFCBB /* xxGraphicEAGL.mm in Sources */ = {isa = PBXBuildFile; fileRef = D6D0AA6323283A3D0044D0CF /* xxGraphicEAGL.mm */; };
+		D6D0AA6623283A3E0044D0CF /* xxGraphicEAGL.h in Headers */ = {isa = PBXBuildFile; fileRef = D6D0AA6423283A3E0044D0CF /* xxGraphicEAGL.h */; };
 		D6DA664B23258F6F00953C5B /* xxGraphicMetal.mm in Sources */ = {isa = PBXBuildFile; fileRef = D6A727F1232318E4009981AD /* xxGraphicMetal.mm */; };
 		D6DA664C23258F6F00953C5B /* xxGraphicGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0A9231EDE9B00B75B77 /* xxGraphicGL.cpp */; };
 		D6DA664D23258F6F00953C5B /* xxGraphicGLES2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0A5231EDE9B00B75B77 /* xxGraphicGLES2.cpp */; };
@@ -131,6 +133,8 @@
 		D6B33855232020990096D02F /* xxGraphicCGL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxGraphicCGL.h; path = ../graphic/xxGraphicCGL.h; sourceTree = "<group>"; };
 		D6B3385A232043FE0096D02F /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		D6B3385C232044100096D02F /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		D6D0AA6323283A3D0044D0CF /* xxGraphicEAGL.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = xxGraphicEAGL.mm; path = ../graphic/xxGraphicEAGL.mm; sourceTree = "<group>"; };
+		D6D0AA6423283A3E0044D0CF /* xxGraphicEAGL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxGraphicEAGL.h; path = ../graphic/xxGraphicEAGL.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -277,6 +281,8 @@
 				D644A0B4231EDEA400B75B77 /* gl */,
 				D6B33855232020990096D02F /* xxGraphicCGL.h */,
 				D6B33854232020990096D02F /* xxGraphicCGL.mm */,
+				D6D0AA6423283A3E0044D0CF /* xxGraphicEAGL.h */,
+				D6D0AA6323283A3D0044D0CF /* xxGraphicEAGL.mm */,
 				D644A0A9231EDE9B00B75B77 /* xxGraphicGL.cpp */,
 				D644A0A1231EDE9A00B75B77 /* xxGraphicGL.h */,
 				D644A0A5231EDE9B00B75B77 /* xxGraphicGLES2.cpp */,
@@ -325,6 +331,7 @@
 				D6A727C7232310F4009981AD /* xxGraphicD3D9On12.h in Headers */,
 				D6A727C1232310F4009981AD /* xxGraphicD3D9PS.h in Headers */,
 				D6A727C3232310F4009981AD /* xxGraphicD3D10.h in Headers */,
+				D6D0AA6623283A3E0044D0CF /* xxGraphicEAGL.h in Headers */,
 				D6A727B9232310F4009981AD /* xxGraphicD3D10_1.h in Headers */,
 				D6A727B5232310F4009981AD /* xxGraphicD3D11.h in Headers */,
 				D6A727BE232310F4009981AD /* xxGraphicD3D11On12.h in Headers */,
@@ -423,6 +430,7 @@
 				D6DA664E23258F6F00953C5B /* xxGraphic.cpp in Sources */,
 				D6DA664C23258F6F00953C5B /* xxGraphicGL.cpp in Sources */,
 				D6DA664D23258F6F00953C5B /* xxGraphicGLES2.cpp in Sources */,
+				D6B70EC823283AEC000FFCBB /* xxGraphicEAGL.mm in Sources */,
 				D6DA664B23258F6F00953C5B /* xxGraphicMetal.mm in Sources */,
 				D6DA664F23258F7A00953C5B /* xxGraphicNULL.cpp in Sources */,
 				D6DA665023258F8E00953C5B /* xxSystem.cpp in Sources */,
