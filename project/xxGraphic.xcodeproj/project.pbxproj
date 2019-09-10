@@ -17,10 +17,6 @@
 		D644A0B1231EDE9B00B75B77 /* xxGraphicGLES2.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0A7231EDE9B00B75B77 /* xxGraphicGLES2.h */; };
 		D644A0B2231EDE9B00B75B77 /* xxSystem.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0A8231EDE9B00B75B77 /* xxSystem.h */; };
 		D644A0B3231EDE9B00B75B77 /* xxGraphicGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0A9231EDE9B00B75B77 /* xxGraphicGL.cpp */; };
-		D644A0B9231EDEBB00B75B77 /* gl2.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0B5231EDEBB00B75B77 /* gl2.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		D644A0BA231EDEBB00B75B77 /* gl2platform.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0B6231EDEBB00B75B77 /* gl2platform.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		D644A0BB231EDEBB00B75B77 /* khrplatform.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0B7231EDEBB00B75B77 /* khrplatform.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		D644A0BC231EDEBB00B75B77 /* gl2ext.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0B8231EDEBB00B75B77 /* gl2ext.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D6A727AF232310F4009981AD /* xxGraphicD3DAsm.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A72796232310F2009981AD /* xxGraphicD3DAsm.h */; };
 		D6A727B1232310F4009981AD /* xxGraphicD3D8PS.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A72798232310F3009981AD /* xxGraphicD3D8PS.h */; };
 		D6A727B5232310F4009981AD /* xxGraphicD3D11.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A7279C232310F3009981AD /* xxGraphicD3D11.h */; };
@@ -34,19 +30,8 @@
 		D6A727C3232310F4009981AD /* xxGraphicD3D10.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A727AA232310F4009981AD /* xxGraphicD3D10.h */; };
 		D6A727C5232310F4009981AD /* xxGraphicD3D9.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A727AC232310F4009981AD /* xxGraphicD3D9.h */; };
 		D6A727C7232310F4009981AD /* xxGraphicD3D9On12.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A727AE232310F4009981AD /* xxGraphicD3D9On12.h */; };
-		D6A727D123231137009981AD /* d3d10TokenizedProgramFormat.hpp in Headers */ = {isa = PBXBuildFile; fileRef = D6A727C923231137009981AD /* d3d10TokenizedProgramFormat.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
-		D6A727D223231137009981AD /* d3d9types.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A727CA23231137009981AD /* d3d9types.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		D6A727D323231137009981AD /* d3d8.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A727CB23231137009981AD /* d3d8.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		D6A727D423231137009981AD /* d3d9caps.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A727CC23231137009981AD /* d3d9caps.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		D6A727D523231137009981AD /* d3d9on12.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A727CD23231137009981AD /* d3d9on12.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		D6A727D623231137009981AD /* d3d8caps.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A727CE23231137009981AD /* d3d8caps.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		D6A727D723231137009981AD /* d3d9.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A727CF23231137009981AD /* d3d9.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		D6A727D823231137009981AD /* d3d8types.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A727D023231137009981AD /* d3d8types.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D6A727E023231154009981AD /* xxGraphicMantleAsm.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A727DC23231154009981AD /* xxGraphicMantleAsm.h */; };
 		D6A727E123231154009981AD /* xxGraphicMantle.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A727DD23231154009981AD /* xxGraphicMantle.h */; };
-		D6A727E62323116D009981AD /* mantleWsiWinExt.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A727E32323116D009981AD /* mantleWsiWinExt.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		D6A727E72323116D009981AD /* amdil.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A727E42323116D009981AD /* amdil.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		D6A727E82323116D009981AD /* mantle.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A727E52323116D009981AD /* mantle.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D6A727EC23231180009981AD /* xxGraphicInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A727E92323117F009981AD /* xxGraphicInternal.h */; };
 		D6A727EE23231180009981AD /* xxGraphicWGL.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A727EB23231180009981AD /* xxGraphicWGL.h */; };
 		D6A727F2232318E4009981AD /* xxGraphicMetal.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A727F0232318E4009981AD /* xxGraphicMetal.h */; };
@@ -331,21 +316,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D6A727D323231137009981AD /* d3d8.h in Headers */,
-				D6A727D623231137009981AD /* d3d8caps.h in Headers */,
-				D6A727D823231137009981AD /* d3d8types.h in Headers */,
-				D6A727D723231137009981AD /* d3d9.h in Headers */,
-				D6A727D423231137009981AD /* d3d9caps.h in Headers */,
-				D6A727D523231137009981AD /* d3d9on12.h in Headers */,
-				D6A727D223231137009981AD /* d3d9types.h in Headers */,
-				D6A727D123231137009981AD /* d3d10TokenizedProgramFormat.hpp in Headers */,
-				D644A0B9231EDEBB00B75B77 /* gl2.h in Headers */,
-				D644A0BC231EDEBB00B75B77 /* gl2ext.h in Headers */,
-				D644A0BA231EDEBB00B75B77 /* gl2platform.h in Headers */,
-				D644A0BB231EDEBB00B75B77 /* khrplatform.h in Headers */,
-				D6A727E72323116D009981AD /* amdil.h in Headers */,
-				D6A727E82323116D009981AD /* mantle.h in Headers */,
-				D6A727E62323116D009981AD /* mantleWsiWinExt.h in Headers */,
 				D644A0AE231EDE9B00B75B77 /* xxGraphic.h in Headers */,
 				D6A727BB232310F4009981AD /* xxGraphicD3D.h in Headers */,
 				D6A727C2232310F4009981AD /* xxGraphicD3D8.h in Headers */,

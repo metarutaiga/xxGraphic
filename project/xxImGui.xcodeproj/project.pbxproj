@@ -18,9 +18,8 @@
 		D644A0EF231F117E00B75B77 /* libxxGraphic.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D644A0EE231F117E00B75B77 /* libxxGraphic.dylib */; };
 		D644A0F1231F119400B75B77 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D644A0F0231F119400B75B77 /* Cocoa.framework */; };
 		D644A0F3231F12BE00B75B77 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = D644A0F2231F12BE00B75B77 /* main.mm */; };
-		D66847612325ABA100BBDE9B /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A7280223243208009981AD /* QuartzCore.framework */; };
-		D66847622325C05900BBDE9B /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D668475C2325AB0400BBDE9B /* MetalKit.framework */; };
 		D6A727F92324181D009981AD /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A727F82324181D009981AD /* Metal.framework */; };
+		D6D0AA62232836D10044D0CF /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A7280223243208009981AD /* QuartzCore.framework */; };
 		D6DA66572325A4E800953C5B /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6DA66562325A4E800953C5B /* UIKit.framework */; };
 		D6DA66582325A4F500953C5B /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A727F82324181D009981AD /* Metal.framework */; };
 /* End PBXBuildFile section */
@@ -55,9 +54,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D66847622325C05900BBDE9B /* MetalKit.framework in Frameworks */,
 				D6DA66582325A4F500953C5B /* Metal.framework in Frameworks */,
-				D66847612325ABA100BBDE9B /* QuartzCore.framework in Frameworks */,
+				D6D0AA62232836D10044D0CF /* QuartzCore.framework in Frameworks */,
 				D6DA66572325A4E800953C5B /* UIKit.framework in Frameworks */,
 				D6022C6C23258EB800B9BFB8 /* libfreetype.a in Frameworks */,
 				D6022C6E23258EB800B9BFB8 /* libimgui.a in Frameworks */,
@@ -174,7 +172,7 @@
 		D644A0BE231F021F00B75B77 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1030;
+				LastUpgradeCheck = 1100;
 				TargetAttributes = {
 					D6022C4E23258C4E00B9BFB8 = {
 						CreatedOnToolsVersion = 11.0;

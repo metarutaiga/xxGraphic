@@ -370,11 +370,6 @@ static uint64_t g_renderPass = 0;
     [NSApp terminate:self];
 }
 
--(BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication
-{
-    return YES;
-}
-
 -(void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
     [self initialize];
