@@ -48,7 +48,6 @@
 		D6DA664E23258F6F00953C5B /* xxGraphic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0A3231EDE9A00B75B77 /* xxGraphic.cpp */; };
 		D6DA664F23258F7A00953C5B /* xxGraphicNULL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0A6231EDE9B00B75B77 /* xxGraphicNULL.cpp */; };
 		D6DA665023258F8E00953C5B /* xxSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0A2231EDE9A00B75B77 /* xxSystem.cpp */; };
-		D6F389162329638F00EE9716 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A727F423240EAA009981AD /* Metal.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -150,7 +149,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D6B3385D232044100096D02F /* Cocoa.framework in Frameworks */,
-				D6F389162329638F00EE9716 /* Metal.framework in Frameworks */,
 				D6A727F7232414A7009981AD /* QuartzCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

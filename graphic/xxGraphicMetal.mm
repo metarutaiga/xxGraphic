@@ -3,6 +3,8 @@
 
 #include <dlfcn.h>
 
+#define MTLCreateSystemDefaultDevice MTLCreateSystemDefaultDevice_unused
+#define MTLCopyAllDevices MTLCopyAllDevices_unused
 #import <Metal/Metal.h>
 #import <QuartzCore/CAMetalLayer.h>
 #if defined(xxMACOS)
@@ -10,6 +12,19 @@
 #elif defined(xxIOS)
 #import <UIKit/UIKit.h>
 #endif
+#undef MTLCreateSystemDefaultDevice
+#undef MTLCopyAllDevices
+static void*                        g_metalLibrary = nullptr;
+static id <MTLDevice> __nullable    (*MTLCreateSystemDefaultDevice)();
+static void*                        (*MTLCopyAllDevices)();
+static Class                        classMTLCompileOptions = nil;
+static Class                        classMTLDepthStencilDescriptor = nil;
+static Class                        classMTLRenderPassDescriptor = nil;
+static Class                        classMTLRenderPipelineColorAttachmentDescriptor = nil;
+static Class                        classMTLRenderPipelineDescriptor = nil;
+static Class                        classMTLSamplerDescriptor = nil;
+static Class                        classMTLTextureDescriptor = nil;
+static Class                        classMTLVertexDescriptor = nil;
 #define BASE_VERTEX_CONSTANT        (0)
 #define BASE_FRAGMENT_CONSTANT      (0)
 #define BASE_VERTEX_BUFFER          (1)
@@ -18,10 +33,51 @@
 //==============================================================================
 //  Instance
 //==============================================================================
+static bool MTLSymbolFailed = false;
+static void* MTLSymbol(const char* name, bool* failed)
+{
+    void* ptr = nullptr;
+
+    if (ptr == nullptr && g_metalLibrary)
+        ptr = dlsym(g_metalLibrary, name);
+
+    if (ptr == nullptr)
+        xxLog("Metal", "%s is not found", name);
+
+    MTLSymbolFailed |= (ptr == nullptr);
+    if (failed)
+        (*failed) |= (ptr == nullptr);
+
+    return ptr;
+}
+#define MTLSymbol(var) (void*&)var = MTLSymbol(#var, nullptr);
+//------------------------------------------------------------------------------
 uint64_t xxCreateInstanceMetal()
 {
+    if (g_metalLibrary == nullptr)
+        g_metalLibrary = dlopen("/System/Library/Frameworks/Metal.framework/Metal", RTLD_LAZY);
+    if (g_metalLibrary == nullptr)
+        return 0;
+
+    MTLSymbolFailed = false;
+    MTLSymbol(MTLCreateSystemDefaultDevice);
 #if defined(xxMACOS)
-    NSArray* allDevices = MTLCopyAllDevices();
+    MTLSymbol(MTLCopyAllDevices);
+#endif
+    if (MTLSymbolFailed)
+        return 0;
+
+    classMTLCompileOptions = (__bridge Class)dlsym(g_metalLibrary, "OBJC_CLASS_$_MTLCompileOptions");
+    classMTLDepthStencilDescriptor = (__bridge Class)dlsym(g_metalLibrary, "OBJC_CLASS_$_MTLDepthStencilDescriptor");
+    classMTLRenderPassDescriptor = (__bridge Class)dlsym(g_metalLibrary, "OBJC_CLASS_$_MTLRenderPassDescriptor");
+    classMTLRenderPipelineColorAttachmentDescriptor = (__bridge Class)dlsym(g_metalLibrary, "OBJC_CLASS_$_MTLRenderPipelineColorAttachmentDescriptor");
+    classMTLRenderPipelineDescriptor = (__bridge Class)dlsym(g_metalLibrary, "OBJC_CLASS_$_MTLRenderPipelineDescriptor");
+    classMTLSamplerDescriptor = (__bridge Class)dlsym(g_metalLibrary, "OBJC_CLASS_$_MTLSamplerDescriptor");
+    classMTLTextureDescriptor = (__bridge Class)dlsym(g_metalLibrary, "OBJC_CLASS_$_MTLTextureDescriptor");
+    classMTLVertexDescriptor = (__bridge Class)dlsym(g_metalLibrary, "OBJC_CLASS_$_MTLVertexDescriptor");
+
+#if defined(xxMACOS)
+    NSArray* allDevices = (__bridge NSArray*)MTLCopyAllDevices();
     if (allDevices == nil)
         return 0;
 #elif defined(xxIOS)
@@ -41,6 +97,12 @@ void xxDestroyInstanceMetal(uint64_t instance)
     NSArray* allDevices = (__bridge_transfer NSArray*)reinterpret_cast<void*>(instance);
 
     allDevices = nil;
+
+    if (g_metalLibrary)
+    {
+        dlclose(g_metalLibrary);
+        g_metalLibrary = nullptr;
+    }
 
     xxUnregisterFunction();
 }
@@ -215,7 +277,7 @@ void xxSubmitCommandBufferMetal(uint64_t commandBuffer)
 //==============================================================================
 uint64_t xxCreateRenderPassMetal(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil)
 {
-    MTLRenderPassDescriptor* renderPass = [[MTLRenderPassDescriptor alloc] init];
+    MTLRenderPassDescriptor* renderPass = [[classMTLRenderPassDescriptor alloc] init];
 
     renderPass.colorAttachments[0].clearColor = MTLClearColorMake(r, g, b, a);
     renderPass.colorAttachments[0].loadAction = MTLLoadActionClear;
@@ -340,7 +402,7 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, unsigned int width, u
     stride = (stride + (alignment - 1)) & ~(alignment - 1);
     id <MTLBuffer> buffer = [mtlDevice newBufferWithLength:stride * height options:options];
 
-    MTLTextureDescriptor* desc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:pixelFormat width:width height:height mipmapped:NO];
+    MTLTextureDescriptor* desc = [classMTLTextureDescriptor texture2DDescriptorWithPixelFormat:pixelFormat width:width height:height mipmapped:NO];
     desc.resourceOptions = options;
     id <MTLTexture> texture = [buffer newTextureWithDescriptor:desc offset:0 bytesPerRow:stride];
 
@@ -383,7 +445,7 @@ uint64_t xxCreateSamplerMetal(uint64_t device, bool clampU, bool clampV, bool cl
     if (mtlDevice == nil)
         return 0;
 
-    MTLSamplerDescriptor* desc = [[MTLSamplerDescriptor alloc] init];
+    MTLSamplerDescriptor* desc = [[classMTLSamplerDescriptor alloc] init];
     desc.sAddressMode = clampU ? MTLSamplerAddressModeClampToEdge : MTLSamplerAddressModeRepeat;
     desc.tAddressMode = clampV ? MTLSamplerAddressModeClampToEdge : MTLSamplerAddressModeRepeat;
     desc.rAddressMode = clampW ? MTLSamplerAddressModeClampToEdge : MTLSamplerAddressModeRepeat;
@@ -408,7 +470,7 @@ void xxDestroySamplerMetal(uint64_t sampler)
 //==============================================================================
 uint64_t xxCreateVertexAttributeMetal(uint64_t device, int count, ...)
 {
-    MTLVertexDescriptor* desc = [[MTLVertexDescriptor alloc] init];
+    MTLVertexDescriptor* desc = [[classMTLVertexDescriptor alloc] init];
     int stride = 0;
 
     va_list args;
@@ -536,7 +598,7 @@ uint64_t xxCreateVertexShaderMetal(uint64_t device, const char* shader, uint64_t
     }
 
     NSError* error;
-    MTLCompileOptions* options = [[MTLCompileOptions alloc] init];
+    MTLCompileOptions* options = [[classMTLCompileOptions alloc] init];
     options.fastMathEnabled = YES;
 
     id <MTLLibrary> library = [mtlDevice newLibraryWithSource:[NSString stringWithUTF8String:shader] options:options error:&error];
@@ -563,7 +625,7 @@ uint64_t xxCreateFragmentShaderMetal(uint64_t device, const char* shader)
     }
 
     NSError* error;
-    MTLCompileOptions* options = [[MTLCompileOptions alloc] init];
+    MTLCompileOptions* options = [[classMTLCompileOptions alloc] init];
     options.fastMathEnabled = YES;
 
     id <MTLLibrary> library = [mtlDevice newLibraryWithSource:[NSString stringWithUTF8String:shader] options:options error:&error];
@@ -595,7 +657,7 @@ struct MTLPIPELINE
 //------------------------------------------------------------------------------
 uint64_t xxCreateBlendStateMetal(uint64_t device, bool blending)
 {
-    MTLRenderPipelineColorAttachmentDescriptor* desc = [[MTLRenderPipelineColorAttachmentDescriptor alloc] init];
+    MTLRenderPipelineColorAttachmentDescriptor* desc = [[classMTLRenderPipelineColorAttachmentDescriptor alloc] init];
     desc.pixelFormat = MTLPixelFormatBGRA8Unorm;
     desc.blendingEnabled = blending;
     desc.sourceRGBBlendFactor = MTLBlendFactorSourceAlpha;
@@ -611,7 +673,7 @@ uint64_t xxCreateDepthStencilStateMetal(uint64_t device, bool depthTest, bool de
     if (mtlDevice == nil)
         return 0;
 
-    MTLDepthStencilDescriptor* desc = [[MTLDepthStencilDescriptor alloc] init];
+    MTLDepthStencilDescriptor* desc = [[classMTLDepthStencilDescriptor alloc] init];
     desc.depthCompareFunction = depthTest ? MTLCompareFunctionLessEqual : MTLCompareFunctionAlways;
     desc.depthWriteEnabled = depthWrite;
 
@@ -640,7 +702,7 @@ uint64_t xxCreatePipelineMetal(uint64_t device, uint64_t blendState, uint64_t de
     if (mtlPipeline == nullptr)
         return 0;
 
-    MTLRenderPipelineDescriptor* desc = [[MTLRenderPipelineDescriptor alloc] init];
+    MTLRenderPipelineDescriptor* desc = [[classMTLRenderPipelineDescriptor alloc] init];
     desc.vertexFunction = mtlVertexShader;
     desc.fragmentFunction = mtlFragmentShader;
     desc.vertexDescriptor = mtlVertexAttribute;

@@ -7,6 +7,7 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/CAEAGLLayer.h>
 static void*                            g_glLibrary = nullptr;
+static Class                            classEAGLContext = nil;
 static PFNGLGENVERTEXARRAYSOESPROC      glGenVertexArrays;
 static PFNGLDELETEVERTEXARRAYSOESPROC   glDeleteVertexArrays;
 static PFNGLBINDVERTEXARRAYOESPROC      glBindVertexArray;
@@ -54,10 +55,10 @@ uint64_t glCreateContextEAGL(uint64_t instance, void* view, void** display)
         return 0;
     CAEAGLLayer* layer = (CAEAGLLayer*)[nsView layer];
 
-    EAGLContext* eaglContext = [[EAGLContext alloc] initWithAPI:[rootContext API] sharegroup:[rootContext sharegroup]];
+    EAGLContext* eaglContext = [[classEAGLContext alloc] initWithAPI:[rootContext API] sharegroup:[rootContext sharegroup]];
     if (eaglContext == nil)
         return 0;
-    [EAGLContext setCurrentContext:eaglContext];
+    [classEAGLContext setCurrentContext:eaglContext];
 
     if (display)
     {
@@ -116,7 +117,7 @@ void glDestroyContextEAGL(uint64_t context, void* view, void* display)
         return;
     EAGLDISPLAY* eaglDisplay = reinterpret_cast<EAGLDISPLAY*>(display);
 
-    [EAGLContext setCurrentContext:eaglContext];
+    [classEAGLContext setCurrentContext:eaglContext];
 
     if (eaglDisplay)
     {
@@ -130,7 +131,7 @@ void glDestroyContextEAGL(uint64_t context, void* view, void* display)
         delete eaglDisplay;
     }
 
-    [EAGLContext setCurrentContext:nil];
+    [classEAGLContext setCurrentContext:nil];
 }
 //------------------------------------------------------------------------------
 void glMakeCurrentContextEAGL(uint64_t context, void* display)
@@ -138,7 +139,7 @@ void glMakeCurrentContextEAGL(uint64_t context, void* display)
     EAGLContext* eaglContext = (__bridge EAGLContext*)reinterpret_cast<void*>(context);
     EAGLDISPLAY* eaglDisplay = reinterpret_cast<EAGLDISPLAY*>(display);
 
-    [EAGLContext setCurrentContext:eaglContext];
+    [classEAGLContext setCurrentContext:eaglContext];
 
     glBindFramebuffer(GL_FRAMEBUFFER, eaglDisplay->framebuffer);
 
@@ -175,10 +176,15 @@ uint64_t xxGraphicCreateEAGL()
     if (g_glLibrary == nullptr)
         return 0;
 
-    EAGLContext* rootContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
+    if (classEAGLContext == nil)
+        classEAGLContext = (__bridge Class)dlsym(g_glLibrary, "OBJC_CLASS_$_EAGLContext");
+    if (classEAGLContext == nil)
+        return 0;
+
+    EAGLContext* rootContext = [[classEAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
     if (rootContext == nil)
     {
-        rootContext = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+        rootContext = [[classEAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
     }
 
     if (xxGraphicCreateGL(eaglSymbol) == false)
@@ -199,6 +205,8 @@ uint64_t xxGraphicCreateEAGL()
 void xxGraphicDestroyEAGL(uint64_t context)
 {
     glDestroyContextEAGL(context, 0, nullptr);
+
+    classEAGLContext = nullptr;
 
     if (g_glLibrary)
     {
