@@ -24,6 +24,16 @@
 		D6DA66582325A4F500953C5B /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A727F82324181D009981AD /* Metal.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		D6F389182329653100EE9716 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6F389172329653100EE9716 /* OpenGLES.framework */; platformFilter = ios; settings = {ATTRIBUTES = (Weak, ); }; };
 		D6F3891A2329674000EE9716 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6F389192329674000EE9716 /* OpenGL.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		D6F38923232978BA00EE9716 /* Default-Landscape-1366h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D6F3891C232978B900EE9716 /* Default-Landscape-1366h@2x.png */; };
+		D6F38924232978BA00EE9716 /* Default-812h@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = D6F3891D232978B900EE9716 /* Default-812h@3x.png */; };
+		D6F38925232978BA00EE9716 /* Default-667h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D6F3891E232978B900EE9716 /* Default-667h@2x.png */; };
+		D6F38926232978BA00EE9716 /* Default-Landscape-1112h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D6F3891F232978B900EE9716 /* Default-Landscape-1112h@2x.png */; };
+		D6F38927232978BA00EE9716 /* Default-Landscape-736h@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = D6F38920232978BA00EE9716 /* Default-Landscape-736h@3x.png */; };
+		D6F38928232978BA00EE9716 /* Default-Landscape@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D6F38921232978BA00EE9716 /* Default-Landscape@2x.png */; };
+		D6F38929232978BA00EE9716 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D6F38922232978BA00EE9716 /* Default-568h@2x.png */; };
+		D6F3892B232979A500EE9716 /* Default-Landscape-1194h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D6F3892A232979A500EE9716 /* Default-Landscape-1194h@2x.png */; };
+		D6F3892D23297A4900EE9716 /* Default-896h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D6F3892C23297A4900EE9716 /* Default-896h@2x.png */; };
+		D6F3892F23297C7800EE9716 /* Default-Landscape-1080h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D6F3892E23297C7800EE9716 /* Default-Landscape-1080h@2x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,6 +61,16 @@
 		D6DA66562325A4E800953C5B /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.0.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
 		D6F389172329653100EE9716 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.0.sdk/System/Library/Frameworks/OpenGLES.framework; sourceTree = DEVELOPER_DIR; };
 		D6F389192329674000EE9716 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		D6F3891C232978B900EE9716 /* Default-Landscape-1366h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Landscape-1366h@2x.png"; sourceTree = "<group>"; };
+		D6F3891D232978B900EE9716 /* Default-812h@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-812h@3x.png"; sourceTree = "<group>"; };
+		D6F3891E232978B900EE9716 /* Default-667h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-667h@2x.png"; sourceTree = "<group>"; };
+		D6F3891F232978B900EE9716 /* Default-Landscape-1112h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Landscape-1112h@2x.png"; sourceTree = "<group>"; };
+		D6F38920232978BA00EE9716 /* Default-Landscape-736h@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Landscape-736h@3x.png"; sourceTree = "<group>"; };
+		D6F38921232978BA00EE9716 /* Default-Landscape@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Landscape@2x.png"; sourceTree = "<group>"; };
+		D6F38922232978BA00EE9716 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		D6F3892A232979A500EE9716 /* Default-Landscape-1194h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Landscape-1194h@2x.png"; sourceTree = "<group>"; };
+		D6F3892C23297A4900EE9716 /* Default-896h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-896h@2x.png"; sourceTree = "<group>"; };
+		D6F3892E23297C7800EE9716 /* Default-Landscape-1080h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Landscape-1080h@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,6 +106,7 @@
 		D644A0BD231F021F00B75B77 = {
 			isa = PBXGroup;
 			children = (
+				D6F3891B232978A000EE9716 /* project */,
 				D6B3385E23205C810096D02F /* info.plist */,
 				D644A0F2231F12BE00B75B77 /* main.mm */,
 				D644A0DA231F107D00B75B77 /* implement */,
@@ -135,6 +156,23 @@
 				D644A0EC231F116C00B75B77 /* libimgui.dylib */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D6F3891B232978A000EE9716 /* project */ = {
+			isa = PBXGroup;
+			children = (
+				D6F38922232978BA00EE9716 /* Default-568h@2x.png */,
+				D6F3891E232978B900EE9716 /* Default-667h@2x.png */,
+				D6F38920232978BA00EE9716 /* Default-Landscape-736h@3x.png */,
+				D6F3891D232978B900EE9716 /* Default-812h@3x.png */,
+				D6F3892C23297A4900EE9716 /* Default-896h@2x.png */,
+				D6F38921232978BA00EE9716 /* Default-Landscape@2x.png */,
+				D6F3892E23297C7800EE9716 /* Default-Landscape-1080h@2x.png */,
+				D6F3891F232978B900EE9716 /* Default-Landscape-1112h@2x.png */,
+				D6F3892A232979A500EE9716 /* Default-Landscape-1194h@2x.png */,
+				D6F3891C232978B900EE9716 /* Default-Landscape-1366h@2x.png */,
+			);
+			name = project;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -214,6 +252,16 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6F38929232978BA00EE9716 /* Default-568h@2x.png in Resources */,
+				D6F38925232978BA00EE9716 /* Default-667h@2x.png in Resources */,
+				D6F38927232978BA00EE9716 /* Default-Landscape-736h@3x.png in Resources */,
+				D6F38924232978BA00EE9716 /* Default-812h@3x.png in Resources */,
+				D6F3892F23297C7800EE9716 /* Default-Landscape-1080h@2x.png in Resources */,
+				D6F3892D23297A4900EE9716 /* Default-896h@2x.png in Resources */,
+				D6F38928232978BA00EE9716 /* Default-Landscape@2x.png in Resources */,
+				D6F38926232978BA00EE9716 /* Default-Landscape-1112h@2x.png in Resources */,
+				D6F3892B232979A500EE9716 /* Default-Landscape-1194h@2x.png in Resources */,
+				D6F38923232978BA00EE9716 /* Default-Landscape-1366h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

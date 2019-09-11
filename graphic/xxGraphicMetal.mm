@@ -15,8 +15,8 @@
 #undef MTLCreateSystemDefaultDevice
 #undef MTLCopyAllDevices
 static void*                        g_metalLibrary = nullptr;
-static id <MTLDevice> __nullable    (*MTLCreateSystemDefaultDevice)();
-static void*                        (*MTLCopyAllDevices)();
+static id <MTLDevice> __nullable    (*MTLCreateSystemDefaultDevice)() = nullptr;
+static void*                        (*MTLCopyAllDevices)() = nullptr;
 static Class                        classMTLCompileOptions = nil;
 static Class                        classMTLDepthStencilDescriptor = nil;
 static Class                        classMTLRenderPassDescriptor = nil;
@@ -63,6 +63,8 @@ uint64_t xxCreateInstanceMetal()
     MTLSymbol(MTLCreateSystemDefaultDevice);
 #if defined(xxMACOS)
     MTLSymbol(MTLCopyAllDevices);
+#elif defined(xxIOS)
+    MTLCopyAllDevices = nullptr;
 #endif
     if (MTLSymbolFailed)
         return 0;
@@ -397,7 +399,7 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, unsigned int width, u
     MTLResourceOptions options = MTLResourceStorageModeShared;
 #endif
 
-    int alignment = (int)[mtlDevice minimumLinearTextureAlignmentForPixelFormat:pixelFormat];
+    int alignment = 256/*[mtlDevice minimumLinearTextureAlignmentForPixelFormat:pixelFormat]*/;
     int stride = width * sizeof(int);
     stride = (stride + (alignment - 1)) & ~(alignment - 1);
     id <MTLBuffer> buffer = [mtlDevice newBufferWithLength:stride * height options:options];
