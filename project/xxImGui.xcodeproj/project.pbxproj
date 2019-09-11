@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -18,10 +18,12 @@
 		D644A0EF231F117E00B75B77 /* libxxGraphic.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D644A0EE231F117E00B75B77 /* libxxGraphic.dylib */; };
 		D644A0F1231F119400B75B77 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D644A0F0231F119400B75B77 /* Cocoa.framework */; };
 		D644A0F3231F12BE00B75B77 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = D644A0F2231F12BE00B75B77 /* main.mm */; };
-		D6A727F92324181D009981AD /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A727F82324181D009981AD /* Metal.framework */; };
+		D6A727F92324181D009981AD /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A727F82324181D009981AD /* Metal.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		D6D0AA62232836D10044D0CF /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A7280223243208009981AD /* QuartzCore.framework */; };
 		D6DA66572325A4E800953C5B /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6DA66562325A4E800953C5B /* UIKit.framework */; };
-		D6DA66582325A4F500953C5B /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A727F82324181D009981AD /* Metal.framework */; };
+		D6DA66582325A4F500953C5B /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6A727F82324181D009981AD /* Metal.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		D6F389182329653100EE9716 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6F389172329653100EE9716 /* OpenGLES.framework */; platformFilter = ios; settings = {ATTRIBUTES = (Weak, ); }; };
+		D6F3891A2329674000EE9716 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6F389192329674000EE9716 /* OpenGL.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +49,8 @@
 		D6DA66522325A4D300953C5B /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		D6DA66542325A4DD00953C5B /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		D6DA66562325A4E800953C5B /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.0.sdk/System/Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
+		D6F389172329653100EE9716 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.0.sdk/System/Library/Frameworks/OpenGLES.framework; sourceTree = DEVELOPER_DIR; };
+		D6F389192329674000EE9716 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,6 +59,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D6DA66582325A4F500953C5B /* Metal.framework in Frameworks */,
+				D6F389182329653100EE9716 /* OpenGLES.framework in Frameworks */,
 				D6D0AA62232836D10044D0CF /* QuartzCore.framework in Frameworks */,
 				D6DA66572325A4E800953C5B /* UIKit.framework in Frameworks */,
 				D6022C6C23258EB800B9BFB8 /* libfreetype.a in Frameworks */,
@@ -69,6 +74,7 @@
 			files = (
 				D644A0F1231F119400B75B77 /* Cocoa.framework in Frameworks */,
 				D6A727F92324181D009981AD /* Metal.framework in Frameworks */,
+				D6F3891A2329674000EE9716 /* OpenGL.framework in Frameworks */,
 				D644A0ED231F116C00B75B77 /* libimgui.dylib in Frameworks */,
 				D644A0EF231F117E00B75B77 /* libxxGraphic.dylib in Frameworks */,
 			);
@@ -111,6 +117,8 @@
 		D644A0EB231F116C00B75B77 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D6F389192329674000EE9716 /* OpenGL.framework */,
+				D6F389172329653100EE9716 /* OpenGLES.framework */,
 				D668475F2325AB7B00BBDE9B /* CoreGraphics.framework */,
 				D668475C2325AB0400BBDE9B /* MetalKit.framework */,
 				D6DA66562325A4E800953C5B /* UIKit.framework */,

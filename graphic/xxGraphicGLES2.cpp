@@ -2,7 +2,7 @@
 #include "xxGraphicGL.h"
 #include "xxGraphicGLES2.h"
 
-#if defined(xxIOS)
+#if defined(xxIOS) && !defined(xxMACCATALYST)
 #   include "xxGraphicEAGL.h"
 #endif
 
@@ -24,7 +24,7 @@ uint64_t xxCreateInstanceGLES2()
 {
     uint64_t instance = 0;
 
-#if defined(xxIOS)
+#if defined(xxIOS) && !defined(xxMACCATALYST)
     instance = xxGraphicCreateEAGL();
 #endif
 
@@ -46,7 +46,7 @@ uint64_t xxCreateInstanceGLES2()
 //------------------------------------------------------------------------------
 void xxDestroyInstanceGLES2(uint64_t instance)
 {
-#if defined(xxIOS)
+#if defined(xxIOS) && !defined(xxMACCATALYST)
     xxGraphicDestroyEAGL(instance);
 #endif
 

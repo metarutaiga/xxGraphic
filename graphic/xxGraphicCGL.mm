@@ -63,6 +63,11 @@ static void* cglSymbol(const char* name, bool* failed)
 }
 #define cglSymbol(var) (void*&)var = cglSymbol(#var, nullptr);
 //------------------------------------------------------------------------------
+struct CGLDISPLAY
+{
+    GLuint  vao;
+};
+//------------------------------------------------------------------------------
 uint64_t glCreateContextCGL(uint64_t instance, void* view, void** display)
 {
     if (g_rootView == nil)
@@ -87,20 +92,25 @@ uint64_t glCreateContextCGL(uint64_t instance, void* view, void** display)
     int swapInterval = 0;
     [nsContext setValues:&swapInterval forParameter:NSOpenGLContextParameterSwapInterval];
 
-    cglSymbol(glGetIntegerv);
-    cglSymbol(glGenVertexArrays);
-    cglSymbol(glDeleteVertexArrays);
-    cglSymbol(glBindVertexArray);
-    if (glGenVertexArrays && glBindVertexArray)
-    {
-        GLuint vao = 0;
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
-    }
-
     if (display)
     {
-        (*display) = (__bridge void*)nsView;
+        CGLDISPLAY* cglDisplay = new CGLDISPLAY;
+        if (cglDisplay == nullptr)
+            return 0;
+
+        cglDisplay->vao = 0;
+        (*display) = cglDisplay;
+
+        cglSymbol(glGenVertexArrays);
+        cglSymbol(glDeleteVertexArrays);
+        cglSymbol(glBindVertexArray);
+        if (glGenVertexArrays && glBindVertexArray)
+        {
+            GLuint vao = 0;
+            glGenVertexArrays(1, &vao);
+            glBindVertexArray(vao);
+            cglDisplay->vao = vao;
+        }
     }
 
     return reinterpret_cast<uint64_t>((__bridge_retained void*)nsContext);
@@ -111,14 +121,18 @@ void glDestroyContextCGL(uint64_t context, void* view, void* display)
     NSOpenGLContext* nsContext = (__bridge_transfer NSOpenGLContext*)reinterpret_cast<void*>(context);
     if (nsContext == nil)
         return;
+    CGLDISPLAY* cglDisplay = reinterpret_cast<CGLDISPLAY*>(display);
+
     [nsContext makeCurrentContext];
     [nsContext clearDrawable];
 
-    if (glGetIntegerv && glDeleteVertexArrays)
+    if (cglDisplay)
     {
-        GLuint vao = 0;
-        glGetIntegerv(GL_VERTEX_ARRAY_BINDING_OES, (GLint*)&vao);
-        glDeleteVertexArrays(1, &vao);
+        if (glDeleteVertexArrays)
+        {
+            glDeleteVertexArrays(1, &cglDisplay->vao);
+        }
+        delete cglDisplay;
     }
 
     [NSOpenGLContext clearCurrentContext];
@@ -127,8 +141,14 @@ void glDestroyContextCGL(uint64_t context, void* view, void* display)
 void glMakeCurrentContextCGL(uint64_t context, void* display)
 {
     NSOpenGLContext* __unsafe_unretained nsContext = (__bridge NSOpenGLContext*)reinterpret_cast<void*>(context);
+    CGLDISPLAY* cglDisplay = reinterpret_cast<CGLDISPLAY*>(display);
 
     [nsContext makeCurrentContext];
+
+    if (glBindVertexArray)
+    {
+        glBindVertexArray(cglDisplay->vao);
+    }
 }
 //------------------------------------------------------------------------------
 void glPresentContextCGL(uint64_t context, void* display)

@@ -3,8 +3,6 @@
 
 #include <dlfcn.h>
 
-#define MTLCreateSystemDefaultDevice MTLCreateSystemDefaultDevice_unused
-#define MTLCopyAllDevices MTLCopyAllDevices_unused
 #import <Metal/Metal.h>
 #import <QuartzCore/CAMetalLayer.h>
 #if defined(xxMACOS)
@@ -12,11 +10,6 @@
 #elif defined(xxIOS)
 #import <UIKit/UIKit.h>
 #endif
-#undef MTLCreateSystemDefaultDevice
-#undef MTLCopyAllDevices
-static void*                        g_metalLibrary = nullptr;
-static id <MTLDevice> __nullable    (*MTLCreateSystemDefaultDevice)();
-static void*                        (*MTLCopyAllDevices)();
 #define BASE_VERTEX_CONSTANT        (0)
 #define BASE_FRAGMENT_CONSTANT      (0)
 #define BASE_VERTEX_BUFFER          (1)
@@ -25,42 +18,10 @@ static void*                        (*MTLCopyAllDevices)();
 //==============================================================================
 //  Instance
 //==============================================================================
-static bool MTLSymbolFailed = false;
-static void* MTLSymbol(const char* name, bool* failed)
-{
-    void* ptr = nullptr;
-
-    if (ptr == nullptr && g_metalLibrary)
-        ptr = dlsym(g_metalLibrary, name);
-
-    if (ptr == nullptr)
-        xxLog("Metal", "%s is not found", name);
-
-    MTLSymbolFailed |= (ptr == nullptr);
-    if (failed)
-        (*failed) |= (ptr == nullptr);
-
-    return ptr;
-}
-#define MTLSymbol(var) (void*&)var = MTLSymbol(#var, nullptr);
-//------------------------------------------------------------------------------
 uint64_t xxCreateInstanceMetal()
 {
-    if (g_metalLibrary == nullptr)
-        g_metalLibrary = dlopen("/System/Library/Frameworks/Metal.framework/Metal", RTLD_LAZY);
-    if (g_metalLibrary == nullptr)
-        return 0;
-
-    MTLSymbolFailed = false;
-    MTLSymbol(MTLCreateSystemDefaultDevice);
 #if defined(xxMACOS)
-    MTLSymbol(MTLCopyAllDevices);
-#endif
-    if (MTLSymbolFailed)
-        return 0;
-
-#if defined(xxMACOS)
-    NSArray* allDevices = (__bridge NSArray*)MTLCopyAllDevices();
+    NSArray* allDevices = MTLCopyAllDevices();
     if (allDevices == nil)
         return 0;
 #elif defined(xxIOS)
@@ -80,12 +41,6 @@ void xxDestroyInstanceMetal(uint64_t instance)
     NSArray* allDevices = (__bridge_transfer NSArray*)reinterpret_cast<void*>(instance);
 
     allDevices = nil;
-
-    if (g_metalLibrary)
-    {
-        dlclose(g_metalLibrary);
-        g_metalLibrary = nullptr;
-    }
 
     xxUnregisterFunction();
 }
@@ -380,8 +335,9 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, unsigned int width, u
     MTLResourceOptions options = MTLResourceStorageModeShared;
 #endif
 
+    int alignment = (int)[mtlDevice minimumLinearTextureAlignmentForPixelFormat:pixelFormat];
     int stride = width * sizeof(int);
-    stride = (stride + 63) & ~63;
+    stride = (stride + (alignment - 1)) & ~(alignment - 1);
     id <MTLBuffer> buffer = [mtlDevice newBufferWithLength:stride * height options:options];
 
     MTLTextureDescriptor* desc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:pixelFormat width:width height:height mipmapped:NO];
