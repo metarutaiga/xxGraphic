@@ -277,15 +277,12 @@ void xxSubmitCommandBufferMetal(uint64_t commandBuffer)
 //==============================================================================
 //  Render Pass
 //==============================================================================
-uint64_t xxCreateRenderPassMetal(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil)
+uint64_t xxCreateRenderPassMetal(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeClear, bool storeDepth, bool storeStencil)
 {
     MTLRenderPassDescriptor* renderPass = [[classMTLRenderPassDescriptor alloc] init];
 
-    renderPass.colorAttachments[0].clearColor = MTLClearColorMake(r, g, b, a);
     renderPass.colorAttachments[0].loadAction = MTLLoadActionClear;
-    renderPass.depthAttachment.clearDepth = depth;
     renderPass.depthAttachment.loadAction = MTLLoadActionClear;
-    renderPass.stencilAttachment.clearStencil = stencil;
     renderPass.stencilAttachment.loadAction = MTLLoadActionClear;
 
     return reinterpret_cast<uint64_t>((__bridge_retained void*)renderPass);
@@ -298,13 +295,17 @@ void xxDestroyRenderPassMetal(uint64_t renderPass)
     mtlRenderPass = nil;
 }
 //------------------------------------------------------------------------------
-uint64_t xxBeginRenderPassMetal(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+uint64_t xxBeginRenderPassMetal(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, float r, float g, float b, float a, float depth, unsigned char stencil)
 {
     id <MTLCommandBuffer> __unsafe_unretained mtlCommandBuffer = (__bridge id)reinterpret_cast<void*>(commandBuffer);
     MTLFRAMEBUFFER* mtlFramebuffer = reinterpret_cast<MTLFRAMEBUFFER*>(framebuffer);
     MTLRenderPassDescriptor* __unsafe_unretained mtlRenderPass = (__bridge MTLRenderPassDescriptor*)reinterpret_cast<void*>(renderPass);
 
     mtlRenderPass.colorAttachments[0].texture = mtlFramebuffer->texture;
+
+    mtlRenderPass.colorAttachments[0].clearColor = MTLClearColorMake(r, g, b, a);
+    mtlRenderPass.depthAttachment.clearDepth = depth;
+    mtlRenderPass.stencilAttachment.clearStencil = stencil;
 
     id <MTLRenderCommandEncoder> commandEncoder = [mtlCommandBuffer renderCommandEncoderWithDescriptor:mtlRenderPass];
 

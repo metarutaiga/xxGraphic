@@ -35,10 +35,10 @@ xxAPI void          xxSubmitCommandBufferVulkan(uint64_t commandBuffer);
 //==============================================================================
 //  Render Pass
 //==============================================================================
-xxAPI uint64_t      xxCreateRenderPassVulkan(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil);
+xxAPI uint64_t      xxCreateRenderPassVulkan(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeClear, bool storeDepth, bool storeStencil);
 xxAPI void          xxDestroyRenderPassVulkan(uint64_t renderPass);
-xxAPI bool          xxBeginRenderPassVulkan(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
-xxAPI void          xxEndRenderPassVulkan(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass);
+xxAPI uint64_t      xxBeginRenderPassVulkan(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, float r, float g, float b, float a, float depth, unsigned char stencil);
+xxAPI void          xxEndRenderPassVulkan(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass);
 //==============================================================================
 //  Buffer
 //==============================================================================
@@ -85,19 +85,19 @@ xxAPI void          xxDestroyPipelineVulkan(uint64_t pipeline);
 //==============================================================================
 //  Command
 //==============================================================================
-xxAPI void          xxSetViewportVulkan(uint64_t commandBuffer, int x, int y, int width, int height, float minZ, float maxZ);
-xxAPI void          xxSetScissorVulkan(uint64_t commandBuffer, int x, int y, int width, int height);
-xxAPI void          xxSetPipelineVulkan(uint64_t commandBuffer, uint64_t pipeline);
-xxAPI void          xxSetIndexBufferVulkan(uint64_t commandBuffer, uint64_t buffer);
-xxAPI void          xxSetVertexBuffersVulkan(uint64_t commandBuffer, int count, const uint64_t* buffers, uint64_t vertexAttribute);
-xxAPI void          xxSetVertexTexturesVulkan(uint64_t commandBuffer, int count, const uint64_t* textures);
-xxAPI void          xxSetFragmentTexturesVulkan(uint64_t commandBuffer, int count, const uint64_t* textures);
-xxAPI void          xxSetVertexSamplersVulkan(uint64_t commandBuffer, int count, const uint64_t* samplers);
-xxAPI void          xxSetFragmentSamplersVulkan(uint64_t commandBuffer, int count, const uint64_t* samplers);
-xxAPI void          xxSetVertexConstantBufferVulkan(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
-xxAPI void          xxSetFragmentConstantBufferVulkan(uint64_t commandBuffer, uint64_t buffer, unsigned int size);
-xxAPI void          xxDrawIndexedVulkan(uint64_t commandBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+xxAPI void          xxSetViewportVulkan(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
+xxAPI void          xxSetScissorVulkan(uint64_t commandEncoder, int x, int y, int width, int height);
+xxAPI void          xxSetPipelineVulkan(uint64_t commandEncoder, uint64_t pipeline);
+xxAPI void          xxSetIndexBufferVulkan(uint64_t commandEncoder, uint64_t buffer);
+xxAPI void          xxSetVertexBuffersVulkan(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
+xxAPI void          xxSetVertexTexturesVulkan(uint64_t commandEncoder, int count, const uint64_t* textures);
+xxAPI void          xxSetFragmentTexturesVulkan(uint64_t commandEncoder, int count, const uint64_t* textures);
+xxAPI void          xxSetVertexSamplersVulkan(uint64_t commandEncoder, int count, const uint64_t* samplers);
+xxAPI void          xxSetFragmentSamplersVulkan(uint64_t commandEncoder, int count, const uint64_t* samplers);
+xxAPI void          xxSetVertexConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          xxSetFragmentConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          xxDrawIndexedVulkan(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function
 //==============================================================================
-xxAPI void          xxSetTransformVulkan(uint64_t commandBuffer, const float* world, const float* view, const float* projection);
+xxAPI void          xxSetTransformVulkan(uint64_t commandEncoder, const float* world, const float* view, const float* projection);

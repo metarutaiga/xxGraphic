@@ -338,35 +338,36 @@ void xxSubmitCommandBufferD3D11(uint64_t commandBuffer)
 //==============================================================================
 //  Render Pass
 //==============================================================================
-struct D3D11RENDERPASS
+union D3D11RENDERPASS
 {
-    float   color[4];
-    float   depth;
-    uint8_t stencil;
+    uint64_t    value;
+    struct
+    {
+        bool    clearColor;
+        DWORD   clearDepthStencil;
+    }
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateRenderPassD3D11(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil)
+uint64_t xxCreateRenderPassD3D11(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeClear, bool storeDepth, bool storeStencil)
 {
-    D3D11RENDERPASS* d3dRenderPass = new D3D11RENDERPASS;
+    D3D11RENDERPASS d3dRenderPass = {};
 
-    d3dRenderPass->color[0] = r;
-    d3dRenderPass->color[1] = g;
-    d3dRenderPass->color[2] = b;
-    d3dRenderPass->color[3] = a;
-    d3dRenderPass->depth = depth;
-    d3dRenderPass->stencil = stencil;
+    if (clearColor)
+        d3dRenderPass.clearColor = true;
+    if (clearDepth)
+        d3dRenderPass.clearDepthStencil |= D3D11_CLEAR_DEPTH;
+    if (clearStencil)
+        d3dRenderPass.clearDepthStencil |= D3D11_CLEAR_STENCIL;
 
-    return reinterpret_cast<uint64_t>(d3dRenderPass);
+    return d3dRenderPass.value;
 }
 //------------------------------------------------------------------------------
 void xxDestroyRenderPassD3D11(uint64_t renderPass)
 {
-    D3D11RENDERPASS* d3dRenderPass = reinterpret_cast<D3D11RENDERPASS*>(renderPass);
 
-    delete d3dRenderPass;
 }
 //------------------------------------------------------------------------------
-uint64_t xxBeginRenderPassD3D11(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+uint64_t xxBeginRenderPassD3D11(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, float r, float g, float b, float a, float depth, unsigned char stencil)
 {
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandBuffer);
     if (d3dDeviceContext == nullptr)
@@ -379,8 +380,16 @@ uint64_t xxBeginRenderPassD3D11(uint64_t commandBuffer, uint64_t framebuffer, ui
         return 0;
 
     d3dDeviceContext->OMSetRenderTargets(1, &d3dFramebuffer->renderTargetView, d3dFramebuffer->depthStencilView);
-    d3dDeviceContext->ClearRenderTargetView(d3dFramebuffer->renderTargetView, d3dRenderPass->color);
-    d3dDeviceContext->ClearDepthStencilView(d3dFramebuffer->depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, d3dRenderPass->depth, d3dRenderPass->stencil);
+
+    if (d3dRenderPass.clearColor)
+    {
+        float color[4] = { r, g, b, a };
+        d3dDeviceContext->ClearRenderTargetView(d3dFramebuffer->renderTargetView, color);
+    }
+    if (d3dRenderPass.clearDepthStencil)
+    {
+        d3dDeviceContext->ClearDepthStencilView(d3dFramebuffer->depthStencilView, d3dRenderPass.clearDepthStencil, depth, stencil);
+    }
 
     return commandBuffer;
 }

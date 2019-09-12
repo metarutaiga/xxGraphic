@@ -198,44 +198,45 @@ void xxSubmitCommandBufferGLES2(uint64_t commandBuffer)
 //==============================================================================
 //  Render Pass
 //==============================================================================
-struct RENDERPASSGL
+uint64_t xxCreateRenderPassGLES2(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeClear, bool storeDepth, bool storeStencil)
 {
-    float   color[4];
-    float   depth;
-    uint8_t stencil;
-};
-//------------------------------------------------------------------------------
-uint64_t xxCreateRenderPassGLES2(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil)
-{
-    RENDERPASSGL* glRenderPass = new RENDERPASSGL;
+    GLbitfield mask = 0;
 
-    glRenderPass->color[0] = r;
-    glRenderPass->color[1] = g;
-    glRenderPass->color[2] = b;
-    glRenderPass->color[3] = a;
-    glRenderPass->depth = depth;
-    glRenderPass->stencil = stencil;
+    if (clearColor)
+        mask |= GL_COLOR_BUFFER_BIT;
+    if (clearDepth)
+        mask |= GL_DEPTH_BUFFER_BIT;
+    if (clearStencil)
+        mask |= GL_STENCIL_BUFFER_BIT;
 
-    return reinterpret_cast<uint64_t>(glRenderPass);
+    return mask;
 }
 //------------------------------------------------------------------------------
 void xxDestroyRenderPassGLES2(uint64_t renderPass)
 {
-    RENDERPASSGL* glRenderPass = reinterpret_cast<RENDERPASSGL*>(renderPass);
 
-    delete glRenderPass;
 }
 //------------------------------------------------------------------------------
-uint64_t xxBeginRenderPassGLES2(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+uint64_t xxBeginRenderPassGLES2(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, float r, float g, float b, float a, float depth, unsigned char stencil)
 {
-    RENDERPASSGL* glRenderPass = reinterpret_cast<RENDERPASSGL*>(renderPass);
-    if (glRenderPass == nullptr)
-        return false;
+    GLbitfield mask = static_cast<GLbitfield>(renderPass);
 
-    glClearColor(glRenderPass->color[0], glRenderPass->color[1], glRenderPass->color[2], glRenderPass->color[3]);
-    glClearDepthf(glRenderPass->depth);
-    glClearStencil(glRenderPass->stencil);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    if (mask & GL_COLOR_BUFFER_BIT)
+    {
+        glClearColor(r, g, b, a);
+    }
+    if (mask & GL_DEPTH_BUFFER_BIT)
+    {
+        glClearDepthf(depth);
+    }
+    if (mask & GL_STENCIL_BUFFER_BIT)
+    {
+        glClearStencil(stencil);
+    }
+    if (mask)
+    {
+        glClear(mask);
+    }
 
     return commandBuffer;
 }

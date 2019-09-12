@@ -17,6 +17,27 @@
 		D644A0B1231EDE9B00B75B77 /* xxGraphicGLES2.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0A7231EDE9B00B75B77 /* xxGraphicGLES2.h */; };
 		D644A0B2231EDE9B00B75B77 /* xxSystem.h in Headers */ = {isa = PBXBuildFile; fileRef = D644A0A8231EDE9B00B75B77 /* xxSystem.h */; };
 		D644A0B3231EDE9B00B75B77 /* xxGraphicGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D644A0A9231EDE9B00B75B77 /* xxGraphicGL.cpp */; };
+		D690A352232AC52400A149EF /* vulkan_core.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A33F232AC52300A149EF /* vulkan_core.h */; };
+		D690A353232AC52400A149EF /* vulkan_xcb.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A340232AC52300A149EF /* vulkan_xcb.h */; };
+		D690A354232AC52400A149EF /* vk_layer.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A341232AC52300A149EF /* vk_layer.h */; };
+		D690A355232AC52400A149EF /* vulkan_metal.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A342232AC52300A149EF /* vulkan_metal.h */; };
+		D690A356232AC52400A149EF /* vk_sdk_platform.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A343232AC52300A149EF /* vk_sdk_platform.h */; };
+		D690A357232AC52400A149EF /* vulkan.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A344232AC52300A149EF /* vulkan.h */; };
+		D690A358232AC52400A149EF /* vk_platform.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A345232AC52300A149EF /* vk_platform.h */; };
+		D690A359232AC52400A149EF /* vulkan_macos.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A346232AC52300A149EF /* vulkan_macos.h */; };
+		D690A35A232AC52400A149EF /* vulkan_xlib.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A347232AC52300A149EF /* vulkan_xlib.h */; };
+		D690A35B232AC52400A149EF /* vulkan_wayland.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A348232AC52300A149EF /* vulkan_wayland.h */; };
+		D690A35C232AC52400A149EF /* vulkan_win32.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A349232AC52400A149EF /* vulkan_win32.h */; };
+		D690A35D232AC52400A149EF /* vulkan_vi.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A34A232AC52400A149EF /* vulkan_vi.h */; };
+		D690A35E232AC52400A149EF /* vulkan_xlib_xrandr.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A34B232AC52400A149EF /* vulkan_xlib_xrandr.h */; };
+		D690A35F232AC52400A149EF /* vulkan_fuchsia.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A34C232AC52400A149EF /* vulkan_fuchsia.h */; };
+		D690A360232AC52400A149EF /* vulkan_ios.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A34D232AC52400A149EF /* vulkan_ios.h */; };
+		D690A361232AC52400A149EF /* vulkan_prototype.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A34E232AC52400A149EF /* vulkan_prototype.h */; };
+		D690A362232AC52400A149EF /* vulkan_ggp.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A34F232AC52400A149EF /* vulkan_ggp.h */; };
+		D690A363232AC52400A149EF /* vulkan_android.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A350232AC52400A149EF /* vulkan_android.h */; };
+		D690A364232AC52400A149EF /* vk_icd.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A351232AC52400A149EF /* vk_icd.h */; };
+		D690A368232AC54600A149EF /* xxGraphicVulkan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D690A366232AC54600A149EF /* xxGraphicVulkan.cpp */; };
+		D690A369232AC54600A149EF /* xxGraphicVulkan.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A367232AC54600A149EF /* xxGraphicVulkan.h */; };
 		D6A727AF232310F4009981AD /* xxGraphicD3DAsm.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A72796232310F2009981AD /* xxGraphicD3DAsm.h */; };
 		D6A727B1232310F4009981AD /* xxGraphicD3D8PS.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A72798232310F3009981AD /* xxGraphicD3D8PS.h */; };
 		D6A727B5232310F4009981AD /* xxGraphicD3D11.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A7279C232310F3009981AD /* xxGraphicD3D11.h */; };
@@ -79,6 +100,27 @@
 		D644A0B6231EDEBB00B75B77 /* gl2platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gl2platform.h; path = ../graphic/gl/gl2platform.h; sourceTree = "<group>"; };
 		D644A0B7231EDEBB00B75B77 /* khrplatform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = khrplatform.h; path = ../graphic/gl/khrplatform.h; sourceTree = "<group>"; };
 		D644A0B8231EDEBB00B75B77 /* gl2ext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gl2ext.h; path = ../graphic/gl/gl2ext.h; sourceTree = "<group>"; };
+		D690A33F232AC52300A149EF /* vulkan_core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vulkan_core.h; path = ../graphic/vulkan/vulkan_core.h; sourceTree = "<group>"; };
+		D690A340232AC52300A149EF /* vulkan_xcb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vulkan_xcb.h; path = ../graphic/vulkan/vulkan_xcb.h; sourceTree = "<group>"; };
+		D690A341232AC52300A149EF /* vk_layer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vk_layer.h; path = ../graphic/vulkan/vk_layer.h; sourceTree = "<group>"; };
+		D690A342232AC52300A149EF /* vulkan_metal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vulkan_metal.h; path = ../graphic/vulkan/vulkan_metal.h; sourceTree = "<group>"; };
+		D690A343232AC52300A149EF /* vk_sdk_platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vk_sdk_platform.h; path = ../graphic/vulkan/vk_sdk_platform.h; sourceTree = "<group>"; };
+		D690A344232AC52300A149EF /* vulkan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vulkan.h; path = ../graphic/vulkan/vulkan.h; sourceTree = "<group>"; };
+		D690A345232AC52300A149EF /* vk_platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vk_platform.h; path = ../graphic/vulkan/vk_platform.h; sourceTree = "<group>"; };
+		D690A346232AC52300A149EF /* vulkan_macos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vulkan_macos.h; path = ../graphic/vulkan/vulkan_macos.h; sourceTree = "<group>"; };
+		D690A347232AC52300A149EF /* vulkan_xlib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vulkan_xlib.h; path = ../graphic/vulkan/vulkan_xlib.h; sourceTree = "<group>"; };
+		D690A348232AC52300A149EF /* vulkan_wayland.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vulkan_wayland.h; path = ../graphic/vulkan/vulkan_wayland.h; sourceTree = "<group>"; };
+		D690A349232AC52400A149EF /* vulkan_win32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vulkan_win32.h; path = ../graphic/vulkan/vulkan_win32.h; sourceTree = "<group>"; };
+		D690A34A232AC52400A149EF /* vulkan_vi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vulkan_vi.h; path = ../graphic/vulkan/vulkan_vi.h; sourceTree = "<group>"; };
+		D690A34B232AC52400A149EF /* vulkan_xlib_xrandr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vulkan_xlib_xrandr.h; path = ../graphic/vulkan/vulkan_xlib_xrandr.h; sourceTree = "<group>"; };
+		D690A34C232AC52400A149EF /* vulkan_fuchsia.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vulkan_fuchsia.h; path = ../graphic/vulkan/vulkan_fuchsia.h; sourceTree = "<group>"; };
+		D690A34D232AC52400A149EF /* vulkan_ios.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vulkan_ios.h; path = ../graphic/vulkan/vulkan_ios.h; sourceTree = "<group>"; };
+		D690A34E232AC52400A149EF /* vulkan_prototype.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vulkan_prototype.h; path = ../graphic/vulkan/vulkan_prototype.h; sourceTree = "<group>"; };
+		D690A34F232AC52400A149EF /* vulkan_ggp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vulkan_ggp.h; path = ../graphic/vulkan/vulkan_ggp.h; sourceTree = "<group>"; };
+		D690A350232AC52400A149EF /* vulkan_android.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vulkan_android.h; path = ../graphic/vulkan/vulkan_android.h; sourceTree = "<group>"; };
+		D690A351232AC52400A149EF /* vk_icd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vk_icd.h; path = ../graphic/vulkan/vk_icd.h; sourceTree = "<group>"; };
+		D690A366232AC54600A149EF /* xxGraphicVulkan.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xxGraphicVulkan.cpp; path = ../graphic/xxGraphicVulkan.cpp; sourceTree = "<group>"; };
+		D690A367232AC54600A149EF /* xxGraphicVulkan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxGraphicVulkan.h; path = ../graphic/xxGraphicVulkan.h; sourceTree = "<group>"; };
 		D6A72796232310F2009981AD /* xxGraphicD3DAsm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxGraphicD3DAsm.h; path = ../graphic/xxGraphicD3DAsm.h; sourceTree = "<group>"; };
 		D6A72797232310F2009981AD /* xxGraphicD3D11On12.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xxGraphicD3D11On12.cpp; path = ../graphic/xxGraphicD3D11On12.cpp; sourceTree = "<group>"; };
 		D6A72798232310F3009981AD /* xxGraphicD3D8PS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxGraphicD3D8PS.h; path = ../graphic/xxGraphicD3D8PS.h; sourceTree = "<group>"; };
@@ -164,6 +206,7 @@
 				D6A727EF232318C7009981AD /* Metal */,
 				D6CA4E292327F563008FFA94 /* NULL */,
 				D6B338582320214C0096D02F /* OpenGL */,
+				D690A331232AC4E700A149EF /* Vulkan */,
 				D644A0A3231EDE9A00B75B77 /* xxGraphic.cpp */,
 				D644A0A4231EDE9B00B75B77 /* xxGraphic.h */,
 				D6A727E92323117F009981AD /* xxGraphicInternal.h */,
@@ -192,6 +235,42 @@
 				D644A0B7231EDEBB00B75B77 /* khrplatform.h */,
 			);
 			name = gl;
+			sourceTree = "<group>";
+		};
+		D690A331232AC4E700A149EF /* Vulkan */ = {
+			isa = PBXGroup;
+			children = (
+				D690A365232AC52900A149EF /* vulkan */,
+				D690A366232AC54600A149EF /* xxGraphicVulkan.cpp */,
+				D690A367232AC54600A149EF /* xxGraphicVulkan.h */,
+			);
+			name = Vulkan;
+			sourceTree = "<group>";
+		};
+		D690A365232AC52900A149EF /* vulkan */ = {
+			isa = PBXGroup;
+			children = (
+				D690A351232AC52400A149EF /* vk_icd.h */,
+				D690A341232AC52300A149EF /* vk_layer.h */,
+				D690A345232AC52300A149EF /* vk_platform.h */,
+				D690A343232AC52300A149EF /* vk_sdk_platform.h */,
+				D690A350232AC52400A149EF /* vulkan_android.h */,
+				D690A33F232AC52300A149EF /* vulkan_core.h */,
+				D690A34C232AC52400A149EF /* vulkan_fuchsia.h */,
+				D690A34F232AC52400A149EF /* vulkan_ggp.h */,
+				D690A34D232AC52400A149EF /* vulkan_ios.h */,
+				D690A346232AC52300A149EF /* vulkan_macos.h */,
+				D690A342232AC52300A149EF /* vulkan_metal.h */,
+				D690A34E232AC52400A149EF /* vulkan_prototype.h */,
+				D690A34A232AC52400A149EF /* vulkan_vi.h */,
+				D690A348232AC52300A149EF /* vulkan_wayland.h */,
+				D690A349232AC52400A149EF /* vulkan_win32.h */,
+				D690A340232AC52300A149EF /* vulkan_xcb.h */,
+				D690A34B232AC52400A149EF /* vulkan_xlib_xrandr.h */,
+				D690A347232AC52300A149EF /* vulkan_xlib.h */,
+				D690A344232AC52300A149EF /* vulkan.h */,
+			);
+			name = vulkan;
 			sourceTree = "<group>";
 		};
 		D6A72795232310E1009981AD /* Direct3D */ = {
@@ -320,26 +399,46 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D690A362232AC52400A149EF /* vulkan_ggp.h in Headers */,
 				D644A0AE231EDE9B00B75B77 /* xxGraphic.h in Headers */,
 				D6A727BB232310F4009981AD /* xxGraphicD3D.h in Headers */,
 				D6A727C2232310F4009981AD /* xxGraphicD3D8.h in Headers */,
+				D690A35C232AC52400A149EF /* vulkan_win32.h in Headers */,
 				D6A727B1232310F4009981AD /* xxGraphicD3D8PS.h in Headers */,
+				D690A353232AC52400A149EF /* vulkan_xcb.h in Headers */,
+				D690A352232AC52400A149EF /* vulkan_core.h in Headers */,
 				D6A727C5232310F4009981AD /* xxGraphicD3D9.h in Headers */,
+				D690A359232AC52400A149EF /* vulkan_macos.h in Headers */,
+				D690A35B232AC52400A149EF /* vulkan_wayland.h in Headers */,
 				D6A727BF232310F4009981AD /* xxGraphicD3D9Ex.h in Headers */,
+				D690A358232AC52400A149EF /* vk_platform.h in Headers */,
 				D6A727C7232310F4009981AD /* xxGraphicD3D9On12.h in Headers */,
+				D690A35E232AC52400A149EF /* vulkan_xlib_xrandr.h in Headers */,
 				D6A727C1232310F4009981AD /* xxGraphicD3D9PS.h in Headers */,
 				D6A727C3232310F4009981AD /* xxGraphicD3D10.h in Headers */,
 				D6D0AA6623283A3E0044D0CF /* xxGraphicEAGL.h in Headers */,
 				D6A727B9232310F4009981AD /* xxGraphicD3D10_1.h in Headers */,
+				D690A361232AC52400A149EF /* vulkan_prototype.h in Headers */,
+				D690A363232AC52400A149EF /* vulkan_android.h in Headers */,
+				D690A354232AC52400A149EF /* vk_layer.h in Headers */,
+				D690A355232AC52400A149EF /* vulkan_metal.h in Headers */,
 				D6A727B5232310F4009981AD /* xxGraphicD3D11.h in Headers */,
+				D690A360232AC52400A149EF /* vulkan_ios.h in Headers */,
 				D6A727BE232310F4009981AD /* xxGraphicD3D11On12.h in Headers */,
+				D690A35D232AC52400A149EF /* vulkan_vi.h in Headers */,
+				D690A35F232AC52400A149EF /* vulkan_fuchsia.h in Headers */,
 				D6A727B7232310F4009981AD /* xxGraphicD3D12.h in Headers */,
 				D6A727AF232310F4009981AD /* xxGraphicD3DAsm.h in Headers */,
 				D644A0AB231EDE9B00B75B77 /* xxGraphicGL.h in Headers */,
 				D644A0B1231EDE9B00B75B77 /* xxGraphicGLES2.h in Headers */,
+				D690A357232AC52400A149EF /* vulkan.h in Headers */,
+				D690A35A232AC52400A149EF /* vulkan_xlib.h in Headers */,
 				D6B338572320209A0096D02F /* xxGraphicCGL.h in Headers */,
 				D6A727EE23231180009981AD /* xxGraphicWGL.h in Headers */,
+				D690A356232AC52400A149EF /* vk_sdk_platform.h in Headers */,
 				D6A727EC23231180009981AD /* xxGraphicInternal.h in Headers */,
+				D690A364232AC52400A149EF /* vk_icd.h in Headers */,
+				D690A369232AC54600A149EF /* xxGraphicVulkan.h in Headers */,
 				D6A727E123231154009981AD /* xxGraphicMantle.h in Headers */,
 				D6A727E023231154009981AD /* xxGraphicMantleAsm.h in Headers */,
 				D6A727F2232318E4009981AD /* xxGraphicMetal.h in Headers */,
@@ -442,6 +541,7 @@
 				D644A0AD231EDE9B00B75B77 /* xxGraphic.cpp in Sources */,
 				D644A0B3231EDE9B00B75B77 /* xxGraphicGL.cpp in Sources */,
 				D644A0AF231EDE9B00B75B77 /* xxGraphicGLES2.cpp in Sources */,
+				D690A368232AC54600A149EF /* xxGraphicVulkan.cpp in Sources */,
 				D6B338562320209A0096D02F /* xxGraphicCGL.mm in Sources */,
 				D6A727F3232318E4009981AD /* xxGraphicMetal.mm in Sources */,
 				D644A0B0231EDE9B00B75B77 /* xxGraphicNULL.cpp in Sources */,

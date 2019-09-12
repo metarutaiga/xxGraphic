@@ -483,35 +483,34 @@ void xxSubmitCommandBufferMantle(uint64_t commandBuffer)
 //==============================================================================
 //  Render Pass
 //==============================================================================
-struct RENDERPASSGR
+union RENDERPASSGR
 {
-    float   color[4];
-    float   depth;
-    uint8_t stencil;
+    uint64_t    value;
+    struct
+    {
+        bool    clearColor;
+        bool    clearDepthStencil;
+    }
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateRenderPassMantle(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil)
+uint64_t xxCreateRenderPassMantle(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeClear, bool storeDepth, bool storeStencil)
 {
-    RENDERPASSGR* grRenderPass = new RENDERPASSGR;
+    RENDERPASSGR grRenderPass = {};
 
-    grRenderPass->color[0] = r;
-    grRenderPass->color[1] = g;
-    grRenderPass->color[2] = b;
-    grRenderPass->color[3] = a;
-    grRenderPass->depth = depth;
-    grRenderPass->stencil = stencil;
+    if (clearColor)
+        d3dRenderPass.clearColor = true;
+    if (clearDepth || clearStencil)
+        d3dRenderPass.clearDepthStencil = true;
 
-    return reinterpret_cast<uint64_t>(grRenderPass);
+    return grRenderPass.value;
 }
 //------------------------------------------------------------------------------
 void xxDestroyRenderPassMantle(uint64_t renderPass)
 {
-    RENDERPASSGR* grRenderPass = reinterpret_cast<RENDERPASSGR*>(renderPass);
 
-    delete grRenderPass;
 }
 //------------------------------------------------------------------------------
-uint64_t xxBeginRenderPassMantle(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+uint64_t xxBeginRenderPassMantle(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, float r, float g, float b, float a, float depth, unsigned char stencil)
 {
     GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandBuffer);
     if (grCommandBuffer == GR_NULL_HANDLE)
@@ -519,12 +518,17 @@ uint64_t xxBeginRenderPassMantle(uint64_t commandBuffer, uint64_t framebuffer, u
     FRAMEBUFFERGR* grFramebuffer = reinterpret_cast<SWAPCHAINGR*>(framebuffer);
     if (grFramebuffer == nullptr)
         return 0;
-    RENDERPASSGR* grRenderPass = reinterpret_cast<RENDERPASSGR*>(renderPass);
-    if (grRenderPass == nullptr)
-        return 0;
+    RENDERPASSGR grRenderPass = { renderPass };
 
-    grCmdClearColorImage(grCommandBuffer, grFramebuffer->colorImage, grRenderPass->color, 0, nullptr);
-    grCmdClearDepthStencil(grCommandBuffer, grFramebuffer->depthStencilImage, grRenderPass->depth, grRenderPass->stencil, 0, nullptr);
+    if (d3dRenderPass.clearColor)
+    {
+        float color[4] = { r, g, b, a };
+        grCmdClearColorImage(grCommandBuffer, grFramebuffer->colorImage, color, 0, nullptr);
+    }
+    if (d3dRenderPass.clearDepthStencil)
+    {
+        grCmdClearDepthStencil(grCommandBuffer, grFramebuffer->depthStencilImage, depth, stencil, 0, nullptr);
+    }
 
     return commandBuffer;
 }

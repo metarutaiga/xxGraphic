@@ -357,7 +357,7 @@ static void ImGui_ImplXX_CreateWindow(ImGuiViewport* viewport)
     IM_ASSERT(handle != 0);
 
     data->Swapchain = xxCreateSwapchain(g_device, handle, (int)viewport->Size.x, (int)viewport->Size.y);
-    data->RenderPass = xxCreateRenderPass(g_device, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0);
+    data->RenderPass = xxCreateRenderPass(g_device, true, true, true, true, true, true);
     data->Handle = handle;
     IM_ASSERT(data->Swapchain != 0);
     IM_ASSERT(data->RenderPass != 0);
@@ -393,7 +393,7 @@ static void ImGui_ImplXX_RenderWindow(ImGuiViewport* viewport, void*)
     uint64_t framebuffer = xxGetFramebuffer(g_device, data->Swapchain);
     xxBeginCommandBuffer(commandBuffer);
 
-    uint64_t commandEncoder = xxBeginRenderPass(commandBuffer, framebuffer, data->RenderPass);
+    uint64_t commandEncoder = xxBeginRenderPass(commandBuffer, framebuffer, data->RenderPass, 0, 0, 0, 0, 1.0f, 0);
     ImGui_ImplXX_RenderDrawData(viewport->DrawData, commandEncoder);
     xxEndRenderPass(commandEncoder, framebuffer, data->RenderPass);
 

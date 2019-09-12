@@ -682,35 +682,36 @@ void xxSubmitCommandBufferD3D12(uint64_t commandBuffer)
 //==============================================================================
 //  Render Pass
 //==============================================================================
-struct D3D12RENDERPASS
+union D3D12RENDERPASS
 {
-    float   color[4];
-    float   depth;
-    uint8_t stencil;
+    uint64_t    value;
+    struct
+    {
+        bool    clearColor;
+        DWORD   clearDepthStencil;
+    }
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateRenderPassD3D12(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil)
+uint64_t xxCreateRenderPassD3D12(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeClear, bool storeDepth, bool storeStencil)
 {
-    D3D12RENDERPASS* d3dRenderPass = new D3D12RENDERPASS;
+    D3D12RENDERPASS d3dRenderPass = {};
 
-    d3dRenderPass->color[0] = r;
-    d3dRenderPass->color[1] = g;
-    d3dRenderPass->color[2] = b;
-    d3dRenderPass->color[3] = a;
-    d3dRenderPass->depth = depth;
-    d3dRenderPass->stencil = stencil;
+    if (clearColor)
+        d3dRenderPass.clearColor = true;
+    if (clearDepth)
+        d3dRenderPass.clearDepthStencil |= D3D12_CLEAR_DEPTH;
+    if (clearStencil)
+        d3dRenderPass.clearDepthStencil |= D3D12_CLEAR_STENCIL;
 
-    return reinterpret_cast<uint64_t>(d3dRenderPass);
+    return d3dRenderPass.value;
 }
 //------------------------------------------------------------------------------
 void xxDestroyRenderPassD3D12(uint64_t renderPass)
 {
-    D3D12RENDERPASS* d3dRenderPass = reinterpret_cast<D3D12RENDERPASS*>(renderPass);
 
-    delete d3dRenderPass;
 }
 //------------------------------------------------------------------------------
-uint64_t xxBeginRenderPassD3D12(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+uint64_t xxBeginRenderPassD3D12(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, float r, float g, float b, float a, float depth, unsigned char stencil)
 {
     ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandBuffer);
     if (d3dCommandList == nullptr)
@@ -718,9 +719,9 @@ uint64_t xxBeginRenderPassD3D12(uint64_t commandBuffer, uint64_t framebuffer, ui
     D3D12FRAMEBUFFER* d3dFramebuffer = reinterpret_cast<D3D12FRAMEBUFFER*>(framebuffer);
     if (d3dFramebuffer == nullptr)
         return 0;
-    D3D12RENDERPASS* d3dRenderPass = reinterpret_cast<D3D12RENDERPASS*>(renderPass);
-    if (d3dRenderPass == nullptr)
-        return 0;
+    D3D12RENDERPASS d3dRenderPass = { renderPass };
+
+    d3dCommandList->OMSetRenderTargets(1, &d3dFramebuffer->renderTargetHandle, FALSE, nullptr);
 
     D3D12_RESOURCE_BARRIER barrier = {};
     barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -731,8 +732,11 @@ uint64_t xxBeginRenderPassD3D12(uint64_t commandBuffer, uint64_t framebuffer, ui
     barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 
     d3dCommandList->ResourceBarrier(1, &barrier);
-    d3dCommandList->ClearRenderTargetView(d3dFramebuffer->renderTargetHandle, d3dRenderPass->color, 0, nullptr);
-    d3dCommandList->OMSetRenderTargets(1, &d3dFramebuffer->renderTargetHandle, FALSE, nullptr);
+    if (d3dRenderPass.clearColor)
+    {
+        float color[4] = { r, g, b, a };
+        d3dCommandList->ClearRenderTargetView(d3dFramebuffer->renderTargetHandle, color, 0, nullptr);
+    }
 
     return commandBuffer;
 }

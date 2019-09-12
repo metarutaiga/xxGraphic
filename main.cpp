@@ -1,4 +1,4 @@
-﻿// dear imgui: standalone example application
+// dear imgui: standalone example application
 // If you are new to dear imgui, see examples/README.txt and documentation at the top of imgui.cpp.
 
 #include <sys/stat.h>
@@ -52,7 +52,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
     g_instance = xxCreateInstanceD3D11();
     g_device = xxCreateDevice(g_instance);
     g_swapchain = xxCreateSwapchain(g_device, hWnd, 0, 0);
-    g_renderPass = xxCreateRenderPass(g_device, 0.45f, 0.55f, 0.60f, 1.0f, 1.0f, 0);
+    g_renderPass = xxCreateRenderPass(g_device, true, true, true, true, true, true);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -278,7 +278,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
         uint64_t commandBuffer = xxGetCommandBuffer(g_device, g_swapchain);
         uint64_t framebuffer = xxGetFramebuffer(g_device, g_swapchain);
         xxBeginCommandBuffer(commandBuffer);
-        xxBeginRenderPass(commandBuffer, framebuffer, g_renderPass);
+        xxBeginRenderPass(commandBuffer, framebuffer, g_renderPass, clear_color.x, clear_color.y, clear_color.z, clear_color.w, 1.0f, 0);
 
         ImGui_ImplXX_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
 
@@ -327,7 +327,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
             g_instance = createInstance();
             g_device = xxCreateDevice(g_instance);
             g_swapchain = xxCreateSwapchain(g_device, hWnd, 0, 0);
-            g_renderPass = xxCreateRenderPass(g_device, 0.45f, 0.55f, 0.60f, 1.0f, 1.0f, 0);
+            g_renderPass = xxCreateRenderPass(g_device, true, true, true, true, true, true);
             ImGui_ImplWin32_Init(hWnd);
             ImGui_ImplXX_Init(g_instance, 0, g_device);
         }

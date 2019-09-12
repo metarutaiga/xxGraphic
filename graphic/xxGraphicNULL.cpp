@@ -91,7 +91,7 @@ void xxSubmitCommandBufferNULL(uint64_t commandBuffer)
 //==============================================================================
 //  Render Pass
 //==============================================================================
-uint64_t xxCreateRenderPassNULL(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil)
+uint64_t xxCreateRenderPassNULL(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeClear, bool storeDepth, bool storeStencil)
 {
     return 0;
 }
@@ -101,7 +101,7 @@ void xxDestroyRenderPassNULL(uint64_t renderPass)
 
 }
 //------------------------------------------------------------------------------
-uint64_t xxBeginRenderPassNULL(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+uint64_t xxBeginRenderPassNULL(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, float r, float g, float b, float a, float depth, unsigned char stencil)
 {
     return 0;
 }

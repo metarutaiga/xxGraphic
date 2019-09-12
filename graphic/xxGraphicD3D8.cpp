@@ -289,28 +289,18 @@ void xxSubmitCommandBufferD3D8(uint64_t commandBuffer)
 //==============================================================================
 //  Render Pass
 //==============================================================================
-union D3DRENDERPASS8
+uint64_t xxCreateRenderPassD3D8(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeClear, bool storeDepth, bool storeStencil)
 {
-    uint64_t        value;
-    struct
-    {
-        D3DCOLOR    color;
-        uint16_t    depth;
-        uint8_t     stencil;
-        uint8_t     flags;
-    };
-};
-//------------------------------------------------------------------------------
-uint64_t xxCreateRenderPassD3D8(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil)
-{
-    D3DRENDERPASS8 d3dRenderPass;
+    DWORD flags = 0;
 
-    d3dRenderPass.color = D3DCOLOR_COLORVALUE(r, g, b, a);
-    d3dRenderPass.depth = (uint16_t)(depth * UINT16_MAX);
-    d3dRenderPass.stencil = stencil;
-    d3dRenderPass.flags = D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL;
+    if (clearColor)
+        flags |= D3DCLEAR_TARGET;
+    if (clearDepth)
+        flags |= D3DCLEAR_ZBUFFER;
+    if (clearStencil)
+        flags |= D3DCLEAR_STENCIL;
 
-    return d3dRenderPass.value;
+    return flags;
 }
 //------------------------------------------------------------------------------
 void xxDestroyRenderPassD3D8(uint64_t renderPass)
@@ -318,7 +308,7 @@ void xxDestroyRenderPassD3D8(uint64_t renderPass)
 
 }
 //------------------------------------------------------------------------------
-uint64_t xxBeginRenderPassD3D8(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+uint64_t xxBeginRenderPassD3D8(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, float r, float g, float b, float a, float depth, unsigned char stencil)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
     if (d3dDevice == nullptr)
@@ -326,14 +316,16 @@ uint64_t xxBeginRenderPassD3D8(uint64_t commandBuffer, uint64_t framebuffer, uin
     D3DFRAMEBUFFER8* d3dFramebuffer = reinterpret_cast<D3DFRAMEBUFFER8*>(framebuffer);
     if (d3dFramebuffer == nullptr)
         return 0;
-    D3DRENDERPASS8 d3dRenderPass = { renderPass };
+    DWORD d3dFlags = static_cast<DWORD>(renderPass);
 
     d3dDevice->SetRenderTarget(d3dFramebuffer->backBuffer, d3dFramebuffer->depthStencil);
 
-    float depth = d3dRenderPass.depth / (float)UINT16_MAX;
-    HRESULT hResult = d3dDevice->Clear(0, nullptr, d3dRenderPass.flags, d3dRenderPass.color, depth, d3dRenderPass.stencil);
-    if (hResult != S_OK)
-        return 0;
+    if (d3dFlags)
+    {
+        HRESULT hResult = d3dDevice->Clear(0, nullptr, d3dFlags, D3DCOLOR_COLORVALUE(r, g, b, a), depth, stencil);
+        if (hResult != S_OK)
+            return 0;
+    }
 
     return commandBuffer;
 }

@@ -307,35 +307,36 @@ void xxSubmitCommandBufferD3D10(uint64_t commandBuffer)
 //==============================================================================
 //  Render Pass
 //==============================================================================
-struct D3D10RENDERPASS
+union D3D10RENDERPASS
 {
-    float   color[4];
-    float   depth;
-    uint8_t stencil;
+    uint64_t    value;
+    struct
+    {
+        bool    clearColor;
+        DWORD   clearDepthStencil;
+    }
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateRenderPassD3D10(uint64_t device, float r, float g, float b, float a, float depth, unsigned char stencil)
+uint64_t xxCreateRenderPassD3D10(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeClear, bool storeDepth, bool storeStencil)
 {
-    D3D10RENDERPASS* d3dRenderPass = new D3D10RENDERPASS;
+    D3D10RENDERPASS d3dRenderPass = {};
 
-    d3dRenderPass->color[0] = r;
-    d3dRenderPass->color[1] = g;
-    d3dRenderPass->color[2] = b;
-    d3dRenderPass->color[3] = a;
-    d3dRenderPass->depth = depth;
-    d3dRenderPass->stencil = stencil;
+    if (clearColor)
+        d3dRenderPass.clearColor = true;
+    if (clearDepth)
+        d3dRenderPass.clearDepthStencil |= D3D10_CLEAR_DEPTH;
+    if (clearStencil)
+        d3dRenderPass.clearDepthStencil |= D3D10_CLEAR_STENCIL;
 
-    return reinterpret_cast<uint64_t>(d3dRenderPass);
+    return d3dRenderPass.value;
 }
 //------------------------------------------------------------------------------
 void xxDestroyRenderPassD3D10(uint64_t renderPass)
 {
-    D3D10RENDERPASS* d3dRenderPass = reinterpret_cast<D3D10RENDERPASS*>(renderPass);
 
-    delete d3dRenderPass;
 }
 //------------------------------------------------------------------------------
-uint64_t xxBeginRenderPassD3D10(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass)
+uint64_t xxBeginRenderPassD3D10(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, float r, float g, float b, float a, float depth, unsigned char stencil)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
     if (d3dDevice == nullptr)
@@ -343,13 +344,19 @@ uint64_t xxBeginRenderPassD3D10(uint64_t commandBuffer, uint64_t framebuffer, ui
     D3D10FRAMEBUFFER* d3dFramebuffer = reinterpret_cast<D3D10FRAMEBUFFER*>(framebuffer);
     if (d3dFramebuffer == nullptr)
         return 0;
-    D3D10RENDERPASS* d3dRenderPass = reinterpret_cast<D3D10RENDERPASS*>(renderPass);
-    if (d3dRenderPass == nullptr)
-        return 0;
+    D3D10RENDERPASS d3dRenderPass = { renderPass };
 
     d3dDevice->OMSetRenderTargets(1, &d3dFramebuffer->renderTargetView, d3dFramebuffer->depthStencilView);
-    d3dDevice->ClearRenderTargetView(d3dFramebuffer->renderTargetView, d3dRenderPass->color);
-    d3dDevice->ClearDepthStencilView(d3dFramebuffer->depthStencilView, D3D10_CLEAR_DEPTH | D3D10_CLEAR_STENCIL, d3dRenderPass->depth, d3dRenderPass->stencil);
+
+    if (d3dRenderPass.clearColor)
+    {
+        float color[4] = { r, g, b, a };
+        d3dDevice->ClearRenderTargetView(d3dFramebuffer->renderTargetView, color);
+    }
+    if (d3dRenderPass.clearDepthStencil)
+    {
+        d3dDevice->ClearDepthStencilView(d3dFramebuffer->depthStencilView, d3dRenderPass.clearDepthStencil, depth, stencil);
+    }
 
     return commandBuffer;
 }

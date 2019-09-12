@@ -179,6 +179,10 @@ PFN_vkGetPhysicalDevicePresentRectanglesKHR         vkGetPhysicalDevicePresentRe
 PFN_vkAcquireNextImage2KHR                          vkAcquireNextImage2KHR;
 #endif
 
+#if VK_MVK_macos_surface
+PFN_vkCreateMacOSSurfaceMVK                         vkCreateMacOSSurfaceMVK;
+#endif
+
 #if VK_KHR_win32_surface
 PFN_vkCreateWin32SurfaceKHR                         vkCreateWin32SurfaceKHR;
 PFN_vkGetPhysicalDeviceWin32PresentationSupportKHR  vkGetPhysicalDeviceWin32PresentationSupportKHR;
