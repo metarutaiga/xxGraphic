@@ -37,6 +37,7 @@
     <ClCompile Include="..\graphic\xxGraphicMantle.cpp" />
     <ClCompile Include="..\graphic\xxGraphicMantleAsm.cpp" />
     <ClCompile Include="..\graphic\xxGraphicNULL.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicVulkan.cpp" />
     <ClCompile Include="..\graphic\xxGraphicWGL.cpp" />
     <ClCompile Include="..\graphic\xxSystem.cpp" />
   </ItemGroup>
@@ -57,6 +58,25 @@
     <ClInclude Include="..\graphic\gr\amdil.h" />
     <ClInclude Include="..\graphic\gr\mantle.h" />
     <ClInclude Include="..\graphic\gr\mantleWsiWinExt.h" />
+    <ClInclude Include="..\graphic\vulkan\vk_icd.h" />
+    <ClInclude Include="..\graphic\vulkan\vk_layer.h" />
+    <ClInclude Include="..\graphic\vulkan\vk_platform.h" />
+    <ClInclude Include="..\graphic\vulkan\vk_sdk_platform.h" />
+    <ClInclude Include="..\graphic\vulkan\vulkan.h" />
+    <ClInclude Include="..\graphic\vulkan\vulkan_android.h" />
+    <ClInclude Include="..\graphic\vulkan\vulkan_core.h" />
+    <ClInclude Include="..\graphic\vulkan\vulkan_fuchsia.h" />
+    <ClInclude Include="..\graphic\vulkan\vulkan_ggp.h" />
+    <ClInclude Include="..\graphic\vulkan\vulkan_ios.h" />
+    <ClInclude Include="..\graphic\vulkan\vulkan_macos.h" />
+    <ClInclude Include="..\graphic\vulkan\vulkan_metal.h" />
+    <ClInclude Include="..\graphic\vulkan\vulkan_prototype.h" />
+    <ClInclude Include="..\graphic\vulkan\vulkan_vi.h" />
+    <ClInclude Include="..\graphic\vulkan\vulkan_wayland.h" />
+    <ClInclude Include="..\graphic\vulkan\vulkan_win32.h" />
+    <ClInclude Include="..\graphic\vulkan\vulkan_xcb.h" />
+    <ClInclude Include="..\graphic\vulkan\vulkan_xlib.h" />
+    <ClInclude Include="..\graphic\vulkan\vulkan_xlib_xrandr.h" />
     <ClInclude Include="..\graphic\xxGraphic.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D.h" />
     <ClInclude Include="..\graphic\xxGraphicD3D10.h" />
@@ -77,6 +97,7 @@
     <ClInclude Include="..\graphic\xxGraphicMantle.h" />
     <ClInclude Include="..\graphic\xxGraphicMantleAsm.h" />
     <ClInclude Include="..\graphic\xxGraphicNULL.h" />
+    <ClInclude Include="..\graphic\xxGraphicVulkan.h" />
     <ClInclude Include="..\graphic\xxGraphicWGL.h" />
     <ClInclude Include="..\graphic\xxSystem.h" />
   </ItemGroup>

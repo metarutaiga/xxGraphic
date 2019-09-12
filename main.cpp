@@ -22,6 +22,7 @@
 #include "graphic/xxGraphicD3D12.h"
 #include "graphic/xxGraphicGLES2.h"
 #include "graphic/xxGraphicMantle.h"
+#include "graphic/xxGraphicVulkan.h"
 #include "graphic/xxGraphicNULL.h"
 
 #define NOMINMAX
@@ -210,6 +211,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
                     GRAPHIC(D3D12);
                     GRAPHIC(GLES2);
                     GRAPHIC(Mantle);
+                    GRAPHIC(Vulkan);
                     GRAPHIC(NULL);
 #undef GRAPHIC
                 }
