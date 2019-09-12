@@ -91,7 +91,7 @@ void xxSubmitCommandBufferNULL(uint64_t commandBuffer)
 //==============================================================================
 //  Render Pass
 //==============================================================================
-uint64_t xxCreateRenderPassNULL(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeClear, bool storeDepth, bool storeStencil)
+uint64_t xxCreateRenderPassNULL(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil)
 {
     return 0;
 }

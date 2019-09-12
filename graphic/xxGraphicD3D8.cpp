@@ -289,7 +289,7 @@ void xxSubmitCommandBufferD3D8(uint64_t commandBuffer)
 //==============================================================================
 //  Render Pass
 //==============================================================================
-uint64_t xxCreateRenderPassD3D8(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeClear, bool storeDepth, bool storeStencil)
+uint64_t xxCreateRenderPassD3D8(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil)
 {
     DWORD flags = 0;
 

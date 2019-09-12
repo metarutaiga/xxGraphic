@@ -33,7 +33,7 @@ void        (*xxSubmitCommandBuffer)(uint64_t commandBuffer);
 //==============================================================================
 //  Render Pass
 //==============================================================================
-uint64_t    (*xxCreateRenderPass)(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeClear, bool storeDepth, bool storeStencil);
+uint64_t    (*xxCreateRenderPass)(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil);
 void        (*xxDestroyRenderPass)(uint64_t renderPass);
 uint64_t    (*xxBeginRenderPass)(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, float r, float g, float b, float a, float depth, unsigned char stencil);
 void        (*xxEndRenderPass)(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass);

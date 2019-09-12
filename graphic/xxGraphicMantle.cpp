@@ -493,7 +493,7 @@ union RENDERPASSGR
     }
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateRenderPassMantle(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeClear, bool storeDepth, bool storeStencil)
+uint64_t xxCreateRenderPassMantle(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil)
 {
     RENDERPASSGR grRenderPass = {};
 

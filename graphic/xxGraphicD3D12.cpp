@@ -692,7 +692,7 @@ union D3D12RENDERPASS
     }
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateRenderPassD3D12(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeClear, bool storeDepth, bool storeStencil)
+uint64_t xxCreateRenderPassD3D12(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil)
 {
     D3D12RENDERPASS d3dRenderPass = {};
 

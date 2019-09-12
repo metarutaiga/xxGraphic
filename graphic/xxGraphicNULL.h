@@ -35,7 +35,7 @@ xxAPI void          xxSubmitCommandBufferNULL(uint64_t commandBuffer);
 //==============================================================================
 //  Render Pass
 //==============================================================================
-xxAPI uint64_t      xxCreateRenderPassNULL(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeClear, bool storeDepth, bool storeStencil);
+xxAPI uint64_t      xxCreateRenderPassNULL(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil);
 xxAPI void          xxDestroyRenderPassNULL(uint64_t renderPass);
 xxAPI uint64_t      xxBeginRenderPassNULL(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, float r, float g, float b, float a, float depth, unsigned char stencil);
 xxAPI void          xxEndRenderPassNULL(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass);

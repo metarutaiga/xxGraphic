@@ -277,13 +277,17 @@ void xxSubmitCommandBufferMetal(uint64_t commandBuffer)
 //==============================================================================
 //  Render Pass
 //==============================================================================
-uint64_t xxCreateRenderPassMetal(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeClear, bool storeDepth, bool storeStencil)
+uint64_t xxCreateRenderPassMetal(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil)
 {
     MTLRenderPassDescriptor* renderPass = [[classMTLRenderPassDescriptor alloc] init];
 
-    renderPass.colorAttachments[0].loadAction = MTLLoadActionClear;
-    renderPass.depthAttachment.loadAction = MTLLoadActionClear;
-    renderPass.stencilAttachment.loadAction = MTLLoadActionClear;
+    renderPass.colorAttachments[0].loadAction = clearColor ? MTLLoadActionClear : MTLLoadActionDontCare;
+    renderPass.depthAttachment.loadAction = clearDepth ? MTLLoadActionClear : MTLLoadActionDontCare;
+    renderPass.stencilAttachment.loadAction = clearStencil ? MTLLoadActionClear : MTLLoadActionDontCare;
+
+    renderPass.colorAttachments[0].storeAction = storeColor ? MTLStoreActionStore : MTLStoreActionDontCare;
+    renderPass.depthAttachment.storeAction = storeDepth ? MTLStoreActionStore : MTLStoreActionDontCare;
+    renderPass.stencilAttachment.storeAction = storeStencil ? MTLStoreActionStore : MTLStoreActionDontCare;
 
     return reinterpret_cast<uint64_t>((__bridge_retained void*)renderPass);
 }

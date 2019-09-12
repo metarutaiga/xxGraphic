@@ -317,7 +317,7 @@ union D3D10RENDERPASS
     }
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateRenderPassD3D10(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeClear, bool storeDepth, bool storeStencil)
+uint64_t xxCreateRenderPassD3D10(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil)
 {
     D3D10RENDERPASS d3dRenderPass = {};
 
