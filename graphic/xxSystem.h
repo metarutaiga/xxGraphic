@@ -93,8 +93,8 @@
 #   define xxFree(ptr)              _aligned_free(ptr)
 #endif
 
-#define xxRotateLeft(v, s)          (v << s) | (v >> (sizeof(v) * 8 - s))
-#define xxRotateRight(v, s)         (v >> s) | (v << (sizeof(v) * 8 - s))
+#define xxRotateLeft(v, s)          ((v << s) | (v >> (sizeof(v) * 8 - s)))
+#define xxRotateRight(v, s)         ((v >> s) | (v << (sizeof(v) * 8 - s)))
 
 #define xxLocalBreak()              switch (0) case 0:
 

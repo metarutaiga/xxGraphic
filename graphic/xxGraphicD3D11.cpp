@@ -345,7 +345,7 @@ union D3D11RENDERPASS
     {
         bool    clearColor;
         DWORD   clearDepthStencil;
-    }
+    };
 };
 //------------------------------------------------------------------------------
 uint64_t xxCreateRenderPassD3D11(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil)
@@ -375,9 +375,7 @@ uint64_t xxBeginRenderPassD3D11(uint64_t commandBuffer, uint64_t framebuffer, ui
     D3D11FRAMEBUFFER* d3dFramebuffer = reinterpret_cast<D3D11FRAMEBUFFER*>(framebuffer);
     if (d3dFramebuffer == nullptr)
         return 0;
-    D3D11RENDERPASS* d3dRenderPass = reinterpret_cast<D3D11RENDERPASS*>(renderPass);
-    if (d3dRenderPass == nullptr)
-        return 0;
+    D3D11RENDERPASS d3dRenderPass = { renderPass };
 
     d3dDeviceContext->OMSetRenderTargets(1, &d3dFramebuffer->renderTargetView, d3dFramebuffer->depthStencilView);
 

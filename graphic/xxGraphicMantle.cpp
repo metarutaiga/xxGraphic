@@ -490,7 +490,7 @@ union RENDERPASSGR
     {
         bool    clearColor;
         bool    clearDepthStencil;
-    }
+    };
 };
 //------------------------------------------------------------------------------
 uint64_t xxCreateRenderPassMantle(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil)
@@ -498,9 +498,9 @@ uint64_t xxCreateRenderPassMantle(uint64_t device, bool clearColor, bool clearDe
     RENDERPASSGR grRenderPass = {};
 
     if (clearColor)
-        d3dRenderPass.clearColor = true;
+        grRenderPass.clearColor = true;
     if (clearDepth || clearStencil)
-        d3dRenderPass.clearDepthStencil = true;
+        grRenderPass.clearDepthStencil = true;
 
     return grRenderPass.value;
 }
@@ -520,12 +520,12 @@ uint64_t xxBeginRenderPassMantle(uint64_t commandBuffer, uint64_t framebuffer, u
         return 0;
     RENDERPASSGR grRenderPass = { renderPass };
 
-    if (d3dRenderPass.clearColor)
+    if (grRenderPass.clearColor)
     {
         float color[4] = { r, g, b, a };
         grCmdClearColorImage(grCommandBuffer, grFramebuffer->colorImage, color, 0, nullptr);
     }
-    if (d3dRenderPass.clearDepthStencil)
+    if (grRenderPass.clearDepthStencil)
     {
         grCmdClearDepthStencil(grCommandBuffer, grFramebuffer->depthStencilImage, depth, stencil, 0, nullptr);
     }

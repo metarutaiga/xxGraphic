@@ -13,6 +13,7 @@
 #   define VK_USE_PLATFORM_WIN32_KHR    1
 #endif
 
+#define VK_DEFINE_NON_DISPATCHABLE_HANDLE(object) typedef uint64_t object;
 #define VK_NO_PROTOTYPES                1
 #define VK_PROTOTYPES                   1
 #include "vulkan/vulkan.h"
@@ -47,7 +48,7 @@ static void* vkSymbol(const char* name)
 
 #if defined(xxWINDOWS)
     if (ptr == nullptr && g_vulkanLibrary)
-        ptr = GetProcAddress(g_vulkanLibrary, name);
+        ptr = GetProcAddress((HMODULE)g_vulkanLibrary, name);
 #endif
 
     if (ptr == nullptr)
@@ -323,7 +324,7 @@ void xxDestroyInstanceVulkan(uint64_t instance)
 #endif
 
 #if defined(xxWINDOWS)
-        FreeLibrary(g_vulkanLibrary);
+        FreeLibrary((HMODULE)g_vulkanLibrary);
 #endif
         g_vulkanLibrary = nullptr;
     }
@@ -550,6 +551,8 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, void* view, unsigned int width
             return 0;
         }
     }
+#else
+    VkSurfaceKHR surface = VK_NULL_HANDLE;
 #endif
 
     VkSwapchainCreateInfoKHR swapchainInfo = {};
@@ -703,7 +706,7 @@ uint64_t xxGetFramebufferVulkan(uint64_t device, uint64_t swapchain)
     uint32_t imageIndex = vkSwapchain->imageIndex;
     VkFramebuffer framebuffer = vkSwapchain->framebuffers[imageIndex];
 
-    return reinterpret_cast<uint64_t>(framebuffer);
+    return static_cast<uint64_t>(framebuffer);
 }
 //==============================================================================
 //  Command Buffer
@@ -800,12 +803,12 @@ uint64_t xxCreateRenderPassVulkan(uint64_t device, bool clearColor, bool clearDe
     if (result != VK_SUCCESS)
         return 0;
 
-    return reinterpret_cast<uint64_t>(renderPass);
+    return static_cast<uint64_t>(renderPass);
 }
 //------------------------------------------------------------------------------
 void xxDestroyRenderPassVulkan(uint64_t renderPass)
 {
-    VkRenderPass vkRenderPass = reinterpret_cast<VkRenderPass>(renderPass);
+    VkRenderPass vkRenderPass = static_cast<VkRenderPass>(renderPass);
     if (vkRenderPass == VK_NULL_HANDLE)
         return;
 
@@ -817,10 +820,10 @@ uint64_t xxBeginRenderPassVulkan(uint64_t commandBuffer, uint64_t framebuffer, u
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandBuffer);
     if (vkCommandBuffer == VK_NULL_HANDLE)
         return 0;
-    VkFramebuffer vkFramebuffer = reinterpret_cast<VkFramebuffer>(framebuffer);
+    VkFramebuffer vkFramebuffer = static_cast<VkFramebuffer>(framebuffer);
     if (vkFramebuffer == VK_NULL_HANDLE)
         return 0;
-    VkRenderPass vkRenderPass = reinterpret_cast<VkRenderPass>(renderPass);
+    VkRenderPass vkRenderPass = static_cast<VkRenderPass>(renderPass);
     if (vkRenderPass == VK_NULL_HANDLE)
         return 0;
 

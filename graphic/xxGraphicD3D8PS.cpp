@@ -199,7 +199,7 @@ uint64_t xxCreatePipelineD3D8PS(uint64_t device, uint64_t blendState, uint64_t d
 //==============================================================================
 void xxSetScissorD3D8PS(uint64_t commandEncoder, int x, int y, int width, int height)
 {
-    xxSetScissorD3D8(commandBuffer, x, y, width, height);
+    xxSetScissorD3D8(commandEncoder, x, y, width, height);
 
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
 

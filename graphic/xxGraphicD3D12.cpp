@@ -688,8 +688,8 @@ union D3D12RENDERPASS
     struct
     {
         bool    clearColor;
-        DWORD   clearDepthStencil;
-    }
+        bool    clearDepthStencil;
+    };
 };
 //------------------------------------------------------------------------------
 uint64_t xxCreateRenderPassD3D12(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil)
@@ -698,10 +698,8 @@ uint64_t xxCreateRenderPassD3D12(uint64_t device, bool clearColor, bool clearDep
 
     if (clearColor)
         d3dRenderPass.clearColor = true;
-    if (clearDepth)
-        d3dRenderPass.clearDepthStencil |= D3D12_CLEAR_DEPTH;
-    if (clearStencil)
-        d3dRenderPass.clearDepthStencil |= D3D12_CLEAR_STENCIL;
+    if (clearDepth || clearStencil)
+        d3dRenderPass.clearDepthStencil = true;
 
     return d3dRenderPass.value;
 }

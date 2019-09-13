@@ -314,7 +314,7 @@ union D3D10RENDERPASS
     {
         bool    clearColor;
         DWORD   clearDepthStencil;
-    }
+    };
 };
 //------------------------------------------------------------------------------
 uint64_t xxCreateRenderPassD3D10(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil)
