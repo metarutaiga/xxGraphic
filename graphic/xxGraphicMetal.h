@@ -21,7 +21,7 @@ xxAPI const char*   xxGetDeviceStringMetal(uint64_t device);
 //==============================================================================
 //  Swapchain
 //==============================================================================
-xxAPI uint64_t      xxCreateSwapchainMetal(uint64_t device, void* view, unsigned int width, unsigned int height);
+xxAPI uint64_t      xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height);
 xxAPI void          xxDestroySwapchainMetal(uint64_t swapchain);
 xxAPI void          xxPresentSwapchainMetal(uint64_t swapchain);
 xxAPI uint64_t      xxGetCommandBufferMetal(uint64_t device, uint64_t swapchain);
@@ -31,7 +31,7 @@ xxAPI uint64_t      xxGetFramebufferMetal(uint64_t device, uint64_t swapchain);
 //==============================================================================
 xxAPI bool          xxBeginCommandBufferMetal(uint64_t commandBuffer);
 xxAPI void          xxEndCommandBufferMetal(uint64_t commandBuffer);
-xxAPI void          xxSubmitCommandBufferMetal(uint64_t commandBuffer);
+xxAPI void          xxSubmitCommandBufferMetal(uint64_t commandBuffer, uint64_t swapchain);
 //==============================================================================
 //  Render Pass
 //==============================================================================
@@ -77,7 +77,7 @@ xxAPI void          xxDestroyShaderMetal(uint64_t device, uint64_t shader);
 xxAPI uint64_t      xxCreateBlendStateMetal(uint64_t device, bool blending);
 xxAPI uint64_t      xxCreateDepthStencilStateMetal(uint64_t device, bool depthTest, bool depthWrite);
 xxAPI uint64_t      xxCreateRasterizerStateMetal(uint64_t device, bool cull, bool scissor);
-xxAPI uint64_t      xxCreatePipelineMetal(uint64_t device, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
+xxAPI uint64_t      xxCreatePipelineMetal(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
 xxAPI void          xxDestroyBlendStateMetal(uint64_t blendState);
 xxAPI void          xxDestroyDepthStencilStateMetal(uint64_t depthStencilState);
 xxAPI void          xxDestroyRasterizerStateMetal(uint64_t rasterizerState);

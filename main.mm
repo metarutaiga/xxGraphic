@@ -25,8 +25,8 @@
 // Graphic data
 static uint64_t g_instance = 0;
 static uint64_t g_device = 0;
-static uint64_t g_swapchain = 0;
 static uint64_t g_renderPass = 0;
+static uint64_t g_swapchain = 0;
 
 //-----------------------------------------------------------------------------------
 // ImGuiExampleView
@@ -176,7 +176,7 @@ static uint64_t g_renderPass = 0;
     xxEndRenderPass(commandEncoder, framebuffer, g_renderPass);
 
     xxEndCommandBuffer(commandBuffer);
-    xxSubmitCommandBuffer(commandBuffer);
+    xxSubmitCommandBuffer(commandBuffer, g_swapchain);
 
     xxPresentSwapchain(g_swapchain);
 
@@ -185,7 +185,7 @@ static uint64_t g_renderPass = 0;
         ImGui_ImplXX_InvalidateDeviceObjects();
         xxDestroySwapchain(g_swapchain);
         xxResetDevice(g_device);
-        g_swapchain = xxCreateSwapchain(g_device, (__bridge void*)self.window, 0, 0);
+        g_swapchain = xxCreateSwapchain(g_device, g_renderPass, (__bridge void*)self.window, 0, 0);
         ImGui_ImplXX_CreateDeviceObjects();
     }
 
@@ -203,20 +203,20 @@ static uint64_t g_renderPass = 0;
     {
         ImGui_ImplXX_Shutdown();
         ImGui_ImplOSX_Shutdown();
-        xxDestroyRenderPass(g_renderPass);
         xxDestroySwapchain(g_swapchain);
+        xxDestroyRenderPass(g_renderPass);
         xxDestroyDevice(g_device);
         xxDestroyInstance(g_instance);
-        g_renderPass = 0;
         g_swapchain = 0;
+        g_renderPass = 0;
         g_device = 0;
         g_instance = 0;
         g_instance = createInstance();
         g_device = xxCreateDevice(g_instance);
-        g_swapchain = xxCreateSwapchain(g_device, (__bridge void*)[self window], 0, 0);
         g_renderPass = xxCreateRenderPass(g_device, true, true, true, true, true, true);
+        g_swapchain = xxCreateSwapchain(g_device, g_renderPass, (__bridge void*)[self window], 0, 0);
         ImGui_ImplOSX_Init(self);
-        ImGui_ImplXX_Init(g_instance, 0, g_device);
+        ImGui_ImplXX_Init(g_instance, 0, g_device, g_renderPass);
     }
 #endif
 }
@@ -227,7 +227,7 @@ static uint64_t g_renderPass = 0;
     {
         xxDestroySwapchain(g_swapchain);
         g_swapchain = 0;
-        g_swapchain = xxCreateSwapchain(g_device, (__bridge void*)[self window], 0, 0);
+        g_swapchain = xxCreateSwapchain(g_device, g_renderPass, (__bridge void*)[self window], 0, 0);
     }
 }
 
@@ -431,8 +431,8 @@ static uint64_t g_renderPass = 0;
 
     g_instance = xxCreateInstanceMetal();
     g_device = xxCreateDevice(g_instance);
-    g_swapchain = xxCreateSwapchain(g_device, (__bridge void*)self.window, 0, 0);
     g_renderPass = xxCreateRenderPass(g_device, true, true, true, true, true, true);
+    g_swapchain = xxCreateSwapchain(g_device, g_renderPass, (__bridge void*)self.window, 0, 0);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -462,7 +462,7 @@ static uint64_t g_renderPass = 0;
 #if defined(xxMACOS)
     ImGui_ImplOSX_Init(view);
 #endif
-    ImGui_ImplXX_Init(g_instance, 0, g_device);
+    ImGui_ImplXX_Init(g_instance, 0, g_device, g_renderPass);
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -507,12 +507,12 @@ static uint64_t g_renderPass = 0;
 #endif
     ImGui::DestroyContext();
 
-    xxDestroyRenderPass(g_renderPass);
     xxDestroySwapchain(g_swapchain);
+    xxDestroyRenderPass(g_renderPass);
     xxDestroyDevice(g_device);
     xxDestroyInstance(g_instance);
-    g_renderPass = 0;
     g_swapchain = 0;
+    g_renderPass = 0;
     g_device = 0;
     g_instance = 0;
 }

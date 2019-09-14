@@ -18,6 +18,7 @@
 static uint64_t g_instance = 0;
 static uint64_t g_physicalDevice = 0;
 static uint64_t g_device = 0;
+static uint64_t g_renderPass = 0;
 static int      g_bufferIndex = 0;
 static uint64_t g_vertexBuffers[4] = {};
 static int      g_vertexBufferSizes[4] = {};
@@ -206,11 +207,12 @@ void ImGui_ImplXX_RenderDrawData(ImDrawData* draw_data, uint64_t commandEncoder)
     }
 }
 
-bool ImGui_ImplXX_Init(uint64_t instance, uint64_t physicalDevice, uint64_t device)
+bool ImGui_ImplXX_Init(uint64_t instance, uint64_t physicalDevice, uint64_t device, uint64_t renderPass)
 {
     g_instance = instance;
     g_physicalDevice = physicalDevice;
     g_device = device;
+    g_renderPass = renderPass;
 
     const char* deviceString = xxGetDeviceString(device);
     g_halfPixel = (strncmp(deviceString, "Direct3D 8", 10) == 0 || strncmp(deviceString, "Direct3D 9", 10) == 0);
@@ -285,7 +287,7 @@ bool ImGui_ImplXX_CreateDeviceObjects()
     g_blendState = xxCreateBlendState(g_device, true);
     g_depthStencilState = xxCreateDepthStencilState(g_device, false, false);
     g_rasterizerState = xxCreateRasterizerState(g_device, false, true);
-    g_pipeline = xxCreatePipeline(g_device, g_blendState, g_depthStencilState, g_rasterizerState, g_vertexAttribute, g_vertexShader, g_fragmentShader);
+    g_pipeline = xxCreatePipeline(g_device, g_renderPass, g_blendState, g_depthStencilState, g_rasterizerState, g_vertexAttribute, g_vertexShader, g_fragmentShader);
 
     return true;
 }
@@ -356,7 +358,7 @@ static void ImGui_ImplXX_CreateWindow(ImGuiViewport* viewport)
     void* handle = viewport->PlatformHandleRaw ? viewport->PlatformHandleRaw : viewport->PlatformHandle;
     IM_ASSERT(handle != 0);
 
-    data->Swapchain = xxCreateSwapchain(g_device, handle, (int)viewport->Size.x, (int)viewport->Size.y);
+    data->Swapchain = xxCreateSwapchain(g_device, g_renderPass, handle, (int)viewport->Size.x, (int)viewport->Size.y);
     data->RenderPass = xxCreateRenderPass(g_device, true, true, true, true, true, true);
     data->Handle = handle;
     IM_ASSERT(data->Swapchain != 0);
@@ -381,7 +383,7 @@ static void ImGui_ImplXX_SetWindowSize(ImGuiViewport* viewport, ImVec2 size)
 {
     ImGuiViewportDataXX* data = (ImGuiViewportDataXX*)viewport->RendererUserData;
     xxDestroySwapchain(data->Swapchain);
-    data->Swapchain = xxCreateSwapchain(g_device, data->Handle, (int)size.x, (int)size.y);
+    data->Swapchain = xxCreateSwapchain(g_device, g_renderPass, data->Handle, (int)size.x, (int)size.y);
     IM_ASSERT(data->Swapchain != 0);
 }
 
@@ -398,7 +400,7 @@ static void ImGui_ImplXX_RenderWindow(ImGuiViewport* viewport, void*)
     xxEndRenderPass(commandEncoder, framebuffer, data->RenderPass);
 
     xxEndCommandBuffer(commandBuffer);
-    xxSubmitCommandBuffer(commandBuffer);
+    xxSubmitCommandBuffer(commandBuffer, data->Swapchain);
 }
 
 static void ImGui_ImplXX_SwapBuffers(ImGuiViewport* viewport, void*)

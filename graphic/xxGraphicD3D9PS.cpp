@@ -211,7 +211,7 @@ void xxDestroyShaderD3D9PS(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreatePipelineD3D9PS(uint64_t device, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+uint64_t xxCreatePipelineD3D9PS(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
 {
     uint64_t pipeline = xxCreatePipelineD3D9(device, blendState, depthStencilState, rasterizerState, 0, vertexShader, fragmentShader);
     if (pipeline == 0)

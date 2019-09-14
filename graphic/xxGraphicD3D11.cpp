@@ -145,7 +145,7 @@ struct D3D11SWAPCHAIN : public D3D11FRAMEBUFFER
     ID3D11DeviceContext*    deviceContext;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateSwapchainD3D11(uint64_t device, void* view, unsigned int width, unsigned int height)
+uint64_t xxCreateSwapchainD3D11(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height)
 {
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
     if (d3dDevice == nullptr)
@@ -332,7 +332,7 @@ void xxEndCommandBufferD3D11(uint64_t commandBuffer)
 
 }
 //------------------------------------------------------------------------------
-void xxSubmitCommandBufferD3D11(uint64_t commandBuffer)
+void xxSubmitCommandBufferD3D11(uint64_t commandBuffer, uint64_t swapchain)
 {
 }
 //==============================================================================
@@ -1117,7 +1117,7 @@ uint64_t xxCreateRasterizerStateD3D11(uint64_t device, bool cull, bool scissor)
     return reinterpret_cast<uint64_t>(d3dRasterizerState);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreatePipelineD3D11(uint64_t device, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+uint64_t xxCreatePipelineD3D11(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
 {
     D3D11PIPELINE* d3dPipeline = new D3D11PIPELINE;
     if (d3dPipeline == nullptr)

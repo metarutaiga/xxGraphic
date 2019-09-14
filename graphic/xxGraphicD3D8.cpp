@@ -162,7 +162,7 @@ struct D3DSWAPCHAIN8 : public D3DFRAMEBUFFER8
     HWND                    hWnd;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateSwapchainD3D8(uint64_t device, void* view, unsigned int width, unsigned int height)
+uint64_t xxCreateSwapchainD3D8(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(device);
     if (d3dDevice == nullptr)
@@ -282,7 +282,7 @@ void xxEndCommandBufferD3D8(uint64_t commandBuffer)
     HRESULT hResult = d3dDevice->EndScene();
 }
 //------------------------------------------------------------------------------
-void xxSubmitCommandBufferD3D8(uint64_t commandBuffer)
+void xxSubmitCommandBufferD3D8(uint64_t commandBuffer, uint64_t swapchain)
 {
 
 }
@@ -778,7 +778,7 @@ uint64_t xxCreateRasterizerStateD3D8(uint64_t device, bool cull, bool scissor)
     return d3dRenderState.value;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreatePipelineD3D8(uint64_t device, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+uint64_t xxCreatePipelineD3D8(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
 {
     D3DPIPELINE8* d3dPipeline = new D3DPIPELINE8;
     if (d3dPipeline == nullptr)

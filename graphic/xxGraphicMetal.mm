@@ -171,7 +171,7 @@ struct MTLSWAPCHAIN : public MTLFRAMEBUFFER
     id <MTLCommandBuffer>   commandBuffer;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateSwapchainMetal(uint64_t device, void* view, unsigned int width, unsigned int height)
+uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
     if (mtlDevice == nil)
@@ -271,7 +271,7 @@ void xxEndCommandBufferMetal(uint64_t commandBuffer)
 
 }
 //------------------------------------------------------------------------------
-void xxSubmitCommandBufferMetal(uint64_t commandBuffer)
+void xxSubmitCommandBufferMetal(uint64_t commandBuffer, uint64_t swapchain)
 {
 }
 //==============================================================================
@@ -694,7 +694,7 @@ uint64_t xxCreateRasterizerStateMetal(uint64_t device, bool cull, bool scissor)
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreatePipelineMetal(uint64_t device, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+uint64_t xxCreatePipelineMetal(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
     if (mtlDevice == nil)

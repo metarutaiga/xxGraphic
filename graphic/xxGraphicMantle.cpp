@@ -303,7 +303,7 @@ struct SWAPCHAINGR : public FRAMEBUFFERGR
     void*           view;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateSwapchainMantle(uint64_t device, void* view, unsigned int width, unsigned int height)
+uint64_t xxCreateSwapchainMantle(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
@@ -474,7 +474,7 @@ void xxEndCommandBufferMantle(uint64_t commandBuffer)
     grEndCommandBuffer(grCommandBuffer);
 }
 //------------------------------------------------------------------------------
-void xxSubmitCommandBufferMantle(uint64_t commandBuffer)
+void xxSubmitCommandBufferMantle(uint64_t commandBuffer, uint64_t swapchain)
 {
     GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandBuffer);
 
@@ -877,7 +877,7 @@ uint64_t xxCreateRasterizerStateMantle(uint64_t device, bool cull, bool scissor)
     return reinterpret_cast<uint64_t>(rasterizerState);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreatePipelineMantle(uint64_t device, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+uint64_t xxCreatePipelineMantle(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)

@@ -48,7 +48,7 @@ const char* xxGetDeviceStringNULL(uint64_t device)
 //==============================================================================
 //  Swapchain
 //==============================================================================
-uint64_t xxCreateSwapchainNULL(uint64_t device, void* view, unsigned int width, unsigned int height)
+uint64_t xxCreateSwapchainNULL(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height)
 {
     return 0;
 }
@@ -85,7 +85,7 @@ void xxEndCommandBufferNULL(uint64_t commandBuffer)
 
 }
 //------------------------------------------------------------------------------
-void xxSubmitCommandBufferNULL(uint64_t commandBuffer)
+void xxSubmitCommandBufferNULL(uint64_t commandBuffer, uint64_t swapchain)
 {
 }
 //==============================================================================
@@ -223,7 +223,7 @@ uint64_t xxCreateRasterizerStateNULL(uint64_t device, bool cull, bool scissor)
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreatePipelineNULL(uint64_t device, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+uint64_t xxCreatePipelineNULL(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
 {
     return 0;
 }

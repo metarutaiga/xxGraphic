@@ -159,6 +159,12 @@ PFN_vkCmdNextSubpass                                vkCmdNextSubpass;
 PFN_vkCmdEndRenderPass                              vkCmdEndRenderPass;
 PFN_vkCmdExecuteCommands                            vkCmdExecuteCommands;
 
+#if VK_EXT_debug_report
+PFN_vkCreateDebugReportCallbackEXT                  vkCreateDebugReportCallbackEXT;
+PFN_vkDestroyDebugReportCallbackEXT                 vkDestroyDebugReportCallbackEXT;
+PFN_vkDebugReportMessageEXT                         vkDebugReportMessageEXT;
+#endif
+
 #if VK_KHR_surface
 PFN_vkDestroySurfaceKHR                             vkDestroySurfaceKHR;
 PFN_vkGetPhysicalDeviceSurfaceSupportKHR            vkGetPhysicalDeviceSurfaceSupportKHR;
@@ -183,9 +189,18 @@ PFN_vkAcquireNextImage2KHR                          vkAcquireNextImage2KHR;
 PFN_vkCreateMacOSSurfaceMVK                         vkCreateMacOSSurfaceMVK;
 #endif
 
+#if VK_MVK_ios_surface
+PFN_vkCreateIOSSurfaceMVK                           vkCreateIOSSurfaceMVK;
+#endif
+
 #if VK_KHR_win32_surface
 PFN_vkCreateWin32SurfaceKHR                         vkCreateWin32SurfaceKHR;
 PFN_vkGetPhysicalDeviceWin32PresentationSupportKHR  vkGetPhysicalDeviceWin32PresentationSupportKHR;
+#endif
+
+#if VK_KHR_push_descriptor
+PFN_vkCmdPushDescriptorSetKHR                       vkCmdPushDescriptorSetKHR;
+PFN_vkCmdPushDescriptorSetWithTemplateKHR           vkCmdPushDescriptorSetWithTemplateKHR;
 #endif
 #endif
 

@@ -21,7 +21,7 @@ xxAPI const char*   xxGetDeviceStringVulkan(uint64_t device);
 //==============================================================================
 //  Swapchain
 //==============================================================================
-xxAPI uint64_t      xxCreateSwapchainVulkan(uint64_t device, void* view, unsigned int width, unsigned int height);
+xxAPI uint64_t      xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height);
 xxAPI void          xxDestroySwapchainVulkan(uint64_t swapchain);
 xxAPI void          xxPresentSwapchainVulkan(uint64_t swapchain);
 xxAPI uint64_t      xxGetCommandBufferVulkan(uint64_t device, uint64_t swapchain);
@@ -31,7 +31,7 @@ xxAPI uint64_t      xxGetFramebufferVulkan(uint64_t device, uint64_t swapchain);
 //==============================================================================
 xxAPI bool          xxBeginCommandBufferVulkan(uint64_t commandBuffer);
 xxAPI void          xxEndCommandBufferVulkan(uint64_t commandBuffer);
-xxAPI void          xxSubmitCommandBufferVulkan(uint64_t commandBuffer);
+xxAPI void          xxSubmitCommandBufferVulkan(uint64_t commandBuffer, uint64_t swapchain);
 //==============================================================================
 //  Render Pass
 //==============================================================================
@@ -77,7 +77,7 @@ xxAPI void          xxDestroyShaderVulkan(uint64_t device, uint64_t shader);
 xxAPI uint64_t      xxCreateBlendStateVulkan(uint64_t device, bool blending);
 xxAPI uint64_t      xxCreateDepthStencilStateVulkan(uint64_t device, bool depthTest, bool depthWrite);
 xxAPI uint64_t      xxCreateRasterizerStateVulkan(uint64_t device, bool cull, bool scissor);
-xxAPI uint64_t      xxCreatePipelineVulkan(uint64_t device, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
+xxAPI uint64_t      xxCreatePipelineVulkan(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
 xxAPI void          xxDestroyBlendStateVulkan(uint64_t blendState);
 xxAPI void          xxDestroyDepthStencilStateVulkan(uint64_t depthStencilState);
 xxAPI void          xxDestroyRasterizerStateVulkan(uint64_t rasterizerState);

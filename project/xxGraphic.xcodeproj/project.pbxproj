@@ -38,6 +38,10 @@
 		D690A364232AC52400A149EF /* vk_icd.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A351232AC52400A149EF /* vk_icd.h */; };
 		D690A368232AC54600A149EF /* xxGraphicVulkan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D690A366232AC54600A149EF /* xxGraphicVulkan.cpp */; };
 		D690A369232AC54600A149EF /* xxGraphicVulkan.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A367232AC54600A149EF /* xxGraphicVulkan.h */; };
+		D690A36D232C346500A149EF /* xxGraphicVulkanAsm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D690A36B232C346500A149EF /* xxGraphicVulkanAsm.cpp */; };
+		D690A36E232C346500A149EF /* xxGraphicVulkanAsm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D690A36B232C346500A149EF /* xxGraphicVulkanAsm.cpp */; };
+		D690A36F232C346500A149EF /* xxGraphicVulkanAsm.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A36C232C346500A149EF /* xxGraphicVulkanAsm.h */; };
+		D690A370232D90DC00A149EF /* xxGraphicVulkan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D690A366232AC54600A149EF /* xxGraphicVulkan.cpp */; };
 		D6A727AF232310F4009981AD /* xxGraphicD3DAsm.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A72796232310F2009981AD /* xxGraphicD3DAsm.h */; };
 		D6A727B1232310F4009981AD /* xxGraphicD3D8PS.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A72798232310F3009981AD /* xxGraphicD3D8PS.h */; };
 		D6A727B5232310F4009981AD /* xxGraphicD3D11.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A7279C232310F3009981AD /* xxGraphicD3D11.h */; };
@@ -121,6 +125,8 @@
 		D690A351232AC52400A149EF /* vk_icd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vk_icd.h; path = ../graphic/vulkan/vk_icd.h; sourceTree = "<group>"; };
 		D690A366232AC54600A149EF /* xxGraphicVulkan.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xxGraphicVulkan.cpp; path = ../graphic/xxGraphicVulkan.cpp; sourceTree = "<group>"; };
 		D690A367232AC54600A149EF /* xxGraphicVulkan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxGraphicVulkan.h; path = ../graphic/xxGraphicVulkan.h; sourceTree = "<group>"; };
+		D690A36B232C346500A149EF /* xxGraphicVulkanAsm.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = xxGraphicVulkanAsm.cpp; path = ../graphic/xxGraphicVulkanAsm.cpp; sourceTree = "<group>"; };
+		D690A36C232C346500A149EF /* xxGraphicVulkanAsm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = xxGraphicVulkanAsm.h; path = ../graphic/xxGraphicVulkanAsm.h; sourceTree = "<group>"; };
 		D6A72796232310F2009981AD /* xxGraphicD3DAsm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxGraphicD3DAsm.h; path = ../graphic/xxGraphicD3DAsm.h; sourceTree = "<group>"; };
 		D6A72797232310F2009981AD /* xxGraphicD3D11On12.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xxGraphicD3D11On12.cpp; path = ../graphic/xxGraphicD3D11On12.cpp; sourceTree = "<group>"; };
 		D6A72798232310F3009981AD /* xxGraphicD3D8PS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxGraphicD3D8PS.h; path = ../graphic/xxGraphicD3D8PS.h; sourceTree = "<group>"; };
@@ -243,6 +249,8 @@
 				D690A365232AC52900A149EF /* vulkan */,
 				D690A366232AC54600A149EF /* xxGraphicVulkan.cpp */,
 				D690A367232AC54600A149EF /* xxGraphicVulkan.h */,
+				D690A36B232C346500A149EF /* xxGraphicVulkanAsm.cpp */,
+				D690A36C232C346500A149EF /* xxGraphicVulkanAsm.h */,
 			);
 			name = Vulkan;
 			sourceTree = "<group>";
@@ -439,6 +447,7 @@
 				D6A727EC23231180009981AD /* xxGraphicInternal.h in Headers */,
 				D690A364232AC52400A149EF /* vk_icd.h in Headers */,
 				D690A369232AC54600A149EF /* xxGraphicVulkan.h in Headers */,
+				D690A36F232C346500A149EF /* xxGraphicVulkanAsm.h in Headers */,
 				D6A727E123231154009981AD /* xxGraphicMantle.h in Headers */,
 				D6A727E023231154009981AD /* xxGraphicMantleAsm.h in Headers */,
 				D6A727F2232318E4009981AD /* xxGraphicMetal.h in Headers */,
@@ -530,6 +539,8 @@
 				D6B70EC823283AEC000FFCBB /* xxGraphicEAGL.mm in Sources */,
 				D6DA664B23258F6F00953C5B /* xxGraphicMetal.mm in Sources */,
 				D6DA664F23258F7A00953C5B /* xxGraphicNULL.cpp in Sources */,
+				D690A370232D90DC00A149EF /* xxGraphicVulkan.cpp in Sources */,
+				D690A36E232C346500A149EF /* xxGraphicVulkanAsm.cpp in Sources */,
 				D6DA665023258F8E00953C5B /* xxSystem.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -539,12 +550,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				D644A0AD231EDE9B00B75B77 /* xxGraphic.cpp in Sources */,
+				D6B338562320209A0096D02F /* xxGraphicCGL.mm in Sources */,
 				D644A0B3231EDE9B00B75B77 /* xxGraphicGL.cpp in Sources */,
 				D644A0AF231EDE9B00B75B77 /* xxGraphicGLES2.cpp in Sources */,
-				D690A368232AC54600A149EF /* xxGraphicVulkan.cpp in Sources */,
-				D6B338562320209A0096D02F /* xxGraphicCGL.mm in Sources */,
 				D6A727F3232318E4009981AD /* xxGraphicMetal.mm in Sources */,
 				D644A0B0231EDE9B00B75B77 /* xxGraphicNULL.cpp in Sources */,
+				D690A368232AC54600A149EF /* xxGraphicVulkan.cpp in Sources */,
+				D690A36D232C346500A149EF /* xxGraphicVulkanAsm.cpp in Sources */,
 				D644A0AC231EDE9B00B75B77 /* xxSystem.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

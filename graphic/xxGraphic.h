@@ -21,7 +21,7 @@ xxAPI const char*   (*xxGetDeviceString)(uint64_t device);
 //==============================================================================
 //  Swapchain
 //==============================================================================
-xxAPI uint64_t      (*xxCreateSwapchain)(uint64_t device, void* view, unsigned int width, unsigned int height);
+xxAPI uint64_t      (*xxCreateSwapchain)(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height);
 xxAPI void          (*xxDestroySwapchain)(uint64_t swapchain);
 xxAPI void          (*xxPresentSwapchain)(uint64_t swapchain);
 xxAPI uint64_t      (*xxGetCommandBuffer)(uint64_t device, uint64_t swapchain);
@@ -31,7 +31,7 @@ xxAPI uint64_t      (*xxGetFramebuffer)(uint64_t device, uint64_t swapchain);
 //==============================================================================
 xxAPI bool          (*xxBeginCommandBuffer)(uint64_t commandBuffer);
 xxAPI void          (*xxEndCommandBuffer)(uint64_t commandBuffer);
-xxAPI void          (*xxSubmitCommandBuffer)(uint64_t commandBuffer);
+xxAPI void          (*xxSubmitCommandBuffer)(uint64_t commandBuffer, uint64_t swapchain);
 //==============================================================================
 //  Render Pass
 //==============================================================================
@@ -77,7 +77,7 @@ xxAPI void          (*xxDestroyShader)(uint64_t device, uint64_t shader);
 xxAPI uint64_t      (*xxCreateBlendState)(uint64_t device, bool blending);
 xxAPI uint64_t      (*xxCreateDepthStencilState)(uint64_t device, bool depthTest, bool depthWrite);
 xxAPI uint64_t      (*xxCreateRasterizerState)(uint64_t device, bool cull, bool scissor);
-xxAPI uint64_t      (*xxCreatePipeline)(uint64_t device, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
+xxAPI uint64_t      (*xxCreatePipeline)(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
 xxAPI void          (*xxDestroyBlendState)(uint64_t blendState);
 xxAPI void          (*xxDestroyDepthStencilState)(uint64_t depthStencilState);
 xxAPI void          (*xxDestroyRasterizerState)(uint64_t rasterizerState);

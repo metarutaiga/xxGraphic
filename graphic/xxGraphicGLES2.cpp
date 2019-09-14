@@ -106,7 +106,7 @@ struct SWAPCHAINGL
     bool        textureMipmaps[8];
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateSwapchainGLES2(uint64_t device, void* view, unsigned int width, unsigned int height)
+uint64_t xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height)
 {
     SWAPCHAINGL* glSwapchain = new SWAPCHAINGL;
     if (glSwapchain == nullptr)
@@ -192,7 +192,7 @@ void xxEndCommandBufferGLES2(uint64_t commandBuffer)
 
 }
 //------------------------------------------------------------------------------
-void xxSubmitCommandBufferGLES2(uint64_t commandBuffer)
+void xxSubmitCommandBufferGLES2(uint64_t commandBuffer, uint64_t swapchain)
 {
 }
 //==============================================================================
@@ -720,7 +720,7 @@ uint64_t xxCreateRasterizerStateGLES2(uint64_t device, bool cull, bool scissor)
     return glState.value;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
 {
     VERTEXATTRIBUTEGL* glVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEGL*>(vertexAttribute);
     if (glVertexAttribute == nullptr)
