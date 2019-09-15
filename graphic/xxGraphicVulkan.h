@@ -37,7 +37,7 @@ xxAPI void          xxSubmitCommandBufferVulkan(uint64_t commandBuffer, uint64_t
 //==============================================================================
 xxAPI uint64_t      xxCreateRenderPassVulkan(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil);
 xxAPI void          xxDestroyRenderPassVulkan(uint64_t renderPass);
-xxAPI uint64_t      xxBeginRenderPassVulkan(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, float r, float g, float b, float a, float depth, unsigned char stencil);
+xxAPI uint64_t      xxBeginRenderPassVulkan(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float r, float g, float b, float a, float depth, unsigned char stencil);
 xxAPI void          xxEndRenderPassVulkan(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass);
 //==============================================================================
 //  Buffer

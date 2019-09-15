@@ -343,6 +343,8 @@ struct ImGuiViewportDataXX
     uint64_t                Swapchain;
     uint64_t                RenderPass;
     void*                   Handle;
+    int                     Width;
+    int                     Height;
 
     ImGuiViewportDataXX()   { Swapchain = 0; Handle = nullptr; }
     ~ImGuiViewportDataXX()  { IM_ASSERT(Swapchain == 0); IM_ASSERT(RenderPass == 0); }
@@ -361,6 +363,8 @@ static void ImGui_ImplXX_CreateWindow(ImGuiViewport* viewport)
     data->Swapchain = xxCreateSwapchain(g_device, g_renderPass, handle, (int)viewport->Size.x, (int)viewport->Size.y);
     data->RenderPass = xxCreateRenderPass(g_device, true, true, true, true, true, true);
     data->Handle = handle;
+    data->Width = (int)viewport->Size.x;
+    data->Height = (int)viewport->Size.y;
     IM_ASSERT(data->Swapchain != 0);
     IM_ASSERT(data->RenderPass != 0);
 }
@@ -384,6 +388,8 @@ static void ImGui_ImplXX_SetWindowSize(ImGuiViewport* viewport, ImVec2 size)
     ImGuiViewportDataXX* data = (ImGuiViewportDataXX*)viewport->RendererUserData;
     xxDestroySwapchain(data->Swapchain);
     data->Swapchain = xxCreateSwapchain(g_device, g_renderPass, data->Handle, (int)size.x, (int)size.y);
+    data->Width = (int)size.x;
+    data->Height = (int)size.y;
     IM_ASSERT(data->Swapchain != 0);
 }
 
@@ -395,7 +401,7 @@ static void ImGui_ImplXX_RenderWindow(ImGuiViewport* viewport, void*)
     uint64_t framebuffer = xxGetFramebuffer(g_device, data->Swapchain);
     xxBeginCommandBuffer(commandBuffer);
 
-    uint64_t commandEncoder = xxBeginRenderPass(commandBuffer, framebuffer, data->RenderPass, 0, 0, 0, 0, 1.0f, 0);
+    uint64_t commandEncoder = xxBeginRenderPass(commandBuffer, framebuffer, data->RenderPass, data->Width, data->Height, 0, 0, 0, 0, 1.0f, 0);
     ImGui_ImplXX_RenderDrawData(viewport->DrawData, commandEncoder);
     xxEndRenderPass(commandEncoder, framebuffer, data->RenderPass);
 

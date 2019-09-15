@@ -167,11 +167,14 @@ static uint64_t g_swapchain = 0;
     ImGui::EndFrame();
     ImGui::Render();
 
+    int width = (int)ImGui::GetIO().DisplaySize.x;
+    int height = (int)ImGui::GetIO().DisplaySize.y;
+
     uint64_t commandBuffer = xxGetCommandBuffer(g_device, g_swapchain);
     uint64_t framebuffer = xxGetFramebuffer(g_device, g_swapchain);
     xxBeginCommandBuffer(commandBuffer);
 
-    uint64_t commandEncoder = xxBeginRenderPass(commandBuffer, framebuffer, g_renderPass, clear_color.x, clear_color.y, clear_color.z, clear_color.w, 1.0f, 0);
+    uint64_t commandEncoder = xxBeginRenderPass(commandBuffer, framebuffer, g_renderPass, width, height, clear_color.x, clear_color.y, clear_color.z, clear_color.w, 1.0f, 0);
     ImGui_ImplXX_RenderDrawData(ImGui::GetDrawData(), commandEncoder);
     xxEndRenderPass(commandEncoder, framebuffer, g_renderPass);
 
@@ -429,7 +432,7 @@ static uint64_t g_swapchain = 0;
     [self.window makeKeyAndVisible];
 #endif
 
-    g_instance = xxCreateInstanceMetal();
+    g_instance = xxCreateInstanceVulkan();
     g_device = xxCreateDevice(g_instance);
     g_renderPass = xxCreateRenderPass(g_device, true, true, true, true, true, true);
     g_swapchain = xxCreateSwapchain(g_device, g_renderPass, (__bridge void*)self.window, 0, 0);

@@ -47,6 +47,7 @@ static VkQueue                          g_queue = VK_NULL_HANDLE;
 static VkCommandPool                    g_commandPool = VK_NULL_HANDLE;
 static VkDescriptorSetLayout            g_setLayout = VK_NULL_HANDLE;
 static VkPipelineLayout                 g_pipelineLayout = VK_NULL_HANDLE;
+static VkDebugUtilsMessengerEXT         g_debugReport = VK_NULL_HANDLE;
 static uint32_t                         g_graphicFamily = 0;
 
 //==============================================================================
@@ -304,6 +305,8 @@ uint64_t xxCreateInstanceVulkan()
 {
 #if defined(xxMACOS) || defined(xxIOS)
     if (g_vulkanLibrary == nullptr)
+        g_vulkanLibrary = dlopen("libvulkan.dylib", RTLD_LAZY);
+    if (g_vulkanLibrary == nullptr)
         g_vulkanLibrary = dlopen("libMoltenVK.dylib", RTLD_LAZY);
 #endif
 
@@ -349,6 +352,10 @@ uint64_t xxCreateInstanceVulkan()
             xxLog("xxGraphic", "%s : %s", "VkInstance", instanceLayerNames[i]);
         }
     }
+    instanceLayerCount = 0;
+    instanceLayerNames[0] = "VK_LAYER_LUNARG_core_validation";
+    instanceLayerNames[1] = "VK_LAYER_LUNARG_standard_validation";
+    instanceLayerNames[2] = "VK_LAYER_LUNARG_parameter_validation";
 
     VkApplicationInfo appInfo = {};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -382,7 +389,9 @@ uint64_t xxCreateInstanceVulkan()
     debugReportInfo.pfnCallback = vkDebugReportCallbackEXT;
 
     VkDebugUtilsMessengerEXT debugReport = VK_NULL_HANDLE;
-    vkCreateDebugReportCallbackEXT(instance, &debugReportInfo, nullptr, &debugReport);
+    vkCreateDebugReportCallbackEXT(instance, &debugReportInfo, g_callbacks, &debugReport);
+
+    g_debugReport = debugReport;
 #endif
 
     xxRegisterFunction(Vulkan);
@@ -393,8 +402,16 @@ uint64_t xxCreateInstanceVulkan()
 void xxDestroyInstanceVulkan(uint64_t instance)
 {
     VkInstance vkInstance = reinterpret_cast<VkInstance>(instance);
+
     if (vkInstance)
     {
+#if VK_EXT_debug_report
+        if (g_debugReport != VK_NULL_HANDLE)
+        {
+            vkDestroyDebugReportCallbackEXT(vkInstance, g_debugReport, g_callbacks);
+            g_debugReport = VK_NULL_HANDLE;
+        }
+#endif
         vkDestroyInstance(vkInstance, g_callbacks);
     }
     g_instance = VK_NULL_HANDLE;
@@ -692,7 +709,6 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
     }
 
     id layer = objc_msgSend((id)objc_getClass("CAMetalLayer"), sel_getUid("layer"));
-    objc_msgSend(layer, sel_getUid("setDisplaySyncEnabled:"), NO);
     objc_msgSend(layer, sel_getUid("setContentsScale:"), contentsScale);
     objc_msgSend(nsView, sel_getUid("setLayer:"), layer);
     objc_msgSend(nsView, sel_getUid("setWantsLayer:"), YES);
@@ -776,6 +792,29 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
 #else
     VkSurfaceKHR surface = VK_NULL_HANDLE;
 #endif
+
+    VkBool32 presentSupport = VK_FALSE;
+    vkGetPhysicalDeviceSurfaceSupportKHR(g_physicalDevice, g_graphicFamily, surface, &presentSupport);
+    if (presentSupport == VK_FALSE)
+    {
+        vkDestroySurfaceKHR(g_instance, surface, g_callbacks);
+        xxDestroySwapchain(reinterpret_cast<uint64_t>(vkSwapchain));
+        return 0;
+    }
+
+    uint32_t surfaceFormatCount = 0;
+    vkGetPhysicalDeviceSurfaceFormatsKHR(g_physicalDevice, surface, &surfaceFormatCount, nullptr);
+
+    VkSurfaceFormatKHR* surfaceFormats = xxAlloc(VkSurfaceFormatKHR, surfaceFormatCount);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(g_physicalDevice, surface, &surfaceFormatCount, surfaceFormats);
+    xxFree(surfaceFormats);
+
+    uint32_t presentModeCount = 0;
+    vkGetPhysicalDeviceSurfacePresentModesKHR(g_physicalDevice, surface, &presentModeCount, nullptr);
+
+    VkPresentModeKHR* presentModes = xxAlloc(VkPresentModeKHR, presentModeCount);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(g_physicalDevice, surface, &presentModeCount, presentModes);
+    xxFree(presentModes);
 
     VkSwapchainCreateInfoKHR swapchainInfo = {};
     swapchainInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -1127,7 +1166,7 @@ void xxDestroyRenderPassVulkan(uint64_t renderPass)
     vkDestroyRenderPass(g_device, vkRenderPass, g_callbacks);
 }
 //------------------------------------------------------------------------------
-uint64_t xxBeginRenderPassVulkan(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, float r, float g, float b, float a, float depth, unsigned char stencil)
+uint64_t xxBeginRenderPassVulkan(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float r, float g, float b, float a, float depth, unsigned char stencil)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandBuffer);
     if (vkCommandBuffer == VK_NULL_HANDLE)
@@ -1151,8 +1190,8 @@ uint64_t xxBeginRenderPassVulkan(uint64_t commandBuffer, uint64_t framebuffer, u
     info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     info.renderPass = vkRenderPass;
     info.framebuffer = vkFramebuffer;
-    info.renderArea.extent.width = -1;
-    info.renderArea.extent.height = -1;
+    info.renderArea.extent.width = width;
+    info.renderArea.extent.height = height;
     info.clearValueCount = 1;
     info.pClearValues = clearValues;
     vkCmdBeginRenderPass(vkCommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
@@ -1361,6 +1400,8 @@ void xxDestroyBufferVulkan(uint64_t device, uint64_t buffer)
     if (vkBuffer == nullptr)
         return;
 
+    vkQueueWaitIdle(g_queue);
+
     if (vkBuffer->buffer)
         vkDestroyBuffer(vkDevice, vkBuffer->buffer, g_callbacks);
     if (vkBuffer->memory)
@@ -1433,7 +1474,7 @@ uint64_t xxCreateTextureVulkan(uint64_t device, int format, unsigned int width, 
     VkImageCreateInfo imageInfo = {};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageInfo.imageType = VK_IMAGE_TYPE_2D;
-    imageInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
+    imageInfo.format = VK_FORMAT_B8G8R8A8_UNORM;
     imageInfo.extent.width = width;
     imageInfo.extent.height = height;
     imageInfo.extent.depth = 1;
@@ -1484,7 +1525,7 @@ uint64_t xxCreateTextureVulkan(uint64_t device, int format, unsigned int width, 
     imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     imageViewInfo.image = image;
     imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    imageViewInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
+    imageViewInfo.format = VK_FORMAT_B8G8R8A8_UNORM;
     imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     imageViewInfo.subresourceRange.levelCount = 1;
     imageViewInfo.subresourceRange.layerCount = 1;
@@ -1512,6 +1553,8 @@ void xxDestroyTextureVulkan(uint64_t texture)
     TEXTUREVK* vkTexture = reinterpret_cast<TEXTUREVK*>(texture);
     if (vkTexture == nullptr)
         return;
+
+    vkQueueWaitIdle(g_queue);
 
     if (vkTexture->image != VK_NULL_HANDLE)
         vkDestroyImage(g_device, vkTexture->image, g_callbacks);
@@ -2020,6 +2063,8 @@ void xxDestroyPipelineVulkan(uint64_t pipeline)
     VkPipeline vkPipeline = static_cast<uint64_t>(pipeline);
     if (vkPipeline == VK_NULL_HANDLE)
         return;
+
+    vkQueueWaitIdle(g_queue);
 
     vkDestroyPipeline(g_device, vkPipeline, g_callbacks);
 }
