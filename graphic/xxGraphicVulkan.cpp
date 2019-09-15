@@ -1113,8 +1113,14 @@ uint64_t xxCreateRenderPassVulkan(uint64_t device, bool clearColor, bool clearDe
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
 
+#if defined(xxMACOS) || defined(xxMACCATALYST) || defined(xxWINDOWS)
+    VkFormat imageFormat = VK_FORMAT_B8G8R8A8_UNORM;
+#else
+    VkFormat imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+#endif
+
     VkAttachmentDescription attachments[1] = {};
-    attachments[0].format = VK_FORMAT_B8G8R8A8_UNORM;
+    attachments[0].format = imageFormat;
     attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
     attachments[0].loadOp = clearColor ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     attachments[0].storeOp = storeColor ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -1471,10 +1477,16 @@ uint64_t xxCreateTextureVulkan(uint64_t device, int format, unsigned int width, 
     if (vkTexture == nullptr)
         return 0;
 
+#if defined(xxMACOS) || defined(xxMACCATALYST) || defined(xxWINDOWS)
+    VkFormat imageFormat = VK_FORMAT_B8G8R8A8_UNORM;
+#else
+    VkFormat imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+#endif
+
     VkImageCreateInfo imageInfo = {};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageInfo.imageType = VK_IMAGE_TYPE_2D;
-    imageInfo.format = VK_FORMAT_B8G8R8A8_UNORM;
+    imageInfo.format = imageFormat;
     imageInfo.extent.width = width;
     imageInfo.extent.height = height;
     imageInfo.extent.depth = 1;
@@ -1525,7 +1537,7 @@ uint64_t xxCreateTextureVulkan(uint64_t device, int format, unsigned int width, 
     imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     imageViewInfo.image = image;
     imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    imageViewInfo.format = VK_FORMAT_B8G8R8A8_UNORM;
+    imageViewInfo.format = imageFormat;
     imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     imageViewInfo.subresourceRange.levelCount = 1;
     imageViewInfo.subresourceRange.layerCount = 1;
@@ -1804,7 +1816,11 @@ uint64_t xxCreateVertexAttributeVulkan(uint64_t device, int count, ...)
 
         if (element == 4 && size == sizeof(char) * 4)
         {
+#if defined(xxMACOS) || defined(xxMACCATALYST) || defined(xxWINDOWS)
             attributeDesc.format = VK_FORMAT_B8G8R8A8_UNORM;
+#else
+            attributeDesc.format = VK_FORMAT_R8G8B8A8_UNORM;
+#endif
             continue;
         }
 
