@@ -35,8 +35,8 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 // Graphic data
 static uint64_t g_instance = 0;
 static uint64_t g_device = 0;
-static uint64_t g_swapchain = 0;
 static uint64_t g_renderPass = 0;
+static uint64_t g_swapchain = 0;
 
 // Main code
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
@@ -51,8 +51,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
 
     g_instance = xxCreateInstanceD3D11();
     g_device = xxCreateDevice(g_instance);
-    g_swapchain = xxCreateSwapchain(g_device, hWnd, 0, 0);
     g_renderPass = xxCreateRenderPass(g_device, true, true, true, true, true, true);
+    g_swapchain = xxCreateSwapchain(g_device, g_renderPass, hWnd, 0, 0);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -82,7 +82,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
 
     // Setup Platform/Renderer bindings
     ImGui_ImplWin32_Init(hWnd);
-    ImGui_ImplXX_Init(g_instance, 0, g_device);
+    ImGui_ImplXX_Init(g_instance, 0, g_device, g_renderPass);
 
     // Load Fonts
     // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
@@ -211,8 +211,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
                     GRAPHIC(D3D12);
                     GRAPHIC(GLES2);
                     GRAPHIC(Mantle);
-                    GRAPHIC(Vulkan);
                     GRAPHIC(NULL);
+                    GRAPHIC(Vulkan);
 #undef GRAPHIC
                 }
 
@@ -284,7 +284,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
 
         xxEndRenderPass(commandBuffer, framebuffer, g_renderPass);
         xxEndCommandBuffer(commandBuffer);
-        xxSubmitCommandBuffer(commandBuffer);
+        xxSubmitCommandBuffer(commandBuffer, g_swapchain);
 
         xxPresentSwapchain(g_swapchain);
 
@@ -293,7 +293,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
             ImGui_ImplXX_InvalidateDeviceObjects();
             xxDestroySwapchain(g_swapchain);
             xxResetDevice(g_device);
-            g_swapchain = xxCreateSwapchain(g_device, hWnd, 0, 0);
+            g_swapchain = xxCreateSwapchain(g_device, g_renderPass, hWnd, 0, 0);
             ImGui_ImplXX_CreateDeviceObjects();
         }
 
@@ -309,12 +309,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
         {
             ImGui_ImplXX_Shutdown();
             ImGui_ImplWin32_Shutdown();
-            xxDestroyRenderPass(g_renderPass);
             xxDestroySwapchain(g_swapchain);
+            xxDestroyRenderPass(g_renderPass);
             xxDestroyDevice(g_device);
             xxDestroyInstance(g_instance);
-            g_renderPass = 0;
             g_swapchain = 0;
+            g_renderPass = 0;
             g_device = 0;
             g_instance = 0;
             if (recreateWindow)
@@ -326,10 +326,10 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
             }
             g_instance = createInstance();
             g_device = xxCreateDevice(g_instance);
-            g_swapchain = xxCreateSwapchain(g_device, hWnd, 0, 0);
             g_renderPass = xxCreateRenderPass(g_device, true, true, true, true, true, true);
+            g_swapchain = xxCreateSwapchain(g_device, g_renderPass, hWnd, 0, 0);
             ImGui_ImplWin32_Init(hWnd);
-            ImGui_ImplXX_Init(g_instance, 0, g_device);
+            ImGui_ImplXX_Init(g_instance, 0, g_device, g_renderPass);
         }
     }
 
@@ -337,8 +337,8 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
-    xxDestroyRenderPass(g_renderPass);
     xxDestroySwapchain(g_swapchain);
+    xxDestroyRenderPass(g_renderPass);
     xxDestroyDevice(g_device);
     xxDestroyInstance(g_instance);
 
@@ -365,7 +365,8 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         if (wParam != SIZE_MINIMIZED && g_swapchain)
         {
             xxDestroySwapchain(g_swapchain);
-            g_swapchain = xxCreateSwapchain(g_device, hWnd, LOWORD(lParam), HIWORD(lParam));
+            g_swapchain = 0;
+            g_swapchain = xxCreateSwapchain(g_device, g_renderPass, hWnd, LOWORD(lParam), HIWORD(lParam));
         }
         return 0;
     case WM_SYSCOMMAND:

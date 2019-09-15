@@ -38,6 +38,7 @@
     <ClCompile Include="..\graphic\xxGraphicMantleAsm.cpp" />
     <ClCompile Include="..\graphic\xxGraphicNULL.cpp" />
     <ClCompile Include="..\graphic\xxGraphicVulkan.cpp" />
+    <ClCompile Include="..\graphic\xxGraphicVulkanAsm.cpp" />
     <ClCompile Include="..\graphic\xxGraphicWGL.cpp" />
     <ClCompile Include="..\graphic\xxSystem.cpp" />
   </ItemGroup>
@@ -98,6 +99,7 @@
     <ClInclude Include="..\graphic\xxGraphicMantleAsm.h" />
     <ClInclude Include="..\graphic\xxGraphicNULL.h" />
     <ClInclude Include="..\graphic\xxGraphicVulkan.h" />
+    <ClInclude Include="..\graphic\xxGraphicVulkanAsm.h" />
     <ClInclude Include="..\graphic\xxGraphicWGL.h" />
     <ClInclude Include="..\graphic\xxSystem.h" />
   </ItemGroup>

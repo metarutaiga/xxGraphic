@@ -58,6 +58,9 @@
     <ClCompile Include="..\graphic\xxGraphicVulkan.cpp">
       <Filter>Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="..\graphic\xxGraphicVulkanAsm.cpp">
+      <Filter>Vulkan</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\graphic\xxGraphic.h" />
@@ -225,6 +228,9 @@
     </ClInclude>
     <ClInclude Include="..\graphic\vulkan\vulkan_prototype.h">
       <Filter>Vulkan\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\graphic\xxGraphicVulkanAsm.h">
+      <Filter>Vulkan</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

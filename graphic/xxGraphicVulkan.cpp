@@ -230,14 +230,6 @@ bool vkSymbols(void* (*grSymbol)(const char* name))
     if (vkSymbolFailed)
         return false;
 
-#if VK_EXT_debug_report
-    vkSymbol(vkCreateDebugReportCallbackEXT);
-    vkSymbol(vkDestroyDebugReportCallbackEXT);
-    vkSymbol(vkDebugReportMessageEXT);
-    if (vkSymbolFailed)
-        return false;
-#endif
-
 #if VK_KHR_surface
     vkSymbol(vkDestroySurfaceKHR);
     vkSymbol(vkGetPhysicalDeviceSurfaceSupportKHR);
@@ -281,6 +273,17 @@ bool vkSymbols(void* (*grSymbol)(const char* name))
         return false;
 #endif
 
+    if (g_instance == nullptr)
+        return true;
+
+#if VK_EXT_debug_report
+    vkSymbol(vkCreateDebugReportCallbackEXT);
+    vkSymbol(vkDestroyDebugReportCallbackEXT);
+    vkSymbol(vkDebugReportMessageEXT);
+    if (vkSymbolFailed)
+        return false;
+#endif
+
 #if VK_KHR_push_descriptor
     vkSymbol(vkCmdPushDescriptorSetKHR);
     vkSymbol(vkCmdPushDescriptorSetWithTemplateKHR);
@@ -291,7 +294,7 @@ bool vkSymbols(void* (*grSymbol)(const char* name))
     return true;
 }
 //------------------------------------------------------------------------------
-static VkBool32 vkDebugReportCallbackEXT(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, const char* pLayerPrefix, const char* pMessage, void* pUserData)
+static VkBool32 VKAPI_CALL vkDebugReportCallbackEXT(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, const char* pLayerPrefix, const char* pMessage, void* pUserData)
 {
     xxLog("Vulkan", "%s : %s", pLayerPrefix, pMessage);
     return VK_FALSE;
@@ -369,6 +372,8 @@ uint64_t xxCreateInstanceVulkan()
     if (instanceResult != VK_SUCCESS)
         return 0;
     g_instance = instance;
+
+    vkSymbols(vkSymbol);
 
 #if VK_EXT_debug_report
     VkDebugReportCallbackCreateInfoEXT debugReportInfo = {};
@@ -735,6 +740,32 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
             return 0;
         }
     }
+#elif defined(xxWINDOWS)
+    VkWin32SurfaceCreateInfoKHR surfaceInfo = {};
+    surfaceInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+    surfaceInfo.hinstance = GetModuleHandle(nullptr);
+    surfaceInfo.hwnd = (HWND)view;
+
+    VkSurfaceKHR surface = VK_NULL_HANDLE;
+    if (surface == VK_NULL_HANDLE)
+    {
+        VkResult result = vkCreateWin32SurfaceKHR(g_instance, &surfaceInfo, nullptr, &surface);
+        if (result != VK_SUCCESS)
+        {
+            xxDestroySwapchain(reinterpret_cast<uint64_t>(vkSwapchain));
+            return 0;
+        }
+    }
+
+    if (width == 0 || height == 0)
+    {
+        RECT rect = {};
+        if (GetWindowRect((HWND)view, &rect) == TRUE)
+        {
+            width = rect.right - rect.left;
+            height = rect.bottom - rect.top;
+        }
+    }
 #else
     VkSurfaceKHR surface = VK_NULL_HANDLE;
 #endif
@@ -1020,7 +1051,7 @@ uint64_t xxCreateRenderPassVulkan(uint64_t device, bool clearColor, bool clearDe
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
 
-    VkAttachmentDescription attachments[2] = {};
+    VkAttachmentDescription attachments[1] = {};
     attachments[0].format = VK_FORMAT_B8G8R8A8_UNORM;
     attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
     attachments[0].loadOp = clearColor ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -1029,28 +1060,15 @@ uint64_t xxCreateRenderPassVulkan(uint64_t device, bool clearColor, bool clearDe
     attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     attachments[0].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     attachments[0].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-    attachments[1].format = VK_FORMAT_B8G8R8A8_UNORM;
-    attachments[1].samples = VK_SAMPLE_COUNT_1_BIT;
-    attachments[1].loadOp = clearDepth ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    attachments[1].storeOp = clearDepth ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    attachments[1].stencilLoadOp = storeStencil ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    attachments[1].stencilStoreOp = storeStencil ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    attachments[1].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    attachments[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
     VkAttachmentReference colorAttachment = {};
     colorAttachment.attachment = 0;
     colorAttachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-    VkAttachmentReference depthAttachment = {};
-    colorAttachment.attachment = 1;
-    colorAttachment.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
     VkSubpassDescription subpass = {};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorAttachment;
-    subpass.pDepthStencilAttachment = &depthAttachment;
 
     VkSubpassDependency dependency = {};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -1062,7 +1080,7 @@ uint64_t xxCreateRenderPassVulkan(uint64_t device, bool clearColor, bool clearDe
 
     VkRenderPassCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    info.attachmentCount = 2;
+    info.attachmentCount = 1;
     info.pAttachments = attachments;
     info.subpassCount = 1;
     info.pSubpasses = &subpass;
@@ -1091,10 +1109,10 @@ uint64_t xxBeginRenderPassVulkan(uint64_t commandBuffer, uint64_t framebuffer, u
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandBuffer);
     if (vkCommandBuffer == VK_NULL_HANDLE)
         return 0;
-    VkFramebuffer vkFramebuffer = reinterpret_cast<VkFramebuffer>(framebuffer);
+    VkFramebuffer vkFramebuffer = static_cast<VkFramebuffer>(framebuffer);
     if (vkFramebuffer == VK_NULL_HANDLE)
         return 0;
-    VkRenderPass vkRenderPass = reinterpret_cast<VkRenderPass>(renderPass);
+    VkRenderPass vkRenderPass = static_cast<VkRenderPass>(renderPass);
     if (vkRenderPass == VK_NULL_HANDLE)
         return 0;
 
@@ -1110,9 +1128,9 @@ uint64_t xxBeginRenderPassVulkan(uint64_t commandBuffer, uint64_t framebuffer, u
     info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     info.renderPass = vkRenderPass;
     info.framebuffer = vkFramebuffer;
-    info.renderArea.extent.width = 1;
-    info.renderArea.extent.height = 1;
-    info.clearValueCount = 2;
+    info.renderArea.extent.width = 0;
+    info.renderArea.extent.height = 0;
+    info.clearValueCount = 1;
     info.pClearValues = clearValues;
     vkCmdBeginRenderPass(vkCommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
 
@@ -1647,7 +1665,7 @@ uint64_t xxCreateSamplerVulkan(uint64_t device, bool clampU, bool clampV, bool c
     info.addressModeU = clampU ? VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE : VK_SAMPLER_ADDRESS_MODE_REPEAT;
     info.addressModeV = clampV ? VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE : VK_SAMPLER_ADDRESS_MODE_REPEAT;
     info.addressModeW = clampW ? VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE : VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    info.maxAnisotropy = anisotropy;
+    info.maxAnisotropy = (float)anisotropy;
 
     VkSampler sampler = VK_NULL_HANDLE;
     VkResult result = vkCreateSampler(vkDevice, &info, g_callbacks, &sampler);
@@ -1856,7 +1874,7 @@ uint64_t xxCreatePipelineVulkan(uint64_t device, uint64_t renderPass, uint64_t b
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
-    VkRenderPass vkRenderPass = reinterpret_cast<VkRenderPass>(renderPass);
+    VkRenderPass vkRenderPass = static_cast<VkRenderPass>(renderPass);
     if (vkRenderPass == VK_NULL_HANDLE)
         return 0;
     VkPipelineColorBlendAttachmentState* vkBlendState = reinterpret_cast<VkPipelineColorBlendAttachmentState*>(blendState);
@@ -1980,10 +1998,10 @@ void xxSetViewportVulkan(uint64_t commandEncoder, int x, int y, int width, int h
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
 
     VkViewport vp;
-    vp.x = x;
-    vp.y = y;
-    vp.width = width;
-    vp.height = height;
+    vp.x = (float)x;
+    vp.y = (float)y;
+    vp.width = (float)width;
+    vp.height = (float)height;
     vp.minDepth = minZ;
     vp.maxDepth = maxZ;
     vkCmdSetViewport(vkCommandBuffer, 0, 1, &vp);
@@ -2004,7 +2022,7 @@ void xxSetScissorVulkan(uint64_t commandEncoder, int x, int y, int width, int he
 void xxSetPipelineVulkan(uint64_t commandEncoder, uint64_t pipeline)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
-    VkPipeline vkPipeline = reinterpret_cast<VkPipeline>(pipeline);
+    VkPipeline vkPipeline = static_cast<VkPipeline>(pipeline);
 
     vkCmdBindPipeline(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline);
 }
