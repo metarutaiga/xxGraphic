@@ -565,6 +565,7 @@ uint64_t xxCreateDeviceVulkan(uint64_t instance)
 
     VkDescriptorSetLayoutCreateInfo setLayoutInfo = {};
     setLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    setLayoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR;
     setLayoutInfo.pBindings = layoutBindings;
     setLayoutInfo.bindingCount = TOTAL_DESCRIPTOR_COUNT;
 
@@ -596,10 +597,16 @@ void xxDestroyDeviceVulkan(uint64_t device)
     if (vkDevice == VK_NULL_HANDLE)
         return;
 
+    vkDestroyPipelineLayout(vkDevice, g_pipelineLayout, g_callbacks);
+    vkDestroyDescriptorSetLayout(vkDevice, g_setLayout, g_callbacks);
     vkDestroyCommandPool(vkDevice, g_commandPool, g_callbacks);
     vkDestroyDevice(vkDevice, g_callbacks);
     g_device = VK_NULL_HANDLE;
     g_physicalDevice = VK_NULL_HANDLE;
+    g_queue = VK_NULL_HANDLE;
+    g_commandPool = VK_NULL_HANDLE;
+    g_setLayout = VK_NULL_HANDLE;
+    g_pipelineLayout = VK_NULL_HANDLE;
 }
 //------------------------------------------------------------------------------
 void xxResetDeviceVulkan(uint64_t device)
@@ -781,7 +788,7 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
     swapchainInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     swapchainInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
     swapchainInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    swapchainInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR;
+    swapchainInfo.presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
     swapchainInfo.clipped = VK_TRUE;
     swapchainInfo.oldSwapchain = VK_NULL_HANDLE;
 
@@ -916,11 +923,27 @@ void xxDestroySwapchainVulkan(uint64_t swapchain)
     if (vkSwapchain == nullptr)
         return;
 
+    vkQueueWaitIdle(g_queue);
+
     for (uint32_t i = 0; i < vkSwapchain->imageCount; i++)
     {
+        if (vkSwapchain->commandBuffers[i])
+            vkFreeCommandBuffers(g_device, g_commandPool, 1, &vkSwapchain->commandBuffers[i]);
+        if (vkSwapchain->fences[i])
+            vkDestroyFence(g_device, vkSwapchain->fences[i], g_callbacks);
+        if (vkSwapchain->imageSemaphores[i])
+            vkDestroySemaphore(g_device, vkSwapchain->imageSemaphores[i], g_callbacks);
+        if (vkSwapchain->presentSemaphores[i])
+            vkDestroySemaphore(g_device, vkSwapchain->presentSemaphores[i], g_callbacks);
+        if (vkSwapchain->framebuffers[i])
+            vkDestroyFramebuffer(g_device, vkSwapchain->framebuffers[i], g_callbacks);
         if (vkSwapchain->imageViews[i])
             vkDestroyImageView(g_device, vkSwapchain->imageViews[i], g_callbacks);
     }
+    if (vkSwapchain->depthStencil)
+        vkDestroyImage(g_device, vkSwapchain->depthStencil, g_callbacks);
+    if (vkSwapchain->depthStencilView)
+        vkDestroyImageView(g_device, vkSwapchain->depthStencilView, g_callbacks);
     if (vkSwapchain->swapchain)
         vkDestroySwapchainKHR(g_device, vkSwapchain->swapchain, g_callbacks);
     if (vkSwapchain->surface)
@@ -1128,8 +1151,8 @@ uint64_t xxBeginRenderPassVulkan(uint64_t commandBuffer, uint64_t framebuffer, u
     info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     info.renderPass = vkRenderPass;
     info.framebuffer = vkFramebuffer;
-    info.renderArea.extent.width = 0;
-    info.renderArea.extent.height = 0;
+    info.renderArea.extent.width = -1;
+    info.renderArea.extent.height = -1;
     info.clearValueCount = 1;
     info.pClearValues = clearValues;
     vkCmdBeginRenderPass(vkCommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
@@ -1370,6 +1393,12 @@ void xxUnmapBufferVulkan(uint64_t device, uint64_t buffer)
         return;
 
     vkUnmapMemory(vkDevice, vkBuffer->memory);
+
+    VkMappedMemoryRange range = {};
+    range.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+    range.memory = vkBuffer->memory;
+    range.size = VK_WHOLE_SIZE;
+    vkFlushMappedMemoryRanges(vkDevice, 1, &range);
 }
 //==============================================================================
 //  Texture
@@ -1388,6 +1417,7 @@ struct TEXTUREVK
     VkBuffer        uploadBuffer;
     VkDeviceMemory  uploadMemory;
     VkDeviceSize    uploadSize;
+    VkDeviceSize    uploadStride;
 };
 //------------------------------------------------------------------------------
 uint64_t xxCreateTextureVulkan(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array)
@@ -1552,7 +1582,10 @@ void* xxMapTextureVulkan(uint64_t device, uint64_t texture, unsigned int& stride
         vkTexture->uploadBuffer = buffer;
         vkTexture->uploadMemory = memory;
         vkTexture->uploadSize = req.size;
+        vkTexture->uploadStride = req.size / vkTexture->array / vkTexture->depth / vkTexture->height;
     }
+
+    stride = (int)vkTexture->uploadStride;
 
     void* ptr = nullptr;
     vkMapMemory(vkDevice, vkTexture->uploadMemory, 0, vkTexture->uploadSize, 0, &ptr);
