@@ -200,12 +200,13 @@ static uint64_t g_swapchain = 0;
         ImGui::RenderPlatformWindowsDefault();
     }
 
-#if defined(xxMACOS)
     // Recreate Graphic API
     if (createInstance != nullptr)
     {
         ImGui_ImplXX_Shutdown();
+#if defined(xxMACOS)
         ImGui_ImplOSX_Shutdown();
+#endif
         xxDestroySwapchain(g_swapchain);
         xxDestroyRenderPass(g_renderPass);
         xxDestroyDevice(g_device);
@@ -218,10 +219,11 @@ static uint64_t g_swapchain = 0;
         g_device = xxCreateDevice(g_instance);
         g_renderPass = xxCreateRenderPass(g_device, true, true, true, true, true, true);
         g_swapchain = xxCreateSwapchain(g_device, g_renderPass, (__bridge void*)[self window], 0, 0);
+#if defined(xxMACOS)
         ImGui_ImplOSX_Init(self);
+#endif
         ImGui_ImplXX_Init(g_instance, 0, g_device, g_renderPass);
     }
-#endif
 }
 
 -(void)reset
@@ -278,6 +280,18 @@ static uint64_t g_swapchain = 0;
 -(void)scrollWheel:(NSEvent *)event     { ImGui_ImplOSX_HandleEvent(event, self.view);  }
 
 #elif TARGET_OS_IOS
+
+-(void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id <UIViewControllerTransitionCoordinator>)coordinator
+{
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+
+    if (g_swapchain)
+    {
+        xxDestroySwapchain(g_swapchain);
+        g_swapchain = 0;
+        g_swapchain = xxCreateSwapchain(g_device, g_renderPass, (__bridge void*)[self.view window], size.width, size.height);
+    }
+}
 
 // This touch mapping is super cheesy/hacky. We treat any touch on the screen
 // as if it were a depressed left mouse button, and we don't bother handling
@@ -432,7 +446,7 @@ static uint64_t g_swapchain = 0;
     [self.window makeKeyAndVisible];
 #endif
 
-    g_instance = xxCreateInstanceVulkan();
+    g_instance = xxCreateInstanceMetal();
     g_device = xxCreateDevice(g_instance);
     g_renderPass = xxCreateRenderPass(g_device, true, true, true, true, true, true);
     g_swapchain = xxCreateSwapchain(g_device, g_renderPass, (__bridge void*)self.window, 0, 0);
