@@ -275,10 +275,13 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int)
         ImGui::EndFrame();
         ImGui::Render();
 
+        int width = (int)ImGui::GetIO().DisplaySize.x;
+        int height = (int)ImGui::GetIO().DisplaySize.y;
+
         uint64_t commandBuffer = xxGetCommandBuffer(g_device, g_swapchain);
         uint64_t framebuffer = xxGetFramebuffer(g_device, g_swapchain);
         xxBeginCommandBuffer(commandBuffer);
-        xxBeginRenderPass(commandBuffer, framebuffer, g_renderPass, clear_color.x, clear_color.y, clear_color.z, clear_color.w, 1.0f, 0);
+        xxBeginRenderPass(commandBuffer, framebuffer, g_renderPass, width, height, clear_color.x, clear_color.y, clear_color.z, clear_color.w, 1.0f, 0);
 
         ImGui_ImplXX_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
 
