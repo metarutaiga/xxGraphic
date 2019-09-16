@@ -42,6 +42,8 @@
 		D690A36E232C346500A149EF /* xxGraphicVulkanAsm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D690A36B232C346500A149EF /* xxGraphicVulkanAsm.cpp */; };
 		D690A36F232C346500A149EF /* xxGraphicVulkanAsm.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A36C232C346500A149EF /* xxGraphicVulkanAsm.h */; };
 		D690A370232D90DC00A149EF /* xxGraphicVulkan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D690A366232AC54600A149EF /* xxGraphicVulkan.cpp */; };
+		D690A37723300D3800A149EF /* spirv.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A37523300D3800A149EF /* spirv.h */; };
+		D690A37823300D3800A149EF /* GLSL.std.450.h in Headers */ = {isa = PBXBuildFile; fileRef = D690A37623300D3800A149EF /* GLSL.std.450.h */; };
 		D6A727AF232310F4009981AD /* xxGraphicD3DAsm.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A72796232310F2009981AD /* xxGraphicD3DAsm.h */; };
 		D6A727B1232310F4009981AD /* xxGraphicD3D8PS.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A72798232310F3009981AD /* xxGraphicD3D8PS.h */; };
 		D6A727B5232310F4009981AD /* xxGraphicD3D11.h in Headers */ = {isa = PBXBuildFile; fileRef = D6A7279C232310F3009981AD /* xxGraphicD3D11.h */; };
@@ -127,6 +129,8 @@
 		D690A367232AC54600A149EF /* xxGraphicVulkan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxGraphicVulkan.h; path = ../graphic/xxGraphicVulkan.h; sourceTree = "<group>"; };
 		D690A36B232C346500A149EF /* xxGraphicVulkanAsm.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = xxGraphicVulkanAsm.cpp; path = ../graphic/xxGraphicVulkanAsm.cpp; sourceTree = "<group>"; };
 		D690A36C232C346500A149EF /* xxGraphicVulkanAsm.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = xxGraphicVulkanAsm.h; path = ../graphic/xxGraphicVulkanAsm.h; sourceTree = "<group>"; };
+		D690A37523300D3800A149EF /* spirv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = spirv.h; path = ../graphic/vulkan/spirv.h; sourceTree = "<group>"; };
+		D690A37623300D3800A149EF /* GLSL.std.450.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLSL.std.450.h; path = ../graphic/vulkan/GLSL.std.450.h; sourceTree = "<group>"; };
 		D6A72796232310F2009981AD /* xxGraphicD3DAsm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxGraphicD3DAsm.h; path = ../graphic/xxGraphicD3DAsm.h; sourceTree = "<group>"; };
 		D6A72797232310F2009981AD /* xxGraphicD3D11On12.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = xxGraphicD3D11On12.cpp; path = ../graphic/xxGraphicD3D11On12.cpp; sourceTree = "<group>"; };
 		D6A72798232310F3009981AD /* xxGraphicD3D8PS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = xxGraphicD3D8PS.h; path = ../graphic/xxGraphicD3D8PS.h; sourceTree = "<group>"; };
@@ -258,6 +262,8 @@
 		D690A365232AC52900A149EF /* vulkan */ = {
 			isa = PBXGroup;
 			children = (
+				D690A37623300D3800A149EF /* GLSL.std.450.h */,
+				D690A37523300D3800A149EF /* spirv.h */,
 				D690A351232AC52400A149EF /* vk_icd.h */,
 				D690A341232AC52300A149EF /* vk_layer.h */,
 				D690A345232AC52300A149EF /* vk_platform.h */,
@@ -413,6 +419,7 @@
 				D6A727C2232310F4009981AD /* xxGraphicD3D8.h in Headers */,
 				D690A35C232AC52400A149EF /* vulkan_win32.h in Headers */,
 				D6A727B1232310F4009981AD /* xxGraphicD3D8PS.h in Headers */,
+				D690A37823300D3800A149EF /* GLSL.std.450.h in Headers */,
 				D690A353232AC52400A149EF /* vulkan_xcb.h in Headers */,
 				D690A352232AC52400A149EF /* vulkan_core.h in Headers */,
 				D6A727C5232310F4009981AD /* xxGraphicD3D9.h in Headers */,
@@ -435,6 +442,7 @@
 				D6A727BE232310F4009981AD /* xxGraphicD3D11On12.h in Headers */,
 				D690A35D232AC52400A149EF /* vulkan_vi.h in Headers */,
 				D690A35F232AC52400A149EF /* vulkan_fuchsia.h in Headers */,
+				D690A37723300D3800A149EF /* spirv.h in Headers */,
 				D6A727B7232310F4009981AD /* xxGraphicD3D12.h in Headers */,
 				D6A727AF232310F4009981AD /* xxGraphicD3DAsm.h in Headers */,
 				D644A0AB231EDE9B00B75B77 /* xxGraphicGL.h in Headers */,
