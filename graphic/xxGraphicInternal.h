@@ -1,5 +1,26 @@
 #pragma once
 
+enum xxGraphicDescriptor
+{
+    VERTEX_UNIFORM          = 0,
+    FRAGMENT_UNIFORM        = 1,
+    VERTEX_TEXTURE          = 2,
+    FRAGMENT_TEXTURE        = 6,
+    VERTEX_SAMPLER          = 14,
+    FRAGMENT_SAMPLER        = 18,
+    TOTAL                   = 26,
+
+    VERTEX_UNIFORM_COUNT    = FRAGMENT_UNIFORM  - VERTEX_UNIFORM,
+    FRAGMENT_UNIFORM_COUNT  = VERTEX_TEXTURE    - FRAGMENT_UNIFORM,
+    VERTEX_TEXTURE_COUNT    = FRAGMENT_TEXTURE  - VERTEX_TEXTURE,
+    FRAGMENT_TEXTURE_COUNT  = VERTEX_SAMPLER    - FRAGMENT_TEXTURE,
+    VERTEX_SAMPLER_COUNT    = FRAGMENT_SAMPLER  - VERTEX_SAMPLER,
+    FRAGMENT_SAMPLER_COUNT  = TOTAL             - FRAGMENT_SAMPLER,
+
+    VERTEX_BUFFER           = TOTAL,
+    VERTEX_BUFFER_COUNT     = 4,
+};
+
 #define xxRegisterFunction(API) \
     xxCreateInstance = xxCreateInstance ## API; \
     xxDestroyInstance = xxDestroyInstance ## API; \

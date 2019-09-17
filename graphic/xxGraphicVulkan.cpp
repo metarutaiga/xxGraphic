@@ -29,14 +29,6 @@
 #define VK_PROTOTYPES                   1
 #include "vulkan/vulkan.h"
 #include "vulkan/vulkan_prototype.h"
-#define NUM_DESCRIPTOR_COUNT            (8)
-#define BASE_VERTEX_CONSTANT            (0)
-#define BASE_FRAGMENT_CONSTANT          (1)
-#define BASE_VERTEX_TEXTURE             (2)
-#define BASE_FRAGMENT_TEXTURE           (2 + NUM_DESCRIPTOR_COUNT * 1)
-#define BASE_VERTEX_SAMPLER             (2 + NUM_DESCRIPTOR_COUNT * 2)
-#define BASE_FRAGMENT_SAMPLER           (2 + NUM_DESCRIPTOR_COUNT * 3)
-#define TOTAL_DESCRIPTOR_COUNT          (2 + NUM_DESCRIPTOR_COUNT * 4)
 
 static void*                            g_vulkanLibrary = nullptr;
 static VkInstance                       g_instance = VK_NULL_HANDLE;
@@ -551,40 +543,55 @@ uint64_t xxCreateDeviceVulkan(uint64_t instance)
     if (commandPoolResult != VK_SUCCESS)
         return 0;
 
-    VkDescriptorSetLayoutBinding layoutBindings[TOTAL_DESCRIPTOR_COUNT] = {};
-    layoutBindings[BASE_VERTEX_CONSTANT].binding = BASE_VERTEX_CONSTANT;
-    layoutBindings[BASE_VERTEX_CONSTANT].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    layoutBindings[BASE_VERTEX_CONSTANT].descriptorCount = 1;
-    layoutBindings[BASE_VERTEX_CONSTANT].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    layoutBindings[BASE_FRAGMENT_CONSTANT].binding = BASE_FRAGMENT_CONSTANT;
-    layoutBindings[BASE_FRAGMENT_CONSTANT].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    layoutBindings[BASE_FRAGMENT_CONSTANT].descriptorCount = 1;
-    layoutBindings[BASE_FRAGMENT_CONSTANT].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    for (int i = 0; i < NUM_DESCRIPTOR_COUNT; ++i)
+    VkDescriptorSetLayoutBinding layoutBindings[xxGraphicDescriptor::TOTAL] = {};
+    for (int i = 0; i < xxGraphicDescriptor::VERTEX_UNIFORM_COUNT; ++i)
     {
-        layoutBindings[BASE_VERTEX_TEXTURE + i].binding = BASE_VERTEX_TEXTURE + i;
-        layoutBindings[BASE_VERTEX_TEXTURE + i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-        layoutBindings[BASE_VERTEX_TEXTURE + i].descriptorCount = 1;
-        layoutBindings[BASE_VERTEX_TEXTURE + i].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-        layoutBindings[BASE_FRAGMENT_TEXTURE + i].binding = BASE_FRAGMENT_TEXTURE + i;
-        layoutBindings[BASE_FRAGMENT_TEXTURE + i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-        layoutBindings[BASE_FRAGMENT_TEXTURE + i].descriptorCount = 1;
-        layoutBindings[BASE_FRAGMENT_TEXTURE + i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-        layoutBindings[BASE_VERTEX_SAMPLER + i].binding = BASE_VERTEX_SAMPLER + i;
-        layoutBindings[BASE_VERTEX_SAMPLER + i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-        layoutBindings[BASE_VERTEX_SAMPLER + i].descriptorCount = 1;
-        layoutBindings[BASE_VERTEX_SAMPLER + i].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-        layoutBindings[BASE_FRAGMENT_SAMPLER + i].binding = BASE_FRAGMENT_SAMPLER + i;
-        layoutBindings[BASE_FRAGMENT_SAMPLER + i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-        layoutBindings[BASE_FRAGMENT_SAMPLER + i].descriptorCount = 1;
-        layoutBindings[BASE_FRAGMENT_SAMPLER + i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        layoutBindings[xxGraphicDescriptor::VERTEX_UNIFORM + i].binding = xxGraphicDescriptor::VERTEX_UNIFORM + i;
+        layoutBindings[xxGraphicDescriptor::VERTEX_UNIFORM + i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        layoutBindings[xxGraphicDescriptor::VERTEX_UNIFORM + i].descriptorCount = 1;
+        layoutBindings[xxGraphicDescriptor::VERTEX_UNIFORM + i].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    }
+    for (int i = 0; i < xxGraphicDescriptor::FRAGMENT_UNIFORM_COUNT; ++i)
+    {
+        layoutBindings[xxGraphicDescriptor::FRAGMENT_UNIFORM + i].binding = xxGraphicDescriptor::FRAGMENT_UNIFORM + i;
+        layoutBindings[xxGraphicDescriptor::FRAGMENT_UNIFORM + i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        layoutBindings[xxGraphicDescriptor::FRAGMENT_UNIFORM + i].descriptorCount = 1;
+        layoutBindings[xxGraphicDescriptor::FRAGMENT_UNIFORM + i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    }
+    for (int i = 0; i < xxGraphicDescriptor::VERTEX_TEXTURE_COUNT; ++i)
+    {
+        layoutBindings[xxGraphicDescriptor::VERTEX_TEXTURE + i].binding = xxGraphicDescriptor::VERTEX_TEXTURE + i;
+        layoutBindings[xxGraphicDescriptor::VERTEX_TEXTURE + i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        layoutBindings[xxGraphicDescriptor::VERTEX_TEXTURE + i].descriptorCount = 1;
+        layoutBindings[xxGraphicDescriptor::VERTEX_TEXTURE + i].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    }
+    for (int i = 0; i < xxGraphicDescriptor::FRAGMENT_TEXTURE_COUNT; ++i)
+    {
+        layoutBindings[xxGraphicDescriptor::FRAGMENT_TEXTURE + i].binding = xxGraphicDescriptor::FRAGMENT_TEXTURE + i;
+        layoutBindings[xxGraphicDescriptor::FRAGMENT_TEXTURE + i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        layoutBindings[xxGraphicDescriptor::FRAGMENT_TEXTURE + i].descriptorCount = 1;
+        layoutBindings[xxGraphicDescriptor::FRAGMENT_TEXTURE + i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+    }
+    for (int i = 0; i < xxGraphicDescriptor::VERTEX_SAMPLER_COUNT; ++i)
+    {
+        layoutBindings[xxGraphicDescriptor::VERTEX_SAMPLER + i].binding = xxGraphicDescriptor::VERTEX_SAMPLER + i;
+        layoutBindings[xxGraphicDescriptor::VERTEX_SAMPLER + i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+        layoutBindings[xxGraphicDescriptor::VERTEX_SAMPLER + i].descriptorCount = 1;
+        layoutBindings[xxGraphicDescriptor::VERTEX_SAMPLER + i].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    }
+    for (int i = 0; i < xxGraphicDescriptor::FRAGMENT_SAMPLER_COUNT; ++i)
+    {
+        layoutBindings[xxGraphicDescriptor::FRAGMENT_SAMPLER + i].binding = xxGraphicDescriptor::FRAGMENT_SAMPLER + i;
+        layoutBindings[xxGraphicDescriptor::FRAGMENT_SAMPLER + i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+        layoutBindings[xxGraphicDescriptor::FRAGMENT_SAMPLER + i].descriptorCount = 1;
+        layoutBindings[xxGraphicDescriptor::FRAGMENT_SAMPLER + i].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     }
 
     VkDescriptorSetLayoutCreateInfo setLayoutInfo = {};
     setLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     setLayoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR;
     setLayoutInfo.pBindings = layoutBindings;
-    setLayoutInfo.bindingCount = TOTAL_DESCRIPTOR_COUNT;
+    setLayoutInfo.bindingCount = xxGraphicDescriptor::TOTAL;
 
     VkDescriptorSetLayout setLayout = VK_NULL_HANDLE;
     VkResult setLayoutResult = vkCreateDescriptorSetLayout(vkDevice, &setLayoutInfo, nullptr, &setLayout);
@@ -2132,8 +2139,8 @@ void xxSetIndexBufferVulkan(uint64_t commandEncoder, uint64_t buffer)
 void xxSetVertexBuffersVulkan(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
-    VkBuffer vkBuffers[NUM_DESCRIPTOR_COUNT];
-    VkDeviceSize vkOffsets[NUM_DESCRIPTOR_COUNT];
+    VkBuffer vkBuffers[xxGraphicDescriptor::VERTEX_BUFFER_COUNT];
+    VkDeviceSize vkOffsets[xxGraphicDescriptor::VERTEX_BUFFER_COUNT];
 
     for (int i = 0; i < count; ++i)
     {
@@ -2148,8 +2155,8 @@ void xxSetVertexBuffersVulkan(uint64_t commandEncoder, int count, const uint64_t
 void xxSetVertexTexturesVulkan(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
-    VkDescriptorImageInfo imageInfos[NUM_DESCRIPTOR_COUNT];
-    VkWriteDescriptorSet sets[NUM_DESCRIPTOR_COUNT];
+    VkDescriptorImageInfo imageInfos[xxGraphicDescriptor::VERTEX_TEXTURE_COUNT];
+    VkWriteDescriptorSet sets[xxGraphicDescriptor::VERTEX_TEXTURE_COUNT];
 
     for (int i = 0; i < count; ++i)
     {
@@ -2160,7 +2167,7 @@ void xxSetVertexTexturesVulkan(uint64_t commandEncoder, int count, const uint64_
         sets[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         sets[i].pNext = nullptr;
         sets[i].dstSet = VK_NULL_HANDLE;
-        sets[i].dstBinding = BASE_VERTEX_TEXTURE + i;
+        sets[i].dstBinding = xxGraphicDescriptor::VERTEX_TEXTURE + i;
         sets[i].dstArrayElement = 0;
         sets[i].descriptorCount = 1;
         sets[i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
@@ -2175,8 +2182,8 @@ void xxSetVertexTexturesVulkan(uint64_t commandEncoder, int count, const uint64_
 void xxSetFragmentTexturesVulkan(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
-    VkDescriptorImageInfo imageInfos[NUM_DESCRIPTOR_COUNT];
-    VkWriteDescriptorSet sets[NUM_DESCRIPTOR_COUNT];
+    VkDescriptorImageInfo imageInfos[xxGraphicDescriptor::FRAGMENT_TEXTURE_COUNT];
+    VkWriteDescriptorSet sets[xxGraphicDescriptor::FRAGMENT_TEXTURE_COUNT];
 
     for (int i = 0; i < count; ++i)
     {
@@ -2187,7 +2194,7 @@ void xxSetFragmentTexturesVulkan(uint64_t commandEncoder, int count, const uint6
         sets[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         sets[i].pNext = nullptr;
         sets[i].dstSet = VK_NULL_HANDLE;
-        sets[i].dstBinding = BASE_FRAGMENT_TEXTURE + i;
+        sets[i].dstBinding = xxGraphicDescriptor::FRAGMENT_TEXTURE + i;
         sets[i].dstArrayElement = 0;
         sets[i].descriptorCount = 1;
         sets[i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
@@ -2202,8 +2209,8 @@ void xxSetFragmentTexturesVulkan(uint64_t commandEncoder, int count, const uint6
 void xxSetVertexSamplersVulkan(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
-    VkDescriptorImageInfo imageInfos[NUM_DESCRIPTOR_COUNT];
-    VkWriteDescriptorSet sets[NUM_DESCRIPTOR_COUNT];
+    VkDescriptorImageInfo imageInfos[xxGraphicDescriptor::VERTEX_SAMPLER_COUNT];
+    VkWriteDescriptorSet sets[xxGraphicDescriptor::VERTEX_SAMPLER_COUNT];
 
     for (int i = 0; i < count; ++i)
     {
@@ -2214,7 +2221,7 @@ void xxSetVertexSamplersVulkan(uint64_t commandEncoder, int count, const uint64_
         sets[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         sets[i].pNext = nullptr;
         sets[i].dstSet = VK_NULL_HANDLE;
-        sets[i].dstBinding = BASE_VERTEX_SAMPLER + i;
+        sets[i].dstBinding = xxGraphicDescriptor::VERTEX_SAMPLER + i;
         sets[i].dstArrayElement = 0;
         sets[i].descriptorCount = 1;
         sets[i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
@@ -2229,8 +2236,8 @@ void xxSetVertexSamplersVulkan(uint64_t commandEncoder, int count, const uint64_
 void xxSetFragmentSamplersVulkan(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
-    VkDescriptorImageInfo imageInfos[NUM_DESCRIPTOR_COUNT];
-    VkWriteDescriptorSet sets[NUM_DESCRIPTOR_COUNT];
+    VkDescriptorImageInfo imageInfos[xxGraphicDescriptor::FRAGMENT_SAMPLER_COUNT];
+    VkWriteDescriptorSet sets[xxGraphicDescriptor::FRAGMENT_SAMPLER_COUNT];
 
     for (int i = 0; i < count; ++i)
     {
@@ -2241,7 +2248,7 @@ void xxSetFragmentSamplersVulkan(uint64_t commandEncoder, int count, const uint6
         sets[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         sets[i].pNext = nullptr;
         sets[i].dstSet = VK_NULL_HANDLE;
-        sets[i].dstBinding = BASE_FRAGMENT_SAMPLER + i;
+        sets[i].dstBinding = xxGraphicDescriptor::FRAGMENT_SAMPLER + i;
         sets[i].dstArrayElement = 0;
         sets[i].descriptorCount = 1;
         sets[i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
@@ -2266,7 +2273,7 @@ void xxSetVertexConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, u
     set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     set.pNext = nullptr;
     set.dstSet = VK_NULL_HANDLE;
-    set.dstBinding = BASE_VERTEX_CONSTANT;
+    set.dstBinding = xxGraphicDescriptor::VERTEX_UNIFORM;
     set.dstArrayElement = 0;
     set.descriptorCount = 1;
     set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -2290,7 +2297,7 @@ void xxSetFragmentConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer,
     set.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     set.pNext = nullptr;
     set.dstSet = VK_NULL_HANDLE;
-    set.dstBinding = BASE_FRAGMENT_CONSTANT;
+    set.dstBinding = xxGraphicDescriptor::FRAGMENT_UNIFORM;
     set.dstArrayElement = 0;
     set.descriptorCount = 1;
     set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;

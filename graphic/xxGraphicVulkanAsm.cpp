@@ -1,3 +1,4 @@
+#include "xxGraphicInternal.h"
 #include "xxGraphicVulkanAsm.h"
 
 #include "vulkan/spirv.h"
@@ -143,9 +144,9 @@ const uint32_t fragmentShaderCodeSPIRV[] =
     Op(SpvOpDecorate, 4),               9, SpvDecorationLocation, 0,
     Op(SpvOpDecorate, 4),               13, SpvDecorationLocation, 0,
     Op(SpvOpDecorate, 4),               21, SpvDecorationDescriptorSet, 0,
-    Op(SpvOpDecorate, 4),               21, SpvDecorationBinding, 10,
+    Op(SpvOpDecorate, 4),               21, SpvDecorationBinding, xxGraphicDescriptor::FRAGMENT_TEXTURE,
     Op(SpvOpDecorate, 4),               25, SpvDecorationDescriptorSet, 0,
-    Op(SpvOpDecorate, 4),               25, SpvDecorationBinding, 26,
+    Op(SpvOpDecorate, 4),               25, SpvDecorationBinding, xxGraphicDescriptor::FRAGMENT_SAMPLER,
     Op(SpvOpTypeVoid, 2),               2,
     Op(SpvOpTypeFunction, 3),           3, 2,
     Op(SpvOpTypeFloat, 3),              6, 32,

@@ -14,6 +14,7 @@
 #endif
 #undef MTLCreateSystemDefaultDevice
 #undef MTLCopyAllDevices
+
 static void*                        g_metalLibrary = nullptr;
 static id <MTLDevice> __nullable    (*MTLCreateSystemDefaultDevice)() = nullptr;
 static void*                        (*MTLCopyAllDevices)() = nullptr;
@@ -25,10 +26,6 @@ static Class                        classMTLRenderPipelineDescriptor = nil;
 static Class                        classMTLSamplerDescriptor = nil;
 static Class                        classMTLTextureDescriptor = nil;
 static Class                        classMTLVertexDescriptor = nil;
-#define BASE_VERTEX_CONSTANT        (0)
-#define BASE_FRAGMENT_CONSTANT      (0)
-#define BASE_VERTEX_BUFFER          (1)
-#define BASE_FRAGMENT_BUFFER        (1)
 
 //==============================================================================
 //  Instance
@@ -501,7 +498,7 @@ uint64_t xxCreateVertexAttributeMetal(uint64_t device, int count, ...)
 
         MTLVertexAttributeDescriptor* attribute = desc.attributes[i];
         attribute.offset = offset;
-        attribute.bufferIndex = BASE_VERTEX_BUFFER + stream;
+        attribute.bufferIndex = xxGraphicDescriptor::VERTEX_BUFFER + stream;
 
         switch (size / element)
         {
@@ -548,7 +545,7 @@ uint64_t xxCreateVertexAttributeMetal(uint64_t device, int count, ...)
     }
     va_end(args);
 
-    MTLVertexBufferLayoutDescriptor* layout = desc.layouts[BASE_VERTEX_BUFFER];
+    MTLVertexBufferLayoutDescriptor* layout = desc.layouts[xxGraphicDescriptor::VERTEX_BUFFER];
     layout.stride = stride;
     layout.stepRate = MTLVertexStepFunctionPerVertex;
 
@@ -811,7 +808,7 @@ void xxSetVertexBuffersMetal(uint64_t commandEncoder, int count, const uint64_t*
         offsets[i] = 0;
     }
 
-    [mtlCommandEncoder setVertexBuffers:mtlBuffers offsets:offsets withRange:NSMakeRange(BASE_VERTEX_BUFFER, count)];
+    [mtlCommandEncoder setVertexBuffers:mtlBuffers offsets:offsets withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_BUFFER, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesMetal(uint64_t commandEncoder, int count, const uint64_t* textures)
@@ -873,7 +870,7 @@ void xxSetVertexConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, un
     id <MTLRenderCommandEncoder> mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
     id <MTLBuffer> mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);
 
-    [mtlCommandEncoder setVertexBuffer:mtlBuffer offset:0 atIndex:BASE_VERTEX_CONSTANT];
+    [mtlCommandEncoder setVertexBuffer:mtlBuffer offset:0 atIndex:0];
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
@@ -881,7 +878,7 @@ void xxSetFragmentConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, 
     id <MTLRenderCommandEncoder> mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
     id <MTLBuffer> mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);
 
-    [mtlCommandEncoder setFragmentBuffer:mtlBuffer offset:0 atIndex:BASE_FRAGMENT_CONSTANT];
+    [mtlCommandEncoder setFragmentBuffer:mtlBuffer offset:0 atIndex:0];
 }
 //------------------------------------------------------------------------------
 void xxDrawIndexedMetal(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
