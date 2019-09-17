@@ -18,7 +18,7 @@ A simulate Next-Generation Graphic API for ImGui
 | Vulkan          | ❌      | ⭕  | ⭕    | ❌     | 12-18-2015 |
 | ATI3DCIF        |         |     |       |         | 10-08-1996 |
 | RRedline        |         |     |       |         | 12-02-1996 |
-| Glide 2         |         |     |       |         | 01-23-1997 |
+| Glide 2         |         |     |       |         | 07-17-1996 |
 | Glide 3         |         |     |       |         | 08-05-1998 |
 | MSI             |         |     |       |         | 07-01-1997 |
 | MeTaL           |         |     |       |         | 05-04-1998 |
