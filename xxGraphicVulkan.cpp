@@ -430,16 +430,29 @@ uint64_t xxCreateInstanceVulkan()
 
     VkInstance instance = VK_NULL_HANDLE;
     VkResult instanceResult = vkCreateInstance(&instanceCreateInfo, g_callbacks, &instance);
+    if (instanceResult != VK_SUCCESS)
+    {
+        xxFree(instanceExtensionProperties);
+        xxFree(instanceExtensionNames);
+        xxFree(instanceLayerProperties);
+        xxFree(instanceLayerNames);
+        return 0;
+    }
+    g_instance = instance;
+
+    vkSymbols(vkSymbol);
+    VK_EXT_debug_report = false;
+    for (uint32_t i = 0; i < instanceExtensionCount; ++i)
+    {
+        if (VK_EXT_debug_report == false && vkCreateDebugReportCallbackEXT && strcmp(instanceExtensionNames[i], "VK_EXT_debug_report") == 0)
+        {
+            VK_EXT_debug_report = true;
+        }
+    }
     xxFree(instanceExtensionProperties);
     xxFree(instanceExtensionNames);
     xxFree(instanceLayerProperties);
     xxFree(instanceLayerNames);
-
-    if (instanceResult != VK_SUCCESS)
-        return 0;
-    g_instance = instance;
-
-    vkSymbols(vkSymbol);
 
     if (VK_EXT_debug_report)
     {
@@ -589,13 +602,25 @@ uint64_t xxCreateDeviceVulkan(uint64_t instance)
 
     VkDevice vkDevice = VK_NULL_HANDLE;
     VkResult deviceResult = vkCreateDevice(vkPhysicalDevice, &deviceCreateInfo, g_callbacks, &vkDevice);
-    xxFree(deviceExtensionProperties);
-    xxFree(deviceExtensionNames);
-
     if (deviceResult != VK_SUCCESS)
+    {
+        xxFree(deviceExtensionProperties);
+        xxFree(deviceExtensionNames);
         return 0;
+    }
+    g_device = vkDevice;
 
     vkSymbols(vkSymbol);
+    VK_KHR_push_descriptor = false;
+    for (uint32_t i = 0; i < deviceExtensionCount; ++i)
+    {
+        if (VK_KHR_push_descriptor == false && vkCmdPushDescriptorSetKHR && strcmp(deviceExtensionNames[i], "VK_KHR_push_descriptor") == 0)
+        {
+            VK_KHR_push_descriptor = true;
+        }
+    }
+    xxFree(deviceExtensionProperties);
+    xxFree(deviceExtensionNames);
 
     vkGetDeviceQueue(vkDevice, g_graphicFamily, 0, &g_queue);
     if (g_queue == VK_NULL_HANDLE)
