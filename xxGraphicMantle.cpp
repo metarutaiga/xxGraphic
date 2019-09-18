@@ -26,7 +26,7 @@ static GR_UINT                      g_suitableHeap = 0;
 //  Instance
 //==============================================================================
 static bool grSymbolFailed = false;
-static void* grSymbol(const char* name, bool* failed)
+static void* grSymbol(const char* name)
 {
     void* ptr = nullptr;
 
@@ -37,22 +37,18 @@ static void* grSymbol(const char* name, bool* failed)
         xxLog("Mantle", "%s is not found", name);
 
     grSymbolFailed |= (ptr == nullptr);
-    if (failed)
-        (*failed) |= (ptr == nullptr);
 
     return ptr;
 }
-#define grSymbol(var) (void*&)var = grSymbol(#var, nullptr);
+#define grSymbol(var) (void*&)var = grSymbol(#var);
 //------------------------------------------------------------------------------
-uint64_t xxCreateInstanceMantle()
+static void* grSymbolNULL(const char* name)
 {
-    if (g_mantleLibrary == nullptr)
-        g_mantleLibrary = LoadLibraryW(L"mantle32.dll");
-    if (g_mantleLibrary == nullptr)
-        g_mantleLibrary = LoadLibraryW(L"mantle64.dll");
-    if (g_mantleLibrary == nullptr)
-        return 0;
-
+    return nullptr;
+}
+//------------------------------------------------------------------------------
+bool grSymbols(void* (*grSymbol)(const char* name))
+{
     grSymbolFailed = false;
     grSymbol(grInitAndEnumerateGpus);
     grSymbol(grGetGpuInfo);
@@ -157,7 +153,7 @@ uint64_t xxCreateInstanceMantle()
     grSymbol(grCmdLoadAtomicCounters);
     grSymbol(grCmdSaveAtomicCounters);
     if (grSymbolFailed)
-        return 0;
+        return false;
 
     grSymbolFailed = false;
     grSymbol(grWsiWinGetDisplays);
@@ -171,6 +167,21 @@ uint64_t xxCreateInstanceMantle()
     grSymbol(grWsiWinQueuePresent);
     grSymbol(grWsiWinSetMaxQueuedFrames);
     if (grSymbolFailed)
+        return false;
+
+    return true;
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateInstanceMantle()
+{
+    if (g_mantleLibrary == nullptr)
+        g_mantleLibrary = LoadLibraryW(L"mantle32.dll");
+    if (g_mantleLibrary == nullptr)
+        g_mantleLibrary = LoadLibraryW(L"mantle64.dll");
+    if (g_mantleLibrary == nullptr)
+        return 0;
+
+    if (grSymbols(grSymbol) == false)
         return 0;
 
     GR_APPLICATION_INFO appInfo = {};
@@ -189,6 +200,8 @@ uint64_t xxCreateInstanceMantle()
 //------------------------------------------------------------------------------
 void xxDestroyInstanceMantle(uint64_t instance)
 {
+    grSymbols(grSymbolNULL);
+
     if (g_mantleLibrary)
     {
         FreeLibrary(g_mantleLibrary);
