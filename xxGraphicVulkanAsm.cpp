@@ -23,7 +23,7 @@
 //------------------------------------------------------------------------------
 const uint32_t vertexShaderCodeSPIRV[] =
 {
-    SpvMagicNumber, SpvVersion, 0x00080007, 53, 0,
+    SpvMagicNumber, SpvVersion, 0, 53, 0,
     Op(SpvOpCapability, 2),             SpvCapabilityShader,
     Op(SpvOpExtInstImport, 6),          1, _glsl_std_450, 0,
     Op(SpvOpMemoryModel, 3),            SpvAddressingModelLogical, SpvMemoryModelGLSL450,
@@ -117,7 +117,7 @@ const uint32_t vertexShaderCodeSPIRVSize = sizeof(vertexShaderCodeSPIRV);
 //------------------------------------------------------------------------------
 const uint32_t fragmentShaderCodeSPIRV[] =
 {
-    SpvMagicNumber, SpvVersion, 0x00080007, 35, 0,
+    SpvMagicNumber, SpvVersion, 0, 35, 0,
     Op(SpvOpCapability, 2),             SpvCapabilityShader,
     Op(SpvOpExtInstImport, 6),          1, _glsl_std_450, 0,
     Op(SpvOpMemoryModel, 3),            SpvAddressingModelLogical, SpvMemoryModelGLSL450,
