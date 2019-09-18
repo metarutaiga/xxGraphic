@@ -77,6 +77,11 @@ const DWORD pixelShaderCode20[] =
 #define _ISGN                                   0x4e475349
 #define _OSGN                                   0x4e47534f
 #define _SHDR                                   0x52444853
+#define _POSITION                               0x49534f50, 0x4e4f4954
+#define _COLOR                                  0x4f4c4f43, 0x00000052
+#define _TEXCOORD                               0x43584554, 0x44524f4f
+#define _SV_POSITION                            0x505f5653, 0x5449534f, 0x004e4f49
+#define _SV_TARGET                              0x545f5653, 0x45475241, 0x00000054
 #define D3D10_SB_4_COMPONENT_XXXX               ((D3D10_SB_4_COMPONENT_X << 0) | (D3D10_SB_4_COMPONENT_X << 2) | (D3D10_SB_4_COMPONENT_X << 4) | (D3D10_SB_4_COMPONENT_X << 6))
 #define D3D10_SB_4_COMPONENT_XYXX               ((D3D10_SB_4_COMPONENT_X << 0) | (D3D10_SB_4_COMPONENT_Y << 2) | (D3D10_SB_4_COMPONENT_X << 4) | (D3D10_SB_4_COMPONENT_X << 6))
 #define D3D10_SB_4_COMPONENT_XYZW               ((D3D10_SB_4_COMPONENT_X << 0) | (D3D10_SB_4_COMPONENT_Y << 2) | (D3D10_SB_4_COMPONENT_Z << 4) | (D3D10_SB_4_COMPONENT_W << 6))
@@ -109,19 +114,23 @@ const DWORD pixelShaderCode20[] =
 //------------------------------------------------------------------------------
 const DWORD vertexShaderCode40[] =
 {
-    _DXBC, 0xcfae7b3b, 0x43ebb6a0, 0x0acaeefb, 0x9d526f8a,
-    0x00000001, 0x00000240, 3,
-    0x0000002c, 0x0000009c, 0x00000110,
-    _ISGN, 0x00000068, 3, 0x00000008,
+    _DXBC, 0x97f66d1a, 0x57e3bff3, 0x64b9ebf9, 0x84763d6e,
+    0x00000001, 0x00000258, 3,
+    0x0000002c, 0x000000a8, 0x00000128,
+    _ISGN, 0x00000074, 3, 0x00000008,
     0x00000050, 0, 0, 3, 0, 0x0707,
-    0x00000059, 0, 0, 3, 1, 0x0f0f,
-    0x0000005f, 0, 0, 3, 2, 0x0303,
-    0x49534f50, 0x4e4f4954, 0x4c4f4300, 0x5400524f, 0x4f435845, 0x0044524f,
-    _OSGN, 0x0000006c, 3, 0x00000008,
+    0x0000005c, 0, 0, 3, 1, 0x0f0f,
+    0x00000068, 0, 0, 3, 2, 0x0303,
+    _POSITION, 0,
+    _COLOR, 0,
+    _TEXCOORD, 0,
+    _OSGN, 0x00000078, 3, 0x00000008,
     0x00000050, 0, 1, 3, 0, 0x000f,
-    0x0000005c, 0, 0, 3, 1, 0x000f,
-    0x00000062, 0, 0, 3, 2, 0x0c03,
-    0x505f5653, 0x5449534f, 0x004e4f49, 0x4f4c4f43, 0x45540052, 0x4f4f4358, 0x00004452,
+    0x00000060, 0, 0, 3, 1, 0x000f,
+    0x0000006c, 0, 0, 3, 2, 0x0c03,
+    _SV_POSITION, 0,
+    _COLOR, 0,
+    _TEXCOORD, 0,
     _SHDR, 0x00000128, _VER(VERTEX_SHADER, 4, 0), 0x0000004a,
     _OP(DCL_CONSTANT_BUFFER, 4), _4S(2D, CONSTANT_BUFFER), D3D10_SB_CONSTANT_BUFFER_IMMEDIATE_INDEXED, 4,       // dcl_constantbuffer CB0[4], immediateIndexed
     _OP(DCL_INPUT, 3), _4MM(1D, INPUT, XYZ), 0,                                                                 // dcl_input v0.xyz
@@ -142,17 +151,19 @@ const DWORD vertexShaderCode40[] =
 //------------------------------------------------------------------------------
 const DWORD pixelShaderCode40[] =
 {
-    _DXBC, 0xdb70d4ab, 0x2f38da8d, 0xd5a0ddf2, 0xfed338c8,
-    0x00000001, 0x00000170, 3,
-    0x0000002c, 0x000000a0, 0x000000d4,
-    _ISGN, 0x0000006c, 3, 0x00000008,
+    _DXBC, 0x699f5ee8, 0xcbd8a667, 0xedaa31ef, 0x41715e6e,
+    0x00000001, 0x00000180, 3,
+    0x0000002c, 0x000000ac, 0x000000e4,
+    _ISGN, 0x00000078, 3, 0x00000008,
     0x00000050, 0, 1, 3, 0, 0x000f,
-    0x0000005c, 0, 0, 3, 1, 0x0f0f,
-    0x00000062, 0, 0, 3, 2, 0x0303,
-    0x505f5653, 0x5449534f, 0x004e4f49, 0x4f4c4f43, 0x45540052, 0x4f4f4358, 0x00004452,
-    _OSGN, 0x0000002c, 1, 0x00000008,
+    0x00000060, 0, 0, 3, 1, 0x0f0f,
+    0x0000006c, 0, 0, 3, 2, 0x0303,
+    _SV_POSITION, 0,
+    _COLOR, 0,
+    _TEXCOORD, 0,
+    _OSGN, 0x00000030, 1, 0x00000008,
     0x00000020, 0, 0, 3, 0, 0x000f,
-    0x545f5653, 0x45475241, 0x00000054,
+    _SV_TARGET, 0,
     _SHDR, 0x00000094, _VER(PIXEL_SHADER, 4, 0), 0x00000025,
     _OP(DCL_SAMPLER, 3), _0(1D, SAMPLER), D3D10_SB_SAMPLER_MODE_DEFAULT,                                        // dcl_sampler s0, mode_default
     _OPDIM(DCL_RESOURCE, 4, TEXTURE2D), _0(1D, RESOURCE), 0, D3D10_SB_RETURN_TYPE_FLOAT4,                       // dcl_resource_texture2d(float,float,float,float) t0

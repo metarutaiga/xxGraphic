@@ -7,25 +7,16 @@
 //==============================================================================
 //  Vulkan SPIR-V Assembly Shader
 //==============================================================================
-#define _glsl                           0x4c534c47
-#define _pstd                           0x6474732e
-#define _p450                           0x3035342e
+#define _glsl_std_450                   0x4c534c47, 0x6474732e, 0x3035342e
 #define _main                           0x6e69616d
-#define _posi                           0x69736f70
-#define _tion                           0x6e6f6974
-#define _colo                           0x6f6c6f63
-#define _r                              0x00000072
-#define _uv                             0x00007675
-#define _out                            0x0074756f
-#define _gl_P                           0x505f6c67
-#define _erVe                           0x65567265
-#define _rtex                           0x78657472
-#define _osit                           0x7469736f
-#define _ion                            0x006e6f69
-#define _unif                           0x66696e75
-#define _ormB                           0x426d726f
-#define _uffe                           0x65666675
 #define _in                             0x00006e69
+#define _out                            0x0074756f
+#define _uniformBuffer                  0x66696e75, 0x426d726f, 0x65666675, 0x00000072
+#define _position                       0x69736f70, 0x6e6f6974
+#define _color                          0x6f6c6f63, 0x00000072
+#define _uv                             0x00007675
+#define _gl_PerVertex                   0x505f6c67, 0x65567265, 0x78657472
+#define _gl_Position                    0x505f6c67, 0x7469736f, 0x006e6f69
 #define _tex                            0x00786574
 #define _sam                            0x006d6173
 #define Op(op, length)                  (op | (length << SpvWordCountShift))
@@ -34,24 +25,24 @@ const uint32_t vertexShaderCodeSPIRV[] =
 {
     SpvMagicNumber, SpvVersion, 0x00080007, 53, 0,
     Op(SpvOpCapability, 2),             SpvCapabilityShader,
-    Op(SpvOpExtInstImport, 6),          1, _glsl, _pstd, _p450, 0,
+    Op(SpvOpExtInstImport, 6),          1, _glsl_std_450, 0,
     Op(SpvOpMemoryModel, 3),            SpvAddressingModelLogical, SpvMemoryModelGLSL450,
     Op(SpvOpEntryPoint, 10),            SpvExecutionModelVertex, 4, _main, 0, 11, 15, 21, 27, 37,
     Op(SpvOpSource, 3),                 SpvSourceLanguageGLSL, 450,
     Op(SpvOpName, 4),                   4, _main, 0,
     Op(SpvOpName, 3),                   9, 0,
-    Op(SpvOpMemberName, 5),             9, 0, _colo, _r,
-    Op(SpvOpMemberName, 4),             9, 1, _uv,
-    Op(SpvOpName, 3),                   11, _out,
-    Op(SpvOpName, 4),                   15, _colo, _r,
-    Op(SpvOpName, 3),                   21, _uv,
-    Op(SpvOpName, 6),                   25, _gl_P, _erVe, _rtex, 0,
-    Op(SpvOpMemberName, 6),             25, 0, _gl_P, _osit, _ion,
+    Op(SpvOpMemberName, 6),             9, 0, _color, 0,
+    Op(SpvOpMemberName, 5),             9, 1, _uv, 0,
+    Op(SpvOpName, 4),                   11, _out, 0,
+    Op(SpvOpName, 5),                   15, _color, 0,
+    Op(SpvOpName, 4),                   21, _uv, 0,
+    Op(SpvOpName, 6),                   25, _gl_PerVertex, 0,
+    Op(SpvOpMemberName, 7),             25, 0, _gl_Position, 0,
     Op(SpvOpName, 3),                   27, 0,
-    Op(SpvOpName, 6),                   29, _unif, _ormB, _uffe, _r,
+    Op(SpvOpName, 7),                   29, _uniformBuffer, 0,
     Op(SpvOpMemberName, 3),             29, 0,
     Op(SpvOpName, 3),                   31, 0,
-    Op(SpvOpName, 5),                   37, _posi, _tion, 0,
+    Op(SpvOpName, 5),                   37, _position, 0,
     Op(SpvOpDecorate, 4),               11, SpvDecorationLocation, 0,
     Op(SpvOpDecorate, 4),               15, SpvDecorationLocation, 1,
     Op(SpvOpDecorate, 4),               21, SpvDecorationLocation, 2,
@@ -128,19 +119,19 @@ const uint32_t fragmentShaderCodeSPIRV[] =
 {
     SpvMagicNumber, SpvVersion, 0x00080007, 35, 0,
     Op(SpvOpCapability, 2),             SpvCapabilityShader,
-    Op(SpvOpExtInstImport, 6),          1, _glsl, _pstd, _p450, 0,
+    Op(SpvOpExtInstImport, 6),          1, _glsl_std_450, 0,
     Op(SpvOpMemoryModel, 3),            SpvAddressingModelLogical, SpvMemoryModelGLSL450,
     Op(SpvOpEntryPoint, 7),             SpvExecutionModelFragment, 4, _main, 0, 9, 13,
     Op(SpvOpExecutionMode, 3),          4, SpvExecutionModeOriginUpperLeft,
     Op(SpvOpSource, 3),                 SpvSourceLanguageGLSL, 450,
     Op(SpvOpName, 4),                   4, _main, 0,
-    Op(SpvOpName, 4),                   9, _colo, _r,
+    Op(SpvOpName, 5),                   9, _color, 0,
     Op(SpvOpName, 3),                   11, 0,
-    Op(SpvOpMemberName, 5),             11, 0, _colo, _r,
-    Op(SpvOpMemberName, 4),             11, 1, _uv,
-    Op(SpvOpName, 3),                   13, _in,
-    Op(SpvOpName, 3),                   21, _tex,
-    Op(SpvOpName, 3),                   25, _sam,
+    Op(SpvOpMemberName, 6),             11, 0, _color, 0,
+    Op(SpvOpMemberName, 5),             11, 1, _uv, 0,
+    Op(SpvOpName, 4),                   13, _in, 0,
+    Op(SpvOpName, 4),                   21, _tex, 0,
+    Op(SpvOpName, 4),                   25, _sam, 0,
     Op(SpvOpDecorate, 4),               9, SpvDecorationLocation, 0,
     Op(SpvOpDecorate, 4),               13, SpvDecorationLocation, 0,
     Op(SpvOpDecorate, 4),               21, SpvDecorationDescriptorSet, 0,
