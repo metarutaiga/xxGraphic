@@ -50,7 +50,7 @@ static VkDescriptorSet                  g_currentDescriptorSet = VK_NULL_HANDLE;
 //==============================================================================
 //  DescriptorSet
 //==============================================================================
-static void VKAPI_CALL vkCmdPushDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint32_t set, uint32_t descriptorWriteCount, const VkWriteDescriptorSet* pDescriptorWrites)
+static void VKAPI_CALL vkCmdPushDescriptorSetEXT(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint32_t set, uint32_t descriptorWriteCount, const VkWriteDescriptorSet* pDescriptorWrites)
 {
     if (g_currentDescriptorSet == VK_NULL_HANDLE)
     {
@@ -60,6 +60,7 @@ static void VKAPI_CALL vkCmdPushDescriptorSet(VkCommandBuffer commandBuffer, VkP
         {
             int descriptorSetChunk = xxCountOf(g_descriptorSetArray) / xxCountOf(g_descriptorPools);
             int descriptorPoolIndex = g_descriptorSetAvailable / descriptorSetChunk;
+
             VkDescriptorPool pool = g_descriptorPools[descriptorPoolIndex];
             if (xxUnlikely(pool == VK_NULL_HANDLE))
             {
@@ -673,7 +674,7 @@ uint64_t xxCreateDeviceVulkan(uint64_t instance)
     g_descriptorSetAvailable = xxCountOf(g_descriptorSetArray);
     if (VK_KHR_push_descriptor == false)
     {
-        vkCmdPushDescriptorSetKHR = vkCmdPushDescriptorSet;
+        vkCmdPushDescriptorSetKHR = vkCmdPushDescriptorSetEXT;
     }
 
     return reinterpret_cast<uint64_t>(vkDevice);
@@ -684,6 +685,8 @@ void xxDestroyDeviceVulkan(uint64_t device)
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
         return;
+
+    vkQueueWaitIdle(g_queue);
 
     if (VK_KHR_push_descriptor == false)
     {
@@ -1098,7 +1101,7 @@ void xxPresentSwapchainVulkan(uint64_t swapchain)
     if (VK_KHR_push_descriptor == false)
     {
         g_descriptorSetSwapIndex++;
-        if (g_descriptorSetSwapIndex >= 4)
+        if (g_descriptorSetSwapIndex >= 8)
         {
             g_descriptorSetSwapIndex = 0;
             g_descriptorSetAvailable = xxCountOf(g_descriptorSetArray);
