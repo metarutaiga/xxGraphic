@@ -1,3 +1,9 @@
+//==============================================================================
+// xxGraphic : Direct3D 11On12 Header
+//
+// Copyright (c) 2019 TAiGA
+// https://github.com/metarutaiga/xxGraphic
+//==============================================================================
 #pragma once
 
 #include "xxGraphic.h"

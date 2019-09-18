@@ -1,3 +1,9 @@
+//==============================================================================
+// xxGraphic : Direct3D 9.0 Source
+//
+// Copyright (c) 2019 TAiGA
+// https://github.com/metarutaiga/xxGraphic
+//==============================================================================
 #include "xxGraphicInternal.h"
 #include "xxGraphicD3D.h"
 #include "xxGraphicD3DAsm.h"

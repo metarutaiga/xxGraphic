@@ -1,3 +1,9 @@
+//==============================================================================
+// xxGraphic : Direct3D Assembly Shader Source
+//
+// Copyright (c) 2019 TAiGA
+// https://github.com/metarutaiga/xxGraphic
+//==============================================================================
 #include "xxGraphicD3DAsm.h"
 
 #include "dxsdk/d3d9.h"

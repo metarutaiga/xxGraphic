@@ -1,3 +1,9 @@
+//==============================================================================
+// xxGraphic : OpenGL ES 2.0 Source
+//
+// Copyright (c) 2019 TAiGA
+// https://github.com/metarutaiga/xxGraphic
+//==============================================================================
 #include "xxGraphicInternal.h"
 #include "xxGraphicGL.h"
 #include "xxGraphicGLES2.h"

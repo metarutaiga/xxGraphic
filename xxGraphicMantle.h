@@ -1,3 +1,9 @@
+//==============================================================================
+// xxGraphic : Mantle Header
+//
+// Copyright (c) 2019 TAiGA
+// https://github.com/metarutaiga/xxGraphic
+//==============================================================================
 #pragma once
 
 #include "xxGraphic.h"

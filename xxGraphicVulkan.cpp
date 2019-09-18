@@ -1,3 +1,9 @@
+//==============================================================================
+// xxGraphic : Vulkan Source
+//
+// Copyright (c) 2019 TAiGA
+// https://github.com/metarutaiga/xxGraphic
+//==============================================================================
 #include "xxGraphicInternal.h"
 #include "xxGraphicVulkanAsm.h"
 #include "xxGraphicVulkan.h"

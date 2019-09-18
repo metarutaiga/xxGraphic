@@ -1,3 +1,9 @@
+//==============================================================================
+// xxGraphic : System Source
+//
+// Copyright (c) 2019 TAiGA
+// https://github.com/metarutaiga/xxGraphic
+//==============================================================================
 #include "xxSystem.h"
 
 #if defined(__APPLE__)

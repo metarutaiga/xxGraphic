@@ -1,3 +1,9 @@
+//==============================================================================
+// xxGraphic : OpenGL EAGL Source
+//
+// Copyright (c) 2019 TAiGA
+// https://github.com/metarutaiga/xxGraphic
+//==============================================================================
 #include "xxGraphicGL.h"
 #include "xxGraphicEAGL.h"
 

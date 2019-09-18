@@ -1,3 +1,9 @@
+//==============================================================================
+// xxGraphic : NULL Source
+//
+// Copyright (c) 2019 TAiGA
+// https://github.com/metarutaiga/xxGraphic
+//==============================================================================
 #include "xxGraphicInternal.h"
 #include "xxGraphicNULL.h"
 

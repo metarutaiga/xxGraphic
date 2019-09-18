@@ -1,3 +1,9 @@
+//==============================================================================
+// xxGraphic : Direct3D 9.0 Programmable Shader Header
+//
+// Copyright (c) 2019 TAiGA
+// https://github.com/metarutaiga/xxGraphic
+//==============================================================================
 #pragma once
 
 #include "xxGraphicD3D9.h"
