@@ -50,24 +50,18 @@ static VkDescriptorSet                  g_currentDescriptorSet = VK_NULL_HANDLE;
 //==============================================================================
 //  DescriptorSet
 //==============================================================================
-void vkCmdPushDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint32_t set, uint32_t descriptorWriteCount, const VkWriteDescriptorSet* pDescriptorWrites)
+static void VKAPI_CALL vkCmdPushDescriptorSet(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint32_t set, uint32_t descriptorWriteCount, const VkWriteDescriptorSet* pDescriptorWrites)
 {
-    if (VK_KHR_push_descriptor)
-    {
-        vkCmdPushDescriptorSetKHR(commandBuffer, pipelineBindPoint, layout, set, descriptorWriteCount, pDescriptorWrites);
-        return;
-    }
-
     if (g_currentDescriptorSet == VK_NULL_HANDLE)
     {
         g_descriptorSetAvailable--;
         g_currentDescriptorSet = g_descriptorSetArray[g_descriptorSetAvailable];
-        if (g_currentDescriptorSet == VK_NULL_HANDLE)
+        if (xxUnlikely(g_currentDescriptorSet == VK_NULL_HANDLE))
         {
             int descriptorSetChunk = xxCountOf(g_descriptorSetArray) / xxCountOf(g_descriptorPools);
             int descriptorPoolIndex = g_descriptorSetAvailable / descriptorSetChunk;
             VkDescriptorPool pool = g_descriptorPools[descriptorPoolIndex];
-            if (pool == VK_NULL_HANDLE)
+            if (xxUnlikely(pool == VK_NULL_HANDLE))
             {
                 unsigned int count = xxCountOf(g_descriptorSetArray) / xxCountOf(g_descriptorPools);
 
@@ -349,7 +343,6 @@ bool vkSymbols(void* (*vkSymbol)(const char* name))
     vkSymbol(vkCmdPushDescriptorSetKHR);
     vkSymbol(vkCmdPushDescriptorSetWithTemplateKHR);
     VK_KHR_push_descriptor = (vkSymbolFailed == false);
-    VK_KHR_push_descriptor = false;
 
     return true;
 }
@@ -678,6 +671,10 @@ uint64_t xxCreateDeviceVulkan(uint64_t instance)
     g_setLayout = setLayout;
     g_pipelineLayout = pipelineLayout;
     g_descriptorSetAvailable = xxCountOf(g_descriptorSetArray);
+    if (VK_KHR_push_descriptor == false)
+    {
+        vkCmdPushDescriptorSetKHR = vkCmdPushDescriptorSet;
+    }
 
     return reinterpret_cast<uint64_t>(vkDevice);
 }
@@ -2267,7 +2264,7 @@ void xxSetVertexTexturesVulkan(uint64_t commandEncoder, int count, const uint64_
         sets[i].pTexelBufferView = nullptr;
     }
 
-    vkCmdPushDescriptorSet(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
+    vkCmdPushDescriptorSetKHR(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentTexturesVulkan(uint64_t commandEncoder, int count, const uint64_t* textures)
@@ -2294,7 +2291,7 @@ void xxSetFragmentTexturesVulkan(uint64_t commandEncoder, int count, const uint6
         sets[i].pTexelBufferView = nullptr;
     }
 
-    vkCmdPushDescriptorSet(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
+    vkCmdPushDescriptorSetKHR(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersVulkan(uint64_t commandEncoder, int count, const uint64_t* samplers)
@@ -2321,7 +2318,7 @@ void xxSetVertexSamplersVulkan(uint64_t commandEncoder, int count, const uint64_
         sets[i].pTexelBufferView = nullptr;
     }
 
-    vkCmdPushDescriptorSet(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
+    vkCmdPushDescriptorSetKHR(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentSamplersVulkan(uint64_t commandEncoder, int count, const uint64_t* samplers)
@@ -2348,7 +2345,7 @@ void xxSetFragmentSamplersVulkan(uint64_t commandEncoder, int count, const uint6
         sets[i].pTexelBufferView = nullptr;
     }
 
-    vkCmdPushDescriptorSet(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
+    vkCmdPushDescriptorSetKHR(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
@@ -2372,7 +2369,7 @@ void xxSetVertexConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, u
     set.pBufferInfo = &bufferInfo;
     set.pTexelBufferView = nullptr;
 
-    vkCmdPushDescriptorSet(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, 1, &set);
+    vkCmdPushDescriptorSetKHR(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, 1, &set);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
@@ -2396,7 +2393,7 @@ void xxSetFragmentConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer,
     set.pBufferInfo = &bufferInfo;
     set.pTexelBufferView = nullptr;
 
-    vkCmdPushDescriptorSet(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, 1, &set);
+    vkCmdPushDescriptorSetKHR(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, 1, &set);
 }
 //------------------------------------------------------------------------------
 void xxDrawIndexedVulkan(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
