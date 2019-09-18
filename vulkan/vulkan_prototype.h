@@ -160,6 +160,8 @@ PFN_vkCmdEndRenderPass                              vkCmdEndRenderPass;
 PFN_vkCmdExecuteCommands                            vkCmdExecuteCommands;
 
 #if VK_EXT_debug_report
+#undef VK_EXT_debug_report
+bool                                                VK_EXT_debug_report;
 PFN_vkCreateDebugReportCallbackEXT                  vkCreateDebugReportCallbackEXT;
 PFN_vkDestroyDebugReportCallbackEXT                 vkDestroyDebugReportCallbackEXT;
 PFN_vkDebugReportMessageEXT                         vkDebugReportMessageEXT;
@@ -199,6 +201,8 @@ PFN_vkGetPhysicalDeviceWin32PresentationSupportKHR  vkGetPhysicalDeviceWin32Pres
 #endif
 
 #if VK_KHR_push_descriptor
+#undef VK_KHR_push_descriptor
+bool                                                VK_KHR_push_descriptor;
 PFN_vkCmdPushDescriptorSetKHR                       vkCmdPushDescriptorSetKHR;
 PFN_vkCmdPushDescriptorSetWithTemplateKHR           vkCmdPushDescriptorSetWithTemplateKHR;
 #endif
