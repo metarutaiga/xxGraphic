@@ -4,7 +4,12 @@
 // Copyright (c) 2019 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
+#include "xxGraphicInternal.h"
 #include "xxGraphicD3DAsm.h"
+
+#if defined(_MSC_VER)
+#   pragma const_seg(".rdata$shader")
+#endif
 
 #include "dxsdk/d3d9.h"
 #include "dxsdk/d3d10TokenizedProgramFormat.hpp"

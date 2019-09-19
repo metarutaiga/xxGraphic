@@ -7,6 +7,10 @@
 #include "xxGraphicInternal.h"
 #include "xxGraphicVulkanAsm.h"
 
+#if defined(_MSC_VER)
+#   pragma const_seg(".rdata$shader")
+#endif
+
 #include "vulkan/spirv.h"
 #include "vulkan/GLSL.std.450.h"
 

@@ -227,7 +227,7 @@ uint64_t xxCreateDeviceMantle(uint64_t instance)
     queueInfo.queueType = GR_QUEUE_UNIVERSAL;
     queueInfo.queueCount = 1;
 
-    static const GR_CHAR* const extensions[] = { "GR_WSI_WINDOWS" };
+    const GR_CHAR* const extensions[] = { "GR_WSI_WINDOWS" };
 
     GR_DEVICE_CREATE_INFO deviceInfo = {};
     deviceInfo.queueRecordCount = 1;
@@ -674,7 +674,7 @@ uint64_t xxCreateSamplerMantle(uint64_t device, bool clampU, bool clampV, bool c
     if (grDevice == GR_NULL_HANDLE)
         return 0;
 
-    static const GR_TEX_FILTER filters[2][2][2] =
+    const GR_TEX_FILTER filters[2][2][2] =
     {
         {
             { GR_TEX_FILTER_MAG_POINT_MIN_POINT_MIP_POINT, GR_TEX_FILTER_MAG_POINT_MIN_POINT_MIP_LINEAR },

@@ -925,6 +925,19 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
 
     VkSurfaceFormatKHR* surfaceFormats = xxAlloc(VkSurfaceFormatKHR, surfaceFormatCount);
     vkGetPhysicalDeviceSurfaceFormatsKHR(g_physicalDevice, surface, &surfaceFormatCount, surfaceFormats);
+
+    VkFormat imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+    if (imageFormat == VK_FORMAT_R8G8B8A8_UNORM)
+    {
+        for (uint32_t i = 0; i < surfaceFormatCount; ++i)
+        {
+            if (surfaceFormats[i].format == VK_FORMAT_B8G8R8A8_UNORM && surfaceFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+            {
+                imageFormat = VK_FORMAT_B8G8R8A8_UNORM;
+                break;
+            }
+        }
+    }
     xxFree(surfaceFormats);
 
     uint32_t presentModeCount = 0;
@@ -932,20 +945,33 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
 
     VkPresentModeKHR* presentModes = xxAlloc(VkPresentModeKHR, presentModeCount);
     vkGetPhysicalDeviceSurfacePresentModesKHR(g_physicalDevice, surface, &presentModeCount, presentModes);
+
+    VkPresentModeKHR presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+    if (presentMode == VK_PRESENT_MODE_IMMEDIATE_KHR)
+    {
+        for (uint32_t i = 0; i < presentModeCount; ++i)
+        {
+            if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
+            {
+                presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+                break;
+            }
+        }
+    }
     xxFree(presentModes);
 
     VkSwapchainCreateInfoKHR swapchainInfo = {};
     swapchainInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
     swapchainInfo.surface = surface;
-    swapchainInfo.minImageCount = 1;
-    swapchainInfo.imageFormat = VK_FORMAT_B8G8R8A8_UNORM;
+    swapchainInfo.minImageCount = 3;
+    swapchainInfo.imageFormat = imageFormat;
     swapchainInfo.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
     swapchainInfo.imageArrayLayers = 1;
     swapchainInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
     swapchainInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     swapchainInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
     swapchainInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    swapchainInfo.presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+    swapchainInfo.presentMode = presentMode;
     swapchainInfo.clipped = VK_TRUE;
     swapchainInfo.oldSwapchain = VK_NULL_HANDLE;
 
@@ -1120,7 +1146,21 @@ void xxPresentSwapchainVulkan(uint64_t swapchain)
     info.swapchainCount = 1;
     info.pSwapchains = &vkSwapchain->swapchain;
     info.pImageIndices = &vkSwapchain->imageIndex;
-    vkQueuePresentKHR(g_queue, &info);
+    VkResult result = vkQueuePresentKHR(g_queue, &info);
+    switch (result)
+    {
+    case VK_SUCCESS:
+        break;
+    case VK_ERROR_OUT_OF_DATE_KHR:
+        xxLog("xxGraphic", "%s : %s", "vkQueuePresentKHR", "VK_ERROR_OUT_OF_DATE_KHR");
+        break;
+    case VK_SUBOPTIMAL_KHR:
+        xxLog("xxGraphic", "%s : %s", "vkQueuePresentKHR", "VK_SUBOPTIMAL_KHR");
+        break;
+    default:
+        xxLog("xxGraphic", "%s : %s", "vkQueuePresentKHR", "Unknown");
+        break;
+    }
 
     vkSwapchain->imageIndex++;
     if (vkSwapchain->imageIndex >= vkSwapchain->imageCount)
@@ -1151,8 +1191,20 @@ uint64_t xxGetCommandBufferVulkan(uint64_t device, uint64_t swapchain)
         return 0;
 
     VkResult result = vkAcquireNextImageKHR(vkDevice, vkSwapchain->swapchain, UINT64_MAX, vkSwapchain->imageSemaphores[vkSwapchain->semaphoreIndex], VK_NULL_HANDLE, &vkSwapchain->imageIndex);
-    if (result != VK_SUCCESS)
+    switch (result)
+    {
+    case VK_SUCCESS:
+        break;
+    case VK_SUBOPTIMAL_KHR:
+        xxLog("xxGraphic", "%s : %s", "vkAcquireNextImageKHR", "VK_SUBOPTIMAL_KHR");
+        break;
+    case VK_ERROR_OUT_OF_DATE_KHR:
+        xxLog("xxGraphic", "%s : %s", "vkAcquireNextImageKHR", "VK_ERROR_OUT_OF_DATE_KHR");
         return 0;
+    default:
+        xxLog("xxGraphic", "%s : %s", "vkAcquireNextImageKHR", "Unknown");
+        return 0;
+    }
 
     uint32_t imageIndex = vkSwapchain->imageIndex;
     VkFence fence = vkSwapchain->fences[imageIndex];
