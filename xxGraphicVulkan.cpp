@@ -49,20 +49,20 @@ static VkDebugUtilsMessengerEXT         g_debugReport = VK_NULL_HANDLE;
 static uint32_t                         g_graphicFamily = 0;
 static VkDescriptorPool                 g_descriptorPools[256] = {};
 static VkDescriptorSet                  g_descriptorSetArray[65536] = {};
+static VkDescriptorSet                  g_descriptorSetCurrent = VK_NULL_HANDLE;
 static int                              g_descriptorSetAvailable = 0;
 static int                              g_descriptorSetSwapIndex = 0;
-static VkDescriptorSet                  g_currentDescriptorSet = VK_NULL_HANDLE;
 
 //==============================================================================
 //  DescriptorSet
 //==============================================================================
 static void VKAPI_CALL vkCmdPushDescriptorSetEXT(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint32_t set, uint32_t descriptorWriteCount, const VkWriteDescriptorSet* pDescriptorWrites)
 {
-    if (g_currentDescriptorSet == VK_NULL_HANDLE)
+    if (g_descriptorSetCurrent == VK_NULL_HANDLE)
     {
         g_descriptorSetAvailable--;
-        g_currentDescriptorSet = g_descriptorSetArray[g_descriptorSetAvailable];
-        if (xxUnlikely(g_currentDescriptorSet == VK_NULL_HANDLE))
+        g_descriptorSetCurrent = g_descriptorSetArray[g_descriptorSetAvailable];
+        if (xxUnlikely(g_descriptorSetCurrent == VK_NULL_HANDLE))
         {
             int descriptorSetChunk = xxCountOf(g_descriptorSetArray) / xxCountOf(g_descriptorPools);
             int descriptorPoolIndex = g_descriptorSetAvailable / descriptorSetChunk;
@@ -97,18 +97,18 @@ static void VKAPI_CALL vkCmdPushDescriptorSetEXT(VkCommandBuffer commandBuffer, 
             setInfo.descriptorPool = pool;
             setInfo.descriptorSetCount = 1;
             setInfo.pSetLayouts = &g_setLayout;
-            vkAllocateDescriptorSets(g_device, &setInfo, &g_currentDescriptorSet);
-            if (g_currentDescriptorSet == VK_NULL_HANDLE)
+            vkAllocateDescriptorSets(g_device, &setInfo, &g_descriptorSetCurrent);
+            if (g_descriptorSetCurrent == VK_NULL_HANDLE)
                 return;
 
-            g_descriptorSetArray[g_descriptorSetAvailable] = g_currentDescriptorSet;
+            g_descriptorSetArray[g_descriptorSetAvailable] = g_descriptorSetCurrent;
         }
     }
 
     for (uint32_t i = 0; i < descriptorWriteCount; ++i)
     {
         VkWriteDescriptorSet& kWrite = *(VkWriteDescriptorSet*)&pDescriptorWrites[i];
-        kWrite.dstSet = g_currentDescriptorSet;
+        kWrite.dstSet = g_descriptorSetCurrent;
     }
 
     vkUpdateDescriptorSets(g_device, descriptorWriteCount, pDescriptorWrites, 0, nullptr);
@@ -1177,7 +1177,7 @@ void xxPresentSwapchainVulkan(uint64_t swapchain)
             g_descriptorSetSwapIndex = 0;
             g_descriptorSetAvailable = xxCountOf(g_descriptorSetArray);
         }
-        g_currentDescriptorSet = VK_NULL_HANDLE;
+        g_descriptorSetCurrent = VK_NULL_HANDLE;
     }
 }
 //------------------------------------------------------------------------------
@@ -2488,11 +2488,11 @@ void xxDrawIndexedVulkan(uint64_t commandEncoder, uint64_t indexBuffer, int inde
 
     if (VK_KHR_push_descriptor == false)
     {
-        VkDescriptorSet set = g_currentDescriptorSet;
+        VkDescriptorSet set = g_descriptorSetCurrent;
         if (set != VK_NULL_HANDLE)
         {
             vkCmdBindDescriptorSets(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, 1, &set, 0, nullptr);
-            g_currentDescriptorSet = VK_NULL_HANDLE;
+            g_descriptorSetCurrent = VK_NULL_HANDLE;
         }
     }
     vkCmdDrawIndexed(vkCommandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);

@@ -124,3 +124,10 @@ xxAPI int xxLog(const char* tag, const char* format, ...);
 //==============================================================================
 xxAPI const uint8_t* xxMD5(const void* data, int len, uint8_t* digest);
 xxAPI const uint8_t* xxDXBCChecksum(const void* data, int len, uint8_t* digest);
+//==============================================================================
+//  Hash
+//==============================================================================
+xxAPI inline constexpr unsigned int xxHash(const char* key, const unsigned int hash = 0)
+{
+    return (*key) ? xxHash(key + 1, (hash << 5) ^ (*key)) : hash;
+}
