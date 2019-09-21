@@ -17,4 +17,4 @@ xxAPI void          xxDestroyInstanceD3D10_1(uint64_t instance);
 //  Device
 //==============================================================================
 xxAPI uint64_t      xxCreateDeviceD3D10_1(uint64_t instance);
-xxAPI const char*   xxGetDeviceStringD3D10_1(uint64_t device);
+xxAPI const char*   xxGetDeviceNameD3D10_1();

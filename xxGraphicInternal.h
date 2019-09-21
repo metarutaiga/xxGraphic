@@ -39,7 +39,7 @@ enum xxGraphicDescriptor
     xxDestroyDevice = xxDestroyDevice ## API; \
     xxResetDevice = xxResetDevice ## API; \
     xxTestDevice = xxTestDevice ## API; \
-    xxGetDeviceString = xxGetDeviceString ## API; \
+    xxGetDeviceName = xxGetDeviceName ## API; \
 \
     xxGetFramebuffer = xxGetFramebuffer ## API; \
 \
@@ -111,7 +111,7 @@ enum xxGraphicDescriptor
     xxDestroyDevice = nullptr; \
     xxResetDevice = nullptr; \
     xxTestDevice = nullptr; \
-    xxGetDeviceString = nullptr; \
+    xxGetDeviceName = nullptr; \
 \
     xxGetFramebuffer = nullptr; \
 \

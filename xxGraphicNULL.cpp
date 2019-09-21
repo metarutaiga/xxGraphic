@@ -44,7 +44,7 @@ bool xxTestDeviceNULL(uint64_t device)
     return true;
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceStringNULL(uint64_t device)
+const char* xxGetDeviceNameNULL()
 {
     return "NULL";
 }

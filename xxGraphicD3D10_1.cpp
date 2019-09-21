@@ -27,7 +27,7 @@ uint64_t xxCreateInstanceD3D10_1()
 
     xxDestroyInstance = xxDestroyInstanceD3D10_1;
     xxCreateDevice = xxCreateDeviceD3D10_1;
-    xxGetDeviceString = xxGetDeviceStringD3D10_1;
+    xxGetDeviceName = xxGetDeviceNameD3D10_1;
 
     return reinterpret_cast<uint64_t>(g_d3dLibrary);
 }
@@ -80,12 +80,12 @@ uint64_t xxCreateDeviceD3D10_1(uint64_t instance)
     {
         if (d3dDevice->QueryInterface(__uuidof(ID3D10Device1*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "10.1", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "10.1", xxGetDeviceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D10Device*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "10.0", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "10.0", xxGetDeviceName());
             break;
         }
     }
@@ -94,7 +94,7 @@ uint64_t xxCreateDeviceD3D10_1(uint64_t instance)
     return reinterpret_cast<uint64_t>(d3dDevice);
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceStringD3D10_1(uint64_t device)
+const char* xxGetDeviceNameD3D10_1()
 {
     return "Direct3D 10.1";
 }

@@ -99,7 +99,7 @@ uint64_t xxCreateDeviceD3D8(uint64_t instance)
     {
         if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice8), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "8.0", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "8.0", xxGetDeviceName());
             break;
         }
     }
@@ -147,7 +147,7 @@ bool xxTestDeviceD3D8(uint64_t device)
     return hResult == S_OK;
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceStringD3D8(uint64_t device)
+const char* xxGetDeviceNameD3D8()
 {
     return "Direct3D 8.0 Fixed Function";
 }

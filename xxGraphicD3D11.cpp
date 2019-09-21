@@ -77,32 +77,32 @@ uint64_t xxCreateDeviceD3D11(uint64_t instance)
     {
         if (d3dDevice->QueryInterface(__uuidof(ID3D11Device5*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.5", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.5", xxGetDeviceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D11Device4*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.4", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.4", xxGetDeviceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D11Device3*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.3", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.3", xxGetDeviceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D11Device2*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.2", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.2", xxGetDeviceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D11Device1*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.1", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.1", xxGetDeviceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D11Device*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.0", xxGetDeviceString(reinterpret_cast<uint64_t>(d3dDevice)));
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.0", xxGetDeviceName());
             break;
         }
     }
@@ -129,7 +129,7 @@ bool xxTestDeviceD3D11(uint64_t device)
     return true;
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceStringD3D11(uint64_t device)
+const char* xxGetDeviceNameD3D11()
 {
     return "Direct3D 11.0";
 }

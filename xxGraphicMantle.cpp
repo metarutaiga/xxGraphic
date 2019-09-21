@@ -296,7 +296,7 @@ bool xxTestDeviceMantle(uint64_t device)
     return true;
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceStringMantle(uint64_t device)
+const char* xxGetDeviceNameMantle()
 {
     return "Mantle";
 }

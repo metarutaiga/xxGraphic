@@ -15,7 +15,7 @@
 //==============================================================================
 //  Initialize
 //==============================================================================
-bool xxGraphicCreateGL(void* (*getSymbol)(const char* name, bool* failed));
+bool xxGraphicCreateGL(void* (GL_APIENTRYP getSymbol)(const char* name, bool* failed));
 void xxGraphicDestroyGL();
 //==============================================================================
 //  GLSL Shader

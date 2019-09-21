@@ -18,7 +18,7 @@ xxAPI void          xxDestroyInstanceD3D11On12(uint64_t instance);
 //==============================================================================
 xxAPI uint64_t      xxCreateDeviceD3D11On12(uint64_t instance);
 xxAPI void          xxDestroyDeviceD3D11On12(uint64_t device);
-xxAPI const char*   xxGetDeviceStringD3D11On12(uint64_t device);
+xxAPI const char*   xxGetDeviceNameD3D11On12();
 //==============================================================================
 //  Swapchain
 //==============================================================================

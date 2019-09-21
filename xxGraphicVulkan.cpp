@@ -35,6 +35,7 @@
 #define VK_PROTOTYPES                   1
 #include "vulkan/vulkan.h"
 #include "vulkan/vulkan_prototype.h"
+#define PERSISTENT_BUFFER               1
 
 static void*                            g_vulkanLibrary = nullptr;
 static VkInstance                       g_instance = VK_NULL_HANDLE;
@@ -117,7 +118,7 @@ static void VKAPI_CALL vkCmdPushDescriptorSetEXT(VkCommandBuffer commandBuffer, 
 //  Instance
 //==============================================================================
 static bool vkSymbolFailed = false;
-static void* vkSymbol(const char* name)
+static void* VKAPI_CALL vkSymbol(const char* name)
 {
     void* ptr = nullptr;
 
@@ -146,12 +147,12 @@ static void* vkSymbol(const char* name)
 }
 #define vkSymbol(var) (void*&)var = vkSymbol(#var);
 //------------------------------------------------------------------------------
-static void* vkSymbolNULL(const char* name)
+static void* VKAPI_CALL vkSymbolNULL(const char* name)
 {
     return nullptr;
 }
 //------------------------------------------------------------------------------
-bool vkSymbols(void* (*vkSymbol)(const char* name))
+static bool vkSymbols(void* (VKAPI_PTR *vkSymbol)(const char* name))
 {
     vkSymbolFailed = false;
     vkSymbol(vkCreateInstance);
@@ -754,7 +755,7 @@ bool xxTestDeviceVulkan(uint64_t device)
     return true;
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceStringVulkan(uint64_t device)
+const char* xxGetDeviceNameVulkan()
 {
     return "Vulkan";
 }
@@ -1402,6 +1403,7 @@ struct BUFFERVK
     VkBuffer        buffer;
     VkDeviceMemory  memory;
     VkDeviceSize    size;
+    void*           ptr;
 };
 //------------------------------------------------------------------------------
 uint64_t xxCreateConstantBufferVulkan(uint64_t device, unsigned int size)
@@ -1431,12 +1433,24 @@ uint64_t xxCreateConstantBufferVulkan(uint64_t device, unsigned int size)
     VkPhysicalDeviceMemoryProperties prop;
     vkGetPhysicalDeviceMemoryProperties(g_physicalDevice, &prop);
 
-    uint32_t memoryTypeIndex = 0;
+    uint32_t persistentMemoryTypeIndex = UINT32_MAX;
+#if PERSISTENT_BUFFER
+    for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
+    {
+        if ((prop.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == VK_MEMORY_PROPERTY_HOST_COHERENT_BIT && req.memoryTypeBits & (1 << i))
+        {
+            persistentMemoryTypeIndex = i;
+            break;
+        }
+    }
+#endif
+
+    uint32_t localMemoryTypeIndex = UINT32_MAX;
     for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
     {
         if ((prop.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) == VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT && req.memoryTypeBits & (1 << i))
         {
-            memoryTypeIndex = i;
+            localMemoryTypeIndex = i;
             break;
         }
     }
@@ -1444,7 +1458,7 @@ uint64_t xxCreateConstantBufferVulkan(uint64_t device, unsigned int size)
     VkMemoryAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = req.size;
-    allocInfo.memoryTypeIndex = memoryTypeIndex;
+    allocInfo.memoryTypeIndex = persistentMemoryTypeIndex != UINT32_MAX ? persistentMemoryTypeIndex : localMemoryTypeIndex;
 
     VkDeviceMemory memory = VK_NULL_HANDLE;
     VkResult memoryResult = vkAllocateMemory(vkDevice, &allocInfo, g_callbacks, &memory);
@@ -1458,6 +1472,13 @@ uint64_t xxCreateConstantBufferVulkan(uint64_t device, unsigned int size)
     vkBuffer->buffer = buffer;
     vkBuffer->memory = memory;
     vkBuffer->size = size;
+    vkBuffer->ptr = nullptr;
+#if PERSISTENT_BUFFER
+    if (persistentMemoryTypeIndex != UINT32_MAX)
+    {
+        vkMapMemory(vkDevice, memory, 0, size, 0, &vkBuffer->ptr);
+    }
+#endif
 
     return reinterpret_cast<uint64_t>(vkBuffer);
 }
@@ -1489,12 +1510,24 @@ uint64_t xxCreateIndexBufferVulkan(uint64_t device, unsigned int size)
     VkPhysicalDeviceMemoryProperties prop;
     vkGetPhysicalDeviceMemoryProperties(g_physicalDevice, &prop);
 
-    uint32_t memoryTypeIndex = 0;
+    uint32_t persistentMemoryTypeIndex = UINT32_MAX;
+#if PERSISTENT_BUFFER
+    for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
+    {
+        if ((prop.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == VK_MEMORY_PROPERTY_HOST_COHERENT_BIT && req.memoryTypeBits & (1 << i))
+        {
+            persistentMemoryTypeIndex = i;
+            break;
+        }
+    }
+#endif
+
+    uint32_t localMemoryTypeIndex = UINT32_MAX;
     for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
     {
         if ((prop.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) == VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT && req.memoryTypeBits & (1 << i))
         {
-            memoryTypeIndex = i;
+            localMemoryTypeIndex = i;
             break;
         }
     }
@@ -1502,7 +1535,7 @@ uint64_t xxCreateIndexBufferVulkan(uint64_t device, unsigned int size)
     VkMemoryAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = req.size;
-    allocInfo.memoryTypeIndex = memoryTypeIndex;
+    allocInfo.memoryTypeIndex = persistentMemoryTypeIndex != UINT32_MAX ? persistentMemoryTypeIndex : localMemoryTypeIndex;
 
     VkDeviceMemory memory = VK_NULL_HANDLE;
     VkResult memoryResult = vkAllocateMemory(vkDevice, &allocInfo, g_callbacks, &memory);
@@ -1516,6 +1549,13 @@ uint64_t xxCreateIndexBufferVulkan(uint64_t device, unsigned int size)
     vkBuffer->buffer = buffer;
     vkBuffer->memory = memory;
     vkBuffer->size = size;
+    vkBuffer->ptr = nullptr;
+#if PERSISTENT_BUFFER
+    if (persistentMemoryTypeIndex != UINT32_MAX)
+    {
+        vkMapMemory(vkDevice, memory, 0, size, 0, &vkBuffer->ptr);
+    }
+#endif
 
     return reinterpret_cast<uint64_t>(vkBuffer);
 }
@@ -1547,12 +1587,24 @@ uint64_t xxCreateVertexBufferVulkan(uint64_t device, unsigned int size)
     VkPhysicalDeviceMemoryProperties prop;
     vkGetPhysicalDeviceMemoryProperties(g_physicalDevice, &prop);
 
-    uint32_t memoryTypeIndex = 0;
+    uint32_t persistentMemoryTypeIndex = UINT32_MAX;
+#if PERSISTENT_BUFFER
+    for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
+    {
+        if ((prop.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == VK_MEMORY_PROPERTY_HOST_COHERENT_BIT && req.memoryTypeBits & (1 << i))
+        {
+            persistentMemoryTypeIndex = i;
+            break;
+        }
+    }
+#endif
+
+    uint32_t localMemoryTypeIndex = UINT32_MAX;
     for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
     {
         if ((prop.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) == VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT && req.memoryTypeBits & (1 << i))
         {
-            memoryTypeIndex = i;
+            localMemoryTypeIndex = i;
             break;
         }
     }
@@ -1560,7 +1612,7 @@ uint64_t xxCreateVertexBufferVulkan(uint64_t device, unsigned int size)
     VkMemoryAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = req.size;
-    allocInfo.memoryTypeIndex = memoryTypeIndex;
+    allocInfo.memoryTypeIndex = persistentMemoryTypeIndex != UINT32_MAX ? persistentMemoryTypeIndex : localMemoryTypeIndex;
 
     VkDeviceMemory memory = VK_NULL_HANDLE;
     VkResult memoryResult = vkAllocateMemory(vkDevice, &allocInfo, g_callbacks, &memory);
@@ -1574,6 +1626,13 @@ uint64_t xxCreateVertexBufferVulkan(uint64_t device, unsigned int size)
     vkBuffer->buffer = buffer;
     vkBuffer->memory = memory;
     vkBuffer->size = size;
+    vkBuffer->ptr = nullptr;
+#if PERSISTENT_BUFFER
+    if (persistentMemoryTypeIndex != UINT32_MAX)
+    {
+        vkMapMemory(vkDevice, memory, 0, size, 0, &vkBuffer->ptr);
+    }
+#endif
 
     return reinterpret_cast<uint64_t>(vkBuffer);
 }
@@ -1604,6 +1663,8 @@ void* xxMapBufferVulkan(uint64_t device, uint64_t buffer)
     BUFFERVK* vkBuffer = reinterpret_cast<BUFFERVK*>(buffer);
     if (vkBuffer == nullptr)
         return nullptr;
+    if (vkBuffer->ptr)
+        return vkBuffer->ptr;
 
     void* ptr = nullptr;
     vkMapMemory(vkDevice, vkBuffer->memory, 0, vkBuffer->size, 0, &ptr);
@@ -1618,6 +1679,8 @@ void xxUnmapBufferVulkan(uint64_t device, uint64_t buffer)
         return;
     BUFFERVK* vkBuffer = reinterpret_cast<BUFFERVK*>(buffer);
     if (vkBuffer == nullptr)
+        return;
+    if (vkBuffer->ptr)
         return;
 
     vkUnmapMemory(vkDevice, vkBuffer->memory);

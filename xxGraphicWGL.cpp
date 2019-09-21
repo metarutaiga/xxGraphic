@@ -29,7 +29,7 @@ static PFNGLBINDVERTEXARRAYOESPROC          glBindVertexArray;
 //  Initialize - WGL
 //==============================================================================
 static bool wglSymbolFailed = false;
-static void* wglSymbol(const char* name, bool* failed)
+static void* GL_APIENTRY wglSymbol(const char* name, bool* failed)
 {
     void* ptr = nullptr;
 

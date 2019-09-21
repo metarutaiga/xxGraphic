@@ -23,7 +23,7 @@ static PFNGLBINDVERTEXARRAYOESPROC      glBindVertexArray;
 //  Initialize - EAGL
 //==============================================================================
 static bool eaglSymbolFailed = false;
-static void* eaglSymbol(const char* name, bool* failed)
+static void* GL_APIENTRY eaglSymbol(const char* name, bool* failed)
 {
     void* ptr = nullptr;
 

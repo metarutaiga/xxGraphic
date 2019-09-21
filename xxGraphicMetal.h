@@ -20,7 +20,7 @@ xxAPI uint64_t      xxCreateDeviceMetal(uint64_t instance);
 xxAPI void          xxDestroyDeviceMetal(uint64_t device);
 xxAPI void          xxResetDeviceMetal(uint64_t device);
 xxAPI bool          xxTestDeviceMetal(uint64_t device);
-xxAPI const char*   xxGetDeviceStringMetal(uint64_t device);
+xxAPI const char*   xxGetDeviceNameMetal();
 //==============================================================================
 //  Framebuffer
 //==============================================================================

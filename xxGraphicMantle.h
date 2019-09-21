@@ -20,7 +20,7 @@ xxAPI uint64_t      xxCreateDeviceMantle(uint64_t instance);
 xxAPI void          xxDestroyDeviceMantle(uint64_t device);
 xxAPI void          xxResetDeviceMantle(uint64_t device);
 xxAPI bool          xxTestDeviceMantle(uint64_t device);
-xxAPI const char*   xxGetDeviceStringMantle(uint64_t device);
+xxAPI const char*   xxGetDeviceNameMantle();
 //==============================================================================
 //  Framebuffer
 //==============================================================================

@@ -11,37 +11,11 @@
 #include <dlfcn.h>
 
 #define GL_SILENCE_DEPRECATION
-#define CGLCreateContext CGLCreateContext_unused
-#define CGLDestroyContext CGLDestroyContext_unused
-#define CGLGetPixelFormat CGLGetPixelFormat_unused
-#define CGLChoosePixelFormat CGLChoosePixelFormat_unused
-#define CGLDestroyPixelFormat CGLDestroyPixelFormat_unused
-#define CGLDescribePixelFormat CGLDescribePixelFormat_unused
-#define CGLSetCurrentContext CGLSetCurrentContext_unused
-#define CGLGetCurrentContext CGLGetCurrentContext_unused
-#define CGLFlushDrawable CGLFlushDrawable_unused
-#define CGLDisable CGLDisable_unused
-#define CGLEnable CGLEnable_unused
-#define CGLSetParameter CGLSetParameter_unused
-#define CGLGetParameter CGLGetParameter_unused
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/OpenGL.h>
-#undef CGLCreateContext
-#undef CGLDestroyContext
-#undef CGLGetPixelFormat
-#undef CGLChoosePixelFormat
-#undef CGLDestroyPixelFormat
-#undef CGLDescribePixelFormat
-#undef CGLSetCurrentContext
-#undef CGLGetCurrentContext
-#undef CGLFlushDrawable
-#undef CGLDisable
-#undef CGLEnable
-#undef CGLSetParameter
-#undef CGLGetParameter
-#include <AppKit/NSWindow.h>
-#include <AppKit/NSOpenGL.h>
-#include <AppKit/NSOpenGLView.h>
+#import <AppKit/NSWindow.h>
+#import <AppKit/NSOpenGL.h>
+#import <AppKit/NSOpenGLView.h>
 static void*                            g_glLibrary = nullptr;
 static NSOpenGLView*                    g_rootView = nil;
 static PFNGLGENVERTEXARRAYSOESPROC      glGenVertexArrays;
@@ -52,7 +26,7 @@ static PFNGLBINDVERTEXARRAYOESPROC      glBindVertexArray;
 //  Initialize - CGL
 //==============================================================================
 static bool cglSymbolFailed = false;
-static void* cglSymbol(const char* name, bool* failed)
+static void* GL_APIENTRY cglSymbol(const char* name, bool* failed)
 {
     void* ptr = nullptr;
 

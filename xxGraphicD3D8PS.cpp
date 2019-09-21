@@ -32,7 +32,7 @@ uint64_t xxCreateInstanceD3D8PS()
         return 0;
 
     xxCreateInstance = xxCreateInstanceD3D8PS;
-    xxGetDeviceString = xxGetDeviceStringD3D8PS;
+    xxGetDeviceName = xxGetDeviceNameD3D8PS;
     xxCreateVertexAttribute = xxCreateVertexAttributeD3D8PS;
     xxDestroyVertexAttribute = xxDestroyVertexAttributeD3D8PS;
     xxCreateVertexShader = xxCreateVertexShaderD3D8PS;
@@ -49,7 +49,7 @@ uint64_t xxCreateInstanceD3D8PS()
 //==============================================================================
 //  Device
 //==============================================================================
-const char* xxGetDeviceStringD3D8PS(uint64_t device)
+const char* xxGetDeviceNameD3D8PS()
 {
     return "Direct3D 8.0 Programmable Shader";
 }

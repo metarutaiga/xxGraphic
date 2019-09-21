@@ -20,7 +20,7 @@ xxAPI uint64_t      xxCreateDeviceD3D11(uint64_t instance);
 xxAPI void          xxDestroyDeviceD3D11(uint64_t device);
 xxAPI void          xxResetDeviceD3D11(uint64_t device);
 xxAPI bool          xxTestDeviceD3D11(uint64_t device);
-xxAPI const char*   xxGetDeviceStringD3D11(uint64_t device);
+xxAPI const char*   xxGetDeviceNameD3D11();
 //==============================================================================
 //  Framebuffer
 //==============================================================================

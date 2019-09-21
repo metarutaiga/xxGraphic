@@ -89,7 +89,7 @@ bool xxTestDeviceGLES2(uint64_t device)
     return true;
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceStringGLES2(uint64_t device)
+const char* xxGetDeviceNameGLES2()
 {
     return "OpenGL ES 2.0";
 }

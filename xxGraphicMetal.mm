@@ -147,7 +147,7 @@ bool xxTestDeviceMetal(uint64_t device)
     return true;
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceStringMetal(uint64_t device)
+const char* xxGetDeviceNameMetal()
 {
     return "Metal";
 }

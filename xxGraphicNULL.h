@@ -20,7 +20,7 @@ xxAPI uint64_t      xxCreateDeviceNULL(uint64_t instance);
 xxAPI void          xxDestroyDeviceNULL(uint64_t device);
 xxAPI void          xxResetDeviceNULL(uint64_t device);
 xxAPI bool          xxTestDeviceNULL(uint64_t device);
-xxAPI const char*   xxGetDeviceStringNULL(uint64_t device);
+xxAPI const char*   xxGetDeviceNameNULL();
 //==============================================================================
 //  Framebuffer
 //==============================================================================

@@ -10,7 +10,7 @@
 //==============================================================================
 //  Initialize
 //==============================================================================
-bool xxGraphicCreateGL(void* (*getSymbol)(const char* name, bool* failed))
+bool xxGraphicCreateGL(void* (GL_APIENTRYP getSymbol)(const char* name, bool* failed))
 {
     bool failed = false;
 
@@ -162,7 +162,7 @@ bool xxGraphicCreateGL(void* (*getSymbol)(const char* name, bool* failed))
     return (failed == false);
 }
 //------------------------------------------------------------------------------
-static void* getNULLSymbol(const char* name, bool* failed)
+static void* GL_APIENTRY getNULLSymbol(const char* name, bool* failed)
 {
     return nullptr;
 }

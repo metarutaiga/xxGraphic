@@ -42,7 +42,7 @@ uint64_t xxCreateInstanceD3D9On12()
     xxRegisterFunction(D3D9);
 
     xxDestroyInstance = xxDestroyInstanceD3D9On12;
-    xxGetDeviceString = xxGetDeviceStringD3D9On12;
+    xxGetDeviceName = xxGetDeviceNameD3D9On12;
 
     return reinterpret_cast<uint64_t>(d3d);
 }
@@ -54,7 +54,7 @@ uint64_t xxCreateInstanceD3D9On12PS()
         return 0;
 
     xxCreateInstance = xxCreateInstanceD3D9PS;
-    xxGetDeviceString = xxGetDeviceStringD3D9PS;
+    xxGetDeviceName = xxGetDeviceNameD3D9PS;
     xxCreateVertexAttribute = xxCreateVertexAttributeD3D9PS;
     xxDestroyVertexAttribute = xxDestroyVertexAttributeD3D9PS;
     xxCreateVertexShader = xxCreateVertexShaderD3D9PS;
@@ -67,7 +67,7 @@ uint64_t xxCreateInstanceD3D9On12PS()
     xxSetTransform = xxSetTransformD3D9PS;
 
     xxDestroyInstance = xxDestroyInstanceD3D9On12;
-    xxGetDeviceString = xxGetDeviceStringD3D9On12PS;
+    xxGetDeviceName = xxGetDeviceNameD3D9On12PS;
 
     return instance;
 }
@@ -96,7 +96,7 @@ uint64_t xxCreateInstanceD3D9On12Ex()
 
     xxTestDevice = xxTestDeviceD3D9On12Ex;
     xxDestroyInstance = xxDestroyInstanceD3D9On12;
-    xxGetDeviceString = xxGetDeviceStringD3D9On12Ex;
+    xxGetDeviceName = xxGetDeviceNameD3D9On12Ex;
 
     return reinterpret_cast<uint64_t>(d3d);
 }
@@ -108,7 +108,7 @@ uint64_t xxCreateInstanceD3D9On12ExPS()
         return 0;
 
     xxCreateInstance = xxCreateInstanceD3D9PS;
-    xxGetDeviceString = xxGetDeviceStringD3D9PS;
+    xxGetDeviceName = xxGetDeviceNameD3D9PS;
     xxCreateVertexAttribute = xxCreateVertexAttributeD3D9PS;
     xxDestroyVertexAttribute = xxDestroyVertexAttributeD3D9PS;
     xxCreateVertexShader = xxCreateVertexShaderD3D9PS;
@@ -122,7 +122,7 @@ uint64_t xxCreateInstanceD3D9On12ExPS()
 
     xxTestDevice = xxTestDeviceD3D9On12Ex;
     xxDestroyInstance = xxDestroyInstanceD3D9On12;
-    xxGetDeviceString = xxGetDeviceStringD3D9On12ExPS;
+    xxGetDeviceName = xxGetDeviceNameD3D9On12ExPS;
 
     return instance;
 }
@@ -149,22 +149,22 @@ bool xxTestDeviceD3D9On12Ex(uint64_t device)
     return true;
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceStringD3D9On12(uint64_t device)
+const char* xxGetDeviceNameD3D9On12()
 {
     return "Direct3D 9On12 Fixed Function";
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceStringD3D9On12PS(uint64_t device)
+const char* xxGetDeviceNameD3D9On12PS()
 {
     return "Direct3D 9On12 Programmable Shader";
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceStringD3D9On12Ex(uint64_t device)
+const char* xxGetDeviceNameD3D9On12Ex()
 {
     return "Direct3D 9On12Ex Fixed Function";
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceStringD3D9On12ExPS(uint64_t device)
+const char* xxGetDeviceNameD3D9On12ExPS()
 {
     return "Direct3D 9On12Ex Programmable Shader";
 }
