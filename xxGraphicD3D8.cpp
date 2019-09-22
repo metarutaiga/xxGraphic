@@ -44,7 +44,11 @@ uint64_t xxCreateInstanceD3D8()
     if (Direct3DCreate8 == nullptr)
         return 0;
 
-    LPDIRECT3D8 d3d = Direct3DCreate8(D3D_SDK_VERSION);
+    LPDIRECT3D8 d3d = nullptr;
+    if (d3d == nullptr)
+        d3d = Direct3DCreate8(D3D_SDK_VERSION);
+    if (d3d == nullptr)
+        d3d = Direct3DCreate8(120/*D3D_SDK_VERSION*/);
     if (d3d == nullptr)
         return 0;
 
