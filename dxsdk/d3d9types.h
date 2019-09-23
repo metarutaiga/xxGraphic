@@ -1657,8 +1657,6 @@ typedef enum _D3DRESOURCETYPE {
 
 
 
-
-
 /* CubeMap Face identifiers */
 typedef enum _D3DCUBEMAP_FACES
 {
@@ -2418,6 +2416,7 @@ typedef struct _D3DAES_CTR_IV
     UINT64   IV;         // Big-Endian IV
     UINT64   Count;      // Big-Endian Block Count
 } D3DAES_CTR_IV;
+
 
 
 #endif // !D3D_DISABLE_9EX
