@@ -144,9 +144,9 @@ uint64_t xxCreateDeviceD3D7(uint64_t instance)
         DDSURFACEDESC2 desc = {};
         desc.dwSize = sizeof(DDSURFACEDESC2);
         desc.dwFlags = DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS;
-        desc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY | DDSCAPS_3DDEVICE;
-        desc.dwWidth = 4096;
-        desc.dwHeight = 4096;
+        desc.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_3DDEVICE;
+        desc.dwWidth = 1;
+        desc.dwHeight = 1;
 
         HRESULT result = g_ddraw->CreateSurface(&desc, &backSurface, nullptr);
         if (result != S_OK)
@@ -196,6 +196,7 @@ struct D3DFRAMEBUFFER7
 //==============================================================================
 struct D3DSWAPCHAIN7 : public D3DFRAMEBUFFER7
 {
+    LPDIRECTDRAWCLIPPER     clipper;
     HWND                    hWnd;
 };
 //------------------------------------------------------------------------------
@@ -257,8 +258,19 @@ uint64_t xxCreateSwapchainD3D7(uint64_t device, uint64_t renderPass, void* view,
         backSurface->AddAttachedSurface(depthSurface);
     }
 
+    LPDIRECTDRAWCLIPPER clipper = nullptr;
+    if (clipper == nullptr)
+    {
+        HRESULT result = g_ddraw->CreateClipper(0, &clipper, nullptr);
+        if (result != S_OK)
+            return 0;
+
+        clipper->SetHWnd(0, hWnd);
+    }
+
     swapchain->backSurface = backSurface;
     swapchain->depthSurface = depthSurface;
+    swapchain->clipper = clipper;
     swapchain->hWnd = hWnd;
 
     return reinterpret_cast<uint64_t>(swapchain);
@@ -272,6 +284,7 @@ void xxDestroySwapchainD3D7(uint64_t swapchain)
 
     SafeRelease(d3dSwapchain->backSurface);
     SafeRelease(d3dSwapchain->depthSurface);
+    SafeRelease(d3dSwapchain->clipper);
     delete d3dSwapchain;
 }
 //------------------------------------------------------------------------------
@@ -284,8 +297,10 @@ void xxPresentSwapchainD3D7(uint64_t swapchain)
     RECT rect = {};
     GetClientRect(d3dSwapchain->hWnd, &rect);
     ClientToScreen(d3dSwapchain->hWnd, (POINT*)&rect.left);
+    ClientToScreen(d3dSwapchain->hWnd, (POINT*)&rect.right);
 
-    g_primarySurface->BltFast(rect.left, rect.top, d3dSwapchain->backSurface, nullptr, DDBLTFAST_WAIT);
+    g_primarySurface->SetClipper(d3dSwapchain->clipper);
+    g_primarySurface->Blt(&rect, d3dSwapchain->backSurface, nullptr, DDBLT_WAIT, nullptr);
 }
 //------------------------------------------------------------------------------
 uint64_t xxGetCommandBufferD3D7(uint64_t device, uint64_t swapchain)
