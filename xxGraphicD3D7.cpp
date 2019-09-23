@@ -36,7 +36,7 @@ static void PatchD3DIM700()
     DWORD codeSize = ntHeader->OptionalHeader.SizeOfCode;
 
     const BYTE wantedBytes[] = { 0xB8, 0x00, 0x08, 0x00, 0x00, 0x39 };
-    for (DWORD i = 0; i < codeSize - sizeof(wantedBytes); ++i)
+    for (DWORD i = 0, size = codeSize - sizeof(wantedBytes); i < size; ++i)
     {
         if (memcmp(codeBase + i, wantedBytes, sizeof(wantedBytes)) == 0)
         {
