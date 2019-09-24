@@ -39,9 +39,7 @@ uint64_t xxTSCFrequencyImpl()
 #else
 #if defined(xxWINDOWS)
     LARGE_INTEGER performanceBegin;
-    LARGE_INTEGER performanceDelta;
     LARGE_INTEGER performanceEnd;
-    LARGE_INTEGER performanceFrequency;
 
     QueryPerformanceCounter(&performanceBegin);
     uint64_t tscBegin = xxTSC();
@@ -49,17 +47,18 @@ uint64_t xxTSCFrequencyImpl()
     uint64_t tscEnd = xxTSC();
     QueryPerformanceCounter(&performanceEnd);
 
+    LARGE_INTEGER performanceFrequency;
     QueryPerformanceFrequency(&performanceFrequency);
     if (performanceFrequency.QuadPart == 0)
         performanceFrequency.QuadPart = 1;
-    performanceDelta.QuadPart = (performanceEnd.QuadPart - performanceBegin.QuadPart) * 1000 / performanceFrequency.QuadPart;
-    if (performanceDelta.QuadPart == 0)
-        performanceDelta.QuadPart = 100;
 
-    uint64_t counter = (tscEnd - tscBegin) * 1000 / performanceDelta.QuadPart;
+    double delta = (performanceEnd.QuadPart - performanceBegin.QuadPart) * 1000.0 / performanceFrequency.QuadPart;
+    if (delta == 0.0)
+        delta = 100.0;
+
+    LONGLONG counter = LONGLONG((tscEnd - tscBegin) * 1000.0 / delta);
 #else
     timeval tmBegin;
-    timeval tmDelta;
     timeval tmEnd;
 
     timespec ts;
@@ -73,17 +72,16 @@ uint64_t xxTSCFrequencyImpl()
     gettimeofday(&tmEnd, nullptr);
 
     uint64_t frequency = 1000000;
-    tmDelta.tv_sec = tmEnd.tv_sec - tmBegin.tv_sec;
-    tmDelta.tv_usec = tmEnd.tv_usec - tmBegin.tv_usec;
-    uint64_t delta = (tmDelta.tv_sec * 1000000 + tmDelta.tv_usec) * 1000 / frequency;
-    if (delta == 0)
-        delta = 100;
 
-    uint64_t counter = (tscEnd - tscBegin) * 1000 / delta;
+    double delta = ((tmEnd.tv_sec - tmBegin.tv_sec) * 1000000 + (tmEnd.tv_usec - tmBegin.tv_usec)) * 1000.0 / frequency;
+    if (delta == 0.0)
+        delta = 100.0;
+
+    int64_t counter = int64_t((tscEnd - tscBegin) * 1000.0 / delta);
 #endif
 
     float mhz = counter / 1000000.0f;
-    counter = llroundf(mhz / 100.0f) * 100 * 1000000;
+    counter = int64_t(int64_t(mhz / 100.0f) * 100.0 * 1000000.0);
 
     return counter;
 #endif
@@ -316,8 +314,8 @@ const uint8_t* MD5_final(MD5_CTX* ctx)
     }
     for (i = 0; i < 8; ++i)
     {
-        uint8_t tmp = (uint8_t)(cnt >> (i * 8));
-        MD5_update(ctx, &tmp, 1);
+        uint8_t* tmp = (uint8_t*)&cnt;
+        MD5_update(ctx, &tmp[i], 1);
     }
 
     for (i = 0; i < 4; i++)
@@ -407,4 +405,167 @@ const uint8_t* xxDXBCChecksum(const void* data, int len, uint8_t* digest)
     memcpy(digest, ctx.state, MD5_CTX::MD5_DIGEST_SIZE);
     return digest;
 }
+//==============================================================================
+//  msvcrt
+//==============================================================================
+#if defined(_MSC_VER) && !defined(_DEBUG)
+extern "C" __declspec(selectany) int _fltused = 1;
+extern "C" ULONG _tls_index = 0;
+static HANDLE globalHeap = nullptr;
+static HMODULE msvcrt = nullptr;
+int (*__vsnprintf)(char*, size_t, const char*, va_list) = nullptr;
+//------------------------------------------------------------------------------
+typedef void (*_PVFV)();
+#pragma const_seg(push, init)
+#pragma const_seg(".CRT$XCA")
+extern "C" const _PVFV __xc_a = 0;
+#pragma const_seg(".CRT$XCZ")
+extern "C" const _PVFV __xc_z = 0;
+#pragma const_seg(".CRT$XIA")
+extern "C" const _PVFV __xi_a = 0;
+#pragma const_seg(".CRT$XIZ")
+extern "C" const _PVFV __xi_z = 0;
+#pragma const_seg(pop, init)
+#pragma comment(linker, "/merge:.CRT=.rdata")
+//------------------------------------------------------------------------------
+static void _initterm(const _PVFV* ppfn, const _PVFV* end)
+{
+    do
+    {
+        if (_PVFV pfn = *++ppfn)
+        {
+            pfn();
+        }
+    } while (ppfn < end);
+}
+//------------------------------------------------------------------------------
+extern "C" BOOL WINAPI _DllMainCRTStartup(HANDLE handle, DWORD reason, LPVOID preserved)
+{
+    switch (reason)
+    {
+    case DLL_PROCESS_ATTACH:
+        if (globalHeap == nullptr)
+        {
+            globalHeap = HeapCreate(0, 0, 0);
+        }
+        if (__vsnprintf == nullptr)
+        {
+            if (msvcrt == nullptr)
+                msvcrt = LoadLibraryW(L"msvcrt.dll");
+            if (msvcrt)
+            {
+                (void*&)__vsnprintf = GetProcAddress(msvcrt, "_vsnprintf");
+            }
+        }
+        _initterm(&__xi_a, &__xi_z);
+        _initterm(&__xc_a, &__xc_z);
+        break;
+
+    case DLL_PROCESS_DETACH:
+        if (globalHeap)
+        {
+            HeapDestroy(globalHeap);
+            globalHeap = nullptr;
+        }
+        if (msvcrt)
+        {
+            FreeLibrary(msvcrt);
+            msvcrt = nullptr;
+        }
+        __vsnprintf = nullptr;
+        break;
+
+    case DLL_THREAD_ATTACH:
+    case DLL_THREAD_DETACH:
+        break;
+    }
+    return TRUE;
+}
+//------------------------------------------------------------------------------
+void* _aligned_malloc(size_t size, size_t alignment)
+{
+    size_t address = reinterpret_cast<size_t>(HeapAlloc(globalHeap, 0, size + alignment));
+    if (address == 0)
+        return nullptr;
+    size_t alignAddress = (address + alignment) & ~(alignment - 1);
+    memcpy((char*)alignAddress - sizeof(size_t), &address, sizeof(size_t));
+    return reinterpret_cast<void*>(alignAddress);
+}
+//------------------------------------------------------------------------------
+void* _aligned_realloc(void* ptr, size_t size, size_t alignment)
+{
+    size_t oldAddress = reinterpret_cast<size_t>(ptr);
+    if (oldAddress == 0)
+        return _aligned_malloc(size, alignment);
+    size_t address;
+    memcpy(&address, (char*)oldAddress - sizeof(size_t), sizeof(size_t));
+    address = reinterpret_cast<size_t>(HeapReAlloc(globalHeap, 0, reinterpret_cast<void*>(address), size + alignment));
+    if (address == 0)
+        return nullptr;
+    size_t alignAddress = (address + alignment) & ~(alignment - 1);
+    memcpy((char*)alignAddress - sizeof(size_t), &address, sizeof(size_t));
+    return reinterpret_cast<void*>(alignAddress);
+}
+//------------------------------------------------------------------------------
+void _aligned_free(void* ptr)
+{
+    size_t alignAddress = reinterpret_cast<size_t>(ptr);
+    if (alignAddress == 0)
+        return;
+    size_t address;
+    memcpy(&address, (char*)alignAddress - sizeof(size_t), sizeof(size_t));
+    HeapFree(globalHeap, 0, reinterpret_cast<void*>(address));
+}
+//------------------------------------------------------------------------------
+void* operator new(size_t size)
+{
+    return xxAlloc(char, size);
+}
+//------------------------------------------------------------------------------
+void operator delete(void* ptr, size_t size)
+{
+    xxFree(ptr);
+}
+//------------------------------------------------------------------------------
+#pragma function(memset)
+void* memset(void* ptr, int value, size_t size)
+{
+    char* data = (char*)ptr;
+    for (size_t i = 0; i < size; ++i)
+        (*data++) = value;
+    return ptr;
+}
+//------------------------------------------------------------------------------
+#pragma function(memcpy)
+void* memcpy(void* dst, void const* src, size_t size)
+{
+    char* p = (char*)dst;
+    char* q = (char*)src;
+    for (size_t i = 0; i < size; ++i)
+        (*p++) = (*q++);
+    return dst;
+}
+//------------------------------------------------------------------------------
+#pragma function(strcmp)
+int strcmp(char const* dst, char const* src)
+{
+    char p;
+    char q;
+    do
+    {
+        p = (*dst++);
+        q = (*src++);
+        if (p == '\0')
+            return p - q;
+    } while (p == q);
+    return p - q;
+}
+//------------------------------------------------------------------------------
+int __stdio_common_vsprintf(unsigned __int64 options, char* buffer, size_t bufferCount, char const* format, _locale_t locale, va_list argList)
+{
+    if (__vsnprintf == nullptr)
+        return 0;
+    return __vsnprintf(buffer, bufferCount, format, argList);
+}
+#endif
 //------------------------------------------------------------------------------

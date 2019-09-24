@@ -565,13 +565,16 @@ uint64_t xxCreateConstantBufferMantle(uint64_t device, unsigned int size)
     if (grDevice == GR_NULL_HANDLE)
         return 0;
 
-    GR_GPU_MEMORY memory;
+    intptr_t pageSize = (intptr_t)g_heapProps.pageSize;
+
     GR_MEMORY_ALLOC_INFO allocInfo = {};
-    allocInfo.size = (1 + size / g_heapProps.pageSize) * g_heapProps.pageSize;
+    allocInfo.size = ((1 + size) / pageSize) * pageSize;
     allocInfo.alignment = 0;
     allocInfo.memPriority = GR_MEMORY_PRIORITY_HIGH;
     allocInfo.heapCount = 1;
     allocInfo.heaps[0] = g_suitableHeap;
+
+    GR_GPU_MEMORY memory = GR_NULL_HANDLE;
     grAllocMemory(grDevice, &allocInfo, &memory);
 
     return reinterpret_cast<uint64_t>(memory);
@@ -583,13 +586,16 @@ uint64_t xxCreateIndexBufferMantle(uint64_t device, unsigned int size)
     if (grDevice == GR_NULL_HANDLE)
         return 0;
 
-    GR_GPU_MEMORY memory;
+    intptr_t pageSize = (intptr_t)g_heapProps.pageSize;
+
     GR_MEMORY_ALLOC_INFO allocInfo = {};
-    allocInfo.size = (1 + size / g_heapProps.pageSize) * g_heapProps.pageSize;
+    allocInfo.size = ((1 + size) / pageSize) * pageSize;
     allocInfo.alignment = 0;
     allocInfo.memPriority = GR_MEMORY_PRIORITY_HIGH;
     allocInfo.heapCount = 1;
     allocInfo.heaps[0] = g_suitableHeap;
+
+    GR_GPU_MEMORY memory = GR_NULL_HANDLE;
     grAllocMemory(grDevice, &allocInfo, &memory);
 
     return reinterpret_cast<uint64_t>(memory);
@@ -601,8 +607,10 @@ uint64_t xxCreateVertexBufferMantle(uint64_t device, unsigned int size)
     if (grDevice == GR_NULL_HANDLE)
         return 0;
 
+    intptr_t pageSize = (intptr_t)g_heapProps.pageSize;
+
     GR_MEMORY_ALLOC_INFO allocInfo = {};
-    allocInfo.size = (1 + size / g_heapProps.pageSize) * g_heapProps.pageSize;
+    allocInfo.size = ((1 + size) / pageSize) * pageSize;
     allocInfo.alignment = 0;
     allocInfo.memPriority = GR_MEMORY_PRIORITY_HIGH;
     allocInfo.heapCount = 1;

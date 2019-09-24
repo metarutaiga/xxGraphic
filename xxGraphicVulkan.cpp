@@ -885,7 +885,7 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
 #elif defined(xxWINDOWS)
     VkWin32SurfaceCreateInfoKHR surfaceInfo = {};
     surfaceInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-    surfaceInfo.hinstance = GetModuleHandle(nullptr);
+    surfaceInfo.hinstance = GetModuleHandleW(nullptr);
     surfaceInfo.hwnd = (HWND)view;
 
     VkSurfaceKHR surface = VK_NULL_HANDLE;
@@ -1878,10 +1878,12 @@ void* xxMapTextureVulkan(uint64_t device, uint64_t texture, unsigned int& stride
         if (bindResult != VK_SUCCESS)
             return nullptr;
 
+        intptr_t size = (intptr_t)req.size;
+
         vkTexture->uploadBuffer = buffer;
         vkTexture->uploadMemory = memory;
-        vkTexture->uploadSize = req.size;
-        vkTexture->uploadStride = req.size / vkTexture->array / vkTexture->depth / vkTexture->height;
+        vkTexture->uploadSize = size;
+        vkTexture->uploadStride = size / vkTexture->array / vkTexture->depth / vkTexture->height;
     }
 
     stride = (int)vkTexture->uploadStride;
