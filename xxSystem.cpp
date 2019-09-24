@@ -98,6 +98,10 @@ float xxGetCurrentTime()
 //==============================================================================
 //  Process / Thread ID
 //==============================================================================
+#if defined(_MSC_VER) && !defined(_DEBUG)
+static DWORD tlsIndexThreadId = TlsAlloc();
+#endif
+//------------------------------------------------------------------------------
 uint64_t xxGetCurrentProcessId()
 {
 #if defined(_M_IX86)
@@ -130,7 +134,11 @@ uint64_t xxGetCurrentThreadId()
 //------------------------------------------------------------------------------
 int xxGetIncrementThreadId()
 {
+#if defined(_MSC_VER) && !defined(_DEBUG)
+    int threadId = (int)(size_t)TlsGetValue(tlsIndexThreadId);
+#else
     static int thread_local threadId;
+#endif
     if (xxUnlikely(threadId == 0))
     {
         static int increment = 0;
@@ -138,6 +146,9 @@ int xxGetIncrementThreadId()
         threadId = __sync_fetch_and_add(&increment, 1);
 #elif defined(_MSC_VER)
         threadId = _InterlockedIncrement((unsigned int*)&increment);
+#endif
+#if defined(_MSC_VER) && !defined(_DEBUG)
+        TlsSetValue(tlsIndexThreadId, (LPVOID)(size_t)threadId);
 #endif
     }
     return threadId - 1;
@@ -410,22 +421,19 @@ const uint8_t* xxDXBCChecksum(const void* data, int len, uint8_t* digest)
 //==============================================================================
 #if defined(_MSC_VER) && !defined(_DEBUG)
 extern "C" __declspec(selectany) int _fltused = 1;
-extern "C" ULONG _tls_index = 0;
 static HANDLE globalHeap = nullptr;
 static HMODULE msvcrt = nullptr;
 int (*__vsnprintf)(char*, size_t, const char*, va_list) = nullptr;
 //------------------------------------------------------------------------------
+#pragma section(".CRT$XCA", long, read)
+#pragma section(".CRT$XCZ", long, read)
+#pragma section(".CRT$XIA", long, read)
+#pragma section(".CRT$XIZ", long, read)
 typedef void (*_PVFV)();
-#pragma const_seg(push, init)
-#pragma const_seg(".CRT$XCA")
-extern "C" const _PVFV __xc_a = 0;
-#pragma const_seg(".CRT$XCZ")
-extern "C" const _PVFV __xc_z = 0;
-#pragma const_seg(".CRT$XIA")
-extern "C" const _PVFV __xi_a = 0;
-#pragma const_seg(".CRT$XIZ")
-extern "C" const _PVFV __xi_z = 0;
-#pragma const_seg(pop, init)
+extern "C" __declspec(allocate(".CRT$XCA")) const _PVFV __xc_a = 0;
+extern "C" __declspec(allocate(".CRT$XCZ")) const _PVFV __xc_z = 0;
+extern "C" __declspec(allocate(".CRT$XIA")) const _PVFV __xi_a = 0;
+extern "C" __declspec(allocate(".CRT$XIZ")) const _PVFV __xi_z = 0;
 #pragma comment(linker, "/merge:.CRT=.rdata")
 //------------------------------------------------------------------------------
 static void _initterm(const _PVFV* ppfn, const _PVFV* end)
@@ -448,31 +456,30 @@ extern "C" BOOL WINAPI _DllMainCRTStartup(HANDLE handle, DWORD reason, LPVOID pr
         {
             globalHeap = HeapCreate(0, 0, 0);
         }
-        if (__vsnprintf == nullptr)
+        if (msvcrt == nullptr)
         {
-            if (msvcrt == nullptr)
-                msvcrt = LoadLibraryW(L"msvcrt.dll");
-            if (msvcrt)
-            {
-                (void*&)__vsnprintf = GetProcAddress(msvcrt, "_vsnprintf");
-            }
+            msvcrt = LoadLibraryW(L"msvcrt.dll");
+        }
+        if (msvcrt && __vsnprintf == nullptr)
+        {
+            (void*&)__vsnprintf = GetProcAddress(msvcrt, "_vsnprintf");
         }
         _initterm(&__xi_a, &__xi_z);
         _initterm(&__xc_a, &__xc_z);
         break;
 
     case DLL_PROCESS_DETACH:
-        if (globalHeap)
-        {
-            HeapDestroy(globalHeap);
-            globalHeap = nullptr;
-        }
+        __vsnprintf = nullptr;
         if (msvcrt)
         {
             FreeLibrary(msvcrt);
             msvcrt = nullptr;
         }
-        __vsnprintf = nullptr;
+        if (globalHeap)
+        {
+            HeapDestroy(globalHeap);
+            globalHeap = nullptr;
+        }
         break;
 
     case DLL_THREAD_ATTACH:
@@ -482,7 +489,7 @@ extern "C" BOOL WINAPI _DllMainCRTStartup(HANDLE handle, DWORD reason, LPVOID pr
     return TRUE;
 }
 //------------------------------------------------------------------------------
-void* _aligned_malloc(size_t size, size_t alignment)
+extern "C" void* _aligned_malloc(size_t size, size_t alignment)
 {
     size_t address = reinterpret_cast<size_t>(HeapAlloc(globalHeap, 0, size + alignment));
     if (address == 0)
@@ -492,7 +499,7 @@ void* _aligned_malloc(size_t size, size_t alignment)
     return reinterpret_cast<void*>(alignAddress);
 }
 //------------------------------------------------------------------------------
-void* _aligned_realloc(void* ptr, size_t size, size_t alignment)
+extern "C" void* _aligned_realloc(void* ptr, size_t size, size_t alignment)
 {
     size_t oldAddress = reinterpret_cast<size_t>(ptr);
     if (oldAddress == 0)
@@ -507,7 +514,7 @@ void* _aligned_realloc(void* ptr, size_t size, size_t alignment)
     return reinterpret_cast<void*>(alignAddress);
 }
 //------------------------------------------------------------------------------
-void _aligned_free(void* ptr)
+extern "C" void _aligned_free(void* ptr)
 {
     size_t alignAddress = reinterpret_cast<size_t>(ptr);
     if (alignAddress == 0)
@@ -528,7 +535,7 @@ void operator delete(void* ptr, size_t size)
 }
 //------------------------------------------------------------------------------
 #pragma function(memset)
-void* memset(void* ptr, int value, size_t size)
+extern "C" void* memset(void* ptr, int value, size_t size)
 {
     char* data = (char*)ptr;
     for (size_t i = 0; i < size; ++i)
@@ -537,7 +544,7 @@ void* memset(void* ptr, int value, size_t size)
 }
 //------------------------------------------------------------------------------
 #pragma function(memcpy)
-void* memcpy(void* dst, void const* src, size_t size)
+extern "C" void* memcpy(void* dst, void const* src, size_t size)
 {
     char* p = (char*)dst;
     char* q = (char*)src;
@@ -547,7 +554,7 @@ void* memcpy(void* dst, void const* src, size_t size)
 }
 //------------------------------------------------------------------------------
 #pragma function(strcmp)
-int strcmp(char const* dst, char const* src)
+extern "C" int strcmp(char const* dst, char const* src)
 {
     char p;
     char q;
@@ -561,7 +568,7 @@ int strcmp(char const* dst, char const* src)
     return p - q;
 }
 //------------------------------------------------------------------------------
-int __stdio_common_vsprintf(unsigned __int64 options, char* buffer, size_t bufferCount, char const* format, _locale_t locale, va_list argList)
+extern "C" int __stdio_common_vsprintf(unsigned __int64 options, char* buffer, size_t bufferCount, char const* format, _locale_t locale, va_list argList)
 {
     if (__vsnprintf == nullptr)
         return 0;

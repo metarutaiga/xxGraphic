@@ -10,8 +10,12 @@
 
 #include "gl/wgl.h"
 static const wchar_t* const                 g_dummy = L"xxGraphicDummyWindow";
+static HMODULE                              g_gdiLibrary = nullptr;
 static HMODULE                              g_glLibrary = nullptr;
 static HWND                                 g_hWnd = nullptr;
+static int                                  (WINAPI *ChoosePixelFormat)(HDC, CONST PIXELFORMATDESCRIPTOR*);
+static BOOL                                 (WINAPI *SetPixelFormat)(HDC, int, CONST PIXELFORMATDESCRIPTOR*);
+static BOOL                                 (WINAPI *SwapBuffers)(HDC);
 static PFNWGLCREATECONTEXTPROC              wglCreateContext;
 static PFNWGLDELETECONTEXTPROC              wglDeleteContext;
 static PFNWGLGETCURRENTCONTEXTPROC          wglGetCurrentContext;
@@ -38,6 +42,9 @@ static void* GL_APIENTRY wglSymbol(const char* name, bool* failed)
 
     if (ptr == nullptr && g_glLibrary)
         ptr = GetProcAddress(g_glLibrary, name);
+
+    if (ptr == nullptr && g_gdiLibrary)
+        ptr = GetProcAddress(g_gdiLibrary, name);
 
     if (ptr == nullptr)
         xxLog("WGL", "%s is not found", name);
@@ -179,6 +186,11 @@ void glGetViewSizeWGL(void* view, unsigned int* width, unsigned int* height)
 //------------------------------------------------------------------------------
 uint64_t xxGraphicCreateWGL()
 {
+    if (g_gdiLibrary == nullptr)
+        g_gdiLibrary = LoadLibraryW(L"gdi32.dll");
+    if (g_gdiLibrary == nullptr)
+        return 0;
+
     if (g_glLibrary == nullptr)
         g_glLibrary = LoadLibraryW(L"opengl32.dll");
     if (g_glLibrary == nullptr)
@@ -192,6 +204,9 @@ uint64_t xxGraphicCreateWGL()
     }
 
     wglSymbolFailed = false;
+    wglSymbol(ChoosePixelFormat);
+    wglSymbol(SetPixelFormat);
+    wglSymbol(SwapBuffers);
     wglSymbol(wglCreateContext);
     wglSymbol(wglDeleteContext);
     wglSymbol(wglGetCurrentContext);
@@ -232,6 +247,18 @@ uint64_t xxGraphicCreateWGL()
 void xxGraphicDestroyWGL(uint64_t context)
 {
     glDestroyContextWGL(context, g_hWnd, nullptr);
+
+    if (g_glLibrary)
+    {
+        FreeLibrary(g_glLibrary);
+        g_glLibrary = nullptr;
+    }
+
+    if (g_gdiLibrary)
+    {
+        FreeLibrary(g_gdiLibrary);
+        g_gdiLibrary = nullptr;
+    }
 
     if (g_hWnd)
     {
