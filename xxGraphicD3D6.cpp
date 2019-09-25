@@ -865,7 +865,7 @@ void xxSetVertexBuffersD3D6(uint64_t commandEncoder, int count, const uint64_t* 
 {
     LPDIRECT3DDEVICE3 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE3>(commandEncoder);
 
-    d3dDevice->SetRenderState(D3DRENDERSTATE_STIPPLEPATTERN00, (DWORD)(getResourceData(buffers[0])));
+    d3dDevice->SetRenderState(D3DRENDERSTATE_LINEPATTERN, (DWORD)(getResourceData(buffers[0])));
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesD3D6(uint64_t commandEncoder, int count, const uint64_t* textures)
@@ -923,12 +923,28 @@ void xxDrawIndexedD3D6(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
     DWORD* d3dIndexBuffer = reinterpret_cast<DWORD*>(getResourceData(indexBuffer));
 
     LPDIRECT3DVERTEXBUFFER vertexBuffer = nullptr;
-    d3dDevice->GetRenderState(D3DRENDERSTATE_STIPPLEPATTERN00, (DWORD*)&vertexBuffer);
+    d3dDevice->GetRenderState(D3DRENDERSTATE_LINEPATTERN, (DWORD*)&vertexBuffer);
 
     static WORD wordIndexBuffer[65536];
-    for (int i = 0; i < indexCount; ++i)
+    int headIndexCount = indexCount / 8;
+    int tailIndexCount = indexCount % 8;
+    DWORD* p = d3dIndexBuffer + firstIndex;
+    WORD* q = wordIndexBuffer;
+    if (headIndexCount)
     {
-        wordIndexBuffer[i] = (WORD)d3dIndexBuffer[firstIndex + i] + vertexOffset;
+        __m128i c = _mm_set1_epi16(vertexOffset);
+        for (int i = 0; i < headIndexCount; ++i)
+        {
+            __m128i a = _mm_loadu_si128((__m128i*)p);
+            __m128i b = _mm_loadu_si128((__m128i*)p + 1);
+            _mm_store_si128((__m128i*)q, _mm_add_epi16(_mm_packs_epi32(a, b), c));
+            p += 8;
+            q += 8;
+        }
+    }
+    for (int i = 0; i < tailIndexCount; ++i)
+    {
+        (*q++) = (*p++) + vertexOffset;
     }
 
     d3dDevice->DrawIndexedPrimitiveVB(D3DPT_TRIANGLELIST, vertexBuffer, wordIndexBuffer, indexCount, 0);
