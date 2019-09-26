@@ -8,21 +8,21 @@
 #include "xxGraphicD3D.h"
 #include "xxGraphicD3D7.h"
 
-#define DIRECTDRAW_VERSION      0x700
-#define DIRECT3D_VERSION        0x700
+#define DIRECTDRAW_VERSION          0x700
+#define DIRECT3D_VERSION            0x700
 #include "dxsdk/ddraw.h"
 #include "dxsdk/d3d.h"
 interface DECLSPEC_UUID("15e65ec0-3b9c-11d2-b92f-00609797ea5b") IDirectDraw7;
 interface DECLSPEC_UUID("f5049e77-4861-11d2-a407-00a0c90629a8") IDirect3D7;
 interface DECLSPEC_UUID("f5049e78-4861-11d2-a407-00a0c90629a8") IDirect3DTnLHalDevice;
 typedef HRESULT (WINAPI *PFN_DIRECT_DRAW_CREATE_EX)(GUID*, LPVOID*, REFIID, IUnknown*);
-#define D3DRTYPE_CONSTANTBUFFER 0
-#define D3DRTYPE_INDEXBUFFER    1
-#define D3DRTYPE_VERTEXBUFFER   2
+#define D3DRTYPE_CONSTANTBUFFER     0
+#define D3DRTYPE_INDEXBUFFER        1
+#define D3DRTYPE_VERTEXBUFFER       2
 
-static HMODULE                  g_ddrawLibrary = nullptr;
-static LPDIRECTDRAW7            g_ddraw = nullptr;
-static LPDIRECTDRAWSURFACE7     g_primarySurface = nullptr;
+static HMODULE                      g_ddrawLibrary = nullptr;
+static LPDIRECTDRAW7                g_ddraw = nullptr;
+static LPDIRECTDRAWSURFACE7         g_primarySurface = nullptr;
 
 //==============================================================================
 //  Resource Type
@@ -62,7 +62,7 @@ uint64_t xxCreateInstanceD3D7()
     g_ddraw = ddraw;
 
     LPDIRECT3D7 d3d = nullptr;
-    HRESULT result = ddraw->QueryInterface(__uuidof(IDirect3D7), (void**)&d3d);
+    HRESULT result = ddraw->QueryInterface(IID_PPV_ARGS(&d3d));
     if (result != S_OK)
         return 0;
 
@@ -881,7 +881,7 @@ void xxDrawIndexedD3D7(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
     }
     for (int i = 0; i < tailIndexCount; ++i)
     {
-        (*q++) = (*p++);
+        (*q++) = (WORD)(*p++);
     }
 
     d3dDevice->DrawIndexedPrimitiveVB(D3DPT_TRIANGLELIST, vertexBuffer, vertexOffset, 0, wordIndexBuffer, indexCount, 0);

@@ -12,15 +12,15 @@
 #include <d3d10.h>
 interface DECLSPEC_UUID("9b7e4c8f-342c-4106-a19f-4f2704f689f0") ID3D10Device1;
 typedef HRESULT (WINAPI *PFN_D3D10_CREATE_DEVICE)(IDXGIAdapter*, D3D10_DRIVER_TYPE, HMODULE, UINT, UINT, ID3D10Device**);
-#define NUM_BACK_BUFFERS 3
+#define NUM_BACK_BUFFERS            3
 #ifndef _DEBUG
-#define PERSISTENT_BUFFER 1
+#define PERSISTENT_BUFFER           1
 #endif
+#define DXGI_FORMAT_B8G8R8A8_UNORM  g_supportBGRA ? DXGI_FORMAT_B8G8R8A8_UNORM : DXGI_FORMAT_R8G8B8A8_UNORM
 
 static HMODULE                      g_d3dLibrary = nullptr;
 static IDXGIFactory*                g_dxgiFactory = nullptr;
 static bool                         g_supportBGRA = true;
-#define DXGI_FORMAT_B8G8R8A8_UNORM  g_supportBGRA ? DXGI_FORMAT_B8G8R8A8_UNORM : DXGI_FORMAT_R8G8B8A8_UNORM
 
 //==============================================================================
 //  Instance

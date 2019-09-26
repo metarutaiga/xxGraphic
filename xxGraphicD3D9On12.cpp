@@ -15,7 +15,7 @@
 #endif
 #include "dxsdk/d3d9on12.h"
 
-static HMODULE g_d3dLibrary = nullptr;
+static HMODULE                      g_d3dLibrary = nullptr;
 
 //==============================================================================
 //  Instance

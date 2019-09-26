@@ -15,11 +15,9 @@
 #include "dxsdk/d3d9.h"
 interface DECLSPEC_UUID("e7fda234-b589-4049-940d-8878977531c8") IDirect3DDevice9On12;
 typedef LPDIRECT3D9 (WINAPI *PFN_DIRECT3D_CREATE9)(UINT);
-#define D3DRTYPE_CONSTANTBUFFER 0
+#define D3DRTYPE_CONSTANTBUFFER     0
 
-static const wchar_t* const g_dummy = L"xxGraphicDummyWindow";
-static HMODULE              g_d3dLibrary = nullptr;
-static HWND                 g_hWnd = nullptr;
+static HMODULE                      g_d3dLibrary = nullptr;
 
 //==============================================================================
 //  Resource Type

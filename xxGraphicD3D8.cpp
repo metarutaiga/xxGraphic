@@ -11,11 +11,9 @@
 
 #include "dxsdk/d3d8.h"
 typedef LPDIRECT3D8 (WINAPI *PFN_DIRECT3D_CREATE8)(UINT);
-#define D3DRTYPE_CONSTANTBUFFER 0
+#define D3DRTYPE_CONSTANTBUFFER     0
 
-static const wchar_t* const g_dummy = L"xxGraphicDummyWindow";
-static HMODULE              g_d3dLibrary = nullptr;
-static HWND                 g_hWnd = nullptr;
+static HMODULE                      g_d3dLibrary = nullptr;
 
 //==============================================================================
 //  Resource Type

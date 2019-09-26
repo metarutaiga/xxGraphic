@@ -16,7 +16,7 @@
 #include "dxsdk/d3d9.h"
 typedef HRESULT (WINAPI *PFN_DIRECT3D_CREATE9EX)(UINT, LPDIRECT3D9EX*);
 
-static HMODULE g_d3dLibrary = nullptr;
+static HMODULE                      g_d3dLibrary = nullptr;
 
 //==============================================================================
 //  Instance

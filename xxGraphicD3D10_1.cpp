@@ -11,7 +11,7 @@
 
 #include <d3d10_1.h>
 
-static HMODULE g_d3dLibrary = nullptr;
+static HMODULE                      g_d3dLibrary = nullptr;
 
 //==============================================================================
 //  Instance

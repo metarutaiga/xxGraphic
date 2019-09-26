@@ -14,16 +14,16 @@
 #include <dxgi1_4.h>
 interface DECLSPEC_UUID("bdb64df4-ea2f-4c70-b861-aaab1258bb5d") ID3D11On12Device1;
 interface DECLSPEC_UUID("dc90f331-4740-43fa-866e-67f12cb58223") ID3D11On12Device2;
-#define NUM_BACK_BUFFERS 3
+#define NUM_BACK_BUFFERS            3
 
-static HMODULE              g_d3d11Library = nullptr;
-static HMODULE              g_d3d12Library = nullptr;
-static ID3D12Device*        g_d3d12Device = nullptr;
-static ID3D12CommandQueue*  g_d3d12CommandQueue = nullptr;
-static ID3D12Fence*         g_d3d12Fence = nullptr;
-static HANDLE               g_d3d12FenceEvent = nullptr;
-static UINT64               g_d3d12FenceValue = 0;
-static UINT64               g_d3d12FenceValues[4] = {};
+static HMODULE                      g_d3d11Library = nullptr;
+static HMODULE                      g_d3d12Library = nullptr;
+static ID3D12Device*                g_d3d12Device = nullptr;
+static ID3D12CommandQueue*          g_d3d12CommandQueue = nullptr;
+static ID3D12Fence*                 g_d3d12Fence = nullptr;
+static HANDLE                       g_d3d12FenceEvent = nullptr;
+static UINT64                       g_d3d12FenceValue = 0;
+static UINT64                       g_d3d12FenceValues[4] = {};
 
 //==============================================================================
 //  Fence

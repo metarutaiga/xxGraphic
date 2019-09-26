@@ -20,8 +20,8 @@ interface DECLSPEC_UUID("c70b221b-40e4-4a17-89af-025a0727a6dc") ID3D12Device6;
 interface DECLSPEC_UUID("5c014b53-68a1-4b9b-8bd1-dd6046b9358b") ID3D12Device7;
 interface DECLSPEC_UUID("4393134F-CF31-41F7-BC51-F2DE938B4374") ID3D12Device8;
 typedef HRESULT (WINAPI *PFN_CREATE_DXGI_FACTORY1)(REFIID, void**);
-#define NUM_BACK_BUFFERS 3
-#define PERSISTENT_BUFFER 1
+#define NUM_BACK_BUFFERS            3
+#define PERSISTENT_BUFFER           1
 
 static HMODULE                      g_d3dLibrary = nullptr;
 static HMODULE                      g_dxgiLibrary = nullptr;
