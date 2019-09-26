@@ -1,5 +1,5 @@
-#ifndef __gl2platform_h_
-#define __gl2platform_h_
+#ifndef __gl3platform_h_
+#define __gl3platform_h_
 
 /*
 ** Copyright (c) 2017 The Khronos Group Inc.
@@ -17,7 +17,7 @@
 ** limitations under the License.
 */
 
-/* Platform-specific types and definitions for OpenGL ES 2.X  gl2.h
+/* Platform-specific types and definitions for OpenGL ES 3.X  gl3.h
  *
  * Adopters may modify khrplatform.h and this file to suit their platform.
  * Please contribute modifications back to Khronos as pull requests on the
@@ -35,4 +35,4 @@
 #define GL_APIENTRY KHRONOS_APIENTRY
 #endif
 
-#endif /* __gl2platform_h_ */
+#endif /* __gl3platform_h_ */

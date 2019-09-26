@@ -4,6 +4,10 @@
 // Copyright (c) 2019 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
+#undef  GL_ES_VERSION_2_0
+#define GL_ES_VERSION_3_0
+#define GL_ES_VERSION_3_1
+#define GL_ES_VERSION_3_2
 #include "xxGraphicInternal.h"
 #include "xxGraphicGL.h"
 #include "xxGraphicGLES2.h"
@@ -20,8 +24,9 @@
 #   include "xxGraphicWGL.h"
 #endif
 
-#include "gl/gl2.h"
-#define GL_UNIFORM_BUFFER   0
+#ifndef GL_UNIFORM_BUFFER
+#define GL_UNIFORM_BUFFER                 0x8A11
+#endif
 
 //==============================================================================
 //  Instance

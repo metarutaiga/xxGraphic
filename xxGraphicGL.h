@@ -9,8 +9,13 @@
 #include "xxSystem.h"
 
 #define GL_GLES_PROTOTYPES 0
-#include "gl/gl2.h"
-#include "gl/gl2ext.h"
+#include "gl/gl32.h"
+
+#ifndef GL_APPLE_texture_format_BGRA8888
+#define GL_APPLE_texture_format_BGRA8888 1
+#define GL_BGRA_EXT                       0x80E1
+#define GL_BGRA8_EXT                      0x93A1
+#endif /* GL_APPLE_texture_format_BGRA8888 */
 
 //==============================================================================
 //  Initialize

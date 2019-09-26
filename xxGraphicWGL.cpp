@@ -23,9 +23,9 @@ static PFNWGLMAKECURRENTPROC                wglMakeCurrent;
 static PFNWGLSHARELISTSPROC                 wglShareLists;
 static PFNWGLCREATECONTEXTATTRIBSARBPROC    wglCreateContextAttribsARB;
 static PFNGLGETINTEGERVPROC                 glGetIntegerv;
-static PFNGLGENVERTEXARRAYSOESPROC          glGenVertexArrays;
-static PFNGLDELETEVERTEXARRAYSOESPROC       glDeleteVertexArrays;
-static PFNGLBINDVERTEXARRAYOESPROC          glBindVertexArray;
+static PFNGLGENVERTEXARRAYSPROC             glGenVertexArrays;
+static PFNGLDELETEVERTEXARRAYSPROC          glDeleteVertexArrays;
+static PFNGLBINDVERTEXARRAYPROC             glBindVertexArray;
 
 //==============================================================================
 //  Initialize - WGL
@@ -146,7 +146,7 @@ void glDestroyContextWGL(uint64_t context, void* view, void* display)
     if (glGetIntegerv && glDeleteVertexArrays)
     {
         GLuint vao = 0;
-        glGetIntegerv(GL_VERTEX_ARRAY_BINDING_OES, (GLint*)&vao);
+        glGetIntegerv(GL_VERTEX_ARRAY_BINDING, (GLint*)&vao);
         glDeleteVertexArrays(1, &vao);
     }
 
