@@ -86,17 +86,10 @@ uint64_t xxCreateDeviceD3D9(uint64_t instance)
     if (d3d == nullptr)
         return 0;
 
-    if (g_hWnd == nullptr)
-    {
-        WNDCLASSEXW wc = { sizeof(WNDCLASSEXW), CS_OWNDC, DefWindowProcW, 0, 0, GetModuleHandleW(nullptr), nullptr, nullptr, nullptr, nullptr, g_dummy, nullptr };
-        RegisterClassExW(&wc);
-        g_hWnd = CreateWindowW(g_dummy, g_dummy, WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 0, 0, 1, 1, nullptr, nullptr, wc.hInstance, nullptr);
-    }
-
     D3DPRESENT_PARAMETERS d3dPresentParameters = {};
     d3dPresentParameters.BackBufferFormat = D3DFMT_UNKNOWN;
     d3dPresentParameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
-    d3dPresentParameters.hDeviceWindow = g_hWnd;
+    d3dPresentParameters.hDeviceWindow = GetDesktopWindow();
     d3dPresentParameters.Windowed = TRUE;
     d3dPresentParameters.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
@@ -134,13 +127,6 @@ void xxDestroyDeviceD3D9(uint64_t device)
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
 
     SafeRelease(d3dDevice);
-
-    if (g_hWnd)
-    {
-        DestroyWindow(g_hWnd);
-        UnregisterClassW(g_dummy, GetModuleHandleW(nullptr));
-        g_hWnd = nullptr;
-    }
 }
 //------------------------------------------------------------------------------
 void xxResetDeviceD3D9(uint64_t device)
@@ -152,7 +138,7 @@ void xxResetDeviceD3D9(uint64_t device)
     D3DPRESENT_PARAMETERS d3dPresentParameters = {};
     d3dPresentParameters.BackBufferFormat = D3DFMT_UNKNOWN;
     d3dPresentParameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
-    d3dPresentParameters.hDeviceWindow = g_hWnd;
+    d3dPresentParameters.hDeviceWindow = GetDesktopWindow();
     d3dPresentParameters.Windowed = TRUE;
     d3dPresentParameters.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 

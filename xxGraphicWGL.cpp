@@ -9,10 +9,8 @@
 #include "xxGraphicWGL.h"
 
 #include "gl/wgl.h"
-static const wchar_t* const                 g_dummy = L"xxGraphicDummyWindow";
 static HMODULE                              g_gdiLibrary = nullptr;
 static HMODULE                              g_glLibrary = nullptr;
-static HWND                                 g_hWnd = nullptr;
 static int                                  (WINAPI *ChoosePixelFormat)(HDC, CONST PIXELFORMATDESCRIPTOR*);
 static BOOL                                 (WINAPI *SetPixelFormat)(HDC, int, CONST PIXELFORMATDESCRIPTOR*);
 static BOOL                                 (WINAPI *SwapBuffers)(HDC);
@@ -196,13 +194,6 @@ uint64_t xxGraphicCreateWGL()
     if (g_glLibrary == nullptr)
         return 0;
 
-    if (g_hWnd == nullptr)
-    {
-        WNDCLASSEXW wc = { sizeof(WNDCLASSEXW), CS_OWNDC, DefWindowProcW, 0, 0, GetModuleHandleW(nullptr), nullptr, nullptr, nullptr, nullptr, g_dummy, nullptr };
-        RegisterClassExW(&wc);
-        g_hWnd = CreateWindowW(g_dummy, g_dummy, WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, 0, 0, 1, 1, nullptr, nullptr, wc.hInstance, nullptr);
-    }
-
     wglSymbolFailed = false;
     wglSymbol(ChoosePixelFormat);
     wglSymbol(SetPixelFormat);
@@ -217,7 +208,7 @@ uint64_t xxGraphicCreateWGL()
     if (wglSymbolFailed)
         return 0;
 
-    uint64_t context = glCreateContextWGL(0, g_hWnd, nullptr);
+    uint64_t context = glCreateContextWGL(0, GetDesktopWindow(), nullptr);
     if (context == 0)
         return 0;
 
@@ -225,8 +216,8 @@ uint64_t xxGraphicCreateWGL()
     wglSymbol(wglCreateContextAttribsARB);
     if (wglSymbolFailed == false)
     {
-        glDestroyContextWGL(context, g_hWnd, nullptr);
-        context = glCreateContextWGL(0, g_hWnd, nullptr);
+        glDestroyContextWGL(context, GetDesktopWindow(), nullptr);
+        context = glCreateContextWGL(0, GetDesktopWindow(), nullptr);
     }
 
     if (xxGraphicCreateGL(wglSymbol) == false)
@@ -246,7 +237,7 @@ uint64_t xxGraphicCreateWGL()
 //------------------------------------------------------------------------------
 void xxGraphicDestroyWGL(uint64_t context)
 {
-    glDestroyContextWGL(context, g_hWnd, nullptr);
+    glDestroyContextWGL(context, GetDesktopWindow(), nullptr);
 
     if (g_glLibrary)
     {
@@ -258,13 +249,6 @@ void xxGraphicDestroyWGL(uint64_t context)
     {
         FreeLibrary(g_gdiLibrary);
         g_gdiLibrary = nullptr;
-    }
-
-    if (g_hWnd)
-    {
-        DestroyWindow(g_hWnd);
-        UnregisterClassW(g_dummy, GetModuleHandleW(nullptr));
-        g_hWnd = nullptr;
     }
 
     xxGraphicDestroyGL();
