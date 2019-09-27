@@ -18,7 +18,7 @@ xxAPI void          xxDestroyInstanceGLES2(uint64_t instance);
 //==============================================================================
 xxAPI uint64_t      xxCreateDeviceGLES2(uint64_t instance);
 xxAPI void          xxDestroyDeviceGLES2(uint64_t device);
-xxAPI void          xxResetDeviceGLES2(uint64_t device);
+xxAPI bool          xxResetDeviceGLES2(uint64_t device);
 xxAPI bool          xxTestDeviceGLES2(uint64_t device);
 xxAPI const char*   xxGetDeviceNameGLES2();
 //==============================================================================

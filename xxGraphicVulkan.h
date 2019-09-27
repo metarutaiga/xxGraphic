@@ -18,7 +18,7 @@ xxAPI void          xxDestroyInstanceVulkan(uint64_t instance);
 //==============================================================================
 xxAPI uint64_t      xxCreateDeviceVulkan(uint64_t instance);
 xxAPI void          xxDestroyDeviceVulkan(uint64_t device);
-xxAPI void          xxResetDeviceVulkan(uint64_t device);
+xxAPI bool          xxResetDeviceVulkan(uint64_t device);
 xxAPI bool          xxTestDeviceVulkan(uint64_t device);
 xxAPI const char*   xxGetDeviceNameVulkan();
 //==============================================================================

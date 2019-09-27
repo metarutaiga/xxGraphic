@@ -110,11 +110,11 @@ void xxDestroyDeviceD3D8(uint64_t device)
     SafeRelease(d3dDevice);
 }
 //------------------------------------------------------------------------------
-void xxResetDeviceD3D8(uint64_t device)
+bool xxResetDeviceD3D8(uint64_t device)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(device);
     if (d3dDevice == nullptr)
-        return;
+        return true;
 
     D3DPRESENT_PARAMETERS d3dPresentParameters = {};
     d3dPresentParameters.BackBufferFormat = D3DFMT_A8R8G8B8;
@@ -123,6 +123,7 @@ void xxResetDeviceD3D8(uint64_t device)
     d3dPresentParameters.Windowed = TRUE;
 
     d3dDevice->Reset(&d3dPresentParameters);
+    return true;
 }
 //------------------------------------------------------------------------------
 bool xxTestDeviceD3D8(uint64_t device)

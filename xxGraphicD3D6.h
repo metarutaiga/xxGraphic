@@ -18,7 +18,7 @@ xxAPI void          xxDestroyInstanceD3D6(uint64_t instance);
 //==============================================================================
 xxAPI uint64_t      xxCreateDeviceD3D6(uint64_t instance);
 xxAPI void          xxDestroyDeviceD3D6(uint64_t device);
-xxAPI void          xxResetDeviceD3D6(uint64_t device);
+xxAPI bool          xxResetDeviceD3D6(uint64_t device);
 xxAPI bool          xxTestDeviceD3D6(uint64_t device);
 xxAPI const char*   xxGetDeviceNameD3D6();
 //==============================================================================

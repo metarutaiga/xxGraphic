@@ -101,9 +101,9 @@ void xxDestroyDeviceD3D10(uint64_t device)
     SafeRelease(d3dDevice);
 }
 //------------------------------------------------------------------------------
-void xxResetDeviceD3D10(uint64_t device)
+bool xxResetDeviceD3D10(uint64_t device)
 {
-
+    return true;
 }
 //------------------------------------------------------------------------------
 bool xxTestDeviceD3D10(uint64_t device)

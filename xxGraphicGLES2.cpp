@@ -84,9 +84,9 @@ void xxDestroyDeviceGLES2(uint64_t device)
 
 }
 //------------------------------------------------------------------------------
-void xxResetDeviceGLES2(uint64_t device)
+bool xxResetDeviceGLES2(uint64_t device)
 {
-
+    return true;
 }
 //------------------------------------------------------------------------------
 bool xxTestDeviceGLES2(uint64_t device)

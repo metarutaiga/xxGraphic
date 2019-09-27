@@ -161,14 +161,20 @@ void xxDestroyDeviceD3D6(uint64_t device)
     SafeRelease(g_primarySurface);
 }
 //------------------------------------------------------------------------------
-void xxResetDeviceD3D6(uint64_t device)
+bool xxResetDeviceD3D6(uint64_t device)
 {
-
+    return false;
 }
 //------------------------------------------------------------------------------
 bool xxTestDeviceD3D6(uint64_t device)
 {
-    return true;
+    HRESULT hResult = g_ddraw->TestCooperativeLevel();
+    while (hResult == DDERR_NOEXCLUSIVEMODE || hResult == DDERR_EXCLUSIVEMODEALREADYSET)
+    {
+        Sleep(100);
+        hResult = g_ddraw->TestCooperativeLevel();
+    }
+    return hResult == DD_OK;
 }
 //------------------------------------------------------------------------------
 const char* xxGetDeviceNameD3D6()

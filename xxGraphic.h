@@ -18,7 +18,7 @@ xxAPI void          (*xxDestroyInstance)(uint64_t instance);
 //==============================================================================
 xxAPI uint64_t      (*xxCreateDevice)(uint64_t instance);
 xxAPI void          (*xxDestroyDevice)(uint64_t device);
-xxAPI void          (*xxResetDevice)(uint64_t device);
+xxAPI bool          (*xxResetDevice)(uint64_t device);
 xxAPI bool          (*xxTestDevice)(uint64_t device);
 xxAPI const char*   (*xxGetDeviceName)();
 //==============================================================================

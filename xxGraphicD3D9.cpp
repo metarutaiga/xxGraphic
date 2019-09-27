@@ -127,11 +127,11 @@ void xxDestroyDeviceD3D9(uint64_t device)
     SafeRelease(d3dDevice);
 }
 //------------------------------------------------------------------------------
-void xxResetDeviceD3D9(uint64_t device)
+bool xxResetDeviceD3D9(uint64_t device)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
     if (d3dDevice == nullptr)
-        return;
+        return true;
 
     D3DPRESENT_PARAMETERS d3dPresentParameters = {};
     d3dPresentParameters.BackBufferFormat = D3DFMT_UNKNOWN;
@@ -141,6 +141,7 @@ void xxResetDeviceD3D9(uint64_t device)
     d3dPresentParameters.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
     d3dDevice->Reset(&d3dPresentParameters);
+    return true;
 }
 //------------------------------------------------------------------------------
 bool xxTestDeviceD3D9(uint64_t device)

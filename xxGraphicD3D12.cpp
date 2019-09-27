@@ -427,9 +427,9 @@ void xxDestroyDeviceD3D12(uint64_t device)
     SafeRelease(d3dDevice);
 }
 //------------------------------------------------------------------------------
-void xxResetDeviceD3D12(uint64_t device)
+bool xxResetDeviceD3D12(uint64_t device)
 {
-
+    return true;
 }
 //------------------------------------------------------------------------------
 bool xxTestDeviceD3D12(uint64_t device)

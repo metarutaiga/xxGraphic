@@ -745,9 +745,9 @@ void xxDestroyDeviceVulkan(uint64_t device)
     g_pipelineLayout = VK_NULL_HANDLE;
 }
 //------------------------------------------------------------------------------
-void xxResetDeviceVulkan(uint64_t device)
+bool xxResetDeviceVulkan(uint64_t device)
 {
-
+    return true;
 }
 //------------------------------------------------------------------------------
 bool xxTestDeviceVulkan(uint64_t device)

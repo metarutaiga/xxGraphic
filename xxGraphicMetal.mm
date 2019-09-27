@@ -137,9 +137,9 @@ void xxDestroyDeviceMetal(uint64_t device)
     mtlDevice = nil;
 }
 //------------------------------------------------------------------------------
-void xxResetDeviceMetal(uint64_t device)
+bool xxResetDeviceMetal(uint64_t device)
 {
-
+    return true;
 }
 //------------------------------------------------------------------------------
 bool xxTestDeviceMetal(uint64_t device)

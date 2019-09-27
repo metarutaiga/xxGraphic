@@ -16,7 +16,7 @@ void        (*xxDestroyInstance)(uint64_t instance);
 //==============================================================================
 uint64_t    (*xxCreateDevice)(uint64_t instance);
 void        (*xxDestroyDevice)(uint64_t device);
-void        (*xxResetDevice)(uint64_t device);
+bool        (*xxResetDevice)(uint64_t device);
 bool        (*xxTestDevice)(uint64_t device);
 const char* (*xxGetDeviceName)();
 //==============================================================================

@@ -34,9 +34,9 @@ void xxDestroyDeviceNULL(uint64_t device)
 
 }
 //------------------------------------------------------------------------------
-void xxResetDeviceNULL(uint64_t device)
+bool xxResetDeviceNULL(uint64_t device)
 {
-
+    return true;
 }
 //------------------------------------------------------------------------------
 bool xxTestDeviceNULL(uint64_t device)

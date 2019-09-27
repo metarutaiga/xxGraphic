@@ -286,9 +286,9 @@ void xxDestroyDeviceMantle(uint64_t device)
     grDestroyDevice(grDevice);
 }
 //------------------------------------------------------------------------------
-void xxResetDeviceMantle(uint64_t device)
+bool xxResetDeviceMantle(uint64_t device)
 {
-
+    return true;
 }
 //------------------------------------------------------------------------------
 bool xxTestDeviceMantle(uint64_t device)
