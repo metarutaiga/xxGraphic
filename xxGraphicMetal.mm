@@ -438,11 +438,11 @@ void xxDestroyTextureMetal(uint64_t texture)
     delete mtlTexture;
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureMetal(uint64_t device, uint64_t texture, unsigned int& stride, unsigned int level, unsigned int array, unsigned int mipmap)
+void* xxMapTextureMetal(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array, unsigned int mipmap)
 {
     MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);
 
-    stride = mtlTexture->stride;
+    (*stride) = mtlTexture->stride;
     return [mtlTexture->buffer contents];
 }
 //------------------------------------------------------------------------------

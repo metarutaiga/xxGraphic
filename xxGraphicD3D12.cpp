@@ -1059,7 +1059,7 @@ void xxDestroyTextureD3D12(uint64_t texture)
     delete d3dTexture;
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureD3D12(uint64_t device, uint64_t texture, unsigned int& stride, unsigned int level, unsigned int array, unsigned int mipmap)
+void* xxMapTextureD3D12(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array, unsigned int mipmap)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
@@ -1095,8 +1095,7 @@ void* xxMapTextureD3D12(uint64_t device, uint64_t texture, unsigned int& stride,
     if (hResult != S_OK)
         return nullptr;
 
-    stride = d3dTexture->uploadPitch;
-
+    (*stride) = d3dTexture->uploadPitch;
     return ptr;
 }
 //------------------------------------------------------------------------------

@@ -551,7 +551,7 @@ void xxDestroyTextureD3D9(uint64_t texture)
     SafeRelease(d3dBaseTexture);
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureD3D9(uint64_t device, uint64_t texture, unsigned int& stride, unsigned int level, unsigned int array, unsigned int mipmap)
+void* xxMapTextureD3D9(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array, unsigned int mipmap)
 {
     switch (getResourceType(texture))
     {
@@ -566,7 +566,7 @@ void* xxMapTextureD3D9(uint64_t device, uint64_t texture, unsigned int& stride, 
         if (hResult != S_OK)
             break;
 
-        stride = rect.Pitch;
+        (*stride) = rect.Pitch;
         return rect.pBits;
     }
     case D3DRTYPE_CUBETEXTURE:
@@ -580,7 +580,7 @@ void* xxMapTextureD3D9(uint64_t device, uint64_t texture, unsigned int& stride, 
         if (hResult != S_OK)
             break;
 
-        stride = rect.Pitch;
+        (*stride) = rect.Pitch;
         return rect.pBits;
     }
     case D3DRTYPE_VOLUME:
@@ -594,7 +594,7 @@ void* xxMapTextureD3D9(uint64_t device, uint64_t texture, unsigned int& stride, 
         if (hResult != S_OK)
             break;
 
-        stride = box.RowPitch;
+        (*stride) = box.RowPitch;
         return box.pBits;
     }
     default:

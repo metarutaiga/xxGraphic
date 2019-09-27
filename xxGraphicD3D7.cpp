@@ -545,7 +545,7 @@ void xxDestroyTextureD3D7(uint64_t texture)
     SafeRelease(surface);
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureD3D7(uint64_t device, uint64_t texture, unsigned int& stride, unsigned int level, unsigned int array, unsigned int mipmap)
+void* xxMapTextureD3D7(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array, unsigned int mipmap)
 {
     LPDIRECTDRAWSURFACE7 surface = reinterpret_cast<LPDIRECTDRAWSURFACE7>(texture);
     if (surface == nullptr)
@@ -564,7 +564,7 @@ void* xxMapTextureD3D7(uint64_t device, uint64_t texture, unsigned int& stride, 
     if (result != S_OK)
         return nullptr;
 
-    stride = desc.lPitch;
+    (*stride) = desc.lPitch;
     return desc.lpSurface;
 }
 //------------------------------------------------------------------------------

@@ -59,7 +59,7 @@ xxAPI void          (*xxUnmapBuffer)(uint64_t device, uint64_t buffer);
 //==============================================================================
 xxAPI uint64_t      (*xxCreateTexture)(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array);
 xxAPI void          (*xxDestroyTexture)(uint64_t texture);
-xxAPI void*         (*xxMapTexture)(uint64_t device, uint64_t texture, unsigned int& stride, unsigned int level, unsigned int array, unsigned int mipmap);
+xxAPI void*         (*xxMapTexture)(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array, unsigned int mipmap);
 xxAPI void          (*xxUnmapTexture)(uint64_t device, uint64_t texture, unsigned int level, unsigned int array, unsigned int mipmap);
 //==============================================================================
 //  Sampler

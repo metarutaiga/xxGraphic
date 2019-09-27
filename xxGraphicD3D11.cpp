@@ -713,7 +713,7 @@ void xxDestroyTextureD3D11(uint64_t texture)
     delete d3dTexture;
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureD3D11(uint64_t device, uint64_t texture, unsigned int& stride, unsigned int level, unsigned int array, unsigned int mipmap)
+void* xxMapTextureD3D11(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array, unsigned int mipmap)
 {
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
     if (d3dDevice == nullptr)
@@ -734,7 +734,7 @@ void* xxMapTextureD3D11(uint64_t device, uint64_t texture, unsigned int& stride,
         if (hResult != S_OK)
             return nullptr;
 
-        stride = mappedSubresource.RowPitch;
+        (*stride) = mappedSubresource.RowPitch;
         return mappedSubresource.pData;
     }
 
@@ -745,7 +745,7 @@ void* xxMapTextureD3D11(uint64_t device, uint64_t texture, unsigned int& stride,
         if (hResult != S_OK)
             return nullptr;
 
-        stride = mappedSubresource.RowPitch;
+        (*stride) = mappedSubresource.RowPitch;
         return mappedSubresource.pData;
     }
 
@@ -756,7 +756,7 @@ void* xxMapTextureD3D11(uint64_t device, uint64_t texture, unsigned int& stride,
         if (hResult != S_OK)
             return nullptr;
 
-        stride = mappedSubresource.RowPitch;
+        (*stride) = mappedSubresource.RowPitch;
         return mappedSubresource.pData;
     }
 

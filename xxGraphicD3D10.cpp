@@ -658,7 +658,7 @@ void xxDestroyTextureD3D10(uint64_t texture)
     delete d3dTexture;
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureD3D10(uint64_t device, uint64_t texture, unsigned int& stride, unsigned int level, unsigned int array, unsigned int mipmap)
+void* xxMapTextureD3D10(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array, unsigned int mipmap)
 {
     D3D10TEXTURE* d3dTexture = reinterpret_cast<D3D10TEXTURE*>(texture);
     if (d3dTexture == nullptr)
@@ -681,7 +681,7 @@ void* xxMapTextureD3D10(uint64_t device, uint64_t texture, unsigned int& stride,
         if (hResult != S_OK)
             return nullptr;
 
-        stride = mappedTexture2D.RowPitch;
+        (*stride) = mappedTexture2D.RowPitch;
         return mappedTexture2D.pData;
     }
 
@@ -692,7 +692,7 @@ void* xxMapTextureD3D10(uint64_t device, uint64_t texture, unsigned int& stride,
         if (hResult != S_OK)
             return nullptr;
 
-        stride = mappedTexture3D.RowPitch;
+        (*stride) = mappedTexture3D.RowPitch;
         return mappedTexture3D.pData;
     }
 

@@ -59,7 +59,7 @@ xxAPI void          xxUnmapBufferMetal(uint64_t device, uint64_t buffer);
 //==============================================================================
 xxAPI uint64_t      xxCreateTextureMetal(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array);
 xxAPI void          xxDestroyTextureMetal(uint64_t texture);
-xxAPI void*         xxMapTextureMetal(uint64_t device, uint64_t texture, unsigned int& stride, unsigned int level, unsigned int array, unsigned int mipmap);
+xxAPI void*         xxMapTextureMetal(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array, unsigned int mipmap);
 xxAPI void          xxUnmapTextureMetal(uint64_t device, uint64_t texture, unsigned int level, unsigned int array, unsigned int mipmap);
 //==============================================================================
 //  Sampler
