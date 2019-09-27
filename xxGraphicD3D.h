@@ -9,7 +9,7 @@
 #include "xxSystem.h"
 
 template <class T>
-ULONG SafeRelease(T*& ptr)
+inline ULONG SafeRelease(T*& ptr)
 {
     ULONG ref = 0;
     if (ptr)

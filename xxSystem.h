@@ -15,6 +15,7 @@
 #include <float.h>
 #include <math.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -65,19 +66,26 @@
 #   define xxWINDOWS 1
 #endif
 
+#ifndef nullptr
+#   if defined(__cplusplus)
+#   else
+#       define nullptr              ((void*)0)
+#   endif
+#endif
+
 #ifndef xxEXTERN
 #   if defined(__cplusplus)
-#       define xxEXTERN extern "C"
+#       define xxEXTERN             extern "C"
 #   else
-#       define xxEXTERN extern
+#       define xxEXTERN             extern
 #   endif
 #endif
 
 #ifndef xxAPI
 #   if defined(_WINDLL)
-#       define xxAPI xxEXTERN __declspec(dllexport)
+#       define xxAPI xxEXTERN       __declspec(dllexport)
 #   elif defined(_MSC_VER)
-#       define xxAPI xxEXTERN __declspec(dllimport)
+#       define xxAPI xxEXTERN       __declspec(dllimport)
 #   else
 #       define xxAPI xxEXTERN
 #   endif
@@ -94,6 +102,20 @@
 #define xxSizeOf(var)               (sizeof(var))
 #define xxCountOf(var)              (sizeof(var) / sizeof(*var))
 #define xxOffsetOf(st, m)           (offsetof(st, m))
+
+#if defined(__cplusplus)
+#   define xxInline                 inline
+#   define xxConstexpr              constexpr
+#   define xxDefaultArgument(value) = value
+#elif defined(__GNUC__)
+#   define xxInline                 __inline__
+#   define xxConstexpr              const
+#   define xxDefaultArgument(value)
+#elif defined(_MSC_VER)
+#   define xxInline                 __inline
+#   define xxConstexpr              const
+#   define xxDefaultArgument(value)
+#endif
 
 #if defined(__APPLE__)
 #   define xxAlloc(T, count)        (T*)malloc(sizeof(T) * count)
@@ -133,7 +155,7 @@ xxAPI const uint8_t* xxDXBCChecksum(const void* data, int len, uint8_t* digest);
 //==============================================================================
 //  Hash
 //==============================================================================
-xxAPI inline constexpr unsigned int xxHash(const char* key, const unsigned int hash = 0)
+xxAPI xxInline xxConstexpr unsigned int xxHash(const char* key, const unsigned int hash xxDefaultArgument(0))
 {
     return (*key) ? xxHash(key + 1, (hash << 5) ^ (*key)) : hash;
 }
