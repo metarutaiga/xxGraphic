@@ -82,7 +82,7 @@
 #endif
 
 #ifndef xxAPI
-#   if defined(_WINDLL)
+#   if defined(XX_BUILD_LIBRARY)
 #       define xxAPI xxEXTERN       __declspec(dllexport)
 #   elif defined(_MSC_VER)
 #       define xxAPI xxEXTERN       __declspec(dllimport)

@@ -13,7 +13,7 @@
 //==============================================================================
 //  TSC
 //==============================================================================
-uint64_t xxTSC()
+static uint64_t xxTSC()
 {
 #if defined(__aarch64__)
     unsigned long cntpct;
@@ -30,7 +30,7 @@ uint64_t xxTSC()
 #endif
 }
 //------------------------------------------------------------------------------
-uint64_t xxTSCFrequencyImpl()
+static uint64_t xxTSCFrequencyImpl()
 {
 #if defined(__aarch64__)
     unsigned long cntfrq;
@@ -81,15 +81,15 @@ uint64_t xxTSCFrequencyImpl()
 #endif
 
     float mhz = counter / 1000000.0f;
-    counter = int64_t(int64_t(mhz / 100.0f) * 100.0 * 1000000.0);
+    counter = int64_t(int64_t(mhz / 100.0 + 0.5) * 100.0 * 1000000.0);
 
     return counter;
 #endif
 }
 //------------------------------------------------------------------------------
-uint64_t xxTSCFrequency = xxTSCFrequencyImpl();
-uint64_t xxTSCInitialized = xxTSC();
-float xxTSCInvFrequencyFloat = 1.0f / xxTSCFrequency;
+static uint64_t xxTSCFrequency = xxTSCFrequencyImpl();
+static uint64_t xxTSCInitialized = xxTSC();
+static float xxTSCInvFrequencyFloat = 1.0f / xxTSCFrequency;
 //------------------------------------------------------------------------------
 float xxGetCurrentTime()
 {
