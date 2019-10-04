@@ -15,9 +15,9 @@
 #import <QuartzCore/CAEAGLLayer.h>
 static void*                            g_glLibrary = nullptr;
 static Class                            classEAGLContext = nil;
-static PFNGLGENVERTEXARRAYSOESPROC      glGenVertexArrays;
-static PFNGLDELETEVERTEXARRAYSOESPROC   glDeleteVertexArrays;
-static PFNGLBINDVERTEXARRAYOESPROC      glBindVertexArray;
+static PFNGLGENVERTEXARRAYSPROC         glGenVertexArrays;
+static PFNGLDELETEVERTEXARRAYSPROC      glDeleteVertexArrays;
+static PFNGLBINDVERTEXARRAYPROC         glBindVertexArray;
 
 //==============================================================================
 //  Initialize - EAGL
@@ -86,7 +86,7 @@ uint64_t glCreateContextEAGL(uint64_t instance, void* view, void** display)
         GLuint depthRenderbuffer = 0;
         glGenRenderbuffers(1, &depthRenderbuffer);
         glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, framebufferWidth, framebufferHeight);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, framebufferWidth, framebufferHeight);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
         GLuint framebuffer = 0;

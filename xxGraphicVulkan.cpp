@@ -809,6 +809,7 @@ struct SWAPCHAINVK : public FRAMEBUFFERVK
     VkPresentModeKHR    presentMode;
     VkSwapchainKHR      swapchain;
 
+    void*               view;
     uint32_t            width;
     uint32_t            height;
     uint32_t            imageCount;
@@ -824,7 +825,7 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
     if (vkRenderPass == VK_NULL_HANDLE)
         return 0;
     SWAPCHAINVK* vkOldSwapchain = reinterpret_cast<SWAPCHAINVK*>(oldSwapchain);
-    if (vkOldSwapchain && vkOldSwapchain->width == width && vkOldSwapchain->height == height)
+    if (vkOldSwapchain && vkOldSwapchain->view == view && vkOldSwapchain->width == width && vkOldSwapchain->height == height)
         return oldSwapchain;
     SWAPCHAINVK* vkSwapchain = new SWAPCHAINVK {};
     if (vkSwapchain == nullptr)
@@ -1148,6 +1149,7 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
     vkSwapchain->surfaceFormat = swapchainInfo.imageFormat;
     vkSwapchain->presentMode = swapchainInfo.presentMode;
     vkSwapchain->swapchain = swapchain;
+    vkSwapchain->view = view;
     vkSwapchain->width = swapchainInfo.imageExtent.width;
     vkSwapchain->height = swapchainInfo.imageExtent.height;
 

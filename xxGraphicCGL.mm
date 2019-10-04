@@ -18,9 +18,9 @@
 #import <AppKit/NSOpenGLView.h>
 static void*                            g_glLibrary = nullptr;
 static NSOpenGLView*                    g_rootView = nil;
-static PFNGLGENVERTEXARRAYSOESPROC      glGenVertexArrays;
-static PFNGLDELETEVERTEXARRAYSOESPROC   glDeleteVertexArrays;
-static PFNGLBINDVERTEXARRAYOESPROC      glBindVertexArray;
+static PFNGLGENVERTEXARRAYSPROC         glGenVertexArrays;
+static PFNGLDELETEVERTEXARRAYSPROC      glDeleteVertexArrays;
+static PFNGLBINDVERTEXARRAYPROC         glBindVertexArray;
 
 //==============================================================================
 //  Initialize - CGL
