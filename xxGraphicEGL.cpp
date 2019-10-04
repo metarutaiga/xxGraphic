@@ -29,6 +29,7 @@ static PFNEGLGETDISPLAYPROC                     eglGetDisplay;
 static PFNEGLGETPROCADDRESSPROC                 eglGetProcAddress;
 static PFNEGLINITIALIZEPROC                     eglInitialize;
 static PFNEGLMAKECURRENTPROC                    eglMakeCurrent;
+static PFNEGLSWAPINTERVALPROC                   eglSwapInterval;
 static PFNEGLSWAPBUFFERSPROC                    eglSwapBuffers;
 static PFNGLGENVERTEXARRAYSPROC                 glGenVertexArrays;
 static PFNGLDELETEVERTEXARRAYSPROC              glDeleteVertexArrays;
@@ -105,6 +106,7 @@ uint64_t glCreateContextEGL(uint64_t instance, void* view, void** surface)
         return 0;
  
     eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext);
+    eglSwapInterval(eglDisplay, 0);
 
     eglSymbol(glGetIntegerv);
     eglSymbol(glGenVertexArrays);
@@ -147,7 +149,7 @@ void glDestroyContextEGL(uint64_t context, void* view, void* surface)
         glBindVertexArray(0);
     }
 
-    eglMakeCurrent(eglDisplay, nullptr, nullptr, nullptr);
+    eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglDestroyContext(eglDisplay, eglContext);
     eglDestroySurface(eglDisplay, eglSurface);
 }
@@ -203,6 +205,7 @@ uint64_t xxGraphicCreateEGL()
     eglSymbol(eglGetProcAddress);
     eglSymbol(eglInitialize);
     eglSymbol(eglMakeCurrent);
+    eglSymbol(eglSwapInterval);
     eglSymbol(eglSwapBuffers);
     if (eglSymbolFailed)
         return 0;
