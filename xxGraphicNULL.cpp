@@ -54,7 +54,7 @@ const char* xxGetDeviceNameNULL()
 //==============================================================================
 //  Swapchain
 //==============================================================================
-uint64_t xxCreateSwapchainNULL(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height)
+uint64_t xxCreateSwapchainNULL(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
 {
     return 0;
 }

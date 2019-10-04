@@ -130,16 +130,24 @@ struct D3D10SWAPCHAIN : public D3D10FRAMEBUFFER
 {
     IDXGISwapChain*         dxgiSwapchain;
     ID3D10Texture2D*        depthStencilTexture;
+    HWND                    hWnd;
+    int                     width;
+    int                     height;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateSwapchainD3D10(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height)
+uint64_t xxCreateSwapchainD3D10(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(device);
     if (d3dDevice == nullptr)
         return 0;
+    D3D10SWAPCHAIN* d3dOldSwapchain = reinterpret_cast<D3D10SWAPCHAIN*>(oldSwapchain);
+    if (d3dOldSwapchain && d3dOldSwapchain->hWnd == view && d3dOldSwapchain->width == width && d3dOldSwapchain->height == height)
+        return oldSwapchain;
     D3D10SWAPCHAIN* d3dSwapchain = new D3D10SWAPCHAIN;
     if (d3dSwapchain == nullptr)
         return 0;
+
+    xxDestroySwapchainD3D10(oldSwapchain);
 
     if (g_dxgiFactory == nullptr)
     {
@@ -255,6 +263,9 @@ uint64_t xxCreateSwapchainD3D10(uint64_t device, uint64_t renderPass, void* view
     d3dSwapchain->depthStencilView = depthStencilView;
     d3dSwapchain->dxgiSwapchain = dxgiSwapchain;
     d3dSwapchain->depthStencilTexture = depthStencilTexture;
+    d3dSwapchain->hWnd = hWnd;
+    d3dSwapchain->width = width;
+    d3dSwapchain->height = height;
 
     return reinterpret_cast<uint64_t>(d3dSwapchain);
 }

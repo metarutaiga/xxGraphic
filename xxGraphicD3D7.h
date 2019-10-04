@@ -27,7 +27,7 @@ xxAPI const char*   xxGetDeviceNameD3D7();
 //==============================================================================
 //  Swapchain
 //==============================================================================
-xxAPI uint64_t      xxCreateSwapchainD3D7(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height);
+xxAPI uint64_t      xxCreateSwapchainD3D7(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain);
 xxAPI void          xxDestroySwapchainD3D7(uint64_t swapchain);
 xxAPI void          xxPresentSwapchainD3D7(uint64_t swapchain);
 xxAPI uint64_t      xxGetCommandBufferD3D7(uint64_t device, uint64_t swapchain);

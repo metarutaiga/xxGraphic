@@ -320,16 +320,23 @@ struct SWAPCHAINGR : public FRAMEBUFFERGR
     GR_CMD_BUFFER   commandBuffers[NUM_BACK_BUFFERS];
     int             commandBufferIndex;
     void*           view;
+    int             width;
+    int             height;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateSwapchainMantle(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height)
+uint64_t xxCreateSwapchainMantle(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
         return 0;
+    SWAPCHAINGR* grOldSwapchain = reinterpret_cast<SWAPCHAINGR*>(oldSwapchain);
+    if (grOldSwapchain && grOldSwapchain->view == view && grOldSwapchain->width == width && grOldSwapchain->height == height)
+        return oldSwapchain;
     SWAPCHAINGR* grSwapchain = new SWAPCHAINGR;
     if (grSwapchain == nullptr)
         return 0;
+
+    xxDestroySwapchainMantle(oldSwapchain);
 
     HWND hWnd = (HWND)view;
     if (width == 0 || height == 0)
@@ -411,6 +418,8 @@ uint64_t xxCreateSwapchainMantle(uint64_t device, uint64_t renderPass, void* vie
     }
     grSwapchain->commandBufferIndex = 0;
     grSwapchain->view = view;
+    grSwapchain->width = width;
+    grSwapchain->height = height;
 
     return reinterpret_cast<uint64_t>(grSwapchain);
 }

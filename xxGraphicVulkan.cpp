@@ -8,6 +8,12 @@
 #include "xxGraphicVulkanAsm.h"
 #include "xxGraphicVulkan.h"
 
+#if defined(xxANDROID)
+#   define VK_USE_PLATFORM_ANDROID_KHR  1
+#   include <dlfcn.h>
+#   include <android/native_window_jni.h>
+#endif
+
 #if defined(xxMACOS)
 #   define VK_USE_PLATFORM_MACOS_MVK    1
 #   include <dlfcn.h>
@@ -57,7 +63,7 @@ static int                              g_descriptorSetSwapIndex = 0;
 //==============================================================================
 //  DescriptorSet
 //==============================================================================
-static void VKAPI_CALL vkCmdPushDescriptorSetEXT(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint32_t set, uint32_t descriptorWriteCount, const VkWriteDescriptorSet* pDescriptorWrites)
+static VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetEXT(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint32_t set, uint32_t descriptorWriteCount, const VkWriteDescriptorSet* pDescriptorWrites)
 {
     if (g_descriptorSetCurrent == VK_NULL_HANDLE)
     {
@@ -118,7 +124,7 @@ static void VKAPI_CALL vkCmdPushDescriptorSetEXT(VkCommandBuffer commandBuffer, 
 //  Instance
 //==============================================================================
 static bool vkSymbolFailed = false;
-static void* VKAPI_CALL vkSymbol(const char* name)
+static VKAPI_ATTR void* VKAPI_CALL vkSymbol(const char* name)
 {
     void* ptr = nullptr;
 
@@ -128,7 +134,7 @@ static void* VKAPI_CALL vkSymbol(const char* name)
     if (ptr == nullptr && vkGetInstanceProcAddr && g_instance)
         ptr = (void*)vkGetInstanceProcAddr(g_instance, name);
 
-#if defined(xxMACOS) || defined(xxIOS)
+#if defined(xxANDROID) || defined(xxMACOS) || defined(xxIOS)
     if (ptr == nullptr && g_vulkanLibrary)
         ptr = dlsym(g_vulkanLibrary, name);
 #endif
@@ -147,7 +153,7 @@ static void* VKAPI_CALL vkSymbol(const char* name)
 }
 #define vkSymbol(var) (void*&)var = vkSymbol(#var);
 //------------------------------------------------------------------------------
-static void* VKAPI_CALL vkSymbolNULL(const char* name)
+static VKAPI_ATTR void* VKAPI_CALL vkSymbolNULL(const char* name)
 {
     return nullptr;
 }
@@ -319,6 +325,12 @@ static bool vkSymbols(void* (VKAPI_PTR *vkSymbol)(const char* name))
         return false;
 #endif
 
+#if VK_KHR_android_surface
+    vkSymbol(vkCreateAndroidSurfaceKHR);
+    if (vkSymbolFailed)
+        return false;
+#endif
+
 #if VK_MVK_macos_surface
     vkSymbol(vkCreateMacOSSurfaceMVK);
     if (vkSymbolFailed)
@@ -355,7 +367,7 @@ static bool vkSymbols(void* (VKAPI_PTR *vkSymbol)(const char* name))
     return true;
 }
 //------------------------------------------------------------------------------
-static VkBool32 VKAPI_CALL vkDebugReportCallbackEXT(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, const char* pLayerPrefix, const char* pMessage, void* pUserData)
+static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugReportCallbackEXT(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, const char* pLayerPrefix, const char* pMessage, void* pUserData)
 {
     xxLog("Vulkan", "%s : %s", pLayerPrefix, pMessage);
     return VK_FALSE;
@@ -363,6 +375,11 @@ static VkBool32 VKAPI_CALL vkDebugReportCallbackEXT(VkDebugReportFlagsEXT flags,
 //------------------------------------------------------------------------------
 uint64_t xxCreateInstanceVulkan()
 {
+#if defined(xxANDROID)
+    if (g_vulkanLibrary == nullptr)
+        g_vulkanLibrary = dlopen("libvulkan.so", RTLD_LAZY);
+#endif
+
 #if defined(xxMACOS) || defined(xxIOS)
     if (g_vulkanLibrary == nullptr)
         g_vulkanLibrary = dlopen("libvulkan.dylib", RTLD_LAZY);
@@ -492,7 +509,7 @@ void xxDestroyInstanceVulkan(uint64_t instance)
 
     if (g_vulkanLibrary)
     {
-#if defined(xxMACOS) || defined(xxIOS)
+#if defined(xxANDROID) || defined(xxMACOS) || defined(xxIOS)
         dlclose(g_vulkanLibrary);
 #endif
 
@@ -540,7 +557,9 @@ uint64_t xxCreateDeviceVulkan(uint64_t instance)
                 continue;
 
             VkBool32 presentSupport = false;
-#if VK_MVK_macos_surface
+#if VK_KHR_android_surface
+            presentSupport = true;
+#elif VK_MVK_macos_surface
             presentSupport = true;
 #elif VK_MVK_ios_surface
             presentSupport = true;
@@ -796,7 +815,7 @@ struct SWAPCHAINVK : public FRAMEBUFFERVK
     uint32_t            imageIndex;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height)
+uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
@@ -804,11 +823,37 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
     VkRenderPass vkRenderPass = static_cast<uint64_t>(renderPass);
     if (vkRenderPass == VK_NULL_HANDLE)
         return 0;
+    SWAPCHAINVK* vkOldSwapchain = reinterpret_cast<SWAPCHAINVK*>(oldSwapchain);
+    if (vkOldSwapchain && vkOldSwapchain->width == width && vkOldSwapchain->height == height)
+        return oldSwapchain;
     SWAPCHAINVK* vkSwapchain = new SWAPCHAINVK {};
     if (vkSwapchain == nullptr)
         return 0;
 
-#if defined(xxMACOS)
+#if defined(xxANDROID)
+    VkAndroidSurfaceCreateInfoKHR surfaceInfo = {};
+    surfaceInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
+    surfaceInfo.window = (ANativeWindow*)view;
+
+    VkSurfaceKHR surface = VK_NULL_HANDLE;
+    if (surface == VK_NULL_HANDLE)
+    {
+        VkResult result = vkCreateAndroidSurfaceKHR(g_instance, &surfaceInfo, nullptr, &surface);
+        if (result != VK_SUCCESS)
+        {
+            xxDestroySwapchain(reinterpret_cast<uint64_t>(vkSwapchain));
+            return 0;
+        }
+    }
+
+    if (width == 0 || height == 0)
+    {
+        width = ANativeWindow_getWidth((ANativeWindow*)view);
+        height = ANativeWindow_getHeight((ANativeWindow*)view);
+    }
+
+    xxLog("xxGraphic", "%d %d", width, height);
+#elif defined(xxMACOS)
     id nsWindow = (id)view;
     if (nsWindow == nil)
         return 0;
@@ -976,6 +1021,11 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
     swapchainInfo.clipped = VK_TRUE;
     swapchainInfo.oldSwapchain = VK_NULL_HANDLE;
 
+    if (vkOldSwapchain)
+    {
+        swapchainInfo.oldSwapchain = vkOldSwapchain->swapchain;
+    }
+
     VkSurfaceCapabilitiesKHR cap = {};
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(g_physicalDevice, surface, &cap);
     if (swapchainInfo.minImageCount < cap.minImageCount)
@@ -1008,6 +1058,9 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
             return 0;
         }
     }
+
+    xxDestroySwapchainVulkan(oldSwapchain);
+
     if (vkSwapchain->imageCount == 0)
     {
         VkResult result = vkGetSwapchainImagesKHR(vkDevice, swapchain, &vkSwapchain->imageCount, nullptr);

@@ -460,16 +460,24 @@ struct D3D12SWAPCHAIN : public D3D12FRAMEBUFFER
     D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandles[NUM_BACK_BUFFERS];
     ID3D12CommandAllocator*     commandAllocators[NUM_BACK_BUFFERS];
     ID3D12GraphicsCommandList*  commandList;
+    HWND                        hWnd;
+    int                         width;
+    int                         height;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateSwapchainD3D12(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height)
+uint64_t xxCreateSwapchainD3D12(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
         return 0;
+    D3D12SWAPCHAIN* d3dOldSwapchain = reinterpret_cast<D3D12SWAPCHAIN*>(oldSwapchain);
+    if (d3dOldSwapchain && d3dOldSwapchain->hWnd == view && d3dOldSwapchain->width == width && d3dOldSwapchain->height == height)
+        return oldSwapchain;
     D3D12SWAPCHAIN* d3dSwapchain = new D3D12SWAPCHAIN;
     if (d3dSwapchain == nullptr)
         return 0;
+
+    xxDestroySwapchainD3D12(oldSwapchain);
 
     if (g_dxgiFactory == nullptr)
     {
@@ -591,6 +599,10 @@ uint64_t xxCreateSwapchainD3D12(uint64_t device, uint64_t renderPass, void* view
         }
     }
     d3dSwapchain->commandList = commandList;
+
+    d3dSwapchain->hWnd = hWnd;
+    d3dSwapchain->width = width;
+    d3dSwapchain->height = height;
 
     return reinterpret_cast<uint64_t>(d3dSwapchain);
 }

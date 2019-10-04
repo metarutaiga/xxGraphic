@@ -187,12 +187,16 @@ PFN_vkGetPhysicalDevicePresentRectanglesKHR         vkGetPhysicalDevicePresentRe
 PFN_vkAcquireNextImage2KHR                          vkAcquireNextImage2KHR;
 #endif
 
-#if VK_MVK_macos_surface
-PFN_vkCreateMacOSSurfaceMVK                         vkCreateMacOSSurfaceMVK;
+#if VK_KHR_android_surface
+PFN_vkCreateAndroidSurfaceKHR                       vkCreateAndroidSurfaceKHR;
 #endif
 
 #if VK_MVK_ios_surface
 PFN_vkCreateIOSSurfaceMVK                           vkCreateIOSSurfaceMVK;
+#endif
+
+#if VK_MVK_macos_surface
+PFN_vkCreateMacOSSurfaceMVK                         vkCreateMacOSSurfaceMVK;
 #endif
 
 #if VK_KHR_win32_surface

@@ -163,22 +163,27 @@ struct MTLFRAMEBUFFER
 //==============================================================================
 struct MTLSWAPCHAIN : public MTLFRAMEBUFFER
 {
+    CAMetalLayer*           metalLayer;
+    id <CAMetalDrawable>    drawable;
+    id <MTLCommandQueue>    commandQueue;
+    id <MTLCommandBuffer>   commandBuffer;
 #if defined(xxMACOS)
     NSView*                 view;
 #elif defined(xxIOS)
     UIView*                 view;
 #endif
-    CAMetalLayer*           metalLayer;
-    id <CAMetalDrawable>    drawable;
-    id <MTLCommandQueue>    commandQueue;
-    id <MTLCommandBuffer>   commandBuffer;
+    int                     width;
+    int                     height;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height)
+uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
     if (mtlDevice == nil)
         return 0;
+    MTLSWAPCHAIN* mtlOldSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(oldSwapchain);
+    if (mtlOldSwapchain && mtlOldSwapchain->view == view && mtlOldSwapchain->width == width && mtlOldSwapchain->height == height)
+        return oldSwapchain;
 #if defined(xxMACOS)
     NSWindow* nsWindow = (__bridge NSWindow*)view;
     if (nsWindow == nil)
@@ -201,6 +206,8 @@ uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view
     if (swapchain == nullptr)
         return 0;
 
+    xxDestroySwapchainMetal(oldSwapchain);
+
 #if defined(xxMACOS)
     CAMetalLayer* layer = [CAMetalLayer layer];
     layer.displaySyncEnabled = NO;
@@ -222,10 +229,12 @@ uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view
     layer.framebufferOnly = YES;
     layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
 
-    swapchain->view = nsView;
     swapchain->metalLayer = layer;
     swapchain->drawable = [layer nextDrawable];
     swapchain->commandQueue = [mtlDevice newCommandQueue];
+    swapchain->view = nsView;
+    swapchain->width = width;
+    swapchain->height = height;
 
     return reinterpret_cast<uint64_t>(swapchain);
 }

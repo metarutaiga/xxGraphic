@@ -27,7 +27,7 @@ xxAPI const char*   (*xxGetDeviceName)();
 //==============================================================================
 //  Swapchain
 //==============================================================================
-xxAPI uint64_t      (*xxCreateSwapchain)(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height);
+xxAPI uint64_t      (*xxCreateSwapchain)(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain);
 xxAPI void          (*xxDestroySwapchain)(uint64_t swapchain);
 xxAPI void          (*xxPresentSwapchain)(uint64_t swapchain);
 xxAPI uint64_t      (*xxGetCommandBuffer)(uint64_t device, uint64_t swapchain);

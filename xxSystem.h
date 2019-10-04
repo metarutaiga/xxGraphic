@@ -20,12 +20,15 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #if defined(__APPLE__)
+#   include <mach/mach_time.h>
 #   include <pthread.h>
 #   include <sys/syscall.h>
 #   include <sys/time.h>
 #   include <TargetConditionals.h>
+#   include <unistd.h>
 #   if TARGET_OS_IPHONE
 #       define xxIOS 1
 #   elif TARGET_OS_OSX
@@ -34,7 +37,17 @@
 #   if TARGET_OS_MACCATALYST
 #       define xxMACCATALYST 1
 #   endif
+#endif
+
+#if defined(__linux__)
+#   include <sys/time.h>
+#   include <sys/types.h>
 #   include <unistd.h>
+#   define xxLINUX 1
+#   if defined(__ANDROID__)
+#   include <android/log.h>
+#       define xxANDROID 1
+#   endif
 #endif
 
 #if defined(_MSC_VER)
@@ -82,7 +95,7 @@
 #endif
 
 #ifndef xxAPI
-#   if defined(XX_BUILD_LIBRARY)
+#   if defined(_MSC_VER) && defined(XX_BUILD_LIBRARY)
 #       define xxAPI xxEXTERN       __declspec(dllexport)
 #   elif defined(_MSC_VER)
 #       define xxAPI xxEXTERN       __declspec(dllimport)
@@ -118,6 +131,10 @@
 #endif
 
 #if defined(__APPLE__)
+#   define xxAlloc(T, count)        (T*)malloc(sizeof(T) * count)
+#   define xxRealloc(T, count, ptr) (T*)realloc(ptr, sizeof(T) * count)
+#   define xxFree(ptr)              free(ptr)
+#elif defined(__linux__)
 #   define xxAlloc(T, count)        (T*)malloc(sizeof(T) * count)
 #   define xxRealloc(T, count, ptr) (T*)realloc(ptr, sizeof(T) * count)
 #   define xxFree(ptr)              free(ptr)

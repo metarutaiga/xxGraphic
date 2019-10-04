@@ -173,16 +173,23 @@ struct D3DSWAPCHAIN9 : public D3DFRAMEBUFFER9
 {
     LPDIRECT3DSWAPCHAIN9    swapchain;
     HWND                    hWnd;
+    int                     width;
+    int                     height;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateSwapchainD3D9(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height)
+uint64_t xxCreateSwapchainD3D9(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
     if (d3dDevice == nullptr)
         return 0;
+    D3DSWAPCHAIN9* d3dOldSwapchain = reinterpret_cast<D3DSWAPCHAIN9*>(oldSwapchain);
+    if (d3dOldSwapchain && d3dOldSwapchain->hWnd == view && d3dOldSwapchain->width == width && d3dOldSwapchain->height == height)
+        return oldSwapchain;
     D3DSWAPCHAIN9* swapchain = new D3DSWAPCHAIN9;
     if (swapchain == nullptr)
         return 0;
+
+    xxDestroySwapchainD3D9(oldSwapchain);
 
     HWND hWnd = (HWND)view;
     if (width == 0 || height == 0)
@@ -235,6 +242,9 @@ uint64_t xxCreateSwapchainD3D9(uint64_t device, uint64_t renderPass, void* view,
     swapchain->depthStencil = d3dDepthStencil;
     swapchain->swapchain = d3dSwapchain;
     swapchain->hWnd = hWnd;
+    swapchain->width = width;
+    swapchain->height = height;
+
     if (d3dPresentParameters.SwapEffect == D3DSWAPEFFECT_FLIPEX)
     {
         swapchain->hWnd = nullptr;

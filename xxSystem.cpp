@@ -6,18 +6,18 @@
 //==============================================================================
 #include "xxSystem.h"
 
-#if defined(__APPLE__)
-#   include <mach/mach_time.h>
-#endif
-
 //==============================================================================
 //  TSC
 //==============================================================================
-static uint64_t xxTSC()
+uint64_t xxTSC()
 {
 #if defined(__aarch64__)
     unsigned long cntpct;
+#if defined(__ANDROID__)
+    asm volatile("mrs %0, cntvct_el0" : "=r" (cntpct));
+#else
     asm volatile("mrs %0, cntpct_el0" : "=r" (cntpct));
+#endif
     return cntpct;
 #elif defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
     return __rdtsc();
@@ -173,7 +173,9 @@ int xxLog(const char* tag, const char* format, ...)
         snprintf(buffer, tagLength + formatLength, "[%s]", tag);
         vsnprintf(buffer + tagLength, formatLength, format, second);
         buffer[tagLength - 1] = ' ';
-#if defined(xxWINDOWS)
+#if defined(xxANDROID)
+        __android_log_print(ANDROID_LOG_INFO, tag, "%s", buffer);
+#elif defined(xxWINDOWS)
         OutputDebugStringA(buffer);
         OutputDebugStringA("\n");
 #else

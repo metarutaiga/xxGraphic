@@ -27,7 +27,7 @@ xxAPI const char*   xxGetDeviceNameGLES2();
 //==============================================================================
 //  Swapchain
 //==============================================================================
-xxAPI uint64_t      xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height);
+xxAPI uint64_t      xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain);
 xxAPI void          xxDestroySwapchainGLES2(uint64_t swapchain);
 xxAPI void          xxPresentSwapchainGLES2(uint64_t swapchain);
 xxAPI uint64_t      xxGetCommandBufferGLES2(uint64_t device, uint64_t swapchain);

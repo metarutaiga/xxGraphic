@@ -155,16 +155,23 @@ struct D3DSWAPCHAIN8 : public D3DFRAMEBUFFER8
 {
     LPDIRECT3DSWAPCHAIN8    swapchain;
     HWND                    hWnd;
+    int                     width;
+    int                     height;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateSwapchainD3D8(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height)
+uint64_t xxCreateSwapchainD3D8(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(device);
     if (d3dDevice == nullptr)
         return 0;
+    D3DSWAPCHAIN8* d3dOldSwapchain = reinterpret_cast<D3DSWAPCHAIN8*>(oldSwapchain);
+    if (d3dOldSwapchain && d3dOldSwapchain->hWnd == view && d3dOldSwapchain->width == width && d3dOldSwapchain->height == height)
+        return oldSwapchain;
     D3DSWAPCHAIN8* swapchain = new D3DSWAPCHAIN8;
     if (swapchain == nullptr)
         return 0;
+
+    xxDestroySwapchainD3D8(oldSwapchain);
 
     HWND hWnd = (HWND)view;
     if (width == 0 || height == 0)
@@ -209,6 +216,8 @@ uint64_t xxCreateSwapchainD3D8(uint64_t device, uint64_t renderPass, void* view,
     swapchain->depthStencil = d3dDepthStencil;
     swapchain->swapchain = d3dSwapchain;
     swapchain->hWnd = hWnd;
+    swapchain->width = width;
+    swapchain->height = height;
 
     return reinterpret_cast<uint64_t>(swapchain);
 }

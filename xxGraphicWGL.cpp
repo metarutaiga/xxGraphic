@@ -143,11 +143,12 @@ void glDestroyContextWGL(uint64_t context, void* view, void* display)
 
     wglMakeCurrent(hDC, hGLRC);
 
-    if (glGetIntegerv && glDeleteVertexArrays)
+    if (glGetIntegerv && glDeleteVertexArrays && glBindVertexArray)
     {
         GLuint vao = 0;
         glGetIntegerv(GL_VERTEX_ARRAY_BINDING, (GLint*)&vao);
         glDeleteVertexArrays(1, &vao);
+        glBindVertexArray(0);
     }
 
     wglMakeCurrent(hDC, nullptr);

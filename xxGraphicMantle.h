@@ -27,7 +27,7 @@ xxAPI const char*   xxGetDeviceNameMantle();
 //==============================================================================
 //  Swapchain
 //==============================================================================
-xxAPI uint64_t      xxCreateSwapchainMantle(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height);
+xxAPI uint64_t      xxCreateSwapchainMantle(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain);
 xxAPI void          xxDestroySwapchainMantle(uint64_t swapchain);
 xxAPI void          xxPresentSwapchainMantle(uint64_t swapchain);
 xxAPI uint64_t      xxGetCommandBufferMantle(uint64_t device, uint64_t swapchain);

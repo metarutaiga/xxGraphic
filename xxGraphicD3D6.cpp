@@ -196,16 +196,23 @@ struct D3DSWAPCHAIN3 : public D3DFRAMEBUFFER3
 {
     LPDIRECTDRAWCLIPPER     clipper;
     HWND                    hWnd;
+    int                     width;
+    int                     height;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateSwapchainD3D6(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height)
+uint64_t xxCreateSwapchainD3D6(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
 {
     LPDIRECT3DDEVICE3 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE3>(device);
     if (d3dDevice == nullptr)
         return 0;
+    D3DSWAPCHAIN3* d3dOldSwapchain = reinterpret_cast<D3DSWAPCHAIN3*>(oldSwapchain);
+    if (d3dOldSwapchain && d3dOldSwapchain->hWnd == view && d3dOldSwapchain->width == width && d3dOldSwapchain->height == height)
+        return oldSwapchain;
     D3DSWAPCHAIN3* swapchain = new D3DSWAPCHAIN3;
     if (swapchain == nullptr)
         return 0;
+
+    xxDestroySwapchainD3D6(oldSwapchain);
 
     HWND hWnd = (HWND)view;
     if (width == 0 || height == 0)
@@ -270,6 +277,8 @@ uint64_t xxCreateSwapchainD3D6(uint64_t device, uint64_t renderPass, void* view,
     swapchain->depthSurface = depthSurface;
     swapchain->clipper = clipper;
     swapchain->hWnd = hWnd;
+    swapchain->width = width;
+    swapchain->height = height;
 
     return reinterpret_cast<uint64_t>(swapchain);
 }

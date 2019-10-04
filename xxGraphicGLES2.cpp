@@ -12,6 +12,10 @@
 #include "xxGraphicGL.h"
 #include "xxGraphicGLES2.h"
 
+#if defined(xxANDROID)
+#   include "xxGraphicEGL.h"
+#endif
+
 #if defined(xxIOS) && !defined(xxMACCATALYST)
 #   include "xxGraphicEAGL.h"
 #endif
@@ -35,12 +39,16 @@ uint64_t xxCreateInstanceGLES2()
 {
     uint64_t instance = 0;
 
-#if defined(xxIOS) && !defined(xxMACCATALYST)
-    instance = xxGraphicCreateEAGL();
+#if defined(xxANDROID)
+    instance = xxGraphicCreateEGL();
 #endif
 
 #if defined(xxMACOS)
     instance = xxGraphicCreateCGL();
+#endif
+
+#if defined(xxIOS) && !defined(xxMACCATALYST)
+    instance = xxGraphicCreateEAGL();
 #endif
 
 #if defined(xxWINDOWS)
@@ -57,6 +65,10 @@ uint64_t xxCreateInstanceGLES2()
 //------------------------------------------------------------------------------
 void xxDestroyInstanceGLES2(uint64_t instance)
 {
+#if defined(xxANDROID)
+    xxGraphicDestroyEGL(instance);
+#endif
+
 #if defined(xxIOS) && !defined(xxMACCATALYST)
     xxGraphicDestroyEAGL(instance);
 #endif
@@ -117,11 +129,16 @@ struct SWAPCHAINGL
     bool        textureMipmaps[8];
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height)
+uint64_t xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
 {
+    SWAPCHAINGL* glOldSwapchain = reinterpret_cast<SWAPCHAINGL*>(oldSwapchain);
+    if (glOldSwapchain && glOldSwapchain->view == view && glOldSwapchain->width == width && glOldSwapchain->height == height)
+        return oldSwapchain;
     SWAPCHAINGL* glSwapchain = new SWAPCHAINGL;
     if (glSwapchain == nullptr)
         return 0;
+
+    xxDestroySwapchainGLES2(oldSwapchain);
 
     void* display = nullptr;
     uint64_t context = glCreateContext(device, view, &display);
