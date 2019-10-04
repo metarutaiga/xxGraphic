@@ -1118,8 +1118,8 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
     vkSwapchain->presentMode = swapchainInfo.presentMode;
     vkSwapchain->swapchain = swapchain;
     vkSwapchain->view = view;
-    vkSwapchain->width = swapchainInfo.imageExtent.width;
-    vkSwapchain->height = swapchainInfo.imageExtent.height;
+    vkSwapchain->width = width;
+    vkSwapchain->height = height;
 
     return reinterpret_cast<uint64_t>(vkSwapchain);
 }
