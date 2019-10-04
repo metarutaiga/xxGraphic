@@ -171,18 +171,6 @@ void glPresentContextWGL(uint64_t context, void* display)
     SwapBuffers(hDC);
 }
 //------------------------------------------------------------------------------
-void glGetViewSizeWGL(void* view, unsigned int* width, unsigned int* height)
-{
-    HWND hWnd = reinterpret_cast<HWND>(view);
-
-    RECT rect = {};
-    if (GetClientRect(hWnd, &rect) == TRUE)
-    {
-        (*width) = rect.right - rect.left;
-        (*height) = rect.bottom - rect.top;
-    }
-}
-//------------------------------------------------------------------------------
 uint64_t xxGraphicCreateWGL()
 {
     if (g_gdiLibrary == nullptr)
@@ -231,7 +219,6 @@ uint64_t xxGraphicCreateWGL()
     glDestroyContext = glDestroyContextWGL;
     glMakeCurrentContext = glMakeCurrentContextWGL;
     glPresentContext = glPresentContextWGL;
-    glGetViewSize = glGetViewSizeWGL;
 
     return context;
 }

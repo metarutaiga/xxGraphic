@@ -169,10 +169,6 @@ void glPresentContextEGL(uint64_t context, void* surface)
     eglSwapBuffers(eglDisplay, eglSurface);
 }
 //------------------------------------------------------------------------------
-void glGetViewSizeEGL(void* view, unsigned int* width, unsigned int* height)
-{
-}
-//------------------------------------------------------------------------------
 uint64_t xxGraphicCreateEGL()
 {
 #if defined(xxANDROID)
@@ -252,7 +248,6 @@ uint64_t xxGraphicCreateEGL()
     glDestroyContext = glDestroyContextEGL;
     glMakeCurrentContext = glMakeCurrentContextEGL;
     glPresentContext = glPresentContextEGL;
-    glGetViewSize = glGetViewSizeEGL;
 
     return context;
 }

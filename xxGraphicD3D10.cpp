@@ -174,15 +174,6 @@ uint64_t xxCreateSwapchainD3D10(uint64_t device, uint64_t renderPass, void* view
     }
 
     HWND hWnd = (HWND)view;
-    if (width == 0 || height == 0)
-    {
-        RECT rect = {};
-        if (GetClientRect(hWnd, &rect) == TRUE)
-        {
-            width = rect.right - rect.left;
-            height = rect.bottom - rect.top;
-        }
-    }
 
     DXGI_SWAP_CHAIN_DESC desc = {};
     desc.BufferDesc.Width = width;

@@ -198,15 +198,6 @@ uint64_t xxCreateSwapchainD3D7(uint64_t device, uint64_t renderPass, void* view,
     xxDestroySwapchainD3D7(oldSwapchain);
 
     HWND hWnd = (HWND)view;
-    if (width == 0 || height == 0)
-    {
-        RECT rect = {};
-        if (GetClientRect(hWnd, &rect) == TRUE)
-        {
-            width = rect.right - rect.left;
-            height = rect.bottom - rect.top;
-        }
-    }
 
     LPDIRECTDRAWSURFACE7 backSurface = nullptr;
     if (backSurface == nullptr)

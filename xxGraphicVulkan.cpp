@@ -846,14 +846,6 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
             return 0;
         }
     }
-
-    if (width == 0 || height == 0)
-    {
-        width = ANativeWindow_getWidth((ANativeWindow*)view);
-        height = ANativeWindow_getHeight((ANativeWindow*)view);
-    }
-
-    xxLog("xxGraphic", "%d %d", width, height);
 #elif defined(xxMACOS)
     id nsWindow = (id)view;
     if (nsWindow == nil)
@@ -865,13 +857,6 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
     if (nsView == nil)
         return 0;
     CGFloat contentsScale = ((CGFloat(*)(id, SEL, ...))objc_msgSend)(nsWindow, sel_registerName("backingScaleFactor"));
-
-    if (width == 0 || height == 0)
-    {
-        CGRect rect = ((CGRect(*)(id, SEL, ...))objc_msgSend_stret)(nsView, sel_registerName("bounds"));
-        width = (int)rect.size.width;
-        height = (int)rect.size.height;
-    }
 
     id layer = objc_msgSend((id)objc_getClass("CAMetalLayer"), sel_getUid("layer"));
     objc_msgSend(layer, sel_getUid("setContentsScale:"), contentsScale);
@@ -904,13 +889,6 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
         return 0;
     CGFloat contentsScale = ((CGFloat(*)(id, SEL, ...))objc_msgSend)(objc_msgSend(nsWindow, sel_getUid("screen")), sel_registerName("nativeScale"));
 
-    if (width == 0 || height == 0)
-    {
-        CGRect rect = ((CGRect(*)(id, SEL, ...))objc_msgSend)(nsView, sel_registerName("bounds"));
-        width = (int)rect.size.width;
-        height = (int)rect.size.height;
-    }
-
     id layer = objc_msgSend(nsView, sel_getUid("layer"));
     objc_msgSend(layer, sel_getUid("setContentsScale:"), contentsScale);
 
@@ -942,16 +920,6 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
         {
             xxDestroySwapchain(reinterpret_cast<uint64_t>(vkSwapchain));
             return 0;
-        }
-    }
-
-    if (width == 0 || height == 0)
-    {
-        RECT rect = {};
-        if (GetWindowRect((HWND)view, &rect) == TRUE)
-        {
-            width = rect.right - rect.left;
-            height = rect.bottom - rect.top;
         }
     }
 #else

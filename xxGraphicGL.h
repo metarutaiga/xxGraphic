@@ -34,7 +34,6 @@ xxEXTERN uint64_t                                       (*glCreateContext)(uint6
 xxEXTERN void                                           (*glDestroyContext)(uint64_t context, void* view, void* display);
 xxEXTERN void                                           (*glMakeCurrentContext)(uint64_t context, void* display);
 xxEXTERN void                                           (*glPresentContext)(uint64_t context, void* display);
-xxEXTERN void                                           (*glGetViewSize)(void* view, unsigned int* width, unsigned int* height);
 //------------------------------------------------------------------------------
 xxEXTERN PFNGLACTIVETEXTUREPROC                         glActiveTexture;
 xxEXTERN PFNGLATTACHSHADERPROC                          glAttachShader;

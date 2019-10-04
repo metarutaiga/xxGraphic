@@ -174,15 +174,6 @@ uint64_t xxCreateSwapchainD3D8(uint64_t device, uint64_t renderPass, void* view,
     xxDestroySwapchainD3D8(oldSwapchain);
 
     HWND hWnd = (HWND)view;
-    if (width == 0 || height == 0)
-    {
-        RECT rect = {};
-        if (GetClientRect(hWnd, &rect) == TRUE)
-        {
-            width = rect.right - rect.left;
-            height = rect.bottom - rect.top;
-        }
-    }
 
     D3DPRESENT_PARAMETERS d3dPresentParameters = {};
     d3dPresentParameters.BackBufferWidth = width;

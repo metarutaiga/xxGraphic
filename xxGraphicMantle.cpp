@@ -339,15 +339,6 @@ uint64_t xxCreateSwapchainMantle(uint64_t device, uint64_t renderPass, void* vie
     xxDestroySwapchainMantle(oldSwapchain);
 
     HWND hWnd = (HWND)view;
-    if (width == 0 || height == 0)
-    {
-        RECT rect = {};
-        if (GetClientRect(hWnd, &rect) == TRUE)
-        {
-            width = rect.right - rect.left;
-            height = rect.bottom - rect.top;
-        }
-    }
 
     GR_WSI_WIN_PRESENTABLE_IMAGE_CREATE_INFO imageCreateInfo = {};
     imageCreateInfo.format.channelFormat = GR_CH_FMT_B8G8R8A8;

@@ -139,16 +139,6 @@ void glPresentContextCGL(uint64_t context, void* display)
     [nsContext flushBuffer];
 }
 //------------------------------------------------------------------------------
-void glGetViewSizeCGL(void* view, unsigned int* width, unsigned int* height)
-{
-    NSWindow* nsWindow = (__bridge NSWindow*)view;
-    NSView* nsView = [nsWindow contentView];
-
-    NSSize size = [nsView convertRectToBacking:[nsView bounds]].size;
-    (*width) = size.width;
-    (*height) = size.height;
-}
-//------------------------------------------------------------------------------
 PFNGLSHADERSOURCEPROC glShaderSource_;
 void glShaderSourceCGL(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
 {
@@ -206,7 +196,6 @@ uint64_t xxGraphicCreateCGL()
     glDestroyContext = glDestroyContextCGL;
     glMakeCurrentContext = glMakeCurrentContextCGL;
     glPresentContext = glPresentContextCGL;
-    glGetViewSize = glGetViewSizeCGL;
 
     glShaderSource_ = glShaderSource;
     glShaderSource = glShaderSourceCGL;

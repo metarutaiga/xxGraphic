@@ -166,16 +166,6 @@ void glPresentContextEAGL(uint64_t context, void* display)
     [eaglContext presentRenderbuffer:GL_RENDERBUFFER];
 }
 //------------------------------------------------------------------------------
-void glGetViewSizeEAGL(void* view, unsigned int* width, unsigned int* height)
-{
-    UIWindow* nsWindow = (__bridge UIWindow*)view;
-    UIView* nsView = [[nsWindow rootViewController] view];
-
-    CGSize size = [nsView bounds].size;
-    (*width) = size.width;
-    (*height) = size.height;
-}
-//------------------------------------------------------------------------------
 uint64_t xxGraphicCreateEAGL()
 {
     if (g_glLibrary == nullptr)
@@ -204,7 +194,6 @@ uint64_t xxGraphicCreateEAGL()
     glDestroyContext = glDestroyContextEAGL;
     glMakeCurrentContext = glMakeCurrentContextEAGL;
     glPresentContext = glPresentContextEAGL;
-    glGetViewSize = glGetViewSizeEAGL;
 
     return reinterpret_cast<uint64_t>((__bridge_retained void*)rootContext);
 }

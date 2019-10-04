@@ -148,11 +148,6 @@ uint64_t xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view
         return 0;
     }
 
-    if (width == 0 || height == 0)
-    {
-        glGetViewSize(view, &width, &height);
-    }
-
     glSwapchain->context = context;
     glSwapchain->view = view;
     glSwapchain->display = display;

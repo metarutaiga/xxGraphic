@@ -215,15 +215,6 @@ uint64_t xxCreateSwapchainD3D6(uint64_t device, uint64_t renderPass, void* view,
     xxDestroySwapchainD3D6(oldSwapchain);
 
     HWND hWnd = (HWND)view;
-    if (width == 0 || height == 0)
-    {
-        RECT rect = {};
-        if (GetClientRect(hWnd, &rect) == TRUE)
-        {
-            width = rect.right - rect.left;
-            height = rect.bottom - rect.top;
-        }
-    }
 
     LPDIRECTDRAWSURFACE4 backSurface = nullptr;
     if (backSurface == nullptr)
