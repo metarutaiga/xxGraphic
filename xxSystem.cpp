@@ -7,6 +7,7 @@
 #include "xxSystem.h"
 
 #if defined(__APPLE__)
+#   include <dlfcn.h>
 #   include <mach/mach_time.h>
 #   include <pthread.h>
 #   include <sys/syscall.h>
