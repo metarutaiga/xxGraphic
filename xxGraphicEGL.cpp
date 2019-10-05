@@ -46,19 +46,11 @@ static void* GL_APIENTRY eglSymbol(const char* name, bool* failed)
     if (ptr == nullptr && eglGetProcAddress)
         ptr = (void*)eglGetProcAddress(name);
 
-#if defined(xxANDROID)
     if (ptr == nullptr && g_glLibrary)
-        ptr = dlsym(g_glLibrary, name);
+        ptr = xxGetProcAddress(g_glLibrary, name);
 
     if (ptr == nullptr && g_eglLibrary)
-        ptr = dlsym(g_eglLibrary, name);
-#elif defined(xxWINDOWS)
-    if (ptr == nullptr && g_glLibrary)
-        ptr = GetProcAddress((HMODULE)g_glLibrary, name);
-
-    if (ptr == nullptr && g_eglLibrary)
-        ptr = GetProcAddress((HMODULE)g_eglLibrary, name);
-#endif
+        ptr = xxGetProcAddress(g_eglLibrary, name);
 
     if (ptr == nullptr)
         xxLog("EGL", "%s is not found", name);
@@ -175,20 +167,20 @@ uint64_t xxGraphicCreateEGL()
 {
 #if defined(xxANDROID)
     if (g_eglLibrary == nullptr)
-        g_eglLibrary = dlopen("libEGL.so", RTLD_LAZY);
+        g_eglLibrary = xxLoadLibrary("libEGL.so");
 #elif defined(xxWINDOWS)
     if (g_eglLibrary == nullptr)
-        g_eglLibrary = LoadLibraryW(L"libEGL.dll");
+        g_eglLibrary = xxLoadLibrary("libEGL.dll");
 #endif
     if (g_eglLibrary == nullptr)
         return 0;
 
 #if defined(xxANDROID)
     if (g_glLibrary == nullptr)
-        g_glLibrary = dlopen("libGLESv2.so", RTLD_LAZY);
+        g_glLibrary = xxLoadLibrary("libGLESv2.so");
 #elif defined(xxWINDOWS)
     if (g_glLibrary == nullptr)
-        g_glLibrary = LoadLibraryW(L"libGLESv2.dll");
+        g_glLibrary = xxLoadLibrary("libGLESv2.dll");
 #endif
     if (g_glLibrary == nullptr)
         return 0;
@@ -261,21 +253,13 @@ void xxGraphicDestroyEGL(uint64_t context)
 
     if (g_glLibrary)
     {
-#if defined(xxANDROID)
-        dlclose(g_glLibrary);
-#elif defined(xxWINDOWS)
-        FreeLibrary((HMODULE)g_glLibrary);
-#endif
+        xxFreeLibrary(g_glLibrary);
         g_glLibrary = nullptr;
     }
 
     if (g_eglLibrary)
     {
-#if defined(xxANDROID)
-        dlclose(g_eglLibrary);
-#elif defined(xxWINDOWS)
-        FreeLibrary((HMODULE)g_eglLibrary);
-#endif
+        xxFreeLibrary(g_eglLibrary);
         g_eglLibrary = nullptr;
     }
 

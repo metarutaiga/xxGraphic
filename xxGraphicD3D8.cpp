@@ -13,7 +13,7 @@
 typedef LPDIRECT3D8 (WINAPI *PFN_DIRECT3D_CREATE8)(UINT);
 #define D3DRTYPE_CONSTANTBUFFER     0
 
-static HMODULE                      g_d3dLibrary = nullptr;
+static void*                        g_d3dLibrary = nullptr;
 
 //==============================================================================
 //  Resource Type
@@ -33,12 +33,12 @@ static uint64_t getResourceData(uint64_t resource)
 uint64_t xxCreateInstanceD3D8()
 {
     if (g_d3dLibrary == nullptr)
-        g_d3dLibrary = LoadLibraryW(L"d3d8.dll");
+        g_d3dLibrary = xxLoadLibrary("d3d8.dll");
     if (g_d3dLibrary == nullptr)
         return 0;
 
     PFN_DIRECT3D_CREATE8 Direct3DCreate8;
-    (void*&)Direct3DCreate8 = GetProcAddress(g_d3dLibrary, "Direct3DCreate8");
+    (void*&)Direct3DCreate8 = xxGetProcAddress(g_d3dLibrary, "Direct3DCreate8");
     if (Direct3DCreate8 == nullptr)
         return 0;
 
@@ -63,7 +63,7 @@ void xxDestroyInstanceD3D8(uint64_t instance)
 
     if (g_d3dLibrary)
     {
-        FreeLibrary(g_d3dLibrary);
+        xxFreeLibrary(g_d3dLibrary);
         g_d3dLibrary = nullptr;
     }
 

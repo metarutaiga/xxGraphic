@@ -16,8 +16,8 @@ interface DECLSPEC_UUID("bdb64df4-ea2f-4c70-b861-aaab1258bb5d") ID3D11On12Device
 interface DECLSPEC_UUID("dc90f331-4740-43fa-866e-67f12cb58223") ID3D11On12Device2;
 #define NUM_BACK_BUFFERS            3
 
-static HMODULE                      g_d3d11Library = nullptr;
-static HMODULE                      g_d3d12Library = nullptr;
+static void*                        g_d3d11Library = nullptr;
+static void*                        g_d3d12Library = nullptr;
 static ID3D12Device*                g_d3d12Device = nullptr;
 static ID3D12CommandQueue*          g_d3d12CommandQueue = nullptr;
 static ID3D12Fence*                 g_d3d12Fence = nullptr;
@@ -44,12 +44,12 @@ static void signalFence(bool wait)
 uint64_t xxCreateInstanceD3D11On12()
 {
     if (g_d3d11Library == nullptr)
-        g_d3d11Library = LoadLibraryW(L"d3d11.dll");
+        g_d3d11Library = xxLoadLibrary("d3d11.dll");
     if (g_d3d11Library == nullptr)
         return 0;
 
     if (g_d3d12Library == nullptr)
-        g_d3d12Library = LoadLibraryW(L"d3d12.dll");
+        g_d3d12Library = xxLoadLibrary("d3d12.dll");
     if (g_d3d12Library == nullptr)
         return 0;
 
@@ -69,13 +69,13 @@ void xxDestroyInstanceD3D11On12(uint64_t instance)
 {
     if (g_d3d12Library)
     {
-        FreeLibrary(g_d3d12Library);
+        xxFreeLibrary(g_d3d12Library);
         g_d3d12Library = nullptr;
     }
 
     if (g_d3d11Library)
     {
-        FreeLibrary(g_d3d11Library);
+        xxFreeLibrary(g_d3d11Library);
         g_d3d11Library = nullptr;
     }
 
@@ -87,12 +87,12 @@ void xxDestroyInstanceD3D11On12(uint64_t instance)
 uint64_t xxCreateDeviceD3D11On12(uint64_t instance)
 {
     PFN_D3D12_CREATE_DEVICE D3D12CreateDevice;
-    (void*&)D3D12CreateDevice = GetProcAddress(g_d3d12Library, "D3D12CreateDevice");
+    (void*&)D3D12CreateDevice = xxGetProcAddress(g_d3d12Library, "D3D12CreateDevice");
     if (D3D12CreateDevice == nullptr)
         return 0;
 
     PFN_D3D11ON12_CREATE_DEVICE D3D11On12CreateDevice;
-    (void*&)D3D11On12CreateDevice = GetProcAddress(g_d3d11Library, "D3D11On12CreateDevice");
+    (void*&)D3D11On12CreateDevice = xxGetProcAddress(g_d3d11Library, "D3D11On12CreateDevice");
     if (D3D11On12CreateDevice == nullptr)
         return 0;
 

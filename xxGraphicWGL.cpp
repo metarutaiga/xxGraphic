@@ -9,8 +9,8 @@
 #include "xxGraphicWGL.h"
 
 #include "gl/wgl.h"
-static HMODULE                              g_gdiLibrary = nullptr;
-static HMODULE                              g_glLibrary = nullptr;
+static void*                                g_gdiLibrary = nullptr;
+static void*                                g_glLibrary = nullptr;
 static int                                  (WINAPI *ChoosePixelFormat)(HDC, CONST PIXELFORMATDESCRIPTOR*);
 static BOOL                                 (WINAPI *SetPixelFormat)(HDC, int, CONST PIXELFORMATDESCRIPTOR*);
 static BOOL                                 (WINAPI *SwapBuffers)(HDC);
@@ -39,10 +39,10 @@ static void* GL_APIENTRY wglSymbol(const char* name, bool* failed)
         ptr = wglGetProcAddress(name);
 
     if (ptr == nullptr && g_glLibrary)
-        ptr = GetProcAddress(g_glLibrary, name);
+        ptr = xxGetProcAddress(g_glLibrary, name);
 
     if (ptr == nullptr && g_gdiLibrary)
-        ptr = GetProcAddress(g_gdiLibrary, name);
+        ptr = xxGetProcAddress(g_gdiLibrary, name);
 
     if (ptr == nullptr)
         xxLog("WGL", "%s is not found", name);
@@ -174,12 +174,12 @@ void glPresentContextWGL(uint64_t context, void* display)
 uint64_t xxGraphicCreateWGL()
 {
     if (g_gdiLibrary == nullptr)
-        g_gdiLibrary = LoadLibraryW(L"gdi32.dll");
+        g_gdiLibrary = xxLoadLibrary("gdi32.dll");
     if (g_gdiLibrary == nullptr)
         return 0;
 
     if (g_glLibrary == nullptr)
-        g_glLibrary = LoadLibraryW(L"opengl32.dll");
+        g_glLibrary = xxLoadLibrary("opengl32.dll");
     if (g_glLibrary == nullptr)
         return 0;
 
@@ -229,13 +229,13 @@ void xxGraphicDestroyWGL(uint64_t context)
 
     if (g_glLibrary)
     {
-        FreeLibrary(g_glLibrary);
+        xxFreeLibrary(g_glLibrary);
         g_glLibrary = nullptr;
     }
 
     if (g_gdiLibrary)
     {
-        FreeLibrary(g_gdiLibrary);
+        xxFreeLibrary(g_gdiLibrary);
         g_gdiLibrary = nullptr;
     }
 

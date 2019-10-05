@@ -15,7 +15,7 @@
 #endif
 #include "dxsdk/d3d9on12.h"
 
-static HMODULE                      g_d3dLibrary = nullptr;
+static void*                        g_d3dLibrary = nullptr;
 
 //==============================================================================
 //  Instance
@@ -23,12 +23,12 @@ static HMODULE                      g_d3dLibrary = nullptr;
 uint64_t xxCreateInstanceD3D9On12()
 {
     if (g_d3dLibrary == nullptr)
-        g_d3dLibrary = LoadLibraryW(L"d3d9.dll");
+        g_d3dLibrary = xxLoadLibrary("d3d9.dll");
     if (g_d3dLibrary == nullptr)
         return 0;
 
     PFN_Direct3DCreate9On12 Direct3DCreate9On12;
-    (void*&)Direct3DCreate9On12 = GetProcAddress(g_d3dLibrary, MAKEINTRESOURCE(20)/*"Direct3DCreate9On12"*/);
+    (void*&)Direct3DCreate9On12 = xxGetProcAddress(g_d3dLibrary, MAKEINTRESOURCE(20)/*"Direct3DCreate9On12"*/);
     if (Direct3DCreate9On12 == nullptr)
         return 0;
 
@@ -75,12 +75,12 @@ uint64_t xxCreateInstanceD3D9On12PS()
 uint64_t xxCreateInstanceD3D9On12Ex()
 {
     if (g_d3dLibrary == nullptr)
-        g_d3dLibrary = LoadLibraryW(L"d3d9.dll");
+        g_d3dLibrary = xxLoadLibrary("d3d9.dll");
     if (g_d3dLibrary == nullptr)
         return 0;
 
     PFN_Direct3DCreate9On12Ex Direct3DCreate9On12Ex;
-    (void*&)Direct3DCreate9On12Ex = GetProcAddress(g_d3dLibrary, MAKEINTRESOURCE(21)/*"Direct3DCreate9On12Ex"*/);
+    (void*&)Direct3DCreate9On12Ex = xxGetProcAddress(g_d3dLibrary, MAKEINTRESOURCE(21)/*"Direct3DCreate9On12Ex"*/);
     if (Direct3DCreate9On12Ex == nullptr)
         return 0;
 
@@ -135,7 +135,7 @@ void xxDestroyInstanceD3D9On12(uint64_t instance)
 
     if (g_d3dLibrary)
     {
-        FreeLibrary(g_d3dLibrary);
+        xxFreeLibrary(g_d3dLibrary);
         g_d3dLibrary = nullptr;
     }
 

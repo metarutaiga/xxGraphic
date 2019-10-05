@@ -134,15 +134,8 @@ static VKAPI_ATTR void* VKAPI_CALL vkSymbol(const char* name)
     if (ptr == nullptr && vkGetInstanceProcAddr && g_instance)
         ptr = (void*)vkGetInstanceProcAddr(g_instance, name);
 
-#if defined(xxANDROID) || defined(xxMACOS) || defined(xxIOS)
     if (ptr == nullptr && g_vulkanLibrary)
-        ptr = dlsym(g_vulkanLibrary, name);
-#endif
-
-#if defined(xxWINDOWS)
-    if (ptr == nullptr && g_vulkanLibrary)
-        ptr = GetProcAddress((HMODULE)g_vulkanLibrary, name);
-#endif
+        ptr = xxGetProcAddress(g_vulkanLibrary, name);
 
     if (ptr == nullptr)
         xxLog("Vulkan", "%s is not found", name);
@@ -377,19 +370,19 @@ uint64_t xxCreateInstanceVulkan()
 {
 #if defined(xxANDROID)
     if (g_vulkanLibrary == nullptr)
-        g_vulkanLibrary = dlopen("libvulkan.so", RTLD_LAZY);
+        g_vulkanLibrary = xxLoadLibrary("libvulkan.so");
 #endif
 
 #if defined(xxMACOS) || defined(xxIOS)
     if (g_vulkanLibrary == nullptr)
-        g_vulkanLibrary = dlopen("libvulkan.dylib", RTLD_LAZY);
+        g_vulkanLibrary = xxLoadLibrary("libvulkan.dylib");
     if (g_vulkanLibrary == nullptr)
-        g_vulkanLibrary = dlopen("libMoltenVK.dylib", RTLD_LAZY);
+        g_vulkanLibrary = xxLoadLibrary("libMoltenVK.dylib");
 #endif
 
 #if defined(xxWINDOWS)
     if (g_vulkanLibrary == nullptr)
-        g_vulkanLibrary = LoadLibraryW(L"vulkan-1.dll");
+        g_vulkanLibrary = xxLoadLibrary("vulkan-1.dll");
 #endif
 
     if (g_vulkanLibrary == nullptr)
@@ -509,13 +502,7 @@ void xxDestroyInstanceVulkan(uint64_t instance)
 
     if (g_vulkanLibrary)
     {
-#if defined(xxANDROID) || defined(xxMACOS) || defined(xxIOS)
-        dlclose(g_vulkanLibrary);
-#endif
-
-#if defined(xxWINDOWS)
-        FreeLibrary((HMODULE)g_vulkanLibrary);
-#endif
+        xxFreeLibrary(g_vulkanLibrary);
         g_vulkanLibrary = nullptr;
     }
 

@@ -21,7 +21,7 @@
 #define BASE_VERTEX_SAMPLER         (2 + 16 + NUM_DESCRIPTOR_COUNT * 3)
 #define BASE_PIXEL_SAMPLER          (2 + 16 + NUM_DESCRIPTOR_COUNT * 4)
 
-static HMODULE                      g_mantleLibrary = nullptr;
+static void*                        g_mantleLibrary = nullptr;
 static GR_QUEUE                     g_queue = GR_NULL_HANDLE;
 static GR_FENCE                     g_fences[NUM_BACK_BUFFERS] = {};
 static int                          g_fenceIndex = 0;
@@ -37,7 +37,7 @@ static void* grSymbol(const char* name)
     void* ptr = nullptr;
 
     if (ptr == nullptr && g_mantleLibrary)
-        ptr = GetProcAddress(g_mantleLibrary, name);
+        ptr = xxGetProcAddress(g_mantleLibrary, name);
 
     if (ptr == nullptr)
         xxLog("Mantle", "%s is not found", name);
@@ -181,9 +181,9 @@ bool grSymbols(void* (*grSymbol)(const char* name))
 uint64_t xxCreateInstanceMantle()
 {
     if (g_mantleLibrary == nullptr)
-        g_mantleLibrary = LoadLibraryW(L"mantle32.dll");
+        g_mantleLibrary = xxLoadLibrary("mantle32.dll");
     if (g_mantleLibrary == nullptr)
-        g_mantleLibrary = LoadLibraryW(L"mantle64.dll");
+        g_mantleLibrary = xxLoadLibrary("mantle64.dll");
     if (g_mantleLibrary == nullptr)
         return 0;
 
@@ -210,7 +210,7 @@ void xxDestroyInstanceMantle(uint64_t instance)
 
     if (g_mantleLibrary)
     {
-        FreeLibrary(g_mantleLibrary);
+        xxFreeLibrary(g_mantleLibrary);
         g_mantleLibrary = nullptr;
     }
 

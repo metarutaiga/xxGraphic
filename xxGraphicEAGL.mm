@@ -8,8 +8,6 @@
 #include "xxGraphicGL.h"
 #include "xxGraphicEAGL.h"
 
-#include <dlfcn.h>
-
 #define GLES_SILENCE_DEPRECATION
 #import <UIKit/UIKit.h>
 #import <QuartzCore/CAEAGLLayer.h>
@@ -28,7 +26,7 @@ static void* GL_APIENTRY eaglSymbol(const char* name, bool* failed)
     void* ptr = nullptr;
 
     if (ptr == nullptr && g_glLibrary)
-        ptr = dlsym(g_glLibrary, name);
+        ptr = xxGetProcAddress(g_glLibrary, name);
 
     if (ptr == nullptr)
         xxLog("CGL", "%s is not found", name);
@@ -169,12 +167,12 @@ void glPresentContextEAGL(uint64_t context, void* display)
 uint64_t xxGraphicCreateEAGL()
 {
     if (g_glLibrary == nullptr)
-        g_glLibrary = dlopen("/System/Library/Frameworks/OpenGLES.framework/OpenGLES", RTLD_LAZY);
+        g_glLibrary = xxLoadLibrary("/System/Library/Frameworks/OpenGLES.framework/OpenGLES");
     if (g_glLibrary == nullptr)
         return 0;
 
     if (classEAGLContext == nil)
-        classEAGLContext = (__bridge Class)dlsym(g_glLibrary, "OBJC_CLASS_$_EAGLContext");
+        classEAGLContext = (__bridge Class)xxGetProcAddress(g_glLibrary, "OBJC_CLASS_$_EAGLContext");
     if (classEAGLContext == nil)
         return 0;
 
@@ -206,7 +204,7 @@ void xxGraphicDestroyEAGL(uint64_t context)
 
     if (g_glLibrary)
     {
-        dlclose(g_glLibrary);
+        xxFreeLibrary(g_glLibrary);
         g_glLibrary = nullptr;
     }
 

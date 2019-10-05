@@ -20,7 +20,7 @@ interface DECLSPEC_UUID("8ffde202-a0e7-45df-9e01-e837801b5ea0") ID3D11Device5;
 #define PERSISTENT_BUFFER           1
 #endif
 
-static HMODULE                      g_d3dLibrary = nullptr;
+static void*                        g_d3dLibrary = nullptr;
 static IDXGIFactory*                g_dxgiFactory = nullptr;
 
 //==============================================================================
@@ -29,7 +29,7 @@ static IDXGIFactory*                g_dxgiFactory = nullptr;
 uint64_t xxCreateInstanceD3D11()
 {
     if (g_d3dLibrary == nullptr)
-        g_d3dLibrary = LoadLibraryW(L"d3d11.dll");
+        g_d3dLibrary = xxLoadLibrary("d3d11.dll");
     if (g_d3dLibrary == nullptr)
         return 0;
 
@@ -42,7 +42,7 @@ void xxDestroyInstanceD3D11(uint64_t instance)
 {
     if (g_d3dLibrary)
     {
-        FreeLibrary(g_d3dLibrary);
+        xxFreeLibrary(g_d3dLibrary);
         g_d3dLibrary = nullptr;
     }
 

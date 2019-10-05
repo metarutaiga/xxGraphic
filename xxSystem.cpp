@@ -6,6 +6,101 @@
 //==============================================================================
 #include "xxSystem.h"
 
+#if defined(__APPLE__)
+#   include <mach/mach_time.h>
+#   include <pthread.h>
+#   include <sys/syscall.h>
+#   include <sys/time.h>
+#   include <unistd.h>
+#endif
+
+#if defined(__linux__)
+#   include <dlfcn.h>
+#   include <sys/time.h>
+#   include <sys/types.h>
+#   include <unistd.h>
+#   if defined(__ANDROID__)
+#       include <android/log.h>
+#   endif
+#endif
+
+#if defined(_MSC_VER)
+#   include <intrin.h>
+#endif
+
+//==============================================================================
+//  Allocator
+//==============================================================================
+void* xxAlignedAlloc(size_t size, size_t alignment)
+{
+#if defined(_MSC_VER)
+    return _aligned_malloc(size, alignment);
+#else
+    void* ptr = nullptr;
+    posix_memalign(&ptr, alignment, size);
+    return ptr;
+#endif
+}
+//------------------------------------------------------------------------------
+void* xxAlignedRealloc(void* ptr, size_t size, size_t alignment)
+{
+#if defined(_MSC_VER)
+    return _aligned_realloc(ptr, size, alignment);
+#else
+    void* newPtr = realloc(ptr, size);
+    if ((reinterpret_cast<size_t>(newPtr) & (alignment - 1)) != 0)
+    {
+        void* alignedPtr = xxAlignedAlloc(size, alignment);
+        if (alignedPtr != nullptr)
+        {
+            memcpy(alignedPtr, newPtr, size);
+        }
+        free(newPtr);
+        newPtr = alignedPtr;
+    }
+    return newPtr;
+#endif
+}
+//------------------------------------------------------------------------------
+void xxAlignedFree(void* ptr)
+{
+#if defined(_MSC_VER)
+    return _aligned_free(ptr);
+#else
+    return free(ptr);
+#endif
+}
+//==============================================================================
+//  Library
+//==============================================================================
+void* xxLoadLibrary(const char* name)
+{
+#if defined(_MSC_VER)
+    wchar_t temp[MAX_PATH];
+    ::MultiByteToWideChar(CP_UTF8, 0, name, -1, temp, MAX_PATH);
+    return LoadLibraryW(temp);
+#else
+    return dlopen(name, RTLD_LAZY);
+#endif
+}
+//------------------------------------------------------------------------------
+void* xxGetProcAddress(void* library, const char* name)
+{
+#if defined(_MSC_VER)
+    return GetProcAddress((HMODULE)library, name);
+#else
+    return dlsym(library, name);
+#endif
+}
+//------------------------------------------------------------------------------
+void xxFreeLibrary(void* library)
+{
+#if defined(_MSC_VER)
+    FreeLibrary((HMODULE)library);
+#else
+    dlclose(library);
+#endif
+}
 //==============================================================================
 //  TSC
 //==============================================================================

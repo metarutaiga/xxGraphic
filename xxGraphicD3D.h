@@ -20,9 +20,9 @@ inline ULONG SafeRelease(T*& ptr)
     return ref;
 }
 
-inline void PatchD3DIM(wchar_t* name)
+inline void PatchD3DIM(const char* name)
 {
-    HMODULE d3dim = LoadLibraryW(name);
+    void* d3dim = xxLoadLibrary(name);
     if (d3dim == nullptr)
         return;
 
@@ -47,5 +47,5 @@ inline void PatchD3DIM(wchar_t* name)
         }
     }
 
-    FreeLibrary(d3dim);
+    xxFreeLibrary(d3dim);
 }

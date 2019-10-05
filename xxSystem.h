@@ -23,12 +23,7 @@
 #include <time.h>
 
 #if defined(__APPLE__)
-#   include <mach/mach_time.h>
-#   include <pthread.h>
-#   include <sys/syscall.h>
-#   include <sys/time.h>
 #   include <TargetConditionals.h>
-#   include <unistd.h>
 #   if TARGET_OS_IPHONE
 #       define xxIOS 1
 #   elif TARGET_OS_OSX
@@ -40,12 +35,8 @@
 #endif
 
 #if defined(__linux__)
-#   include <sys/time.h>
-#   include <sys/types.h>
-#   include <unistd.h>
 #   define xxLINUX 1
 #   if defined(__ANDROID__)
-#   include <android/log.h>
 #       define xxANDROID 1
 #   endif
 #endif
@@ -112,10 +103,6 @@
 #   define xxUnlikely(x)            (x)
 #endif
 
-#define xxSizeOf(var)               (sizeof(var))
-#define xxCountOf(var)              (sizeof(var) / sizeof(*var))
-#define xxOffsetOf(st, m)           (offsetof(st, m))
-
 #if defined(__cplusplus)
 #   define xxInline                 inline
 #   define xxConstexpr              constexpr
@@ -130,25 +117,36 @@
 #   define xxDefaultArgument(value)
 #endif
 
-#if defined(__APPLE__)
-#   define xxAlloc(T, count)        (T*)malloc(sizeof(T) * count)
-#   define xxRealloc(T, count, ptr) (T*)realloc(ptr, sizeof(T) * count)
-#   define xxFree(ptr)              free(ptr)
-#elif defined(__linux__)
-#   define xxAlloc(T, count)        (T*)malloc(sizeof(T) * count)
-#   define xxRealloc(T, count, ptr) (T*)realloc(ptr, sizeof(T) * count)
-#   define xxFree(ptr)              free(ptr)
-#else
-#   define xxAlloc(T, count)        (T*)_aligned_malloc(sizeof(T) * count, 16)
-#   define xxRealloc(T, count, ptr) (T*)_aligned_realloc(ptr, sizeof(T) * count, 16)
-#   define xxFree(ptr)              _aligned_free(ptr)
-#endif
+#define xxSizeOf(var)               (sizeof(var))
+#define xxCountOf(var)              (sizeof(var) / sizeof(*var))
+#define xxOffsetOf(st, m)           (offsetof(st, m))
 
 #define xxRotateLeft(v, s)          ((v << s) | (v >> (sizeof(v) * 8 - s)))
 #define xxRotateRight(v, s)         ((v >> s) | (v << (sizeof(v) * 8 - s)))
 
 #define xxLocalBreak()              switch (0) case 0:
 
+//==============================================================================
+//  Allocator
+//==============================================================================
+#if INTPTR_MAX == INT64_MAX
+#   define xxAlloc(T, count)        (T*)malloc(sizeof(T) * count)
+#   define xxRealloc(T, count, ptr) (T*)realloc(ptr, sizeof(T) * count)
+#   define xxFree(ptr)              free(ptr)
+#else
+#   define xxAlloc(T, count)        (T*)xxAlignedAlloc(sizeof(T) * count, 16)
+#   define xxRealloc(T, count, ptr) (T*)xxAlignedRealloc(ptr, sizeof(T) * count, 16)
+#   define xxFree(ptr)              xxAlignedFree(ptr)
+#endif
+xxAPI void* xxAlignedAlloc(size_t size, size_t alignment);
+xxAPI void* xxAlignedRealloc(void* ptr, size_t size, size_t alignment);
+xxAPI void xxAlignedFree(void* ptr);
+//==============================================================================
+//  Library
+//==============================================================================
+xxAPI void* xxLoadLibrary(const char* name);
+xxAPI void* xxGetProcAddress(void* library, const char* name);
+xxAPI void xxFreeLibrary(void* library);
 //==============================================================================
 //  TSC
 //==============================================================================

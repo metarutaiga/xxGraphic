@@ -20,7 +20,7 @@ typedef HRESULT (WINAPI *PFN_DIRECT_DRAW_CREATE_EX)(GUID*, LPVOID*, REFIID, IUnk
 #define D3DRTYPE_INDEXBUFFER        1
 #define D3DRTYPE_VERTEXBUFFER       2
 
-static HMODULE                      g_ddrawLibrary = nullptr;
+static void*                        g_ddrawLibrary = nullptr;
 static LPDIRECTDRAW7                g_ddraw = nullptr;
 static LPDIRECTDRAWSURFACE7         g_primarySurface = nullptr;
 
@@ -42,12 +42,12 @@ static uint64_t getResourceData(uint64_t resource)
 uint64_t xxCreateInstanceD3D7()
 {
     if (g_ddrawLibrary == nullptr)
-        g_ddrawLibrary = LoadLibraryW(L"ddraw.dll");
+        g_ddrawLibrary = xxLoadLibrary("ddraw.dll");
     if (g_ddrawLibrary == nullptr)
         return 0;
 
     PFN_DIRECT_DRAW_CREATE_EX DirectDrawCreateEx;
-    (void*&)DirectDrawCreateEx = GetProcAddress(g_ddrawLibrary, "DirectDrawCreateEx");
+    (void*&)DirectDrawCreateEx = xxGetProcAddress(g_ddrawLibrary, "DirectDrawCreateEx");
     if (DirectDrawCreateEx == nullptr)
         return 0;
 
@@ -66,7 +66,7 @@ uint64_t xxCreateInstanceD3D7()
     if (result != S_OK)
         return 0;
 
-    PatchD3DIM(L"d3dim700.dll");
+    PatchD3DIM("d3dim700.dll");
 
     xxRegisterFunction(D3D7);
 
@@ -82,7 +82,7 @@ void xxDestroyInstanceD3D7(uint64_t instance)
 
     if (g_ddrawLibrary)
     {
-        FreeLibrary(g_ddrawLibrary);
+        xxFreeLibrary(g_ddrawLibrary);
         g_ddrawLibrary = nullptr;
     }
 

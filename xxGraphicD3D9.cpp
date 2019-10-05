@@ -17,7 +17,7 @@ interface DECLSPEC_UUID("e7fda234-b589-4049-940d-8878977531c8") IDirect3DDevice9
 typedef LPDIRECT3D9 (WINAPI *PFN_DIRECT3D_CREATE9)(UINT);
 #define D3DRTYPE_CONSTANTBUFFER     0
 
-static HMODULE                      g_d3dLibrary = nullptr;
+static void*                        g_d3dLibrary = nullptr;
 
 //==============================================================================
 //  Resource Type
@@ -37,12 +37,12 @@ static uint64_t getResourceData(uint64_t resource)
 uint64_t xxCreateInstanceD3D9()
 {
     if (g_d3dLibrary == nullptr)
-        g_d3dLibrary = LoadLibraryW(L"d3d9.dll");
+        g_d3dLibrary = xxLoadLibrary("d3d9.dll");
     if (g_d3dLibrary == nullptr)
         return 0;
 
     PFN_DIRECT3D_CREATE9 Direct3DCreate9;
-    (void*&)Direct3DCreate9 = GetProcAddress(g_d3dLibrary, "Direct3DCreate9");
+    (void*&)Direct3DCreate9 = xxGetProcAddress(g_d3dLibrary, "Direct3DCreate9");
     if (Direct3DCreate9 == nullptr)
         return 0;
 
@@ -69,7 +69,7 @@ void xxDestroyInstanceD3D9(uint64_t instance)
 
     if (g_d3dLibrary)
     {
-        FreeLibrary(g_d3dLibrary);
+        xxFreeLibrary(g_d3dLibrary);
         g_d3dLibrary = nullptr;
     }
 

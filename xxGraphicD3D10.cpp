@@ -18,7 +18,7 @@ typedef HRESULT (WINAPI *PFN_D3D10_CREATE_DEVICE)(IDXGIAdapter*, D3D10_DRIVER_TY
 #endif
 #define DXGI_FORMAT_B8G8R8A8_UNORM  g_supportBGRA ? DXGI_FORMAT_B8G8R8A8_UNORM : DXGI_FORMAT_R8G8B8A8_UNORM
 
-static HMODULE                      g_d3dLibrary = nullptr;
+static void*                        g_d3dLibrary = nullptr;
 static IDXGIFactory*                g_dxgiFactory = nullptr;
 static bool                         g_supportBGRA = true;
 
@@ -28,7 +28,7 @@ static bool                         g_supportBGRA = true;
 uint64_t xxCreateInstanceD3D10()
 {
     if (g_d3dLibrary == nullptr)
-        g_d3dLibrary = LoadLibraryW(L"d3d10.dll");
+        g_d3dLibrary = xxLoadLibrary("d3d10.dll");
     if (g_d3dLibrary == nullptr)
         return 0;
 
@@ -41,7 +41,7 @@ void xxDestroyInstanceD3D10(uint64_t instance)
 {
     if (g_d3dLibrary)
     {
-        FreeLibrary(g_d3dLibrary);
+        xxFreeLibrary(g_d3dLibrary);
         g_d3dLibrary = nullptr;
     }
 

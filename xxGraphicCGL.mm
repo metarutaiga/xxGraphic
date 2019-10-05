@@ -31,7 +31,7 @@ static void* GL_APIENTRY cglSymbol(const char* name, bool* failed)
     void* ptr = nullptr;
 
     if (ptr == nullptr && g_glLibrary)
-        ptr = dlsym(g_glLibrary, name);
+        ptr = xxGetProcAddress(g_glLibrary, name);
 
     if (ptr == nullptr)
         xxLog("CGL", "%s is not found", name);
@@ -161,7 +161,7 @@ void glShaderSourceCGL(GLuint shader, GLsizei count, const GLchar *const*string,
 uint64_t xxGraphicCreateCGL()
 {
     if (g_glLibrary == nullptr)
-        g_glLibrary = dlopen("/System/Library/Frameworks/OpenGL.framework/OpenGL", RTLD_LAZY);
+        g_glLibrary = xxLoadLibrary("/System/Library/Frameworks/OpenGL.framework/OpenGL");
     if (g_glLibrary == nullptr)
         return 0;
 
@@ -211,7 +211,7 @@ void xxGraphicDestroyCGL(uint64_t context)
 
     if (g_glLibrary)
     {
-        dlclose(g_glLibrary);
+        xxFreeLibrary(g_glLibrary);
         g_glLibrary = nullptr;
     }
 

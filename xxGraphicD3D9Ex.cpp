@@ -16,7 +16,7 @@
 #include "dxsdk/d3d9.h"
 typedef HRESULT (WINAPI *PFN_DIRECT3D_CREATE9EX)(UINT, LPDIRECT3D9EX*);
 
-static HMODULE                      g_d3dLibrary = nullptr;
+static void*                        g_d3dLibrary = nullptr;
 
 //==============================================================================
 //  Instance
@@ -24,12 +24,12 @@ static HMODULE                      g_d3dLibrary = nullptr;
 uint64_t xxCreateInstanceD3D9Ex()
 {
     if (g_d3dLibrary == nullptr)
-        g_d3dLibrary = LoadLibraryW(L"d3d9.dll");
+        g_d3dLibrary = xxLoadLibrary("d3d9.dll");
     if (g_d3dLibrary == nullptr)
         return 0;
 
     PFN_DIRECT3D_CREATE9EX Direct3DCreate9Ex;
-    (void*&)Direct3DCreate9Ex = GetProcAddress(g_d3dLibrary, "Direct3DCreate9Ex");
+    (void*&)Direct3DCreate9Ex = xxGetProcAddress(g_d3dLibrary, "Direct3DCreate9Ex");
     if (Direct3DCreate9Ex == nullptr)
         return 0;
 
@@ -81,7 +81,7 @@ void xxDestroyInstanceD3D9Ex(uint64_t instance)
 
     if (g_d3dLibrary)
     {
-        FreeLibrary(g_d3dLibrary);
+        xxFreeLibrary(g_d3dLibrary);
         g_d3dLibrary = nullptr;
     }
 

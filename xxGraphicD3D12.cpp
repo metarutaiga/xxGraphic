@@ -23,8 +23,8 @@ typedef HRESULT (WINAPI *PFN_CREATE_DXGI_FACTORY1)(REFIID, void**);
 #define NUM_BACK_BUFFERS            3
 #define PERSISTENT_BUFFER           1
 
-static HMODULE                      g_d3dLibrary = nullptr;
-static HMODULE                      g_dxgiLibrary = nullptr;
+static void*                        g_d3dLibrary = nullptr;
+static void*                        g_dxgiLibrary = nullptr;
 static IDXGIFactory4*               g_dxgiFactory = nullptr;
 static ID3D12CommandQueue*          g_commandQueue = nullptr;
 static ID3D12Fence*                 g_fence = nullptr;
@@ -112,12 +112,12 @@ static void destroySamplerHeap(D3D12_CPU_DESCRIPTOR_HANDLE& cpuHandle, D3D12_GPU
 uint64_t xxCreateInstanceD3D12()
 {
     if (g_d3dLibrary == nullptr)
-        g_d3dLibrary = LoadLibraryW(L"d3d12.dll");
+        g_d3dLibrary = xxLoadLibrary("d3d12.dll");
     if (g_d3dLibrary == nullptr)
         return 0;
 
     if (g_dxgiLibrary == nullptr)
-        g_dxgiLibrary = LoadLibraryW(L"dxgi.dll");
+        g_dxgiLibrary = xxLoadLibrary("dxgi.dll");
     if (g_dxgiLibrary == nullptr)
         return 0;
 
@@ -130,13 +130,13 @@ void xxDestroyInstanceD3D12(uint64_t instance)
 {
     if (g_dxgiLibrary)
     {
-        FreeLibrary(g_dxgiLibrary);
+        xxFreeLibrary(g_dxgiLibrary);
         g_dxgiLibrary = nullptr;
     }
 
     if (g_d3dLibrary)
     {
-        FreeLibrary(g_d3dLibrary);
+        xxFreeLibrary(g_d3dLibrary);
         g_d3dLibrary = nullptr;
     }
 
@@ -148,12 +148,12 @@ void xxDestroyInstanceD3D12(uint64_t instance)
 uint64_t xxCreateDeviceD3D12(uint64_t instance)
 {
     PFN_D3D12_CREATE_DEVICE D3D12CreateDevice;
-    (void*&)D3D12CreateDevice = GetProcAddress(g_d3dLibrary, "D3D12CreateDevice");
+    (void*&)D3D12CreateDevice = xxGetProcAddress(g_d3dLibrary, "D3D12CreateDevice");
     if (D3D12CreateDevice == nullptr)
         return 0;
 
     PFN_D3D12_SERIALIZE_ROOT_SIGNATURE D3D12SerializeRootSignature;
-    (void*&)D3D12SerializeRootSignature = GetProcAddress(g_d3dLibrary, "D3D12SerializeRootSignature");
+    (void*&)D3D12SerializeRootSignature = xxGetProcAddress(g_d3dLibrary, "D3D12SerializeRootSignature");
     if (D3D12SerializeRootSignature == nullptr)
         return 0;
 
@@ -482,7 +482,7 @@ uint64_t xxCreateSwapchainD3D12(uint64_t device, uint64_t renderPass, void* view
     if (g_dxgiFactory == nullptr)
     {
         PFN_CREATE_DXGI_FACTORY1 CreateDXGIFactory1;
-        (void*&)CreateDXGIFactory1 = GetProcAddress(g_dxgiLibrary, "CreateDXGIFactory1");
+        (void*&)CreateDXGIFactory1 = xxGetProcAddress(g_dxgiLibrary, "CreateDXGIFactory1");
         if (CreateDXGIFactory1 == nullptr)
         {
             delete d3dSwapchain;

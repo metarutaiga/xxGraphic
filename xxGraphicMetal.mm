@@ -7,8 +7,6 @@
 #include "xxGraphicInternal.h"
 #include "xxGraphicMetal.h"
 
-#include <dlfcn.h>
-
 #define MTLCreateSystemDefaultDevice MTLCreateSystemDefaultDevice_unused
 #define MTLCopyAllDevices MTLCopyAllDevices_unused
 #import <Metal/Metal.h>
@@ -42,7 +40,7 @@ static void* MTLSymbol(const char* name, bool* failed)
     void* ptr = nullptr;
 
     if (ptr == nullptr && g_metalLibrary)
-        ptr = dlsym(g_metalLibrary, name);
+        ptr = xxGetProcAddress(g_metalLibrary, name);
 
     if (ptr == nullptr)
         xxLog("Metal", "%s is not found", name);
@@ -58,7 +56,7 @@ static void* MTLSymbol(const char* name, bool* failed)
 uint64_t xxCreateInstanceMetal()
 {
     if (g_metalLibrary == nullptr)
-        g_metalLibrary = dlopen("/System/Library/Frameworks/Metal.framework/Metal", RTLD_LAZY);
+        g_metalLibrary = xxLoadLibrary("/System/Library/Frameworks/Metal.framework/Metal");
     if (g_metalLibrary == nullptr)
         return 0;
 
@@ -72,14 +70,14 @@ uint64_t xxCreateInstanceMetal()
     if (MTLSymbolFailed)
         return 0;
 
-    classMTLCompileOptions = (__bridge Class)dlsym(g_metalLibrary, "OBJC_CLASS_$_MTLCompileOptions");
-    classMTLDepthStencilDescriptor = (__bridge Class)dlsym(g_metalLibrary, "OBJC_CLASS_$_MTLDepthStencilDescriptor");
-    classMTLRenderPassDescriptor = (__bridge Class)dlsym(g_metalLibrary, "OBJC_CLASS_$_MTLRenderPassDescriptor");
-    classMTLRenderPipelineColorAttachmentDescriptor = (__bridge Class)dlsym(g_metalLibrary, "OBJC_CLASS_$_MTLRenderPipelineColorAttachmentDescriptor");
-    classMTLRenderPipelineDescriptor = (__bridge Class)dlsym(g_metalLibrary, "OBJC_CLASS_$_MTLRenderPipelineDescriptor");
-    classMTLSamplerDescriptor = (__bridge Class)dlsym(g_metalLibrary, "OBJC_CLASS_$_MTLSamplerDescriptor");
-    classMTLTextureDescriptor = (__bridge Class)dlsym(g_metalLibrary, "OBJC_CLASS_$_MTLTextureDescriptor");
-    classMTLVertexDescriptor = (__bridge Class)dlsym(g_metalLibrary, "OBJC_CLASS_$_MTLVertexDescriptor");
+    classMTLCompileOptions = (__bridge Class)xxGetProcAddress(g_metalLibrary, "OBJC_CLASS_$_MTLCompileOptions");
+    classMTLDepthStencilDescriptor = (__bridge Class)xxGetProcAddress(g_metalLibrary, "OBJC_CLASS_$_MTLDepthStencilDescriptor");
+    classMTLRenderPassDescriptor = (__bridge Class)xxGetProcAddress(g_metalLibrary, "OBJC_CLASS_$_MTLRenderPassDescriptor");
+    classMTLRenderPipelineColorAttachmentDescriptor = (__bridge Class)xxGetProcAddress(g_metalLibrary, "OBJC_CLASS_$_MTLRenderPipelineColorAttachmentDescriptor");
+    classMTLRenderPipelineDescriptor = (__bridge Class)xxGetProcAddress(g_metalLibrary, "OBJC_CLASS_$_MTLRenderPipelineDescriptor");
+    classMTLSamplerDescriptor = (__bridge Class)xxGetProcAddress(g_metalLibrary, "OBJC_CLASS_$_MTLSamplerDescriptor");
+    classMTLTextureDescriptor = (__bridge Class)xxGetProcAddress(g_metalLibrary, "OBJC_CLASS_$_MTLTextureDescriptor");
+    classMTLVertexDescriptor = (__bridge Class)xxGetProcAddress(g_metalLibrary, "OBJC_CLASS_$_MTLVertexDescriptor");
 
 #if defined(xxMACOS)
     NSArray* allDevices = (__bridge NSArray*)MTLCopyAllDevices();
@@ -105,7 +103,7 @@ void xxDestroyInstanceMetal(uint64_t instance)
 
     if (g_metalLibrary)
     {
-        dlclose(g_metalLibrary);
+        xxFreeLibrary(g_metalLibrary);
         g_metalLibrary = nullptr;
     }
 

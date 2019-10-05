@@ -11,7 +11,7 @@
 
 #include <d3d10_1.h>
 
-static HMODULE                      g_d3dLibrary = nullptr;
+static void*                        g_d3dLibrary = nullptr;
 
 //==============================================================================
 //  Instance
@@ -19,7 +19,7 @@ static HMODULE                      g_d3dLibrary = nullptr;
 uint64_t xxCreateInstanceD3D10_1()
 {
     if (g_d3dLibrary == nullptr)
-        g_d3dLibrary = LoadLibraryW(L"d3d10_1.dll");
+        g_d3dLibrary = xxLoadLibrary("d3d10_1.dll");
     if (g_d3dLibrary == nullptr)
         return 0;
 
@@ -36,7 +36,7 @@ void xxDestroyInstanceD3D10_1(uint64_t instance)
 {
     if (g_d3dLibrary)
     {
-        FreeLibrary(g_d3dLibrary);
+        xxFreeLibrary(g_d3dLibrary);
         g_d3dLibrary = nullptr;
     }
 
