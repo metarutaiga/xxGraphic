@@ -110,7 +110,9 @@
 #endif
 
 #ifndef snprintf
-#   define snprintf                 _snprintf
+#   if defined(_MSC_VER) && (_MSC_VER < 1600)
+#       define snprintf             _snprintf
+#   endif
 #endif
 
 #ifndef xxEXTERN
