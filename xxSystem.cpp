@@ -241,7 +241,7 @@ int xxGetIncrementThreadId()
 #if defined(__GNUC__)
         threadId = __sync_fetch_and_add(&increment, 1);
 #elif defined(_MSC_VER)
-        threadId = _InterlockedIncrement((unsigned int*)&increment);
+        threadId = _InterlockedIncrement((long*)&increment);
 #endif
 #if defined(_MSC_VER) && !defined(_DEBUG)
         TlsSetValue(tlsIndexThreadId, (LPVOID)(size_t)threadId);

@@ -8,8 +8,6 @@
 extern "C" {
 #endif
 
-#include <stdint.h>
-
 // DEFINES
 
 #define GR_API_VERSION              1
@@ -33,22 +31,22 @@ typedef unsigned int GR_UINT;
 typedef float GR_FLOAT;
 typedef void GR_VOID;
 
-typedef int8_t GR_INT8;
-typedef int16_t GR_INT16;
-typedef int32_t GR_INT32;
-typedef int64_t GR_INT64;
-typedef uint8_t GR_UINT8;
-typedef uint16_t GR_UINT16;
-typedef uint32_t GR_UINT32;
-typedef uint64_t GR_UINT64;
-typedef uint32_t GR_BOOL;
+typedef signed char GR_INT8;
+typedef signed short GR_INT16;
+typedef signed int GR_INT32;
+typedef signed long long GR_INT64;
+typedef unsigned char GR_UINT8;
+typedef unsigned short GR_UINT16;
+typedef unsigned int GR_UINT32;
+typedef unsigned long long GR_UINT64;
+typedef int GR_BOOL;
 
-typedef int32_t GR_ENUM;
-typedef int32_t GR_FLAGS;
-typedef uint32_t GR_SAMPLE_MASK;
+typedef int GR_ENUM;
+typedef int GR_FLAGS;
+typedef unsigned int GR_SAMPLE_MASK;
 
 typedef size_t GR_SIZE;
-typedef uint64_t GR_GPU_SIZE;
+typedef unsigned long long GR_GPU_SIZE;
 
 typedef void* GR_HANDLE;
 

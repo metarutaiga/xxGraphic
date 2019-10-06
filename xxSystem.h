@@ -15,9 +15,7 @@
 #include <float.h>
 #include <math.h>
 #include <stdarg.h>
-#include <stdbool.h>
 #include <stdio.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -67,14 +65,52 @@
 #   undef wglMakeCurrent
 #   undef wglShareLists
 #   pragma warning(disable:4201)
+#   pragma warning(disable:4482)
 #   define xxWINDOWS 1
 #endif
 
+#if !defined(__cplusplus)
+#   include <stdbool.h>
+#endif
+
+#if defined(_MSC_VER) && (_MSC_VER < 1600)
+    typedef signed char             int8_t;
+    typedef signed short            int16_t;
+    typedef signed int              int32_t;
+    typedef signed long long        int64_t;
+    typedef unsigned char           uint8_t;
+    typedef unsigned short          uint16_t;
+    typedef unsigned int            uint32_t;
+    typedef unsigned long long      uint64_t;
+#   define INT8_MIN                 (-127i8 - 1)
+#   define INT16_MIN                (-32767i16 - 1)
+#   define INT32_MIN                (-2147483647i32 - 1)
+#   define INT64_MIN                (-9223372036854775807i64 - 1)
+#   define INT8_MAX                 127i8
+#   define INT16_MAX                32767i16
+#   define INT32_MAX                2147483647i32
+#   define INT64_MAX                9223372036854775807i64
+#   define UINT8_MAX                0xffui8
+#   define UINT16_MAX               0xffffui16
+#   define UINT32_MAX               0xffffffffui32
+#   define UINT64_MAX               0xffffffffffffffffui64
+#else
+#   include <stdint.h>
+#endif
+
 #ifndef nullptr
-#   if defined(__cplusplus)
+#   if defined(__cplusplus) && (__cplusplus >= 201103L)
 #   else
-#       define nullptr              ((void*)0)
+#       define nullptr              NULL
 #   endif
+#endif
+
+#ifndef va_copy
+#   define va_copy(a, b)            ((a) = (b))
+#endif
+
+#ifndef snprintf
+#   define snprintf                 _snprintf
 #endif
 
 #ifndef xxEXTERN
@@ -103,9 +139,13 @@
 #   define xxUnlikely(x)            (x)
 #endif
 
-#if defined(__cplusplus)
+#if defined(__cplusplus) && (__cplusplus >= 201103L)
 #   define xxInline                 inline
 #   define xxConstexpr              constexpr
+#   define xxDefaultArgument(value) = value
+#elif defined(__cplusplus)
+#   define xxInline                 inline
+#   define xxConstexpr              const
 #   define xxDefaultArgument(value) = value
 #elif defined(__GNUC__)
 #   define xxInline                 __inline__

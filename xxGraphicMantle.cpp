@@ -257,7 +257,7 @@ uint64_t xxCreateDeviceMantle(uint64_t instance)
 
     for (GR_UINT i = 0; i < heapCount; i++)
     {
-        g_heapProps = {};
+        memset(&g_heapProps, 0, sizeof(g_heapProps));
         GR_SIZE heapPropSize = sizeof(g_heapProps);
 
         grGetMemoryHeapInfo(device, i, GR_INFO_TYPE_MEMORY_HEAP_PROPERTIES, &heapPropSize, &g_heapProps);

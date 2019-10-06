@@ -143,7 +143,8 @@ uint64_t xxCreateVertexAttributeD3D9PS(uint64_t device, int count, ...)
     }
     va_end(args);
 
-    vertexElements[count] = D3DDECL_END();
+    D3DVERTEXELEMENT9 end = D3DDECL_END();
+    vertexElements[count] = end;
 
     LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = nullptr;
     HRESULT hResult = d3dDevice->CreateVertexDeclaration(vertexElements, &vertexDeclaration);

@@ -407,6 +407,7 @@ uint64_t xxCreateInstanceVulkan()
         }
     }
 
+#if defined(_DEBUG)
     uint32_t instanceLayerCount = 0;
     vkEnumerateInstanceLayerProperties(&instanceLayerCount, nullptr);
 
@@ -426,6 +427,11 @@ uint64_t xxCreateInstanceVulkan()
     instanceLayerNames[0] = "VK_LAYER_LUNARG_core_validation";
     instanceLayerNames[1] = "VK_LAYER_LUNARG_standard_validation";
     instanceLayerNames[2] = "VK_LAYER_LUNARG_parameter_validation";
+#else
+    uint32_t instanceLayerCount = 0;
+    VkLayerProperties* instanceLayerProperties = nullptr;
+    const char** instanceLayerNames = nullptr;
+#endif
 
     VkApplicationInfo appInfo = {};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -814,9 +820,10 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
     SWAPCHAINVK* vkOldSwapchain = reinterpret_cast<SWAPCHAINVK*>(oldSwapchain);
     if (vkOldSwapchain && vkOldSwapchain->view == view && vkOldSwapchain->width == width && vkOldSwapchain->height == height)
         return oldSwapchain;
-    SWAPCHAINVK* vkSwapchain = new SWAPCHAINVK {};
+    SWAPCHAINVK* vkSwapchain = new SWAPCHAINVK;
     if (vkSwapchain == nullptr)
         return 0;
+    memset(vkSwapchain, 0, sizeof(SWAPCHAINVK));
 
 #if defined(xxANDROID)
     VkAndroidSurfaceCreateInfoKHR surfaceInfo = {};
@@ -1044,7 +1051,11 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
     viewInfo.components.g = VK_COMPONENT_SWIZZLE_G;
     viewInfo.components.b = VK_COMPONENT_SWIZZLE_B;
     viewInfo.components.a = VK_COMPONENT_SWIZZLE_A;
-    viewInfo.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    viewInfo.subresourceRange.baseMipLevel = 0;
+    viewInfo.subresourceRange.levelCount = 1;
+    viewInfo.subresourceRange.baseArrayLayer = 0;
+    viewInfo.subresourceRange.layerCount = 1;
     for (uint32_t i = 0; i < vkSwapchain->imageCount; i++)
     {
         viewInfo.image = vkSwapchain->images[i];
@@ -1422,9 +1433,10 @@ uint64_t xxCreateConstantBufferVulkan(uint64_t device, unsigned int size)
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
 
-    BUFFERVK* vkBuffer = new BUFFERVK {};
+    BUFFERVK* vkBuffer = new BUFFERVK;
     if (vkBuffer == nullptr)
         return 0;
+    memset(vkBuffer, 0, sizeof(BUFFERVK));
 
     VkBufferCreateInfo bufferInfo = {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -1499,9 +1511,10 @@ uint64_t xxCreateIndexBufferVulkan(uint64_t device, unsigned int size)
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
 
-    BUFFERVK* vkBuffer = new BUFFERVK {};
+    BUFFERVK* vkBuffer = new BUFFERVK;
     if (vkBuffer == nullptr)
         return 0;
+    memset(vkBuffer, 0, sizeof(BUFFERVK));
 
     VkBufferCreateInfo bufferInfo = {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -1576,9 +1589,10 @@ uint64_t xxCreateVertexBufferVulkan(uint64_t device, unsigned int size)
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
 
-    BUFFERVK* vkBuffer = new BUFFERVK {};
+    BUFFERVK* vkBuffer = new BUFFERVK;
     if (vkBuffer == nullptr)
         return 0;
+    memset(vkBuffer, 0, sizeof(BUFFERVK));
 
     VkBufferCreateInfo bufferInfo = {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -1727,9 +1741,10 @@ uint64_t xxCreateTextureVulkan(uint64_t device, int format, unsigned int width, 
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
 
-    TEXTUREVK* vkTexture = new TEXTUREVK {};
+    TEXTUREVK* vkTexture = new TEXTUREVK;
     if (vkTexture == nullptr)
         return 0;
+    memset(vkTexture, 0, sizeof(TEXTUREVK));
 
 #if defined(xxMACOS) || defined(xxMACCATALYST) || defined(xxWINDOWS)
     VkFormat imageFormat = VK_FORMAT_B8G8R8A8_UNORM;
@@ -2039,9 +2054,10 @@ struct VERTEXATTRIBUTEVK
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeVulkan(uint64_t device, int count, ...)
 {
-    VERTEXATTRIBUTEVK* vkVertexAttribute = new VERTEXATTRIBUTEVK {};
+    VERTEXATTRIBUTEVK* vkVertexAttribute = new VERTEXATTRIBUTEVK;
     if (vkVertexAttribute == nullptr)
         return 0;
+    memset(vkVertexAttribute, 0, sizeof(VERTEXATTRIBUTEVK));
 
     VkVertexInputAttributeDescription* attributeDescs = vkVertexAttribute->attributeDesc;
     int stride = 0;
@@ -2174,9 +2190,10 @@ void xxDestroyShaderVulkan(uint64_t device, uint64_t shader)
 //==============================================================================
 uint64_t xxCreateBlendStateVulkan(uint64_t device, bool blending)
 {
-    VkPipelineColorBlendAttachmentState* blendState = new VkPipelineColorBlendAttachmentState {};
+    VkPipelineColorBlendAttachmentState* blendState = new VkPipelineColorBlendAttachmentState;
     if (blendState == nullptr)
         return 0;
+    memset(blendState, 0, sizeof(VkPipelineColorBlendAttachmentState));
 
     blendState->blendEnable = blending ? VK_TRUE : VK_FALSE;
     blendState->srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
@@ -2192,9 +2209,10 @@ uint64_t xxCreateBlendStateVulkan(uint64_t device, bool blending)
 //------------------------------------------------------------------------------
 uint64_t xxCreateDepthStencilStateVulkan(uint64_t device, bool depthTest, bool depthWrite)
 {
-    VkPipelineDepthStencilStateCreateInfo* depthStencilState = new VkPipelineDepthStencilStateCreateInfo {};
+    VkPipelineDepthStencilStateCreateInfo* depthStencilState = new VkPipelineDepthStencilStateCreateInfo;
     if (depthStencilState == nullptr)
         return 0;
+    memset(depthStencilState, 0, sizeof(VkPipelineDepthStencilStateCreateInfo));
 
     depthStencilState->sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 
@@ -2203,9 +2221,10 @@ uint64_t xxCreateDepthStencilStateVulkan(uint64_t device, bool depthTest, bool d
 //------------------------------------------------------------------------------
 uint64_t xxCreateRasterizerStateVulkan(uint64_t device, bool cull, bool scissor)
 {
-    VkPipelineRasterizationStateCreateInfo* rasterizerState = new VkPipelineRasterizationStateCreateInfo {};
+    VkPipelineRasterizationStateCreateInfo* rasterizerState = new VkPipelineRasterizationStateCreateInfo;
     if (rasterizerState == nullptr)
         return 0;
+    memset(rasterizerState, 0, sizeof(VkPipelineRasterizationStateCreateInfo));
 
     rasterizerState->sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizerState->polygonMode = VK_POLYGON_MODE_FILL;
