@@ -254,32 +254,22 @@ int xxGetIncrementThreadId()
 //==============================================================================
 int xxLog(const char* tag, const char* format, ...)
 {
-    va_list first;
-    va_list second;
+    char buffer[1024];
 
-    va_start(first, format);
-    va_copy(second, first);
-    int tagLength = snprintf(nullptr, 0, "[%s]", tag) + 1;
-    int formatLength = vsnprintf(nullptr, 0, format, first) + 1;
-    va_end(first);
+    va_list va;
+    va_start(va, format);
+    int tagLength = snprintf(buffer, sizeof(buffer), "[%s] ", tag);
+    int formatLength = vsnprintf(buffer + tagLength, sizeof(buffer) - tagLength - 1, format, va);
+    va_end(va);
 
-    char* buffer = xxAlloc(char, tagLength + formatLength);
-    if (buffer)
-    {
-        snprintf(buffer, tagLength + formatLength, "[%s]", tag);
-        vsnprintf(buffer + tagLength, formatLength, format, second);
-        buffer[tagLength - 1] = ' ';
 #if defined(xxANDROID)
-        __android_log_print(ANDROID_LOG_INFO, tag, "%s", buffer);
+    __android_log_print(ANDROID_LOG_INFO, tag, "%s", buffer);
 #elif defined(xxWINDOWS)
-        OutputDebugStringA(buffer);
-        OutputDebugStringA("\n");
+    OutputDebugStringA(buffer);
+    OutputDebugStringA("\n");
 #else
-        printf("%s\n", buffer);
+    printf("%s\n", buffer);
 #endif
-        xxFree(buffer);
-    }
-    va_end(second);
 
     return formatLength - 1;
 }
