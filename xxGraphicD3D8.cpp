@@ -317,9 +317,7 @@ uint64_t xxBeginRenderPassD3D8(uint64_t commandBuffer, uint64_t framebuffer, uin
 
     if (d3dFlags)
     {
-        HRESULT hResult = d3dDevice->Clear(0, nullptr, d3dFlags, D3DCOLOR_COLORVALUE(r, g, b, a), depth, stencil);
-        if (hResult != S_OK)
-            return 0;
+        d3dDevice->Clear(0, nullptr, d3dFlags, D3DCOLOR_COLORVALUE(r, g, b, a), depth, stencil);
     }
 
     return commandBuffer;

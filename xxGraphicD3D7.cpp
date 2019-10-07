@@ -372,9 +372,7 @@ uint64_t xxBeginRenderPassD3D7(uint64_t commandBuffer, uint64_t framebuffer, uin
         vp.dvMaxZ = 1.0f;
         d3dDevice->SetViewport(&vp);
 
-        HRESULT hResult = d3dDevice->Clear(0, nullptr, d3dFlags, D3DRGBA(r, g, b, a), depth, stencil);
-        if (hResult != S_OK)
-            return 0;
+        d3dDevice->Clear(0, nullptr, d3dFlags, D3DRGBA(r, g, b, a), depth, stencil);
     }
 
     return commandBuffer;

@@ -402,9 +402,7 @@ uint64_t xxBeginRenderPassD3D6(uint64_t commandBuffer, uint64_t framebuffer, uin
         rect.lX2 = width;
         rect.lY2 = height;
 
-        HRESULT hResult = viewport->Clear2(1, &rect, d3dFlags, D3DRGBA(r, g, b, a), depth, stencil);
-        if (hResult != S_OK)
-            return 0;
+        viewport->Clear2(1, &rect, d3dFlags, D3DRGBA(r, g, b, a), depth, stencil);
     }
 
     return commandBuffer;
