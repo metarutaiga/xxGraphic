@@ -76,10 +76,12 @@ void xxAlignedFree(void* ptr)
 //==============================================================================
 void* xxLoadLibrary(const char* name)
 {
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && defined(_UNICODE)
     wchar_t temp[MAX_PATH];
     ::MultiByteToWideChar(CP_UTF8, 0, name, -1, temp, MAX_PATH);
     return LoadLibraryW(temp);
+#elif defined(_MSC_VER)
+    return LoadLibraryA(name);
 #else
     return dlopen(name, RTLD_LAZY);
 #endif
@@ -264,6 +266,11 @@ int xxLog(const char* tag, const char* format, ...)
 
 #if defined(xxANDROID)
     __android_log_print(ANDROID_LOG_INFO, tag, "%s", buffer);
+#elif defined(xxWINDOWS) && defined(_UNICODE)
+    wchar_t temp[1024];
+    ::MultiByteToWideChar(CP_UTF8, 0, buffer, -1, temp, MAX_PATH);
+    OutputDebugStringW(temp);
+    OutputDebugStringW(L"\n");
 #elif defined(xxWINDOWS)
     OutputDebugStringA(buffer);
     OutputDebugStringA("\n");

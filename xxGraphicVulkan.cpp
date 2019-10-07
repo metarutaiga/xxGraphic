@@ -903,7 +903,7 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
 #elif defined(xxWINDOWS)
     VkWin32SurfaceCreateInfoKHR surfaceInfo = {};
     surfaceInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-    surfaceInfo.hinstance = GetModuleHandleW(nullptr);
+    surfaceInfo.hinstance = GetModuleHandle(nullptr);
     surfaceInfo.hwnd = (HWND)view;
 
     VkSurfaceKHR surface = VK_NULL_HANDLE;
