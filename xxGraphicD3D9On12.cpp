@@ -28,7 +28,7 @@ uint64_t xxCreateInstanceD3D9On12()
         return 0;
 
     PFN_Direct3DCreate9On12 Direct3DCreate9On12;
-    (void*&)Direct3DCreate9On12 = xxGetProcAddress(g_d3dLibrary, MAKEINTRESOURCE(20)/*"Direct3DCreate9On12"*/);
+    (void*&)Direct3DCreate9On12 = xxGetProcAddress(g_d3dLibrary, MAKEINTRESOURCEA(20)/*"Direct3DCreate9On12"*/);
     if (Direct3DCreate9On12 == nullptr)
         return 0;
 
@@ -80,7 +80,7 @@ uint64_t xxCreateInstanceD3D9On12Ex()
         return 0;
 
     PFN_Direct3DCreate9On12Ex Direct3DCreate9On12Ex;
-    (void*&)Direct3DCreate9On12Ex = xxGetProcAddress(g_d3dLibrary, MAKEINTRESOURCE(21)/*"Direct3DCreate9On12Ex"*/);
+    (void*&)Direct3DCreate9On12Ex = xxGetProcAddress(g_d3dLibrary, MAKEINTRESOURCEA(21)/*"Direct3DCreate9On12Ex"*/);
     if (Direct3DCreate9On12Ex == nullptr)
         return 0;
 
