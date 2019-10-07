@@ -202,7 +202,7 @@ uint64_t xxCreateDeviceD3D12(uint64_t instance)
 
     if (g_fenceEvent == nullptr)
     {
-        g_fenceEvent = CreateEventW(nullptr, FALSE, TRUE, nullptr);
+        g_fenceEvent = CreateEvent(nullptr, FALSE, TRUE, nullptr);
         if (g_fenceEvent == nullptr)
             return 0;
     }

@@ -6,6 +6,9 @@
 //==============================================================================
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
+#ifndef _INC_SETJMPEX
+#define _INC_SETJMPEX
+#endif
 #include <Windows.h>
 #include <float.h>
 #include <setjmp.h>
@@ -373,7 +376,7 @@ extern "C" __declspec(noreturn) void longjmp(jmp_buf a, int b) noexcept(false)
     function(a, b);
 }
 //------------------------------------------------------------------------------
-extern "C" int setjmpex(jmp_buf a)
+extern "C" int setjmp(jmp_buf a)
 {
     int (*function)(jmp_buf a);
     (void*&)function = _IMP_(_setjmp);
