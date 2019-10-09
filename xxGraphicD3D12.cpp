@@ -162,7 +162,7 @@ uint64_t xxCreateDeviceD3D12(uint64_t instance)
     if (debug == nullptr)
     {
         PFN_D3D12_GET_DEBUG_INTERFACE D3D12GetDebugInterface;
-        (void*&)D3D12GetDebugInterface = GetProcAddress(g_d3dLibrary, "D3D12GetDebugInterface");
+        (void*&)D3D12GetDebugInterface = xxGetProcAddress(g_d3dLibrary, "D3D12GetDebugInterface");
         if (D3D12GetDebugInterface)
         {
             HRESULT hResult = D3D12GetDebugInterface(IID_PPV_ARGS(&debug));
