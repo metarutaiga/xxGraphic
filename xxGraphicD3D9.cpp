@@ -13,7 +13,6 @@
 #define D3D_DEBUG_INFO 1
 #endif
 #include "dxsdk/d3d9.h"
-interface DECLSPEC_UUID("e7fda234-b589-4049-940d-8878977531c8") IDirect3DDevice9On12;
 typedef LPDIRECT3D9 (WINAPI *PFN_DIRECT3D_CREATE9)(UINT);
 #define D3DRTYPE_CONSTANTBUFFER     0
 

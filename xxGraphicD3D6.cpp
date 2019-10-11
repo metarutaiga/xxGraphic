@@ -12,11 +12,6 @@
 #define DIRECT3D_VERSION            0x600
 #include "dxsdk/ddraw.h"
 #include "dxsdk/d3d.h"
-interface DECLSPEC_UUID("9c59509a-39bd-11d1-8c4a-00c04fd930c5") IDirectDraw4;
-interface DECLSPEC_UUID("0B2B8630-AD35-11D0-8EA6-00609797EA5B") IDirectDrawSurface4;
-interface DECLSPEC_UUID("bb223240-e72b-11d0-a9b4-00aa00c0993e") IDirect3D3;
-interface DECLSPEC_UUID("84E63dE0-46AA-11CF-816F-0000C020156E") IDirect3DHALDevice;
-interface DECLSPEC_UUID("93281502-8cf8-11d0-89ab-00a0c9054129") IDirect3DTexture2;
 typedef HRESULT (WINAPI *PFN_DIRECT_DRAW_CREATE)(GUID*, LPDIRECTDRAW*, IUnknown*);
 #define D3DRTYPE_CONSTANTBUFFER     0
 #define D3DRTYPE_INDEXBUFFER        1
@@ -149,6 +144,17 @@ uint64_t xxCreateDeviceD3D6(uint64_t instance)
     d3dDevice->AddViewport(viewport);
     d3dDevice->SetCurrentViewport(viewport);
     viewport->Release();
+
+    IUnknown* unknown = nullptr;
+    xxLocalBreak()
+    {
+        if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice3), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "6.0", xxGetDeviceName());
+            break;
+        }
+    }
+    SafeRelease(unknown);
 
     return reinterpret_cast<uint64_t>(d3dDevice);
 }

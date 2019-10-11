@@ -11,14 +11,6 @@
 
 #include <d3d12.h>
 #include <dxgi1_4.h>
-interface DECLSPEC_UUID("77acce80-638e-4e65-8895-c1f23386863e") ID3D12Device1;
-interface DECLSPEC_UUID("30baa41e-b15b-475c-a0bb-1af5c5b64328") ID3D12Device2;
-interface DECLSPEC_UUID("81dadc15-2bad-4392-93c5-101345c4aa98") ID3D12Device3;
-interface DECLSPEC_UUID("e865df17-a9ee-46f9-a463-3098315aa2e5") ID3D12Device4;
-interface DECLSPEC_UUID("8b4f173b-2fea-4b80-8f58-4307191ab95d") ID3D12Device5;
-interface DECLSPEC_UUID("c70b221b-40e4-4a17-89af-025a0727a6dc") ID3D12Device6;
-interface DECLSPEC_UUID("5c014b53-68a1-4b9b-8bd1-dd6046b9358b") ID3D12Device7;
-interface DECLSPEC_UUID("4393134F-CF31-41F7-BC51-F2DE938B4374") ID3D12Device8;
 typedef HRESULT (WINAPI *PFN_CREATE_DXGI_FACTORY1)(REFIID, void**);
 #define NUM_BACK_BUFFERS            3
 #define PERSISTENT_BUFFER           1

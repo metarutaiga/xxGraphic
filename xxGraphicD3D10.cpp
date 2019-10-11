@@ -10,7 +10,6 @@
 #include "xxGraphicD3D10.h"
 
 #include <d3d10.h>
-interface DECLSPEC_UUID("9b7e4c8f-342c-4106-a19f-4f2704f689f0") ID3D10Device1;
 typedef HRESULT (WINAPI *PFN_D3D10_CREATE_DEVICE)(IDXGIAdapter*, D3D10_DRIVER_TYPE, HMODULE, UINT, UINT, ID3D10Device**);
 #define NUM_BACK_BUFFERS            3
 #ifndef _DEBUG

@@ -12,9 +12,6 @@
 #define DIRECT3D_VERSION            0x700
 #include "dxsdk/ddraw.h"
 #include "dxsdk/d3d.h"
-interface DECLSPEC_UUID("15e65ec0-3b9c-11d2-b92f-00609797ea5b") IDirectDraw7;
-interface DECLSPEC_UUID("f5049e77-4861-11d2-a407-00a0c90629a8") IDirect3D7;
-interface DECLSPEC_UUID("f5049e78-4861-11d2-a407-00a0c90629a8") IDirect3DTnLHalDevice;
 typedef HRESULT (WINAPI *PFN_DIRECT_DRAW_CREATE_EX)(GUID*, LPVOID*, REFIID, IUnknown*);
 #define D3DRTYPE_CONSTANTBUFFER     0
 #define D3DRTYPE_INDEXBUFFER        1
@@ -132,6 +129,17 @@ uint64_t xxCreateDeviceD3D7(uint64_t instance)
     if (result != S_OK)
         return 0;
     backSurface->Release();
+
+    IUnknown* unknown = nullptr;
+    xxLocalBreak()
+    {
+        if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice7), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "7.0", xxGetDeviceName());
+            break;
+        }
+    }
+    SafeRelease(unknown);
 
     return reinterpret_cast<uint64_t>(d3dDevice);
 }

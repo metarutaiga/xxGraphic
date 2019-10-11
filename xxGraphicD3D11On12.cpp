@@ -12,8 +12,6 @@
 #include <d3d12.h>
 #include <d3d11on12.h>
 #include <dxgi1_4.h>
-interface DECLSPEC_UUID("bdb64df4-ea2f-4c70-b861-aaab1258bb5d") ID3D11On12Device1;
-interface DECLSPEC_UUID("dc90f331-4740-43fa-866e-67f12cb58223") ID3D11On12Device2;
 #define NUM_BACK_BUFFERS            3
 
 static void*                        g_d3d11Library = nullptr;
