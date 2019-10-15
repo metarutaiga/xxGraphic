@@ -10,6 +10,7 @@
 
 #define DIRECTDRAW_VERSION          0x700
 #define DIRECT3D_VERSION            0x700
+#define D3D_OVERLOADS
 #include "dxsdk/ddraw.h"
 #include "dxsdk/d3d.h"
 typedef HRESULT (WINAPI *PFN_DIRECT_DRAW_CREATE_EX)(GUID*, LPVOID*, REFIID, IUnknown*);
@@ -124,18 +125,36 @@ uint64_t xxCreateDeviceD3D7(uint64_t instance)
             return 0;
     }
 
+    const IID* iid = nullptr;
     LPDIRECT3DDEVICE7 d3dDevice = nullptr;
-    HRESULT result = d3d->CreateDevice(__uuidof(IDirect3DTnLHalDevice), backSurface, &d3dDevice);
-    if (result != S_OK)
+    if (d3dDevice == nullptr)
+    {
+        iid = &__uuidof(IDirect3DTnLHalDevice);
+        d3d->CreateDevice(__uuidof(IDirect3DTnLHalDevice), backSurface, &d3dDevice);
+    }
+    if (d3dDevice == nullptr)
+    {
+        iid = &__uuidof(IDirect3DHALDevice);
+        d3d->CreateDevice(__uuidof(IDirect3DHALDevice), backSurface, &d3dDevice);
+    }
+    if (d3dDevice == nullptr)
+    {
+        backSurface->Release();
         return 0;
+    }
     backSurface->Release();
 
     IUnknown* unknown = nullptr;
     xxLocalBreak()
     {
-        if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice7), (void**)&unknown) == S_OK)
+        if ((*iid) == __uuidof(IDirect3DTnLHalDevice))
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "7.0", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s %s)", "Direct3D", "7.0", xxGetDeviceName(), "Transform and Lighting HAL");
+            break;
+        }
+        if ((*iid) == __uuidof(IDirect3DHALDevice))
+        {
+            xxLog("xxGraphic", "%s %s (%s %s)", "Direct3D", "7.0", xxGetDeviceName(), "HAL");
             break;
         }
     }
@@ -391,6 +410,55 @@ void xxEndRenderPassD3D7(uint64_t commandEncoder, uint64_t framebuffer, uint64_t
 
 }
 //==============================================================================
+//  Vertex Attribute
+//==============================================================================
+union D3DVERTEXATTRIBUTE7
+{
+    uint64_t    value;
+    struct
+    {
+        DWORD   fvf;
+        int     stride;
+    };
+};
+//------------------------------------------------------------------------------
+uint64_t xxCreateVertexAttributeD3D7(uint64_t device, int count, ...)
+{
+    D3DVERTEXATTRIBUTE7 d3dVertexAttribute = {};
+    int stride = 0;
+
+    va_list args;
+    va_start(args, count);
+    for (int i = 0; i < count; ++i)
+    {
+        int stream = va_arg(args, int);
+        int offset = va_arg(args, int);
+        int element = va_arg(args, int);
+        int size = va_arg(args, int);
+
+        stride += size;
+
+        if (offset == 0 && element == 3 && size == sizeof(float) * 3)
+            d3dVertexAttribute.fvf |= D3DFVF_XYZ;
+        if (offset != 0 && element == 3 && size == sizeof(float) * 3)
+            d3dVertexAttribute.fvf |= D3DFVF_NORMAL;
+        if (offset != 0 && element == 4 && size == sizeof(char) * 4)
+            d3dVertexAttribute.fvf |= D3DFVF_DIFFUSE;
+        if (offset != 0 && element == 2 && size == sizeof(float) * 2)
+            d3dVertexAttribute.fvf += D3DFVF_TEX1;
+    }
+    va_end(args);
+
+    d3dVertexAttribute.stride = stride;
+
+    return d3dVertexAttribute.value;
+}
+//------------------------------------------------------------------------------
+void xxDestroyVertexAttributeD3D7(uint64_t vertexAttribute)
+{
+
+}
+//==============================================================================
 //  Buffer
 //==============================================================================
 uint64_t xxCreateConstantBufferD3D7(uint64_t device, unsigned int size)
@@ -407,7 +475,7 @@ uint64_t xxCreateIndexBufferD3D7(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(d3dBuffer) | D3DRTYPE_INDEXBUFFER;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferD3D7(uint64_t device, unsigned int size)
+uint64_t xxCreateVertexBufferD3D7(uint64_t device, unsigned int size, uint64_t vertexAttribute)
 {
     LPDIRECT3DDEVICE7 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE7>(device);
     if (d3dDevice == nullptr)
@@ -420,12 +488,13 @@ uint64_t xxCreateVertexBufferD3D7(uint64_t device, unsigned int size)
             return 0;
         d3d->Release();
     }
+    D3DVERTEXATTRIBUTE7 d3dVertexAttribute = { vertexAttribute };
 
     D3DVERTEXBUFFERDESC desc = {};
     desc.dwSize = sizeof(D3DVERTEXBUFFERDESC);
     desc.dwCaps = D3DVBCAPS_WRITEONLY;
-    desc.dwFVF = D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1;
-    desc.dwNumVertices = (size / (sizeof(float) * (3 + 1 + 2)));
+    desc.dwFVF = d3dVertexAttribute.fvf;
+    desc.dwNumVertices = (size / d3dVertexAttribute.stride);
 
     LPDIRECT3DVERTEXBUFFER7 buffer = nullptr;
     HRESULT result = d3d->CreateVertexBuffer(&desc, &buffer, 0);
@@ -625,18 +694,6 @@ void xxDestroySamplerD3D7(uint64_t sampler)
 
 }
 //==============================================================================
-//  Vertex Attribute
-//==============================================================================
-uint64_t xxCreateVertexAttributeD3D7(uint64_t device, int count, ...)
-{
-    return 0;
-}
-//------------------------------------------------------------------------------
-void xxDestroyVertexAttributeD3D7(uint64_t vertexAttribute)
-{
-
-}
-//==============================================================================
 //  Shader
 //==============================================================================
 uint64_t xxCreateVertexShaderD3D7(uint64_t device, const char* shader, uint64_t vertexAttribute)
@@ -763,21 +820,9 @@ void xxSetScissorD3D7(uint64_t commandEncoder, int x, int y, int width, int heig
     D3DVIEWPORT7 vp;
     d3dDevice->GetViewport(&vp);
 
-    float invWidth = 1.0f / width;
-    float invHeight = 1.0f / height;
-
-    D3DMATRIX scissor;
-    scissor._11 = vp.dwWidth * invWidth;
-    scissor._22 = vp.dwHeight * invHeight;
-    scissor._41 = scissor._11 + 2.0f * (vp.dwX - (x + width * 0.5f)) * invWidth;
-    scissor._42 = scissor._22 + 2.0f * (vp.dwY - (y + height * 0.5f)) * invHeight;
-
     D3DMATRIX projection;
     d3dDevice->GetTransform(D3DTRANSFORMSTATE_PROJECTION, &projection);
-    projection._11 = projection._11 * scissor._11;
-    projection._22 = projection._22 * scissor._22;
-    projection._41 = projection._41 * scissor._11 + scissor._41;
-    projection._42 = projection._42 * scissor._22 - scissor._42;
+    ViewportFromScissor(projection.m, vp.dwX, vp.dwY, vp.dwWidth, vp.dwHeight, x, y, width, height);
     d3dDevice->SetTransform(D3DTRANSFORMSTATE_PROJECTION, &projection);
 
     vp.dwX = x;

@@ -117,6 +117,18 @@ void xxEndRenderPassNULL(uint64_t commandEncoder, uint64_t framebuffer, uint64_t
 
 }
 //==============================================================================
+//  Vertex Attribute
+//==============================================================================
+uint64_t xxCreateVertexAttributeNULL(uint64_t device, int count, ...)
+{
+    return 0;
+}
+//------------------------------------------------------------------------------
+void xxDestroyVertexAttributeNULL(uint64_t vertexAttribute)
+{
+
+}
+//==============================================================================
 //  Buffer
 //==============================================================================
 uint64_t xxCreateConstantBufferNULL(uint64_t device, unsigned int size)
@@ -129,7 +141,7 @@ uint64_t xxCreateIndexBufferNULL(uint64_t device, unsigned int size)
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferNULL(uint64_t device, unsigned int size)
+uint64_t xxCreateVertexBufferNULL(uint64_t device, unsigned int size, uint64_t vertexAttribute)
 {
     return 0;
 }
@@ -179,18 +191,6 @@ uint64_t xxCreateSamplerNULL(uint64_t device, bool clampU, bool clampV, bool cla
 }
 //------------------------------------------------------------------------------
 void xxDestroySamplerNULL(uint64_t sampler)
-{
-
-}
-//==============================================================================
-//  Vertex Attribute
-//==============================================================================
-uint64_t xxCreateVertexAttributeNULL(uint64_t device, int count, ...)
-{
-    return 0;
-}
-//------------------------------------------------------------------------------
-void xxDestroyVertexAttributeNULL(uint64_t vertexAttribute)
 {
 
 }

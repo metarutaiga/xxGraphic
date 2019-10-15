@@ -44,11 +44,16 @@ void        (*xxDestroyRenderPass)(uint64_t renderPass);
 uint64_t    (*xxBeginRenderPass)(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float r, float g, float b, float a, float depth, unsigned char stencil);
 void        (*xxEndRenderPass)(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass);
 //==============================================================================
+//  Vertex Attribute
+//==============================================================================
+uint64_t    (*xxCreateVertexAttribute)(uint64_t device, int count, ...);
+void        (*xxDestroyVertexAttribute)(uint64_t vertexAttribute);
+//==============================================================================
 //  Buffer
 //==============================================================================
 uint64_t    (*xxCreateConstantBuffer)(uint64_t device, unsigned int size);
 uint64_t    (*xxCreateIndexBuffer)(uint64_t device, unsigned int size);
-uint64_t    (*xxCreateVertexBuffer)(uint64_t device, unsigned int size);
+uint64_t    (*xxCreateVertexBuffer)(uint64_t device, unsigned int size, uint64_t vertexAttribute);
 void        (*xxDestroyBuffer)(uint64_t device, uint64_t buffer);
 void*       (*xxMapBuffer)(uint64_t device, uint64_t buffer);
 void        (*xxUnmapBuffer)(uint64_t device, uint64_t buffer);
@@ -64,11 +69,6 @@ void        (*xxUnmapTexture)(uint64_t device, uint64_t texture, unsigned int le
 //==============================================================================
 uint64_t    (*xxCreateSampler)(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy);
 void        (*xxDestroySampler)(uint64_t sampler);
-//==============================================================================
-//  Vertex Attribute
-//==============================================================================
-uint64_t    (*xxCreateVertexAttribute)(uint64_t device, int count, ...);
-void        (*xxDestroyVertexAttribute)(uint64_t vertexAttribute);
 //==============================================================================
 //  Shader
 //==============================================================================

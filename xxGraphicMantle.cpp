@@ -557,6 +557,84 @@ void xxEndRenderPassMantle(uint64_t commandEncoder, uint64_t framebuffer, uint64
 
 }
 //==============================================================================
+//  Vertex Attribute
+//==============================================================================
+struct VERTEXATTRIBUTEGR
+{
+    GR_MEMORY_VIEW_ATTACH_INFO  infos[16];
+    int                         count;
+    int                         stride;
+};
+//------------------------------------------------------------------------------
+uint64_t xxCreateVertexAttributeMantle(uint64_t device, int count, ...)
+{
+    VERTEXATTRIBUTEGR* grVertexAttribute = new VERTEXATTRIBUTEGR;
+    if (grVertexAttribute == nullptr)
+        return 0;
+
+    GR_MEMORY_VIEW_ATTACH_INFO* infos = grVertexAttribute->infos;
+    int stride = 0;
+
+    va_list args;
+    va_start(args, count);
+    for (int i = 0; i < count; ++i)
+    {
+        int stream = va_arg(args, int);
+        int offset = va_arg(args, int);
+        int element = va_arg(args, int);
+        int size = va_arg(args, int);
+
+        stride += size;
+
+        GR_MEMORY_VIEW_ATTACH_INFO& info = infos[i];
+
+        info.mem = GR_NULL_HANDLE;
+        info.offset = offset;
+        info.range = size;
+        info.stride = 0;
+        info.format.channelFormat = GR_CH_FMT_R32;
+        info.format.numericFormat = GR_NUM_FMT_FLOAT;
+        info.state = GR_MEMORY_STATE_GRAPHICS_SHADER_READ_ONLY;
+
+        if (element == 3 && size == sizeof(float) * 3)
+        {
+            info.format.channelFormat = GR_CH_FMT_R32G32B32;
+            continue;
+        }
+
+        if (element == 4 && size == sizeof(char) * 4)
+        {
+            info.format.channelFormat = GR_CH_FMT_B8G8R8A8;
+            info.format.numericFormat = GR_NUM_FMT_UNORM;
+            continue;
+        }
+
+        if (element == 2 && size == sizeof(float) * 2)
+        {
+            info.format.channelFormat = GR_CH_FMT_R32G32;
+            continue;
+        }
+    }
+    va_end(args);
+
+    for (int i = 0; i < count; ++i)
+    {
+        infos[i].stride = stride;
+    }
+
+    grVertexAttribute->count = count;
+    grVertexAttribute->stride = stride;
+
+    return reinterpret_cast<uint64_t>(grVertexAttribute);
+}
+//------------------------------------------------------------------------------
+void xxDestroyVertexAttributeMantle(uint64_t vertexAttribute)
+{
+    VERTEXATTRIBUTEGR* grVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEGR*>(vertexAttribute);
+
+    delete grVertexAttribute;
+}
+//==============================================================================
 //  Buffer
 //==============================================================================
 uint64_t xxCreateConstantBufferMantle(uint64_t device, unsigned int size)
@@ -601,7 +679,7 @@ uint64_t xxCreateIndexBufferMantle(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(memory);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferMantle(uint64_t device, unsigned int size)
+uint64_t xxCreateVertexBufferMantle(uint64_t device, unsigned int size, uint64_t vertexAttribute)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
@@ -714,84 +792,6 @@ void xxDestroySamplerMantle(uint64_t sampler)
         return;
 
     grDestroyObject(grSampler);
-}
-//==============================================================================
-//  Vertex Attribute
-//==============================================================================
-struct VERTEXATTRIBUTEGR
-{
-    GR_MEMORY_VIEW_ATTACH_INFO  infos[16];
-    int                         count;
-    int                         stride;
-};
-//------------------------------------------------------------------------------
-uint64_t xxCreateVertexAttributeMantle(uint64_t device, int count, ...)
-{
-    VERTEXATTRIBUTEGR* grVertexAttribute = new VERTEXATTRIBUTEGR;
-    if (grVertexAttribute == nullptr)
-        return 0;
-
-    GR_MEMORY_VIEW_ATTACH_INFO* infos = grVertexAttribute->infos;
-    int stride = 0;
-
-    va_list args;
-    va_start(args, count);
-    for (int i = 0; i < count; ++i)
-    {
-        int stream = va_arg(args, int);
-        int offset = va_arg(args, int);
-        int element = va_arg(args, int);
-        int size = va_arg(args, int);
-
-        stride += size;
-
-        GR_MEMORY_VIEW_ATTACH_INFO& info = infos[i];
-
-        info.mem = GR_NULL_HANDLE;
-        info.offset = offset;
-        info.range = size;
-        info.stride = 0;
-        info.format.channelFormat = GR_CH_FMT_R32;
-        info.format.numericFormat = GR_NUM_FMT_FLOAT;
-        info.state = GR_MEMORY_STATE_GRAPHICS_SHADER_READ_ONLY;
-
-        if (element == 3 && size == sizeof(float) * 3)
-        {
-            info.format.channelFormat = GR_CH_FMT_R32G32B32;
-            continue;
-        }
-
-        if (element == 4 && size == sizeof(char) * 4)
-        {
-            info.format.channelFormat = GR_CH_FMT_B8G8R8A8;
-            info.format.numericFormat = GR_NUM_FMT_UNORM;
-            continue;
-        }
-
-        if (element == 2 && size == sizeof(float) * 2)
-        {
-            info.format.channelFormat = GR_CH_FMT_R32G32;
-            continue;
-        }
-    }
-    va_end(args);
-
-    for (int i = 0; i < count; ++i)
-    {
-        infos[i].stride = stride;
-    }
-
-    grVertexAttribute->count = count;
-    grVertexAttribute->stride = stride;
-
-    return reinterpret_cast<uint64_t>(grVertexAttribute);
-}
-//------------------------------------------------------------------------------
-void xxDestroyVertexAttributeMantle(uint64_t vertexAttribute)
-{
-    VERTEXATTRIBUTEGR* grVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEGR*>(vertexAttribute);
-
-    delete grVertexAttribute;
 }
 //==============================================================================
 //  Shader

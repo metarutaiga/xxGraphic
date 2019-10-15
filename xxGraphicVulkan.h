@@ -46,11 +46,16 @@ xxAPI void          xxDestroyRenderPassVulkan(uint64_t renderPass);
 xxAPI uint64_t      xxBeginRenderPassVulkan(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float r, float g, float b, float a, float depth, unsigned char stencil);
 xxAPI void          xxEndRenderPassVulkan(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass);
 //==============================================================================
+//  Vertex Attribute
+//==============================================================================
+xxAPI uint64_t      xxCreateVertexAttributeVulkan(uint64_t device, int count, ...);
+xxAPI void          xxDestroyVertexAttributeVulkan(uint64_t vertexAttribute);
+//==============================================================================
 //  Buffer
 //==============================================================================
 xxAPI uint64_t      xxCreateConstantBufferVulkan(uint64_t device, unsigned int size);
 xxAPI uint64_t      xxCreateIndexBufferVulkan(uint64_t device, unsigned int size);
-xxAPI uint64_t      xxCreateVertexBufferVulkan(uint64_t device, unsigned int size);
+xxAPI uint64_t      xxCreateVertexBufferVulkan(uint64_t device, unsigned int size, uint64_t vertexAttribute);
 xxAPI void          xxDestroyBufferVulkan(uint64_t device, uint64_t buffer);
 xxAPI void*         xxMapBufferVulkan(uint64_t device, uint64_t buffer);
 xxAPI void          xxUnmapBufferVulkan(uint64_t device, uint64_t buffer);
@@ -66,11 +71,6 @@ xxAPI void          xxUnmapTextureVulkan(uint64_t device, uint64_t texture, unsi
 //==============================================================================
 xxAPI uint64_t      xxCreateSamplerVulkan(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy);
 xxAPI void          xxDestroySamplerVulkan(uint64_t sampler);
-//==============================================================================
-//  Vertex Attribute
-//==============================================================================
-xxAPI uint64_t      xxCreateVertexAttributeVulkan(uint64_t device, int count, ...);
-xxAPI void          xxDestroyVertexAttributeVulkan(uint64_t vertexAttribute);
 //==============================================================================
 //  Shader
 //==============================================================================

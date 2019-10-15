@@ -768,6 +768,106 @@ void xxEndRenderPassD3D12(uint64_t commandEncoder, uint64_t framebuffer, uint64_
     d3dCommandList->ResourceBarrier(1, &barrier);
 }
 //==============================================================================
+//  Vertex Attribute
+//==============================================================================
+struct D3D12VERTEXATTRIBUTE
+{
+    D3D12_INPUT_ELEMENT_DESC    inputElements[16];
+    UINT                        inputElementCount;
+    int                         stride;
+};
+//------------------------------------------------------------------------------
+uint64_t xxCreateVertexAttributeD3D12(uint64_t device, int count, ...)
+{
+    D3D12VERTEXATTRIBUTE* d3dVertexAttribute = new D3D12VERTEXATTRIBUTE;
+    if (d3dVertexAttribute == nullptr)
+        return 0;
+
+    D3D12_INPUT_ELEMENT_DESC* inputElements = d3dVertexAttribute->inputElements;
+    BYTE xyzIndex = 0;
+    BYTE textureIndex = 0;
+    int stride = 0;
+
+    va_list args;
+    va_start(args, count);
+    for (int i = 0; i < count; ++i)
+    {
+        int stream = va_arg(args, int);
+        int offset = va_arg(args, int);
+        int element = va_arg(args, int);
+        int size = va_arg(args, int);
+
+        stride += size;
+
+        D3D12_INPUT_ELEMENT_DESC& inputElement = inputElements[i];
+        inputElement.SemanticName;
+        inputElement.SemanticIndex;
+        inputElement.Format;
+        inputElement.InputSlot = stream;
+        inputElement.AlignedByteOffset = offset;
+        inputElement.InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+        inputElement.InstanceDataStepRate = 0;
+
+        if (element == 3 && size == sizeof(float) * 3)
+        {
+            inputElement.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+            switch (xyzIndex)
+            {
+            case 0:
+                inputElement.SemanticName = "POSITION";
+                inputElement.SemanticIndex = 0;
+                break;
+            case 1:
+                inputElement.SemanticName = "NORMAL";
+                inputElement.SemanticIndex = 0;
+                break;
+            case 2:
+                inputElement.SemanticName = "BINORMAL";
+                inputElement.SemanticIndex = 0;
+                break;
+            case 3:
+                inputElement.SemanticName = "TANGENT";
+                inputElement.SemanticIndex = 0;
+                break;
+            default:
+                break;
+            }
+            xyzIndex++;
+            continue;
+        }
+
+        if (element == 4 && size == sizeof(char) * 4)
+        {
+            inputElement.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+            inputElement.SemanticName = "COLOR";
+            inputElement.SemanticIndex = 0;
+            continue;
+        }
+
+        if (element == 2 && size == sizeof(float) * 2)
+        {
+            inputElement.Format = DXGI_FORMAT_R32G32_FLOAT;
+            inputElement.SemanticName = "TEXCOORD";
+            inputElement.SemanticIndex = textureIndex;
+            textureIndex++;
+            continue;
+        }
+    }
+    va_end(args);
+
+    d3dVertexAttribute->inputElementCount = count;
+    d3dVertexAttribute->stride = stride;
+
+    return reinterpret_cast<uint64_t>(d3dVertexAttribute);
+}
+//------------------------------------------------------------------------------
+void xxDestroyVertexAttributeD3D12(uint64_t vertexAttribute)
+{
+    D3D12VERTEXATTRIBUTE* d3dVertexAttribute = reinterpret_cast<D3D12VERTEXATTRIBUTE*>(vertexAttribute);
+
+    delete d3dVertexAttribute;
+}
+//==============================================================================
 //  Buffer
 //==============================================================================
 struct D3D12RESOURCE
@@ -865,7 +965,7 @@ uint64_t xxCreateIndexBufferD3D12(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(d3dResource);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferD3D12(uint64_t device, unsigned int size)
+uint64_t xxCreateVertexBufferD3D12(uint64_t device, unsigned int size, uint64_t vertexAttribute)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
@@ -1188,106 +1288,6 @@ void xxDestroySamplerD3D12(uint64_t sampler)
         return;
 
     destroySamplerHeap(samplerCPUHandle, samplerGPUHandle);
-}
-//==============================================================================
-//  Vertex Attribute
-//==============================================================================
-struct D3D12VERTEXATTRIBUTE
-{
-    D3D12_INPUT_ELEMENT_DESC    inputElements[16];
-    UINT                        inputElementCount;
-    int                         stride;
-};
-//------------------------------------------------------------------------------
-uint64_t xxCreateVertexAttributeD3D12(uint64_t device, int count, ...)
-{
-    D3D12VERTEXATTRIBUTE* d3dVertexAttribute = new D3D12VERTEXATTRIBUTE;
-    if (d3dVertexAttribute == nullptr)
-        return 0;
-
-    D3D12_INPUT_ELEMENT_DESC* inputElements = d3dVertexAttribute->inputElements;
-    BYTE xyzIndex = 0;
-    BYTE textureIndex = 0;
-    int stride = 0;
-
-    va_list args;
-    va_start(args, count);
-    for (int i = 0; i < count; ++i)
-    {
-        int stream = va_arg(args, int);
-        int offset = va_arg(args, int);
-        int element = va_arg(args, int);
-        int size = va_arg(args, int);
-
-        stride += size;
-
-        D3D12_INPUT_ELEMENT_DESC& inputElement = inputElements[i];
-        inputElement.SemanticName;
-        inputElement.SemanticIndex;
-        inputElement.Format;
-        inputElement.InputSlot = stream;
-        inputElement.AlignedByteOffset = offset;
-        inputElement.InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-        inputElement.InstanceDataStepRate = 0;
-
-        if (element == 3 && size == sizeof(float) * 3)
-        {
-            inputElement.Format = DXGI_FORMAT_R32G32B32_FLOAT;
-            switch (xyzIndex)
-            {
-            case 0:
-                inputElement.SemanticName = "POSITION";
-                inputElement.SemanticIndex = 0;
-                break;
-            case 1:
-                inputElement.SemanticName = "NORMAL";
-                inputElement.SemanticIndex = 0;
-                break;
-            case 2:
-                inputElement.SemanticName = "BINORMAL";
-                inputElement.SemanticIndex = 0;
-                break;
-            case 3:
-                inputElement.SemanticName = "TANGENT";
-                inputElement.SemanticIndex = 0;
-                break;
-            default:
-                break;
-            }
-            xyzIndex++;
-            continue;
-        }
-
-        if (element == 4 && size == sizeof(char) * 4)
-        {
-            inputElement.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-            inputElement.SemanticName = "COLOR";
-            inputElement.SemanticIndex = 0;
-            continue;
-        }
-
-        if (element == 2 && size == sizeof(float) * 2)
-        {
-            inputElement.Format = DXGI_FORMAT_R32G32_FLOAT;
-            inputElement.SemanticName = "TEXCOORD";
-            inputElement.SemanticIndex = textureIndex;
-            textureIndex++;
-            continue;
-        }
-    }
-    va_end(args);
-
-    d3dVertexAttribute->inputElementCount = count;
-    d3dVertexAttribute->stride = stride;
-
-    return reinterpret_cast<uint64_t>(d3dVertexAttribute);
-}
-//------------------------------------------------------------------------------
-void xxDestroyVertexAttributeD3D12(uint64_t vertexAttribute)
-{
-    D3D12VERTEXATTRIBUTE* d3dVertexAttribute = reinterpret_cast<D3D12VERTEXATTRIBUTE*>(vertexAttribute);
-
-    delete d3dVertexAttribute;
 }
 //==============================================================================
 //  Shader

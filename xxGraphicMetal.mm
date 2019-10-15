@@ -334,6 +334,87 @@ void xxEndRenderPassMetal(uint64_t commandEncoder, uint64_t framebuffer, uint64_
     [mtlCommandEncoder endEncoding];
 }
 //==============================================================================
+//  Vertex Attribute
+//==============================================================================
+uint64_t xxCreateVertexAttributeMetal(uint64_t device, int count, ...)
+{
+    MTLVertexDescriptor* desc = [[classMTLVertexDescriptor alloc] init];
+    int stride = 0;
+
+    va_list args;
+    va_start(args, count);
+    for (int i = 0; i < count; ++i)
+    {
+        int stream = va_arg(args, int);
+        int offset = va_arg(args, int);
+        int element = va_arg(args, int);
+        int size = va_arg(args, int);
+
+        stride += size;
+
+        MTLVertexAttributeDescriptor* attribute = desc.attributes[i];
+        attribute.offset = offset;
+        attribute.bufferIndex = xxGraphicDescriptor::VERTEX_BUFFER + stream;
+
+        switch (size / element)
+        {
+        case sizeof(char):
+            switch (element)
+            {
+            case 1:
+                attribute.format = MTLVertexFormat(47)/*MTLVertexFormatUCharNormalized*/;
+                break;
+            case 2:
+                attribute.format = MTLVertexFormatUChar2Normalized;
+                break;
+            case 3:
+                attribute.format = MTLVertexFormatUChar3Normalized;
+                break;
+            case 4:
+#if defined(xxMACOS) || defined(xxMACCATALYST)
+                attribute.format = MTLVertexFormatUChar4Normalized_BGRA;
+#elif defined(xxIOS)
+                attribute.format = MTLVertexFormatUChar4Normalized;
+#endif
+                break;
+            }
+            break;
+
+        case sizeof(float):
+            switch (element)
+            {
+            case 1:
+                attribute.format = MTLVertexFormatFloat;
+                break;
+            case 2:
+                attribute.format = MTLVertexFormatFloat2;
+                break;
+            case 3:
+                attribute.format = MTLVertexFormatFloat3;
+                break;
+            case 4:
+                attribute.format = MTLVertexFormatFloat4;
+                break;
+            }
+            break;
+        }
+    }
+    va_end(args);
+
+    MTLVertexBufferLayoutDescriptor* layout = desc.layouts[xxGraphicDescriptor::VERTEX_BUFFER];
+    layout.stride = stride;
+    layout.stepRate = MTLVertexStepFunctionPerVertex;
+
+    return reinterpret_cast<uint64_t>((__bridge_retained void*)desc);
+}
+//------------------------------------------------------------------------------
+void xxDestroyVertexAttributeMetal(uint64_t vertexAttribute)
+{
+    MTLVertexDescriptor* desc = (__bridge_transfer MTLVertexDescriptor*)reinterpret_cast<void*>(vertexAttribute);
+
+    desc = nil;
+}
+//==============================================================================
 //  Buffer
 //==============================================================================
 uint64_t xxCreateConstantBufferMetal(uint64_t device, unsigned int size)
@@ -358,7 +439,7 @@ uint64_t xxCreateIndexBufferMetal(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>((__bridge_retained void*)buffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferMetal(uint64_t device, unsigned int size)
+uint64_t xxCreateVertexBufferMetal(uint64_t device, unsigned int size, uint64_t vertexAttribute)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
     if (mtlDevice == nil)
@@ -482,87 +563,6 @@ void xxDestroySamplerMetal(uint64_t sampler)
     id <MTLSamplerState> mtlSampler = (__bridge_transfer id)reinterpret_cast<void*>(sampler);
 
     mtlSampler = nil;
-}
-//==============================================================================
-//  Vertex Attribute
-//==============================================================================
-uint64_t xxCreateVertexAttributeMetal(uint64_t device, int count, ...)
-{
-    MTLVertexDescriptor* desc = [[classMTLVertexDescriptor alloc] init];
-    int stride = 0;
-
-    va_list args;
-    va_start(args, count);
-    for (int i = 0; i < count; ++i)
-    {
-        int stream = va_arg(args, int);
-        int offset = va_arg(args, int);
-        int element = va_arg(args, int);
-        int size = va_arg(args, int);
-
-        stride += size;
-
-        MTLVertexAttributeDescriptor* attribute = desc.attributes[i];
-        attribute.offset = offset;
-        attribute.bufferIndex = xxGraphicDescriptor::VERTEX_BUFFER + stream;
-
-        switch (size / element)
-        {
-        case sizeof(char):
-            switch (element)
-            {
-            case 1:
-                attribute.format = MTLVertexFormat(47)/*MTLVertexFormatUCharNormalized*/;
-                break;
-            case 2:
-                attribute.format = MTLVertexFormatUChar2Normalized;
-                break;
-            case 3:
-                attribute.format = MTLVertexFormatUChar3Normalized;
-                break;
-            case 4:
-#if defined(xxMACOS) || defined(xxMACCATALYST)
-                attribute.format = MTLVertexFormatUChar4Normalized_BGRA;
-#elif defined(xxIOS)
-                attribute.format = MTLVertexFormatUChar4Normalized;
-#endif
-                break;
-            }
-            break;
-
-        case sizeof(float):
-            switch (element)
-            {
-            case 1:
-                attribute.format = MTLVertexFormatFloat;
-                break;
-            case 2:
-                attribute.format = MTLVertexFormatFloat2;
-                break;
-            case 3:
-                attribute.format = MTLVertexFormatFloat3;
-                break;
-            case 4:
-                attribute.format = MTLVertexFormatFloat4;
-                break;
-            }
-            break;
-        }
-    }
-    va_end(args);
-
-    MTLVertexBufferLayoutDescriptor* layout = desc.layouts[xxGraphicDescriptor::VERTEX_BUFFER];
-    layout.stride = stride;
-    layout.stepRate = MTLVertexStepFunctionPerVertex;
-
-    return reinterpret_cast<uint64_t>((__bridge_retained void*)desc);
-}
-//------------------------------------------------------------------------------
-void xxDestroyVertexAttributeMetal(uint64_t vertexAttribute)
-{
-    MTLVertexDescriptor* desc = (__bridge_transfer MTLVertexDescriptor*)reinterpret_cast<void*>(vertexAttribute);
-
-    desc = nil;
 }
 //==============================================================================
 //  Shader

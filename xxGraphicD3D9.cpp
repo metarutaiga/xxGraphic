@@ -359,6 +359,55 @@ void xxEndRenderPassD3D9(uint64_t commandEncoder, uint64_t framebuffer, uint64_t
 
 }
 //==============================================================================
+//  Vertex Attribute
+//==============================================================================
+union D3DVERTEXATTRIBUTE9
+{
+    uint64_t    value;
+    struct
+    {
+        DWORD   fvf;
+        int     stride;
+    };
+};
+//------------------------------------------------------------------------------
+uint64_t xxCreateVertexAttributeD3D9(uint64_t device, int count, ...)
+{
+    D3DVERTEXATTRIBUTE9 d3dVertexAttribute = {};
+    int stride = 0;
+
+    va_list args;
+    va_start(args, count);
+    for (int i = 0; i < count; ++i)
+    {
+        int stream = va_arg(args, int);
+        int offset = va_arg(args, int);
+        int element = va_arg(args, int);
+        int size = va_arg(args, int);
+
+        stride += size;
+
+        if (offset == 0 && element == 3 && size == sizeof(float) * 3)
+            d3dVertexAttribute.fvf |= D3DFVF_XYZ;
+        if (offset != 0 && element == 3 && size == sizeof(float) * 3)
+            d3dVertexAttribute.fvf |= D3DFVF_NORMAL;
+        if (offset != 0 && element == 4 && size == sizeof(char) * 4)
+            d3dVertexAttribute.fvf |= D3DFVF_DIFFUSE;
+        if (offset != 0 && element == 2 && size == sizeof(float) * 2)
+            d3dVertexAttribute.fvf += D3DFVF_TEX1;
+    }
+    va_end(args);
+
+    d3dVertexAttribute.stride = stride;
+
+    return d3dVertexAttribute.value;
+}
+//------------------------------------------------------------------------------
+void xxDestroyVertexAttributeD3D9(uint64_t vertexAttribute)
+{
+
+}
+//==============================================================================
 //  Buffer
 //==============================================================================
 uint64_t xxCreateConstantBufferD3D9(uint64_t device, unsigned int size)
@@ -382,7 +431,7 @@ uint64_t xxCreateIndexBufferD3D9(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(d3dIndexBuffer) | D3DRTYPE_INDEXBUFFER;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferD3D9(uint64_t device, unsigned int size)
+uint64_t xxCreateVertexBufferD3D9(uint64_t device, unsigned int size, uint64_t vertexAttribute)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
     if (d3dDevice == nullptr)
@@ -686,55 +735,6 @@ uint64_t xxCreateSamplerD3D9(uint64_t device, bool clampU, bool clampV, bool cla
 }
 //------------------------------------------------------------------------------
 void xxDestroySamplerD3D9(uint64_t sampler)
-{
-
-}
-//==============================================================================
-//  Vertex Attribute
-//==============================================================================
-union D3DVERTEXATTRIBUTE9
-{
-    uint64_t    value;
-    struct
-    {
-        DWORD   fvf;
-        int     stride;
-    };
-};
-//------------------------------------------------------------------------------
-uint64_t xxCreateVertexAttributeD3D9(uint64_t device, int count, ...)
-{
-    D3DVERTEXATTRIBUTE9 d3dVertexAttribute = {};
-    int stride = 0;
-
-    va_list args;
-    va_start(args, count);
-    for (int i = 0; i < count; ++i)
-    {
-        int stream = va_arg(args, int);
-        int offset = va_arg(args, int);
-        int element = va_arg(args, int);
-        int size = va_arg(args, int);
-
-        stride += size;
-
-        if (offset == 0 && element == 3 && size == sizeof(float) * 3)
-            d3dVertexAttribute.fvf |= D3DFVF_XYZ;
-        if (offset != 0 && element == 3 && size == sizeof(float) * 3)
-            d3dVertexAttribute.fvf |= D3DFVF_NORMAL;
-        if (offset != 0 && element == 4 && size == sizeof(char) * 4)
-            d3dVertexAttribute.fvf |= D3DFVF_DIFFUSE;
-        if (offset != 0 && element == 2 && size == sizeof(float) * 2)
-            d3dVertexAttribute.fvf += D3DFVF_TEX1;
-    }
-    va_end(args);
-
-    d3dVertexAttribute.stride = stride;
-
-    return d3dVertexAttribute.value;
-}
-//------------------------------------------------------------------------------
-void xxDestroyVertexAttributeD3D9(uint64_t vertexAttribute)
 {
 
 }

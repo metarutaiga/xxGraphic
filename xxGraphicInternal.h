@@ -47,6 +47,9 @@ enum xxGraphicDescriptor
     xxDestroySwapchain = xxDestroySwapchain ## API; \
     xxPresentSwapchain = xxPresentSwapchain ## API; \
 \
+    xxCreateVertexAttribute = xxCreateVertexAttribute ## API; \
+    xxDestroyVertexAttribute = xxDestroyVertexAttribute ## API; \
+\
     xxGetCommandBuffer = xxGetCommandBuffer ## API; \
     xxBeginCommandBuffer = xxBeginCommandBuffer ## API; \
     xxEndCommandBuffer = xxEndCommandBuffer ## API; \
@@ -71,9 +74,6 @@ enum xxGraphicDescriptor
 \
     xxCreateSampler = xxCreateSampler ## API; \
     xxDestroySampler = xxDestroySampler ## API; \
-\
-    xxCreateVertexAttribute = xxCreateVertexAttribute ## API; \
-    xxDestroyVertexAttribute = xxDestroyVertexAttribute ## API; \
 \
     xxCreateVertexShader = xxCreateVertexShader ## API; \
     xxCreateFragmentShader = xxCreateFragmentShader ## API; \
@@ -129,6 +129,9 @@ enum xxGraphicDescriptor
     xxBeginRenderPass = nullptr; \
     xxEndRenderPass = nullptr; \
 \
+    xxCreateVertexAttribute = nullptr; \
+    xxDestroyVertexAttribute = nullptr; \
+\
     xxCreateConstantBuffer = nullptr; \
     xxCreateIndexBuffer = nullptr; \
     xxCreateVertexBuffer = nullptr; \
@@ -143,9 +146,6 @@ enum xxGraphicDescriptor
 \
     xxCreateSampler = nullptr; \
     xxDestroySampler = nullptr; \
-\
-    xxCreateVertexAttribute = nullptr; \
-    xxDestroyVertexAttribute = nullptr; \
 \
     xxCreateVertexShader = nullptr; \
     xxCreateFragmentShader = nullptr; \

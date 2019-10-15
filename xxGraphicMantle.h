@@ -46,11 +46,16 @@ xxAPI void          xxDestroyRenderPassMantle(uint64_t renderPass);
 xxAPI uint64_t      xxBeginRenderPassMantle(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float r, float g, float b, float a, float depth, unsigned char stencil);
 xxAPI void          xxEndRenderPassMantle(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass);
 //==============================================================================
+//  Vertex Attribute
+//==============================================================================
+xxAPI uint64_t      xxCreateVertexAttributeMantle(uint64_t device, int count, ...);
+xxAPI void          xxDestroyVertexAttributeMantle(uint64_t vertexAttribute);
+//==============================================================================
 //  Buffer
 //==============================================================================
 xxAPI uint64_t      xxCreateConstantBufferMantle(uint64_t device, unsigned int size);
 xxAPI uint64_t      xxCreateIndexBufferMantle(uint64_t device, unsigned int size);
-xxAPI uint64_t      xxCreateVertexBufferMantle(uint64_t device, unsigned int size);
+xxAPI uint64_t      xxCreateVertexBufferMantle(uint64_t device, unsigned int size, uint64_t vertexAttribute);
 xxAPI void          xxDestroyBufferMantle(uint64_t device, uint64_t buffer);
 xxAPI void*         xxMapBufferMantle(uint64_t device, uint64_t buffer);
 xxAPI void          xxUnmapBufferMantle(uint64_t device, uint64_t buffer);
@@ -66,11 +71,6 @@ xxAPI void          xxUnmapTextureMantle(uint64_t device, uint64_t texture, unsi
 //==============================================================================
 xxAPI uint64_t      xxCreateSamplerMantle(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy);
 xxAPI void          xxDestroySamplerMantle(uint64_t sampler);
-//==============================================================================
-//  Vertex Attribute
-//==============================================================================
-xxAPI uint64_t      xxCreateVertexAttributeMantle(uint64_t device, int count, ...);
-xxAPI void          xxDestroyVertexAttributeMantle(uint64_t vertexAttribute);
 //==============================================================================
 //  Shader
 //==============================================================================

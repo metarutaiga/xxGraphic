@@ -328,6 +328,55 @@ void xxEndRenderPassD3D8(uint64_t commandEncoder, uint64_t framebuffer, uint64_t
 
 }
 //==============================================================================
+//  Vertex Attribute
+//==============================================================================
+union D3DVERTEXATTRIBUTE8
+{
+    uint64_t    value;
+    struct
+    {
+        DWORD   fvf;
+        int     stride;
+    };
+};
+//------------------------------------------------------------------------------
+uint64_t xxCreateVertexAttributeD3D8(uint64_t device, int count, ...)
+{
+    D3DVERTEXATTRIBUTE8 d3dVertexAttribute = {};
+    int stride = 0;
+
+    va_list args;
+    va_start(args, count);
+    for (int i = 0; i < count; ++i)
+    {
+        int stream = va_arg(args, int);
+        int offset = va_arg(args, int);
+        int element = va_arg(args, int);
+        int size = va_arg(args, int);
+
+        stride += size;
+
+        if (offset == 0 && element == 3 && size == sizeof(float) * 3)
+            d3dVertexAttribute.fvf |= D3DFVF_XYZ;
+        if (offset != 0 && element == 3 && size == sizeof(float) * 3)
+            d3dVertexAttribute.fvf |= D3DFVF_NORMAL;
+        if (offset != 0 && element == 4 && size == sizeof(char) * 4)
+            d3dVertexAttribute.fvf |= D3DFVF_DIFFUSE;
+        if (offset != 0 && element == 2 && size == sizeof(float) * 2)
+            d3dVertexAttribute.fvf += D3DFVF_TEX1;
+    }
+    va_end(args);
+
+    d3dVertexAttribute.stride = stride;
+
+    return d3dVertexAttribute.value;
+}
+//------------------------------------------------------------------------------
+void xxDestroyVertexAttributeD3D8(uint64_t vertexAttribute)
+{
+
+}
+//==============================================================================
 //  Buffer
 //==============================================================================
 uint64_t xxCreateConstantBufferD3D8(uint64_t device, unsigned int size)
@@ -351,7 +400,7 @@ uint64_t xxCreateIndexBufferD3D8(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(d3dIndexBuffer) | D3DRTYPE_INDEXBUFFER;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferD3D8(uint64_t device, unsigned int size)
+uint64_t xxCreateVertexBufferD3D8(uint64_t device, unsigned int size, uint64_t vertexAttribute)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(device);
     if (d3dDevice == nullptr)
@@ -659,55 +708,6 @@ void xxDestroySamplerD3D8(uint64_t sampler)
 
 }
 //==============================================================================
-//  Vertex Attribute
-//==============================================================================
-union D3DVERTEXATTRIBUTE8
-{
-    uint64_t    value;
-    struct
-    {
-        DWORD   fvf;
-        int     stride;
-    };
-};
-//------------------------------------------------------------------------------
-uint64_t xxCreateVertexAttributeD3D8(uint64_t device, int count, ...)
-{
-    D3DVERTEXATTRIBUTE8 d3dVertexAttribute = {};
-    int stride = 0;
-
-    va_list args;
-    va_start(args, count);
-    for (int i = 0; i < count; ++i)
-    {
-        int stream = va_arg(args, int);
-        int offset = va_arg(args, int);
-        int element = va_arg(args, int);
-        int size = va_arg(args, int);
-
-        stride += size;
-
-        if (offset == 0 && element == 3 && size == sizeof(float) * 3)
-            d3dVertexAttribute.fvf |= D3DFVF_XYZ;
-        if (offset != 0 && element == 3 && size == sizeof(float) * 3)
-            d3dVertexAttribute.fvf |= D3DFVF_NORMAL;
-        if (offset != 0 && element == 4 && size == sizeof(char) * 4)
-            d3dVertexAttribute.fvf |= D3DFVF_DIFFUSE;
-        if (offset != 0 && element == 2 && size == sizeof(float) * 2)
-            d3dVertexAttribute.fvf += D3DFVF_TEX1;
-    }
-    va_end(args);
-
-    d3dVertexAttribute.stride = stride;
-
-    return d3dVertexAttribute.value;
-}
-//------------------------------------------------------------------------------
-void xxDestroyVertexAttributeD3D8(uint64_t vertexAttribute)
-{
-
-}
-//==============================================================================
 //  Shader
 //==============================================================================
 uint64_t xxCreateVertexShaderD3D8(uint64_t device, const char* shader, uint64_t vertexAttribute)
@@ -839,21 +839,9 @@ void xxSetScissorD3D8(uint64_t commandEncoder, int x, int y, int width, int heig
     D3DVIEWPORT8 vp;
     d3dDevice->GetViewport(&vp);
 
-    float invWidth = 1.0f / width;
-    float invHeight = 1.0f / height;
-
-    D3DMATRIX scissor;
-    scissor._11 = vp.Width * invWidth;
-    scissor._22 = vp.Height * invHeight;
-    scissor._41 = scissor._11 + 2.0f * (vp.X - (x + width * 0.5f)) * invWidth;
-    scissor._42 = scissor._22 + 2.0f * (vp.Y - (y + height * 0.5f)) * invHeight;
-
     D3DMATRIX projection;
     d3dDevice->GetTransform(D3DTS_PROJECTION, &projection);
-    projection._11 = projection._11 * scissor._11;
-    projection._22 = projection._22 * scissor._22;
-    projection._41 = projection._41 * scissor._11 + scissor._41;
-    projection._42 = projection._42 * scissor._22 - scissor._42;
+    ViewportFromScissor(projection.m, vp.X, vp.Y, vp.Width, vp.Height, x, y, width, height);
     d3dDevice->SetTransform(D3DTS_PROJECTION, &projection);
 
     vp.X = x;

@@ -46,11 +46,16 @@ xxAPI void          xxDestroyRenderPassD3D6(uint64_t renderPass);
 xxAPI uint64_t      xxBeginRenderPassD3D6(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float r, float g, float b, float a, float depth, unsigned char stencil);
 xxAPI void          xxEndRenderPassD3D6(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass);
 //==============================================================================
+//  Vertex Attribute
+//==============================================================================
+xxAPI uint64_t      xxCreateVertexAttributeD3D6(uint64_t device, int count, ...);
+xxAPI void          xxDestroyVertexAttributeD3D6(uint64_t vertexAttribute);
+//==============================================================================
 //  Buffer
 //==============================================================================
 xxAPI uint64_t      xxCreateConstantBufferD3D6(uint64_t device, unsigned int size);
 xxAPI uint64_t      xxCreateIndexBufferD3D6(uint64_t device, unsigned int size);
-xxAPI uint64_t      xxCreateVertexBufferD3D6(uint64_t device, unsigned int size);
+xxAPI uint64_t      xxCreateVertexBufferD3D6(uint64_t device, unsigned int size, uint64_t vertexAttribute);
 xxAPI void          xxDestroyBufferD3D6(uint64_t device, uint64_t buffer);
 xxAPI void*         xxMapBufferD3D6(uint64_t device, uint64_t buffer);
 xxAPI void          xxUnmapBufferD3D6(uint64_t device, uint64_t buffer);
@@ -66,11 +71,6 @@ xxAPI void          xxUnmapTextureD3D6(uint64_t device, uint64_t texture, unsign
 //==============================================================================
 xxAPI uint64_t      xxCreateSamplerD3D6(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy);
 xxAPI void          xxDestroySamplerD3D6(uint64_t sampler);
-//==============================================================================
-//  Vertex Attribute
-//==============================================================================
-xxAPI uint64_t      xxCreateVertexAttributeD3D6(uint64_t device, int count, ...);
-xxAPI void          xxDestroyVertexAttributeD3D6(uint64_t vertexAttribute);
 //==============================================================================
 //  Shader
 //==============================================================================

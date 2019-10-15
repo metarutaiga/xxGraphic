@@ -269,6 +269,95 @@ void xxEndRenderPassGLES2(uint64_t commandEncoder, uint64_t framebuffer, uint64_
 
 }
 //==============================================================================
+//  Vertex Attribute
+//==============================================================================
+struct VERTEXATTRIBUTEGL
+{
+    struct Attribute
+    {
+        GLuint      index;
+        GLint       size;
+        GLenum      type;
+        GLboolean   normalized;
+        GLsizei     stride;
+        const char* pointer;
+        int         stream;
+        const char* name;
+    } attributes[16];
+    int count;
+};
+//------------------------------------------------------------------------------
+uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, ...)
+{
+    VERTEXATTRIBUTEGL* glVertexAttribute = new VERTEXATTRIBUTEGL;
+    if (glVertexAttribute == nullptr)
+        return 0;
+
+    VERTEXATTRIBUTEGL::Attribute* attributes = glVertexAttribute->attributes;
+    int stride = 0;
+
+    va_list args;
+    va_start(args, count);
+    for (int i = 0; i < count; ++i)
+    {
+        int stream = va_arg(args, int);
+        int offset = va_arg(args, int);
+        int element = va_arg(args, int);
+        int size = va_arg(args, int);
+
+        stride += size;
+
+        attributes[i].index = i;
+        attributes[i].size = element;
+        attributes[i].type = GL_FLOAT;
+        attributes[i].normalized = GL_FALSE;
+        attributes[i].stride = 0;
+        attributes[i].pointer = (char*)nullptr + offset;
+        attributes[i].stream = stream;
+
+        if (offset == 0 && element == 3 && size == sizeof(float) * 3)
+        {
+            attributes[i].name = "position";
+        }
+        if (offset != 0 && element == 3 && size == sizeof(float) * 3)
+        {
+            attributes[i].name = "normal";
+        }
+        if (offset != 0 && element == 4 && size == sizeof(char) * 4)
+        {
+#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
+            attributes[i].size = GL_BGRA_EXT;
+#else
+            attributes[i].size = 4;
+#endif
+            attributes[i].type = GL_UNSIGNED_BYTE;
+            attributes[i].normalized = GL_TRUE;
+            attributes[i].name = "color";
+        }
+        if (offset != 0 && element == 2 && size == sizeof(float) * 2)
+        {
+            attributes[i].name = "uv";
+        }
+    }
+    va_end(args);
+
+    for (int i = 0; i < count; ++i)
+    {
+        attributes[i].stride = stride;
+    }
+
+    glVertexAttribute->count = count;
+
+    return reinterpret_cast<uint64_t>(glVertexAttribute);
+}
+//------------------------------------------------------------------------------
+void xxDestroyVertexAttributeGLES2(uint64_t vertexAttribute)
+{
+    VERTEXATTRIBUTEGL* glVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEGL*>(vertexAttribute);
+
+    delete glVertexAttribute;
+}
+//==============================================================================
 //  Buffer
 //==============================================================================
 struct BUFFERGL
@@ -310,7 +399,7 @@ uint64_t xxCreateIndexBufferGLES2(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(glBuffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferGLES2(uint64_t device, unsigned int size)
+uint64_t xxCreateVertexBufferGLES2(uint64_t device, unsigned int size, uint64_t vertexAttribute)
 {
     BUFFERGL* glBuffer = new BUFFERGL;
     if (glBuffer == nullptr)
@@ -517,95 +606,6 @@ uint64_t xxCreateSamplerGLES2(uint64_t device, bool clampU, bool clampV, bool cl
 void xxDestroySamplerGLES2(uint64_t sampler)
 {
 
-}
-//==============================================================================
-//  Vertex Attribute
-//==============================================================================
-struct VERTEXATTRIBUTEGL
-{
-    struct Attribute
-    {
-        GLuint      index;
-        GLint       size;
-        GLenum      type;
-        GLboolean   normalized;
-        GLsizei     stride;
-        const char* pointer;
-        int         stream;
-        const char* name;
-    } attributes[16];
-    int count;
-};
-//------------------------------------------------------------------------------
-uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, ...)
-{
-    VERTEXATTRIBUTEGL* glVertexAttribute = new VERTEXATTRIBUTEGL;
-    if (glVertexAttribute == nullptr)
-        return 0;
-
-    VERTEXATTRIBUTEGL::Attribute* attributes = glVertexAttribute->attributes;
-    int stride = 0;
-
-    va_list args;
-    va_start(args, count);
-    for (int i = 0; i < count; ++i)
-    {
-        int stream = va_arg(args, int);
-        int offset = va_arg(args, int);
-        int element = va_arg(args, int);
-        int size = va_arg(args, int);
-
-        stride += size;
-
-        attributes[i].index = i;
-        attributes[i].size = element;
-        attributes[i].type = GL_FLOAT;
-        attributes[i].normalized = GL_FALSE;
-        attributes[i].stride = 0;
-        attributes[i].pointer = (char*)nullptr + offset;
-        attributes[i].stream = stream;
-
-        if (offset == 0 && element == 3 && size == sizeof(float) * 3)
-        {
-            attributes[i].name = "position";
-        }
-        if (offset != 0 && element == 3 && size == sizeof(float) * 3)
-        {
-            attributes[i].name = "normal";
-        }
-        if (offset != 0 && element == 4 && size == sizeof(char) * 4)
-        {
-#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
-            attributes[i].size = GL_BGRA_EXT;
-#else
-            attributes[i].size = 4;
-#endif
-            attributes[i].type = GL_UNSIGNED_BYTE;
-            attributes[i].normalized = GL_TRUE;
-            attributes[i].name = "color";
-        }
-        if (offset != 0 && element == 2 && size == sizeof(float) * 2)
-        {
-            attributes[i].name = "uv";
-        }
-    }
-    va_end(args);
-
-    for (int i = 0; i < count; ++i)
-    {
-        attributes[i].stride = stride;
-    }
-
-    glVertexAttribute->count = count;
-
-    return reinterpret_cast<uint64_t>(glVertexAttribute);
-}
-//------------------------------------------------------------------------------
-void xxDestroyVertexAttributeGLES2(uint64_t vertexAttribute)
-{
-    VERTEXATTRIBUTEGL* glVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEGL*>(vertexAttribute);
-
-    delete glVertexAttribute;
 }
 //==============================================================================
 //  Shader

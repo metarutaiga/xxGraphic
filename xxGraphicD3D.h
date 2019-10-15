@@ -287,6 +287,20 @@ inline ULONG SafeRelease(T*& ptr)
     return ref;
 }
 
+inline void ViewportFromScissor(float projectionMatrix[4][4], int fromX, int fromY, int fromWidth, int fromHeight, int toX, int toY, int toWidth, int toHeight)
+{
+    float invWidth = 1.0f / toWidth;
+    float invHeight = 1.0f / toHeight;
+    float scaleWidth = fromWidth * invWidth;
+    float scaleHeight = fromHeight * invHeight;
+    float offsetWidth = scaleWidth + 2.0f * (fromX - (toX + toWidth * 0.5f)) * invWidth;
+    float offsetHeight = scaleHeight + 2.0f * (fromY - (toY + toHeight * 0.5f)) * invHeight;
+    projectionMatrix[0][0] = projectionMatrix[0][0] * scaleWidth;
+    projectionMatrix[1][1] = projectionMatrix[1][1] * scaleHeight;
+    projectionMatrix[3][0] = projectionMatrix[3][0] * scaleWidth + offsetWidth;
+    projectionMatrix[3][1] = projectionMatrix[3][1] * scaleHeight - offsetHeight;
+}
+
 inline void PatchD3DIM(const char* name)
 {
     void* d3dim = xxLoadLibrary(name);

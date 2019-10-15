@@ -400,6 +400,169 @@ void xxEndRenderPassD3D11(uint64_t commandEncoder, uint64_t framebuffer, uint64_
 
 }
 //==============================================================================
+//  Vertex Attribute
+//==============================================================================
+struct D3D11VERTEXATTRIBUTE
+{
+    ID3D11InputLayout*  inputLayout;
+    int                 stride;
+};
+//------------------------------------------------------------------------------
+uint64_t xxCreateVertexAttributeD3D11(uint64_t device, int count, ...)
+{
+    ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
+    if (d3dDevice == nullptr)
+        return 0;
+    D3D11VERTEXATTRIBUTE* d3dVertexAttribute = new D3D11VERTEXATTRIBUTE;
+    if (d3dVertexAttribute == nullptr)
+        return 0;
+
+    D3D11_INPUT_ELEMENT_DESC inputElements[16];
+    BYTE xyzIndex = 0;
+    BYTE textureIndex = 0;
+    int stride = 0;
+
+    va_list args;
+    va_start(args, count);
+    for (int i = 0; i < count; ++i)
+    {
+        int stream = va_arg(args, int);
+        int offset = va_arg(args, int);
+        int element = va_arg(args, int);
+        int size = va_arg(args, int);
+
+        stride += size;
+
+        D3D11_INPUT_ELEMENT_DESC& inputElement = inputElements[i];
+        inputElement.SemanticName;
+        inputElement.SemanticIndex;
+        inputElement.Format;
+        inputElement.InputSlot = stream;
+        inputElement.AlignedByteOffset = offset;
+        inputElement.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+        inputElement.InstanceDataStepRate = 0;
+
+        if (element == 3 && size == sizeof(float) * 3)
+        {
+            inputElement.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+            switch (xyzIndex)
+            {
+            case 0:
+                inputElement.SemanticName = "POSITION";
+                inputElement.SemanticIndex = 0;
+                break;
+            case 1:
+                inputElement.SemanticName = "NORMAL";
+                inputElement.SemanticIndex = 0;
+                break;
+            case 2:
+                inputElement.SemanticName = "BINORMAL";
+                inputElement.SemanticIndex = 0;
+                break;
+            case 3:
+                inputElement.SemanticName = "TANGENT";
+                inputElement.SemanticIndex = 0;
+                break;
+            default:
+                break;
+            }
+            xyzIndex++;
+            continue;
+        }
+
+        if (element == 4 && size == sizeof(char) * 4)
+        {
+            inputElement.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+            inputElement.SemanticName = "COLOR";
+            inputElement.SemanticIndex = 0;
+            continue;
+        }
+
+        if (element == 2 && size == sizeof(float) * 2)
+        {
+            inputElement.Format = DXGI_FORMAT_R32G32_FLOAT;
+            inputElement.SemanticName = "TEXCOORD";
+            inputElement.SemanticIndex = textureIndex;
+            textureIndex++;
+            continue;
+        }
+    }
+    va_end(args);
+
+    DWORD dxbc[256] = {};
+    DWORD dxbcChunkCount = 1;
+    DWORD dxbcCount = 8 + dxbcChunkCount;
+    DWORD inputSignatureCount = 4 + (6 * count) + (4 * count);
+    DWORD dxbcSize = (dxbcCount + inputSignatureCount) * sizeof(DWORD);
+    DWORD* dxbcChunk = dxbc + 8;
+    DWORD* inputSignatureHeader = dxbc + dxbcCount;
+    DWORD* inputSignature = inputSignatureHeader + 4;
+    char* inputSignatureName = (char*)(inputSignature + (6 * count));
+
+    dxbc[0] = *(DWORD*)"DXBC";
+    dxbc[5] = 1;
+    dxbc[6] = dxbcSize;
+    dxbc[7] = dxbcChunkCount;
+
+    dxbcChunk[0] = (uint32_t)(inputSignatureHeader - dxbc) * sizeof(DWORD);
+
+    inputSignatureHeader[0] = *(DWORD*)"ISGN";
+    inputSignatureHeader[1] = (inputSignatureCount - 2) * sizeof(DWORD);
+    inputSignatureHeader[2] = count;
+    inputSignatureHeader[3] = 8;
+    for (int i = 0; i < count; ++i)
+    {
+        const D3D11_INPUT_ELEMENT_DESC& inputElement = inputElements[i];
+        inputSignature[0] = (DWORD)(inputSignatureName - (char*)inputSignatureHeader - 8);
+        inputSignature[1] = inputElement.SemanticIndex;
+        inputSignature[2] = 0;
+        inputSignature[3] = 3;
+        inputSignature[4] = i;
+        switch (inputElement.Format)
+        {
+        case DXGI_FORMAT_R32_FLOAT:
+            inputSignature[5] = 0x0101;
+            break;
+        case DXGI_FORMAT_R32G32_FLOAT:
+            inputSignature[5] = 0x0303;
+            break;
+        case DXGI_FORMAT_R32G32B32_FLOAT:
+            inputSignature[5] = 0x0707;
+            break;
+        case DXGI_FORMAT_R32G32B32A32_FLOAT:
+        default:
+            inputSignature[5] = 0x0F0F;
+            break;
+        }
+        strcpy(inputSignatureName, inputElement.SemanticName);
+        inputSignature += 6;
+        inputSignatureName += strlen(inputSignatureName) + 1;
+    }
+    xxDXBCChecksum(dxbc, dxbcSize, (uint8_t*)&dxbc[1]);
+
+    ID3D11InputLayout* inputLayout = nullptr;
+    HRESULT hResult = d3dDevice->CreateInputLayout(inputElements, count, dxbc, dxbcSize, &inputLayout);
+    if (hResult != S_OK)
+    {
+        delete d3dVertexAttribute;
+        return 0;
+    }
+    d3dVertexAttribute->inputLayout = inputLayout;
+    d3dVertexAttribute->stride = stride;
+
+    return reinterpret_cast<uint64_t>(d3dVertexAttribute);
+}
+//------------------------------------------------------------------------------
+void xxDestroyVertexAttributeD3D11(uint64_t vertexAttribute)
+{
+    D3D11VERTEXATTRIBUTE* d3dVertexAttribute = reinterpret_cast<D3D11VERTEXATTRIBUTE*>(vertexAttribute);
+    if (d3dVertexAttribute == nullptr)
+        return;
+
+    d3dVertexAttribute->inputLayout->Release();
+    delete d3dVertexAttribute;
+}
+//==============================================================================
 //  Buffer
 //==============================================================================
 struct D3D11BUFFER
@@ -469,7 +632,7 @@ uint64_t xxCreateIndexBufferD3D11(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(d3dBuffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferD3D11(uint64_t device, unsigned int size)
+uint64_t xxCreateVertexBufferD3D11(uint64_t device, unsigned int size, uint64_t vertexAttribute)
 {
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
     if (d3dDevice == nullptr)
@@ -828,169 +991,6 @@ void xxDestroySamplerD3D11(uint64_t sampler)
     ID3D11SamplerState* d3dSamplerState = reinterpret_cast<ID3D11SamplerState*>(sampler);
 
     SafeRelease(d3dSamplerState);
-}
-//==============================================================================
-//  Vertex Attribute
-//==============================================================================
-struct D3D11VERTEXATTRIBUTE
-{
-    ID3D11InputLayout*  inputLayout;
-    int                 stride;
-};
-//------------------------------------------------------------------------------
-uint64_t xxCreateVertexAttributeD3D11(uint64_t device, int count, ...)
-{
-    ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
-    if (d3dDevice == nullptr)
-        return 0;
-    D3D11VERTEXATTRIBUTE* d3dVertexAttribute = new D3D11VERTEXATTRIBUTE;
-    if (d3dVertexAttribute == nullptr)
-        return 0;
-
-    D3D11_INPUT_ELEMENT_DESC inputElements[16];
-    BYTE xyzIndex = 0;
-    BYTE textureIndex = 0;
-    int stride = 0;
-
-    va_list args;
-    va_start(args, count);
-    for (int i = 0; i < count; ++i)
-    {
-        int stream = va_arg(args, int);
-        int offset = va_arg(args, int);
-        int element = va_arg(args, int);
-        int size = va_arg(args, int);
-
-        stride += size;
-
-        D3D11_INPUT_ELEMENT_DESC& inputElement = inputElements[i];
-        inputElement.SemanticName;
-        inputElement.SemanticIndex;
-        inputElement.Format;
-        inputElement.InputSlot = stream;
-        inputElement.AlignedByteOffset = offset;
-        inputElement.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-        inputElement.InstanceDataStepRate = 0;
-
-        if (element == 3 && size == sizeof(float) * 3)
-        {
-            inputElement.Format = DXGI_FORMAT_R32G32B32_FLOAT;
-            switch (xyzIndex)
-            {
-            case 0:
-                inputElement.SemanticName = "POSITION";
-                inputElement.SemanticIndex = 0;
-                break;
-            case 1:
-                inputElement.SemanticName = "NORMAL";
-                inputElement.SemanticIndex = 0;
-                break;
-            case 2:
-                inputElement.SemanticName = "BINORMAL";
-                inputElement.SemanticIndex = 0;
-                break;
-            case 3:
-                inputElement.SemanticName = "TANGENT";
-                inputElement.SemanticIndex = 0;
-                break;
-            default:
-                break;
-            }
-            xyzIndex++;
-            continue;
-        }
-
-        if (element == 4 && size == sizeof(char) * 4)
-        {
-            inputElement.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-            inputElement.SemanticName = "COLOR";
-            inputElement.SemanticIndex = 0;
-            continue;
-        }
-
-        if (element == 2 && size == sizeof(float) * 2)
-        {
-            inputElement.Format = DXGI_FORMAT_R32G32_FLOAT;
-            inputElement.SemanticName = "TEXCOORD";
-            inputElement.SemanticIndex = textureIndex;
-            textureIndex++;
-            continue;
-        }
-    }
-    va_end(args);
-
-    DWORD dxbc[256] = {};
-    DWORD dxbcChunkCount = 1;
-    DWORD dxbcCount = 8 + dxbcChunkCount;
-    DWORD inputSignatureCount = 4 + (6 * count) + (4 * count);
-    DWORD dxbcSize = (dxbcCount + inputSignatureCount) * sizeof(DWORD);
-    DWORD* dxbcChunk = dxbc + 8;
-    DWORD* inputSignatureHeader = dxbc + dxbcCount;
-    DWORD* inputSignature = inputSignatureHeader + 4;
-    char* inputSignatureName = (char*)(inputSignature + (6 * count));
-
-    dxbc[0] = *(DWORD*)"DXBC";
-    dxbc[5] = 1;
-    dxbc[6] = dxbcSize;
-    dxbc[7] = dxbcChunkCount;
-
-    dxbcChunk[0] = (uint32_t)(inputSignatureHeader - dxbc) * sizeof(DWORD);
-
-    inputSignatureHeader[0] = *(DWORD*)"ISGN";
-    inputSignatureHeader[1] = (inputSignatureCount - 2) * sizeof(DWORD);
-    inputSignatureHeader[2] = count;
-    inputSignatureHeader[3] = 8;
-    for (int i = 0; i < count; ++i)
-    {
-        const D3D11_INPUT_ELEMENT_DESC& inputElement = inputElements[i];
-        inputSignature[0] = (DWORD)(inputSignatureName - (char*)inputSignatureHeader - 8);
-        inputSignature[1] = inputElement.SemanticIndex;
-        inputSignature[2] = 0;
-        inputSignature[3] = 3;
-        inputSignature[4] = i;
-        switch (inputElement.Format)
-        {
-        case DXGI_FORMAT_R32_FLOAT:
-            inputSignature[5] = 0x0101;
-            break;
-        case DXGI_FORMAT_R32G32_FLOAT:
-            inputSignature[5] = 0x0303;
-            break;
-        case DXGI_FORMAT_R32G32B32_FLOAT:
-            inputSignature[5] = 0x0707;
-            break;
-        case DXGI_FORMAT_R32G32B32A32_FLOAT:
-        default:
-            inputSignature[5] = 0x0F0F;
-            break;
-        }
-        strcpy(inputSignatureName, inputElement.SemanticName);
-        inputSignature += 6;
-        inputSignatureName += strlen(inputSignatureName) + 1;
-    }
-    xxDXBCChecksum(dxbc, dxbcSize, (uint8_t*)&dxbc[1]);
-
-    ID3D11InputLayout* inputLayout = nullptr;
-    HRESULT hResult = d3dDevice->CreateInputLayout(inputElements, count, dxbc, dxbcSize, &inputLayout);
-    if (hResult != S_OK)
-    {
-        delete d3dVertexAttribute;
-        return 0;
-    }
-    d3dVertexAttribute->inputLayout = inputLayout;
-    d3dVertexAttribute->stride = stride;
-
-    return reinterpret_cast<uint64_t>(d3dVertexAttribute);
-}
-//------------------------------------------------------------------------------
-void xxDestroyVertexAttributeD3D11(uint64_t vertexAttribute)
-{
-    D3D11VERTEXATTRIBUTE* d3dVertexAttribute = reinterpret_cast<D3D11VERTEXATTRIBUTE*>(vertexAttribute);
-    if (d3dVertexAttribute == nullptr)
-        return;
-
-    d3dVertexAttribute->inputLayout->Release();
-    delete d3dVertexAttribute;
 }
 //==============================================================================
 //  Shader

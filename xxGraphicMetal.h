@@ -46,11 +46,16 @@ xxAPI void          xxDestroyRenderPassMetal(uint64_t renderPass);
 xxAPI uint64_t      xxBeginRenderPassMetal(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float r, float g, float b, float a, float depth, unsigned char stencil);
 xxAPI void          xxEndRenderPassMetal(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass);
 //==============================================================================
+//  Vertex Attribute
+//==============================================================================
+xxAPI uint64_t      xxCreateVertexAttributeMetal(uint64_t device, int count, ...);
+xxAPI void          xxDestroyVertexAttributeMetal(uint64_t vertexAttribute);
+//==============================================================================
 //  Buffer
 //==============================================================================
 xxAPI uint64_t      xxCreateConstantBufferMetal(uint64_t device, unsigned int size);
 xxAPI uint64_t      xxCreateIndexBufferMetal(uint64_t device, unsigned int size);
-xxAPI uint64_t      xxCreateVertexBufferMetal(uint64_t device, unsigned int size);
+xxAPI uint64_t      xxCreateVertexBufferMetal(uint64_t device, unsigned int size, uint64_t vertexAttribute);
 xxAPI void          xxDestroyBufferMetal(uint64_t device, uint64_t buffer);
 xxAPI void*         xxMapBufferMetal(uint64_t device, uint64_t buffer);
 xxAPI void          xxUnmapBufferMetal(uint64_t device, uint64_t buffer);
@@ -66,11 +71,6 @@ xxAPI void          xxUnmapTextureMetal(uint64_t device, uint64_t texture, unsig
 //==============================================================================
 xxAPI uint64_t      xxCreateSamplerMetal(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy);
 xxAPI void          xxDestroySamplerMetal(uint64_t sampler);
-//==============================================================================
-//  Vertex Attribute
-//==============================================================================
-xxAPI uint64_t      xxCreateVertexAttributeMetal(uint64_t device, int count, ...);
-xxAPI void          xxDestroyVertexAttributeMetal(uint64_t vertexAttribute);
 //==============================================================================
 //  Shader
 //==============================================================================

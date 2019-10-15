@@ -1417,6 +1417,88 @@ void xxEndRenderPassVulkan(uint64_t commandEncoder, uint64_t framebuffer, uint64
     vkCmdEndRenderPass(vkCommandBuffer);
 }
 //==============================================================================
+//  Vertex Attribute
+//==============================================================================
+struct VERTEXATTRIBUTEVK
+{
+    VkVertexInputAttributeDescription   attributeDesc[16];
+    uint32_t                            attributeCount;
+    VkVertexInputBindingDescription     bindingDesc[4];
+    uint32_t                            bindingCount;
+};
+//------------------------------------------------------------------------------
+uint64_t xxCreateVertexAttributeVulkan(uint64_t device, int count, ...)
+{
+    VERTEXATTRIBUTEVK* vkVertexAttribute = new VERTEXATTRIBUTEVK;
+    if (vkVertexAttribute == nullptr)
+        return 0;
+    memset(vkVertexAttribute, 0, sizeof(VERTEXATTRIBUTEVK));
+
+    VkVertexInputAttributeDescription* attributeDescs = vkVertexAttribute->attributeDesc;
+    int stride = 0;
+
+    va_list args;
+    va_start(args, count);
+    for (int i = 0; i < count; ++i)
+    {
+        int stream = va_arg(args, int);
+        int offset = va_arg(args, int);
+        int element = va_arg(args, int);
+        int size = va_arg(args, int);
+
+        stride += size;
+
+        VkVertexInputAttributeDescription& attributeDesc = attributeDescs[i];
+        attributeDesc.location = i;
+        attributeDesc.binding = stream;
+        attributeDesc.format = VK_FORMAT_R32G32B32A32_SFLOAT;
+        attributeDesc.offset = offset;
+
+        if (element == 3 && size == sizeof(float) * 3)
+        {
+            attributeDesc.format = VK_FORMAT_R32G32B32_SFLOAT;
+            continue;
+        }
+
+        if (element == 4 && size == sizeof(char) * 4)
+        {
+#if defined(xxMACOS) || defined(xxMACCATALYST) || defined(xxWINDOWS)
+            attributeDesc.format = VK_FORMAT_B8G8R8A8_UNORM;
+#else
+            attributeDesc.format = VK_FORMAT_R8G8B8A8_UNORM;
+#endif
+            continue;
+        }
+
+        if (element == 2 && size == sizeof(float) * 2)
+        {
+            attributeDesc.format = VK_FORMAT_R32G32_SFLOAT;
+            continue;
+        }
+    }
+    va_end(args);
+
+    vkVertexAttribute->attributeCount = count;
+
+    VkVertexInputBindingDescription* bindingDesc = vkVertexAttribute->bindingDesc;
+    bindingDesc[0].binding = 0;
+    bindingDesc[0].stride = stride;
+    bindingDesc[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+    vkVertexAttribute->bindingCount = 1;
+
+    return reinterpret_cast<uint64_t>(vkVertexAttribute);
+}
+//------------------------------------------------------------------------------
+void xxDestroyVertexAttributeVulkan(uint64_t vertexAttribute)
+{
+    VERTEXATTRIBUTEVK* vkVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEVK*>(vertexAttribute);
+    if (vkVertexAttribute == nullptr)
+        return;
+
+    delete vkVertexAttribute;
+}
+//==============================================================================
 //  Buffer
 //==============================================================================
 struct BUFFERVK
@@ -1583,7 +1665,7 @@ uint64_t xxCreateIndexBufferVulkan(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(vkBuffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferVulkan(uint64_t device, unsigned int size)
+uint64_t xxCreateVertexBufferVulkan(uint64_t device, unsigned int size, uint64_t vertexAttribute)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
@@ -2040,88 +2122,6 @@ void xxDestroySamplerVulkan(uint64_t sampler)
         return;
 
     vkDestroySampler(g_device, vkSampler, g_callbacks);
-}
-//==============================================================================
-//  Vertex Attribute
-//==============================================================================
-struct VERTEXATTRIBUTEVK
-{
-    VkVertexInputAttributeDescription   attributeDesc[16];
-    uint32_t                            attributeCount;
-    VkVertexInputBindingDescription     bindingDesc[4];
-    uint32_t                            bindingCount;
-};
-//------------------------------------------------------------------------------
-uint64_t xxCreateVertexAttributeVulkan(uint64_t device, int count, ...)
-{
-    VERTEXATTRIBUTEVK* vkVertexAttribute = new VERTEXATTRIBUTEVK;
-    if (vkVertexAttribute == nullptr)
-        return 0;
-    memset(vkVertexAttribute, 0, sizeof(VERTEXATTRIBUTEVK));
-
-    VkVertexInputAttributeDescription* attributeDescs = vkVertexAttribute->attributeDesc;
-    int stride = 0;
-
-    va_list args;
-    va_start(args, count);
-    for (int i = 0; i < count; ++i)
-    {
-        int stream = va_arg(args, int);
-        int offset = va_arg(args, int);
-        int element = va_arg(args, int);
-        int size = va_arg(args, int);
-
-        stride += size;
-
-        VkVertexInputAttributeDescription& attributeDesc = attributeDescs[i];
-        attributeDesc.location = i;
-        attributeDesc.binding = stream;
-        attributeDesc.format = VK_FORMAT_R32G32B32A32_SFLOAT;
-        attributeDesc.offset = offset;
-
-        if (element == 3 && size == sizeof(float) * 3)
-        {
-            attributeDesc.format = VK_FORMAT_R32G32B32_SFLOAT;
-            continue;
-        }
-
-        if (element == 4 && size == sizeof(char) * 4)
-        {
-#if defined(xxMACOS) || defined(xxMACCATALYST) || defined(xxWINDOWS)
-            attributeDesc.format = VK_FORMAT_B8G8R8A8_UNORM;
-#else
-            attributeDesc.format = VK_FORMAT_R8G8B8A8_UNORM;
-#endif
-            continue;
-        }
-
-        if (element == 2 && size == sizeof(float) * 2)
-        {
-            attributeDesc.format = VK_FORMAT_R32G32_SFLOAT;
-            continue;
-        }
-    }
-    va_end(args);
-
-    vkVertexAttribute->attributeCount = count;
-
-    VkVertexInputBindingDescription* bindingDesc = vkVertexAttribute->bindingDesc;
-    bindingDesc[0].binding = 0;
-    bindingDesc[0].stride = stride;
-    bindingDesc[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-    vkVertexAttribute->bindingCount = 1;
-
-    return reinterpret_cast<uint64_t>(vkVertexAttribute);
-}
-//------------------------------------------------------------------------------
-void xxDestroyVertexAttributeVulkan(uint64_t vertexAttribute)
-{
-    VERTEXATTRIBUTEVK* vkVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEVK*>(vertexAttribute);
-    if (vkVertexAttribute == nullptr)
-        return;
-
-    delete vkVertexAttribute;
 }
 //==============================================================================
 //  Shader
