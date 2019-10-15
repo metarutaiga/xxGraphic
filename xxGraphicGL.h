@@ -25,8 +25,8 @@ void xxGraphicDestroyGL();
 //==============================================================================
 //  GLSL Shader
 //==============================================================================
-xxEXTERN const char*                                    vertexShaderCode;
-xxEXTERN const char*                                    fragmentShaderCode;
+xxEXTERN const char* const                              vertexShaderCode;
+xxEXTERN const char* const                              fragmentShaderCode;
 //==============================================================================
 //  Function
 //==============================================================================

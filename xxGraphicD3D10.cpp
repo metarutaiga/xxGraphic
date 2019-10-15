@@ -15,11 +15,11 @@ typedef HRESULT (WINAPI *PFN_D3D10_CREATE_DEVICE)(IDXGIAdapter*, D3D10_DRIVER_TY
 #ifndef _DEBUG
 #define PERSISTENT_BUFFER           1
 #endif
-#define DXGI_FORMAT_B8G8R8A8_UNORM  g_supportBGRA ? DXGI_FORMAT_B8G8R8A8_UNORM : DXGI_FORMAT_R8G8B8A8_UNORM
+#define DXGI_FORMAT_B8G8R8A8_UNORM  g_unsupportedBGRA ? DXGI_FORMAT_R8G8B8A8_UNORM : DXGI_FORMAT_B8G8R8A8_UNORM
 
 static void*                        g_d3dLibrary = nullptr;
 static IDXGIFactory*                g_dxgiFactory = nullptr;
-static bool                         g_supportBGRA = true;
+static bool                         g_unsupportedBGRA = false;
 
 //==============================================================================
 //  Instance
@@ -85,14 +85,14 @@ uint64_t xxCreateDeviceD3D10(uint64_t instance)
     }
     SafeRelease(unknown);
 
-    g_supportBGRA = false;
+    g_unsupportedBGRA = true;
 
     return reinterpret_cast<uint64_t>(d3dDevice);
 }
 //------------------------------------------------------------------------------
 void xxDestroyDeviceD3D10(uint64_t device)
 {
-    g_supportBGRA = true;
+    g_unsupportedBGRA = false;
 
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(device);
 

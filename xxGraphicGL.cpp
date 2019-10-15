@@ -174,7 +174,7 @@ void xxGraphicDestroyGL()
 //==============================================================================
 //  GLSL Shader
 //==============================================================================
-const char* vertexShaderCode = 
+const char* const vertexShaderCode = 
     "uniform vec4 uniformBuffer[4];\n"
     "attribute vec3 position;\n"
     "attribute vec4 color;\n"
@@ -193,7 +193,7 @@ const char* vertexShaderCode =
     "    varyColor = color;\n"
     "}\n";
 //------------------------------------------------------------------------------
-const char* fragmentShaderCode =
+const char* const fragmentShaderCode =
     "uniform sampler2D tex;\n"
     "varying vec2 varyUV;\n"
     "varying vec4 varyColor;\n"

@@ -149,12 +149,12 @@ uint64_t xxCreateDeviceD3D7(uint64_t instance)
     {
         if ((*iid) == __uuidof(IDirect3DTnLHalDevice))
         {
-            xxLog("xxGraphic", "%s %s (%s %s)", "Direct3D", "7.0", xxGetDeviceName(), "Transform and Lighting HAL");
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "7.0 Hardware Transform and Lighting", xxGetDeviceName());
             break;
         }
-        if ((*iid) == __uuidof(IDirect3DHALDevice))
+        if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice7), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s %s)", "Direct3D", "7.0", xxGetDeviceName(), "HAL");
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "7.0", xxGetDeviceName());
             break;
         }
     }
