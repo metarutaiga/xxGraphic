@@ -22,6 +22,16 @@ static NSOpenGLView*                    g_rootView = nil;
 //==============================================================================
 //  Initialize - CGL
 //==============================================================================
+static void GL_APIENTRY cglInvalidateFramebuffer (GLenum target, GLsizei numAttachments, const GLenum *attachments)
+{
+    
+}
+//------------------------------------------------------------------------------
+static void GL_APIENTRY cglInvalidateSubFramebuffer (GLenum target, GLsizei numAttachments, const GLenum *attachments, GLint x, GLint y, GLsizei width, GLsizei height)
+{
+    
+}
+//------------------------------------------------------------------------------
 static bool cglSymbolFailed = false;
 static void* GL_APIENTRY cglSymbol(const char* name, bool* failed)
 {
@@ -29,6 +39,12 @@ static void* GL_APIENTRY cglSymbol(const char* name, bool* failed)
 
     if (ptr == nullptr && g_glLibrary)
         ptr = xxGetProcAddress(g_glLibrary, name);
+
+    if (ptr == nullptr && strcmp(name, "glInvalidateFramebuffer") == 0)
+        ptr = (void*)cglInvalidateFramebuffer;
+
+    if (ptr == nullptr && strcmp(name, "glInvalidateSubFramebuffer") == 0)
+        ptr = (void*)cglInvalidateSubFramebuffer;
 
     if (ptr == nullptr)
         xxLog("CGL", "%s is not found", name);
