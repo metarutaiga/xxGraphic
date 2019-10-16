@@ -22,10 +22,6 @@ static PFNWGLGETPROCADDRESSPROC             wglGetProcAddress;
 static PFNWGLMAKECURRENTPROC                wglMakeCurrent;
 static PFNWGLSHARELISTSPROC                 wglShareLists;
 static PFNWGLCREATECONTEXTATTRIBSARBPROC    wglCreateContextAttribsARB;
-static PFNGLGETINTEGERVPROC                 glGetIntegerv;
-static PFNGLGENVERTEXARRAYSPROC             glGenVertexArrays;
-static PFNGLDELETEVERTEXARRAYSPROC          glDeleteVertexArrays;
-static PFNGLBINDVERTEXARRAYPROC             glBindVertexArray;
 
 //==============================================================================
 //  Initialize - WGL
@@ -171,7 +167,7 @@ void glPresentContextWGL(uint64_t context, void* display)
     SwapBuffers(hDC);
 }
 //------------------------------------------------------------------------------
-uint64_t xxGraphicCreateWGL()
+uint64_t xxGraphicCreateWGL(int version)
 {
     if (g_gdiLibrary == nullptr)
         g_gdiLibrary = xxLoadLibrary("gdi32.dll");
@@ -209,7 +205,16 @@ uint64_t xxGraphicCreateWGL()
         context = glCreateContextWGL(0, GetDesktopWindow(), nullptr);
     }
 
-    if (xxGraphicCreateGL(wglSymbol) == false)
+    bool success = false;
+    if (success == false && version >= 320)
+        success = xxGraphicCreateGLES32(wglSymbol);
+    if (success == false && version >= 310)
+        success = xxGraphicCreateGLES31(wglSymbol);
+    if (success == false && version >= 300)
+        success = xxGraphicCreateGLES3(wglSymbol);
+    if (success == false && version >= 200)
+        success = xxGraphicCreateGLES2(wglSymbol);
+    if (success == false)
     {
         xxGraphicDestroyWGL(context);
         return 0;

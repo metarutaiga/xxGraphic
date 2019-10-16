@@ -11,5 +11,5 @@
 //==============================================================================
 //  Initialize
 //==============================================================================
-uint64_t xxGraphicCreateWGL();
+uint64_t xxGraphicCreateWGL(int version);
 void xxGraphicDestroyWGL(uint64_t context);

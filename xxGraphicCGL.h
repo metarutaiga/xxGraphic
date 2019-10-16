@@ -11,5 +11,5 @@
 //==============================================================================
 //  Initialize
 //==============================================================================
-uint64_t xxGraphicCreateCGL();
+uint64_t xxGraphicCreateCGL(int version);
 void xxGraphicDestroyCGL(uint64_t context);

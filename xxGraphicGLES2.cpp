@@ -5,9 +5,9 @@
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #undef  GL_ES_VERSION_2_0
-#define GL_ES_VERSION_3_0
-#define GL_ES_VERSION_3_1
-#define GL_ES_VERSION_3_2
+#define GL_ES_VERSION_3_0 0
+#define GL_ES_VERSION_3_1 0
+#define GL_ES_VERSION_3_2 0
 #include "xxGraphicInternal.h"
 #include "xxGraphicGL.h"
 #include "xxGraphicGLES2.h"
@@ -40,19 +40,19 @@ uint64_t xxCreateInstanceGLES2()
     uint64_t instance = 0;
 
 #if defined(xxANDROID)
-    instance = xxGraphicCreateEGL();
+    instance = xxGraphicCreateEGL(200);
 #endif
 
 #if defined(xxMACOS)
-    instance = xxGraphicCreateCGL();
+    instance = xxGraphicCreateCGL(200);
 #endif
 
 #if defined(xxIOS) && !defined(xxMACCATALYST)
-    instance = xxGraphicCreateEAGL();
+    instance = xxGraphicCreateEAGL(200);
 #endif
 
 #if defined(xxWINDOWS)
-    instance = xxGraphicCreateWGL();
+    instance = xxGraphicCreateWGL(200);
 #endif
 
     if (instance == 0)
@@ -956,7 +956,7 @@ void xxDrawIndexedGLES2(uint64_t commandEncoder, uint64_t indexBuffer, int index
         glVertexAttribPointer(attribute.index, attribute.size, attribute.type, attribute.normalized, attribute.stride, attribute.pointer + vertexOffset * attribute.stride);
     }
 
-    glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, (char*)nullptr + firstIndex * sizeof(int));
+    glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, (int*)nullptr + firstIndex);
 }
 //==============================================================================
 //  Fixed-Function

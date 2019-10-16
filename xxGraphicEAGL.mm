@@ -13,9 +13,6 @@
 #import <QuartzCore/CAEAGLLayer.h>
 static void*                            g_glLibrary = nullptr;
 static Class                            classEAGLContext = nil;
-static PFNGLGENVERTEXARRAYSPROC         glGenVertexArrays;
-static PFNGLDELETEVERTEXARRAYSPROC      glDeleteVertexArrays;
-static PFNGLBINDVERTEXARRAYPROC         glBindVertexArray;
 
 //==============================================================================
 //  Initialize - EAGL
@@ -164,7 +161,7 @@ void glPresentContextEAGL(uint64_t context, void* display)
     [eaglContext presentRenderbuffer:GL_RENDERBUFFER];
 }
 //------------------------------------------------------------------------------
-uint64_t xxGraphicCreateEAGL()
+uint64_t xxGraphicCreateEAGL(int version)
 {
     if (g_glLibrary == nullptr)
         g_glLibrary = xxLoadLibrary("/System/Library/Frameworks/OpenGLES.framework/OpenGLES");
@@ -182,7 +179,16 @@ uint64_t xxGraphicCreateEAGL()
         rootContext = [[classEAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
     }
 
-    if (xxGraphicCreateGL(eaglSymbol) == false)
+    bool success = false;
+    if (success == false && version >= 320)
+        success = xxGraphicCreateGLES32(eaglSymbol);
+    if (success == false && version >= 310)
+        success = xxGraphicCreateGLES31(eaglSymbol);
+    if (success == false && version >= 300)
+        success = xxGraphicCreateGLES3(eaglSymbol);
+    if (success == false && version >= 200)
+        success = xxGraphicCreateGLES2(eaglSymbol);
+    if (success == false)
     {
         xxGraphicDestroyEAGL(reinterpret_cast<uint64_t>(rootContext));
         return 0;

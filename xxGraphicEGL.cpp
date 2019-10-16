@@ -31,9 +31,6 @@ static PFNEGLINITIALIZEPROC                     eglInitialize;
 static PFNEGLMAKECURRENTPROC                    eglMakeCurrent;
 static PFNEGLSWAPINTERVALPROC                   eglSwapInterval;
 static PFNEGLSWAPBUFFERSPROC                    eglSwapBuffers;
-static PFNGLGENVERTEXARRAYSPROC                 glGenVertexArrays;
-static PFNGLDELETEVERTEXARRAYSPROC              glDeleteVertexArrays;
-static PFNGLBINDVERTEXARRAYPROC                 glBindVertexArray;
 
 //==============================================================================
 //  Initialize - EGL
@@ -163,7 +160,7 @@ void glPresentContextEGL(uint64_t context, void* surface)
     eglSwapBuffers(eglDisplay, eglSurface);
 }
 //------------------------------------------------------------------------------
-uint64_t xxGraphicCreateEGL()
+uint64_t xxGraphicCreateEGL(int version)
 {
 #if defined(xxANDROID)
     if (g_eglLibrary == nullptr)
@@ -233,7 +230,16 @@ uint64_t xxGraphicCreateEGL()
     if (context == 0)
         return 0;
 
-    if (xxGraphicCreateGL(eglSymbol) == false)
+    bool success = false;
+    if (success == false && version >= 320)
+        success = xxGraphicCreateGLES32(eglSymbol);
+    if (success == false && version >= 310)
+        success = xxGraphicCreateGLES31(eglSymbol);
+    if (success == false && version >= 300)
+        success = xxGraphicCreateGLES3(eglSymbol);
+    if (success == false && version >= 200)
+        success = xxGraphicCreateGLES2(eglSymbol);
+    if (success == false)
     {
         xxGraphicDestroyEGL(context);
         return 0;

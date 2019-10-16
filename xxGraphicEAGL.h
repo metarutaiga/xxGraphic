@@ -11,5 +11,5 @@
 //==============================================================================
 //  Initialize
 //==============================================================================
-uint64_t xxGraphicCreateEAGL();
+uint64_t xxGraphicCreateEAGL(int version);
 void xxGraphicDestroyEAGL(uint64_t context);

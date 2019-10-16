@@ -18,9 +18,6 @@
 #import <AppKit/NSOpenGLView.h>
 static void*                            g_glLibrary = nullptr;
 static NSOpenGLView*                    g_rootView = nil;
-static PFNGLGENVERTEXARRAYSPROC         glGenVertexArrays;
-static PFNGLDELETEVERTEXARRAYSPROC      glDeleteVertexArrays;
-static PFNGLBINDVERTEXARRAYPROC         glBindVertexArray;
 
 //==============================================================================
 //  Initialize - CGL
@@ -158,7 +155,7 @@ void glShaderSourceCGL(GLuint shader, GLsizei count, const GLchar *const*string,
     xxFree(replaceString);
 }
 //------------------------------------------------------------------------------
-uint64_t xxGraphicCreateCGL()
+uint64_t xxGraphicCreateCGL(int version)
 {
     if (g_glLibrary == nullptr)
         g_glLibrary = xxLoadLibrary("/System/Library/Frameworks/OpenGL.framework/OpenGL");
@@ -186,7 +183,16 @@ uint64_t xxGraphicCreateCGL()
     [[g_rootView openGLContext] makeCurrentContext];
     NSOpenGLContext* rootContext = [g_rootView openGLContext];
 
-    if (xxGraphicCreateGL(cglSymbol) == false)
+    bool success = false;
+    if (success == false && version >= 320)
+        success = xxGraphicCreateGLES32(cglSymbol);
+    if (success == false && version >= 310)
+        success = xxGraphicCreateGLES31(cglSymbol);
+    if (success == false && version >= 300)
+        success = xxGraphicCreateGLES3(cglSymbol);
+    if (success == false && version >= 200)
+        success = xxGraphicCreateGLES2(cglSymbol);
+    if (success == false)
     {
         xxGraphicDestroyCGL(reinterpret_cast<uint64_t>(rootContext));
         return 0;
