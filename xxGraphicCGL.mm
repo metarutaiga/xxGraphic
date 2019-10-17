@@ -20,14 +20,14 @@ static NSOpenGLView*                    g_rootView = nil;
 //==============================================================================
 //  Initialize - CGL
 //==============================================================================
-static void GL_APIENTRY cglInvalidateFramebuffer (GLenum target, GLsizei numAttachments, const GLenum *attachments)
+static void GL_APIENTRY cglInvalidateFramebuffer(GLenum target, GLsizei numAttachments, const GLenum *attachments)
 {
-    
+
 }
 //------------------------------------------------------------------------------
-static void GL_APIENTRY cglInvalidateSubFramebuffer (GLenum target, GLsizei numAttachments, const GLenum *attachments, GLint x, GLint y, GLsizei width, GLsizei height)
+static void GL_APIENTRY cglInvalidateSubFramebuffer(GLenum target, GLsizei numAttachments, const GLenum *attachments, GLint x, GLint y, GLsizei width, GLsizei height)
 {
-    
+
 }
 //------------------------------------------------------------------------------
 static bool cglSymbolFailed = false;
@@ -151,9 +151,11 @@ void glPresentContextCGL(uint64_t context, void* display)
 }
 //------------------------------------------------------------------------------
 PFNGLSHADERSOURCEPROC glShaderSource_;
-void glShaderSourceCGL(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
+//------------------------------------------------------------------------------
+void cglShaderSourceLegacy(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
 {
     const GLchar** replaceString = xxAlloc(const GLchar*, count);
+
     for (GLsizei i = 0; i < count; ++i)
     {
         const GLchar* var = string[i];
@@ -161,6 +163,36 @@ void glShaderSourceCGL(GLuint shader, GLsizei count, const GLchar *const*string,
             var = "#version 120";
         if (strncmp(var, "precision", sizeof("precision") - 1) == 0)
             var = "";
+        replaceString[i] = var;
+    }
+
+    glShaderSource_(shader, count, replaceString, length);
+
+    xxFree(replaceString);
+}
+//------------------------------------------------------------------------------
+void cglShaderSource(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
+{
+    const GLchar** replaceString = xxAlloc(const GLchar*, count);
+
+    bool fragmentShader = false;
+    for (GLsizei i = 0; i < count; ++i)
+    {
+        const GLchar* var = string[i];
+        if (strcmp(var, "#version 100") == 0)
+            var = "#version 140";
+        if (strncmp(var, "precision", sizeof("precision") - 1) == 0)
+        {
+            var =   "out vec4 fragColor;\n"
+                    "#define gl_FragColor fragColor\n"
+                    "#define texture2D texture";
+            fragmentShader = true;
+        }
+        if (strcmp(var, "#define attribute attribute") == 0)
+            var = "#define attribute in";
+        if (strcmp(var, "#define varying varying") == 0)
+            var = fragmentShader ? "#define varying in" : "#define varying out";
+
         replaceString[i] = var;
     }
 
@@ -178,6 +210,7 @@ uint64_t xxGraphicCreateCGL(int version)
 
     NSOpenGLPixelFormatAttribute attributes[] =
     {
+        NSOpenGLPFAOpenGLProfile, version <= 200 ? NSOpenGLProfileVersionLegacy : NSOpenGLProfileVersion3_2Core,
         NSOpenGLPFAColorSize, 24,
         NSOpenGLPFAAlphaSize, 8,
         NSOpenGLPFADepthSize, 24,
@@ -218,7 +251,7 @@ uint64_t xxGraphicCreateCGL(int version)
     glPresentContext = glPresentContextCGL;
 
     glShaderSource_ = glShaderSource;
-    glShaderSource = glShaderSourceCGL;
+    glShaderSource = version <= 200 ? cglShaderSourceLegacy : cglShaderSource;
 
     return reinterpret_cast<uint64_t>((__bridge_retained void*)rootContext);
 }
