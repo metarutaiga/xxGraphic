@@ -19,18 +19,6 @@ typedef LPDIRECT3D9 (WINAPI *PFN_DIRECT3D_CREATE9)(UINT);
 static void*                        g_d3dLibrary = nullptr;
 
 //==============================================================================
-//  Resource Type
-//==============================================================================
-static uint64_t getResourceType(uint64_t resource)
-{
-    return resource & 7ull;
-}
-//------------------------------------------------------------------------------
-static uint64_t getResourceData(uint64_t resource)
-{
-    return resource & ~7ull;
-}
-//==============================================================================
 //  Instance
 //==============================================================================
 uint64_t xxCreateInstanceD3D9()
@@ -158,24 +146,8 @@ const char* xxGetDeviceNameD3D9()
     return "Direct3D 9.0 Fixed Function";
 }
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-struct D3DFRAMEBUFFER9
-{
-    LPDIRECT3DSURFACE9      backBuffer;
-    LPDIRECT3DSURFACE9      depthStencil;
-};
-//==============================================================================
 //  Swapchain
 //==============================================================================
-struct D3DSWAPCHAIN9 : public D3DFRAMEBUFFER9
-{
-    LPDIRECT3DSWAPCHAIN9    swapchain;
-    HWND                    hWnd;
-    int                     width;
-    int                     height;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateSwapchainD3D9(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
@@ -361,16 +333,6 @@ void xxEndRenderPassD3D9(uint64_t commandEncoder, uint64_t framebuffer, uint64_t
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-union D3DVERTEXATTRIBUTE9
-{
-    uint64_t    value;
-    struct
-    {
-        DWORD   fvf;
-        int     stride;
-    };
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeD3D9(uint64_t device, int count, ...)
 {
     D3DVERTEXATTRIBUTE9 d3dVertexAttribute = {};
@@ -698,21 +660,6 @@ void xxUnmapTextureD3D9(uint64_t device, uint64_t texture, unsigned int level, u
 //==============================================================================
 //  Sampler
 //==============================================================================
-union D3DSAMPLER9
-{
-    uint64_t    value;
-    struct
-    {
-        uint8_t addressU;
-        uint8_t addressV;
-        uint8_t addressW;
-        uint8_t magFilter;
-        uint8_t minFilter;
-        uint8_t mipFilter;
-        uint8_t anisotropy;
-    };
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateSamplerD3D9(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy)
 {
     D3DSAMPLER9 d3dSampler = {};
@@ -758,29 +705,6 @@ void xxDestroyShaderD3D9(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-union D3DRENDERSTATE9
-{
-    uint64_t        value;
-    struct
-    {
-        uint64_t    alphaBlending:1;
-        uint64_t    alphaTesting:1;
-        uint64_t    depthTest:1;
-        uint64_t    depthWrite:1;
-        uint64_t    cull:1;
-        uint64_t    scissor:1;
-    };
-};
-//------------------------------------------------------------------------------
-struct D3DPIPELINE9
-{
-    LPDIRECT3DVERTEXDECLARATION9    vertexDeclaration;
-    DWORD                           fvf;
-    LPDIRECT3DVERTEXSHADER9         vertexShader;
-    LPDIRECT3DPIXELSHADER9          pixelShader;
-    D3DRENDERSTATE9                 renderState;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateBlendStateD3D9(uint64_t device, bool blending)
 {
     D3DRENDERSTATE9 d3dRenderState = {};

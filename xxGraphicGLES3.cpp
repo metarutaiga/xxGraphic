@@ -59,9 +59,7 @@ uint64_t xxCreateInstanceGLES3()
     xxRegisterFunction(GLES2);
 
     xxCreateInstance = xxCreateInstanceGLES3;
-
     xxGetDeviceName = xxGetDeviceNameGLES3;
-
     xxCreateIndexBuffer = xxCreateIndexBufferGLES3;
     xxCreateVertexBuffer = xxCreateVertexBufferGLES3;
     xxMapBuffer = xxMapBufferGLES3;

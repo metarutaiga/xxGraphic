@@ -23,18 +23,6 @@ static LPDIRECTDRAW4                g_ddraw = nullptr;
 static LPDIRECTDRAWSURFACE4         g_primarySurface = nullptr;
 
 //==============================================================================
-//  Resource Type
-//==============================================================================
-static uint64_t getResourceType(uint64_t resource)
-{
-    return resource & 7ull;
-}
-//------------------------------------------------------------------------------
-static uint64_t getResourceData(uint64_t resource)
-{
-    return resource & ~7ull;
-}
-//==============================================================================
 //  Instance
 //==============================================================================
 uint64_t xxCreateInstanceD3D6()
@@ -207,24 +195,8 @@ const char* xxGetDeviceNameD3D6()
     return "Direct3D 6.0";
 }
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-struct D3DFRAMEBUFFER3
-{
-    LPDIRECTDRAWSURFACE4    backSurface;
-    LPDIRECTDRAWSURFACE4    depthSurface;
-};
-//==============================================================================
 //  Swapchain
 //==============================================================================
-struct D3DSWAPCHAIN3 : public D3DFRAMEBUFFER3
-{
-    LPDIRECTDRAWCLIPPER     clipper;
-    HWND                    hWnd;
-    int                     width;
-    int                     height;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateSwapchainD3D6(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
 {
     LPDIRECT3DDEVICE3 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE3>(device);
@@ -440,16 +412,6 @@ void xxEndRenderPassD3D6(uint64_t commandEncoder, uint64_t framebuffer, uint64_t
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-union D3DVERTEXATTRIBUTE3
-{
-    uint64_t    value;
-    struct
-    {
-        DWORD   fvf;
-        int     stride;
-    };
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeD3D6(uint64_t device, int count, ...)
 {
     D3DVERTEXATTRIBUTE3 d3dVertexAttribute = {};
@@ -698,24 +660,9 @@ void xxUnmapTextureD3D6(uint64_t device, uint64_t texture, unsigned int level, u
 //==============================================================================
 //  Sampler
 //==============================================================================
-union D3DSAMPLER7
-{
-    uint64_t    value;
-    struct
-    {
-        uint8_t addressU;
-        uint8_t addressV;
-        uint8_t addressW;
-        uint8_t magFilter;
-        uint8_t minFilter;
-        uint8_t mipFilter;
-        uint8_t anisotropy;
-    };
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateSamplerD3D6(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy)
 {
-    D3DSAMPLER7 d3dSampler = {};
+    D3DSAMPLER3 d3dSampler = {};
 
     d3dSampler.addressU = clampU ? D3DTADDRESS_CLAMP : D3DTADDRESS_WRAP;
     d3dSampler.addressV = clampV ? D3DTADDRESS_CLAMP : D3DTADDRESS_WRAP;
@@ -757,35 +704,16 @@ void xxDestroyShaderD3D6(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-union D3DRENDERSTATE7
-{
-    uint64_t        value;
-    struct
-    {
-        uint64_t    alphaBlending:1;
-        uint64_t    alphaTesting:1;
-        uint64_t    depthTest:1;
-        uint64_t    depthWrite:1;
-        uint64_t    cull:1;
-        uint64_t    scissor:1;
-    };
-};
-//------------------------------------------------------------------------------
-struct D3DPIPELINE7
-{
-    D3DRENDERSTATE7 renderState;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateBlendStateD3D6(uint64_t device, bool blending)
 {
-    D3DRENDERSTATE7 d3dRenderState = {};
+    D3DRENDERSTATE3 d3dRenderState = {};
     d3dRenderState.alphaBlending = blending;
     return d3dRenderState.value;
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateDepthStencilStateD3D6(uint64_t device, bool depthTest, bool depthWrite)
 {
-    D3DRENDERSTATE7 d3dRenderState = {};
+    D3DRENDERSTATE3 d3dRenderState = {};
     d3dRenderState.depthTest = depthTest;
     d3dRenderState.depthWrite = depthWrite;
     return d3dRenderState.value;
@@ -793,7 +721,7 @@ uint64_t xxCreateDepthStencilStateD3D6(uint64_t device, bool depthTest, bool dep
 //------------------------------------------------------------------------------
 uint64_t xxCreateRasterizerStateD3D6(uint64_t device, bool cull, bool scissor)
 {
-    D3DRENDERSTATE7 d3dRenderState = {};
+    D3DRENDERSTATE3 d3dRenderState = {};
     d3dRenderState.cull = cull;
     d3dRenderState.scissor = scissor;
     return d3dRenderState.value;
@@ -801,15 +729,15 @@ uint64_t xxCreateRasterizerStateD3D6(uint64_t device, bool cull, bool scissor)
 //------------------------------------------------------------------------------
 uint64_t xxCreatePipelineD3D6(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
 {
-    D3DPIPELINE7* d3dPipeline = new D3DPIPELINE7;
+    D3DPIPELINE3* d3dPipeline = new D3DPIPELINE3;
     if (d3dPipeline == nullptr)
         return 0;
 
     DWORD d3dVertexShader                   = static_cast<DWORD>(vertexShader);
     DWORD d3dPixelShader                    = static_cast<DWORD>(fragmentShader);
-    D3DRENDERSTATE7 d3dBlendState           = { blendState };
-    D3DRENDERSTATE7 d3dDepthStencilState    = { depthStencilState };
-    D3DRENDERSTATE7 d3dRasterizerState      = { rasterizerState };
+    D3DRENDERSTATE3 d3dBlendState           = { blendState };
+    D3DRENDERSTATE3 d3dDepthStencilState    = { depthStencilState };
+    D3DRENDERSTATE3 d3dRasterizerState      = { rasterizerState };
     d3dPipeline->renderState.alphaBlending  = d3dBlendState.alphaBlending;
     d3dPipeline->renderState.depthTest      = d3dDepthStencilState.depthTest;
     d3dPipeline->renderState.depthWrite     = d3dDepthStencilState.depthWrite;
@@ -836,7 +764,7 @@ void xxDestroyRasterizerStateD3D6(uint64_t rasterizerState)
 //------------------------------------------------------------------------------
 void xxDestroyPipelineD3D6(uint64_t pipeline)
 {
-    D3DPIPELINE7* d3dPipeline = reinterpret_cast<D3DPIPELINE7*>(pipeline);
+    D3DPIPELINE3* d3dPipeline = reinterpret_cast<D3DPIPELINE3*>(pipeline);
 
     delete d3dPipeline;
 }
@@ -893,7 +821,7 @@ void xxSetScissorD3D6(uint64_t commandEncoder, int x, int y, int width, int heig
 void xxSetPipelineD3D6(uint64_t commandEncoder, uint64_t pipeline)
 {
     LPDIRECT3DDEVICE3 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE3>(commandEncoder);
-    D3DPIPELINE7* d3dPipeline = reinterpret_cast<D3DPIPELINE7*>(pipeline);
+    D3DPIPELINE3* d3dPipeline = reinterpret_cast<D3DPIPELINE3*>(pipeline);
 
     d3dDevice->SetRenderState(D3DRENDERSTATE_SHADEMODE, D3DSHADE_GOURAUD);
     d3dDevice->SetTextureStageState(0, D3DTSS_COLOROP, D3DTOP_MODULATE);
@@ -950,7 +878,7 @@ void xxSetFragmentSamplersD3D6(uint64_t commandEncoder, int count, const uint64_
 
     for (int i = 0; i < count; ++i)
     {
-        D3DSAMPLER7 d3dSampler = { samplers[i] };
+        D3DSAMPLER3 d3dSampler = { samplers[i] };
         d3dDevice->SetTextureStageState(i, D3DTSS_ADDRESSU, d3dSampler.addressU);
         d3dDevice->SetTextureStageState(i, D3DTSS_ADDRESSV, d3dSampler.addressV);
         d3dDevice->SetTextureStageState(i, D3DTSS_MAGFILTER, d3dSampler.magFilter);

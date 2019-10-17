@@ -5,23 +5,12 @@
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "internal/xxGraphicInternal.h"
+#include "internal/xxGraphicInternalD3D.h"
 #include "xxGraphicD3DAsm.h"
 #include "xxGraphicD3D8PS.h"
 
 #include "dxsdk/d3d8.h"
 
-//==============================================================================
-//  Resource Type
-//==============================================================================
-static uint64_t getResourceType(uint64_t resource)
-{
-    return resource & 7ull;
-}
-//------------------------------------------------------------------------------
-static uint64_t getResourceData(uint64_t resource)
-{
-    return resource & ~7ull;
-}
 //==============================================================================
 //  Instance
 //==============================================================================
@@ -56,12 +45,6 @@ const char* xxGetDeviceNameD3D8PS()
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-struct D3DVERTEXATTRIBUTE8PS
-{
-    DWORD   declaration[16];
-    int     stride;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeD3D8PS(uint64_t device, int count, ...)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(device);

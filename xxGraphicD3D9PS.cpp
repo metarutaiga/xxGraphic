@@ -12,18 +12,6 @@
 #include "dxsdk/d3d9.h"
 
 //==============================================================================
-//  Resource Type
-//==============================================================================
-static uint64_t getResourceType(uint64_t resource)
-{
-    return resource & 7ull;
-}
-//------------------------------------------------------------------------------
-static uint64_t getResourceData(uint64_t resource)
-{
-    return resource & ~7ull;
-}
-//==============================================================================
 //  Instance
 //==============================================================================
 uint64_t xxCreateInstanceD3D9PS()
@@ -57,12 +45,6 @@ const char* xxGetDeviceNameD3D9PS()
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-struct D3DVERTEXATTRIBUTE9PS
-{
-    LPDIRECT3DVERTEXDECLARATION9    vertexDeclaration;
-    int                             stride;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeD3D9PS(uint64_t device, int count, ...)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);

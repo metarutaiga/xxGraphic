@@ -26,6 +26,13 @@ interface DECLSPEC_UUID("6C14DB85-A733-11CE-A521-0020AF0BE560") IDirectDrawClipp
 interface DECLSPEC_UUID("4B9F0EE0-0D7E-11D0-9B06-00A0C903A3B8") IDirectDrawColorControl;
 interface DECLSPEC_UUID("69C11C3E-B46B-11D1-AD7A-00C04FC29B4E") IDirectDrawGammaControl;
 
+// DirectX Graphics Infrastructure
+interface DECLSPEC_UUID("310d36a0-d2e7-4c0a-aa04-6a9d23b8886a") IDXGISwapChain;
+interface DECLSPEC_UUID("790a45f7-0d42-4876-983a-0a55cfe6f4aa") IDXGISwapChain1;
+interface DECLSPEC_UUID("a8be2ac4-199f-4946-b331-79599fb98de7") IDXGISwapChain2;
+interface DECLSPEC_UUID("94d99bdb-f1f8-4ab0-b236-7da0170edab1") IDXGISwapChain3;
+interface DECLSPEC_UUID("3D585D5A-BD4A-489E-B1F4-3DBCB6452FFB") IDXGISwapChain4;
+
 // Direct3D 3.0
 interface DECLSPEC_UUID("3BBA0080-2421-11CF-A31A-00AA00B93356") IDirect3D;
 interface DECLSPEC_UUID("64108800-957d-11d0-89ab-00a0c9054129") IDirect3DDevice;
@@ -330,3 +337,290 @@ inline void PatchD3DIM(const char* name)
 
     xxFreeLibrary(d3dim);
 }
+
+//==============================================================================
+//  Resource Type
+//==============================================================================
+inline uint64_t getResourceType(uint64_t resource)
+{
+    return resource & 7ull;
+}
+//------------------------------------------------------------------------------
+inline uint64_t getResourceData(uint64_t resource)
+{
+    return resource & ~7ull;
+}
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+struct D3DFRAMEBUFFER3
+{
+    IDirectDrawSurface4*    backSurface;
+    IDirectDrawSurface4*    depthSurface;
+};
+//------------------------------------------------------------------------------
+struct D3DFRAMEBUFFER7
+{
+    IDirectDrawSurface7*    backSurface;
+    IDirectDrawSurface7*    depthSurface;
+};
+//------------------------------------------------------------------------------
+struct D3DFRAMEBUFFER8
+{
+    IDirect3DSurface8*      backBuffer;
+    IDirect3DSurface8*      depthStencil;
+};
+//------------------------------------------------------------------------------
+struct D3DFRAMEBUFFER9
+{
+    IDirect3DSurface9*      backBuffer;
+    IDirect3DSurface9*      depthStencil;
+};
+//------------------------------------------------------------------------------
+struct D3D10FRAMEBUFFER
+{
+    ID3D10RenderTargetView* renderTargetView;
+    ID3D10DepthStencilView* depthStencilView;
+};
+//------------------------------------------------------------------------------
+struct D3D11FRAMEBUFFER
+{
+    ID3D11RenderTargetView* renderTargetView;
+    ID3D11DepthStencilView* depthStencilView;
+};
+//==============================================================================
+//  Swapchain
+//==============================================================================
+struct D3DSWAPCHAIN3 : public D3DFRAMEBUFFER3
+{
+    IDirectDrawClipper*     clipper;
+    HWND                    hWnd;
+    int                     width;
+    int                     height;
+};
+//------------------------------------------------------------------------------
+struct D3DSWAPCHAIN7 : public D3DFRAMEBUFFER7
+{
+    IDirectDrawClipper*     clipper;
+    HWND                    hWnd;
+    int                     width;
+    int                     height;
+};
+//------------------------------------------------------------------------------
+struct D3DSWAPCHAIN8 : public D3DFRAMEBUFFER8
+{
+    IDirect3DSwapChain8*    swapchain;
+    HWND                    hWnd;
+    int                     width;
+    int                     height;
+};
+//------------------------------------------------------------------------------
+struct D3DSWAPCHAIN9 : public D3DFRAMEBUFFER9
+{
+    IDirect3DSwapChain9*    swapchain;
+    HWND                    hWnd;
+    int                     width;
+    int                     height;
+};
+//------------------------------------------------------------------------------
+struct D3D10SWAPCHAIN : public D3D10FRAMEBUFFER
+{
+    IDXGISwapChain*         dxgiSwapchain;
+    ID3D10Texture2D*        depthStencilTexture;
+    HWND                    hWnd;
+    int                     width;
+    int                     height;
+};
+//------------------------------------------------------------------------------
+struct D3D11SWAPCHAIN : public D3D11FRAMEBUFFER
+{
+    IDXGISwapChain*         dxgiSwapchain;
+    ID3D11Texture2D*        depthStencilTexture;
+    ID3D11DeviceContext*    deviceContext;
+    HWND                    hWnd;
+    int                     width;
+    int                     height;
+};
+//------------------------------------------------------------------------------
+struct D3D11ON12SWAPCHAIN : public D3D11FRAMEBUFFER
+{
+    IDXGISwapChain3*        dxgiSwapchain;
+    ID3D11Texture2D*        depthStencilTexture;
+    ID3D11DeviceContext*    deviceContext;
+    HWND                    hWnd;
+    int                     width;
+    int                     height;
+};
+//==============================================================================
+//  Render Pass
+//==============================================================================
+union D3D10RENDERPASS
+{
+    uint64_t    value;
+    struct
+    {
+        bool    clearColor;
+        DWORD   clearDepthStencil;
+    };
+};
+//------------------------------------------------------------------------------
+typedef D3D10RENDERPASS D3D11RENDERPASS;
+//==============================================================================
+//  Vertex Attribute
+//==============================================================================
+union D3DVERTEXATTRIBUTE3
+{
+    uint64_t    value;
+    struct
+    {
+        DWORD   fvf;
+        int     stride;
+    };
+};
+//------------------------------------------------------------------------------
+typedef D3DVERTEXATTRIBUTE3 D3DVERTEXATTRIBUTE7;
+typedef D3DVERTEXATTRIBUTE3 D3DVERTEXATTRIBUTE8;
+typedef D3DVERTEXATTRIBUTE3 D3DVERTEXATTRIBUTE9;
+//------------------------------------------------------------------------------
+struct D3DVERTEXATTRIBUTE8PS
+{
+    DWORD   declaration[16];
+    int     stride;
+};
+//------------------------------------------------------------------------------
+struct D3DVERTEXATTRIBUTE9PS
+{
+    IDirect3DVertexDeclaration9*    vertexDeclaration;
+    int                             stride;
+};
+//------------------------------------------------------------------------------
+struct D3D10VERTEXATTRIBUTE
+{
+    ID3D10InputLayout*  inputLayout;
+    int                 stride;
+};
+//------------------------------------------------------------------------------
+struct D3D11VERTEXATTRIBUTE
+{
+    ID3D11InputLayout*  inputLayout;
+    int                 stride;
+};
+//==============================================================================
+//  Buffer
+//==============================================================================
+struct D3D10BUFFER
+{
+    ID3D10Buffer*   buffer;
+    UINT            size;
+    void*           address;
+};
+//------------------------------------------------------------------------------
+struct D3D11BUFFER
+{
+    ID3D11Buffer*   buffer;
+    UINT            size;
+    void*           address;
+};
+//==============================================================================
+//  Texture
+//==============================================================================
+struct D3D10TEXTURE
+{
+    ID3D10Texture1D*            texture1D;
+    ID3D10Texture2D*            texture2D;
+    ID3D10Texture3D*            texture3D;
+    ID3D10ShaderResourceView*   resourceView;
+};
+//------------------------------------------------------------------------------
+struct D3D11TEXTURE
+{
+    ID3D11Texture1D*            texture1D;
+    ID3D11Texture2D*            texture2D;
+    ID3D11Texture3D*            texture3D;
+    ID3D11ShaderResourceView*   resourceView;
+};
+//==============================================================================
+//  Sampler
+//==============================================================================
+union D3DSAMPLER3
+{
+    uint64_t    value;
+    struct
+    {
+        uint8_t addressU;
+        uint8_t addressV;
+        uint8_t addressW;
+        uint8_t magFilter;
+        uint8_t minFilter;
+        uint8_t mipFilter;
+        uint8_t anisotropy;
+    };
+};
+//------------------------------------------------------------------------------
+typedef D3DSAMPLER3 D3DSAMPLER7;
+typedef D3DSAMPLER3 D3DSAMPLER8;
+typedef D3DSAMPLER3 D3DSAMPLER9;
+//==============================================================================
+//  Pipeline
+//==============================================================================
+union D3DRENDERSTATE3
+{
+    uint64_t        value;
+    struct
+    {
+        uint64_t    alphaBlending:1;
+        uint64_t    alphaTesting:1;
+        uint64_t    depthTest:1;
+        uint64_t    depthWrite:1;
+        uint64_t    cull:1;
+        uint64_t    scissor:1;
+    };
+};
+//------------------------------------------------------------------------------
+typedef D3DRENDERSTATE3 D3DRENDERSTATE7;
+typedef D3DRENDERSTATE3 D3DRENDERSTATE8;
+typedef D3DRENDERSTATE3 D3DRENDERSTATE9;
+//------------------------------------------------------------------------------
+struct D3DPIPELINE3
+{
+    D3DRENDERSTATE3 renderState;
+};
+//------------------------------------------------------------------------------
+typedef D3DPIPELINE3 D3DPIPELINE7;
+//------------------------------------------------------------------------------
+struct D3DPIPELINE8
+{
+    DWORD           vertexShader;
+    DWORD           pixelShader;
+    D3DRENDERSTATE8 renderState;
+};
+//------------------------------------------------------------------------------
+struct D3DPIPELINE9
+{
+    IDirect3DVertexDeclaration9*    vertexDeclaration;
+    DWORD                           fvf;
+    IDirect3DVertexShader9*         vertexShader;
+    IDirect3DPixelShader9*          pixelShader;
+    D3DRENDERSTATE9                 renderState;
+};
+//------------------------------------------------------------------------------
+struct D3D10PIPELINE
+{
+    ID3D10VertexShader*         vertexShader;
+    ID3D10PixelShader*          pixelShader;
+    ID3D10BlendState*           blendState;
+    ID3D10DepthStencilState*    depthStencilState;
+    ID3D10RasterizerState*      rasterizerState;
+    ID3D10InputLayout*          inputLayout;
+};
+//------------------------------------------------------------------------------
+struct D3D11PIPELINE
+{
+    ID3D11VertexShader*         vertexShader;
+    ID3D11PixelShader*          pixelShader;
+    ID3D11BlendState*           blendState;
+    ID3D11DepthStencilState*    depthStencilState;
+    ID3D11RasterizerState*      rasterizerState;
+    ID3D11InputLayout*          inputLayout;
+};
+//==============================================================================

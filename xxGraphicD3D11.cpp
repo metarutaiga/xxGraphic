@@ -129,26 +129,8 @@ const char* xxGetDeviceNameD3D11()
     return "Direct3D 11.0";
 }
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-struct D3D11FRAMEBUFFER
-{
-    ID3D11RenderTargetView* renderTargetView;
-    ID3D11DepthStencilView* depthStencilView;
-};
-//==============================================================================
 //  Swapchain
 //==============================================================================
-struct D3D11SWAPCHAIN : public D3D11FRAMEBUFFER
-{
-    IDXGISwapChain*         dxgiSwapchain;
-    ID3D11Texture2D*        depthStencilTexture;
-    ID3D11DeviceContext*    deviceContext;
-    HWND                    hWnd;
-    int                     width;
-    int                     height;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateSwapchainD3D11(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
 {
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
@@ -341,16 +323,6 @@ void xxSubmitCommandBufferD3D11(uint64_t commandBuffer, uint64_t swapchain)
 //==============================================================================
 //  Render Pass
 //==============================================================================
-union D3D11RENDERPASS
-{
-    uint64_t    value;
-    struct
-    {
-        bool    clearColor;
-        DWORD   clearDepthStencil;
-    };
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateRenderPassD3D11(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil)
 {
     D3D11RENDERPASS d3dRenderPass = {};
@@ -402,12 +374,6 @@ void xxEndRenderPassD3D11(uint64_t commandEncoder, uint64_t framebuffer, uint64_
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-struct D3D11VERTEXATTRIBUTE
-{
-    ID3D11InputLayout*  inputLayout;
-    int                 stride;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeD3D11(uint64_t device, int count, ...)
 {
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
@@ -565,13 +531,6 @@ void xxDestroyVertexAttributeD3D11(uint64_t vertexAttribute)
 //==============================================================================
 //  Buffer
 //==============================================================================
-struct D3D11BUFFER
-{
-    ID3D11Buffer*   buffer;
-    UINT            size;
-    void*           address;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateConstantBufferD3D11(uint64_t device, unsigned int size)
 {
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
@@ -732,14 +691,6 @@ void xxUnmapBufferD3D11(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-struct D3D11TEXTURE
-{
-    ID3D11Texture1D*            texture1D;
-    ID3D11Texture2D*            texture2D;
-    ID3D11Texture3D*            texture3D;
-    ID3D11ShaderResourceView*   resourceView;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateTextureD3D11(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array)
 {
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
@@ -1042,16 +993,6 @@ void xxDestroyShaderD3D11(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-struct D3D11PIPELINE
-{
-    ID3D11VertexShader*         vertexShader;
-    ID3D11PixelShader*          pixelShader;
-    ID3D11BlendState*           blendState;
-    ID3D11DepthStencilState*    depthStencilState;
-    ID3D11RasterizerState*      rasterizerState;
-    ID3D11InputLayout*          inputLayout;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateBlendStateD3D11(uint64_t device, bool blending)
 {
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);

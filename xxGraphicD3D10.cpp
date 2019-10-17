@@ -115,25 +115,8 @@ const char* xxGetDeviceNameD3D10()
     return "Direct3D 10.0";
 }
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-struct D3D10FRAMEBUFFER
-{
-    ID3D10RenderTargetView* renderTargetView;
-    ID3D10DepthStencilView* depthStencilView;
-};
-//==============================================================================
 //  Swapchain
 //==============================================================================
-struct D3D10SWAPCHAIN : public D3D10FRAMEBUFFER
-{
-    IDXGISwapChain*         dxgiSwapchain;
-    ID3D10Texture2D*        depthStencilTexture;
-    HWND                    hWnd;
-    int                     width;
-    int                     height;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateSwapchainD3D10(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(device);
@@ -314,16 +297,6 @@ void xxSubmitCommandBufferD3D10(uint64_t commandBuffer, uint64_t swapchain)
 //==============================================================================
 //  Render Pass
 //==============================================================================
-union D3D10RENDERPASS
-{
-    uint64_t    value;
-    struct
-    {
-        bool    clearColor;
-        DWORD   clearDepthStencil;
-    };
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateRenderPassD3D10(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil)
 {
     D3D10RENDERPASS d3dRenderPass = {};
@@ -375,12 +348,6 @@ void xxEndRenderPassD3D10(uint64_t commandEncoder, uint64_t framebuffer, uint64_
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-struct D3D10VERTEXATTRIBUTE
-{
-    ID3D10InputLayout*  inputLayout;
-    int                 stride;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeD3D10(uint64_t device, int count, ...)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(device);
@@ -538,13 +505,6 @@ void xxDestroyVertexAttributeD3D10(uint64_t vertexAttribute)
 //==============================================================================
 //  Buffer
 //==============================================================================
-struct D3D10BUFFER
-{
-    ID3D10Buffer*   buffer;
-    UINT            size;
-    void*           address;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateConstantBufferD3D10(uint64_t device, unsigned int size)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(device);
@@ -681,14 +641,6 @@ void xxUnmapBufferD3D10(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-struct D3D10TEXTURE
-{
-    ID3D10Texture1D*            texture1D;
-    ID3D10Texture2D*            texture2D;
-    ID3D10Texture3D*            texture3D;
-    ID3D10ShaderResourceView*   resourceView;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateTextureD3D10(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(device);
@@ -974,16 +926,6 @@ void xxDestroyShaderD3D10(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-struct D3D10PIPELINE
-{
-    ID3D10VertexShader*         vertexShader;
-    ID3D10PixelShader*          pixelShader;
-    ID3D10BlendState*           blendState;
-    ID3D10DepthStencilState*    depthStencilState;
-    ID3D10RasterizerState*      rasterizerState;
-    ID3D10InputLayout*          inputLayout;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateBlendStateD3D10(uint64_t device, bool blending)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(device);

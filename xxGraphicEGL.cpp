@@ -8,10 +8,6 @@
 #include "xxGraphicGL.h"
 #include "xxGraphicEGL.h"
 
-#if defined(xxANDROID)
-#   include <dlfcn.h>
-#endif
-
 #define EGL_EGL_PROTOTYPES 0
 #include "gl/egl.h"
 static void*                                    g_eglLibrary = nullptr;

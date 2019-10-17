@@ -75,17 +75,13 @@ uint64_t xxCreateInstanceGLES31()
 
     xxCreateInstance = xxCreateInstanceGLES31;
     xxDestroyInstance = xxDestroyInstanceGLES31;
-
     xxGetDeviceName = xxGetDeviceNameGLES31;
-
     xxCreateIndexBuffer = xxCreateIndexBufferGLES3;
     xxCreateVertexBuffer = xxCreateVertexBufferGLES3;
     xxMapBuffer = xxMapBufferGLES3;
     xxUnmapBuffer = xxUnmapBufferGLES3;
-
     xxPresentSwapchain = xxPresentSwapchainGLES31;
     xxGetCommandBuffer = xxGetCommandBufferGLES31;
-
     xxSetVertexBuffers = xxSetVertexBuffersGLES31;
     xxDrawIndexed = xxDrawIndexedGLES31;
 

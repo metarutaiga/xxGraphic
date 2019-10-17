@@ -189,23 +189,8 @@ const char* xxGetDeviceNameD3D11On12()
     return "Direct3D 11On12";
 }
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-struct D3D11ON12FRAMEBUFFER
-{
-    ID3D11RenderTargetView* renderTargetView;
-    ID3D11DepthStencilView* depthStencilView;
-};
-//==============================================================================
 //  Swapchain
 //==============================================================================
-struct D3D11ON12SWAPCHAIN : public D3D11ON12FRAMEBUFFER
-{
-    IDXGISwapChain3*        dxgiSwapchain;
-    ID3D11Texture2D*        depthStencilTexture;
-    ID3D11DeviceContext*    deviceContext;
-};
-//------------------------------------------------------------------------------
 void xxPresentSwapchainD3D11On12(uint64_t swapchain)
 {
     D3D11ON12SWAPCHAIN* d3dSwapchain = reinterpret_cast<D3D11ON12SWAPCHAIN*>(swapchain);

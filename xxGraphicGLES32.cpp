@@ -61,14 +61,11 @@ uint64_t xxCreateInstanceGLES32()
     xxRegisterFunction(GLES2);
 
     xxCreateInstance = xxCreateInstanceGLES32;
-
     xxGetDeviceName = xxGetDeviceNameGLES32;
-
     xxCreateIndexBuffer = xxCreateIndexBufferGLES3;
     xxCreateVertexBuffer = xxCreateVertexBufferGLES3;
     xxMapBuffer = xxMapBufferGLES3;
     xxUnmapBuffer = xxUnmapBufferGLES3;
-
     xxSetVertexBuffers = xxSetVertexBuffersGLES32;
     xxDrawIndexed = xxDrawIndexedGLES32;
 

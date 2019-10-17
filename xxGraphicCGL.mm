@@ -8,8 +8,6 @@
 #include "xxGraphicGL.h"
 #include "xxGraphicCGL.h"
 
-#include <dlfcn.h>
-
 #define GL_SILENCE_DEPRECATION
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/OpenGL.h>

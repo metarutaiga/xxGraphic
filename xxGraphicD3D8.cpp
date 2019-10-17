@@ -16,18 +16,6 @@ typedef LPDIRECT3D8 (WINAPI *PFN_DIRECT3D_CREATE8)(UINT);
 static void*                        g_d3dLibrary = nullptr;
 
 //==============================================================================
-//  Resource Type
-//==============================================================================
-static uint64_t getResourceType(uint64_t resource)
-{
-    return resource & 7ull;
-}
-//------------------------------------------------------------------------------
-static uint64_t getResourceData(uint64_t resource)
-{
-    return resource & ~7ull;
-}
-//==============================================================================
 //  Instance
 //==============================================================================
 uint64_t xxCreateInstanceD3D8()
@@ -141,24 +129,8 @@ const char* xxGetDeviceNameD3D8()
     return "Direct3D 8.0 Fixed Function";
 }
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-struct D3DFRAMEBUFFER8
-{
-    LPDIRECT3DSURFACE8      backBuffer;
-    LPDIRECT3DSURFACE8      depthStencil;
-};
-//==============================================================================
 //  Swapchain
 //==============================================================================
-struct D3DSWAPCHAIN8 : public D3DFRAMEBUFFER8
-{
-    LPDIRECT3DSWAPCHAIN8    swapchain;
-    HWND                    hWnd;
-    int                     width;
-    int                     height;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateSwapchainD3D8(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(device);
@@ -330,16 +302,6 @@ void xxEndRenderPassD3D8(uint64_t commandEncoder, uint64_t framebuffer, uint64_t
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-union D3DVERTEXATTRIBUTE8
-{
-    uint64_t    value;
-    struct
-    {
-        DWORD   fvf;
-        int     stride;
-    };
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeD3D8(uint64_t device, int count, ...)
 {
     D3DVERTEXATTRIBUTE8 d3dVertexAttribute = {};
@@ -667,21 +629,6 @@ void xxUnmapTextureD3D8(uint64_t device, uint64_t texture, unsigned int level, u
 //==============================================================================
 //  Sampler
 //==============================================================================
-union D3DSAMPLER8
-{
-    uint64_t    value;
-    struct
-    {
-        uint8_t addressU;
-        uint8_t addressV;
-        uint8_t addressW;
-        uint8_t magFilter;
-        uint8_t minFilter;
-        uint8_t mipFilter;
-        uint8_t anisotropy;
-    };
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateSamplerD3D8(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy)
 {
     D3DSAMPLER8 d3dSampler = {};
@@ -727,27 +674,6 @@ void xxDestroyShaderD3D8(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-union D3DRENDERSTATE8
-{
-    uint64_t        value;
-    struct
-    {
-        uint64_t    alphaBlending:1;
-        uint64_t    alphaTesting:1;
-        uint64_t    depthTest:1;
-        uint64_t    depthWrite:1;
-        uint64_t    cull:1;
-        uint64_t    scissor:1;
-    };
-};
-//------------------------------------------------------------------------------
-struct D3DPIPELINE8
-{
-    DWORD           vertexShader;
-    DWORD           pixelShader;
-    D3DRENDERSTATE8 renderState;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateBlendStateD3D8(uint64_t device, bool blending)
 {
     D3DRENDERSTATE8 d3dRenderState = {};

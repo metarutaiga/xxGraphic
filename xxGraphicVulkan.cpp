@@ -10,13 +10,11 @@
 
 #if defined(xxANDROID)
 #   define VK_USE_PLATFORM_ANDROID_KHR  1
-#   include <dlfcn.h>
 #   include <android/native_window_jni.h>
 #endif
 
 #if defined(xxMACOS)
 #   define VK_USE_PLATFORM_MACOS_MVK    1
-#   include <dlfcn.h>
 #   define OBJC_OLD_DISPATCH_PROTOTYPES 1
 #   include <CoreGraphics/CoreGraphics.h>
 #   include <objc/runtime.h>
@@ -25,7 +23,6 @@
 
 #if defined(xxIOS)
 #   define VK_USE_PLATFORM_IOS_MVK      1
-#   include <dlfcn.h>
 #   define OBJC_OLD_DISPATCH_PROTOTYPES 1
 #   include <CoreGraphics/CoreGraphics.h>
 #   include <objc/runtime.h>
