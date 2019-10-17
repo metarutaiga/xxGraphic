@@ -8,20 +8,12 @@
 #undef  GL_ES_VERSION_3_0
 #undef  GL_ES_VERSION_3_1
 #define GL_ES_VERSION_3_2 0
-#include "xxGraphicInternal.h"
+#include "internal/xxGraphicInternal.h"
+#include "internal/xxGraphicInternalGL.h"
 #include "xxGraphicGL.h"
 #include "xxGraphicGLES2.h"
 #include "xxGraphicGLES3.h"
 #include "xxGraphicGLES31.h"
-
-struct DrawElementsIndirectCommand
-{
-    GLuint  count;
-    GLuint  instanceCount;
-    GLuint  firstIndex;
-    GLuint  baseVertex;
-    GLuint  baseInstance;
-};
 
 #if defined(xxANDROID)
 #   include "xxGraphicEGL.h"
@@ -39,9 +31,9 @@ struct DrawElementsIndirectCommand
 #   include "xxGraphicWGL.h"
 #endif
 
-#define NUM_INDIRECT_BUFFER_SIZE    8192
+#define NUM_INDIRECT_BUFFER_SIZE    32768
 static GLuint                       g_indirectBuffer;
-static DrawElementsIndirectCommand* g_indirectCommand;
+static INDIRECTCOMMANDGL*           g_indirectCommand;
 static int                          g_indirectIndex;
 
 //==============================================================================
@@ -73,7 +65,7 @@ uint64_t xxCreateInstanceGLES31()
     GLuint indirectBuffer = 0;
     glGenBuffers(1, &indirectBuffer);
     glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectBuffer);
-    glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawElementsIndirectCommand) * NUM_INDIRECT_BUFFER_SIZE, nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(INDIRECTCOMMANDGL) * NUM_INDIRECT_BUFFER_SIZE, nullptr, GL_STREAM_DRAW);
 
     g_indirectBuffer = indirectBuffer;
     g_indirectCommand = nullptr;
@@ -134,38 +126,10 @@ uint64_t xxGetCommandBufferGLES31(uint64_t device, uint64_t swapchain)
     uint64_t commandBuffer = xxGetCommandBufferGLES2(0, swapchain);
 
     glBindBuffer(GL_DRAW_INDIRECT_BUFFER, g_indirectBuffer);
-    (void*&)g_indirectCommand = glMapBufferRange(GL_DRAW_INDIRECT_BUFFER, 0, sizeof(DrawElementsIndirectCommand) * NUM_INDIRECT_BUFFER_SIZE, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+    (void*&)g_indirectCommand = glMapBufferRange(GL_DRAW_INDIRECT_BUFFER, 0, sizeof(INDIRECTCOMMANDGL) * NUM_INDIRECT_BUFFER_SIZE, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
 
     return commandBuffer;
 }
-//==============================================================================
-//  Vertex Attribute
-//==============================================================================
-struct VERTEXATTRIBUTEGL
-{
-    struct Attribute
-    {
-        GLuint      index;
-        GLint       size;
-        GLenum      type;
-        GLboolean   normalized;
-        GLsizei     stride;
-        const char* pointer;
-        int         stream;
-        const char* name;
-    } attributes[16];
-    int count;
-};
-//==============================================================================
-//  Buffer
-//==============================================================================
-struct BUFFERGL
-{
-    GLenum      type;
-    GLuint      buffer;
-    void*       memory;
-    GLsizei     size;
-};
 //==============================================================================
 //  Command
 //==============================================================================
@@ -195,13 +159,13 @@ void xxDrawIndexedGLES31(uint64_t commandEncoder, uint64_t indexBuffer, int inde
     if (g_indirectIndex >= NUM_INDIRECT_BUFFER_SIZE)
         g_indirectIndex = 0;
 
-    DrawElementsIndirectCommand& indirectCommand = g_indirectCommand[index];
+    INDIRECTCOMMANDGL& indirectCommand = g_indirectCommand[index];
     indirectCommand.count = indexCount;
     indirectCommand.instanceCount = instanceCount;
     indirectCommand.firstIndex = firstIndex;
     indirectCommand.baseVertex = vertexOffset;
     indirectCommand.baseInstance = firstInstance;
 
-    glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, (DrawElementsIndirectCommand*)nullptr + index);
+    glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, (INDIRECTCOMMANDGL*)nullptr + index);
 }
 //==============================================================================

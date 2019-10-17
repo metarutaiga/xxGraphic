@@ -8,7 +8,8 @@
 #undef  GL_ES_VERSION_3_0
 #define GL_ES_VERSION_3_1 0
 #define GL_ES_VERSION_3_2 0
-#include "xxGraphicInternal.h"
+#include "internal/xxGraphicInternal.h"
+#include "internal/xxGraphicInternalGL.h"
 #include "xxGraphicGL.h"
 #include "xxGraphicGLES2.h"
 #include "xxGraphicGLES3.h"
@@ -78,14 +79,6 @@ const char* xxGetDeviceNameGLES3()
 //==============================================================================
 //  Buffer
 //==============================================================================
-struct BUFFERGL
-{
-    GLenum      type;
-    GLuint      buffer;
-    void*       memory;
-    GLsizei     size;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateIndexBufferGLES3(uint64_t device, unsigned int size)
 {
     BUFFERGL* glBuffer = new BUFFERGL;

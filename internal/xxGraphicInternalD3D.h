@@ -1,5 +1,5 @@
 //==============================================================================
-// xxGraphic : Direct3D Common Function
+// xxGraphic : Direct3D Internal Header
 //
 // Copyright (c) 2019 TAiGA
 // https://github.com/metarutaiga/xxGraphic

@@ -8,7 +8,8 @@
 #define GL_ES_VERSION_3_0 0
 #define GL_ES_VERSION_3_1 0
 #define GL_ES_VERSION_3_2 0
-#include "xxGraphicInternal.h"
+#include "internal/xxGraphicInternal.h"
+#include "internal/xxGraphicInternalGL.h"
 #include "xxGraphicGL.h"
 #include "xxGraphicGLES2.h"
 
@@ -116,19 +117,6 @@ const char* xxGetDeviceNameGLES2()
 //==============================================================================
 //  Swapchain
 //==============================================================================
-struct SWAPCHAINGL
-{
-    uint64_t    context;
-    void*       view;
-    void*       display;
-    int         width;
-    int         height;
-    uint64_t    pipeline;
-    uint64_t    vertexBuffers[8];
-    GLenum      textureTypes[8];
-    bool        textureMipmaps[8];
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
 {
     SWAPCHAINGL* glOldSwapchain = reinterpret_cast<SWAPCHAINGL*>(oldSwapchain);
@@ -271,22 +259,6 @@ void xxEndRenderPassGLES2(uint64_t commandEncoder, uint64_t framebuffer, uint64_
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-struct VERTEXATTRIBUTEGL
-{
-    struct Attribute
-    {
-        GLuint      index;
-        GLint       size;
-        GLenum      type;
-        GLboolean   normalized;
-        GLsizei     stride;
-        const char* pointer;
-        int         stream;
-        const char* name;
-    } attributes[16];
-    int count;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, ...)
 {
     VERTEXATTRIBUTEGL* glVertexAttribute = new VERTEXATTRIBUTEGL;
@@ -360,14 +332,6 @@ void xxDestroyVertexAttributeGLES2(uint64_t vertexAttribute)
 //==============================================================================
 //  Buffer
 //==============================================================================
-struct BUFFERGL
-{
-    GLenum      type;
-    GLuint      buffer;
-    void*       memory;
-    GLsizei     size;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateConstantBufferGLES2(uint64_t device, unsigned int size)
 {
     BUFFERGL* glBuffer = new BUFFERGL;
@@ -451,18 +415,6 @@ void xxUnmapBufferGLES2(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-struct TEXTUREGL
-{
-    GLenum          type;
-    GLuint          texture;
-    void*           memory;
-    unsigned int    width;
-    unsigned int    height;
-    unsigned int    depth;
-    unsigned int    mipmap;
-    unsigned int    array;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateTextureGLES2(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array)
 {
     if (width == 0 || height == 0 || depth == 0 || mipmap == 0 || array == 0)
@@ -573,21 +525,6 @@ void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, unsigned int level, 
 //==============================================================================
 //  Sampler
 //==============================================================================
-union SAMPLERGL
-{
-    uint64_t    value;
-    struct
-    {
-        uint8_t addressU;
-        uint8_t addressV;
-        uint8_t addressW;
-        uint8_t magFilter;
-        uint8_t minFilter;
-        uint8_t mipFilter;
-        uint8_t anisotropy;
-    };
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateSamplerGLES2(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy)
 {
     SAMPLERGL d3dSampler = {};
@@ -676,28 +613,6 @@ void xxDestroyShaderGLES2(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-union STATEGL
-{
-    uint64_t        value;
-    struct
-    {
-        uint64_t    alphaBlending:1;
-        uint64_t    alphaTesting:1;
-        uint64_t    depthTest:1;
-        uint64_t    depthWrite:1;
-        uint64_t    cull:1;
-        uint64_t    scissor:1;
-    };
-};
-//------------------------------------------------------------------------------
-struct PIPELINEGL
-{
-    GLuint              program;
-    VERTEXATTRIBUTEGL*  vertexAttribute;
-    GLint               texture;
-    STATEGL             state;
-};
-//------------------------------------------------------------------------------
 static void checkProgram(GLuint glProgram)
 {
     GLint status = 0;

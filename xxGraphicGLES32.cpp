@@ -8,21 +8,13 @@
 #undef  GL_ES_VERSION_3_0
 #undef  GL_ES_VERSION_3_1
 #undef  GL_ES_VERSION_3_2
-#include "xxGraphicInternal.h"
+#include "internal/xxGraphicInternal.h"
+#include "internal/xxGraphicInternalGL.h"
 #include "xxGraphicGL.h"
 #include "xxGraphicGLES2.h"
 #include "xxGraphicGLES3.h"
 #include "xxGraphicGLES31.h"
 #include "xxGraphicGLES32.h"
-
-struct DrawElementsIndirectCommand
-{
-    GLuint  count;
-    GLuint  instanceCount;
-    GLuint  firstIndex;
-    GLuint  baseVertex;
-    GLuint  baseInstance;
-};
 
 #if defined(xxANDROID)
 #   include "xxGraphicEGL.h"
@@ -89,34 +81,6 @@ const char* xxGetDeviceNameGLES32()
 {
     return "OpenGL ES 3.2";
 }
-//==============================================================================
-//  Vertex Attribute
-//==============================================================================
-struct VERTEXATTRIBUTEGL
-{
-    struct Attribute
-    {
-        GLuint      index;
-        GLint       size;
-        GLenum      type;
-        GLboolean   normalized;
-        GLsizei     stride;
-        const char* pointer;
-        int         stream;
-        const char* name;
-    } attributes[16];
-    int count;
-};
-//==============================================================================
-//  Buffer
-//==============================================================================
-struct BUFFERGL
-{
-    GLenum      type;
-    GLuint      buffer;
-    void*       memory;
-    GLsizei     size;
-};
 //==============================================================================
 //  Command
 //==============================================================================

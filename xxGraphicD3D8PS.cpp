@@ -4,7 +4,7 @@
 // Copyright (c) 2019 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
-#include "xxGraphicInternal.h"
+#include "internal/xxGraphicInternal.h"
 #include "xxGraphicD3DAsm.h"
 #include "xxGraphicD3D8PS.h"
 
