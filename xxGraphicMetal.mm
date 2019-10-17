@@ -324,6 +324,22 @@ uint64_t xxBeginRenderPassMetal(uint64_t commandBuffer, uint64_t framebuffer, ui
 
     id <MTLRenderCommandEncoder> commandEncoder = [mtlCommandBuffer renderCommandEncoderWithDescriptor:mtlRenderPass];
 
+    MTLViewport vp;
+    vp.originX = 0;
+    vp.originY = 0;
+    vp.width = width;
+    vp.height = height;
+    vp.znear = 0.0f;
+    vp.zfar = 1.0f;
+    [commandEncoder setViewport:vp];
+
+    MTLScissorRect rect;
+    rect.x = 0;
+    rect.y = 0;
+    rect.width = width;
+    rect.height = height;
+    [commandEncoder setScissorRect:rect];
+
     return reinterpret_cast<uint64_t>((__bridge_retained void*)commandEncoder);
 }
 //------------------------------------------------------------------------------

@@ -287,6 +287,15 @@ uint64_t xxBeginRenderPassD3D8(uint64_t commandBuffer, uint64_t framebuffer, uin
 
     d3dDevice->SetRenderTarget(d3dFramebuffer->backBuffer, d3dFramebuffer->depthStencil);
 
+    D3DVIEWPORT8 vp;
+    vp.X = 0;
+    vp.Y = 0;
+    vp.Width = width;
+    vp.Height = height;
+    vp.MinZ = 0.0f;
+    vp.MaxZ = 1.0f;
+    d3dDevice->SetViewport(&vp);
+
     if (d3dFlags)
     {
         d3dDevice->Clear(0, nullptr, d3dFlags, D3DCOLOR_COLORVALUE(r, g, b, a), depth, stencil);

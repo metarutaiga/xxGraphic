@@ -328,6 +328,22 @@ uint64_t xxBeginRenderPassD3D10(uint64_t commandBuffer, uint64_t framebuffer, ui
 
     d3dDevice->OMSetRenderTargets(1, &d3dFramebuffer->renderTargetView, d3dFramebuffer->depthStencilView);
 
+    D3D10_VIEWPORT vp;
+    vp.TopLeftX = 0;
+    vp.TopLeftY = 0;
+    vp.Width = width;
+    vp.Height = height;
+    vp.MinDepth = 0.0f;
+    vp.MaxDepth = 1.0f;
+    d3dDevice->RSSetViewports(1, &vp);
+
+    D3D10_RECT rect;
+    rect.left = 0;
+    rect.top = 0;
+    rect.right = width;
+    rect.bottom = height;
+    d3dDevice->RSSetScissorRects(1, &rect);
+
     if (d3dRenderPass.clearColor)
     {
         float color[4] = { r, g, b, a };

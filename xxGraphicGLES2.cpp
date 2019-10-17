@@ -232,6 +232,9 @@ uint64_t xxBeginRenderPassGLES2(uint64_t commandBuffer, uint64_t framebuffer, ui
 {
     GLbitfield mask = static_cast<GLbitfield>(renderPass);
 
+    glViewport(0, 0, width, height);
+    glScissor(0, 0, width, height);
+
     if (mask & GL_COLOR_BUFFER_BIT)
     {
         glClearColor(r, g, b, a);

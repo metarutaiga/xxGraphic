@@ -318,6 +318,22 @@ uint64_t xxBeginRenderPassD3D9(uint64_t commandBuffer, uint64_t framebuffer, uin
     d3dDevice->SetRenderTarget(0, d3dFramebuffer->backBuffer);
     d3dDevice->SetDepthStencilSurface(d3dFramebuffer->depthStencil);
 
+    D3DVIEWPORT9 vp;
+    vp.X = 0;
+    vp.Y = 0;
+    vp.Width = width;
+    vp.Height = height;
+    vp.MinZ = 0.0f;
+    vp.MaxZ = 1.0f;
+    d3dDevice->SetViewport(&vp);
+
+    RECT rect;
+    rect.left = 0;
+    rect.top = 0;
+    rect.right = width;
+    rect.bottom = height;
+    d3dDevice->SetScissorRect(&rect);
+
     if (d3dFlags)
     {
         d3dDevice->Clear(0, nullptr, d3dFlags, D3DCOLOR_COLORVALUE(r, g, b, a), depth, stencil);

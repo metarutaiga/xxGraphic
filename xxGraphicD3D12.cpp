@@ -730,6 +730,22 @@ uint64_t xxBeginRenderPassD3D12(uint64_t commandBuffer, uint64_t framebuffer, ui
 
     d3dCommandList->OMSetRenderTargets(1, &d3dFramebuffer->renderTargetHandle, FALSE, nullptr);
 
+    D3D12_VIEWPORT vp;
+    vp.TopLeftX = 0;
+    vp.TopLeftY = 0;
+    vp.Width = (FLOAT)width;
+    vp.Height = (FLOAT)height;
+    vp.MinDepth = 0.0f;
+    vp.MaxDepth = 1.0f;
+    d3dCommandList->RSSetViewports(1, &vp);
+
+    D3D12_RECT rect;
+    rect.left = 0;
+    rect.top = 0;
+    rect.right = width;
+    rect.bottom = height;
+    d3dCommandList->RSSetScissorRects(1, &rect);
+
     D3D12_RESOURCE_BARRIER barrier = {};
     barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
     barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;

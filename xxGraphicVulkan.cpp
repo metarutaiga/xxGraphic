@@ -1402,6 +1402,22 @@ uint64_t xxBeginRenderPassVulkan(uint64_t commandBuffer, uint64_t framebuffer, u
     info.pClearValues = clearValues;
     vkCmdBeginRenderPass(vkCommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
 
+    VkViewport vp;
+    vp.x = 0;
+    vp.y = 0;
+    vp.width = (float)width;
+    vp.height = (float)height;
+    vp.minDepth = 0.0f;
+    vp.maxDepth = 1.0f;
+    vkCmdSetViewport(vkCommandBuffer, 0, 1, &vp);
+
+    VkRect2D rect;
+    rect.offset.x = 0;
+    rect.offset.y = 0;
+    rect.extent.width = width;
+    rect.extent.height = height;
+    vkCmdSetScissor(vkCommandBuffer, 0, 1, &rect);
+
     return commandBuffer;
 }
 //------------------------------------------------------------------------------
