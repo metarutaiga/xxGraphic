@@ -46,6 +46,24 @@ static void* GL_APIENTRY eglSymbol(const char* name, bool* failed)
         ptr = xxGetProcAddress(g_eglLibrary, name);
 
     if (ptr == nullptr)
+    {
+        static const char* const tags[] = { "ARB", "OES", "EXT", "KHR", "AMD", "ARM", "IMG", "INTEL", "NV", "QCOM" };
+
+        static bool internal;
+        if (failed == &internal)
+            return nullptr;
+
+        char extensionName[64];
+        for (int i = 0; i < xxCountOf(tags); ++i)
+        {
+            snprintf(extensionName, 64, "%s%s", name, tags[i]);
+            ptr = eglSymbol(extensionName, &internal);
+            if (ptr != nullptr)
+                break;
+        }
+    }
+
+    if (ptr == nullptr)
         xxLog("EGL", "%s is not found", name);
 
     eglSymbolFailed |= (ptr == nullptr);
@@ -227,14 +245,22 @@ uint64_t xxGraphicCreateEGL(int version)
         return 0;
 
     bool success = false;
-    if (success == false && version >= 320)
+    switch (version)
+    {
+    case 320:
         success = xxGraphicCreateGLES32(eglSymbol);
-    if (success == false && version >= 310)
+        break;
+    case 310:
         success = xxGraphicCreateGLES31(eglSymbol);
-    if (success == false && version >= 300)
+        break;
+    case 300:
         success = xxGraphicCreateGLES3(eglSymbol);
-    if (success == false && version >= 200)
+        break;
+    case 200:
+    default:
         success = xxGraphicCreateGLES2(eglSymbol);
+        break;
+    }
     if (success == false)
     {
         xxGraphicDestroyEGL(context);

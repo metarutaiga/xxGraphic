@@ -38,6 +38,24 @@ static void* GL_APIENTRY cglSymbol(const char* name, bool* failed)
     if (ptr == nullptr && g_glLibrary)
         ptr = xxGetProcAddress(g_glLibrary, name);
 
+    if (ptr == nullptr)
+    {
+        static const char* const tags[] = { "ARB", "OES", "EXT", "KHR", "AMD", "ARM", "IMG", "INTEL", "NV", "QCOM" };
+
+        static bool internal;
+        if (failed == &internal)
+            return nullptr;
+
+        char extensionName[64];
+        for (int i = 0; i < xxCountOf(tags); ++i)
+        {
+            snprintf(extensionName, 64, "%s%s", name, tags[i]);
+            ptr = cglSymbol(extensionName, &internal);
+            if (ptr != nullptr)
+                break;
+        }
+    }
+
     if (ptr == nullptr && strcmp(name, "glInvalidateFramebuffer") == 0)
         ptr = (void*)cglInvalidateFramebuffer;
 
@@ -231,14 +249,22 @@ uint64_t xxGraphicCreateCGL(int version)
     NSOpenGLContext* rootContext = [g_rootView openGLContext];
 
     bool success = false;
-    if (success == false && version >= 320)
+    switch (version)
+    {
+    case 320:
         success = xxGraphicCreateGLES32(cglSymbol);
-    if (success == false && version >= 310)
+        break;
+    case 310:
         success = xxGraphicCreateGLES31(cglSymbol);
-    if (success == false && version >= 300)
+        break;
+    case 300:
         success = xxGraphicCreateGLES3(cglSymbol);
-    if (success == false && version >= 200)
+        break;
+    case 200:
+    default:
         success = xxGraphicCreateGLES2(cglSymbol);
+        break;
+    }
     if (success == false)
     {
         xxGraphicDestroyCGL(reinterpret_cast<uint64_t>(rootContext));

@@ -26,6 +26,16 @@ static PFNWGLCREATECONTEXTATTRIBSARBPROC    wglCreateContextAttribsARB;
 //==============================================================================
 //  Initialize - WGL
 //==============================================================================
+static void GL_APIENTRY wglBlendBarrier(void)
+{
+
+}
+//------------------------------------------------------------------------------
+static void GL_APIENTRY wglPrimitiveBoundingBox(GLfloat minX, GLfloat minY, GLfloat minZ, GLfloat minW, GLfloat maxX, GLfloat maxY, GLfloat maxZ, GLfloat maxW)
+{
+
+}
+//------------------------------------------------------------------------------
 static bool wglSymbolFailed = false;
 static void* GL_APIENTRY wglSymbol(const char* name, bool* failed)
 {
@@ -39,6 +49,30 @@ static void* GL_APIENTRY wglSymbol(const char* name, bool* failed)
 
     if (ptr == nullptr && g_gdiLibrary)
         ptr = xxGetProcAddress(g_gdiLibrary, name);
+
+    if (ptr == nullptr)
+    {
+        static const char* const tags[] = { "ARB", "OES", "EXT", "KHR", "AMD", "ARM", "IMG", "INTEL", "NV", "QCOM" };
+
+        static bool internal;
+        if (failed == &internal)
+            return nullptr;
+
+        char extensionName[64];
+        for (int i = 0; i < xxCountOf(tags); ++i)
+        {
+            snprintf(extensionName, 64, "%s%s", name, tags[i]);
+            ptr = wglSymbol(extensionName, &internal);
+            if (ptr != nullptr)
+                break;
+        }
+    }
+
+    if (ptr == nullptr && strcmp(name, "glBlendBarrier") == 0)
+        ptr = (void*)wglBlendBarrier;
+
+    if (ptr == nullptr && strcmp(name, "glPrimitiveBoundingBox") == 0)
+        ptr = (void*)wglPrimitiveBoundingBox;
 
     if (ptr == nullptr)
         xxLog("WGL", "%s is not found", name);
@@ -206,14 +240,22 @@ uint64_t xxGraphicCreateWGL(int version)
     }
 
     bool success = false;
-    if (success == false && version >= 320)
+    switch (version)
+    {
+    case 320:
         success = xxGraphicCreateGLES32(wglSymbol);
-    if (success == false && version >= 310)
+        break;
+    case 310:
         success = xxGraphicCreateGLES31(wglSymbol);
-    if (success == false && version >= 300)
+        break;
+    case 300:
         success = xxGraphicCreateGLES3(wglSymbol);
-    if (success == false && version >= 200)
+        break;
+    case 200:
+    default:
         success = xxGraphicCreateGLES2(wglSymbol);
+        break;
+    }
     if (success == false)
     {
         xxGraphicDestroyWGL(context);
