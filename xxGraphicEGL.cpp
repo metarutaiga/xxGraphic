@@ -5,6 +5,7 @@
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "internal/xxGraphicInternal.h"
+#include "internal/xxGraphicInternalGL.h"
 #include "xxGraphicGL.h"
 #include "xxGraphicEGL.h"
 
@@ -47,20 +48,11 @@ static void* GL_APIENTRY eglSymbol(const char* name, bool* failed)
 
     if (ptr == nullptr)
     {
-        static const char* const tags[] = { "ARB", "OES", "EXT", "KHR", "AMD", "ARM", "IMG", "INTEL", "NV", "QCOM" };
-
         static bool internal;
         if (failed == &internal)
             return nullptr;
 
-        char extensionName[64];
-        for (int i = 0; i < xxCountOf(tags); ++i)
-        {
-            snprintf(extensionName, 64, "%s%s", name, tags[i]);
-            ptr = eglSymbol(extensionName, &internal);
-            if (ptr != nullptr)
-                break;
-        }
+        ptr = getSymbolExtension(eglSymbol, name, &internal);
     }
 
     if (ptr == nullptr)

@@ -5,6 +5,7 @@
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "internal/xxGraphicInternal.h"
+#include "internal/xxGraphicInternalGL.h"
 #include "xxGraphicGL.h"
 #include "xxGraphicWGL.h"
 
@@ -52,20 +53,11 @@ static void* GL_APIENTRY wglSymbol(const char* name, bool* failed)
 
     if (ptr == nullptr)
     {
-        static const char* const tags[] = { "ARB", "OES", "EXT", "KHR", "AMD", "ARM", "IMG", "INTEL", "NV", "QCOM" };
-
         static bool internal;
         if (failed == &internal)
             return nullptr;
 
-        char extensionName[64];
-        for (int i = 0; i < xxCountOf(tags); ++i)
-        {
-            snprintf(extensionName, 64, "%s%s", name, tags[i]);
-            ptr = wglSymbol(extensionName, &internal);
-            if (ptr != nullptr)
-                break;
-        }
+        ptr = getSymbolExtension(wglSymbol, name, &internal);
     }
 
     if (ptr == nullptr && strcmp(name, "glBlendBarrier") == 0)

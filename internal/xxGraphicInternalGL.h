@@ -11,6 +11,22 @@
 #define GL_GLES_PROTOTYPES 0
 #include "gl/gl32.h"
 
+inline void* getSymbolExtension(void* (GL_APIENTRYP getSymbol)(const char* name, bool* failed), const char* name, bool* failed)
+{
+    static const char* const tags[] = { "ARB", "OES", "EXT", "KHR", "AMD", "ARM", "IMG", "INTEL", "NV", "QCOM" };
+
+    char extensionName[64];
+    for (int i = 0; i < xxCountOf(tags); ++i)
+    {
+        snprintf(extensionName, 64, "%s%s", name, tags[i]);
+        void* ptr = getSymbol(extensionName, failed);
+        if (ptr != nullptr)
+            return ptr;
+    }
+
+    return nullptr;
+}
+
 //==============================================================================
 //  Swapchain
 //==============================================================================
