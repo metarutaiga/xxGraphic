@@ -99,6 +99,16 @@
 #   endif
 #endif
 
+#ifndef xxCPPAPI
+#   if defined(_MSC_VER) && defined(XX_BUILD_LIBRARY)
+#       define xxCPPAPI             __declspec(dllexport)
+#   elif defined(_MSC_VER)
+#       define xxCPPAPI             __declspec(dllimport)
+#   else
+#       define xxCPPAPI
+#   endif
+#endif
+
 #if defined(__GNUC__)
 #   define xxLikely(x)              __builtin_expect((x), 1)
 #   define xxUnlikely(x)            __builtin_expect((x), 0)
