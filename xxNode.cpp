@@ -6,8 +6,6 @@
 //==============================================================================
 #include "xxNode.h"
 
-#include <functional>
-
 //==============================================================================
 //  Node
 //==============================================================================
@@ -26,11 +24,19 @@ xxNode::xxNode()
     m_linearMatrix = nullptr;
     m_linearMatrixSize = 0;
 
-    m_resetLinearMatrix = false;
+    m_createLinearMatrix = false;
+
+#if 0
+    xxLog("xxNode", "Construct : %p", this);
+#endif
 }
 //------------------------------------------------------------------------------
 xxNode::~xxNode()
 {
+#if 0
+    xxLog("xxNode", "Destruct : %p", this);
+#endif
+
     delete[] m_children;
     delete[] m_linearMatrix;
 }
@@ -42,7 +48,7 @@ xxNodePtr xxNode::Create()
 //------------------------------------------------------------------------------
 xxNodePtr xxNode::GetParent() const
 {
-    return m_parent;
+    return m_parent.lock();
 }
 //------------------------------------------------------------------------------
 xxNodePtr xxNode::GetChild(uint32_t index)
@@ -51,6 +57,11 @@ xxNodePtr xxNode::GetChild(uint32_t index)
         return xxNodePtr();
 
     return m_children[index];
+}
+//------------------------------------------------------------------------------
+uint32_t xxNode::GetChildCount() const
+{
+    return m_childrenCount;
 }
 //------------------------------------------------------------------------------
 uint32_t xxNode::GetChildSize() const
@@ -62,7 +73,7 @@ bool xxNode::AttachChild(xxNodePtr& child)
 {
     if (child == nullptr)
         return false;
-    if (child->m_parent != nullptr)
+    if (child->m_parent.lock() != nullptr)
         return false;
 
     if (m_childrenCount >= m_childrenSize)
@@ -91,11 +102,11 @@ bool xxNode::AttachChild(xxNodePtr& child)
             m_childrenCount++;
 
             xxNode* node = this;
-            while (node->m_parent)
+            while (node->m_parent.lock())
             {
-                node = node->m_parent.get();
+                node = node->m_parent.lock().get();
             }
-            node->m_resetLinearMatrix = true;
+            node->m_createLinearMatrix = true;
             return true;
         }
     }
@@ -107,7 +118,7 @@ bool xxNode::DetachChild(xxNodePtr& child)
 {
     if (child == nullptr)
         return false;
-    if (child->m_parent == nullptr)
+    if (child->m_parent.lock() == nullptr)
         return false;
 
     for (uint32_t i = 0; i < m_childrenSize; ++i)
@@ -117,10 +128,26 @@ bool xxNode::DetachChild(xxNodePtr& child)
             m_children[i].reset();
             m_childrenCount--;
 
-            child->m_classLocalMatrix = (*child->m_localMatrix);
-            child->m_classWorldMatrix = (*child->m_worldMatrix);
-            child->m_localMatrix = &child->m_classLocalMatrix;
-            child->m_worldMatrix = &child->m_classWorldMatrix;
+            struct TraversalResetMatrix
+            {
+                void operator() (xxNode* node)
+                {
+                    node->m_classLocalMatrix = (*node->m_localMatrix);
+                    node->m_classWorldMatrix = (*node->m_worldMatrix);
+                    node->m_localMatrix = &node->m_classLocalMatrix;
+                    node->m_worldMatrix = &node->m_classWorldMatrix;
+
+                    for (uint32_t i = 0; i < node->m_childrenSize; ++i)
+                    {
+                        xxNode* child = node->m_children[i].get();
+                        if (child == nullptr)
+                            continue;
+                        (*this)(child);
+                    }
+                }
+            };
+            TraversalResetMatrix()(child.get());
+
             return true;
         }
     }
@@ -148,48 +175,9 @@ void xxNode::SetWorldMatrix(const xxMatrix4& matrix)
     (*m_worldMatrix) = matrix;
 }
 //------------------------------------------------------------------------------
-void xxNode::Update(float time)
+void xxNode::CreateLinearMatrix()
 {
-    if (m_resetLinearMatrix)
-    {
-        m_resetLinearMatrix = false;
-        LinearMatrix();
-    }
-
-    xxMatrix4* linearMatrix = m_linearMatrix;
-    if (linearMatrix)
-    {
-        // Root
-        linearMatrix[1] = linearMatrix[0];
-        linearMatrix += 2;
-
-        // Linear
-        LinearMatrixHeader* header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
-        while (header->parentMatrix && header->childrenCount)
-        {
-            xxMatrix4 parentMatrix = (*header->parentMatrix);
-            uint32_t childrenCount = header->childrenCount;
-            for (uint32_t i = 0; i < childrenCount; ++i)
-            {
-                linearMatrix[1] = xxMatrix4::Multiply(parentMatrix, linearMatrix[0]);
-                linearMatrix += 2;
-            }
-            header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
-        }
-    }
-    else if (m_parent != nullptr)
-    {
-        (*m_worldMatrix) = xxMatrix4::Multiply(*m_parent->m_worldMatrix, *m_localMatrix);
-    }
-    else
-    {
-        (*m_worldMatrix) = (*m_localMatrix);
-    }
-}
-//------------------------------------------------------------------------------
-void xxNode::LinearMatrix()
-{
-    if (m_parent != nullptr)
+    if (m_parent.lock() != nullptr)
         return;
 
     struct TraversalMatrixCount
@@ -222,11 +210,11 @@ void xxNode::LinearMatrix()
 
     struct TraversalLinearMatrix
     {
-        void operator() (xxNode* node, xxMatrix4*& linearMatrix, xxMatrix4* parentMatrix)
+        void operator() (xxNode* node, xxMatrix4*& linearMatrix)
         {
             // Header
             LinearMatrixHeader* header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
-            header->parentMatrix = parentMatrix;
+            header->parentMatrix = node->m_worldMatrix;
             header->childrenCount = node->m_childrenCount;
 
             // Children Count
@@ -249,7 +237,7 @@ void xxNode::LinearMatrix()
                 xxNode* child = node->m_children[i].get();
                 if (child != nullptr && child->m_childrenCount != 0)
                 {
-                    (*this)(child, linearMatrix, node->m_worldMatrix);
+                    (*this)(child, linearMatrix);
                 }
             }
         }
@@ -264,7 +252,7 @@ void xxNode::LinearMatrix()
     linearMatrix += 2;
 
     // Traversal
-    TraversalLinearMatrix()(this, linearMatrix, nullptr);
+    TraversalLinearMatrix()(this, linearMatrix);
 
     // Final
     LinearMatrixHeader* header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
@@ -274,5 +262,65 @@ void xxNode::LinearMatrix()
     delete[] m_linearMatrix;
     m_linearMatrix = newLinearMatrix;
     m_linearMatrixSize = newLinearMatrixSize;
+}
+//------------------------------------------------------------------------------
+bool xxNode::UpdateMatrix()
+{
+    if (m_createLinearMatrix)
+    {
+        m_createLinearMatrix = false;
+        CreateLinearMatrix();
+    }
+
+    xxMatrix4* linearMatrix = m_linearMatrix;
+    if (linearMatrix)
+    {
+        // Root
+        linearMatrix[1] = linearMatrix[0];
+        linearMatrix += 2;
+
+        // Linear
+        LinearMatrixHeader* header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
+        while (header->parentMatrix)
+        {
+            const xxMatrix4& parentMatrix = (*header->parentMatrix);
+            uint32_t childrenCount = header->childrenCount;
+
+            xxMatrix4::MultiplyArray(parentMatrix, childrenCount, &linearMatrix[0], sizeof(xxMatrix4) * 2, &linearMatrix[1], sizeof(xxMatrix4) * 2);
+            linearMatrix += childrenCount * 2;
+
+            header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
+        }
+
+        return false;
+    }
+
+    if (m_parent.lock() == nullptr)
+    {
+        (*m_worldMatrix) = (*m_localMatrix);
+    }
+    else
+    {
+        (*m_worldMatrix) = xxMatrix4::Multiply(*m_parent.lock()->m_worldMatrix, *m_localMatrix);
+    }
+
+    return true;
+}
+//------------------------------------------------------------------------------
+void xxNode::Update(float time, bool updateMatrix)
+{
+    if (updateMatrix)
+    {
+        updateMatrix = UpdateMatrix();
+    }
+
+    for (uint32_t i = 0; i < m_childrenSize; ++i)
+    {
+        xxNode* child = m_children[i].get();
+        if (child != nullptr)
+        {
+            child->Update(time, updateMatrix);
+        }
+    }
 }
 //------------------------------------------------------------------------------

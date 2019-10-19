@@ -13,6 +13,8 @@ union xxCPPAPI xxVector2
     struct { float x, y; };
     struct { float u, v; };
 
+    xxVector2 operator - () const;
+
     static const xxVector2 ZERO;
     static const xxVector2 ONE;
 
@@ -25,6 +27,8 @@ union xxCPPAPI xxVector3
     struct { float x, y, z; };
     struct { float r, g, b; };
     struct { float u, v, w; };
+
+    xxVector3 operator - () const;
 
     static const xxVector3 ZERO;
     static const xxVector3 ONE;
@@ -48,10 +52,9 @@ union xxCPPAPI xxVector4
     __m128 v;
 #endif
 
-    union { float x; float r; };
-    union { float y; float g; };
-    union { float z; float b; };
-    union { float w; float a; };
+    xxVector4 operator - () const;
+
+    xxVector4& operator = (const xxVector4& other);
 
     static const xxVector4 ZERO;
     static const xxVector4 ONE;
@@ -86,6 +89,11 @@ struct xxCPPAPI xxMatrix4
 {
     xxVector4 v[4];
 
-    static xxMatrix4 Multiply(const xxMatrix4& left, const xxMatrix4& right);
+    static xxMatrix4 Multiply(const xxMatrix4& matrix, float scale);
+    static xxVector4 Multiply(const xxMatrix4& matrix, const xxVector4& vector);
+    static xxMatrix4 Multiply(const xxMatrix4& matrix, const xxMatrix4& other);
+    static void MultiplyArray(const xxMatrix4& matrix, int count, const xxVector4* input, int inputStride, xxVector4* output, int outputStride);
+    static void MultiplyArray(const xxMatrix4& matrix, int count, const xxMatrix4* input, int inputStride, xxMatrix4* output, int outputStride);
+
     static const xxMatrix4 IDENTITY;
 };

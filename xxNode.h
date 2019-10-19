@@ -14,6 +14,7 @@
 
 class xxNode;
 typedef std::shared_ptr<xxNode> xxNodePtr;
+typedef std::weak_ptr<xxNode> xxNodeWeakPtr;
 
 class xxCPPAPI xxNode
 {
@@ -25,6 +26,7 @@ public:
 
     xxNodePtr GetParent() const;
     xxNodePtr GetChild(uint32_t index);
+    uint32_t GetChildCount() const;
     uint32_t GetChildSize() const;
     bool AttachChild(xxNodePtr& child);
     bool DetachChild(xxNodePtr& child);
@@ -33,25 +35,26 @@ public:
     const xxMatrix4& GetWorldMatrix() const;
     void SetLocalMatrix(const xxMatrix4& matrix);
     void SetWorldMatrix(const xxMatrix4& matrix);
+    void CreateLinearMatrix();
+    bool UpdateMatrix();
 
-    void Update(float time);
-    void LinearMatrix();
+    void Update(float time, bool updateMatrix = true);
 
 protected:
-    xxNodePtr   m_parent;
-    xxNodePtr*  m_children;
-    uint32_t    m_childrenCount;
-    uint32_t    m_childrenSize;
+    xxNodeWeakPtr   m_parent;
+    xxNodePtr*      m_children;
+    uint32_t        m_childrenCount;
+    uint32_t        m_childrenSize;
 
-    xxMatrix4*  m_localMatrix;
-    xxMatrix4*  m_worldMatrix;
+    xxMatrix4*      m_localMatrix;
+    xxMatrix4*      m_worldMatrix;
 
-    xxMatrix4   m_classLocalMatrix;
-    xxMatrix4   m_classWorldMatrix;
-    xxMatrix4*  m_linearMatrix;
-    uint32_t    m_linearMatrixSize;
+    xxMatrix4       m_classLocalMatrix;
+    xxMatrix4       m_classWorldMatrix;
+    xxMatrix4*      m_linearMatrix;
+    uint32_t        m_linearMatrixSize;
 
-    bool        m_resetLinearMatrix;
+    bool            m_createLinearMatrix;
 
     struct LinearMatrixHeader
     {

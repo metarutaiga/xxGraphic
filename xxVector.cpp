@@ -6,6 +6,10 @@
 //==============================================================================
 #include "xxVector.h"
 
+#if defined(_MSC_VER)
+#   pragma optimize("y", on)
+#endif
+
 const xxVector2 xxVector2::ZERO     = { 0, 0 };
 const xxVector2 xxVector2::ONE      = { 1, 1 };
 const xxVector2 xxVector2::X        = { 1, 0 };
@@ -39,32 +43,96 @@ const xxMatrix3 xxMatrix3::IDENTITY = { xxVector3::X, xxVector3::Y, xxVector3::Z
 const xxMatrix4 xxMatrix4::IDENTITY = { xxVector4::X, xxVector4::Y, xxVector4::Z, xxVector4::W };
 
 //==============================================================================
+//  Vector 2
+//==============================================================================
+xxVector2 xxVector2::operator - () const
+{
+    return { -x, -y };
+}
+//==============================================================================
+//  Vector 3
+//==============================================================================
+xxVector3 xxVector3::operator - () const
+{
+    return { -x, -y, -z };
+}
+//==============================================================================
+//  Vector 4
+//==============================================================================
+xxVector4 xxVector4::operator - () const
+{
+    return { -x, -y, -z, -w };
+}
+//------------------------------------------------------------------------------
+xxVector4& xxVector4::operator = (const xxVector4& other)
+{
+#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
+    (*this).v = other.v;
+#else
+    (*this).x = other.x;
+    (*this).y = other.y;
+    (*this).z = other.z;
+    (*this).w = other.w;
+#endif
+
+    return (*this);
+}
+//==============================================================================
 //  Matrix 4x4
 //==============================================================================
-xxMatrix4 xxMatrix4::Multiply(const xxMatrix4& left, const xxMatrix4& right)
+xxMatrix4 xxMatrix4::Multiply(const xxMatrix4& __restrict m, float s)
 {
-    xxMatrix4 newMatrix;
+    xxMatrix4 r;
 
-    newMatrix.v[0].v =                               _mm_mul_ps(right.v[0].v, _mm_set1_ps(left.v[0].x));
-    newMatrix.v[0].v = _mm_add_ps(newMatrix.v[0].v,  _mm_mul_ps(right.v[1].v, _mm_set1_ps(left.v[0].y)));
-    newMatrix.v[0].v = _mm_add_ps(newMatrix.v[0].v,  _mm_mul_ps(right.v[2].v, _mm_set1_ps(left.v[0].z)));
-    newMatrix.v[0].v = _mm_add_ps(newMatrix.v[0].v,  _mm_mul_ps(right.v[3].v, _mm_set1_ps(left.v[0].w)));
+    r.v[0].v = _mm_mul_ps(m.v[0].v, _mm_set1_ps(s));
+    r.v[1].v = _mm_mul_ps(m.v[1].v, _mm_set1_ps(s));
+    r.v[2].v = _mm_mul_ps(m.v[2].v, _mm_set1_ps(s));
+    r.v[3].v = _mm_mul_ps(m.v[3].v, _mm_set1_ps(s));
 
-    newMatrix.v[1].v =                               _mm_mul_ps(right.v[0].v, _mm_set1_ps(left.v[1].x));
-    newMatrix.v[1].v = _mm_add_ps(newMatrix.v[1].v,  _mm_mul_ps(right.v[1].v, _mm_set1_ps(left.v[1].y)));
-    newMatrix.v[1].v = _mm_add_ps(newMatrix.v[1].v,  _mm_mul_ps(right.v[2].v, _mm_set1_ps(left.v[1].z)));
-    newMatrix.v[1].v = _mm_add_ps(newMatrix.v[1].v,  _mm_mul_ps(right.v[3].v, _mm_set1_ps(left.v[1].w)));
+    return r;
+}
+//------------------------------------------------------------------------------
+xxVector4 xxMatrix4::Multiply(const xxMatrix4& __restrict m, const xxVector4& __restrict v)
+{
+    xxVector4 r;
 
-    newMatrix.v[2].v =                               _mm_mul_ps(right.v[0].v, _mm_set1_ps(left.v[2].x));
-    newMatrix.v[2].v = _mm_add_ps(newMatrix.v[2].v,  _mm_mul_ps(right.v[1].v, _mm_set1_ps(left.v[2].y)));
-    newMatrix.v[2].v = _mm_add_ps(newMatrix.v[2].v,  _mm_mul_ps(right.v[2].v, _mm_set1_ps(left.v[2].z)));
-    newMatrix.v[2].v = _mm_add_ps(newMatrix.v[2].v,  _mm_mul_ps(right.v[3].v, _mm_set1_ps(left.v[2].w)));
+    r.v =                   _mm_mul_ps(m.v[0].v, _mm_shuffle1_ps(v.v, _MM_SHUFFLE(0,0,0,0)));
+    r.v = _mm_add_ps(r.v,   _mm_mul_ps(m.v[1].v, _mm_shuffle1_ps(v.v, _MM_SHUFFLE(1,1,1,1))));
+    r.v = _mm_add_ps(r.v,   _mm_mul_ps(m.v[2].v, _mm_shuffle1_ps(v.v, _MM_SHUFFLE(2,2,2,2))));
+    r.v = _mm_add_ps(r.v,   _mm_mul_ps(m.v[3].v, _mm_shuffle1_ps(v.v, _MM_SHUFFLE(3,3,3,3))));
 
-    newMatrix.v[3].v =                               _mm_mul_ps(right.v[0].v, _mm_set1_ps(left.v[3].x));
-    newMatrix.v[3].v = _mm_add_ps(newMatrix.v[3].v,  _mm_mul_ps(right.v[1].v, _mm_set1_ps(left.v[3].y)));
-    newMatrix.v[3].v = _mm_add_ps(newMatrix.v[3].v,  _mm_mul_ps(right.v[2].v, _mm_set1_ps(left.v[3].z)));
-    newMatrix.v[3].v = _mm_add_ps(newMatrix.v[3].v,  _mm_mul_ps(right.v[3].v, _mm_set1_ps(left.v[3].w)));
+    return r;
+}
+//------------------------------------------------------------------------------
+xxMatrix4 xxMatrix4::Multiply(const xxMatrix4& __restrict m, const xxMatrix4& __restrict o)
+{
+    xxMatrix4 r;
 
-    return newMatrix;
+    r.v[0] = Multiply(m, o.v[0]);
+    r.v[1] = Multiply(m, o.v[1]);
+    r.v[2] = Multiply(m, o.v[2]);
+    r.v[3] = Multiply(m, o.v[3]);
+
+    return r;
+}
+//------------------------------------------------------------------------------
+void xxMatrix4::MultiplyArray(const xxMatrix4& __restrict matrix, int count, const xxVector4* __restrict input, int inputStride, xxVector4* __restrict output, int outputStride)
+{
+    for (int x = 0; x < count; ++x)
+    {
+        (*output) = Multiply(matrix, (*input));
+        input = reinterpret_cast<xxVector4*>((char*)input + inputStride);
+        output = reinterpret_cast<xxVector4*>((char*)output + outputStride);
+    }
+}
+//------------------------------------------------------------------------------
+void xxMatrix4::MultiplyArray(const xxMatrix4& __restrict matrix, int count, const xxMatrix4* __restrict input, int inputStride, xxMatrix4* __restrict output, int outputStride)
+{
+    for (int x = 0; x < count; ++x)
+    {
+        (*output) = Multiply(matrix, (*input));
+        input = reinterpret_cast<xxMatrix4*>((char*)input + inputStride);
+        output = reinterpret_cast<xxMatrix4*>((char*)output + outputStride);
+    }
 }
 //==============================================================================
