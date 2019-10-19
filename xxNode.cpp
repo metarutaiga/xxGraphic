@@ -21,6 +21,10 @@ xxNode::xxNode()
     m_classLocalMatrix = xxMatrix4::IDENTITY;
     m_classWorldMatrix = xxMatrix4::IDENTITY;
 
+    m_legacyRotate = xxMatrix3::IDENTITY;
+    m_legacyTranslate = xxVector3::ZERO;
+    m_legacyScale = -1.0f;
+
     m_linearMatrix = nullptr;
     m_linearMatrixSize = 0;
 
@@ -168,6 +172,8 @@ const xxMatrix4& xxNode::GetWorldMatrix() const
 void xxNode::SetLocalMatrix(const xxMatrix4& matrix)
 {
     (*m_localMatrix) = matrix;
+
+    m_legacyScale = -1.0f;
 }
 //------------------------------------------------------------------------------
 void xxNode::SetWorldMatrix(const xxMatrix4& matrix)
@@ -301,10 +307,86 @@ bool xxNode::UpdateMatrix()
     }
     else
     {
-        (*m_worldMatrix) = xxMatrix4::Multiply(*m_parent.lock()->m_worldMatrix, *m_localMatrix);
+        xxMatrix4::Multiply((*m_worldMatrix), *m_parent.lock()->m_worldMatrix, *m_localMatrix);
     }
 
     return true;
+}
+//------------------------------------------------------------------------------
+xxMatrix3 xxNode::GetRotate() const
+{
+    if (m_legacyScale < 0.0f)
+    {
+        xxMatrix3 rotate;
+
+        rotate.v[0] = { (*m_localMatrix).v[0].x, (*m_localMatrix).v[0].y, (*m_localMatrix).v[0].z };
+        rotate.v[1] = { (*m_localMatrix).v[1].x, (*m_localMatrix).v[1].y, (*m_localMatrix).v[1].z };
+        rotate.v[2] = { (*m_localMatrix).v[2].x, (*m_localMatrix).v[2].y, (*m_localMatrix).v[2].z };
+
+        return rotate;
+    }
+
+    return m_legacyRotate;
+}
+//------------------------------------------------------------------------------
+xxVector3 xxNode::GetTranslate() const
+{
+    if (m_legacyScale < 0.0f)
+    {
+        xxVector3 translate;
+
+        translate = { (*m_localMatrix).v[3].x, (*m_localMatrix).v[3].y, (*m_localMatrix).v[3].z };
+
+        return translate;
+    }
+
+    return m_legacyTranslate;
+}
+//------------------------------------------------------------------------------
+float xxNode::GetScale() const
+{
+    if (m_legacyScale < 0.0f)
+        return 1.0f;
+
+    return m_legacyScale;
+}
+//------------------------------------------------------------------------------
+void xxNode::SetRotate(const xxMatrix3& rotate)
+{
+    if (m_legacyScale < 0.0f)
+        CreateRotateTranslateScale();
+
+    m_legacyRotate = rotate;
+}
+//------------------------------------------------------------------------------
+void xxNode::SetTranslate(const xxVector3& translate)
+{
+    if (m_legacyScale < 0.0f)
+        CreateRotateTranslateScale();
+
+    m_legacyTranslate = translate;
+}
+//------------------------------------------------------------------------------
+void xxNode::SetScale(float scale)
+{
+    if (m_legacyScale < 0.0f)
+        CreateRotateTranslateScale();
+
+    m_legacyScale = scale;
+}
+//------------------------------------------------------------------------------
+void xxNode::CreateRotateTranslateScale()
+{
+    xxMatrix4::FastDecompose((*m_localMatrix), m_legacyRotate, m_legacyTranslate, m_legacyScale);
+}
+//------------------------------------------------------------------------------
+void xxNode::UpdateRotateTranslateScale()
+{
+    for (int i = 0; i < 3; ++i)
+    {
+        xxVector4::Multiply((*m_localMatrix).v[i], { m_legacyRotate.v[i].x, m_legacyRotate.v[i].y, m_legacyRotate.v[i].z }, m_legacyScale);
+    }
+    (*m_localMatrix).v[3] = { m_legacyTranslate.x, m_legacyTranslate.y, m_legacyTranslate.z, 1.0f };
 }
 //------------------------------------------------------------------------------
 void xxNode::Update(float time, bool updateMatrix)

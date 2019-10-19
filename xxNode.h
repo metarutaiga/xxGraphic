@@ -38,6 +38,15 @@ public:
     void CreateLinearMatrix();
     bool UpdateMatrix();
 
+    xxMatrix3 GetRotate() const;
+    xxVector3 GetTranslate() const;
+    float GetScale() const;
+    void SetRotate(const xxMatrix3& rotate);
+    void SetTranslate(const xxVector3& translate);
+    void SetScale(float scale);
+    void CreateRotateTranslateScale();
+    void UpdateRotateTranslateScale();
+
     void Update(float time, bool updateMatrix = true);
 
 protected:
@@ -48,6 +57,10 @@ protected:
 
     xxMatrix4*      m_localMatrix;
     xxMatrix4*      m_worldMatrix;
+
+    xxMatrix3       m_legacyRotate;
+    xxVector3       m_legacyTranslate;
+    float           m_legacyScale;
 
     xxMatrix4       m_classLocalMatrix;
     xxMatrix4       m_classWorldMatrix;

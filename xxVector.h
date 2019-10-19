@@ -30,6 +30,9 @@ union xxCPPAPI xxVector3
 
     xxVector3 operator - () const;
 
+    static float SquaredLength(const xxVector3& vector);
+    static float Length(const xxVector3& vector);
+
     static const xxVector3 ZERO;
     static const xxVector3 ONE;
 
@@ -55,6 +58,8 @@ union xxCPPAPI xxVector4
     xxVector4 operator - () const;
 
     xxVector4& operator = (const xxVector4& other);
+
+    static void Multiply(xxVector4& output, const xxVector4& vector, float scale);
 
     static const xxVector4 ZERO;
     static const xxVector4 ONE;
@@ -89,9 +94,13 @@ struct xxCPPAPI xxMatrix4
 {
     xxVector4 v[4];
 
-    static xxMatrix4 Multiply(const xxMatrix4& matrix, float scale);
-    static xxVector4 Multiply(const xxMatrix4& matrix, const xxVector4& vector);
-    static xxMatrix4 Multiply(const xxMatrix4& matrix, const xxMatrix4& other);
+    static float Determinant(const xxMatrix4& matrix);
+
+    static void FastDecompose(const xxMatrix4& matrix, xxMatrix3& rotate, xxVector3& translate, float& scale);
+
+    static void Multiply(xxMatrix4& output, const xxMatrix4& matrix, float scale);
+    static void Multiply(xxVector4& output, const xxMatrix4& matrix, const xxVector4& vector);
+    static void Multiply(xxMatrix4& output, const xxMatrix4& matrix, const xxMatrix4& other);
     static void MultiplyArray(const xxMatrix4& matrix, int count, const xxVector4* input, int inputStride, xxVector4* output, int outputStride);
     static void MultiplyArray(const xxMatrix4& matrix, int count, const xxMatrix4* input, int inputStride, xxMatrix4* output, int outputStride);
 
