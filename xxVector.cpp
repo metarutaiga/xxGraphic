@@ -49,68 +49,18 @@ const xxMatrix4 xxMatrix4::IDENTITY = { 1, 0, 0, 0,
                                         0, 0, 0, 1 };
 
 //==============================================================================
-//  Vector 2
-//==============================================================================
-xxVector2 xxVector2::operator - () const
-{
-    return { -x, -y };
-}
-//==============================================================================
-//  Vector 3
-//==============================================================================
-xxVector3 xxVector3::operator - () const
-{
-    return { -x, -y, -z };
-}
-//------------------------------------------------------------------------------
-float xxVector3::SquaredLength(const xxVector3& vector)
-{
-    return vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
-}
-//------------------------------------------------------------------------------
-float xxVector3::Length(const xxVector3& vector)
-{
-    return sqrtf(SquaredLength(vector));
-}
-//==============================================================================
-//  Vector 4
-//==============================================================================
-xxVector4 xxVector4::operator - () const
-{
-    return { -x, -y, -z, -w };
-}
-//------------------------------------------------------------------------------
-xxVector4& xxVector4::operator = (const xxVector4& other)
-{
-#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
-    (*this).v = other.v;
-#else
-    (*this).x = other.x;
-    (*this).y = other.y;
-    (*this).z = other.z;
-    (*this).w = other.w;
-#endif
-
-    return (*this);
-}
-//------------------------------------------------------------------------------
-void xxVector4::Multiply(xxVector4& output, const xxVector4& vector, float scale)
-{
-    output.v = _mm_mul_ps(vector.v, _mm_set1_ps(scale));
-}
-//==============================================================================
 //  Matrix 4x4
 //==============================================================================
-float xxMatrix4::Determinant(const xxMatrix4& matrix)
+float xxMatrix4::Determinant(const xxMatrix4& __restrict matrix)
 {
     return  matrix.v[0].x * (matrix.v[1].y * matrix.v[2].z - matrix.v[1].z * matrix.v[2].y) +
             matrix.v[0].y * (matrix.v[1].z * matrix.v[2].x - matrix.v[1].x * matrix.v[2].z) +
             matrix.v[0].z * (matrix.v[1].x * matrix.v[2].y - matrix.v[1].y * matrix.v[2].x);
 }
 //------------------------------------------------------------------------------
-void xxMatrix4::FastDecompose(const xxMatrix4& matrix, xxMatrix3& rotate, xxVector3& translate, float& scale)
+void xxMatrix4::FastDecompose(const xxMatrix4& __restrict matrix, xxMatrix3& __restrict rotate, xxVector3& __restrict translate, float& __restrict scale)
 {
-    scale = xxVector3::Length({ matrix.v[0].x, matrix.v[0].y, matrix.v[0].z });
+    scale = xxVector3{ matrix.v[0].x, matrix.v[0].y, matrix.v[0].z }.Length();
     translate = { matrix.v[3].x, matrix.v[3].y, matrix.v[3].z };
 
     float invScale = 1.0f / scale;

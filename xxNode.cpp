@@ -384,7 +384,7 @@ void xxNode::UpdateRotateTranslateScale()
 {
     for (int i = 0; i < 3; ++i)
     {
-        xxVector4::Multiply((*m_localMatrix).v[i], { m_legacyRotate.v[i].x, m_legacyRotate.v[i].y, m_legacyRotate.v[i].z }, m_legacyScale);
+        (*m_localMatrix).v[i] = xxVector4{ m_legacyRotate.v[i].x, m_legacyRotate.v[i].y, m_legacyRotate.v[i].z } * m_legacyScale;
     }
     (*m_localMatrix).v[3] = { m_legacyTranslate.x, m_legacyTranslate.y, m_legacyTranslate.z, 1.0f };
 }
