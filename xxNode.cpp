@@ -47,7 +47,12 @@ xxNode::~xxNode()
 //------------------------------------------------------------------------------
 xxNodePtr xxNode::Create()
 {
-    return std::make_shared<xxNode>();
+    xxNodePtr node = xxNodePtr(new xxNode);
+    if (node == nullptr)
+        return xxNodePtr();
+
+    node->m_this = node;
+    return node->m_this.lock();
 }
 //------------------------------------------------------------------------------
 xxNodePtr xxNode::GetParent() const
@@ -102,15 +107,17 @@ bool xxNode::AttachChild(xxNodePtr& child)
     {
         if (m_children[i] == nullptr)
         {
+            child->m_parent = m_this;
             m_children[i] = child;
             m_childrenCount++;
 
             xxNode* node = this;
-            while (node->m_parent.lock())
+            while (xxNode* parent = node->m_parent.lock().get())
             {
-                node = node->m_parent.lock().get();
+                node = parent;
             }
             node->m_createLinearMatrix = true;
+
             return true;
         }
     }
@@ -129,6 +136,7 @@ bool xxNode::DetachChild(xxNodePtr& child)
     {
         if (m_children[i] == child)
         {
+            child->m_parent.reset();
             m_children[i].reset();
             m_childrenCount--;
 

@@ -268,12 +268,14 @@ int xxLog(const char* tag, const char* format, ...)
     __android_log_print(ANDROID_LOG_INFO, tag, "%s", buffer);
 #elif defined(xxWINDOWS) && defined(_UNICODE)
     wchar_t temp[1024];
-    ::MultiByteToWideChar(CP_UTF8, 0, buffer, -1, temp, MAX_PATH);
+    int length = ::MultiByteToWideChar(CP_UTF8, 0, buffer, -1, temp, MAX_PATH);
+    temp[length - 1] = L'\n';
+    temp[length - 0] = L'\0';
     OutputDebugStringW(temp);
-    OutputDebugStringW(L"\n");
 #elif defined(xxWINDOWS)
+    buffer[tagLength + formatLength - 1] = '\n';
+    buffer[tagLength + formatLength - 0] = '\0';
     OutputDebugStringA(buffer);
-    OutputDebugStringA("\n");
 #else
     printf("%s\n", buffer);
 #endif

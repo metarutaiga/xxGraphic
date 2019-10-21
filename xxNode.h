@@ -9,7 +9,6 @@
 #include "xxSystem.h"
 #include "xxVector.h"
 
-#define _ENABLE_EXTENDED_ALIGNED_STORAGE
 #include <memory>
 
 class xxNode;
@@ -19,7 +18,6 @@ typedef std::weak_ptr<xxNode> xxNodeWeakPtr;
 class xxCPPAPI xxNode
 {
 public:
-    xxNode();
     virtual ~xxNode();
 
     static xxNodePtr Create();
@@ -50,7 +48,10 @@ public:
     void Update(float time, bool updateMatrix = true);
 
 protected:
+    xxNode();
+
     xxNodeWeakPtr   m_parent;
+    xxNodeWeakPtr   m_this;
     xxNodePtr*      m_children;
     uint32_t        m_childrenCount;
     uint32_t        m_childrenSize;

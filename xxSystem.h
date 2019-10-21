@@ -70,6 +70,22 @@
 #   define xxWINDOWS 1
 #endif
 
+#if defined(__llvm__)
+#   pragma clang diagnostic ignored "-Wcomment"
+#   pragma clang diagnostic ignored "-Wignored-pragma-optimize"
+#   pragma clang diagnostic ignored "-Wmicrosoft-cast"
+#   pragma clang diagnostic ignored "-Wmissing-braces"
+#   pragma clang diagnostic ignored "-Wunused-value"
+#   pragma clang diagnostic ignored "-Wunused-variable"
+#   if __has_feature(address_sanitizer)
+#       if defined(_M_AMD64)
+#           pragma comment(lib, "clang_rt.asan-x86_64")
+#       elif defined(_M_IX86)
+#           pragma comment(lib, "clang_rt.asan-i386")
+#       endif
+#   endif
+#endif
+
 #if !defined(__cplusplus)
 #   include <stdbool.h>
 #endif
@@ -133,7 +149,7 @@
 
 #define xxSizeOf(var)               (sizeof(var))
 #define xxCountOf(var)              (sizeof(var) / sizeof(*var))
-#define xxOffsetOf(st, m)           (offsetof(st, m))
+#define xxOffsetOf(s, m)            ((char*)&((s*)nullptr)->m - (char*)nullptr)
 
 #define xxRotateLeft(v, s)          ((v << s) | (v >> (sizeof(v) * 8 - s)))
 #define xxRotateRight(v, s)         ((v >> s) | (v << (sizeof(v) * 8 - s)))
@@ -141,10 +157,10 @@
 #define xxLocalBreak()              switch (0) case 0:
 
 #if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
-#   if defined(_MSC_VER)
-#       define _mm_shuffle1_ps(v,i) _mm_shuffle_ps(v, v, i)
-#   else
+#   if defined(__llvm__)
 #       define _mm_shuffle1_ps(v,i) _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(v), i))
+#   else
+#       define _mm_shuffle1_ps(v,i) _mm_shuffle_ps(v, v, i)
 #   endif
 #endif
 
