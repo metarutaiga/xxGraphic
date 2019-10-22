@@ -133,9 +133,9 @@ static uint64_t xxTSCFrequencyImpl()
 #if defined(__aarch64__)
     unsigned long cntfrq;
     asm volatile("mrs %0, cntfrq_el0" : "=r" (cntfrq));
-    return cntfrq;
-#else
-#if defined(xxWINDOWS)
+
+    unsigned long counter = cntfrq;
+#elif defined(xxWINDOWS)
     LARGE_INTEGER performanceBegin;
     LARGE_INTEGER performanceEnd;
 
@@ -155,6 +155,8 @@ static uint64_t xxTSCFrequencyImpl()
         delta = 100.0;
 
     LONGLONG counter = LONGLONG((tscEnd - tscBegin) * 1000.0 / delta);
+    float mhz = counter / 1000000.0f;
+    counter = LONGLONG(LONGLONG(mhz / 100.0f + 0.5f) * 100.0 * 1000000.0);
 #else
     timeval tmBegin;
     timeval tmEnd;
@@ -176,13 +178,13 @@ static uint64_t xxTSCFrequencyImpl()
         delta = 100.0;
 
     int64_t counter = int64_t((tscEnd - tscBegin) * 1000.0 / delta);
+    float mhz = counter / 1000000.0f;
+    counter = int64_t(int64_t(mhz / 100.0f + 0.5f) * 100.0 * 1000000.0);
 #endif
 
-    float mhz = counter / 1000000.0f;
-    counter = int64_t(int64_t(mhz / 100.0 + 0.5) * 100.0 * 1000000.0);
+    xxLog("xxSystem", "Frequency : %llu", counter);
 
     return counter;
-#endif
 }
 //------------------------------------------------------------------------------
 static uint64_t xxTSCFrequency = xxTSCFrequencyImpl();

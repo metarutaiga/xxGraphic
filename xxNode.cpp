@@ -18,17 +18,16 @@ xxNode::xxNode()
     m_localMatrix = &m_classLocalMatrix;
     m_worldMatrix = &m_classWorldMatrix;
 
-    m_classLocalMatrix = xxMatrix4::IDENTITY;
-    m_classWorldMatrix = xxMatrix4::IDENTITY;
-
     m_legacyRotate = xxMatrix3::IDENTITY;
     m_legacyTranslate = xxVector3::ZERO;
     m_legacyScale = -1.0f;
 
+    m_classLocalMatrix = xxMatrix4::IDENTITY;
+    m_classWorldMatrix = xxMatrix4::IDENTITY;
+
     m_linearMatrix = nullptr;
     m_linearMatrixSize = 0;
-
-    m_createLinearMatrix = false;
+    m_linearMatrixCreate = false;
 
 #if 0
     xxLog("xxNode", "Construct : %p", this);
@@ -116,7 +115,7 @@ bool xxNode::AttachChild(xxNodePtr& child)
             {
                 node = parent;
             }
-            node->m_createLinearMatrix = true;
+            node->m_linearMatrixCreate = true;
 
             return true;
         }
@@ -280,9 +279,9 @@ void xxNode::CreateLinearMatrix()
 //------------------------------------------------------------------------------
 bool xxNode::UpdateMatrix()
 {
-    if (m_createLinearMatrix)
+    if (m_linearMatrixCreate)
     {
-        m_createLinearMatrix = false;
+        m_linearMatrixCreate = false;
         CreateLinearMatrix();
     }
 
@@ -298,7 +297,7 @@ bool xxNode::UpdateMatrix()
         while (header->parentMatrix)
         {
             const xxMatrix4& parentMatrix = (*header->parentMatrix);
-            uint32_t childrenCount = header->childrenCount;
+            size_t childrenCount = header->childrenCount;
 
             xxMatrix4::MultiplyArray(parentMatrix, childrenCount, &linearMatrix[0], sizeof(xxMatrix4) * 2, &linearMatrix[1], sizeof(xxMatrix4) * 2);
             linearMatrix += childrenCount * 2;

@@ -128,35 +128,81 @@ union xxCPPAPI xxVector4
     static const xxVector4 WHITE;
 };
 
-struct xxCPPAPI xxMatrix2
+typedef struct xxMatrix2x3 xxMatrix2;
+typedef struct xxMatrix3x3 xxMatrix3;
+typedef struct xxMatrix4x4 xxMatrix4;
+
+struct xxCPPAPI xxMatrix2x2
 {
     xxVector2 v[2];
 
-    static const xxMatrix2 IDENTITY;
+    static const xxMatrix2x2 IDENTITY;
 };
 
-struct xxCPPAPI xxMatrix3
+struct xxCPPAPI xxMatrix2x3
+{
+    xxVector2 v[3];
+
+    static const xxMatrix2x3 IDENTITY;
+};
+
+struct xxCPPAPI xxMatrix2x4
+{
+    xxVector2 v[4];
+
+    static const xxMatrix2x4 IDENTITY;
+};
+
+struct xxCPPAPI xxMatrix3x2
+{
+    xxVector3 v[2];
+
+    static const xxMatrix3x2 IDENTITY;
+};
+
+struct xxCPPAPI xxMatrix3x3
 {
     xxVector3 v[3];
 
-    static const xxMatrix3 IDENTITY;
+    static const xxMatrix3x3 IDENTITY;
 };
 
-struct xxCPPAPI xxMatrix4
+struct xxCPPAPI xxMatrix3x4
+{
+    xxVector3 v[4];
+
+    static const xxMatrix3x4 IDENTITY;
+};
+
+struct xxCPPAPI xxMatrix4x2
+{
+    xxVector4 v[2];
+
+    static const xxMatrix4x2 IDENTITY;
+};
+
+struct xxCPPAPI xxMatrix4x3
+{
+    xxVector4 v[3];
+
+    static const xxMatrix4x3 IDENTITY;
+};
+
+struct xxCPPAPI xxMatrix4x4
 {
     xxVector4 v[4];
 
-    static float Determinant(const xxMatrix4& matrix);
+    static float Determinant(const xxMatrix4& __restrict matrix);
 
-    static void FastDecompose(const xxMatrix4& matrix, xxMatrix3& rotate, xxVector3& translate, float& scale);
+    static void FastDecompose(const xxMatrix4& __restrict matrix, xxMatrix3& __restrict rotate, xxVector3& __restrict translate, float& __restrict scale);
 
-    static void Multiply(xxMatrix4& output, const xxMatrix4& matrix, float scale);
-    static void Multiply(xxVector4& output, const xxMatrix4& matrix, const xxVector4& vector);
-    static void Multiply(xxMatrix4& output, const xxMatrix4& matrix, const xxMatrix4& other);
-    static void MultiplyArray(const xxMatrix4& matrix, int count, const xxVector4* input, int inputStride, xxVector4* output, int outputStride);
-    static void MultiplyArray(const xxMatrix4& matrix, int count, const xxMatrix4* input, int inputStride, xxMatrix4* output, int outputStride);
+    static void Multiply(xxMatrix4& __restrict output, const xxMatrix4& __restrict matrix, float scale);
+    static void Multiply(xxVector4& __restrict output, const xxMatrix4& __restrict matrix, const xxVector4& __restrict vector);
+    static void Multiply(xxMatrix4& __restrict output, const xxMatrix4& __restrict matrix, const xxMatrix4& __restrict other);
+    static void MultiplyArray(const xxMatrix4& __restrict matrix, size_t count, const xxVector4* __restrict input, int inputStride, xxVector4* __restrict output, int outputStride);
+    static void MultiplyArray(const xxMatrix4& __restrict matrix, size_t count, const xxMatrix4* __restrict input, int inputStride, xxMatrix4* __restrict output, int outputStride);
 
-    static const xxMatrix4 IDENTITY;
+    static const xxMatrix4x4 IDENTITY;
 };
 
 #if defined(_MSC_VER)

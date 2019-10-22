@@ -65,14 +65,14 @@ protected:
 
     xxMatrix4       m_classLocalMatrix;
     xxMatrix4       m_classWorldMatrix;
-    xxMatrix4*      m_linearMatrix;
-    uint32_t        m_linearMatrixSize;
-
-    bool            m_createLinearMatrix;
 
     struct LinearMatrixHeader
     {
         xxMatrix4*  parentMatrix;
         uint32_t    childrenCount;
     };
+
+    xxMatrix4*      m_linearMatrix;
+    uint32_t        m_linearMatrixSize;
+    bool            m_linearMatrixCreate;
 };

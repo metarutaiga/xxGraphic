@@ -10,43 +10,61 @@
 #   pragma optimize("y", on)
 #endif
 
-const xxVector2 xxVector2::ZERO     = { 0, 0 };
-const xxVector2 xxVector2::ONE      = { 1, 1 };
-const xxVector2 xxVector2::X        = { 1, 0 };
-const xxVector2 xxVector2::Y        = { 0, 1 };
+const xxVector2 xxVector2::ZERO         = { 0, 0 };
+const xxVector2 xxVector2::ONE          = { 1, 1 };
+const xxVector2 xxVector2::X            = { 1, 0 };
+const xxVector2 xxVector2::Y            = { 0, 1 };
 
-const xxVector3 xxVector3::ZERO     = { 0, 0, 0 };
-const xxVector3 xxVector3::ONE      = { 1, 1, 1 };
-const xxVector3 xxVector3::X        = { 1, 0, 0 };
-const xxVector3 xxVector3::Y        = { 0, 1, 0 };
-const xxVector3 xxVector3::Z        = { 0, 0, 1 };
-const xxVector3 xxVector3::BLACK    = { 0, 0, 0 };
-const xxVector3 xxVector3::BLUE     = { 0, 0, 1 };
-const xxVector3 xxVector3::GREEN    = { 0, 1, 0 };
-const xxVector3 xxVector3::RED      = { 1, 0, 0 };
-const xxVector3 xxVector3::WHITE    = { 1, 1, 1 };
+const xxVector3 xxVector3::ZERO         = { 0, 0, 0 };
+const xxVector3 xxVector3::ONE          = { 1, 1, 1 };
+const xxVector3 xxVector3::X            = { 1, 0, 0 };
+const xxVector3 xxVector3::Y            = { 0, 1, 0 };
+const xxVector3 xxVector3::Z            = { 0, 0, 1 };
+const xxVector3 xxVector3::BLACK        = { 0, 0, 0 };
+const xxVector3 xxVector3::BLUE         = { 0, 0, 1 };
+const xxVector3 xxVector3::GREEN        = { 0, 1, 0 };
+const xxVector3 xxVector3::RED          = { 1, 0, 0 };
+const xxVector3 xxVector3::WHITE        = { 1, 1, 1 };
 
-const xxVector4 xxVector4::ZERO     = { 0, 0, 0, 0 };
-const xxVector4 xxVector4::ONE      = { 1, 1, 1, 1 };
-const xxVector4 xxVector4::X        = { 1, 0, 0, 0 };
-const xxVector4 xxVector4::Y        = { 0, 1, 0, 0 };
-const xxVector4 xxVector4::Z        = { 0, 0, 1, 0 };
-const xxVector4 xxVector4::W        = { 0, 0, 0, 1 };
-const xxVector4 xxVector4::BLACK    = { 0, 0, 0, 1 };
-const xxVector4 xxVector4::BLUE     = { 0, 0, 1, 1 };
-const xxVector4 xxVector4::GREEN    = { 0, 1, 0, 1 };
-const xxVector4 xxVector4::RED      = { 1, 0, 0, 1 };
-const xxVector4 xxVector4::WHITE    = { 1, 1, 1, 1 };
+const xxVector4 xxVector4::ZERO         = { 0, 0, 0, 0 };
+const xxVector4 xxVector4::ONE          = { 1, 1, 1, 1 };
+const xxVector4 xxVector4::X            = { 1, 0, 0, 0 };
+const xxVector4 xxVector4::Y            = { 0, 1, 0, 0 };
+const xxVector4 xxVector4::Z            = { 0, 0, 1, 0 };
+const xxVector4 xxVector4::W            = { 0, 0, 0, 1 };
+const xxVector4 xxVector4::BLACK        = { 0, 0, 0, 1 };
+const xxVector4 xxVector4::BLUE         = { 0, 0, 1, 1 };
+const xxVector4 xxVector4::GREEN        = { 0, 1, 0, 1 };
+const xxVector4 xxVector4::RED          = { 1, 0, 0, 1 };
+const xxVector4 xxVector4::WHITE        = { 1, 1, 1, 1 };
 
-const xxMatrix2 xxMatrix2::IDENTITY = { 1, 0,
-                                        0, 1 };
-const xxMatrix3 xxMatrix3::IDENTITY = { 1, 0, 0,
-                                        0, 1, 0,
-                                        0, 0, 1 };
-const xxMatrix4 xxMatrix4::IDENTITY = { 1, 0, 0, 0,
-                                        0, 1, 0, 0,
-                                        0, 0, 1, 0,
-                                        0, 0, 0, 1 };
+const xxMatrix2x2 xxMatrix2x2::IDENTITY = { 1, 0,
+                                            0, 1 };
+const xxMatrix2x3 xxMatrix2x3::IDENTITY = { 1, 0,
+                                            0, 1,
+                                            0, 0 };
+const xxMatrix2x4 xxMatrix2x4::IDENTITY = { 1, 0,
+                                            0, 1,
+                                            0, 0,
+                                            0, 0 };
+const xxMatrix3x2 xxMatrix3x2::IDENTITY = { 1, 0, 0,
+                                            0, 1, 0 };
+const xxMatrix3x3 xxMatrix3x3::IDENTITY = { 1, 0, 0,
+                                            0, 1, 0,
+                                            0, 0, 1 };
+const xxMatrix3x4 xxMatrix3x4::IDENTITY = { 1, 0, 0,
+                                            0, 1, 0,
+                                            0, 0, 1,
+                                            0, 0, 0 };
+const xxMatrix4x2 xxMatrix4x2::IDENTITY = { 1, 0, 0, 0,
+                                            0, 1, 0, 0 };
+const xxMatrix4x3 xxMatrix4x3::IDENTITY = { 1, 0, 0, 0,
+                                            0, 1, 0, 0,
+                                            0, 0, 1, 0 };
+const xxMatrix4x4 xxMatrix4x4::IDENTITY = { 1, 0, 0, 0,
+                                            0, 1, 0, 0,
+                                            0, 0, 1, 0,
+                                            0, 0, 0, 1 };
 
 //==============================================================================
 //  Matrix 4x4
@@ -104,9 +122,9 @@ void xxMatrix4::Multiply(xxMatrix4& __restrict r, const xxMatrix4& __restrict m,
     Multiply(r.v[3], m, o.v[3]);
 }
 //------------------------------------------------------------------------------
-void xxMatrix4::MultiplyArray(const xxMatrix4& __restrict matrix, int count, const xxVector4* __restrict input, int inputStride, xxVector4* __restrict output, int outputStride)
+void xxMatrix4::MultiplyArray(const xxMatrix4& __restrict matrix, size_t count, const xxVector4* __restrict input, int inputStride, xxVector4* __restrict output, int outputStride)
 {
-    for (int x = 0; x < count; ++x)
+    for (size_t i = 0; i < count; ++i)
     {
         Multiply((*output), matrix, (*input));
         input = reinterpret_cast<xxVector4*>((char*)input + inputStride);
@@ -114,9 +132,9 @@ void xxMatrix4::MultiplyArray(const xxMatrix4& __restrict matrix, int count, con
     }
 }
 //------------------------------------------------------------------------------
-void xxMatrix4::MultiplyArray(const xxMatrix4& __restrict matrix, int count, const xxMatrix4* __restrict input, int inputStride, xxMatrix4* __restrict output, int outputStride)
+void xxMatrix4::MultiplyArray(const xxMatrix4& __restrict matrix, size_t count, const xxMatrix4* __restrict input, int inputStride, xxMatrix4* __restrict output, int outputStride)
 {
-    for (int x = 0; x < count; ++x)
+    for (size_t i = 0; i < count; ++i)
     {
         Multiply((*output), matrix, (*input));
         input = reinterpret_cast<xxMatrix4*>((char*)input + inputStride);
