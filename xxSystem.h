@@ -66,6 +66,7 @@
 #   undef wglMakeCurrent
 #   undef wglShareLists
 #   pragma warning(disable:4201)
+#   pragma warning(disable:4251)
 #   pragma warning(disable:4482)
 #   define xxWINDOWS 1
 #endif
@@ -169,11 +170,11 @@
 //==============================================================================
 #if INTPTR_MAX == INT64_MAX
 #   define xxAlloc(T, count)        (T*)malloc(sizeof(T) * count)
-#   define xxRealloc(T, count, ptr) (T*)realloc(ptr, sizeof(T) * count)
+#   define xxRealloc(ptr, T, count) (T*)realloc(ptr, sizeof(T) * count)
 #   define xxFree(ptr)              free(ptr)
 #else
 #   define xxAlloc(T, count)        (T*)xxAlignedAlloc(sizeof(T) * count, 16)
-#   define xxRealloc(T, count, ptr) (T*)xxAlignedRealloc(ptr, sizeof(T) * count, 16)
+#   define xxRealloc(ptr, T, count) (T*)xxAlignedRealloc(ptr, sizeof(T) * count, 16)
 #   define xxFree(ptr)              xxAlignedFree(ptr)
 #endif
 xxAPI void* xxAlignedAlloc(size_t size, size_t alignment);

@@ -473,7 +473,7 @@ void* xxMapTextureGLES2(uint64_t device, uint64_t texture, unsigned int* stride,
         height = 1;
     if (depth == 0)
         depth = 1;
-    glTexture->memory = xxRealloc(char, width * height * depth * 4, glTexture->memory);
+    glTexture->memory = xxRealloc(glTexture->memory, char, width * height * depth * 4);
 
     (*stride) = width * 4;
     return glTexture->memory;

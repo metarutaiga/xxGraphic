@@ -26,8 +26,8 @@ public:
     xxNodePtr GetChild(uint32_t index);
     uint32_t GetChildCount() const;
     uint32_t GetChildSize() const;
-    bool AttachChild(xxNodePtr& child);
-    bool DetachChild(xxNodePtr& child);
+    bool AttachChild(const xxNodePtr& child);
+    bool DetachChild(const xxNodePtr& child);
 
     const xxMatrix4& GetLocalMatrix() const;
     const xxMatrix4& GetWorldMatrix() const;

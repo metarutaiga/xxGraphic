@@ -77,7 +77,7 @@ uint32_t xxNode::GetChildSize() const
     return m_childrenSize;
 }
 //------------------------------------------------------------------------------
-bool xxNode::AttachChild(xxNodePtr& child)
+bool xxNode::AttachChild(const xxNodePtr& child)
 {
     if (child == nullptr)
         return false;
@@ -124,7 +124,7 @@ bool xxNode::AttachChild(xxNodePtr& child)
     return false;
 }
 //------------------------------------------------------------------------------
-bool xxNode::DetachChild(xxNodePtr& child)
+bool xxNode::DetachChild(const xxNodePtr& child)
 {
     if (child == nullptr)
         return false;
