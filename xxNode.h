@@ -10,6 +10,7 @@
 #include "xxVector.h"
 
 #include <memory>
+#include <vector>
 
 class xxNode;
 typedef std::shared_ptr<xxNode> xxNodePtr;
@@ -50,21 +51,20 @@ public:
 protected:
     xxNode();
 
-    xxNodeWeakPtr   m_parent;
-    xxNodeWeakPtr   m_this;
-    xxNodePtr*      m_children;
-    uint32_t        m_childrenCount;
-    uint32_t        m_childrenSize;
+    xxNodeWeakPtr           m_parent;
+    xxNodeWeakPtr           m_this;
+    std::vector<xxNodePtr>  m_children;
+    uint32_t                m_childrenCount;
 
-    xxMatrix4*      m_localMatrix;
-    xxMatrix4*      m_worldMatrix;
+    xxMatrix4*              m_localMatrix;
+    xxMatrix4*              m_worldMatrix;
 
-    xxMatrix3       m_legacyRotate;
-    xxVector3       m_legacyTranslate;
-    float           m_legacyScale;
+    xxMatrix3               m_legacyRotate;
+    xxVector3               m_legacyTranslate;
+    float                   m_legacyScale;
 
-    xxMatrix4       m_classLocalMatrix;
-    xxMatrix4       m_classWorldMatrix;
+    xxMatrix4               m_classLocalMatrix;
+    xxMatrix4               m_classWorldMatrix;
 
     struct LinearMatrixHeader
     {
@@ -72,7 +72,44 @@ protected:
         uint32_t    childrenCount;
     };
 
-    xxMatrix4*      m_linearMatrix;
-    uint32_t        m_linearMatrixSize;
-    bool            m_linearMatrixCreate;
+    std::vector<xxMatrix4>  m_linearMatrix;
+    bool                    m_linearMatrixCreate;
+};
+
+template <class T>
+struct xxStrideIterator
+{
+    xxStrideIterator(void* base, size_t size, size_t stride)
+    {
+        m_now = reinterpret_cast<T*>(base);
+        m_begin = reinterpret_cast<T*>(base);
+        m_end = reinterpret_cast<T*>(reinterpret_cast<char*>(base) + size * stride);
+        m_stride = stride;
+    }
+
+    T& operator * () const
+    {
+        return (*m_now);
+    }
+
+    xxStrideIterator& operator ++ ()
+    {
+        m_now = reinterpret_cast<T*>(reinterpret_cast<char*>(m_now) + m_stride);
+        return (*this);
+    }
+
+    void toBegin()
+    {
+        m_now = m_begin;
+    }
+
+    bool isEnd() const
+    {
+        return m_now == m_end();
+    }
+
+    T*      m_now;
+    T*      m_begin;
+    T*      m_end;
+    size_t  m_stride;
 };

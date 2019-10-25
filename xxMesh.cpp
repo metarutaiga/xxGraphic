@@ -12,12 +12,6 @@
 //==============================================================================
 xxMesh::Data::Data(int color, int normal, int texture)
 {
-    m_vertex = nullptr;
-    m_index = nullptr;
-
-    m_vertexCount = 0;
-    m_indexCount = 0;
-
     m_vertexDataModified = false;
     m_vertexSizeChanged = false;
     m_indexDataModified = false;
@@ -45,9 +39,6 @@ xxMesh::Data::Data(int color, int normal, int texture)
 //------------------------------------------------------------------------------
 xxMesh::Data::~Data()
 {
-    xxFree(m_vertex);
-    xxFree(m_index);
-
     xxDestroyVertexAttribute(m_vertexAttribute);
     for (int i = 0; i < xxCountOf(m_vertexBuffers); ++i)
         xxDestroyBuffer(m_device, m_vertexBuffers[i]);
@@ -57,79 +48,55 @@ xxMesh::Data::~Data()
 //------------------------------------------------------------------------------
 uint32_t xxMesh::Data::GetVertexCount() const
 {
-    return m_vertexCount;
+    return static_cast<uint32_t>(m_vertex.size() / m_stride);
 }
 //------------------------------------------------------------------------------
 void xxMesh::Data::SetVertexCount(uint32_t count)
 {
-    if (m_vertexCount != count)
-    {
-        m_vertexCount = count;
-
-        m_vertex = xxRealloc(m_vertex, char, m_stride * count);
-        if (m_vertex == nullptr)
-        {
-            m_vertexCount = 0;
-            return;
-        }
-    }
+    m_vertex.resize(count * m_stride);
 }
 //------------------------------------------------------------------------------
 uint32_t xxMesh::Data::GetIndexCount() const
 {
-    return m_indexCount;
+    return static_cast<uint32_t>(m_index.size());
 }
 //------------------------------------------------------------------------------
 void xxMesh::Data::SetIndexCount(uint32_t count)
 {
-    if (m_indexCount != count)
-    {
-        m_indexCount = count;
-
-        m_index = xxRealloc(m_index, uint32_t, count);
-        if (m_index == nullptr)
-        {
-            m_indexCount = 0;
-            return;
-        }
-    }
+    m_index.resize(count);
 }
 //------------------------------------------------------------------------------
-xxVector2* xxMesh::Data::GetVertex(int& stride) const
+xxStrideIterator<xxVector2> xxMesh::Data::GetVertex() const
 {
-    stride = m_stride;
-    char* vertex = (char*)m_vertex;
-    return (xxVector2*)vertex;
+    char* vertex = (char*)&m_vertex.front();
+    return xxStrideIterator<xxVector2>(vertex, GetVertexCount(), m_stride);
 }
 //------------------------------------------------------------------------------
-uint32_t* xxMesh::Data::GetColor(int index, int& stride) const
+xxStrideIterator<uint32_t> xxMesh::Data::GetColor(int index) const
 {
-    stride = m_stride;
-    char* vertex = (char*)m_vertex;
+    char* vertex = (char*)&m_vertex.front();
     vertex += xxSizeOf(xxVector3);
     vertex += xxSizeOf(uint32_t) * index;
-    return (uint32_t*)vertex;
+    return xxStrideIterator<uint32_t>(vertex, GetVertexCount(), m_stride);
 }
 //------------------------------------------------------------------------------
-xxVector3* xxMesh::Data::GetNormal(int index, int& stride) const
+xxStrideIterator<xxVector3> xxMesh::Data::GetNormal(int index) const
 {
-    stride = m_stride;
-    char* vertex = (char*)m_vertex;
+    char* vertex = (char*)&m_vertex.front();
     vertex += xxSizeOf(xxVector3);
     vertex += xxSizeOf(uint32_t) * m_colorCount;
     vertex += xxSizeOf(xxVector3) * index;
-    return (xxVector3*)vertex;
+    return xxStrideIterator<xxVector3>(vertex, GetVertexCount(), m_stride);
 }
 //------------------------------------------------------------------------------
-xxVector2* xxMesh::Data::GetTexture(int index, int& stride) const
+xxStrideIterator<xxVector2> xxMesh::Data::GetTexture(int index) const
 {
-    stride = m_stride;
-    char* vertex = (char*)m_vertex;
+    char* vertex = (char*)&m_vertex.front();
     vertex += xxSizeOf(xxVector3);
     vertex += xxSizeOf(uint32_t) * m_colorCount;
     vertex += xxSizeOf(xxVector3) * m_normalCount;
     vertex += xxSizeOf(xxVector2)* index;
-    return (xxVector2*)vertex;
+    return xxStrideIterator<xxVector2>(vertex, GetVertexCount(), m_stride);
 }
 //------------------------------------------------------------------------------
 void xxMesh::Data::Update(uint64_t device)
@@ -207,7 +174,7 @@ void xxMesh::Data::Update(uint64_t device)
         }
         if (m_vertexBuffers[index] == 0)
         {
-            m_vertexBuffers[index] = xxCreateVertexBuffer(m_device, m_stride * m_vertexCount, m_vertexAttribute);
+            m_vertexBuffers[index] = xxCreateVertexBuffer(m_device, m_stride * GetVertexCount(), m_vertexAttribute);
         }
 
         if (m_vertexDataModified)
@@ -217,7 +184,7 @@ void xxMesh::Data::Update(uint64_t device)
             {
                 m_vertexDataModified = false;
 
-                memcpy(ptr, m_vertex, m_stride * m_vertexCount);
+                memcpy(ptr, &m_vertex.front(), m_stride * GetVertexCount());
                 xxUnmapBuffer(m_device, m_vertexBuffers[index]);
             }
         }
@@ -243,7 +210,7 @@ void xxMesh::Data::Update(uint64_t device)
         }
         if (m_indexBuffers[index] == 0)
         {
-            m_indexBuffers[index] = xxCreateIndexBuffer(m_device, xxSizeOf(uint32_t) * m_indexCount);
+            m_indexBuffers[index] = xxCreateIndexBuffer(m_device, xxSizeOf(uint32_t) * GetIndexCount());
         }
 
         if (m_indexDataModified)
@@ -253,7 +220,7 @@ void xxMesh::Data::Update(uint64_t device)
             {
                 m_indexDataModified = false;
 
-                memcpy(ptr, m_vertex, xxSizeOf(uint32_t)* m_indexCount);
+                memcpy(ptr, &m_index.front(), xxSizeOf(uint32_t) * GetIndexCount());
                 xxUnmapBuffer(m_device, m_indexBuffers[index]);
             }
         }
@@ -275,10 +242,11 @@ xxMeshPtr xxMesh::Create(const DataPtr& data)
 {
     if (data == nullptr)
         return xxMeshPtr();
-    xxMesh* mesh = new xxMesh(data);
+    xxMeshPtr mesh = xxMeshPtr(new xxMesh(data));
     if (mesh == nullptr)
         return xxMeshPtr();
 
-    return std::static_pointer_cast<xxMesh>(mesh->m_this.lock());
+    mesh->m_this = mesh;
+    return mesh;
 }
 //==============================================================================

@@ -21,42 +21,39 @@ public:
         Data(int color, int normal, int texture);
         virtual ~Data();
 
-        uint32_t        GetVertexCount() const;
-        void            SetVertexCount(uint32_t count);
+        uint32_t                    GetVertexCount() const;
+        void                        SetVertexCount(uint32_t count);
 
-        uint32_t        GetIndexCount() const;
-        void            SetIndexCount(uint32_t count);
+        uint32_t                    GetIndexCount() const;
+        void                        SetIndexCount(uint32_t count);
 
-        xxVector2*      GetVertex(int& stride) const;
-        uint32_t*       GetColor(int index, int& stride) const;
-        xxVector3*      GetNormal(int index, int& stride) const;
-        xxVector2*      GetTexture(int index, int& stride) const;
+        xxStrideIterator<xxVector2> GetVertex() const;
+        xxStrideIterator<uint32_t>  GetColor(int index) const;
+        xxStrideIterator<xxVector3> GetNormal(int index) const;
+        xxStrideIterator<xxVector2> GetTexture(int index) const;
 
-        void            Update(uint64_t device);
+        void                        Update(uint64_t device);
 
     protected:
-        void*           m_vertex;
-        uint32_t*       m_index;
+        std::vector<char>           m_vertex;
+        std::vector<uint32_t>       m_index;
 
-        uint32_t        m_vertexCount;
-        uint32_t        m_indexCount;
+        bool                        m_vertexDataModified;
+        bool                        m_vertexSizeChanged;
+        bool                        m_indexDataModified;
+        bool                        m_indexSizeChanged;
 
-        bool            m_vertexDataModified;
-        bool            m_vertexSizeChanged;
-        bool            m_indexDataModified;
-        bool            m_indexSizeChanged;
+        char                        m_vertexBufferIndex;
+        char                        m_indexBufferIndex;
+        uint64_t                    m_device;
+        uint64_t                    m_vertexAttribute;
+        uint64_t                    m_vertexBuffers[4];
+        uint64_t                    m_indexBuffers[4];
 
-        char            m_vertexBufferIndex;
-        char            m_indexBufferIndex;
-        uint64_t        m_device;
-        uint64_t        m_vertexAttribute;
-        uint64_t        m_vertexBuffers[4];
-        uint64_t        m_indexBuffers[4];
-
-        int             m_stride;
-        int             m_colorCount;
-        int             m_normalCount;
-        int             m_textureCount;
+        int                         m_stride;
+        int                         m_colorCount;
+        int                         m_normalCount;
+        int                         m_textureCount;
     };
     typedef std::shared_ptr<Data> DataPtr;
 
