@@ -119,7 +119,7 @@ void xxEndRenderPassNULL(uint64_t commandEncoder, uint64_t framebuffer, uint64_t
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-uint64_t xxCreateVertexAttributeNULL(uint64_t device, int count, ...)
+uint64_t xxCreateVertexAttributeNULL(uint64_t device, int count, int* attribute)
 {
     return 0;
 }

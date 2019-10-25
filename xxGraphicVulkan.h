@@ -48,7 +48,7 @@ xxAPI void          xxEndRenderPassVulkan(uint64_t commandEncoder, uint64_t fram
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-xxAPI uint64_t      xxCreateVertexAttributeVulkan(uint64_t device, int count, ...);
+xxAPI uint64_t      xxCreateVertexAttributeVulkan(uint64_t device, int count, int* attribute);
 xxAPI void          xxDestroyVertexAttributeVulkan(uint64_t vertexAttribute);
 //==============================================================================
 //  Buffer

@@ -48,7 +48,7 @@ xxAPI void          xxEndRenderPassNULL(uint64_t commandEncoder, uint64_t frameb
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-xxAPI uint64_t      xxCreateVertexAttributeNULL(uint64_t device, int count, ...);
+xxAPI uint64_t      xxCreateVertexAttributeNULL(uint64_t device, int count, int* attribute);
 xxAPI void          xxDestroyVertexAttributeNULL(uint64_t vertexAttribute);
 //==============================================================================
 //  Buffer

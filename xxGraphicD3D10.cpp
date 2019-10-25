@@ -364,7 +364,7 @@ void xxEndRenderPassD3D10(uint64_t commandEncoder, uint64_t framebuffer, uint64_
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-uint64_t xxCreateVertexAttributeD3D10(uint64_t device, int count, ...)
+uint64_t xxCreateVertexAttributeD3D10(uint64_t device, int count, int* attribute)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(device);
     if (d3dDevice == nullptr)
@@ -378,14 +378,12 @@ uint64_t xxCreateVertexAttributeD3D10(uint64_t device, int count, ...)
     BYTE textureIndex = 0;
     int stride = 0;
 
-    va_list args;
-    va_start(args, count);
     for (int i = 0; i < count; ++i)
     {
-        int stream = va_arg(args, int);
-        int offset = va_arg(args, int);
-        int element = va_arg(args, int);
-        int size = va_arg(args, int);
+        int stream = (*attribute++);
+        int offset = (*attribute++);
+        int element = (*attribute++);
+        int size = (*attribute++);
 
         stride += size;
 
@@ -443,7 +441,6 @@ uint64_t xxCreateVertexAttributeD3D10(uint64_t device, int count, ...)
             continue;
         }
     }
-    va_end(args);
 
     DWORD dxbc[256] = {};
     DWORD dxbcChunkCount = 1;

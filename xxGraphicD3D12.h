@@ -48,7 +48,7 @@ xxAPI void          xxEndRenderPassD3D12(uint64_t commandEncoder, uint64_t frame
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-xxAPI uint64_t      xxCreateVertexAttributeD3D12(uint64_t device, int count, ...);
+xxAPI uint64_t      xxCreateVertexAttributeD3D12(uint64_t device, int count, int* attribute);
 xxAPI void          xxDestroyVertexAttributeD3D12(uint64_t vertexAttribute);
 //==============================================================================
 //  Buffer

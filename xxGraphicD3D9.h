@@ -48,7 +48,7 @@ xxAPI void          xxEndRenderPassD3D9(uint64_t commandEncoder, uint64_t frameb
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-xxAPI uint64_t      xxCreateVertexAttributeD3D9(uint64_t device, int count, ...);
+xxAPI uint64_t      xxCreateVertexAttributeD3D9(uint64_t device, int count, int* attribute);
 xxAPI void          xxDestroyVertexAttributeD3D9(uint64_t vertexAttribute);
 //==============================================================================
 //  Buffer

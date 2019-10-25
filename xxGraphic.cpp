@@ -46,7 +46,7 @@ void        (*xxEndRenderPass)(uint64_t commandEncoder, uint64_t framebuffer, ui
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-uint64_t    (*xxCreateVertexAttribute)(uint64_t device, int count, ...);
+uint64_t    (*xxCreateVertexAttribute)(uint64_t device, int count, int* attribute);
 void        (*xxDestroyVertexAttribute)(uint64_t vertexAttribute);
 //==============================================================================
 //  Buffer

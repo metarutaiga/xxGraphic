@@ -1440,7 +1440,7 @@ struct VERTEXATTRIBUTEVK
     uint32_t                            bindingCount;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexAttributeVulkan(uint64_t device, int count, ...)
+uint64_t xxCreateVertexAttributeVulkan(uint64_t device, int count, int* attribute)
 {
     VERTEXATTRIBUTEVK* vkVertexAttribute = new VERTEXATTRIBUTEVK;
     if (vkVertexAttribute == nullptr)
@@ -1450,14 +1450,12 @@ uint64_t xxCreateVertexAttributeVulkan(uint64_t device, int count, ...)
     VkVertexInputAttributeDescription* attributeDescs = vkVertexAttribute->attributeDesc;
     int stride = 0;
 
-    va_list args;
-    va_start(args, count);
     for (int i = 0; i < count; ++i)
     {
-        int stream = va_arg(args, int);
-        int offset = va_arg(args, int);
-        int element = va_arg(args, int);
-        int size = va_arg(args, int);
+        int stream = (*attribute++);
+        int offset = (*attribute++);
+        int element = (*attribute++);
+        int size = (*attribute++);
 
         stride += size;
 
@@ -1489,7 +1487,6 @@ uint64_t xxCreateVertexAttributeVulkan(uint64_t device, int count, ...)
             continue;
         }
     }
-    va_end(args);
 
     vkVertexAttribute->attributeCount = count;
 

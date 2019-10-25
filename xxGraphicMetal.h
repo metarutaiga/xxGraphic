@@ -48,7 +48,7 @@ xxAPI void          xxEndRenderPassMetal(uint64_t commandEncoder, uint64_t frame
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-xxAPI uint64_t      xxCreateVertexAttributeMetal(uint64_t device, int count, ...);
+xxAPI uint64_t      xxCreateVertexAttributeMetal(uint64_t device, int count, int* attribute);
 xxAPI void          xxDestroyVertexAttributeMetal(uint64_t vertexAttribute);
 //==============================================================================
 //  Buffer

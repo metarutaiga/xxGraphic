@@ -566,7 +566,7 @@ struct VERTEXATTRIBUTEGR
     int                         stride;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexAttributeMantle(uint64_t device, int count, ...)
+uint64_t xxCreateVertexAttributeMantle(uint64_t device, int count, int* attribute)
 {
     VERTEXATTRIBUTEGR* grVertexAttribute = new VERTEXATTRIBUTEGR;
     if (grVertexAttribute == nullptr)
@@ -575,14 +575,12 @@ uint64_t xxCreateVertexAttributeMantle(uint64_t device, int count, ...)
     GR_MEMORY_VIEW_ATTACH_INFO* infos = grVertexAttribute->infos;
     int stride = 0;
 
-    va_list args;
-    va_start(args, count);
     for (int i = 0; i < count; ++i)
     {
-        int stream = va_arg(args, int);
-        int offset = va_arg(args, int);
-        int element = va_arg(args, int);
-        int size = va_arg(args, int);
+        int stream = (*attribute++);
+        int offset = (*attribute++);
+        int element = (*attribute++);
+        int size = (*attribute++);
 
         stride += size;
 
@@ -615,7 +613,6 @@ uint64_t xxCreateVertexAttributeMantle(uint64_t device, int count, ...)
             continue;
         }
     }
-    va_end(args);
 
     for (int i = 0; i < count; ++i)
     {

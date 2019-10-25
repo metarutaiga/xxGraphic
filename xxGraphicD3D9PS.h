@@ -19,7 +19,7 @@ xxAPI const char*   xxGetDeviceNameD3D9PS();
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-xxAPI uint64_t      xxCreateVertexAttributeD3D9PS(uint64_t device, int count, ...);
+xxAPI uint64_t      xxCreateVertexAttributeD3D9PS(uint64_t device, int count, int* attribute);
 xxAPI void          xxDestroyVertexAttributeD3D9PS(uint64_t vertexAttribute);
 //==============================================================================
 //  Shader

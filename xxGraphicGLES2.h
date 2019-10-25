@@ -48,7 +48,7 @@ xxAPI void          xxEndRenderPassGLES2(uint64_t commandEncoder, uint64_t frame
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-xxAPI uint64_t      xxCreateVertexAttributeGLES2(uint64_t device, int count, ...);
+xxAPI uint64_t      xxCreateVertexAttributeGLES2(uint64_t device, int count, int* attribute);
 xxAPI void          xxDestroyVertexAttributeGLES2(uint64_t vertexAttribute);
 //==============================================================================
 //  Buffer

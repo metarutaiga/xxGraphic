@@ -349,19 +349,17 @@ void xxEndRenderPassD3D9(uint64_t commandEncoder, uint64_t framebuffer, uint64_t
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-uint64_t xxCreateVertexAttributeD3D9(uint64_t device, int count, ...)
+uint64_t xxCreateVertexAttributeD3D9(uint64_t device, int count, int* attribute)
 {
     D3DVERTEXATTRIBUTE9 d3dVertexAttribute = {};
     int stride = 0;
 
-    va_list args;
-    va_start(args, count);
     for (int i = 0; i < count; ++i)
     {
-        int stream = va_arg(args, int);
-        int offset = va_arg(args, int);
-        int element = va_arg(args, int);
-        int size = va_arg(args, int);
+        int stream = (*attribute++);
+        int offset = (*attribute++);
+        int element = (*attribute++);
+        int size = (*attribute++);
 
         stride += size;
 
@@ -374,7 +372,6 @@ uint64_t xxCreateVertexAttributeD3D9(uint64_t device, int count, ...)
         if (offset != 0 && element == 2 && size == sizeof(float) * 2)
             d3dVertexAttribute.fvf += D3DFVF_TEX1;
     }
-    va_end(args);
 
     d3dVertexAttribute.stride = stride;
 
