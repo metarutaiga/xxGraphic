@@ -1,16 +1,16 @@
 //==============================================================================
-// xxGraphic : Texture Source
+// xxGraphic : Image Source
 //
 // Copyright (c) 2019 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "xxGraphic.h"
-#include "xxTexture.h"
+#include "xxImage.h"
 
 //==============================================================================
 //  Texture
 //==============================================================================
-xxTexture::xxTexture()
+xxImage::xxImage()
 {
     m_format = 0;
     m_width = 0;
@@ -24,13 +24,13 @@ xxTexture::xxTexture()
     m_sampler = 0;
 }
 //------------------------------------------------------------------------------
-xxTexture::~xxTexture()
+xxImage::~xxImage()
 {
     xxDestroyTexture(m_texture);
     xxDestroySampler(m_sampler);
 }
 //------------------------------------------------------------------------------
-void xxTexture::Create(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap, uint32_t array)
+void xxImage::Create(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap, uint32_t array)
 {
     for (uint32_t i = 0; i < xxCountOf(m_images); ++i)
         m_images[i] = std::vector<char>();
@@ -60,22 +60,22 @@ void xxTexture::Create(uint32_t format, uint32_t width, uint32_t height, uint32_
     }
 }
 //------------------------------------------------------------------------------
-void xxTexture::Create2D(uint32_t format, uint32_t width, uint32_t height, uint32_t mipmap)
+void xxImage::Create2D(uint32_t format, uint32_t width, uint32_t height, uint32_t mipmap)
 {
     Create(format, width, height, 1, mipmap, 1);
 }
 //------------------------------------------------------------------------------
-void xxTexture::Create3D(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap)
+void xxImage::Create3D(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap)
 {
     Create(format, width, height, depth, mipmap, 1);
 }
 //------------------------------------------------------------------------------
-void xxTexture::CreateCube(uint32_t format, uint32_t width, uint32_t height, uint32_t mipmap)
+void xxImage::CreateCube(uint32_t format, uint32_t width, uint32_t height, uint32_t mipmap)
 {
     Create(format, width, height, 1, mipmap, 6);
 }
 //------------------------------------------------------------------------------
-void* xxTexture::operator () (uint32_t x, uint32_t y, uint32_t z, uint32_t mipmap, uint32_t array)
+void* xxImage::operator () (uint32_t x, uint32_t y, uint32_t z, uint32_t mipmap, uint32_t array)
 {
     if (array >= m_array)
         return nullptr;

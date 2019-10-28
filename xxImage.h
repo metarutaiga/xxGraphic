@@ -1,5 +1,5 @@
 //==============================================================================
-// xxGraphic : Texture Header
+// xxGraphic : Image Header
 //
 // Copyright (c) 2019 TAiGA
 // https://github.com/metarutaiga/xxGraphic
@@ -12,13 +12,13 @@
 #include <memory>
 #include <vector>
 
-class xxTexture;
-typedef std::shared_ptr<xxTexture> xxTexturePtr;
+class xxImage;
+typedef std::shared_ptr<xxImage> xxImagePtr;
 
-class xxCPPAPI xxTexture
+class xxCPPAPI xxImage
 {
 public:
-    virtual ~xxTexture();
+    virtual ~xxImage();
 
     void Create(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap, uint32_t array);
     void Create2D(uint32_t format, uint32_t width, uint32_t height, uint32_t mipmap);
@@ -28,7 +28,7 @@ public:
     void* operator () (uint32_t x, uint32_t y, uint32_t z, uint32_t mipmap, uint32_t array);
 
 protected:
-    xxTexture();
+    xxImage();
 
     std::vector<char>   m_images[16];
 

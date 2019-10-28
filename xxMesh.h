@@ -7,6 +7,7 @@
 #pragma once
 
 #include "xxNode.h"
+#include "xxImage.h"
 #include "xxMaterial.h"
 
 class xxMesh;
@@ -65,6 +66,7 @@ public:
 protected:
     xxMesh(const DataPtr& data);
 
-    DataPtr         m_meshData;
-    xxMaterialPtr   m_material;
+    DataPtr                                         m_meshData;
+    std::vector<std::pair<uint32_t, xxImagePtr> >   m_imageArray;
+    xxMaterialPtr                                   m_material;
 };
