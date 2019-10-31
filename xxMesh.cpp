@@ -8,9 +8,9 @@
 #include "xxMesh.h"
 
 //==============================================================================
-//  Mesh - Data
+//  Mesh
 //==============================================================================
-xxMesh::Data::Data(int color, int normal, int texture)
+xxMesh::xxMesh(int color, int normal, int texture)
 {
     m_vertexDataModified = false;
     m_vertexSizeChanged = false;
@@ -37,7 +37,7 @@ xxMesh::Data::Data(int color, int normal, int texture)
     m_textureCount = texture;
 }
 //------------------------------------------------------------------------------
-xxMesh::Data::~Data()
+xxMesh::~xxMesh()
 {
     xxDestroyVertexAttribute(m_vertexAttribute);
     for (int i = 0; i < xxCountOf(m_vertexBuffers); ++i)
@@ -46,33 +46,33 @@ xxMesh::Data::~Data()
         xxDestroyBuffer(m_device, m_indexBuffers[i]);
 }
 //------------------------------------------------------------------------------
-uint32_t xxMesh::Data::GetVertexCount() const
+uint32_t xxMesh::GetVertexCount() const
 {
     return static_cast<uint32_t>(m_vertex.size() / m_stride);
 }
 //------------------------------------------------------------------------------
-void xxMesh::Data::SetVertexCount(uint32_t count)
+void xxMesh::SetVertexCount(uint32_t count)
 {
     m_vertex.resize(count * m_stride);
 }
 //------------------------------------------------------------------------------
-uint32_t xxMesh::Data::GetIndexCount() const
+uint32_t xxMesh::GetIndexCount() const
 {
     return static_cast<uint32_t>(m_index.size());
 }
 //------------------------------------------------------------------------------
-void xxMesh::Data::SetIndexCount(uint32_t count)
+void xxMesh::SetIndexCount(uint32_t count)
 {
     m_index.resize(count);
 }
 //------------------------------------------------------------------------------
-xxStrideIterator<xxVector2> xxMesh::Data::GetVertex() const
+xxStrideIterator<xxVector2> xxMesh::GetVertex() const
 {
     char* vertex = (char*)&m_vertex.front();
     return xxStrideIterator<xxVector2>(vertex, GetVertexCount(), m_stride);
 }
 //------------------------------------------------------------------------------
-xxStrideIterator<uint32_t> xxMesh::Data::GetColor(int index) const
+xxStrideIterator<uint32_t> xxMesh::GetColor(int index) const
 {
     char* vertex = (char*)&m_vertex.front();
     vertex += xxSizeOf(xxVector3);
@@ -80,7 +80,7 @@ xxStrideIterator<uint32_t> xxMesh::Data::GetColor(int index) const
     return xxStrideIterator<uint32_t>(vertex, GetVertexCount(), m_stride);
 }
 //------------------------------------------------------------------------------
-xxStrideIterator<xxVector3> xxMesh::Data::GetNormal(int index) const
+xxStrideIterator<xxVector3> xxMesh::GetNormal(int index) const
 {
     char* vertex = (char*)&m_vertex.front();
     vertex += xxSizeOf(xxVector3);
@@ -89,7 +89,7 @@ xxStrideIterator<xxVector3> xxMesh::Data::GetNormal(int index) const
     return xxStrideIterator<xxVector3>(vertex, GetVertexCount(), m_stride);
 }
 //------------------------------------------------------------------------------
-xxStrideIterator<xxVector2> xxMesh::Data::GetTexture(int index) const
+xxStrideIterator<xxVector2> xxMesh::GetTexture(int index) const
 {
     char* vertex = (char*)&m_vertex.front();
     vertex += xxSizeOf(xxVector3);
@@ -99,7 +99,7 @@ xxStrideIterator<xxVector2> xxMesh::Data::GetTexture(int index) const
     return xxStrideIterator<xxVector2>(vertex, GetVertexCount(), m_stride);
 }
 //------------------------------------------------------------------------------
-void xxMesh::Data::Update(uint64_t device)
+void xxMesh::Update(uint64_t device)
 {
     m_device = device;
 
@@ -226,27 +226,13 @@ void xxMesh::Data::Update(uint64_t device)
         }
     }
 }
-//==============================================================================
-//  Mesh
-//==============================================================================
-xxMesh::xxMesh(const DataPtr& data)
-{
-    m_meshData = data;
-}
 //------------------------------------------------------------------------------
-xxMesh::~xxMesh()
+xxMeshPtr xxMesh::Create(int color, int normal, int texture)
 {
-}
-//------------------------------------------------------------------------------
-xxMeshPtr xxMesh::Create(const DataPtr& data)
-{
-    if (data == nullptr)
-        return xxMeshPtr();
-    xxMeshPtr mesh = xxMeshPtr(new xxMesh(data));
+    xxMeshPtr mesh = xxMeshPtr(new xxMesh(color, normal, texture));
     if (mesh == nullptr)
         return xxMeshPtr();
 
-    mesh->m_this = mesh;
     return mesh;
 }
 //==============================================================================

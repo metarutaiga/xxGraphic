@@ -6,67 +6,96 @@
 //==============================================================================
 #pragma once
 
-#include "xxNode.h"
-#include "xxImage.h"
-#include "xxMaterial.h"
+#include "xxSystem.h"
+#include "xxVector.h"
+
+#include <memory>
+#include <vector>
 
 class xxMesh;
 typedef std::shared_ptr<xxMesh> xxMeshPtr;
 
-class xxCPPAPI xxMesh : public xxNode
+template <class T>
+struct xxStrideIterator;
+
+class xxCPPAPI xxMesh
 {
-public:
-    class xxCPPAPI Data
-    {
-    public:
-        Data(int color, int normal, int texture);
-        virtual ~Data();
-
-        uint32_t                    GetVertexCount() const;
-        void                        SetVertexCount(uint32_t count);
-
-        uint32_t                    GetIndexCount() const;
-        void                        SetIndexCount(uint32_t count);
-
-        xxStrideIterator<xxVector2> GetVertex() const;
-        xxStrideIterator<uint32_t>  GetColor(int index) const;
-        xxStrideIterator<xxVector3> GetNormal(int index) const;
-        xxStrideIterator<xxVector2> GetTexture(int index) const;
-
-        void                        Update(uint64_t device);
-
-    protected:
-        std::vector<char>           m_vertex;
-        std::vector<uint32_t>       m_index;
-
-        bool                        m_vertexDataModified;
-        bool                        m_vertexSizeChanged;
-        bool                        m_indexDataModified;
-        bool                        m_indexSizeChanged;
-
-        char                        m_vertexBufferIndex;
-        char                        m_indexBufferIndex;
-        uint64_t                    m_device;
-        uint64_t                    m_vertexAttribute;
-        uint64_t                    m_vertexBuffers[4];
-        uint64_t                    m_indexBuffers[4];
-
-        int                         m_stride;
-        int                         m_colorCount;
-        int                         m_normalCount;
-        int                         m_textureCount;
-    };
-    typedef std::shared_ptr<Data> DataPtr;
-
 public:
     virtual ~xxMesh();
 
-    static xxMeshPtr Create(const DataPtr& data);
+    uint32_t                    GetVertexCount() const;
+    void                        SetVertexCount(uint32_t count);
+
+    uint32_t                    GetIndexCount() const;
+    void                        SetIndexCount(uint32_t count);
+
+    xxStrideIterator<xxVector2> GetVertex() const;
+    xxStrideIterator<uint32_t>  GetColor(int index) const;
+    xxStrideIterator<xxVector3> GetNormal(int index) const;
+    xxStrideIterator<xxVector2> GetTexture(int index) const;
+
+    void                        Update(uint64_t device);
+
+    static xxMeshPtr Create(int color, int normal, int texture);
 
 protected:
-    xxMesh(const DataPtr& data);
+    xxMesh(int color, int normal, int texture);
 
-    DataPtr                                         m_meshData;
-    std::vector<std::pair<uint32_t, xxImagePtr> >   m_imageArray;
-    xxMaterialPtr                                   m_material;
+    std::vector<char>           m_vertex;
+    std::vector<uint32_t>       m_index;
+
+    bool                        m_vertexDataModified;
+    bool                        m_vertexSizeChanged;
+    bool                        m_indexDataModified;
+    bool                        m_indexSizeChanged;
+
+    char                        m_vertexBufferIndex;
+    char                        m_indexBufferIndex;
+    uint64_t                    m_device;
+    uint64_t                    m_vertexAttribute;
+    uint64_t                    m_vertexBuffers[4];
+    uint64_t                    m_indexBuffers[4];
+
+    int                         m_stride;
+    int                         m_colorCount;
+    int                         m_normalCount;
+    int                         m_textureCount;
+};
+
+template <class T>
+struct xxStrideIterator
+{
+    xxStrideIterator(void* base, size_t size, size_t stride)
+    {
+        m_now = reinterpret_cast<T*>(base);
+        m_begin = reinterpret_cast<T*>(base);
+        m_end = reinterpret_cast<T*>(reinterpret_cast<char*>(base) + size * stride);
+        m_stride = stride;
+    }
+
+    T& operator * () const
+    {
+        return (*m_now);
+    }
+
+    xxStrideIterator& operator ++ ()
+    {
+        m_now = reinterpret_cast<T*>(reinterpret_cast<char*>(m_now) + m_stride);
+        return (*this);
+    }
+
+    void toBegin()
+    {
+        m_now = m_begin;
+    }
+
+    bool isEnd() const
+    {
+        return m_now == m_end();
+    }
+
+    T* m_now;
+    T* m_begin;
+    T* m_end;
+    size_t  m_stride;
 };
