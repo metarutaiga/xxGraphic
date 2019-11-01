@@ -7,7 +7,7 @@
 #pragma once
 
 #include "xxSystem.h"
-#include "xxVector.h"
+#include "xxMath.h"
 
 #include <memory>
 #include <vector>

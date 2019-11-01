@@ -1,10 +1,10 @@
 //==============================================================================
-// xxGraphic : Vector Source
+// xxGraphic : Math Source
 //
 // Copyright (c) 2019 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
-#include "xxVector.h"
+#include "xxMath.h"
 
 #if defined(_MSC_VER)
 #   pragma optimize("y", on)
@@ -71,62 +71,43 @@ const xxMatrix4x4 xxMatrix4x4::IDENTITY = { 1, 0, 0, 0,
 //==============================================================================
 float xxMatrix4::Determinant(const xxMatrix4& __restrict matrix)
 {
-    return  matrix.v[0].x * (matrix.v[1].y * matrix.v[2].z - matrix.v[1].z * matrix.v[2].y) +
-            matrix.v[0].y * (matrix.v[1].z * matrix.v[2].x - matrix.v[1].x * matrix.v[2].z) +
-            matrix.v[0].z * (matrix.v[1].x * matrix.v[2].y - matrix.v[1].y * matrix.v[2].x);
+    return  matrix._[0].x * (matrix._[1].y * matrix._[2].z - matrix._[1].z * matrix._[2].y) +
+            matrix._[0].y * (matrix._[1].z * matrix._[2].x - matrix._[1].x * matrix._[2].z) +
+            matrix._[0].z * (matrix._[1].x * matrix._[2].y - matrix._[1].y * matrix._[2].x);
 }
 //------------------------------------------------------------------------------
 void xxMatrix4::FastDecompose(const xxMatrix4& __restrict matrix, xxMatrix3& __restrict rotate, xxVector3& __restrict translate, float& __restrict scale)
 {
-    scale = xxVector3{ matrix.v[0].x, matrix.v[0].y, matrix.v[0].z }.Length();
-    translate = { matrix.v[3].x, matrix.v[3].y, matrix.v[3].z };
+    scale = xxVector3{ matrix._[0].x, matrix._[0].y, matrix._[0].z }.Length();
+    translate = { matrix._[3].x, matrix._[3].y, matrix._[3].z };
 
     float invScale = 1.0f / scale;
     for (int i = 0; i < 3; ++i)
     {
-        rotate.v[i].x = matrix.v[i].x * invScale;
-        rotate.v[i].y = matrix.v[i].y * invScale;
-        rotate.v[i].z = matrix.v[i].z * invScale;
+        rotate._[i].x = matrix._[i].x * invScale;
+        rotate._[i].y = matrix._[i].y * invScale;
+        rotate._[i].z = matrix._[i].z * invScale;
     }
-}
-//------------------------------------------------------------------------------
-void xxMatrix4::Multiply(xxMatrix4& __restrict r, const xxMatrix4& __restrict m, float s)
-{
-    __m128 vs = _mm_set1_ps(s);
-
-    r.v[0].v = _mm_mul_ps(m.v[0].v, vs);
-    r.v[1].v = _mm_mul_ps(m.v[1].v, vs);
-    r.v[2].v = _mm_mul_ps(m.v[2].v, vs);
-    r.v[3].v = _mm_mul_ps(m.v[3].v, vs);
-}
-//------------------------------------------------------------------------------
-void xxMatrix4::Multiply(xxVector4& __restrict r, const xxMatrix4& __restrict m, const xxVector4& __restrict v)
-{
-    __m128 vv = v.v;
-    __m128 v0 = _mm_shuffle1_ps(vv, _MM_SHUFFLE(0, 0, 0, 0));
-    __m128 v1 = _mm_shuffle1_ps(vv, _MM_SHUFFLE(1, 1, 1, 1));
-    __m128 v2 = _mm_shuffle1_ps(vv, _MM_SHUFFLE(2, 2, 2, 2));
-    __m128 v3 = _mm_shuffle1_ps(vv, _MM_SHUFFLE(3, 3, 3, 3));
-
-    r.v =                   _mm_mul_ps(m.v[0].v, v0);
-    r.v = _mm_add_ps(r.v,   _mm_mul_ps(m.v[1].v, v1));
-    r.v = _mm_add_ps(r.v,   _mm_mul_ps(m.v[2].v, v2));
-    r.v = _mm_add_ps(r.v,   _mm_mul_ps(m.v[3].v, v3));
-}
-//------------------------------------------------------------------------------
-void xxMatrix4::Multiply(xxMatrix4& __restrict r, const xxMatrix4& __restrict m, const xxMatrix4& __restrict o)
-{
-    Multiply(r.v[0], m, o.v[0]);
-    Multiply(r.v[1], m, o.v[1]);
-    Multiply(r.v[2], m, o.v[2]);
-    Multiply(r.v[3], m, o.v[3]);
 }
 //------------------------------------------------------------------------------
 void xxMatrix4::MultiplyArray(const xxMatrix4& __restrict matrix, size_t count, const xxVector4* __restrict input, int inputStride, xxVector4* __restrict output, int outputStride)
 {
     for (size_t i = 0; i < count; ++i)
     {
-        Multiply((*output), matrix, (*input));
+#if defined(_M_IX86) || defined(_M_AMD64)
+        __m128 vv = (*input).v;
+        __m128 v0 = _mm_shuffle1_ps(vv, _MM_SHUFFLE(0, 0, 0, 0));
+        __m128 v1 = _mm_shuffle1_ps(vv, _MM_SHUFFLE(1, 1, 1, 1));
+        __m128 v2 = _mm_shuffle1_ps(vv, _MM_SHUFFLE(2, 2, 2, 2));
+        __m128 v3 = _mm_shuffle1_ps(vv, _MM_SHUFFLE(3, 3, 3, 3));
+
+        (*output).v =                         _mm_mul_ps(matrix._[0].v, v0);
+        (*output).v = _mm_add_ps((*output).v, _mm_mul_ps(matrix._[1].v, v1));
+        (*output).v = _mm_add_ps((*output).v, _mm_mul_ps(matrix._[2].v, v2));
+        (*output).v = _mm_add_ps((*output).v, _mm_mul_ps(matrix._[3].v, v3));
+#else
+        (*output) = matrix * (*input);
+#endif
         input = reinterpret_cast<xxVector4*>((char*)input + inputStride);
         output = reinterpret_cast<xxVector4*>((char*)output + outputStride);
     }
@@ -136,7 +117,49 @@ void xxMatrix4::MultiplyArray(const xxMatrix4& __restrict matrix, size_t count, 
 {
     for (size_t i = 0; i < count; ++i)
     {
-        Multiply((*output), matrix, (*input));
+#if defined(_M_IX86) || defined(_M_AMD64)
+        __m128 v0 = (*input)._[0].v;
+        __m128 v00 = _mm_shuffle1_ps(v0, _MM_SHUFFLE(0, 0, 0, 0));
+        __m128 v01 = _mm_shuffle1_ps(v0, _MM_SHUFFLE(1, 1, 1, 1));
+        __m128 v02 = _mm_shuffle1_ps(v0, _MM_SHUFFLE(2, 2, 2, 2));
+        __m128 v03 = _mm_shuffle1_ps(v0, _MM_SHUFFLE(3, 3, 3, 3));
+        (*output)._[0].v =                              _mm_mul_ps(matrix._[0].v, v00);
+        (*output)._[0].v = _mm_add_ps((*output)._[0].v, _mm_mul_ps(matrix._[1].v, v01));
+        (*output)._[0].v = _mm_add_ps((*output)._[0].v, _mm_mul_ps(matrix._[2].v, v02));
+        (*output)._[0].v = _mm_add_ps((*output)._[0].v, _mm_mul_ps(matrix._[3].v, v03));
+
+        __m128 v1 = (*input)._[1].v;
+        __m128 v10 = _mm_shuffle1_ps(v1, _MM_SHUFFLE(0, 0, 0, 0));
+        __m128 v11 = _mm_shuffle1_ps(v1, _MM_SHUFFLE(1, 1, 1, 1));
+        __m128 v12 = _mm_shuffle1_ps(v1, _MM_SHUFFLE(2, 2, 2, 2));
+        __m128 v13 = _mm_shuffle1_ps(v1, _MM_SHUFFLE(3, 3, 3, 3));
+        (*output)._[1].v =                              _mm_mul_ps(matrix._[0].v, v10);
+        (*output)._[1].v = _mm_add_ps((*output)._[1].v, _mm_mul_ps(matrix._[1].v, v11));
+        (*output)._[1].v = _mm_add_ps((*output)._[1].v, _mm_mul_ps(matrix._[2].v, v12));
+        (*output)._[1].v = _mm_add_ps((*output)._[1].v, _mm_mul_ps(matrix._[3].v, v13));
+
+        __m128 v2 = (*input)._[2].v;
+        __m128 v20 = _mm_shuffle1_ps(v2, _MM_SHUFFLE(0, 0, 0, 0));
+        __m128 v21 = _mm_shuffle1_ps(v2, _MM_SHUFFLE(1, 1, 1, 1));
+        __m128 v22 = _mm_shuffle1_ps(v2, _MM_SHUFFLE(2, 2, 2, 2));
+        __m128 v23 = _mm_shuffle1_ps(v2, _MM_SHUFFLE(3, 3, 3, 3));
+        (*output)._[2].v =                              _mm_mul_ps(matrix._[0].v, v20);
+        (*output)._[2].v = _mm_add_ps((*output)._[2].v, _mm_mul_ps(matrix._[1].v, v21));
+        (*output)._[2].v = _mm_add_ps((*output)._[2].v, _mm_mul_ps(matrix._[2].v, v22));
+        (*output)._[2].v = _mm_add_ps((*output)._[2].v, _mm_mul_ps(matrix._[3].v, v23));
+
+        __m128 v3 = (*input)._[3].v;
+        __m128 v30 = _mm_shuffle1_ps(v3, _MM_SHUFFLE(0, 0, 0, 0));
+        __m128 v31 = _mm_shuffle1_ps(v3, _MM_SHUFFLE(1, 1, 1, 1));
+        __m128 v32 = _mm_shuffle1_ps(v3, _MM_SHUFFLE(2, 2, 2, 2));
+        __m128 v33 = _mm_shuffle1_ps(v3, _MM_SHUFFLE(3, 3, 3, 3));
+        (*output)._[3].v =                              _mm_mul_ps(matrix._[0].v, v30);
+        (*output)._[3].v = _mm_add_ps((*output)._[3].v, _mm_mul_ps(matrix._[1].v, v31));
+        (*output)._[3].v = _mm_add_ps((*output)._[3].v, _mm_mul_ps(matrix._[2].v, v32));
+        (*output)._[3].v = _mm_add_ps((*output)._[3].v, _mm_mul_ps(matrix._[3].v, v33));
+#else
+        (*output) = matrix * (*input);
+#endif
         input = reinterpret_cast<xxMatrix4*>((char*)input + inputStride);
         output = reinterpret_cast<xxMatrix4*>((char*)output + outputStride);
     }

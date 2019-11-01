@@ -292,7 +292,7 @@ bool xxNode::UpdateMatrix()
     }
     else
     {
-        xxMatrix4::Multiply((*m_worldMatrix), *m_parent.lock()->m_worldMatrix, *m_localMatrix);
+       (*m_worldMatrix) = (*m_parent.lock()->m_worldMatrix) * (*m_localMatrix);
     }
 
     return true;
@@ -304,9 +304,9 @@ xxMatrix3 xxNode::GetRotate() const
     {
         xxMatrix3 rotate;
 
-        rotate.v[0] = { (*m_localMatrix).v[0].x, (*m_localMatrix).v[0].y, (*m_localMatrix).v[0].z };
-        rotate.v[1] = { (*m_localMatrix).v[1].x, (*m_localMatrix).v[1].y, (*m_localMatrix).v[1].z };
-        rotate.v[2] = { (*m_localMatrix).v[2].x, (*m_localMatrix).v[2].y, (*m_localMatrix).v[2].z };
+        rotate._[0] = { (*m_localMatrix)._[0].x, (*m_localMatrix)._[0].y, (*m_localMatrix)._[0].z };
+        rotate._[1] = { (*m_localMatrix)._[1].x, (*m_localMatrix)._[1].y, (*m_localMatrix)._[1].z };
+        rotate._[2] = { (*m_localMatrix)._[2].x, (*m_localMatrix)._[2].y, (*m_localMatrix)._[2].z };
 
         return rotate;
     }
@@ -320,7 +320,7 @@ xxVector3 xxNode::GetTranslate() const
     {
         xxVector3 translate;
 
-        translate = { (*m_localMatrix).v[3].x, (*m_localMatrix).v[3].y, (*m_localMatrix).v[3].z };
+        translate = { (*m_localMatrix)._[3].x, (*m_localMatrix)._[3].y, (*m_localMatrix)._[3].z };
 
         return translate;
     }
@@ -369,9 +369,9 @@ void xxNode::UpdateRotateTranslateScale()
 {
     for (int i = 0; i < 3; ++i)
     {
-        (*m_localMatrix).v[i] = xxVector4{ m_legacyRotate.v[i].x, m_legacyRotate.v[i].y, m_legacyRotate.v[i].z } * m_legacyScale;
+        (*m_localMatrix)._[i] = xxVector4{ m_legacyRotate._[i].x, m_legacyRotate._[i].y, m_legacyRotate._[i].z } * m_legacyScale;
     }
-    (*m_localMatrix).v[3] = { m_legacyTranslate.x, m_legacyTranslate.y, m_legacyTranslate.z, 1.0f };
+    (*m_localMatrix)._[3] = { m_legacyTranslate.x, m_legacyTranslate.y, m_legacyTranslate.z, 1.0f };
 }
 //------------------------------------------------------------------------------
 void xxNode::Update(float time, bool updateMatrix)
