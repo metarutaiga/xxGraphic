@@ -277,7 +277,7 @@ bool xxNode::UpdateMatrix()
             const xxMatrix4& parentMatrix = (*header->parentMatrix);
             size_t childrenCount = header->childrenCount;
 
-            xxMatrix4::MultiplyArray(parentMatrix, childrenCount, &linearMatrix[0], sizeof(xxMatrix4) * 2, &linearMatrix[1], sizeof(xxMatrix4) * 2);
+            parentMatrix.MultiplyArray(childrenCount, &linearMatrix[0], sizeof(xxMatrix4) * 2, &linearMatrix[1], sizeof(xxMatrix4) * 2);
             linearMatrix += childrenCount * 2;
 
             header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
@@ -362,7 +362,7 @@ void xxNode::SetScale(float scale)
 //------------------------------------------------------------------------------
 void xxNode::CreateRotateTranslateScale()
 {
-    xxMatrix4::FastDecompose((*m_localMatrix), m_legacyRotate, m_legacyTranslate, m_legacyScale);
+    (*m_localMatrix).FastDecompose(m_legacyRotate, m_legacyTranslate, m_legacyScale);
 }
 //------------------------------------------------------------------------------
 void xxNode::UpdateRotateTranslateScale()
