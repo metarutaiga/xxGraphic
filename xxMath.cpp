@@ -69,29 +69,31 @@ const xxMatrix4x4 xxMatrix4x4::IDENTITY = { 1, 0, 0, 0,
 //==============================================================================
 //  Matrix 4x4
 //==============================================================================
-float xxMatrix4::Determinant(const xxMatrix4& __restrict matrix)
+float xxMatrix4::Determinant() const
 {
-    return  matrix._[0].x * (matrix._[1].y * matrix._[2].z - matrix._[1].z * matrix._[2].y) +
-            matrix._[0].y * (matrix._[1].z * matrix._[2].x - matrix._[1].x * matrix._[2].z) +
-            matrix._[0].z * (matrix._[1].x * matrix._[2].y - matrix._[1].y * matrix._[2].x);
+    return  _[0].x * (_[1].y * _[2].z - _[1].z * _[2].y) +
+            _[0].y * (_[1].z * _[2].x - _[1].x * _[2].z) +
+            _[0].z * (_[1].x * _[2].y - _[1].y * _[2].x);
 }
 //------------------------------------------------------------------------------
-void xxMatrix4::FastDecompose(const xxMatrix4& __restrict matrix, xxMatrix3& __restrict rotate, xxVector3& __restrict translate, float& __restrict scale)
+void xxMatrix4::FastDecompose(xxMatrix3& __restrict rotate, xxVector3& __restrict translate, float& __restrict scale) const
 {
-    scale = xxVector3{ matrix._[0].x, matrix._[0].y, matrix._[0].z }.Length();
-    translate = { matrix._[3].x, matrix._[3].y, matrix._[3].z };
+    scale = xxVector3{ _[0].x, _[0].y, _[0].z }.Length();
+    translate = { _[3].x, _[3].y, _[3].z };
 
     float invScale = 1.0f / scale;
     for (int i = 0; i < 3; ++i)
     {
-        rotate._[i].x = matrix._[i].x * invScale;
-        rotate._[i].y = matrix._[i].y * invScale;
-        rotate._[i].z = matrix._[i].z * invScale;
+        rotate._[i].x = _[i].x * invScale;
+        rotate._[i].y = _[i].y * invScale;
+        rotate._[i].z = _[i].z * invScale;
     }
 }
 //------------------------------------------------------------------------------
-void xxMatrix4::MultiplyArray(const xxMatrix4& __restrict matrix, size_t count, const xxVector4* __restrict input, int inputStride, xxVector4* __restrict output, int outputStride)
+void xxMatrix4::MultiplyArray(size_t count, const xxVector4* __restrict input, int inputStride, xxVector4* __restrict output, int outputStride) const
 {
+    xxMatrix4x4 matrix(*this);
+
     for (size_t i = 0; i < count; ++i)
     {
 #if defined(_M_IX86) || defined(_M_AMD64)
@@ -113,11 +115,14 @@ void xxMatrix4::MultiplyArray(const xxMatrix4& __restrict matrix, size_t count, 
     }
 }
 //------------------------------------------------------------------------------
-void xxMatrix4::MultiplyArray(const xxMatrix4& __restrict matrix, size_t count, const xxMatrix4* __restrict input, int inputStride, xxMatrix4* __restrict output, int outputStride)
+void xxMatrix4::MultiplyArray(size_t count, const xxMatrix4* __restrict input, int inputStride, xxMatrix4* __restrict output, int outputStride) const
 {
+    xxMatrix4x4 matrix(*this);
+
     for (size_t i = 0; i < count; ++i)
     {
 #if defined(_M_IX86) || defined(_M_AMD64)
+
         __m128 v0 = (*input)._[0].v;
         __m128 v00 = _mm_shuffle1_ps(v0, _MM_SHUFFLE(0, 0, 0, 0));
         __m128 v01 = _mm_shuffle1_ps(v0, _MM_SHUFFLE(1, 1, 1, 1));
