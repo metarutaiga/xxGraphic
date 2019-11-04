@@ -20,15 +20,15 @@ class xxCPPAPI xxImage
 public:
     virtual ~xxImage();
 
-    void Create(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap, uint32_t array);
-    void Create2D(uint32_t format, uint32_t width, uint32_t height, uint32_t mipmap);
-    void Create3D(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap);
-    void CreateCube(uint32_t format, uint32_t width, uint32_t height, uint32_t mipmap);
+    static xxImagePtr Create(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap, uint32_t array);
+    static xxImagePtr Create2D(uint32_t format, uint32_t width, uint32_t height, uint32_t mipmap);
+    static xxImagePtr Create3D(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap);
+    static xxImagePtr CreateCube(uint32_t format, uint32_t width, uint32_t height, uint32_t mipmap);
 
     void* operator () (uint32_t x, uint32_t y, uint32_t z, uint32_t mipmap, uint32_t array);
 
 protected:
-    xxImage();
+    xxImage(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap, uint32_t array);
 
     std::vector<char>   m_images[16];
 

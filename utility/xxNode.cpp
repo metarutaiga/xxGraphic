@@ -11,17 +11,13 @@
 //==============================================================================
 xxNode::xxNode()
 {
-    m_childrenCount = 0;
-
     m_localMatrix = &m_classLocalMatrix;
     m_worldMatrix = &m_classWorldMatrix;
-
+    m_classLocalMatrix = xxMatrix4::IDENTITY;
+    m_classWorldMatrix = xxMatrix4::IDENTITY;
     m_legacyRotate = xxMatrix3::IDENTITY;
     m_legacyTranslate = xxVector3::ZERO;
     m_legacyScale = -1.0f;
-
-    m_classLocalMatrix = xxMatrix4::IDENTITY;
-    m_classWorldMatrix = xxMatrix4::IDENTITY;
 
     m_linearMatrixCreate = false;
 
@@ -62,11 +58,6 @@ xxNodePtr xxNode::GetChild(uint32_t index)
 //------------------------------------------------------------------------------
 uint32_t xxNode::GetChildCount() const
 {
-    return m_childrenCount;
-}
-//------------------------------------------------------------------------------
-uint32_t xxNode::GetChildSize() const
-{
     return static_cast<uint32_t>(m_children.size());
 }
 //------------------------------------------------------------------------------
@@ -77,31 +68,17 @@ bool xxNode::AttachChild(const xxNodePtr& child)
     if (child->m_parent.lock() != nullptr)
         return false;
 
-    if (GetChildCount() >= GetChildSize())
+    m_children.push_back(child);
+    child->m_parent = m_this;
+
+    xxNode* node = this;
+    while (xxNode* parent = node->m_parent.lock().get())
     {
-        m_children.emplace_back(xxNodePtr());
+        node = parent;
     }
+    node->m_linearMatrixCreate = true;
 
-    for (size_t i = 0; i < m_children.size(); ++i)
-    {
-        if (m_children[i] == nullptr)
-        {
-            child->m_parent = m_this;
-            m_children[i] = child;
-            m_childrenCount++;
-
-            xxNode* node = this;
-            while (xxNode* parent = node->m_parent.lock().get())
-            {
-                node = parent;
-            }
-            node->m_linearMatrixCreate = true;
-
-            return true;
-        }
-    }
-
-    return false;
+    return true;
 }
 //------------------------------------------------------------------------------
 bool xxNode::DetachChild(const xxNodePtr& child)
@@ -116,8 +93,9 @@ bool xxNode::DetachChild(const xxNodePtr& child)
         if (m_children[i] == child)
         {
             child->m_parent.reset();
-            m_children[i].reset();
-            m_childrenCount--;
+            for (size_t j = i + 1; j < m_children.size(); ++j)
+                m_children[j - 1] = m_children[j];
+            m_children.pop_back();
 
             struct TraversalResetMatrix
             {
@@ -181,13 +159,13 @@ void xxNode::CreateLinearMatrix()
             uint32_t count = 1;
 
             // Children Count
-            count += node->m_childrenCount * 2;
+            count += node->GetChildCount() * 2;
 
             // Traversal
             for (size_t i = 0; i < node->m_children.size(); ++i)
             {
                 xxNode* child = node->m_children[i].get();
-                if (child != nullptr && child->m_childrenCount != 0)
+                if (child != nullptr && child->m_children.empty() == false)
                 {
                     count += (*this)(child);
                 }
@@ -208,7 +186,7 @@ void xxNode::CreateLinearMatrix()
             // Header
             LinearMatrixHeader* header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
             header->parentMatrix = node->m_worldMatrix;
-            header->childrenCount = node->m_childrenCount;
+            header->childrenCount = node->GetChildCount();
 
             // Children Count
             for (size_t i = 0; i < node->m_children.size(); ++i)
@@ -228,7 +206,7 @@ void xxNode::CreateLinearMatrix()
             for (size_t i = 0; i < node->m_children.size(); ++i)
             {
                 xxNode* child = node->m_children[i].get();
-                if (child != nullptr && child->m_childrenCount != 0)
+                if (child != nullptr && child->m_children.empty() == false)
                 {
                     (*this)(child, linearMatrix);
                 }

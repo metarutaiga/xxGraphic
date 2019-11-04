@@ -10,31 +10,8 @@
 //==============================================================================
 //  Texture
 //==============================================================================
-xxImage::xxImage()
+xxImage::xxImage(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap, uint32_t array)
 {
-    m_format = 0;
-    m_width = 0;
-    m_height = 0;
-    m_depth = 0;
-    m_mipmap = 0;
-    m_array = 0;
-
-    m_device = 0;
-    m_texture = 0;
-    m_sampler = 0;
-}
-//------------------------------------------------------------------------------
-xxImage::~xxImage()
-{
-    xxDestroyTexture(m_texture);
-    xxDestroySampler(m_sampler);
-}
-//------------------------------------------------------------------------------
-void xxImage::Create(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap, uint32_t array)
-{
-    for (uint32_t i = 0; i < xxCountOf(m_images); ++i)
-        m_images[i] = std::vector<char>();
-
     m_format = format;
     m_width = width;
     m_height = height;
@@ -51,28 +28,43 @@ void xxImage::Create(uint32_t format, uint32_t width, uint32_t height, uint32_t 
         if (depth == 0)
             depth = 1;
 
-        size_t size = width * height * depth * array * xxSizeOf(uint32_t);
+        size_t size = xxSizeOf(uint32_t) * width * height * depth * array;
         m_images[i].resize(size);
 
         width <<= 1;
         height <<= 1;
         depth <<= 1;
     }
+
+    m_device = 0;
+    m_texture = 0;
+    m_sampler = 0;
 }
 //------------------------------------------------------------------------------
-void xxImage::Create2D(uint32_t format, uint32_t width, uint32_t height, uint32_t mipmap)
+xxImage::~xxImage()
 {
-    Create(format, width, height, 1, mipmap, 1);
+    xxDestroyTexture(m_texture);
+    xxDestroySampler(m_sampler);
 }
 //------------------------------------------------------------------------------
-void xxImage::Create3D(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap)
+xxImagePtr xxImage::Create(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap, uint32_t array)
 {
-    Create(format, width, height, depth, mipmap, 1);
+    return xxImagePtr(new xxImage(format, width, height, depth, mipmap, array));
 }
 //------------------------------------------------------------------------------
-void xxImage::CreateCube(uint32_t format, uint32_t width, uint32_t height, uint32_t mipmap)
+xxImagePtr xxImage::Create2D(uint32_t format, uint32_t width, uint32_t height, uint32_t mipmap)
 {
-    Create(format, width, height, 1, mipmap, 6);
+    return Create(format, width, height, 1, mipmap, 1);
+}
+//------------------------------------------------------------------------------
+xxImagePtr xxImage::Create3D(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap)
+{
+    return Create(format, width, height, depth, mipmap, 1);
+}
+//------------------------------------------------------------------------------
+xxImagePtr xxImage::CreateCube(uint32_t format, uint32_t width, uint32_t height, uint32_t mipmap)
+{
+    return Create(format, width, height, 1, mipmap, 6);
 }
 //------------------------------------------------------------------------------
 void* xxImage::operator () (uint32_t x, uint32_t y, uint32_t z, uint32_t mipmap, uint32_t array)

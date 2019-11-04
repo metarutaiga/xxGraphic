@@ -30,7 +30,6 @@ public:
     xxNodePtr GetParent() const;
     xxNodePtr GetChild(uint32_t index);
     uint32_t GetChildCount() const;
-    uint32_t GetChildSize() const;
     bool AttachChild(const xxNodePtr& child);
     bool DetachChild(const xxNodePtr& child);
 
@@ -56,21 +55,18 @@ protected:
     xxNode();
 
     // Parent / Children
-    xxNodeWeakPtr           m_parent;
-    xxNodeWeakPtr           m_this;
-    std::vector<xxNodePtr>  m_children;
-    uint32_t                m_childrenCount;
+    xxNodeWeakPtr               m_parent;
+    xxNodeWeakPtr               m_this;
+    std::vector<xxNodePtr>      m_children;
 
     // Matrix
-    xxMatrix4*              m_localMatrix;
-    xxMatrix4*              m_worldMatrix;
-
-    xxMatrix3               m_legacyRotate;
-    xxVector3               m_legacyTranslate;
-    float                   m_legacyScale;
-
-    xxMatrix4               m_classLocalMatrix;
-    xxMatrix4               m_classWorldMatrix;
+    xxMatrix4*                  m_localMatrix;
+    xxMatrix4*                  m_worldMatrix;
+    xxMatrix4                   m_classLocalMatrix;
+    xxMatrix4                   m_classWorldMatrix;
+    xxMatrix3                   m_legacyRotate;
+    xxVector3                   m_legacyTranslate;
+    float                       m_legacyScale;
 
     struct LinearMatrixHeader
     {
@@ -78,11 +74,11 @@ protected:
         uint32_t    childrenCount;
     };
 
-    std::vector<xxMatrix4>  m_linearMatrix;
-    bool                    m_linearMatrixCreate;
+    std::vector<xxMatrix4>      m_linearMatrix;
+    bool                        m_linearMatrixCreate;
 
     // Component
-    std::vector<xxImagePtr> m_images;
-    xxMaterialPtr           m_material;
-    xxMeshPtr               m_mesh;
+    std::vector<xxImagePtr>     m_images;
+    std::vector<xxMaterialPtr>  m_material;
+    xxMeshPtr                   m_mesh;
 };

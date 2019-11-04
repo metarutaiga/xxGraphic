@@ -14,11 +14,12 @@
 
 union xxCPPAPI xxVector2
 {
-    typedef xxVector2 type;
     enum { N = 2 };
     struct { float x, y; };
     struct { float u, v; };
     float f[N];
+
+    typedef xxVector2 type;
 
     xxVector2       operator -  () const                     { type t;        for (int i = 0; i < N; ++i) t.f[i] =   -f[i];              return t;       }
     xxVector2&      operator += (const xxVector2& v)         { type t(*this); for (int i = 0; i < N; ++i) t.f[i] += v.f[i]; (*this) = t; return (*this); }
@@ -50,11 +51,12 @@ union xxCPPAPI xxVector2
 
 union xxCPPAPI xxVector3
 {
-    typedef xxVector3 type;
     enum { N = 3 };
     struct { float x, y, z; };
     struct { float r, g, b; };
     float f[N];
+
+    typedef xxVector3 type;
 
     xxVector3       operator -  () const                     { type t;        for (int i = 0; i < N; ++i) t.f[i] =   -f[i];              return t;       }
     xxVector3&      operator += (const xxVector3& v)         { type t(*this); for (int i = 0; i < N; ++i) t.f[i] += v.f[i]; (*this) = t; return (*this); }
@@ -94,7 +96,6 @@ union xxCPPAPI xxVector3
 
 union xxCPPAPI xxVector4
 {
-    typedef xxVector4 type;
     enum { N = 4 };
     struct { float x, y, z, w; };
     struct { float r, g, b, a; };
@@ -102,6 +103,8 @@ union xxCPPAPI xxVector4
 #if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
     __m128 v;
 #endif
+
+    typedef xxVector4 type;
 
     xxVector4       operator -  () const                     { type t;        for (int i = 0; i < N; ++i) t.f[i] =   -f[i];              return t;       }
     xxVector4&      operator += (const xxVector4& v)         { type t(*this); for (int i = 0; i < N; ++i) t.f[i] += v.f[i]; (*this) = t; return (*this); }
@@ -137,16 +140,22 @@ union xxCPPAPI xxVector4
     static const xxVector4 WHITE;
 };
 
-typedef union xxMatrix2x3 xxMatrix2;
+typedef union xxMatrix2x2 xxMatrix2;
 typedef union xxMatrix3x3 xxMatrix3;
 typedef union xxMatrix4x4 xxMatrix4;
 
 union xxCPPAPI xxMatrix2x2
 {
-    typedef xxMatrix2x2 type;
     enum { M = 2, N = 2 };
     xxVector2 _[N];
     float f[M * N];
+    struct
+    {
+        float m11, m12;
+        float m21, m22;
+    };
+
+    typedef xxMatrix2x2 type;
 
     xxMatrix2x2     operator -  () const                     { type t;        for (int i = 0; i < M * N; ++i) t.f[i] =   -f[i];              return t;       }
     xxMatrix2x2&    operator += (const xxMatrix2x2& m)       { type t(*this); for (int i = 0; i < M * N; ++i) t.f[i] += m.f[i]; (*this) = t; return (*this); }
@@ -163,15 +172,20 @@ union xxCPPAPI xxMatrix2x2
 
     xxVector2       operator *  (const xxVector2& v) const   { return _[0] * v.x + _[1] * v.y; }
 
+    float           Determinant     () const;
+    xxMatrix2x2     Inverse         () const;
+    xxMatrix2x2     Transpose       () const;
+
     static const xxMatrix2x2 IDENTITY;
 };
 
 union xxCPPAPI xxMatrix2x3
 {
-    typedef xxMatrix2x3 type;
     enum { M = 2, N = 3 };
     xxVector2 _[N];
     float f[M * N];
+
+    typedef xxMatrix2x3 type;
 
     xxMatrix2x3     operator -  () const                     { type t;        for (int i = 0; i < M * N; ++i) t.f[i] =   -f[i];              return t;       }
     xxMatrix2x3&    operator += (const xxMatrix2x3& m)       { type t(*this); for (int i = 0; i < M * N; ++i) t.f[i] += m.f[i]; (*this) = t; return (*this); }
@@ -189,10 +203,11 @@ union xxCPPAPI xxMatrix2x3
 
 union xxCPPAPI xxMatrix2x4
 {
-    typedef xxMatrix2x4 type;
     enum { M = 2, N = 4 };
     xxVector2 _[N];
     float f[M * N];
+
+    typedef xxMatrix2x4 type;
 
     xxMatrix2x4     operator -  () const                     { type t;        for (int i = 0; i < M * N; ++i) t.f[i] =   -f[i];              return t;       }
     xxMatrix2x4&    operator += (const xxMatrix2x4& m)       { type t(*this); for (int i = 0; i < M * N; ++i) t.f[i] += m.f[i]; (*this) = t; return (*this); }
@@ -210,10 +225,11 @@ union xxCPPAPI xxMatrix2x4
 
 union xxCPPAPI xxMatrix3x2
 {
-    typedef xxMatrix3x2 type;
     enum { M = 3, N = 2 };
     xxVector3 _[N];
     float f[M * N];
+
+    typedef xxMatrix3x2 type;
 
     xxMatrix3x2     operator -  () const                     { type t;        for (int i = 0; i < M * N; ++i) t.f[i] =   -f[i];              return t;       }
     xxMatrix3x2&    operator += (const xxMatrix3x2& m)       { type t(*this); for (int i = 0; i < M * N; ++i) t.f[i] += m.f[i]; (*this) = t; return (*this); }
@@ -231,10 +247,17 @@ union xxCPPAPI xxMatrix3x2
 
 union xxCPPAPI xxMatrix3x3
 {
-    typedef xxMatrix3x3 type;
     enum { M = 3, N = 3 };
     xxVector3 _[N];
     float f[M * N];
+    struct
+    {
+        float m11, m12, m13;
+        float m21, m22, m23;
+        float m31, m32, m33;
+    };
+
+    typedef xxMatrix3x3 type;
 
     xxMatrix3x3     operator -  () const                     { type t;        for (int i = 0; i < M * N; ++i) t.f[i] =   -f[i];              return t;       }
     xxMatrix3x3&    operator += (const xxMatrix3x3& m)       { type t(*this); for (int i = 0; i < M * N; ++i) t.f[i] += m.f[i]; (*this) = t; return (*this); }
@@ -251,15 +274,20 @@ union xxCPPAPI xxMatrix3x3
 
     xxVector3       operator *  (const xxVector3& v) const   { return _[0] * v.x + _[1] * v.y + _[2] * v.z; }
 
+    float           Determinant     () const;
+    xxMatrix3x3     Inverse         () const;
+    xxMatrix3x3     Transpose       () const;
+
     static const xxMatrix3x3 IDENTITY;
 };
 
 union xxCPPAPI xxMatrix3x4
 {
-    typedef xxMatrix3x4 type;
     enum { M = 3, N = 4 };
     xxVector3 _[N];
     float f[M * N];
+
+    typedef xxMatrix3x4 type;
 
     xxMatrix3x4     operator -  () const                     { type t;        for (int i = 0; i < M * N; ++i) t.f[i] =   -f[i];              return t;       }
     xxMatrix3x4&    operator += (const xxMatrix3x4& m)       { type t(*this); for (int i = 0; i < M * N; ++i) t.f[i] += m.f[i]; (*this) = t; return (*this); }
@@ -277,10 +305,11 @@ union xxCPPAPI xxMatrix3x4
 
 union xxCPPAPI xxMatrix4x2
 {
-    typedef xxMatrix4x2 type;
     enum { M = 4, N = 2 };
     xxVector4 _[N];
     float f[M * N];
+
+    typedef xxMatrix4x2 type;
 
     xxMatrix4x2     operator -  () const                     { type t;        for (int i = 0; i < M * N; ++i) t.f[i] =   -f[i];              return t;       }
     xxMatrix4x2&    operator += (const xxMatrix4x2& m)       { type t(*this); for (int i = 0; i < M * N; ++i) t.f[i] += m.f[i]; (*this) = t; return (*this); }
@@ -298,10 +327,11 @@ union xxCPPAPI xxMatrix4x2
 
 union xxCPPAPI xxMatrix4x3
 {
-    typedef xxMatrix4x3 type;
     enum { M = 4, N = 3 };
     xxVector4 _[N];
     float f[M * N];
+
+    typedef xxMatrix4x3 type;
 
     xxMatrix4x3     operator -  () const                     { type t;        for (int i = 0; i < M * N; ++i) t.f[i] =   -f[i];              return t;       }
     xxMatrix4x3&    operator += (const xxMatrix4x3& m)       { type t(*this); for (int i = 0; i < M * N; ++i) t.f[i] += m.f[i]; (*this) = t; return (*this); }
@@ -319,10 +349,18 @@ union xxCPPAPI xxMatrix4x3
 
 union xxCPPAPI xxMatrix4x4
 {
-    typedef xxMatrix4x4 type;
     enum { M = 4, N = 4 };
     xxVector4 _[N];
     float f[M * N];
+    struct
+    {
+        float m11, m12, m13, m14;
+        float m21, m22, m23, m24;
+        float m31, m32, m33, m34;
+        float m41, m42, m43, m44;
+    };
+
+    typedef xxMatrix4x4 type;
 
     xxMatrix4x4     operator -  () const                     { type t;        for (int i = 0; i < M * N; ++i) t.f[i] =   -f[i];                    return t;       }
     xxMatrix4x4&    operator += (const xxMatrix4x4& m)       { type t(*this); for (int i = 0; i < M * N; ++i) t.f[i] += m.f[i];       (*this) = t; return (*this); }
@@ -339,10 +377,13 @@ union xxCPPAPI xxMatrix4x4
 
     xxVector4       operator *  (const xxVector4& v) const   { return _[0] * v.x + _[1] * v.y + _[2] * v.z + _[3] * v.w; }
 
-    float   Determinant         () const;
-    void    FastDecompose       (xxMatrix3& rotate, xxVector3& translate, float& scale) const;
-    void    MultiplyArray       (size_t count, const xxVector4* input, int inputStride, xxVector4* output, int outputStride) const;
-    void    MultiplyArray       (size_t count, const xxMatrix4* input, int inputStride, xxMatrix4* output, int outputStride) const;
+    float           Determinant     () const;
+    xxMatrix4x4     Inverse         () const;
+    xxMatrix4x4     Transpose       () const;
+    float           FastDeterminant () const;
+    void            FastDecompose   (xxMatrix3& rotate, xxVector3& translate, float& scale) const;
+    void            MultiplyArray   (size_t count, const xxVector4* input, int inputStride, xxVector4* output, int outputStride) const;
+    void            MultiplyArray   (size_t count, const xxMatrix4* input, int inputStride, xxMatrix4* output, int outputStride) const;
 
     static const xxMatrix4x4 IDENTITY;
 };

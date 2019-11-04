@@ -23,6 +23,8 @@ class xxCPPAPI xxMesh
 public:
     virtual ~xxMesh();
 
+    static xxMeshPtr Create(int color, int normal, int texture);
+
     uint32_t                    GetVertexCount() const;
     void                        SetVertexCount(uint32_t count);
 
@@ -35,8 +37,6 @@ public:
     xxStrideIterator<xxVector2> GetTexture(int index) const;
 
     void                        Update(uint64_t device);
-
-    static xxMeshPtr Create(int color, int normal, int texture);
 
 protected:
     xxMesh(int color, int normal, int texture);
