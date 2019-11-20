@@ -15,7 +15,7 @@
 class xxMesh;
 typedef std::shared_ptr<xxMesh> xxMeshPtr;
 
-template <class T>
+template<class T>
 struct xxStrideIterator;
 
 class xxCPPAPI xxMesh
@@ -62,7 +62,7 @@ protected:
     int                         m_textureCount;
 };
 
-template <class T>
+template<class T>
 struct xxStrideIterator
 {
     xxStrideIterator(void* base, size_t size, size_t stride)

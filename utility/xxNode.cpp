@@ -22,14 +22,14 @@ xxNode::xxNode()
     m_linearMatrixCreate = false;
 
 #if 0
-    xxLog("xxNode", "Construct : %p", this);
+    xxLog("xxNode", "Constructor : %p", this);
 #endif
 }
 //------------------------------------------------------------------------------
 xxNode::~xxNode()
 {
 #if 0
-    xxLog("xxNode", "Destruct : %p", this);
+    xxLog("xxNode", "Destructor : %p", this);
 #endif
 }
 //------------------------------------------------------------------------------
@@ -94,7 +94,7 @@ bool xxNode::DetachChild(const xxNodePtr& child)
         {
             child->m_parent.reset();
             for (size_t j = i + 1; j < m_children.size(); ++j)
-                m_children[j - 1] = m_children[j];
+                std::move(m_children[j - 1] = m_children[j]);
             m_children.pop_back();
 
             struct TraversalResetMatrix
