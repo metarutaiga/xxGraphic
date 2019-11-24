@@ -900,34 +900,68 @@ void xxDrawIndexedD3D6(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
     LPDIRECT3DDEVICE3 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE3>(commandEncoder);
     if (d3dDevice == nullptr)
         return;
-    DWORD* d3dIndexBuffer = reinterpret_cast<DWORD*>(getResourceData(indexBuffer));
 
     LPDIRECT3DVERTEXBUFFER vertexBuffer = nullptr;
     d3dDevice->GetRenderState(D3DRENDERSTATE_LINEPATTERN, (DWORD*)&vertexBuffer);
 
     static WORD wordIndexBuffer[65536];
-    int headIndexCount = indexCount / 8;
-    int tailIndexCount = indexCount % 8;
-    DWORD* p = d3dIndexBuffer + firstIndex;
-    WORD* q = wordIndexBuffer;
-    if (headIndexCount)
+    WORD* indexArray = nullptr;
+    if (INDEX_BUFFER_WIDTH == 2 && vertexOffset == 0)
     {
-        __m128i c = _mm_set1_epi16(vertexOffset);
-        for (int i = 0; i < headIndexCount; ++i)
-        {
-            __m128i a = _mm_loadu_si128((__m128i*)p);
-            __m128i b = _mm_loadu_si128((__m128i*)p + 1);
-            _mm_store_si128((__m128i*)q, _mm_add_epi16(_mm_packs_epi32(a, b), c));
-            p += 8;
-            q += 8;
-        }
+        WORD* d3dIndexBuffer = reinterpret_cast<WORD*>(getResourceData(indexBuffer));
+        indexArray = d3dIndexBuffer + firstIndex;
     }
-    for (int i = 0; i < tailIndexCount; ++i)
+    else if (INDEX_BUFFER_WIDTH == 2)
     {
-        (*q++) = (WORD)((*p++) + vertexOffset);
+        int headIndexCount = indexCount / 8;
+        int tailIndexCount = indexCount % 8;
+        WORD* d3dIndexBuffer = reinterpret_cast<WORD*>(getResourceData(indexBuffer));
+        WORD* p = d3dIndexBuffer + firstIndex;
+        WORD* q = wordIndexBuffer;
+        if (headIndexCount)
+        {
+            __m128i c = _mm_set1_epi16(vertexOffset);
+            for (int i = 0; i < headIndexCount; ++i)
+            {
+                __m128i a = _mm_loadu_si128((__m128i*)p);
+                _mm_store_si128((__m128i*)q, _mm_add_epi16(a, c));
+                p += 8;
+                q += 8;
+            }
+        }
+        for (int i = 0; i < tailIndexCount; ++i)
+        {
+            (*q++) = (*p++) + vertexOffset;
+        }
+        indexArray = wordIndexBuffer;
+    }
+    else
+    {
+        int headIndexCount = indexCount / 8;
+        int tailIndexCount = indexCount % 8;
+        DWORD* d3dIndexBuffer = reinterpret_cast<DWORD*>(getResourceData(indexBuffer));
+        DWORD* p = d3dIndexBuffer + firstIndex;
+        WORD* q = wordIndexBuffer;
+        if (headIndexCount)
+        {
+            __m128i c = _mm_set1_epi16(vertexOffset);
+            for (int i = 0; i < headIndexCount; ++i)
+            {
+                __m128i a = _mm_loadu_si128((__m128i*)p);
+                __m128i b = _mm_loadu_si128((__m128i*)p + 1);
+                _mm_store_si128((__m128i*)q, _mm_add_epi16(_mm_packs_epi32(a, b), c));
+                p += 8;
+                q += 8;
+            }
+        }
+        for (int i = 0; i < tailIndexCount; ++i)
+        {
+            (*q++) = (WORD)((*p++) + vertexOffset);
+        }
+        indexArray = wordIndexBuffer;
     }
 
-    d3dDevice->DrawIndexedPrimitiveVB(D3DPT_TRIANGLELIST, vertexBuffer, wordIndexBuffer, indexCount, 0);
+    d3dDevice->DrawIndexedPrimitiveVB(D3DPT_TRIANGLELIST, vertexBuffer, indexArray, indexCount, 0);
 }
 //==============================================================================
 //  Fixed-Function

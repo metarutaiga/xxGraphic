@@ -103,6 +103,7 @@ void xxSetVertexBuffersGLES32(uint64_t commandEncoder, int count, const uint64_t
 //------------------------------------------------------------------------------
 void xxDrawIndexedGLES32(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
-    glDrawElementsInstancedBaseVertex(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, (int*)nullptr + firstIndex, instanceCount, vertexOffset);
+    GLenum indexType = (INDEX_BUFFER_WIDTH == 2) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+    glDrawElementsInstancedBaseVertex(GL_TRIANGLES, indexCount, indexType, (char*)nullptr + firstIndex * INDEX_BUFFER_WIDTH, instanceCount, vertexOffset);
 }
 //==============================================================================

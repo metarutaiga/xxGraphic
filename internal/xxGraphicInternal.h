@@ -29,6 +29,8 @@ enum xxGraphicDescriptor
 
     VERTEX_BUFFER           = TOTAL,
     VERTEX_BUFFER_COUNT     = 4,
+
+    INDEX_BUFFER_WIDTH      = 2,
 };
 
 #define xxRegisterFunction(API) \

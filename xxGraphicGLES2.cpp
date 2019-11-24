@@ -883,7 +883,8 @@ void xxDrawIndexedGLES2(uint64_t commandEncoder, uint64_t indexBuffer, int index
         glVertexAttribPointer(attribute.index, attribute.size, attribute.type, attribute.normalized, attribute.stride, attribute.pointer + vertexOffset * attribute.stride);
     }
 
-    glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, (int*)nullptr + firstIndex);
+    GLenum indexType = (INDEX_BUFFER_WIDTH == 2) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+    glDrawElements(GL_TRIANGLES, indexCount, indexType, (char*)nullptr + firstIndex * INDEX_BUFFER_WIDTH);
 }
 //==============================================================================
 //  Fixed-Function

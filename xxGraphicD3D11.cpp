@@ -1175,7 +1175,8 @@ void xxSetIndexBufferD3D11(uint64_t commandEncoder, uint64_t buffer)
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandEncoder);
     D3D11BUFFER* d3dBuffer = reinterpret_cast<D3D11BUFFER*>(buffer);
 
-    d3dDeviceContext->IASetIndexBuffer(d3dBuffer->buffer, DXGI_FORMAT_R32_UINT, 0);
+    DXGI_FORMAT format = (INDEX_BUFFER_WIDTH == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+    d3dDeviceContext->IASetIndexBuffer(d3dBuffer->buffer, format, 0);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersD3D11(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)

@@ -905,7 +905,8 @@ void xxDrawIndexedMetal(uint64_t commandEncoder, uint64_t indexBuffer, int index
     id <MTLRenderCommandEncoder> mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
     id <MTLBuffer> mtlIndexBuffer = (__bridge id)reinterpret_cast<void*>(indexBuffer);
 
-    [mtlCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle indexCount:indexCount indexType:MTLIndexTypeUInt32 indexBuffer:mtlIndexBuffer indexBufferOffset:firstIndex * sizeof(int) instanceCount:instanceCount baseVertex:vertexOffset baseInstance:firstInstance];
+    MTLIndexType indexType = (INDEX_BUFFER_WIDTH == 2) ? MTLIndexTypeUInt16 : MTLIndexTypeUInt32;
+    [mtlCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle indexCount:indexCount indexType:indexType indexBuffer:mtlIndexBuffer indexBufferOffset:firstIndex * sizeof(int) instanceCount:instanceCount baseVertex:vertexOffset baseInstance:firstInstance];
 }
 //==============================================================================
 //  Fixed-Function

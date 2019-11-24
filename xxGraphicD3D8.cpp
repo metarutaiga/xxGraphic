@@ -360,8 +360,9 @@ uint64_t xxCreateIndexBufferD3D8(uint64_t device, unsigned int size)
     if (d3dDevice == nullptr)
         return 0;
 
+    D3DFORMAT format = (INDEX_BUFFER_WIDTH == 2) ? D3DFMT_INDEX16 : D3DFMT_INDEX32;
     LPDIRECT3DINDEXBUFFER8 d3dIndexBuffer = nullptr;
-    HRESULT hResult = d3dDevice->CreateIndexBuffer(size, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX32, D3DPOOL_DEFAULT, &d3dIndexBuffer);
+    HRESULT hResult = d3dDevice->CreateIndexBuffer(size, D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, format, D3DPOOL_DEFAULT, &d3dIndexBuffer);
     if (hResult != S_OK)
         return 0;
 

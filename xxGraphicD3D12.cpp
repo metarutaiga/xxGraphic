@@ -1513,10 +1513,11 @@ void xxSetIndexBufferD3D12(uint64_t commandEncoder, uint64_t buffer)
     ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
     D3D12RESOURCE* d3dBuffer = reinterpret_cast<D3D12RESOURCE*>(buffer);
 
+    DXGI_FORMAT format = (INDEX_BUFFER_WIDTH == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
     D3D12_INDEX_BUFFER_VIEW view = {};
     view.BufferLocation = d3dBuffer->resource->GetGPUVirtualAddress();
     view.SizeInBytes = d3dBuffer->size;
-    view.Format = DXGI_FORMAT_R32_UINT;
+    view.Format = format;
     d3dCommandList->IASetIndexBuffer(&view);
 }
 //------------------------------------------------------------------------------

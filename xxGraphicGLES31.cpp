@@ -162,6 +162,7 @@ void xxDrawIndexedGLES31(uint64_t commandEncoder, uint64_t indexBuffer, int inde
     indirectCommand.baseVertex = vertexOffset;
     indirectCommand.baseInstance = firstInstance;
 
-    glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, (INDIRECTCOMMANDGL*)nullptr + index);
+    GLenum indexType = (INDEX_BUFFER_WIDTH == 2) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+    glDrawElementsIndirect(GL_TRIANGLES, indexType, (INDIRECTCOMMANDGL*)nullptr + index);
 }
 //==============================================================================

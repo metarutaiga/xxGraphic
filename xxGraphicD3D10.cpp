@@ -1108,7 +1108,8 @@ void xxSetIndexBufferD3D10(uint64_t commandEncoder, uint64_t buffer)
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
     D3D10BUFFER* d3dBuffer = reinterpret_cast<D3D10BUFFER*>(buffer);
 
-    d3dDevice->IASetIndexBuffer(d3dBuffer->buffer, DXGI_FORMAT_R32_UINT, 0);
+    DXGI_FORMAT format = (INDEX_BUFFER_WIDTH == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+    d3dDevice->IASetIndexBuffer(d3dBuffer->buffer, format, 0);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersD3D10(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)

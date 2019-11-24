@@ -843,30 +843,40 @@ void xxDrawIndexedD3D7(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
     LPDIRECT3DDEVICE7 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE7>(commandEncoder);
     if (d3dDevice == nullptr)
         return;
-    DWORD* d3dIndexBuffer = reinterpret_cast<DWORD*>(getResourceData(indexBuffer));
 
     LPDIRECT3DVERTEXBUFFER7 vertexBuffer = nullptr;
     d3dDevice->GetRenderState(D3DRENDERSTATE_LINEPATTERN, (DWORD*)&vertexBuffer);
 
     static WORD wordIndexBuffer[65536];
-    int headIndexCount = indexCount / 8;
-    int tailIndexCount = indexCount % 8;
-    DWORD* p = d3dIndexBuffer + firstIndex;
-    WORD* q = wordIndexBuffer;
-    for (int i = 0; i < headIndexCount; ++i)
+    WORD* indexArray = nullptr;
+    if (INDEX_BUFFER_WIDTH == 2)
     {
-        __m128i a = _mm_loadu_si128((__m128i*)p);
-        __m128i b = _mm_loadu_si128((__m128i*)p + 1);
-        _mm_store_si128((__m128i*)q, _mm_packs_epi32(a, b));
-        p += 8;
-        q += 8;
+        WORD* d3dIndexBuffer = reinterpret_cast<WORD*>(getResourceData(indexBuffer));
+        indexArray = d3dIndexBuffer + firstIndex;
     }
-    for (int i = 0; i < tailIndexCount; ++i)
+    else
     {
-        (*q++) = (WORD)(*p++);
+        int headIndexCount = indexCount / 8;
+        int tailIndexCount = indexCount % 8;
+        DWORD* d3dIndexBuffer = reinterpret_cast<DWORD*>(getResourceData(indexBuffer));
+        DWORD* p = d3dIndexBuffer + firstIndex;
+        WORD* q = wordIndexBuffer;
+        for (int i = 0; i < headIndexCount; ++i)
+        {
+            __m128i a = _mm_loadu_si128((__m128i*)p);
+            __m128i b = _mm_loadu_si128((__m128i*)p + 1);
+            _mm_store_si128((__m128i*)q, _mm_packs_epi32(a, b));
+            p += 8;
+            q += 8;
+        }
+        for (int i = 0; i < tailIndexCount; ++i)
+        {
+            (*q++) = (WORD)(*p++);
+        }
+        indexArray = wordIndexBuffer;
     }
 
-    d3dDevice->DrawIndexedPrimitiveVB(D3DPT_TRIANGLELIST, vertexBuffer, vertexOffset, 0, wordIndexBuffer, indexCount, 0);
+    d3dDevice->DrawIndexedPrimitiveVB(D3DPT_TRIANGLELIST, vertexBuffer, vertexOffset, 0, indexArray, indexCount, 0);
 }
 //==============================================================================
 //  Fixed-Function
