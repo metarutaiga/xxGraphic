@@ -64,8 +64,8 @@ xxAPI void          xxUnmapBufferD3D7(uint64_t device, uint64_t buffer);
 //==============================================================================
 xxAPI uint64_t      xxCreateTextureD3D7(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array);
 xxAPI void          xxDestroyTextureD3D7(uint64_t texture);
-xxAPI void*         xxMapTextureD3D7(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array, unsigned int mipmap);
-xxAPI void          xxUnmapTextureD3D7(uint64_t device, uint64_t texture, unsigned int level, unsigned int array, unsigned int mipmap);
+xxAPI void*         xxMapTextureD3D7(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array);
+xxAPI void          xxUnmapTextureD3D7(uint64_t device, uint64_t texture, unsigned int level, unsigned int array);
 //==============================================================================
 //  Sampler
 //==============================================================================

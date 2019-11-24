@@ -532,7 +532,7 @@ void xxDestroyTextureMetal(uint64_t texture)
     delete mtlTexture;
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureMetal(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array, unsigned int mipmap)
+void* xxMapTextureMetal(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
 {
     MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);
 
@@ -540,7 +540,7 @@ void* xxMapTextureMetal(uint64_t device, uint64_t texture, unsigned int* stride,
     return [mtlTexture->buffer contents];
 }
 //------------------------------------------------------------------------------
-void xxUnmapTextureMetal(uint64_t device, uint64_t texture, unsigned int level, unsigned int array, unsigned int mipmap)
+void xxUnmapTextureMetal(uint64_t device, uint64_t texture, unsigned int level, unsigned int array)
 {
 #if defined(xxMACOS) || defined(xxMACCATALYST)
     MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);

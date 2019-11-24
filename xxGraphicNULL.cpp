@@ -173,12 +173,12 @@ void xxDestroyTextureNULL(uint64_t texture)
 
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureNULL(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array, unsigned int mipmap)
+void* xxMapTextureNULL(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
 {
     return nullptr;
 }
 //------------------------------------------------------------------------------
-void xxUnmapTextureNULL(uint64_t device, uint64_t texture, unsigned int level, unsigned int array, unsigned int mipmap)
+void xxUnmapTextureNULL(uint64_t device, uint64_t texture, unsigned int level, unsigned int array)
 {
 
 }

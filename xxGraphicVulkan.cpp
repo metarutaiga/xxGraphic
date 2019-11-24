@@ -1943,7 +1943,7 @@ void xxDestroyTextureVulkan(uint64_t texture)
     delete vkTexture;
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureVulkan(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array, unsigned int mipmap)
+void* xxMapTextureVulkan(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
@@ -2010,7 +2010,7 @@ void* xxMapTextureVulkan(uint64_t device, uint64_t texture, unsigned int* stride
     return ptr;
 }
 //------------------------------------------------------------------------------
-void xxUnmapTextureVulkan(uint64_t device, uint64_t texture, unsigned int level, unsigned int array, unsigned int mipmap)
+void xxUnmapTextureVulkan(uint64_t device, uint64_t texture, unsigned int level, unsigned int array)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)

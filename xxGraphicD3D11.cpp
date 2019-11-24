@@ -820,6 +820,7 @@ uint64_t xxCreateTextureD3D11(uint64_t device, int format, unsigned int width, u
     d3dTexture->texture2D = d3dTexture2D;
     d3dTexture->texture3D = d3dTexture3D;
     d3dTexture->resourceView = d3dView;
+    d3dTexture->mipmap = mipmap;
 
     return reinterpret_cast<uint64_t>(d3dTexture);
 }
@@ -837,7 +838,7 @@ void xxDestroyTextureD3D11(uint64_t texture)
     delete d3dTexture;
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureD3D11(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array, unsigned int mipmap)
+void* xxMapTextureD3D11(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
 {
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
     if (d3dDevice == nullptr)
@@ -854,7 +855,7 @@ void* xxMapTextureD3D11(uint64_t device, uint64_t texture, unsigned int* stride,
     if (d3dTexture->texture1D)
     {
         D3D11_MAPPED_SUBRESOURCE mappedSubresource = {};
-        HRESULT hResult = d3dDeviceContext->Map(d3dTexture->texture1D, D3D11CalcSubresource(level, array, mipmap), D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
+        HRESULT hResult = d3dDeviceContext->Map(d3dTexture->texture1D, D3D11CalcSubresource(level, array, d3dTexture->mipmap), D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
         if (hResult != S_OK)
             return nullptr;
 
@@ -865,7 +866,7 @@ void* xxMapTextureD3D11(uint64_t device, uint64_t texture, unsigned int* stride,
     if (d3dTexture->texture2D)
     {
         D3D11_MAPPED_SUBRESOURCE mappedSubresource = {};
-        HRESULT hResult = d3dDeviceContext->Map(d3dTexture->texture2D, D3D11CalcSubresource(level, array, mipmap), D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
+        HRESULT hResult = d3dDeviceContext->Map(d3dTexture->texture2D, D3D11CalcSubresource(level, array, d3dTexture->mipmap), D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
         if (hResult != S_OK)
             return nullptr;
 
@@ -876,7 +877,7 @@ void* xxMapTextureD3D11(uint64_t device, uint64_t texture, unsigned int* stride,
     if (d3dTexture->texture3D)
     {
         D3D11_MAPPED_SUBRESOURCE mappedSubresource = {};
-        HRESULT hResult = d3dDeviceContext->Map(d3dTexture->texture3D, D3D11CalcSubresource(level, array, mipmap), D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
+        HRESULT hResult = d3dDeviceContext->Map(d3dTexture->texture3D, D3D11CalcSubresource(level, array, d3dTexture->mipmap), D3D11_MAP_WRITE_DISCARD, 0, &mappedSubresource);
         if (hResult != S_OK)
             return nullptr;
 
@@ -887,7 +888,7 @@ void* xxMapTextureD3D11(uint64_t device, uint64_t texture, unsigned int* stride,
     return nullptr;
 }
 //------------------------------------------------------------------------------
-void xxUnmapTextureD3D11(uint64_t device, uint64_t texture, unsigned int level, unsigned int array, unsigned int mipmap)
+void xxUnmapTextureD3D11(uint64_t device, uint64_t texture, unsigned int level, unsigned int array)
 {
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
     if (d3dDevice == nullptr)
@@ -903,19 +904,19 @@ void xxUnmapTextureD3D11(uint64_t device, uint64_t texture, unsigned int level, 
 
     if (d3dTexture->texture1D)
     {
-        d3dDeviceContext->Unmap(d3dTexture->texture1D, D3D11CalcSubresource(level, array, mipmap));
+        d3dDeviceContext->Unmap(d3dTexture->texture1D, D3D11CalcSubresource(level, array, d3dTexture->mipmap));
         return;
     }
 
     if (d3dTexture->texture2D)
     {
-        d3dDeviceContext->Unmap(d3dTexture->texture2D, D3D11CalcSubresource(level, array, mipmap));
+        d3dDeviceContext->Unmap(d3dTexture->texture2D, D3D11CalcSubresource(level, array, d3dTexture->mipmap));
         return;
     }
 
     if (d3dTexture->texture3D)
     {
-        d3dDeviceContext->Unmap(d3dTexture->texture3D, D3D11CalcSubresource(level, array, mipmap));
+        d3dDeviceContext->Unmap(d3dTexture->texture3D, D3D11CalcSubresource(level, array, d3dTexture->mipmap));
         return;
     }
 }

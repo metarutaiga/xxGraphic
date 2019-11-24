@@ -155,8 +155,8 @@ static uint64_t xxTSCFrequencyImpl()
         delta = 100.0;
 
     LONGLONG counter = LONGLONG((tscEnd - tscBegin) * 1000.0 / delta);
-    float mhz = counter / 1000000.0f;
-    counter = LONGLONG(LONGLONG(mhz / 100.0f + 0.5f) * 100.0 * 1000000.0);
+    double mhz = counter / 1000000.0;
+    counter = LONGLONG(LONGLONG(mhz / 100.0 + 0.5) * 100.0 * 1000000.0);
 #else
     timeval tmBegin;
     timeval tmEnd;
@@ -178,8 +178,8 @@ static uint64_t xxTSCFrequencyImpl()
         delta = 100.0;
 
     int64_t counter = int64_t((tscEnd - tscBegin) * 1000.0 / delta);
-    float mhz = counter / 1000000.0f;
-    counter = int64_t(int64_t(mhz / 100.0f + 0.5f) * 100.0 * 1000000.0);
+    double mhz = counter / 1000000.0;
+    counter = int64_t(int64_t(mhz / 100.0 + 0.5) * 100.0 * 1000000.0);
 #endif
 
     xxLog("xxSystem", "Frequency : %llu", counter);
@@ -271,12 +271,19 @@ int xxLog(const char* tag, const char* format, ...)
 #elif defined(xxWINDOWS) && defined(_UNICODE)
     wchar_t temp[1024];
     int length = ::MultiByteToWideChar(CP_UTF8, 0, buffer, -1, temp, MAX_PATH);
-    temp[length - 1] = L'\n';
-    temp[length - 0] = L'\0';
+    if (length > 0 && length < xxCountOf(temp))
+    {
+        temp[length - 1] = L'\n';
+        temp[length - 0] = L'\0';
+    }
     OutputDebugStringW(temp);
 #elif defined(xxWINDOWS)
-    buffer[tagLength + formatLength - 1] = '\n';
-    buffer[tagLength + formatLength - 0] = '\0';
+    int length = tagLength + formatLength;
+    if (length > 0 && length < xxCountOf(buffer))
+    {
+        buffer[length - 1] = '\n';
+        buffer[length - 0] = '\0';
+    }
     OutputDebugStringA(buffer);
 #else
     printf("%s\n", buffer);

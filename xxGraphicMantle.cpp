@@ -739,12 +739,12 @@ void xxDestroyTextureMantle(uint64_t texture)
 
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureMantle(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array, unsigned int mipmap)
+void* xxMapTextureMantle(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
 {
     return nullptr;
 }
 //------------------------------------------------------------------------------
-void xxUnmapTextureMantle(uint64_t device, uint64_t texture, unsigned int level, unsigned int array, unsigned int mipmap)
+void xxUnmapTextureMantle(uint64_t device, uint64_t texture, unsigned int level, unsigned int array)
 {
 
 }

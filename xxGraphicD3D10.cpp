@@ -770,6 +770,7 @@ uint64_t xxCreateTextureD3D10(uint64_t device, int format, unsigned int width, u
     d3dTexture->texture2D = d3dTexture2D;
     d3dTexture->texture3D = d3dTexture3D;
     d3dTexture->resourceView = d3dView;
+    d3dTexture->mipmap = mipmap;
 
     return reinterpret_cast<uint64_t>(d3dTexture);
 }
@@ -787,7 +788,7 @@ void xxDestroyTextureD3D10(uint64_t texture)
     delete d3dTexture;
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureD3D10(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array, unsigned int mipmap)
+void* xxMapTextureD3D10(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
 {
     D3D10TEXTURE* d3dTexture = reinterpret_cast<D3D10TEXTURE*>(texture);
     if (d3dTexture == nullptr)
@@ -796,7 +797,7 @@ void* xxMapTextureD3D10(uint64_t device, uint64_t texture, unsigned int* stride,
     if (d3dTexture->texture1D)
     {
         void* ptr = nullptr;
-        HRESULT hResult = d3dTexture->texture1D->Map(D3D10CalcSubresource(level, array, mipmap), D3D10_MAP_WRITE_DISCARD, 0, &ptr);
+        HRESULT hResult = d3dTexture->texture1D->Map(D3D10CalcSubresource(level, array, d3dTexture->mipmap), D3D10_MAP_WRITE_DISCARD, 0, &ptr);
         if (hResult != S_OK)
             return nullptr;
 
@@ -806,7 +807,7 @@ void* xxMapTextureD3D10(uint64_t device, uint64_t texture, unsigned int* stride,
     if (d3dTexture->texture2D)
     {
         D3D10_MAPPED_TEXTURE2D mappedTexture2D = {};
-        HRESULT hResult = d3dTexture->texture2D->Map(D3D10CalcSubresource(level, array, mipmap), D3D10_MAP_WRITE_DISCARD, 0, &mappedTexture2D);
+        HRESULT hResult = d3dTexture->texture2D->Map(D3D10CalcSubresource(level, array, d3dTexture->mipmap), D3D10_MAP_WRITE_DISCARD, 0, &mappedTexture2D);
         if (hResult != S_OK)
             return nullptr;
 
@@ -817,7 +818,7 @@ void* xxMapTextureD3D10(uint64_t device, uint64_t texture, unsigned int* stride,
     if (d3dTexture->texture3D)
     {
         D3D10_MAPPED_TEXTURE3D mappedTexture3D = {};
-        HRESULT hResult = d3dTexture->texture3D->Map(D3D10CalcSubresource(level, array, mipmap), D3D10_MAP_WRITE_DISCARD, 0, &mappedTexture3D);
+        HRESULT hResult = d3dTexture->texture3D->Map(D3D10CalcSubresource(level, array, d3dTexture->mipmap), D3D10_MAP_WRITE_DISCARD, 0, &mappedTexture3D);
         if (hResult != S_OK)
             return nullptr;
 
@@ -828,7 +829,7 @@ void* xxMapTextureD3D10(uint64_t device, uint64_t texture, unsigned int* stride,
     return nullptr;
 }
 //------------------------------------------------------------------------------
-void xxUnmapTextureD3D10(uint64_t device, uint64_t texture, unsigned int level, unsigned int array, unsigned int mipmap)
+void xxUnmapTextureD3D10(uint64_t device, uint64_t texture, unsigned int level, unsigned int array)
 {
     D3D10TEXTURE* d3dTexture = reinterpret_cast<D3D10TEXTURE*>(texture);
     if (d3dTexture == nullptr)
@@ -836,19 +837,19 @@ void xxUnmapTextureD3D10(uint64_t device, uint64_t texture, unsigned int level, 
 
     if (d3dTexture->texture1D)
     {
-        d3dTexture->texture1D->Unmap(D3D10CalcSubresource(level, array, mipmap));
+        d3dTexture->texture1D->Unmap(D3D10CalcSubresource(level, array, d3dTexture->mipmap));
         return;
     }
 
     if (d3dTexture->texture2D)
     {
-        d3dTexture->texture2D->Unmap(D3D10CalcSubresource(level, array, mipmap));
+        d3dTexture->texture2D->Unmap(D3D10CalcSubresource(level, array, d3dTexture->mipmap));
         return;
     }
 
     if (d3dTexture->texture3D)
     {
-        d3dTexture->texture3D->Unmap(D3D10CalcSubresource(level, array, mipmap));
+        d3dTexture->texture3D->Unmap(D3D10CalcSubresource(level, array, d3dTexture->mipmap));
         return;
     }
 }

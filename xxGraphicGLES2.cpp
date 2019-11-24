@@ -455,7 +455,7 @@ void xxDestroyTextureGLES2(uint64_t texture)
     delete glTexture;
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureGLES2(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array, unsigned int mipmap)
+void* xxMapTextureGLES2(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
 {
     TEXTUREGL* glTexture = reinterpret_cast<TEXTUREGL*>(texture);
     if (glTexture == nullptr)
@@ -476,7 +476,7 @@ void* xxMapTextureGLES2(uint64_t device, uint64_t texture, unsigned int* stride,
     return glTexture->memory;
 }
 //------------------------------------------------------------------------------
-void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, unsigned int level, unsigned int array, unsigned int mipmap)
+void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, unsigned int level, unsigned int array)
 {
     TEXTUREGL* glTexture = reinterpret_cast<TEXTUREGL*>(texture);
     if (glTexture == nullptr)

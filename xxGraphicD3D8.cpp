@@ -535,7 +535,7 @@ void xxDestroyTextureD3D8(uint64_t texture)
     SafeRelease(d3dBaseTexture);
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureD3D8(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array, unsigned int mipmap)
+void* xxMapTextureD3D8(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
 {
     switch (getResourceType(texture))
     {
@@ -588,7 +588,7 @@ void* xxMapTextureD3D8(uint64_t device, uint64_t texture, unsigned int* stride, 
     return nullptr;
 }
 //------------------------------------------------------------------------------
-void xxUnmapTextureD3D8(uint64_t device, uint64_t texture, unsigned int level, unsigned int array, unsigned int mipmap)
+void xxUnmapTextureD3D8(uint64_t device, uint64_t texture, unsigned int level, unsigned int array)
 {
     switch (getResourceType(texture))
     {
