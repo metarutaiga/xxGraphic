@@ -49,7 +49,12 @@ public:
     void CreateRotateTranslateScale();
     void UpdateRotateTranslateScale();
 
+    xxImage* GetImage(size_t index) const;
+    xxMaterial* GetMaterial() const;
+    xxMesh* GetMesh() const;
+
     void Update(float time, bool updateMatrix = true);
+    void Draw(uint64_t device, uint64_t commandEncoder);
 
 protected:
     xxNode();
@@ -79,6 +84,6 @@ protected:
 
     // Component
     std::vector<xxImagePtr>     m_images;
-    std::vector<xxMaterialPtr>  m_material;
+    xxMaterialPtr               m_material;
     xxMeshPtr                   m_mesh;
 };

@@ -12,6 +12,8 @@
 #include <memory>
 #include <vector>
 
+class xxNode;
+
 class xxMesh;
 typedef std::shared_ptr<xxMesh> xxMeshPtr;
 
@@ -36,7 +38,10 @@ public:
     xxStrideIterator<xxVector3> GetNormal(int index) const;
     xxStrideIterator<xxVector2> GetTexture(int index) const;
 
-    void                        Update(uint64_t device);
+    uint64_t                    GetVertexAttribute() const;
+
+    void                        Update(xxNode& node, uint64_t device);
+    void                        Draw(uint64_t commandEncoder, int instanceCount = 1, int firstIndex = 0, int vertexOffset = 0, int firstInstance = 0);
 
 protected:
     xxMesh(int color, int normal, int texture);
@@ -51,6 +56,7 @@ protected:
 
     char                        m_vertexBufferIndex;
     char                        m_indexBufferIndex;
+
     uint64_t                    m_device;
     uint64_t                    m_vertexAttribute;
     uint64_t                    m_vertexBuffers[4];

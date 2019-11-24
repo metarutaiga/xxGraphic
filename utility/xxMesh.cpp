@@ -19,6 +19,7 @@ xxMesh::xxMesh(int color, int normal, int texture)
 
     m_vertexBufferIndex = 0;
     m_indexBufferIndex = 0;
+
     m_device = 0;
     m_vertexAttribute = 0;
     for (int i = 0; i < xxCountOf(m_vertexBuffers); ++i)
@@ -99,7 +100,12 @@ xxStrideIterator<xxVector2> xxMesh::GetTexture(int index) const
     return xxStrideIterator<xxVector2>(vertex, GetVertexCount(), m_stride);
 }
 //------------------------------------------------------------------------------
-void xxMesh::Update(uint64_t device)
+uint64_t xxMesh::GetVertexAttribute() const
+{
+    return m_vertexAttribute;
+}
+//------------------------------------------------------------------------------
+void xxMesh::Update(xxNode& node, uint64_t device)
 {
     m_device = device;
 
@@ -225,6 +231,13 @@ void xxMesh::Update(uint64_t device)
             }
         }
     }
+}
+//------------------------------------------------------------------------------
+void xxMesh::Draw(uint64_t commandEncoder, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+{
+    xxSetVertexBuffers(commandEncoder, 1, &m_vertexBuffers[m_vertexBufferIndex], m_vertexAttribute);
+    xxSetIndexBuffer(commandEncoder, m_indexBuffers[m_indexBufferIndex]);
+    xxDrawIndexed(commandEncoder, m_indexBuffers[m_indexBufferIndex], GetIndexCount(), instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 //------------------------------------------------------------------------------
 xxMeshPtr xxMesh::Create(int color, int normal, int texture)

@@ -27,6 +27,11 @@ public:
 
     void* operator () (uint32_t x, uint32_t y, uint32_t z, uint32_t mipmap, uint32_t array);
 
+    uint64_t GetTexture() const;
+    uint64_t GetSampler() const;
+
+    void Update(uint64_t device);
+
 protected:
     xxImage(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap, uint32_t array);
 
@@ -38,6 +43,8 @@ protected:
     uint32_t            m_depth;
     uint32_t            m_mipmap;
     uint32_t            m_array;
+
+    bool                m_imageModified;
 
     uint64_t            m_device;
     uint64_t            m_texture;

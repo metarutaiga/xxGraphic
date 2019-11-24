@@ -4,6 +4,7 @@
 // Copyright (c) 2019 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
+#include "xxGraphic.h"
 #include "xxNode.h"
 
 //==============================================================================
@@ -352,6 +353,24 @@ void xxNode::UpdateRotateTranslateScale()
     (*m_localMatrix)._[3] = { m_legacyTranslate.x, m_legacyTranslate.y, m_legacyTranslate.z, 1.0f };
 }
 //------------------------------------------------------------------------------
+xxImage* xxNode::GetImage(size_t index) const
+{
+    if (m_images.size() <= index)
+        return nullptr;
+
+    return m_images[index].get();
+}
+//------------------------------------------------------------------------------
+xxMaterial* xxNode::GetMaterial() const
+{
+    return m_material.get();
+}
+//------------------------------------------------------------------------------
+xxMesh* xxNode::GetMesh() const
+{
+    return m_mesh.get();
+}
+//------------------------------------------------------------------------------
 void xxNode::Update(float time, bool updateMatrix)
 {
     if (updateMatrix)
@@ -367,5 +386,31 @@ void xxNode::Update(float time, bool updateMatrix)
             child->Update(time, updateMatrix);
         }
     }
+}
+//------------------------------------------------------------------------------
+void xxNode::Draw(uint64_t device, uint64_t commandEncoder)
+{
+    if (m_material == nullptr || m_mesh == nullptr)
+        return;
+
+    int textureCount = (int)m_images.size();
+    uint64_t textures[16];
+    uint64_t samplers[16];
+
+    for (int i = 0; i < textureCount; ++i)
+    {
+        xxImage* image = m_images[i].get();
+        image->Update(device);
+        textures[i] = image->GetTexture();
+        samplers[i] = image->GetSampler();
+    }
+    xxSetFragmentTextures(commandEncoder, textureCount, textures);
+    xxSetFragmentSamplers(commandEncoder, textureCount, samplers);
+
+    m_mesh->Update(*this, device);
+    m_material->Update(*this, device);
+
+    m_material->Draw(commandEncoder);
+    m_mesh->Draw(commandEncoder);
 }
 //------------------------------------------------------------------------------

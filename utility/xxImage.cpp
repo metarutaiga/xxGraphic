@@ -36,6 +36,8 @@ xxImage::xxImage(uint32_t format, uint32_t width, uint32_t height, uint32_t dept
         depth <<= 1;
     }
 
+    m_imageModified = true;
+
     m_device = 0;
     m_texture = 0;
     m_sampler = 0;
@@ -103,5 +105,63 @@ void* xxImage::operator () (uint32_t x, uint32_t y, uint32_t z, uint32_t mipmap,
     char* ptr = &image.front();
 
     return ptr + offset * xxSizeOf(uint32_t);
+}
+//------------------------------------------------------------------------------
+uint64_t xxImage::GetTexture() const
+{
+    return m_texture;
+}
+//------------------------------------------------------------------------------
+uint64_t xxImage::GetSampler() const
+{
+    return m_sampler;
+}
+//------------------------------------------------------------------------------
+void xxImage::Update(uint64_t device)
+{
+    m_device = device;
+
+    if (m_texture == 0)
+    {
+        m_texture = xxCreateTexture(m_device, 0, m_width, m_height, m_depth, m_mipmap, m_array);
+    }
+    if (m_sampler == 0)
+    {
+        m_sampler = xxCreateSampler(m_device, true, true, true, true, true, true, 1);
+    }
+
+    if (m_imageModified == false)
+        return;
+    m_imageModified = false;
+
+    for (uint32_t array = 0; array < m_array; ++array)
+    {
+        for (uint32_t mipmap = 0; mipmap < m_mipmap; ++mipmap)
+        {
+            void* source = (*this)(0, 0, 0, mipmap, array);
+            if (source == nullptr)
+                continue;
+
+            unsigned int stride = 0;
+            void* target = xxMapTexture(m_device, m_texture, &stride, mipmap, array);
+            if (target == nullptr)
+                continue;
+
+            uint32_t levelWidth = (m_width << mipmap);
+            uint32_t levelHeight = (m_height << mipmap);
+            uint32_t levelDepth = (m_depth << mipmap);
+            if (levelWidth == 0)
+                levelWidth = 1;
+            if (levelHeight == 0)
+                levelHeight = 1;
+            if (levelDepth == 0)
+                levelDepth = 1;
+            uint32_t size = levelWidth * levelHeight * levelDepth * sizeof(int);
+
+            memcpy(target, source, size);
+
+            xxUnmapTexture(m_device, m_texture, mipmap, array);
+        }
+    }
 }
 //==============================================================================
