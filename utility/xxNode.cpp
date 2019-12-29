@@ -95,7 +95,7 @@ bool xxNode::DetachChild(const xxNodePtr& child)
         {
             child->m_parent.reset();
             for (size_t j = i + 1; j < m_children.size(); ++j)
-                std::move(m_children[j - 1] = m_children[j]);
+                m_children[j - 1] = std::move(m_children[j]);
             m_children.pop_back();
 
             struct TraversalResetMatrix
