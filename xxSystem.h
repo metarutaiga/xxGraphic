@@ -10,7 +10,9 @@
 #   define _HAS_EXCEPTIONS 0
 #endif
 
-#define _CRT_SECURE_NO_WARNINGS
+#ifndef _CRT_SECURE_NO_WARNINGS
+#   define _CRT_SECURE_NO_WARNINGS
+#endif
 
 #include <float.h>
 #include <math.h>
@@ -80,9 +82,11 @@
 #   pragma clang diagnostic ignored "-Wunused-variable"
 #   if __has_feature(address_sanitizer)
 #       if defined(_M_AMD64)
-#           pragma comment(lib, "clang_rt.asan-x86_64")
+#           pragma comment(lib, "clang_rt.asan_dynamic-x86_64")
+#           pragma comment(lib, "clang_rt.asan_dynamic_runtime_thunk-x86_64")
 #       elif defined(_M_IX86)
-#           pragma comment(lib, "clang_rt.asan-i386")
+#           pragma comment(lib, "clang_rt.asan_dynamic-i386")
+#           pragma comment(lib, "clang_rt.asan_dynamic_runtime_thunk-i386")
 #       endif
 #   endif
 #endif

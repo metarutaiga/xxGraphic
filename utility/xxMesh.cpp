@@ -216,7 +216,7 @@ void xxMesh::Update(xxNode& node, uint64_t device)
         }
         if (m_indexBuffers[index] == 0)
         {
-            m_indexBuffers[index] = xxCreateIndexBuffer(m_device, xxSizeOf(uint32_t) * GetIndexCount());
+            m_indexBuffers[index] = xxCreateIndexBuffer(m_device, xxSizeOf(IndexType) * GetIndexCount());
         }
 
         if (m_indexDataModified)
@@ -226,7 +226,7 @@ void xxMesh::Update(xxNode& node, uint64_t device)
             {
                 m_indexDataModified = false;
 
-                memcpy(ptr, &m_index.front(), xxSizeOf(uint32_t) * GetIndexCount());
+                memcpy(ptr, &m_index.front(), xxSizeOf(IndexType) * GetIndexCount());
                 xxUnmapBuffer(m_device, m_indexBuffers[index]);
             }
         }

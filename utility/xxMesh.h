@@ -43,11 +43,14 @@ public:
     void                        Update(xxNode& node, uint64_t device);
     void                        Draw(uint64_t commandEncoder, int instanceCount = 1, int firstIndex = 0, int vertexOffset = 0, int firstInstance = 0);
 
+public:
+    typedef uint16_t IndexType;
+
 protected:
     xxMesh(int color, int normal, int texture);
 
     std::vector<char>           m_vertex;
-    std::vector<uint32_t>       m_index;
+    std::vector<IndexType>      m_index;
 
     bool                        m_vertexDataModified;
     bool                        m_vertexSizeChanged;
@@ -100,8 +103,8 @@ struct xxStrideIterator
         return m_now == m_end();
     }
 
-    T* m_now;
-    T* m_begin;
-    T* m_end;
+    T*      m_now;
+    T*      m_begin;
+    T*      m_end;
     size_t  m_stride;
 };
