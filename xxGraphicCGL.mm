@@ -21,16 +21,6 @@ static NSOpenGLView*                    g_rootView = nil;
 //==============================================================================
 //  Initialize - CGL
 //==============================================================================
-static void GL_APIENTRY cglInvalidateFramebuffer(GLenum target, GLsizei numAttachments, const GLenum *attachments)
-{
-
-}
-//------------------------------------------------------------------------------
-static void GL_APIENTRY cglInvalidateSubFramebuffer(GLenum target, GLsizei numAttachments, const GLenum *attachments, GLint x, GLint y, GLsizei width, GLsizei height)
-{
-
-}
-//------------------------------------------------------------------------------
 static bool cglSymbolFailed = false;
 static void* GL_APIENTRY cglSymbol(const char* name, bool* failed)
 {
@@ -48,11 +38,51 @@ static void* GL_APIENTRY cglSymbol(const char* name, bool* failed)
         ptr = getSymbolExtension(cglSymbol, name, &internal);
     }
 
-    if (ptr == nullptr && strcmp(name, "glInvalidateFramebuffer") == 0)
-        ptr = (void*)cglInvalidateFramebuffer;
-
-    if (ptr == nullptr && strcmp(name, "glInvalidateSubFramebuffer") == 0)
-        ptr = (void*)cglInvalidateSubFramebuffer;
+    if (ptr == nullptr)
+    {
+        if (strcmp(name, "glInvalidateFramebuffer") == 0 ||
+            strcmp(name, "glInvalidateSubFramebuffer") == 0 ||
+            strcmp(name, "glDispatchCompute") == 0 ||
+            strcmp(name, "glDispatchComputeIndirect") == 0 ||
+            strcmp(name, "glFramebufferParameteri") == 0 ||
+            strcmp(name, "glGetFramebufferParameteriv") == 0 ||
+            strcmp(name, "glGetProgramInterfaceiv") == 0 ||
+            strcmp(name, "glGetProgramResourceIndex") == 0 ||
+            strcmp(name, "glGetProgramResourceName") == 0 ||
+            strcmp(name, "glGetProgramResourceiv") == 0 ||
+            strcmp(name, "glGetProgramResourceLocation") == 0 ||
+            strcmp(name, "glBindImageTexture") == 0 ||
+            strcmp(name, "glMemoryBarrier") == 0 ||
+            strcmp(name, "glMemoryBarrierByRegion") == 0 ||
+            strcmp(name, "glTexStorage2DMultisample") == 0 ||
+            strcmp(name, "glBindVertexBuffer") == 0 ||
+            strcmp(name, "glVertexAttribFormat") == 0 ||
+            strcmp(name, "glVertexAttribIFormat") == 0 ||
+            strcmp(name, "glVertexAttribBinding") == 0 ||
+            strcmp(name, "glVertexBindingDivisor") == 0 ||
+            strcmp(name, "glBlendBarrier") == 0 ||
+            strcmp(name, "glCopyImageSubData") == 0 ||
+            strcmp(name, "glDebugMessageControl") == 0 ||
+            strcmp(name, "glDebugMessageInsert") == 0 ||
+            strcmp(name, "glDebugMessageCallback") == 0 ||
+            strcmp(name, "glGetDebugMessageLog") == 0 ||
+            strcmp(name, "glPushDebugGroup") == 0 ||
+            strcmp(name, "glPopDebugGroup") == 0 ||
+            strcmp(name, "glObjectLabel") == 0 ||
+            strcmp(name, "glObjectPtrLabel") == 0 ||
+            strcmp(name, "glGetObjectPtrLabel") == 0 ||
+            strcmp(name, "glPrimitiveBoundingBox") == 0 ||
+            strcmp(name, "glGetGraphicsResetStatus") == 0 ||
+            strcmp(name, "glReadnPixels") == 0 ||
+            strcmp(name, "glGetnUniformfv") == 0 ||
+            strcmp(name, "glGetnUniformiv") == 0 ||
+            strcmp(name, "glGetnUniformuiv") == 0 ||
+            strcmp(name, "glTexBufferRange") == 0 ||
+            strcmp(name, "glTexStorage3DMultisample") == 0)
+        {
+            ptr = (void*)[](){};
+        }
+    }
 
     if (ptr == nullptr)
         xxLog("CGL", "%s is not found", name);
@@ -259,7 +289,7 @@ uint64_t xxGraphicCreateCGL(int version)
     }
     if (success == false)
     {
-        xxGraphicDestroyCGL(reinterpret_cast<uint64_t>(rootContext));
+        xxGraphicDestroyCGL(reinterpret_cast<uint64_t>((__bridge_retained void*)rootContext));
         return 0;
     }
 
