@@ -7,6 +7,7 @@
 #include "xxSystem.h"
 
 #if defined(__APPLE__)
+#   include <dirent.h>
 #   include <dlfcn.h>
 #   include <mach/mach_time.h>
 #   include <mach-o/dyld.h>
@@ -17,6 +18,7 @@
 #endif
 
 #if defined(__linux__)
+#   include <dirent.h>
 #   include <dlfcn.h>
 #   include <sys/time.h>
 #   include <sys/types.h>
@@ -255,7 +257,7 @@ int xxGetIncrementThreadId()
     return threadId - 1;
 }
 //==============================================================================
-//  Logger
+//  Path
 //==============================================================================
 const char* xxGetExecutablePath()
 {
@@ -275,6 +277,103 @@ const char* xxGetExecutablePath()
 #endif
 
     return path;
+}
+//------------------------------------------------------------------------------
+const char* xxOpenDirectory(uint64_t* handle, const char* path, ...)
+{
+    if (handle == nullptr)
+        return nullptr;
+
+    const char* filename;
+#if defined(xxWINDOWS)
+    WIN32_FIND_DATAA data;
+
+    HANDLE* dir = (HANDLE*)handle;
+    if ((*dir) == nullptr)
+    {
+        (*dir) = FindFirstFileA(temp, &data);
+        if ((*dir) == INVALID_HANDLE_VALUE)
+            return nullptr;
+    }
+    else
+    {
+        if ((*dir) == INVALID_HANDLE_VALUE)
+            return nullptr;
+        if (FindNextFileA((*dir), &data) == FALSE)
+            return nullptr;
+    }
+
+    filename = data.cFileName;
+#else
+    DIR** dir = (DIR**)handle;
+    if ((*dir) == nullptr)
+        (*dir) = opendir(path);
+    if ((*dir) == nullptr)
+        return nullptr;
+
+    dirent* dirent = readdir(*dir);
+    if (dirent == nullptr)
+        return nullptr;
+
+    filename = dirent->d_name;
+#endif
+
+    for (;;)
+    {
+        va_list args;
+        va_start(args, path);
+        while (const char* match = va_arg(args, const char*))
+        {
+            if (match[0] && strstr(filename, match) == nullptr)
+            {
+                filename = nullptr;
+                break;
+            }
+        }
+        va_end(args);
+
+        if (filename)
+            break;
+#if defined(xxWINDOWS)
+        if (FindNextFileA((*dir), &data) == FALSE)
+            return nullptr;
+
+        filename = data.cFileName;
+#else
+        dirent = readdir(*dir);
+        if (dirent == nullptr)
+            return nullptr;
+
+        filename = dirent->d_name;
+#endif
+        if (filename == nullptr)
+            break;
+    }
+
+    return filename;
+}
+//------------------------------------------------------------------------------
+void xxCloseDirectory(uint64_t* handle)
+{
+    if (handle == nullptr)
+        return;
+
+#if defined(xxWINDOWS)
+    HANDLE* dir = (HANDLE*)handle;
+    if ((*dir) == nullptr)
+        return;
+    if ((*dir) == INVALID_HANDLE_VALUE)
+        return;
+
+    FindClose((*dir));
+#else
+    DIR** dir = (DIR**)handle;
+    if ((*dir) == nullptr)
+        return;
+
+    closedir(*dir);
+#endif
+    (*dir) = nullptr;
 }
 //==============================================================================
 //  Logger

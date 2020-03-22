@@ -202,9 +202,11 @@ xxAPI uint64_t xxGetCurrentProcessId();
 xxAPI uint64_t xxGetCurrentThreadId();
 xxAPI int xxGetIncrementThreadId();
 //==============================================================================
-//  Logger
+//  Path
 //==============================================================================
 xxAPI const char* xxGetExecutablePath();
+xxAPI const char* xxOpenDirectory(uint64_t* handle, const char* path, ...);
+xxAPI void xxCloseDirectory(uint64_t* handle);
 //==============================================================================
 //  Logger
 //==============================================================================
