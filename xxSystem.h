@@ -28,6 +28,7 @@
 #   if TARGET_OS_IPHONE
 #       define xxIOS 1
 #   elif TARGET_OS_OSX
+#       include <xmmintrin.h>
 #       define xxMACOS 1
 #   endif
 #   if TARGET_OS_MACCATALYST
