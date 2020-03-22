@@ -9,6 +9,7 @@
 #if defined(__APPLE__)
 #   include <dlfcn.h>
 #   include <mach/mach_time.h>
+#   include <mach-o/dyld.h>
 #   include <pthread.h>
 #   include <sys/syscall.h>
 #   include <sys/time.h>
@@ -252,6 +253,28 @@ int xxGetIncrementThreadId()
 #endif
     }
     return threadId - 1;
+}
+//==============================================================================
+//  Logger
+//==============================================================================
+const char* xxGetExecutablePath()
+{
+    static char path[4096];
+    if (path[0] != '\0')
+        return path;
+
+#if defined(xxWINDOWS)
+    GetModuleFileNameA(nullptr, path, sizeof(path));
+    if (char* slash = strrchr(path, '\\'))
+        (*slash) = '\0';
+#elif defined(xxMACOS)
+    unsigned int pathSize = sizeof(path);
+    _NSGetExecutablePath(path, &pathSize);
+    if (char* slash = strrchr(path, '/'))
+        (*slash) = '\0';
+#endif
+
+    return path;
 }
 //==============================================================================
 //  Logger
