@@ -274,6 +274,28 @@ const char* xxGetExecutablePath()
     _NSGetExecutablePath(path, &pathSize);
     if (char* slash = strrchr(path, '/'))
         (*slash) = '\0';
+#elif defined(xxANDROID)
+    FILE* maps = fopen("/proc/self/maps", "r");
+    if (maps)
+    {
+        while (fgets(path, sizeof(path), maps))
+        {
+            const char* temp = strstr(path, "/data/app/");
+            if (temp)
+            {
+                strcpy(path, temp);
+                break;
+            }
+        }
+        fclose(maps);
+    }
+    else
+    {
+        strcpy(path, ".");
+    }
+
+    if (char* slash = strrchr(path, '/'))
+        (*slash) = '\0';
 #endif
 
     return path;
