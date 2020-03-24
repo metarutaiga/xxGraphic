@@ -62,7 +62,7 @@ xxAPI void          xxUnmapBufferMantle(uint64_t device, uint64_t buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
-xxAPI uint64_t      xxCreateTextureMantle(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array);
+xxAPI uint64_t      xxCreateTextureMantle(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array, const void* external);
 xxAPI void          xxDestroyTextureMantle(uint64_t texture);
 xxAPI void*         xxMapTextureMantle(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array);
 xxAPI void          xxUnmapTextureMantle(uint64_t device, uint64_t texture, unsigned int level, unsigned int array);

@@ -1084,7 +1084,7 @@ struct D3D12TEXTURE
     UINT                        uploadSize;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateTextureD3D12(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array)
+uint64_t xxCreateTextureD3D12(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array, const void* external)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)

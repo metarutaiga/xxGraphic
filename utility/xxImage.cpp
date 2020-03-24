@@ -123,7 +123,7 @@ void xxImage::Update(uint64_t device)
 
     if (m_texture == 0)
     {
-        m_texture = xxCreateTexture(m_device, 0, m_width, m_height, m_depth, m_mipmap, m_array);
+        m_texture = xxCreateTexture(m_device, 0, m_width, m_height, m_depth, m_mipmap, m_array, nullptr);
     }
     if (m_sampler == 0)
     {

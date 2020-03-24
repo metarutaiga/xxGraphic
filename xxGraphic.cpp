@@ -60,7 +60,7 @@ void        (*xxUnmapBuffer)(uint64_t device, uint64_t buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t    (*xxCreateTexture)(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array);
+uint64_t    (*xxCreateTexture)(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array, const void* external);
 void        (*xxDestroyTexture)(uint64_t texture);
 void*       (*xxMapTexture)(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array);
 void        (*xxUnmapTexture)(uint64_t device, uint64_t texture, unsigned int level, unsigned int array);
