@@ -9,8 +9,12 @@
 #include "xxGraphicGL.h"
 #include "xxGraphicEGL.h"
 
+#define GL_GLEXT_PROTOTYPES 0
 #define EGL_EGL_PROTOTYPES 0
+#define EGL_EGLEXT_PROTOTYPES 0
+#include "gl/gl2ext.h"
 #include "gl/egl.h"
+#include "gl/eglext.h"
 static void*                                    g_eglLibrary = nullptr;
 static void*                                    g_glLibrary = nullptr;
 static EGLConfig                                g_eglConfig = nullptr;
@@ -28,6 +32,13 @@ static PFNEGLINITIALIZEPROC                     eglInitialize;
 static PFNEGLMAKECURRENTPROC                    eglMakeCurrent;
 static PFNEGLSWAPINTERVALPROC                   eglSwapInterval;
 static PFNEGLSWAPBUFFERSPROC                    eglSwapBuffers;
+
+#if defined(xxANDROID)
+static PFNGLEGLIMAGETARGETTEXTURE2DOESPROC      glEGLImageTargetTexture2DOES;
+static PFNEGLGETNATIVECLIENTBUFFERANDROIDPROC   eglGetNativeClientBufferANDROID;
+static PFNEGLCREATEIMAGEKHRPROC                 eglCreateImageKHR;
+static PFNEGLDESTROYIMAGEKHRPROC                eglDestroyImageKHR;
+#endif
 
 //==============================================================================
 //  Initialize - EGL
@@ -205,6 +216,13 @@ uint64_t xxGraphicCreateEGL(int version)
     if (eglSymbolFailed)
         return 0;
 
+#if defined(xxANDROID)
+    eglSymbol(glEGLImageTargetTexture2DOES);
+    eglSymbol(eglGetNativeClientBufferANDROID);
+    eglSymbol(eglCreateImageKHR);
+    eglSymbol(eglDestroyImageKHR);
+#endif
+
     EGLDisplay eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (eglDisplay == EGL_NO_DISPLAY)
         return 0;
@@ -287,5 +305,42 @@ void xxGraphicDestroyEGL(uint64_t context)
     g_eglDisplay = EGL_NO_DISPLAY;
 
     xxGraphicDestroyGL();
+}
+//==============================================================================
+//  Extension
+//==============================================================================
+const void* xxCreateImageFromHardwareBuffer(const void* hardwareBuffer)
+{
+    if (hardwareBuffer == nullptr)
+        return 0;
+
+#if defined(xxANDROID)
+    EGLint eglImageAttributes[] = { EGL_NONE };
+    EGLClientBuffer clientBuffer = eglGetNativeClientBufferANDROID((AHardwareBuffer*)hardwareBuffer);
+    EGLImageKHR image = eglCreateImageKHR(g_eglDisplay, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID, clientBuffer, eglImageAttributes);
+    return image;
+#endif
+
+    return 0;
+}
+//------------------------------------------------------------------------------
+void xxBindTextureWithImage(const void* image)
+{
+    if (image == nullptr)
+        return;
+
+#if defined(xxANDROID)
+    glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, (EGLImageKHR)image);
+#endif
+}
+//------------------------------------------------------------------------------
+void xxDestroyImage(const void* image)
+{
+    if (image == nullptr)
+        return;
+
+#if defined(xxANDROID)
+    eglDestroyImageKHR(g_eglDisplay, (EGLImageKHR)image);
+#endif
 }
 //==============================================================================

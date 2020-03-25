@@ -83,6 +83,8 @@ struct TEXTUREGL
     unsigned int    depth;
     unsigned int    mipmap;
     unsigned int    array;
+    const void*     external;
+    const void*     image;
 };
 //==============================================================================
 //  Sampler

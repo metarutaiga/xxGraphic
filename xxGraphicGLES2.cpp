@@ -440,6 +440,22 @@ uint64_t xxCreateTextureGLES2(uint64_t device, int format, unsigned int width, u
     glTexture->depth = depth;
     glTexture->mipmap = mipmap;
     glTexture->array = array;
+    glTexture->external = external;
+    glTexture->image = nullptr;
+
+#if defined(xxANDROID)
+    if (external)
+    {
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexture->type = GL_TEXTURE_2D;
+        glTexture->image = xxCreateImageFromHardwareBuffer(external);
+        xxBindTextureWithImage(glTexture->image);
+    }
+#endif
 
     return reinterpret_cast<uint64_t>(glTexture);
 }
@@ -449,6 +465,13 @@ void xxDestroyTextureGLES2(uint64_t texture)
     TEXTUREGL* glTexture = reinterpret_cast<TEXTUREGL*>(texture);
     if (glTexture == nullptr)
         return;
+
+#if defined(xxANDROID)
+    if (glTexture->image)
+    {
+        xxDestroyImage(glTexture->image);
+    }
+#endif
 
     glDeleteTextures(1, &glTexture->texture);
     xxFree(glTexture->memory);
@@ -460,6 +483,11 @@ void* xxMapTextureGLES2(uint64_t device, uint64_t texture, unsigned int* stride,
     TEXTUREGL* glTexture = reinterpret_cast<TEXTUREGL*>(texture);
     if (glTexture == nullptr)
         return nullptr;
+
+#if defined(xxANDROID)
+    if (glTexture->image)
+        return nullptr;
+#endif
 
     unsigned int width = glTexture->width >> level;
     unsigned int height = glTexture->height >> level;
@@ -481,6 +509,11 @@ void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, unsigned int level, 
     TEXTUREGL* glTexture = reinterpret_cast<TEXTUREGL*>(texture);
     if (glTexture == nullptr)
         return;
+
+#if defined(xxANDROID)
+    if (glTexture->image)
+        return;
+#endif
 
     if (glTexture->depth == 1 && glTexture->array == 1)
     {
