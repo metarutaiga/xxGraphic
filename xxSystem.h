@@ -213,7 +213,7 @@ xxAPI int xxGetIncrementThreadId();
 //  Path
 //==============================================================================
 xxAPI const char* xxGetExecutablePath();
-xxAPI const char* xxOpenDirectory(uint64_t* handle, const char* path, ...);
+xxAPI char* xxOpenDirectory(uint64_t* handle, const char* path, ...);
 xxAPI void xxCloseDirectory(uint64_t* handle);
 //==============================================================================
 //  Logger

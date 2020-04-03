@@ -62,7 +62,7 @@ xxAPI void          xxUnmapBufferD3D9(uint64_t device, uint64_t buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
-xxAPI uint64_t      xxCreateTextureD3D9(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth = 1, unsigned int mipmap = 1, unsigned int array = 1);
+xxAPI uint64_t      xxCreateTextureD3D9(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array, const void* external);
 xxAPI void          xxDestroyTextureD3D9(uint64_t texture);
 xxAPI void*         xxMapTextureD3D9(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array);
 xxAPI void          xxUnmapTextureD3D9(uint64_t device, uint64_t texture, unsigned int level, unsigned int array);

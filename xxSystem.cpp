@@ -307,7 +307,7 @@ const char* xxGetExecutablePath()
     return path;
 }
 //------------------------------------------------------------------------------
-const char* xxOpenDirectory(uint64_t* handle, const char* path, ...)
+char* xxOpenDirectory(uint64_t* handle, const char* path, ...)
 {
     if (handle == nullptr)
         return nullptr;
@@ -319,6 +319,8 @@ const char* xxOpenDirectory(uint64_t* handle, const char* path, ...)
     HANDLE* dir = (HANDLE*)handle;
     if ((*dir) == nullptr)
     {
+        char temp[MAX_PATH];
+        snprintf(temp, MAX_PATH, "%s\\%s", path, "*.*");
         (*dir) = FindFirstFileA(temp, &data);
         if ((*dir) == INVALID_HANDLE_VALUE)
             return nullptr;
@@ -346,6 +348,7 @@ const char* xxOpenDirectory(uint64_t* handle, const char* path, ...)
     filename = dirent->d_name;
 #endif
 
+    char* result = nullptr;
     for (;;)
     {
         va_list args;
@@ -361,7 +364,10 @@ const char* xxOpenDirectory(uint64_t* handle, const char* path, ...)
         va_end(args);
 
         if (filename)
+        {
+            result = strdup(filename);
             break;
+        }
 #if defined(xxWINDOWS)
         if (FindNextFileA((*dir), &data) == FALSE)
             return nullptr;
@@ -378,7 +384,7 @@ const char* xxOpenDirectory(uint64_t* handle, const char* path, ...)
             break;
     }
 
-    return filename;
+    return result;
 }
 //------------------------------------------------------------------------------
 void xxCloseDirectory(uint64_t* handle)
