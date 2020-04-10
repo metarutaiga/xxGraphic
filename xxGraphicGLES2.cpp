@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : OpenGL ES 2.0 Source
 //
-// Copyright (c) 2019 TAiGA
+// Copyright (c) 2019-2020 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #undef  GL_ES_VERSION_2_0
