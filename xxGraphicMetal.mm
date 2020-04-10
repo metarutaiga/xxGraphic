@@ -509,10 +509,19 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, unsigned int width, u
     MTLResourceOptions options = MTLResourceStorageModeShared;
 #endif
 
-    int alignment = 256/*[mtlDevice minimumLinearTextureAlignmentForPixelFormat:pixelFormat]*/;
-    int stride = width * sizeof(int);
-    stride = (stride + (alignment - 1)) & ~(alignment - 1);
-    id <MTLBuffer> buffer = [mtlDevice newBufferWithLength:stride * height options:options];
+    id <MTLBuffer> buffer;
+    if (external)
+    {
+        buffer = (__bridge id)external;
+    }
+    else
+    {
+        int alignment = 256/*[mtlDevice minimumLinearTextureAlignmentForPixelFormat:pixelFormat]*/;
+        int stride = width * sizeof(int);
+        stride = (stride + (alignment - 1)) & ~(alignment - 1);
+        buffer = [mtlDevice newBufferWithLength:stride * height options:options];
+    }
+    int stride = (int)[buffer length] / height;
 
     MTLTextureDescriptor* desc = [classMTLTextureDescriptor texture2DDescriptorWithPixelFormat:pixelFormat width:width height:height mipmapped:NO];
     desc.resourceOptions = options;
