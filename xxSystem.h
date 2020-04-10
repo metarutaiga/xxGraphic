@@ -164,6 +164,7 @@
 #define xxLocalBreak()              switch (0) case 0:
 
 #if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
+#   include <emmintrin.h>
 #   if defined(__llvm__)
 #       define _mm_shuffle1_ps(v,i) _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(v), i))
 #   else
