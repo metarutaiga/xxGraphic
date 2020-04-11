@@ -455,15 +455,13 @@ uint64_t xxCreateTextureGLES2(uint64_t device, int format, unsigned int width, u
         glTexture->image = xxCreateImageFromHardwareBuffer(external);
         xxBindTextureWithImage(glTexture->image);
 #elif defined(xxMACOS)
-        //void* memory = malloc(width * height * 4);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA_EXT, 0x8367, memory);
-        glTexture->type = GL_TEXTURE_2D;
-        //free(memory);
+        glBindTexture(GL_TEXTURE_RECTANGLE_ARB, texture);
+        glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexture->type = GL_TEXTURE_RECTANGLE_ARB;
+        xxBindTextureWithSurface(glTexture->external);
 #endif
     }
 
@@ -860,12 +858,6 @@ void xxSetFragmentTexturesGLES2(uint64_t commandEncoder, int count, const uint64
         glBindTexture(glTexture->type, glTexture->texture);
         glSwapchain->textureTypes[i] = glTexture->type;
         glSwapchain->textureMipmaps[i] = (glTexture->mipmap > 1);
-#if defined(xxMACOS)
-        if (glTexture->external)
-        {
-            xxBindTextureWithPixelBuffer(glTexture->external);
-        }
-#endif
     }
 }
 //------------------------------------------------------------------------------

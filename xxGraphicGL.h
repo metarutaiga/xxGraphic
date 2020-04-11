@@ -25,6 +25,10 @@
 #define GL_MAX_RECTANGLE_TEXTURE_SIZE_ARB 0x84F8
 #endif /* GL_EXT_texture_rectangle */
 
+#ifndef GL_UNSIGNED_INT_8_8_8_8_REV
+#define GL_UNSIGNED_INT_8_8_8_8_REV       0x8367
+#endif /* GL_UNSIGNED_INT_8_8_8_8_REV */
+
 //==============================================================================
 //  Initialize
 //==============================================================================

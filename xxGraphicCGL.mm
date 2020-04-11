@@ -11,6 +11,8 @@
 
 #define IOSurfaceGetWidth IOSurfaceGetWidth_unused
 #define IOSurfaceGetHeight IOSurfaceGetHeight_unused
+#define IOSurfaceLock IOSurfaceLock_unused
+#define IOSurfaceUnlock IOSurfaceUnlock_unused
 #define CGLTexImageIOSurface2D CGLTexImageIOSurface2D_unused
 #define GL_SILENCE_DEPRECATION
 #import <Cocoa/Cocoa.h>
@@ -20,12 +22,19 @@
 #import <AppKit/NSOpenGLView.h>
 #undef IOSurfaceGetWidth
 #undef IOSurfaceGetHeight
+#undef IOSurfaceLock
+#undef IOSurfaceUnlock
 #undef CGLTexImageIOSurface2D
 static void*                            g_glLibrary = nullptr;
 static NSOpenGLView*                    g_rootView = nil;
 static size_t                           (*IOSurfaceGetWidth)(IOSurfaceRef);
 static size_t                           (*IOSurfaceGetHeight)(IOSurfaceRef);
+static kern_return_t                    (*IOSurfaceLock)(IOSurfaceRef, IOSurfaceLockOptions, uint32_t*);
+static kern_return_t                    (*IOSurfaceUnlock)(IOSurfaceRef, IOSurfaceLockOptions, uint32_t*);
 static CGLError                         (*CGLTexImageIOSurface2D)(CGLContextObj, GLenum, GLenum, GLsizei, GLsizei, GLenum, GLenum, IOSurfaceRef, GLuint);
+static GLint                            rectangleProgram = 0;
+static GLint                            rectangleProgramTexture = 0;
+static float                            rectangleProgramMatrix[16];
 
 //==============================================================================
 //  Initialize - CGL
@@ -234,20 +243,45 @@ void cglShaderSource(GLuint shader, GLsizei count, const GLchar *const*string, c
         {
             var =   "out vec4 fragColor;\n"
                     "#define gl_FragColor fragColor\n"
-                    "#define texture2D texture";
+                    "#define texture2D texture\n"
+                    "#define texture2DRect texture\n"
+                    "#define textureSize2DRect(t, l) textureSize(t)";
             fragmentShader = true;
         }
         if (strcmp(var, "#define attribute attribute") == 0)
             var = "#define attribute in";
         if (strcmp(var, "#define varying varying") == 0)
             var = fragmentShader ? "#define varying in" : "#define varying out";
-
+        if (strcmp(var, "#extension GL_EXT_gpu_shader4 : enable") == 0)
+            var = "";
         replaceString[i] = var;
     }
 
     glShaderSource_(shader, count, replaceString, length);
 
     xxFree(replaceString);
+}
+//------------------------------------------------------------------------------
+PFNGLBINDTEXTUREPROC glBindTexture_;
+//------------------------------------------------------------------------------
+void cglBindTexture(GLenum target, GLuint texture)
+{
+    glBindTexture_(target, texture);
+    if (target == GL_TEXTURE_RECTANGLE_ARB)
+    {
+        xxBindRectangleProgram();
+    }
+}
+//------------------------------------------------------------------------------
+PFNGLUNIFORM4FVPROC glUniform4fv_;
+//------------------------------------------------------------------------------
+void cglUniform4fv(GLint location, GLsizei count, const GLfloat *value)
+{
+    glUniform4fv_(location, count, value);
+    if (location == 0 && count == 4)
+    {
+        memcpy(rectangleProgramMatrix, value, sizeof(rectangleProgramMatrix));
+    }
 }
 //------------------------------------------------------------------------------
 uint64_t xxGraphicCreateCGL(int version)
@@ -259,6 +293,8 @@ uint64_t xxGraphicCreateCGL(int version)
 
     cglSymbol(IOSurfaceGetWidth);
     cglSymbol(IOSurfaceGetHeight);
+    cglSymbol(IOSurfaceLock);
+    cglSymbol(IOSurfaceUnlock);
     cglSymbol(CGLTexImageIOSurface2D);
 
     NSOpenGLPixelFormatAttribute attributes[] =
@@ -313,12 +349,22 @@ uint64_t xxGraphicCreateCGL(int version)
 
     glShaderSource_ = glShaderSource;
     glShaderSource = version <= 200 ? cglShaderSourceLegacy : cglShaderSource;
+    glBindTexture_ = glBindTexture;
+    glBindTexture = cglBindTexture;
+    glUniform4fv_ = glUniform4fv;
+    glUniform4fv = cglUniform4fv;
 
     return reinterpret_cast<uint64_t>((__bridge_retained void*)rootContext);
 }
 //------------------------------------------------------------------------------
 void xxGraphicDestroyCGL(uint64_t context)
 {
+    if (rectangleProgram)
+    {
+        glDeleteProgram(rectangleProgram);
+        rectangleProgram = 0;
+    }
+
     glDestroyContextCGL(context, 0, nullptr);
 
     g_rootView = nil;
@@ -334,23 +380,72 @@ void xxGraphicDestroyCGL(uint64_t context)
 //==============================================================================
 //  Extension
 //==============================================================================
-void xxBindTextureWithPixelBuffer(const void* pixelBuffer)
+void xxBindTextureWithSurface(const void* surface)
 {
-    CVPixelBufferRef cvPixelBuffer = nullptr;
-    __atomic_exchange((void**)pixelBuffer, (void**)&cvPixelBuffer, (void**)&cvPixelBuffer, __ATOMIC_ACQ_REL);
-    if (cvPixelBuffer == nullptr)
-        return;
+    CGLContextObj contextObj = [[NSOpenGLContext currentContext] CGLContextObj];
+    IOSurfaceRef ioSurface = (IOSurfaceRef)surface;
 
-    GLint width = (GLint)CVPixelBufferGetWidth(cvPixelBuffer);
-    GLint height = (GLint)CVPixelBufferGetHeight(cvPixelBuffer);
+    GLsizei width = (GLsizei)IOSurfaceGetWidth(ioSurface);
+    GLsizei height = (GLsizei)IOSurfaceGetHeight(ioSurface);
 
-    CVPixelBufferLockBaseAddress(cvPixelBuffer, kCVPixelBufferLock_ReadOnly);
+    CGLTexImageIOSurface2D(contextObj, GL_TEXTURE_RECTANGLE_ARB, GL_RGBA, width, height, GL_BGRA_EXT, GL_UNSIGNED_INT_8_8_8_8_REV, ioSurface, 0);
+}
+//------------------------------------------------------------------------------
+void xxBindRectangleProgram()
+{
+    if (rectangleProgram == 0)
+    {
+        const char* const fragmentShaderCode =
+            "uniform sampler2DRect tex;\n"
+            "varying vec2 varyUV;\n"
+            "varying vec4 varyColor;\n"
+            "void main()\n"
+            "{\n"
+            "    gl_FragColor = varyColor * texture2DRect(tex, varyUV * vec2(textureSize2DRect(tex, 0)));\n"
+            "}\n";
 
-    void* input = CVPixelBufferGetBaseAddressOfPlane(cvPixelBuffer, 0);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, input);
+        const char* vertexShaderCodes[] =
+        {
+            "#version 100", "\n",
+            "#define attribute attribute", "\n",
+            "#define varying varying", "\n",
+            vertexShaderCode
+        };
 
-    CVPixelBufferUnlockBaseAddress(cvPixelBuffer, kCVPixelBufferLock_ReadOnly);
+        const char* fragmentShaderCodes[] =
+        {
+            "#version 100", "\n",
+            "#extension GL_EXT_gpu_shader4 : enable", "\n",
+            "precision mediump float;", "\n",
+            "#define varying varying", "\n",
+            fragmentShaderCode
+        };
 
-    CFRelease(cvPixelBuffer);
+        GLuint glVertexShader = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(glVertexShader, xxCountOf(vertexShaderCodes), vertexShaderCodes, nullptr);
+        glCompileShader(glVertexShader);
+
+        GLuint glFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(glFragmentShader, xxCountOf(fragmentShaderCodes), fragmentShaderCodes, nullptr);
+        glCompileShader(glFragmentShader);
+
+        GLuint glProgram = glCreateProgram();
+        glBindAttribLocation(glProgram, 0, "position");
+        glBindAttribLocation(glProgram, 1, "color");
+        glBindAttribLocation(glProgram, 2, "uv");
+        glAttachShader(glProgram, glVertexShader);
+        glAttachShader(glProgram, glFragmentShader);
+        glLinkProgram(glProgram);
+
+        glDeleteShader(glVertexShader);
+        glDeleteShader(glFragmentShader);
+
+        rectangleProgram = glProgram;
+        rectangleProgramTexture = glGetUniformLocation(rectangleProgram, "tex");
+    }
+
+    glUseProgram(rectangleProgram);
+    glUniform4fv(0, 4, rectangleProgramMatrix);
+    glUniform1i(rectangleProgramTexture, 0);
 }
 //==============================================================================
