@@ -17,6 +17,14 @@
 #define GL_BGRA8_EXT                      0x93A1
 #endif /* GL_APPLE_texture_format_BGRA8888 */
 
+#ifndef GL_ARB_texture_rectangle
+#define GL_ARB_texture_rectangle 1
+#define GL_TEXTURE_RECTANGLE_ARB          0x84F5
+#define GL_TEXTURE_BINDING_RECTANGLE_ARB  0x84F6
+#define GL_PROXY_TEXTURE_RECTANGLE_ARB    0x84F7
+#define GL_MAX_RECTANGLE_TEXTURE_SIZE_ARB 0x84F8
+#endif /* GL_EXT_texture_rectangle */
+
 //==============================================================================
 //  Initialize
 //==============================================================================

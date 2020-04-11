@@ -13,3 +13,7 @@
 //==============================================================================
 uint64_t xxGraphicCreateCGL(int version);
 void xxGraphicDestroyCGL(uint64_t context);
+//==============================================================================
+//  Extension
+//==============================================================================
+void xxBindTextureWithPixelBuffer(const void* pixelBuffer);

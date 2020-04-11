@@ -9,14 +9,23 @@
 #include "xxGraphicGL.h"
 #include "xxGraphicCGL.h"
 
+#define IOSurfaceGetWidth IOSurfaceGetWidth_unused
+#define IOSurfaceGetHeight IOSurfaceGetHeight_unused
+#define CGLTexImageIOSurface2D CGLTexImageIOSurface2D_unused
 #define GL_SILENCE_DEPRECATION
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/OpenGL.h>
 #import <AppKit/NSWindow.h>
 #import <AppKit/NSOpenGL.h>
 #import <AppKit/NSOpenGLView.h>
+#undef IOSurfaceGetWidth
+#undef IOSurfaceGetHeight
+#undef CGLTexImageIOSurface2D
 static void*                            g_glLibrary = nullptr;
 static NSOpenGLView*                    g_rootView = nil;
+static size_t                           (*IOSurfaceGetWidth)(IOSurfaceRef);
+static size_t                           (*IOSurfaceGetHeight)(IOSurfaceRef);
+static CGLError                         (*CGLTexImageIOSurface2D)(CGLContextObj, GLenum, GLenum, GLsizei, GLsizei, GLenum, GLenum, IOSurfaceRef, GLuint);
 
 //==============================================================================
 //  Initialize - CGL
@@ -248,6 +257,10 @@ uint64_t xxGraphicCreateCGL(int version)
     if (g_glLibrary == nullptr)
         return 0;
 
+    cglSymbol(IOSurfaceGetWidth);
+    cglSymbol(IOSurfaceGetHeight);
+    cglSymbol(CGLTexImageIOSurface2D);
+
     NSOpenGLPixelFormatAttribute attributes[] =
     {
         NSOpenGLPFAOpenGLProfile, version <= 200 ? NSOpenGLProfileVersionLegacy : NSOpenGLProfileVersion3_2Core,
@@ -317,5 +330,27 @@ void xxGraphicDestroyCGL(uint64_t context)
     }
 
     xxGraphicDestroyGL();
+}
+//==============================================================================
+//  Extension
+//==============================================================================
+void xxBindTextureWithPixelBuffer(const void* pixelBuffer)
+{
+    CVPixelBufferRef cvPixelBuffer = nullptr;
+    __atomic_exchange((void**)pixelBuffer, (void**)&cvPixelBuffer, (void**)&cvPixelBuffer, __ATOMIC_ACQ_REL);
+    if (cvPixelBuffer == nullptr)
+        return;
+
+    GLint width = (GLint)CVPixelBufferGetWidth(cvPixelBuffer);
+    GLint height = (GLint)CVPixelBufferGetHeight(cvPixelBuffer);
+
+    CVPixelBufferLockBaseAddress(cvPixelBuffer, kCVPixelBufferLock_ReadOnly);
+
+    void* input = CVPixelBufferGetBaseAddressOfPlane(cvPixelBuffer, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, input);
+
+    CVPixelBufferUnlockBaseAddress(cvPixelBuffer, kCVPixelBufferLock_ReadOnly);
+
+    CFRelease(cvPixelBuffer);
 }
 //==============================================================================
