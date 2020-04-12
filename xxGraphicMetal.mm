@@ -80,7 +80,7 @@ uint64_t xxCreateInstanceMetal()
     classMTLVertexDescriptor = (__bridge Class)xxGetProcAddress(g_metalLibrary, "OBJC_CLASS_$_MTLVertexDescriptor");
 
 #if defined(xxMACOS)
-    NSArray* allDevices = (__bridge NSArray*)MTLCopyAllDevices();
+    NSArray* allDevices = (__bridge_transfer NSArray*)MTLCopyAllDevices();
     if (allDevices == nil)
         return 0;
 #elif defined(xxIOS)
