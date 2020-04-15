@@ -454,7 +454,7 @@ uint64_t xxCreateTextureGLES2(uint64_t device, int format, unsigned int width, u
         glTexture->type = GL_TEXTURE_2D;
         glTexture->image = xxCreateImageFromHardwareBuffer(external);
         xxBindTextureWithImage(glTexture->image);
-#elif defined(xxMACOS)
+#elif defined(xxMACOS) || defined(xxIOS)
         glBindTexture(GL_TEXTURE_RECTANGLE_ARB, texture);
         glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

@@ -13,3 +13,8 @@
 //==============================================================================
 uint64_t xxGraphicCreateEAGL(int version);
 void xxGraphicDestroyEAGL(uint64_t context);
+//==============================================================================
+//  Extension
+//==============================================================================
+void xxBindTextureWithSurface(const void* surface);
+

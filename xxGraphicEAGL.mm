@@ -65,7 +65,10 @@ uint64_t glCreateContextEAGL(uint64_t instance, void* view, void** display)
     UIView* nsView = [[nsWindow rootViewController] view];
     if (nsView == nil)
         return 0;
+    float contentsScale = [[nsWindow screen] nativeScale];
+
     CAEAGLLayer* layer = (CAEAGLLayer*)[nsView layer];
+    layer.contentsScale = contentsScale;
 
     EAGLContext* eaglContext = [[classEAGLContext alloc] initWithAPI:[rootContext API] sharegroup:[rootContext sharegroup]];
     if (eaglContext == nil)
@@ -235,3 +238,35 @@ void xxGraphicDestroyEAGL(uint64_t context)
     xxGraphicDestroyGL();
 }
 //==============================================================================
+//  Extension
+//==============================================================================
+@interface EAGLContext()
+- (BOOL)texImageIOSurface:(IOSurfaceRef)ioSurface
+                   target:(NSUInteger)target
+           internalFormat:(NSUInteger)internalFormat
+                    width:(uint32_t)width
+                   height:(uint32_t)height
+                   format:(NSUInteger)format
+                     type:(NSUInteger)type
+                    plane:(uint32_t)plane
+                   invert:(BOOL)invert NS_AVAILABLE_IOS(4_0);
+@end
+//------------------------------------------------------------------------------
+void xxBindTextureWithSurface(const void* surface)
+{
+    IOSurfaceRef ioSurface = (IOSurfaceRef)surface;
+
+    GLsizei width = (GLsizei)IOSurfaceGetWidth(ioSurface);
+    GLsizei height = (GLsizei)IOSurfaceGetHeight(ioSurface);
+
+    [[EAGLContext currentContext] texImageIOSurface:ioSurface
+                                             target:GL_TEXTURE_RECTANGLE_ARB
+                                     internalFormat:GL_RGBA
+                                              width:width
+                                             height:height
+                                             format:GL_RGBA
+                                               type:GL_UNSIGNED_BYTE
+                                              plane:0
+                                             invert:NO];
+}
+//------------------------------------------------------------------------------
