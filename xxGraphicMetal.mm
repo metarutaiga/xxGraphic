@@ -512,6 +512,7 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, unsigned int width, u
     id <MTLBuffer> buffer;
     if (external)
     {
+        pixelFormat = MTLPixelFormatBGRA8Unorm;
         buffer = (__bridge id)external;
     }
     else

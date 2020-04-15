@@ -275,7 +275,7 @@ const char* xxGetExecutablePath()
     GetModuleFileNameA(nullptr, path, sizeof(path));
     if (char* slash = strrchr(path, '\\'))
         (*slash) = '\0';
-#elif defined(xxMACOS)
+#elif defined(xxMACOS) || defined(xxIOS)
     unsigned int pathSize = sizeof(path);
     _NSGetExecutablePath(path, &pathSize);
     if (char* slash = strrchr(path, '/'))
