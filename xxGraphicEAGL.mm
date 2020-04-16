@@ -260,11 +260,11 @@ void xxBindTextureWithSurface(const void* surface)
     GLsizei height = (GLsizei)IOSurfaceGetHeight(ioSurface);
 
     [[EAGLContext currentContext] texImageIOSurface:ioSurface
-                                             target:GL_TEXTURE_RECTANGLE_ARB
+                                             target:GL_TEXTURE_2D
                                      internalFormat:GL_RGBA
                                               width:width
                                              height:height
-                                             format:GL_RGBA
+                                             format:GL_BGRA_EXT
                                                type:GL_UNSIGNED_BYTE
                                               plane:0
                                              invert:NO];
