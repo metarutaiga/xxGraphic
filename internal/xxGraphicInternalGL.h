@@ -125,6 +125,7 @@ struct PIPELINEGL
     GLuint              program;
     VERTEXATTRIBUTEGL*  vertexAttribute;
     GLint               texture;
+    GLint               uniform;
     STATEGL             state;
 };
 //==============================================================================

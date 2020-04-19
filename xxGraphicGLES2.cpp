@@ -750,6 +750,7 @@ uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t bl
     glPipeline->program = glProgram;
     glPipeline->vertexAttribute = glVertexAttribute;
     glPipeline->texture = glGetUniformLocation(glProgram, "tex");
+    glPipeline->uniform = glGetUniformLocation(glProgram, "uniformBuffer");
     glPipeline->state.alphaBlending = glBlendState.alphaBlending;
     glPipeline->state.depthTest = glDepthStencilState.depthTest;
     glPipeline->state.depthWrite = glDepthStencilState.depthWrite;
@@ -901,9 +902,11 @@ void xxSetFragmentSamplersGLES2(uint64_t commandEncoder, int count, const uint64
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
 {
+    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
+    PIPELINEGL* glPipeline = reinterpret_cast<PIPELINEGL*>(glSwapchain->pipeline);
     BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(buffer);
 
-    glUniform4fv(0, size / sizeof(float) / 4, (GLfloat*)glBuffer->memory);
+    glUniform4fv(glPipeline->uniform, size / sizeof(float) / 4, (GLfloat*)glBuffer->memory);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, unsigned int size)

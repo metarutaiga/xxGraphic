@@ -287,7 +287,7 @@ const char* xxGetExecutablePath()
         while (fgets(path, sizeof(path), maps))
         {
             const char* temp = strstr(path, "/data/app/");
-            if (temp)
+            if (temp && strstr(path, ".so"))
             {
                 strcpy(path, temp);
                 break;

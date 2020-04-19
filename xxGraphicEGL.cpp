@@ -316,7 +316,11 @@ const void* xxCreateImageFromHardwareBuffer(const void* hardwareBuffer)
 
 #if defined(xxANDROID)
     EGLint eglImageAttributes[] = { EGL_NONE };
-    EGLClientBuffer clientBuffer = eglGetNativeClientBufferANDROID((AHardwareBuffer*)hardwareBuffer);
+    EGLClientBuffer clientBuffer = nullptr;
+    if (eglGetNativeClientBufferANDROID)
+        clientBuffer = eglGetNativeClientBufferANDROID((AHardwareBuffer*)hardwareBuffer);
+    else
+        clientBuffer = reinterpret_cast<EGLClientBuffer>((void**)hardwareBuffer + 2);
     EGLImageKHR image = eglCreateImageKHR(g_eglDisplay, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID, clientBuffer, eglImageAttributes);
     return image;
 #endif
