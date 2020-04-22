@@ -590,7 +590,7 @@ void xxDestroySamplerMetal(uint64_t sampler)
 //==============================================================================
 //  Shader
 //==============================================================================
-static const char* defaultShaderCode =
+static const char* const defaultShaderCode =
     "#include <metal_stdlib>\n"
     "using namespace metal;\n"
     "\n"
