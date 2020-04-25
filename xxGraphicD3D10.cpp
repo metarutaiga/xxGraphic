@@ -673,7 +673,25 @@ uint64_t xxCreateTextureD3D10(uint64_t device, int format, unsigned int width, u
     ID3D10Texture3D* d3dTexture3D = nullptr;
     ID3D10Resource* d3dResource = nullptr;
 
-    if (depth == 1 && array == 1)
+    if (external)
+    {
+        IUnknown* unknown = (IUnknown*)external;
+        HRESULT hResult = unknown->QueryInterface(__uuidof(ID3D10Texture2D), (void**)&d3dTexture2D);
+        if (hResult != S_OK)
+        {
+            delete d3dTexture;
+            return 0;
+        }
+        d3dResource = d3dTexture2D;
+
+        D3D10_TEXTURE2D_DESC texture2DDesc = {};
+        d3dTexture2D->GetDesc(&texture2DDesc);
+
+        viewDesc.Format = texture2DDesc.Format;
+        viewDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
+        viewDesc.Texture2D.MipLevels = mipmap;
+    }
+    else if (depth == 1 && array == 1)
     {
         D3D10_TEXTURE2D_DESC texture2DDesc = {};
         texture2DDesc.Width = width;
@@ -698,8 +716,7 @@ uint64_t xxCreateTextureD3D10(uint64_t device, int format, unsigned int width, u
         viewDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
         viewDesc.Texture2D.MipLevels = mipmap;
     }
-
-    if (width == height && depth == 1 && array == 6)
+    else if (width == height && depth == 1 && array == 6)
     {
         D3D10_TEXTURE2D_DESC texture2DDesc = {};
         texture2DDesc.Width = width;
@@ -725,8 +742,7 @@ uint64_t xxCreateTextureD3D10(uint64_t device, int format, unsigned int width, u
         viewDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
         viewDesc.Texture2D.MipLevels = mipmap;
     }
-
-    if (depth != 1 && array == 1)
+    else if (depth != 1 && array == 1)
     {
         D3D10_TEXTURE3D_DESC texture3DDesc = {};
         texture3DDesc.Width = width;

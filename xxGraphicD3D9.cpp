@@ -534,6 +534,17 @@ uint64_t xxCreateTextureD3D9(uint64_t device, int format, unsigned int width, un
     if (width == 0 || height == 0 || depth == 0 || mipmap == 0 || array == 0)
         return 0;
 
+    if (external)
+    {
+        IUnknown* unknown = (IUnknown*)external;
+        LPDIRECT3DTEXTURE9 d3dTexture = nullptr;
+        HRESULT hResult = unknown->QueryInterface(__uuidof(LPDIRECT3DTEXTURE9), (void**)&d3dTexture);
+        if (hResult != S_OK)
+            return 0;
+
+        return reinterpret_cast<uint64_t>(d3dTexture) | D3DRTYPE_TEXTURE;
+    }
+
     if (depth == 1 && array == 1)
     {
         LPDIRECT3DTEXTURE9 d3dTexture = nullptr;
