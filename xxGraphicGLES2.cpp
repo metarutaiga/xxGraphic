@@ -298,7 +298,7 @@ uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, int* attribute
         }
         if (offset != 0 && element == 4 && size == sizeof(char) * 4)
         {
-#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
+#if defined(xxMACOS) || defined(xxWINDOWS)
             attributes[i].size = GL_BGRA_EXT;
 #else
             attributes[i].size = 4;
@@ -540,11 +540,12 @@ void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, unsigned int level, 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glTexture->mipmap > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
         }
-#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
-        glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, glTexture->width, glTexture->height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, glTexture->memory);
+#if defined(xxMACOS) || defined(xxWINDOWS)
+        int format = GL_BGRA_EXT;
 #else
-        glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, glTexture->width, glTexture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, glTexture->memory);
+        int format = GL_RGBA;
 #endif
+        glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, glTexture->width, glTexture->height, 0, format, GL_UNSIGNED_BYTE, glTexture->memory);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
@@ -557,11 +558,12 @@ void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, unsigned int level, 
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, glTexture->mipmap > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
         }
-#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + array, level, GL_RGBA, glTexture->width, glTexture->height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, glTexture->memory);
+#if defined(xxMACOS) || defined(xxWINDOWS)
+        int format = GL_BGRA_EXT;
 #else
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + array, level, GL_RGBA, glTexture->width, glTexture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, glTexture->memory);
+        int format = GL_RGBA;
 #endif
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + array, level, GL_RGBA, glTexture->width, glTexture->height, 0, format, GL_UNSIGNED_BYTE, glTexture->memory);
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
 
