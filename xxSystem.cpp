@@ -204,6 +204,18 @@ float xxGetCurrentTime()
 {
     return (float)(xxTSC() - xxTSCInitialized) * xxTSCInvFrequencyFloat;
 }
+//------------------------------------------------------------------------------
+void xxSleep(unsigned int sleepMs)
+{
+#if defined(_MSC_VER)
+    Sleep(sleepMs);
+#else
+    struct timespec timespec;
+    timespec.tv_sec = (sleepMs / 1000);
+    timespec.tv_nsec = (sleepMs % 1000) * 1000000;
+    nanosleep(&timespec, nullptr);
+#endif
+}
 //==============================================================================
 //  Process / Thread ID
 //==============================================================================

@@ -204,6 +204,7 @@ xxAPI void xxFreeLibrary(void* library);
 //==============================================================================
 xxAPI uint64_t xxTSC();
 xxAPI float xxGetCurrentTime();
+xxAPI void xxSleep(unsigned int sleepMs);
 //==============================================================================
 //  Process / Thread ID
 //==============================================================================
