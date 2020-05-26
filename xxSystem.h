@@ -39,7 +39,6 @@
 #if defined(__linux__)
 #   define xxLINUX 1
 #   if defined(__ANDROID__)
-#       include <jni.h>
 #       define xxANDROID 1
 #   endif
 #endif
@@ -176,7 +175,8 @@
 //  OS Dependency
 //==============================================================================
 #if defined(xxANDROID)
-extern _JNIEnv* xxJNIEnv;
+extern struct _JNIEnv* xxAndroidJNIEnv;
+extern struct _jobject* xxAndroidContext;
 #endif
 //==============================================================================
 //  Allocator

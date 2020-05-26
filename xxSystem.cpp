@@ -36,7 +36,8 @@
 //  OS Dependency
 //==============================================================================
 #if defined(xxANDROID)
-_JNIEnv* xxJNIEnv;
+struct _JNIEnv* xxAndroidJNIEnv;
+struct _jobject* xxAndroidContext;
 #endif
 //==============================================================================
 //  Allocator
