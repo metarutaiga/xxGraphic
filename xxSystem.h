@@ -175,8 +175,10 @@
 //  OS Dependency
 //==============================================================================
 #if defined(xxANDROID)
+extern struct _JavaVM* xxAndroidJavaVM;
 extern struct _JNIEnv* xxAndroidJNIEnv;
-extern struct _jobject* xxAndroidContext;
+extern class _jobject* xxAndroidContext;
+extern int xxAndroidJNIVersion;
 #endif
 //==============================================================================
 //  Allocator
