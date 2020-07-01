@@ -578,17 +578,17 @@ void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, unsigned int level, 
 //==============================================================================
 uint64_t xxCreateSamplerGLES2(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy)
 {
-    SAMPLERGL d3dSampler = {};
+    SAMPLERGL glSampler = {};
 
-    d3dSampler.addressU = clampU;
-    d3dSampler.addressV = clampV;
-    d3dSampler.addressW = clampW;
-    d3dSampler.magFilter = linearMag;
-    d3dSampler.minFilter = linearMin;
-    d3dSampler.mipFilter = linearMip;
-    d3dSampler.anisotropy = anisotropy;
+    glSampler.addressU = clampU;
+    glSampler.addressV = clampV;
+    glSampler.addressW = clampW;
+    glSampler.magFilter = linearMag;
+    glSampler.minFilter = linearMin;
+    glSampler.mipFilter = linearMip;
+    glSampler.anisotropy = anisotropy;
 
-    return d3dSampler.value;
+    return glSampler.value;
 }
 //------------------------------------------------------------------------------
 void xxDestroySamplerGLES2(uint64_t sampler)
