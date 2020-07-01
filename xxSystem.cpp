@@ -134,7 +134,7 @@ uint64_t xxTSC()
 #elif defined(_M_ARM)
     return __rdpmccntr64();
 #elif defined(_M_ARM64)
-    return _ReadStatusReg(42);
+    return _ReadStatusReg(ARM64_PMCCNTR_EL0);
 #elif defined(__APPLE__)
     return mach_absolute_time();
 #else
