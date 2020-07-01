@@ -913,11 +913,11 @@ void xxDrawIndexedD3D6(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
     }
     else if (INDEX_BUFFER_WIDTH == 2)
     {
-        int headIndexCount = indexCount / 8;
-        int tailIndexCount = indexCount % 8;
         WORD* d3dIndexBuffer = reinterpret_cast<WORD*>(getResourceData(indexBuffer));
         WORD* p = d3dIndexBuffer + firstIndex;
         WORD* q = wordIndexBuffer;
+#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
+        int headIndexCount = indexCount / 8;
         if (headIndexCount)
         {
             __m128i c = _mm_set1_epi16(vertexOffset);
@@ -929,6 +929,10 @@ void xxDrawIndexedD3D6(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
                 q += 8;
             }
         }
+        int tailIndexCount = indexCount % 8;
+#else
+        int tailIndexCount = indexCount;
+#endif
         for (int i = 0; i < tailIndexCount; ++i)
         {
             (*q++) = (*p++) + vertexOffset;
@@ -937,11 +941,11 @@ void xxDrawIndexedD3D6(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
     }
     else
     {
-        int headIndexCount = indexCount / 8;
-        int tailIndexCount = indexCount % 8;
         DWORD* d3dIndexBuffer = reinterpret_cast<DWORD*>(getResourceData(indexBuffer));
         DWORD* p = d3dIndexBuffer + firstIndex;
         WORD* q = wordIndexBuffer;
+#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
+        int headIndexCount = indexCount / 8;
         if (headIndexCount)
         {
             __m128i c = _mm_set1_epi16(vertexOffset);
@@ -954,6 +958,10 @@ void xxDrawIndexedD3D6(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
                 q += 8;
             }
         }
+        int tailIndexCount = indexCount % 8;
+#else
+        int tailIndexCount = indexCount;
+#endif
         for (int i = 0; i < tailIndexCount; ++i)
         {
             (*q++) = (WORD)((*p++) + vertexOffset);

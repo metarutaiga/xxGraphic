@@ -131,6 +131,10 @@ uint64_t xxTSC()
     return cntpct;
 #elif defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
     return __rdtsc();
+#elif defined(_M_ARM)
+    return __rdpmccntr64();
+#elif defined(_M_ARM64)
+    return _ReadStatusReg(42);
 #elif defined(__APPLE__)
     return mach_absolute_time();
 #else
