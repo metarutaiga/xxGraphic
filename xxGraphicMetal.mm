@@ -217,7 +217,7 @@ uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view
 #endif
     layer.contentsScale = contentsScale;
     layer.device = mtlDevice;
-    layer.framebufferOnly = YES;
+    layer.framebufferOnly = NO;
     layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
 
     swapchain->metalLayer = layer;
@@ -256,6 +256,7 @@ uint64_t xxGetCommandBufferMetal(uint64_t device, uint64_t swapchain)
 
     id <MTLCommandBuffer> commandBuffer = [mtlSwapchain->commandQueue commandBuffer];
     mtlSwapchain->commandBuffer = commandBuffer;
+    [commandBuffer enqueue];
 
     return reinterpret_cast<uint64_t>((__bridge void*)commandBuffer);
 }
