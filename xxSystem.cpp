@@ -203,9 +203,14 @@ static uint64_t xxTSCFrequencyImpl()
     return counter;
 }
 //------------------------------------------------------------------------------
-static uint64_t xxTSCFrequency = xxTSCFrequencyImpl();
+static uint64_t xxTSCFrequencyInteger = xxTSCFrequencyImpl();
 static uint64_t xxTSCInitialized = xxTSC();
-static float xxTSCInvFrequencyFloat = 1.0f / xxTSCFrequency;
+static float xxTSCInvFrequencyFloat = 1.0f / xxTSCFrequencyInteger;
+//------------------------------------------------------------------------------
+uint64_t xxTSCFrequency()
+{
+    return xxTSCFrequencyInteger;
+}
 //------------------------------------------------------------------------------
 float xxGetCurrentTime()
 {

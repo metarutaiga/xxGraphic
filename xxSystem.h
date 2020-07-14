@@ -209,6 +209,7 @@ xxAPI void xxFreeLibrary(void* library);
 //  TSC
 //==============================================================================
 xxAPI uint64_t xxTSC();
+xxAPI uint64_t xxTSCFrequency();
 xxAPI float xxGetCurrentTime();
 xxAPI void xxSleep(unsigned int sleepMs);
 //==============================================================================
