@@ -254,19 +254,22 @@ void xxGraphicDestroyEAGL(uint64_t context)
 //------------------------------------------------------------------------------
 void xxBindTextureWithSurface(const void* surface)
 {
-    IOSurfaceRef ioSurface = (IOSurfaceRef)surface;
+    if (@available(iOS 11.0, *))
+    {
+        IOSurfaceRef ioSurface = (IOSurfaceRef)surface;
 
-    GLsizei width = (GLsizei)IOSurfaceGetWidth(ioSurface);
-    GLsizei height = (GLsizei)IOSurfaceGetHeight(ioSurface);
-
-    [[EAGLContext currentContext] texImageIOSurface:ioSurface
-                                             target:GL_TEXTURE_2D
-                                     internalFormat:GL_RGBA
-                                              width:width
-                                             height:height
-                                             format:GL_BGRA_EXT
-                                               type:GL_UNSIGNED_BYTE
-                                              plane:0
-                                             invert:NO];
+        GLsizei width = (GLsizei)IOSurfaceGetWidth(ioSurface);
+        GLsizei height = (GLsizei)IOSurfaceGetHeight(ioSurface);
+        
+        [[EAGLContext currentContext] texImageIOSurface:ioSurface
+                                                 target:GL_TEXTURE_2D
+                                         internalFormat:GL_RGBA
+                                                  width:width
+                                                 height:height
+                                                 format:GL_BGRA_EXT
+                                                   type:GL_UNSIGNED_BYTE
+                                                  plane:0
+                                                 invert:NO];
+    }
 }
 //------------------------------------------------------------------------------

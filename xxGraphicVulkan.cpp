@@ -2404,7 +2404,7 @@ void xxSetIndexBufferVulkan(uint64_t commandEncoder, uint64_t buffer)
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
     BUFFERVK* vkBuffer = reinterpret_cast<BUFFERVK*>(buffer);
 
-    VkIndexType indexType = (INDEX_BUFFER_WIDTH == 2) ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
+    VkIndexType indexType = (INDEX_BUFFER_WIDTH == /* DISABLES CODE */(2)) ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
     vkCmdBindIndexBuffer(vkCommandBuffer, vkBuffer->buffer, 0, indexType);
 }
 //------------------------------------------------------------------------------

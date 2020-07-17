@@ -85,12 +85,6 @@
 #endif
 
 #if defined(__llvm__)
-#   pragma clang diagnostic ignored "-Wcomment"
-#   pragma clang diagnostic ignored "-Wignored-pragma-optimize"
-#   pragma clang diagnostic ignored "-Wmicrosoft-cast"
-#   pragma clang diagnostic ignored "-Wmissing-braces"
-#   pragma clang diagnostic ignored "-Wunused-value"
-#   pragma clang diagnostic ignored "-Wunused-variable"
 #   if __has_feature(address_sanitizer)
 #       if defined(_M_AMD64)
 #           pragma comment(lib, "clang_rt.asan_dynamic-x86_64")
