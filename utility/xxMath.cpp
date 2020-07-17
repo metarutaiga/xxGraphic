@@ -298,7 +298,6 @@ void xxMatrix4::MultiplyArray(size_t count, const xxMatrix4* __restrict input, i
     for (size_t i = 0; i < count; ++i)
     {
 #if defined(_M_IX86) || defined(_M_AMD64)
-
         __m128 v0 = (*input)._[0].v;
         __m128 v00 = _mm_shuffle1_ps(v0, _MM_SHUFFLE(0, 0, 0, 0));
         __m128 v01 = _mm_shuffle1_ps(v0, _MM_SHUFFLE(1, 1, 1, 1));

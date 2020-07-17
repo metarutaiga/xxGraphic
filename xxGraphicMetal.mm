@@ -256,7 +256,6 @@ uint64_t xxGetCommandBufferMetal(uint64_t device, uint64_t swapchain)
 
     id <MTLCommandBuffer> commandBuffer = [mtlSwapchain->commandQueue commandBuffer];
     mtlSwapchain->commandBuffer = commandBuffer;
-    [commandBuffer enqueue];
 
     return reinterpret_cast<uint64_t>((__bridge void*)commandBuffer);
 }

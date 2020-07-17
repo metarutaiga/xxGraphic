@@ -15,18 +15,12 @@
 
 #if defined(xxMACOS)
 #   define VK_USE_PLATFORM_MACOS_MVK    1
-#   define OBJC_OLD_DISPATCH_PROTOTYPES 1
 #   include <CoreGraphics/CoreGraphics.h>
-#   include <objc/runtime.h>
-#   include <objc/message.h>
 #endif
 
 #if defined(xxIOS)
 #   define VK_USE_PLATFORM_IOS_MVK      1
-#   define OBJC_OLD_DISPATCH_PROTOTYPES 1
 #   include <CoreGraphics/CoreGraphics.h>
-#   include <objc/runtime.h>
-#   include <objc/message.h>
 #endif
 
 #if defined(xxWINDOWS)

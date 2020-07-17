@@ -32,12 +32,18 @@
 #   if TARGET_OS_IPHONE
 #       define xxIOS 1
 #   elif TARGET_OS_OSX
-#       include <xmmintrin.h>
+#       if defined(__i386__) || defined(__amd64__)
+#           include <xmmintrin.h>
+#       endif
 #       define xxMACOS 1
 #   endif
 #   if TARGET_OS_MACCATALYST
 #       define xxMACCATALYST 1
 #   endif
+#   define objc_msgSend objc_msgSend_unused
+#   include <objc/message.h>
+#   undef objc_msgSend
+    OBJC_EXPORT id objc_msgSend(id self, SEL op, ...);
 #endif
 
 #if defined(__linux__)
