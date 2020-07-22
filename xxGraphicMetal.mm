@@ -517,7 +517,11 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, unsigned int width, u
     }
     else
     {
-        int alignment = 256/*[mtlDevice minimumLinearTextureAlignmentForPixelFormat:pixelFormat]*/;
+        int alignment = 256;
+        if (@available(macOS 10.13, iOS 11.0, *))
+        {
+            alignment = (int)[mtlDevice minimumLinearTextureAlignmentForPixelFormat:pixelFormat];
+        }
         int stride = width * sizeof(int);
         stride = (stride + (alignment - 1)) & ~(alignment - 1);
         buffer = [mtlDevice newBufferWithLength:stride * height options:options];
