@@ -595,41 +595,41 @@ void xxDestroySamplerMetal(uint64_t sampler)
 //  Shader
 //==============================================================================
 static const char* const defaultShaderCode =
-    "#include <metal_stdlib>\n"
-    "using namespace metal;\n"
-    "\n"
-    "struct Uniforms\n"
-    "{\n"
-    "    float4x4 projectionMatrix;\n"
-    "};\n"
-    "\n"
-    "struct VertexIn\n"
-    "{\n"
-    "    float3 position [[attribute(0)]];\n"
-    "    float4 color    [[attribute(1)]];\n"
-    "    float2 uv       [[attribute(2)]];\n"
-    "};\n"
-    "\n"
-    "struct VertexOut\n"
-    "{\n"
-    "    float4 position [[position]];\n"
-    "    float4 color;\n"
-    "    float2 uv;\n"
-    "};\n"
-    "\n"
-    "vertex VertexOut VSMain(VertexIn in [[stage_in]], constant Uniforms& uniforms [[buffer(0)]])\n"
-    "{\n"
-    "    VertexOut out;\n"
-    "    out.position = uniforms.projectionMatrix * float4(in.position, 1);\n"
-    "    out.color = in.color;\n"
-    "    out.uv = in.uv;\n"
-    "    return out;\n"
-    "}\n"
-    "\n"
-    "fragment float4 FSMain(VertexOut in [[stage_in]], texture2d<float> tex [[texture(0)]], sampler sam [[sampler(0)]])\n"
-    "{\n"
-    "    return in.color * tex.sample(sam, in.uv);\n"
-    "}\n";
+R"(#include <metal_stdlib>
+using namespace metal;
+
+struct Uniforms
+{
+    float4x4 projectionMatrix;
+};
+
+struct VertexIn
+{
+    float3 position [[attribute(0)]];
+    float4 color    [[attribute(1)]];
+    float2 uv       [[attribute(2)]];
+};
+
+struct VertexOut
+{
+    float4 position [[position]];
+    float4 color;
+    float2 uv;
+};
+
+vertex VertexOut VSMain(VertexIn in [[stage_in]], constant Uniforms& uniforms [[buffer(0)]])
+{
+    VertexOut out;
+    out.position = uniforms.projectionMatrix * float4(in.position, 1);
+    out.color = in.color;
+    out.uv = in.uv;
+    return out;
+}
+
+fragment float4 FSMain(VertexOut in [[stage_in]], texture2d<float> tex [[texture(0)]], sampler sam [[sampler(0)]])
+{
+    return in.color * tex.sample(sam, in.uv);
+})";
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexShaderMetal(uint64_t device, const char* shader, uint64_t vertexAttribute)
 {

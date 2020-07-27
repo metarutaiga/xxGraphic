@@ -240,16 +240,19 @@ void cglShaderSource(GLuint shader, GLsizei count, const GLchar *const*string, c
         if (strcmp(var, "#version 100") == 0)
             var = "#version 140";
         if (strncmp(var, "precision", sizeof("precision") - 1) == 0)
+            var = "";
+        if (strcmp(var, "#define __FRAGMENT__ 1") == 0)
         {
-            var =   "out vec4 fragColor;\n"
+            var =   "#define __FRAGMENT__ 1\n"
                     "#define gl_FragColor fragColor\n"
                     "#define texture2D texture\n"
                     "#define texture2DRect texture\n"
-                    "#define textureSize2DRect(t, l) textureSize(t)";
+                    "#define textureSize2DRect(t, l) textureSize(t)\n"
+                    "out vec4 fragColor;";
             fragmentShader = true;
         }
-        if (strcmp(var, "#define attribute attribute") == 0)
-            var = "#define attribute in";
+        if (strncmp(var, "#define attribute", sizeof("#define attribute") - 1) == 0)
+            var = fragmentShader ? "#define attribute" : "#define attribute in";
         if (strcmp(var, "#define varying varying") == 0)
             var = fragmentShader ? "#define varying in" : "#define varying out";
         if (strcmp(var, "#extension GL_EXT_gpu_shader4 : enable") == 0)
@@ -395,30 +398,25 @@ void xxBindRectangleProgram()
 {
     if (rectangleProgram == 0)
     {
-        const char* const fragmentShaderCode =
-            "uniform sampler2DRect tex;\n"
-            "varying vec2 varyUV;\n"
-            "varying vec4 varyColor;\n"
-            "void main()\n"
-            "{\n"
-            "    gl_FragColor = varyColor * texture2DRect(tex, varyUV * vec2(textureSize2DRect(tex, 0)));\n"
-            "}\n";
-
         const char* vertexShaderCodes[] =
         {
             "#version 100", "\n",
+            "#define __VERTEX__ 1", "\n",
             "#define attribute attribute", "\n",
             "#define varying varying", "\n",
-            vertexShaderCode
+            glDefaultShaderCode
         };
 
         const char* fragmentShaderCodes[] =
         {
             "#version 100", "\n",
-            "#extension GL_EXT_gpu_shader4 : enable", "\n",
-            "precision mediump float;", "\n",
+            "#define __FRAGMENT__ 1", "\n",
+            "#define attribute", "\n",
             "#define varying varying", "\n",
-            fragmentShaderCode
+            "#define sampler2D sampler2DRect", "\n",
+            "#define texture2D(t,c) texture2DRect(t, (c) * vec2(textureSize2DRect(t, 0)))", "\n",
+            "#extension GL_EXT_gpu_shader4 : enable", "\n",
+            glDefaultShaderCode
         };
 
         GLuint glVertexShader = glCreateShader(GL_VERTEX_SHADER);

@@ -626,9 +626,11 @@ uint64_t xxCreateVertexShaderGLES2(uint64_t device, const char* shader, uint64_t
         const char* sources[] =
         {
             "#version 100", "\n",
+            "#define __VERTEX__ 1", "\n",
             "#define attribute attribute", "\n",
             "#define varying varying", "\n",
-            vertexShaderCode
+            "precision highp float;", "\n",
+            glDefaultShaderCode
         };
 
         GLuint glShader = glCreateShader(GL_VERTEX_SHADER);
@@ -649,9 +651,11 @@ uint64_t xxCreateFragmentShaderGLES2(uint64_t device, const char* shader)
         const char* sources[] =
         {
             "#version 100", "\n",
-            "precision mediump float;", "\n",
+            "#define __FRAGMENT__ 1", "\n",
+            "#define attribute", "\n",
             "#define varying varying", "\n",
-            fragmentShaderCode
+            "precision mediump float;", "\n",
+            glDefaultShaderCode
         };
 
         GLuint glShader = glCreateShader(GL_FRAGMENT_SHADER);

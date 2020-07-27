@@ -422,33 +422,37 @@ void xxGraphicDestroyGL()
 //==============================================================================
 //  GLSL Shader
 //==============================================================================
-const char* const vertexShaderCode = 
-    "uniform vec4 uniformBuffer[4];\n"
-    "attribute vec3 position;\n"
-    "attribute vec4 color;\n"
-    "attribute vec2 uv;\n"
-    "varying vec2 varyUV;\n"
-    "varying vec4 varyColor;\n"
-    "void main()\n"
-    "{\n"
-    "    vec4 projection;\n"
-    "    projection = uniformBuffer[0] * position.x;\n"
-    "    projection += uniformBuffer[1] * position.y;\n"
-    "    projection += uniformBuffer[2] * position.z;\n"
-    "    projection += uniformBuffer[3];\n"
-    "    gl_Position = projection;\n"
-    "    varyUV = uv;\n"
-    "    varyColor = color;\n"
-    "}\n";
-//------------------------------------------------------------------------------
-const char* const fragmentShaderCode =
-    "uniform sampler2D tex;\n"
-    "varying vec2 varyUV;\n"
-    "varying vec4 varyColor;\n"
-    "void main()\n"
-    "{\n"
-    "    gl_FragColor = varyColor * texture2D(tex, varyUV);\n"
-    "}\n";
+const char* const glDefaultShaderCode =
+R"(uniform vec4 uniformBuffer[4];
+uniform sampler2D tex;
+
+attribute vec3 position;
+attribute vec4 color;
+attribute vec2 uv;
+
+varying vec2 varyUV;
+varying vec4 varyColor;
+
+#ifdef __VERTEX__
+void main()
+{
+    vec4 projection;
+    projection = uniformBuffer[0] * position.x;
+    projection += uniformBuffer[1] * position.y;
+    projection += uniformBuffer[2] * position.z;
+    projection += uniformBuffer[3];
+    gl_Position = projection;
+    varyUV = uv;
+    varyColor = color;
+}
+#endif
+
+#ifdef __FRAGMENT__
+void main()
+{
+    gl_FragColor = varyColor * texture2D(tex, varyUV);
+}
+#endif)";
 //==============================================================================
 //  Function
 //==============================================================================
