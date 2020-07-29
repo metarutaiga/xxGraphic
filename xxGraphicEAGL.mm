@@ -70,7 +70,8 @@ uint64_t glCreateContextEAGL(uint64_t instance, void* view, void** display)
     CAEAGLLayer* layer = (CAEAGLLayer*)[nsView layer];
     layer.contentsScale = contentsScale;
 
-    EAGLContext* eaglContext = [[classEAGLContext alloc] initWithAPI:[rootContext API] sharegroup:[rootContext sharegroup]];
+    EAGLContext* eaglContext = [[classEAGLContext alloc] initWithAPI:[rootContext API]
+                                                          sharegroup:[rootContext sharegroup]];
     if (eaglContext == nil)
         return 0;
     [classEAGLContext setCurrentContext:eaglContext];
@@ -260,16 +261,16 @@ void xxBindTextureWithSurface(const void* surface)
 
         GLsizei width = (GLsizei)IOSurfaceGetWidth(ioSurface);
         GLsizei height = (GLsizei)IOSurfaceGetHeight(ioSurface);
-        
-        [[EAGLContext currentContext] texImageIOSurface:ioSurface
-                                                 target:GL_TEXTURE_2D
-                                         internalFormat:GL_RGBA
-                                                  width:width
-                                                 height:height
-                                                 format:GL_BGRA_EXT
-                                                   type:GL_UNSIGNED_BYTE
-                                                  plane:0
-                                                 invert:NO];
+
+        [[classEAGLContext currentContext] texImageIOSurface:ioSurface
+                                                      target:GL_TEXTURE_2D
+                                              internalFormat:GL_RGBA
+                                                       width:width
+                                                      height:height
+                                                      format:GL_BGRA_EXT
+                                                        type:GL_UNSIGNED_BYTE
+                                                       plane:0
+                                                      invert:NO];
     }
 }
 //------------------------------------------------------------------------------

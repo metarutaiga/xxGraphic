@@ -140,7 +140,8 @@ uint64_t glCreateContextCGL(uint64_t instance, void* view, void** display)
     [nsContext makeCurrentContext];
 
     int swapInterval = 0;
-    [nsContext setValues:&swapInterval forParameter:NSOpenGLContextParameterSwapInterval];
+    [nsContext setValues:&swapInterval
+            forParameter:NSOpenGLContextParameterSwapInterval];
 
     if (display)
     {

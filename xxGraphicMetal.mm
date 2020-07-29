@@ -5,31 +5,20 @@
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "internal/xxGraphicInternal.h"
+#include "internal/xxGraphicInternalMetal.h"
 #include "xxGraphicMetal.h"
 
-#define MTLCreateSystemDefaultDevice MTLCreateSystemDefaultDevice_unused
-#define MTLCopyAllDevices MTLCopyAllDevices_unused
-#import <Metal/Metal.h>
-#import <QuartzCore/CAMetalLayer.h>
-#if defined(xxMACOS)
-#import <Cocoa/Cocoa.h>
-#elif defined(xxIOS)
-#import <UIKit/UIKit.h>
-#endif
-#undef MTLCreateSystemDefaultDevice
-#undef MTLCopyAllDevices
-
-static void*                        g_metalLibrary = nullptr;
-static id <MTLDevice> __nullable    (*MTLCreateSystemDefaultDevice)() = nullptr;
-static void*                        (*MTLCopyAllDevices)() = nullptr;
-static Class                        classMTLCompileOptions = nil;
-static Class                        classMTLDepthStencilDescriptor = nil;
-static Class                        classMTLRenderPassDescriptor = nil;
-static Class                        classMTLRenderPipelineColorAttachmentDescriptor = nil;
-static Class                        classMTLRenderPipelineDescriptor = nil;
-static Class                        classMTLSamplerDescriptor = nil;
-static Class                        classMTLTextureDescriptor = nil;
-static Class                        classMTLVertexDescriptor = nil;
+void*                       g_metalLibrary = nullptr;
+id <MTLDevice> __nullable   (*MTLCreateSystemDefaultDevice)() = nullptr;
+void*                       (*MTLCopyAllDevices)() = nullptr;
+Class                       classMTLCompileOptions = nil;
+Class                       classMTLDepthStencilDescriptor = nil;
+Class                       classMTLRenderPassDescriptor = nil;
+Class                       classMTLRenderPipelineColorAttachmentDescriptor = nil;
+Class                       classMTLRenderPipelineDescriptor = nil;
+Class                       classMTLSamplerDescriptor = nil;
+Class                       classMTLTextureDescriptor = nil;
+Class                       classMTLVertexDescriptor = nil;
 
 //==============================================================================
 //  Instance
@@ -87,7 +76,8 @@ uint64_t xxCreateInstanceMetal()
     id <MTLDevice> device = MTLCreateSystemDefaultDevice();
     if (device == nil)
         return 0;
-    NSArray* allDevices = [[NSArray alloc] initWithObjects:&device count:1];
+    NSArray* allDevices = [[NSArray alloc] initWithObjects:&device
+                                                     count:1];
 #endif
 
     xxRegisterFunction(Metal);
@@ -150,30 +140,8 @@ const char* xxGetDeviceNameMetal()
     return "Metal";
 }
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-struct MTLFRAMEBUFFER
-{
-    id <MTLTexture>         texture;
-};
-//==============================================================================
 //  Swapchain
 //==============================================================================
-struct MTLSWAPCHAIN : public MTLFRAMEBUFFER
-{
-    CAMetalLayer*           metalLayer;
-    id <CAMetalDrawable>    drawable;
-    id <MTLCommandQueue>    commandQueue;
-    id <MTLCommandBuffer>   commandBuffer;
-#if defined(xxMACOS)
-    NSView*                 view;
-#elif defined(xxIOS)
-    UIView*                 view;
-#endif
-    int                     width;
-    int                     height;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
@@ -200,7 +168,7 @@ uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view
     float contentsScale = [[nsWindow screen] nativeScale];
 #endif
 
-    MTLSWAPCHAIN* swapchain = new MTLSWAPCHAIN;
+    MTLSWAPCHAIN* swapchain = new MTLSWAPCHAIN{};
     if (swapchain == nullptr)
         return 0;
 
@@ -290,7 +258,7 @@ void xxSubmitCommandBufferMetal(uint64_t commandBuffer, uint64_t swapchain)
 //==============================================================================
 uint64_t xxCreateRenderPassMetal(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil)
 {
-    MTLRenderPassDescriptor* renderPass = [[classMTLRenderPassDescriptor alloc] init];
+    MTLRenderPassDescriptor* renderPass = [classMTLRenderPassDescriptor new];
 
     renderPass.colorAttachments[0].loadAction = clearColor ? MTLLoadActionClear : MTLLoadActionDontCare;
     renderPass.depthAttachment.loadAction = clearDepth ? MTLLoadActionClear : MTLLoadActionDontCare;
@@ -354,7 +322,7 @@ void xxEndRenderPassMetal(uint64_t commandEncoder, uint64_t framebuffer, uint64_
 //==============================================================================
 uint64_t xxCreateVertexAttributeMetal(uint64_t device, int count, int* attribute)
 {
-    MTLVertexDescriptor* desc = [[classMTLVertexDescriptor alloc] init];
+    MTLVertexDescriptor* desc = [classMTLVertexDescriptor new];
     int stride = 0;
 
     for (int i = 0; i < count; ++i)
@@ -436,7 +404,8 @@ uint64_t xxCreateConstantBufferMetal(uint64_t device, unsigned int size)
     if (mtlDevice == nil)
         return 0;
 
-    id <MTLBuffer> buffer = [mtlDevice newBufferWithLength:size options:MTLResourceStorageModeShared];
+    id <MTLBuffer> buffer = [mtlDevice newBufferWithLength:size
+                                                   options:MTLResourceStorageModeShared];
 
     return reinterpret_cast<uint64_t>((__bridge_retained void*)buffer);
 }
@@ -447,7 +416,8 @@ uint64_t xxCreateIndexBufferMetal(uint64_t device, unsigned int size)
     if (mtlDevice == nil)
         return 0;
 
-    id <MTLBuffer> buffer = [mtlDevice newBufferWithLength:size options:MTLResourceStorageModeShared];
+    id <MTLBuffer> buffer = [mtlDevice newBufferWithLength:size
+                                                   options:MTLResourceStorageModeShared];
 
     return reinterpret_cast<uint64_t>((__bridge_retained void*)buffer);
 }
@@ -458,7 +428,8 @@ uint64_t xxCreateVertexBufferMetal(uint64_t device, unsigned int size, uint64_t 
     if (mtlDevice == nil)
         return 0;
 
-    id <MTLBuffer> buffer = [mtlDevice newBufferWithLength:size options:MTLResourceStorageModeShared];
+    id <MTLBuffer> buffer = [mtlDevice newBufferWithLength:size
+                                                   options:MTLResourceStorageModeShared];
 
     return reinterpret_cast<uint64_t>((__bridge_retained void*)buffer);
 }
@@ -484,20 +455,13 @@ void xxUnmapBufferMetal(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-struct MTLTEXTURE
-{
-    id <MTLTexture>     texture;
-    id <MTLBuffer>      buffer;
-    int                 stride;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateTextureMetal(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array, const void* external)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
     if (mtlDevice == nil)
         return 0;
 
-    MTLTEXTURE* mtlTexture = new MTLTEXTURE;
+    MTLTEXTURE* mtlTexture = new MTLTEXTURE{};
     if (mtlTexture == nullptr)
         return 0;
 
@@ -524,13 +488,19 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, unsigned int width, u
         }
         int stride = width * sizeof(int);
         stride = (stride + (alignment - 1)) & ~(alignment - 1);
-        buffer = [mtlDevice newBufferWithLength:stride * height options:options];
+        buffer = [mtlDevice newBufferWithLength:stride * height
+                                        options:options];
     }
     int stride = (int)[buffer length] / height;
 
-    MTLTextureDescriptor* desc = [classMTLTextureDescriptor texture2DDescriptorWithPixelFormat:pixelFormat width:width height:height mipmapped:NO];
+    MTLTextureDescriptor* desc = [classMTLTextureDescriptor texture2DDescriptorWithPixelFormat:pixelFormat
+                                                                                        width:width
+                                                                                        height:height
+                                                                                     mipmapped:NO];
     desc.resourceOptions = options;
-    id <MTLTexture> texture = [buffer newTextureWithDescriptor:desc offset:0 bytesPerRow:stride];
+    id <MTLTexture> texture = [buffer newTextureWithDescriptor:desc
+                                                        offset:0
+                                                   bytesPerRow:stride];
 
     mtlTexture->texture = texture;
     mtlTexture->buffer = buffer;
@@ -571,7 +541,7 @@ uint64_t xxCreateSamplerMetal(uint64_t device, bool clampU, bool clampV, bool cl
     if (mtlDevice == nil)
         return 0;
 
-    MTLSamplerDescriptor* desc = [[classMTLSamplerDescriptor alloc] init];
+    MTLSamplerDescriptor* desc = [classMTLSamplerDescriptor new];
     desc.sAddressMode = clampU ? MTLSamplerAddressModeClampToEdge : MTLSamplerAddressModeRepeat;
     desc.tAddressMode = clampV ? MTLSamplerAddressModeClampToEdge : MTLSamplerAddressModeRepeat;
     desc.rAddressMode = clampW ? MTLSamplerAddressModeClampToEdge : MTLSamplerAddressModeRepeat;
@@ -643,10 +613,12 @@ uint64_t xxCreateVertexShaderMetal(uint64_t device, const char* shader, uint64_t
     }
 
     NSError* error;
-    MTLCompileOptions* options = [[classMTLCompileOptions alloc] init];
+    MTLCompileOptions* options = [classMTLCompileOptions new];
     options.fastMathEnabled = YES;
 
-    id <MTLLibrary> library = [mtlDevice newLibraryWithSource:[NSString stringWithUTF8String:shader] options:options error:&error];
+    id <MTLLibrary> library = [mtlDevice newLibraryWithSource:[NSString stringWithUTF8String:shader]
+                                                      options:options
+                                                        error:&error];
     if (library == nil)
     {
         xxLog("xxGraphic", "%s", [[error localizedDescription] UTF8String]);
@@ -670,10 +642,12 @@ uint64_t xxCreateFragmentShaderMetal(uint64_t device, const char* shader)
     }
 
     NSError* error;
-    MTLCompileOptions* options = [[classMTLCompileOptions alloc] init];
+    MTLCompileOptions* options = [classMTLCompileOptions new];
     options.fastMathEnabled = YES;
 
-    id <MTLLibrary> library = [mtlDevice newLibraryWithSource:[NSString stringWithUTF8String:shader] options:options error:&error];
+    id <MTLLibrary> library = [mtlDevice newLibraryWithSource:[NSString stringWithUTF8String:shader]
+                                                      options:options
+                                                        error:&error];
     if (library == nil)
     {
         xxLog("xxGraphic", "%s", [[error localizedDescription] UTF8String]);
@@ -694,15 +668,9 @@ void xxDestroyShaderMetal(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-struct MTLPIPELINE
-{
-    id <MTLRenderPipelineState> pipeline;
-    id <MTLDepthStencilState>   depthStencil;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateBlendStateMetal(uint64_t device, bool blending)
 {
-    MTLRenderPipelineColorAttachmentDescriptor* desc = [[classMTLRenderPipelineColorAttachmentDescriptor alloc] init];
+    MTLRenderPipelineColorAttachmentDescriptor* desc = [classMTLRenderPipelineColorAttachmentDescriptor new];
     desc.pixelFormat = MTLPixelFormatBGRA8Unorm;
     desc.blendingEnabled = blending;
     desc.sourceRGBBlendFactor = MTLBlendFactorSourceAlpha;
@@ -718,7 +686,7 @@ uint64_t xxCreateDepthStencilStateMetal(uint64_t device, bool depthTest, bool de
     if (mtlDevice == nil)
         return 0;
 
-    MTLDepthStencilDescriptor* desc = [[classMTLDepthStencilDescriptor alloc] init];
+    MTLDepthStencilDescriptor* desc = [classMTLDepthStencilDescriptor new];
     desc.depthCompareFunction = depthTest ? MTLCompareFunctionLessEqual : MTLCompareFunctionAlways;
     desc.depthWriteEnabled = depthWrite;
 
@@ -743,17 +711,18 @@ uint64_t xxCreatePipelineMetal(uint64_t device, uint64_t renderPass, uint64_t bl
     id <MTLFunction> mtlVertexShader = (__bridge id)reinterpret_cast<void*>(vertexShader);
     id <MTLFunction> mtlFragmentShader = (__bridge id)reinterpret_cast<void*>(fragmentShader);
 
-    MTLPIPELINE* mtlPipeline = new MTLPIPELINE;
+    MTLPIPELINE* mtlPipeline = new MTLPIPELINE{};
     if (mtlPipeline == nullptr)
         return 0;
 
-    MTLRenderPipelineDescriptor* desc = [[classMTLRenderPipelineDescriptor alloc] init];
+    MTLRenderPipelineDescriptor* desc = [classMTLRenderPipelineDescriptor new];
     desc.vertexFunction = mtlVertexShader;
     desc.fragmentFunction = mtlFragmentShader;
     desc.vertexDescriptor = mtlVertexAttribute;
     desc.colorAttachments[0] = mtlBlendState;
 
-    id <MTLRenderPipelineState> pipeline = [mtlDevice newRenderPipelineStateWithDescriptor:desc error:nil];
+    id <MTLRenderPipelineState> pipeline = [mtlDevice newRenderPipelineStateWithDescriptor:desc
+                                                                                     error:nil];
 
     mtlPipeline->pipeline = pipeline;
     mtlPipeline->depthStencil = mtlDepthStencilState;
@@ -841,7 +810,9 @@ void xxSetVertexBuffersMetal(uint64_t commandEncoder, int count, const uint64_t*
         offsets[i] = 0;
     }
 
-    [mtlCommandEncoder setVertexBuffers:mtlBuffers offsets:offsets withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_BUFFER, count)];
+    [mtlCommandEncoder setVertexBuffers:mtlBuffers
+                                offsets:offsets
+                              withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_BUFFER, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesMetal(uint64_t commandEncoder, int count, const uint64_t* textures)
@@ -855,7 +826,8 @@ void xxSetVertexTexturesMetal(uint64_t commandEncoder, int count, const uint64_t
         mtlTextures[i] = mtlTexture->texture;
     }
 
-    [mtlCommandEncoder setVertexTextures:mtlTextures withRange:NSMakeRange(0, count)];
+    [mtlCommandEncoder setVertexTextures:mtlTextures
+                               withRange:NSMakeRange(0, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentTexturesMetal(uint64_t commandEncoder, int count, const uint64_t* textures)
@@ -869,7 +841,8 @@ void xxSetFragmentTexturesMetal(uint64_t commandEncoder, int count, const uint64
         mtlTextures[i] = mtlTexture->texture;
     }
 
-    [mtlCommandEncoder setFragmentTextures:mtlTextures withRange:NSMakeRange(0, count)];
+    [mtlCommandEncoder setFragmentTextures:mtlTextures
+                                 withRange:NSMakeRange(0, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersMetal(uint64_t commandEncoder, int count, const uint64_t* samplers)
@@ -882,7 +855,8 @@ void xxSetVertexSamplersMetal(uint64_t commandEncoder, int count, const uint64_t
         mtlSamplers[i] = (__bridge id)reinterpret_cast<void*>(samplers[i]);
     }
 
-    [mtlCommandEncoder setVertexSamplerStates:mtlSamplers withRange:NSMakeRange(0, count)];
+    [mtlCommandEncoder setVertexSamplerStates:mtlSamplers
+                                    withRange:NSMakeRange(0, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentSamplersMetal(uint64_t commandEncoder, int count, const uint64_t* samplers)
@@ -895,7 +869,8 @@ void xxSetFragmentSamplersMetal(uint64_t commandEncoder, int count, const uint64
         mtlSamplers[i] = (__bridge id)reinterpret_cast<void*>(samplers[i]);
     }
 
-    [mtlCommandEncoder setFragmentSamplerStates:mtlSamplers withRange:NSMakeRange(0, count)];
+    [mtlCommandEncoder setFragmentSamplerStates:mtlSamplers
+                                      withRange:NSMakeRange(0, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
@@ -903,7 +878,9 @@ void xxSetVertexConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, un
     id <MTLRenderCommandEncoder> mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
     id <MTLBuffer> mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);
 
-    [mtlCommandEncoder setVertexBuffer:mtlBuffer offset:0 atIndex:0];
+    [mtlCommandEncoder setVertexBuffer:mtlBuffer
+                                offset:0
+                               atIndex:0];
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
@@ -911,7 +888,9 @@ void xxSetFragmentConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, 
     id <MTLRenderCommandEncoder> mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
     id <MTLBuffer> mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);
 
-    [mtlCommandEncoder setFragmentBuffer:mtlBuffer offset:0 atIndex:0];
+    [mtlCommandEncoder setFragmentBuffer:mtlBuffer
+                                  offset:0
+                                 atIndex:0];
 }
 //------------------------------------------------------------------------------
 void xxDrawIndexedMetal(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
@@ -920,7 +899,14 @@ void xxDrawIndexedMetal(uint64_t commandEncoder, uint64_t indexBuffer, int index
     id <MTLBuffer> mtlIndexBuffer = (__bridge id)reinterpret_cast<void*>(indexBuffer);
 
     MTLIndexType indexType = (INDEX_BUFFER_WIDTH == /* DISABLES CODE */(2)) ? MTLIndexTypeUInt16 : MTLIndexTypeUInt32;
-    [mtlCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle indexCount:indexCount indexType:indexType indexBuffer:mtlIndexBuffer indexBufferOffset:firstIndex * INDEX_BUFFER_WIDTH instanceCount:instanceCount baseVertex:vertexOffset baseInstance:firstInstance];
+    [mtlCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
+                                  indexCount:indexCount
+                                   indexType:indexType
+                                 indexBuffer:mtlIndexBuffer
+                           indexBufferOffset:firstIndex * INDEX_BUFFER_WIDTH
+                               instanceCount:instanceCount
+                                  baseVertex:vertexOffset
+                                baseInstance:firstInstance];
 }
 //==============================================================================
 //  Fixed-Function

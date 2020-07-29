@@ -100,7 +100,7 @@ bool xxNode::DetachChild(const xxNodePtr& child)
 
             struct TraversalResetMatrix
             {
-                void operator() (xxNode* node)
+                static void Execute(xxNode* node)
                 {
                     node->m_classLocalMatrix = (*node->m_localMatrix);
                     node->m_classWorldMatrix = (*node->m_worldMatrix);
@@ -112,11 +112,11 @@ bool xxNode::DetachChild(const xxNodePtr& child)
                         xxNode* child = node->m_children[i].get();
                         if (child == nullptr)
                             continue;
-                        (*this)(child);
+                        Execute(child);
                     }
                 }
             };
-            TraversalResetMatrix()(child.get());
+            TraversalResetMatrix::Execute(child.get());
 
             return true;
         }
@@ -154,7 +154,7 @@ void xxNode::CreateLinearMatrix()
 
     struct TraversalMatrixCount
     {
-        uint32_t operator() (xxNode* node)
+        static uint32_t Execute(xxNode* node)
         {
             // Header
             uint32_t count = 1;
@@ -168,21 +168,21 @@ void xxNode::CreateLinearMatrix()
                 xxNode* child = node->m_children[i].get();
                 if (child != nullptr && child->m_children.empty() == false)
                 {
-                    count += (*this)(child);
+                    count += Execute(child);
                 }
             }
             return count;
         }
     };
 
-    uint32_t newLinearMatrixSize = 2 + TraversalMatrixCount()(this) + 1;
+    uint32_t newLinearMatrixSize = 2 + TraversalMatrixCount::Execute(this) + 1;
     std::vector<xxMatrix4> newLinearMatrix(newLinearMatrixSize);
     if (newLinearMatrix.empty())
         return;
 
     struct TraversalLinearMatrix
     {
-        void operator() (xxNode* node, xxMatrix4*& linearMatrix)
+        static void Execute(xxNode* node, xxMatrix4*& linearMatrix)
         {
             // Header
             LinearMatrixHeader* header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
@@ -209,7 +209,7 @@ void xxNode::CreateLinearMatrix()
                 xxNode* child = node->m_children[i].get();
                 if (child != nullptr && child->m_children.empty() == false)
                 {
-                    (*this)(child, linearMatrix);
+                    Execute(child, linearMatrix);
                 }
             }
         }
@@ -224,7 +224,7 @@ void xxNode::CreateLinearMatrix()
     linearMatrix += 2;
 
     // Traversal
-    TraversalLinearMatrix()(this, linearMatrix);
+    TraversalLinearMatrix::Execute(this, linearMatrix);
 
     // Final
     LinearMatrixHeader* header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
@@ -271,7 +271,7 @@ bool xxNode::UpdateMatrix()
     }
     else
     {
-       (*m_worldMatrix) = (*m_parent.lock()->m_worldMatrix) * (*m_localMatrix);
+        (*m_worldMatrix) = (*m_parent.lock()->m_worldMatrix) * (*m_localMatrix);
     }
 
     return true;
