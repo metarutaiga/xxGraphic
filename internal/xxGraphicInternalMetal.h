@@ -57,6 +57,8 @@ struct MTLSWAPCHAIN : public MTLFRAMEBUFFER
 #endif
     int                             width;
     int                             height;
+
+    // Metal 2
     id <MTLRenderCommandEncoder>    commandEncoder;
     int                             argumentBufferIndex;
     int                             argumentBufferStep;
@@ -80,7 +82,13 @@ struct MTLPIPELINE
 {
     id <MTLRenderPipelineState>     pipeline;
     id <MTLDepthStencilState>       depthStencil;
+
+    // Metal 2
     id <MTLFunction>                vertexShader;
     id <MTLFunction>                fragmentShader;
+    id <MTLArgumentEncoder>         vertexArgumentEncoder;
+    id <MTLArgumentEncoder>         fragmentArgumentEncoder;
+    NSUInteger                      vertexArgumentEncodedLength;
+    NSUInteger                      fragmentArgumentEncodedLength;
 };
 //==============================================================================

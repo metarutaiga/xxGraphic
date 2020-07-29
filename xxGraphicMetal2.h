@@ -26,10 +26,18 @@ xxAPI uint64_t      xxGetCommandBufferMetal2(uint64_t device, uint64_t swapchain
 xxAPI uint64_t      xxBeginRenderPassMetal2(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float r, float g, float b, float a, float depth, unsigned char stencil);
 xxAPI void          xxEndRenderPassMetal2(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass);
 //==============================================================================
+//  Sampler
+//==============================================================================
+xxAPI uint64_t      xxCreateSamplerMetal2(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy);
+//==============================================================================
 //  Shader
 //==============================================================================
 xxAPI uint64_t      xxCreateVertexShaderMetal2(uint64_t device, const char* shader, uint64_t vertexAttribute);
 xxAPI uint64_t      xxCreateFragmentShaderMetal2(uint64_t device, const char* shader);
+//==============================================================================
+//  Pipeline
+//==============================================================================
+xxAPI uint64_t      xxCreatePipelineMetal2(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
 //==============================================================================
 //  Command
 //==============================================================================

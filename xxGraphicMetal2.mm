@@ -25,8 +25,12 @@ uint64_t xxCreateInstanceMetal2()
     xxBeginRenderPass = xxBeginRenderPassMetal2;
     xxEndRenderPass = xxEndRenderPassMetal2;
 
+    xxCreateSampler = xxCreateSamplerMetal2;
+
     xxCreateVertexShader = xxCreateVertexShaderMetal2;
     xxCreateFragmentShader = xxCreateFragmentShaderMetal2;
+
+    xxCreatePipeline = xxCreatePipelineMetal2;
 
     xxSetViewport = xxSetViewportMetal2;
     xxSetScissor = xxSetScissorMetal2;
@@ -60,12 +64,6 @@ uint64_t xxGetCommandBufferMetal2(uint64_t device, uint64_t swapchain)
     id <MTLCommandBuffer> commandBuffer = [mtlSwapchain->commandQueue commandBuffer];
     mtlSwapchain->commandBuffer = commandBuffer;
 
-    int argumentBufferIndex = mtlSwapchain->argumentBufferIndex = (mtlSwapchain->argumentBufferIndex + 1) % xxCountOf(mtlSwapchain->argumentBuffers);
-    if (mtlSwapchain->argumentBuffers[argumentBufferIndex] == nil || [mtlSwapchain->argumentBuffers[argumentBufferIndex] length] < mtlSwapchain->argumentBufferStep)
-    {
-        mtlSwapchain->argumentBuffers[argumentBufferIndex] = [[mtlSwapchain->commandQueue device] newBufferWithLength:(mtlSwapchain->argumentBufferStep + 1) * 2
-                                                                                                              options:MTLResourceStorageModeShared];
-    }
     mtlSwapchain->argumentBufferStep = 0;
 
     return reinterpret_cast<uint64_t>(mtlSwapchain);
@@ -76,32 +74,12 @@ uint64_t xxGetCommandBufferMetal2(uint64_t device, uint64_t swapchain)
 uint64_t xxBeginRenderPassMetal2(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float r, float g, float b, float a, float depth, unsigned char stencil)
 {
     MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(commandBuffer);
-    MTLFRAMEBUFFER* mtlFramebuffer = reinterpret_cast<MTLFRAMEBUFFER*>(framebuffer);
-    MTLRenderPassDescriptor* __unsafe_unretained mtlRenderPass = (__bridge MTLRenderPassDescriptor*)reinterpret_cast<void*>(renderPass);
 
-    mtlRenderPass.colorAttachments[0].texture = mtlFramebuffer->texture;
+    uint64_t commandEncoder = xxBeginRenderPassMetal(reinterpret_cast<uint64_t>(mtlSwapchain->commandBuffer), framebuffer, renderPass, width, height, r, g, b, a, depth, stencil);
+    if (commandEncoder == 0)
+        return 0;
 
-    mtlRenderPass.colorAttachments[0].clearColor = MTLClearColorMake(r, g, b, a);
-    mtlRenderPass.depthAttachment.clearDepth = depth;
-    mtlRenderPass.stencilAttachment.clearStencil = stencil;
-
-    mtlSwapchain->commandEncoder = [mtlSwapchain->commandBuffer renderCommandEncoderWithDescriptor:mtlRenderPass];
-
-    MTLViewport vp;
-    vp.originX = 0;
-    vp.originY = 0;
-    vp.width = width;
-    vp.height = height;
-    vp.znear = 0.0f;
-    vp.zfar = 1.0f;
-    [mtlSwapchain->commandEncoder setViewport:vp];
-
-    MTLScissorRect rect;
-    rect.x = 0;
-    rect.y = 0;
-    rect.width = width;
-    rect.height = height;
-    [mtlSwapchain->commandEncoder setScissorRect:rect];
+    mtlSwapchain->commandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
 
     return reinterpret_cast<uint64_t>(mtlSwapchain);
 }
@@ -114,6 +92,29 @@ void xxEndRenderPassMetal2(uint64_t commandEncoder, uint64_t framebuffer, uint64
     mtlSwapchain->commandEncoder = nil;
 }
 //==============================================================================
+//  Sampler
+//==============================================================================
+uint64_t xxCreateSamplerMetal2(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy)
+{
+    id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
+    if (mtlDevice == nil)
+        return 0;
+
+    MTLSamplerDescriptor* desc = [classMTLSamplerDescriptor new];
+    desc.sAddressMode = clampU ? MTLSamplerAddressModeClampToEdge : MTLSamplerAddressModeRepeat;
+    desc.tAddressMode = clampV ? MTLSamplerAddressModeClampToEdge : MTLSamplerAddressModeRepeat;
+    desc.rAddressMode = clampW ? MTLSamplerAddressModeClampToEdge : MTLSamplerAddressModeRepeat;
+    desc.magFilter = linearMag ? MTLSamplerMinMagFilterLinear : MTLSamplerMinMagFilterNearest;
+    desc.minFilter = linearMin ? MTLSamplerMinMagFilterLinear : MTLSamplerMinMagFilterNearest;
+    desc.mipFilter = linearMip ? MTLSamplerMipFilterLinear : MTLSamplerMipFilterNearest;
+    desc.maxAnisotropy = anisotropy;
+    desc.supportArgumentBuffers = YES;
+
+    id <MTLSamplerState> sampler = [mtlDevice newSamplerStateWithDescriptor:desc];
+
+    return reinterpret_cast<uint64_t>((__bridge_retained void*)sampler);
+}
+//==============================================================================
 //  Shader
 //==============================================================================
 static const char* const defaultShaderCode =
@@ -122,7 +123,7 @@ using namespace metal;
 
 struct Uniforms
 {
-    float4x4 projectionMatrix;
+    device float4x4* projectionMatrix [[id(0)]];
 };
 
 struct VertexIn
@@ -141,20 +142,20 @@ struct VertexOut
 
 struct TextureSampler
 {
-    texture2d<float> tex;
-    sampler sam;
+    texture2d<float> tex [[id(6)]];
+    sampler sam          [[id(18)]];
 };
 
 vertex VertexOut VSMain(VertexIn in [[stage_in]], constant Uniforms& uniforms [[buffer(0)]])
 {
     VertexOut out;
-    out.position = uniforms.projectionMatrix * float4(in.position, 1);
+    out.position = uniforms.projectionMatrix[0] * float4(in.position, 1);
     out.color = in.color;
     out.uv = in.uv;
     return out;
 }
 
-fragment float4 FSMain(VertexOut in [[stage_in]], constant TextureSampler& textureSampler [[buffer(1)]])
+fragment float4 FSMain(VertexOut in [[stage_in]], constant TextureSampler& textureSampler [[buffer(0)]])
 {
     return in.color * textureSampler.tex.sample(textureSampler.sam, in.uv);
 })";
@@ -217,6 +218,29 @@ uint64_t xxCreateFragmentShaderMetal2(uint64_t device, const char* shader)
     return reinterpret_cast<uint64_t>((__bridge_retained void*)function);
 }
 //==============================================================================
+//  Pipeline
+//==============================================================================
+uint64_t xxCreatePipelineMetal2(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+{
+    uint64_t pipeline = xxCreatePipelineMetal(device, renderPass, blendState, depthStencilState, rasterizerState, vertexAttribute, vertexShader, fragmentShader);
+    if (pipeline == 0)
+        return 0;
+    MTLPIPELINE* mtlPipeline = reinterpret_cast<MTLPIPELINE*>(pipeline);
+    id <MTLFunction> mtlVertexShader = (__bridge id)reinterpret_cast<void*>(vertexShader);
+    id <MTLFunction> mtlFragmentShader = (__bridge id)reinterpret_cast<void*>(fragmentShader);
+
+    mtlPipeline->vertexShader = mtlVertexShader;
+    mtlPipeline->fragmentShader = mtlFragmentShader;
+    mtlPipeline->vertexArgumentEncoder = [mtlPipeline->vertexShader newArgumentEncoderWithBufferIndex:0];
+    mtlPipeline->fragmentArgumentEncoder = [mtlPipeline->fragmentShader newArgumentEncoderWithBufferIndex:0];
+    mtlPipeline->vertexArgumentEncodedLength = [mtlPipeline->vertexArgumentEncoder encodedLength];
+    mtlPipeline->fragmentArgumentEncodedLength = [mtlPipeline->fragmentArgumentEncoder encodedLength];
+    mtlPipeline->vertexArgumentEncodedLength = (mtlPipeline->vertexArgumentEncodedLength + 255) & ~255;
+    mtlPipeline->fragmentArgumentEncodedLength = (mtlPipeline->fragmentArgumentEncodedLength + 255) & ~255;
+
+    return pipeline;
+}
+//==============================================================================
 //  Command
 //==============================================================================
 void xxSetViewportMetal2(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ)
@@ -253,8 +277,36 @@ void xxSetPipelineMetal2(uint64_t commandEncoder, uint64_t pipeline)
     [mtlSwapchain->commandEncoder setRenderPipelineState:mtlPipeline->pipeline];
     [mtlSwapchain->commandEncoder setDepthStencilState:mtlPipeline->depthStencil];
 
-    mtlSwapchain->vertexArgumentEncoder = [mtlPipeline->vertexShader newArgumentEncoderWithBufferIndex:1];
-    mtlSwapchain->fragmentArgumentEncoder = [mtlPipeline->fragmentShader newArgumentEncoderWithBufferIndex:1];
+    NSUInteger vertexLength = mtlPipeline->vertexArgumentEncodedLength;
+    NSUInteger fragmentLength = mtlPipeline->fragmentArgumentEncodedLength;
+    NSUInteger requestLength = vertexLength + fragmentLength;
+    NSUInteger vertexOffset = mtlSwapchain->argumentBufferStep * requestLength;
+    NSUInteger fragmentOffset = vertexOffset + vertexLength;
+    NSUInteger capacityLength = fragmentOffset + fragmentLength;
+
+    int argumentBufferIndex = mtlSwapchain->argumentBufferIndex = (mtlSwapchain->argumentBufferIndex + 1) % xxCountOf(mtlSwapchain->argumentBuffers);
+    id <MTLBuffer> argumentBuffer = mtlSwapchain->argumentBuffers[argumentBufferIndex];
+    if (argumentBuffer == nil || [argumentBuffer length] < capacityLength)
+    {
+        argumentBuffer = mtlSwapchain->argumentBuffers[argumentBufferIndex] = [[mtlSwapchain->commandQueue device] newBufferWithLength:capacityLength * 2
+                                                                                                                               options:MTLResourceStorageModeShared];
+    }
+
+    mtlSwapchain->vertexArgumentEncoder = mtlPipeline->vertexArgumentEncoder;
+    mtlSwapchain->fragmentArgumentEncoder = mtlPipeline->fragmentArgumentEncoder;
+    [mtlSwapchain->vertexArgumentEncoder setArgumentBuffer:argumentBuffer
+                                                    offset:vertexOffset];
+    [mtlSwapchain->fragmentArgumentEncoder setArgumentBuffer:argumentBuffer
+                                                      offset:fragmentOffset];
+
+    [mtlSwapchain->commandEncoder setVertexBuffer:argumentBuffer
+                                           offset:vertexOffset
+                                          atIndex:0];
+    [mtlSwapchain->commandEncoder setFragmentBuffer:argumentBuffer
+                                             offset:fragmentOffset
+                                            atIndex:0];
+
+    mtlSwapchain->argumentBufferStep++;
 }
 //------------------------------------------------------------------------------
 void xxSetIndexBufferMetal2(uint64_t commandEncoder, uint64_t buffer)
@@ -290,8 +342,11 @@ void xxSetVertexTexturesMetal2(uint64_t commandEncoder, int count, const uint64_
         mtlTextures[i] = mtlTexture->texture;
     }
 
-    [mtlSwapchain->commandEncoder setVertexTextures:mtlTextures
-                                          withRange:NSMakeRange(0, count)];
+    [mtlSwapchain->vertexArgumentEncoder setTextures:mtlTextures
+                                           withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_SAMPLER, count)];
+    [mtlSwapchain->commandEncoder useResources:mtlTextures
+                                         count:count
+                                        usage:MTLResourceUsageSample];
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentTexturesMetal2(uint64_t commandEncoder, int count, const uint64_t* textures)
@@ -305,8 +360,11 @@ void xxSetFragmentTexturesMetal2(uint64_t commandEncoder, int count, const uint6
         mtlTextures[i] = mtlTexture->texture;
     }
 
-    [mtlSwapchain->commandEncoder setFragmentTextures:mtlTextures
-                                            withRange:NSMakeRange(0, count)];
+    [mtlSwapchain->fragmentArgumentEncoder setTextures:mtlTextures
+                                             withRange:NSMakeRange(xxGraphicDescriptor::FRAGMENT_TEXTURE, count)];
+    [mtlSwapchain->commandEncoder useResources:mtlTextures
+                                         count:count
+                                        usage:MTLResourceUsageSample];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersMetal2(uint64_t commandEncoder, int count, const uint64_t* samplers)
@@ -319,8 +377,8 @@ void xxSetVertexSamplersMetal2(uint64_t commandEncoder, int count, const uint64_
         mtlSamplers[i] = (__bridge id)reinterpret_cast<void*>(samplers[i]);
     }
 
-    [mtlSwapchain->commandEncoder setVertexSamplerStates:mtlSamplers
-                                               withRange:NSMakeRange(0, count)];
+    [mtlSwapchain->vertexArgumentEncoder setSamplerStates:mtlSamplers
+                                                withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_SAMPLER, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentSamplersMetal2(uint64_t commandEncoder, int count, const uint64_t* samplers)
@@ -333,8 +391,8 @@ void xxSetFragmentSamplersMetal2(uint64_t commandEncoder, int count, const uint6
         mtlSamplers[i] = (__bridge id)reinterpret_cast<void*>(samplers[i]);
     }
 
-    [mtlSwapchain->commandEncoder setFragmentSamplerStates:mtlSamplers
-                                                 withRange:NSMakeRange(0, count)];
+    [mtlSwapchain->fragmentArgumentEncoder setSamplerStates:mtlSamplers
+                                                  withRange:NSMakeRange(xxGraphicDescriptor::FRAGMENT_SAMPLER, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferMetal2(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
@@ -342,9 +400,11 @@ void xxSetVertexConstantBufferMetal2(uint64_t commandEncoder, uint64_t buffer, u
     MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(commandEncoder);
     id <MTLBuffer> mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);
 
-    [mtlSwapchain->commandEncoder setVertexBuffer:mtlBuffer
-                                           offset:0
-                                          atIndex:0];
+    [mtlSwapchain->vertexArgumentEncoder setBuffer:mtlBuffer
+                                            offset:0
+                                           atIndex:xxGraphicDescriptor::VERTEX_UNIFORM];
+    [mtlSwapchain->commandEncoder useResource:mtlBuffer
+                                        usage:MTLResourceUsageRead];
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferMetal2(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
@@ -352,9 +412,11 @@ void xxSetFragmentConstantBufferMetal2(uint64_t commandEncoder, uint64_t buffer,
     MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(commandEncoder);
     id <MTLBuffer> mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);
 
-    [mtlSwapchain->commandEncoder setFragmentBuffer:mtlBuffer
-                                             offset:0
-                                            atIndex:0];
+    [mtlSwapchain->fragmentArgumentEncoder setBuffer:mtlBuffer
+                                              offset:0
+                                             atIndex:xxGraphicDescriptor::FRAGMENT_UNIFORM];
+    [mtlSwapchain->commandEncoder useResource:mtlBuffer
+                                        usage:MTLResourceUsageRead];
 }
 //------------------------------------------------------------------------------
 void xxDrawIndexedMetal2(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
