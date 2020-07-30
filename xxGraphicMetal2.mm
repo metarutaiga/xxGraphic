@@ -59,12 +59,17 @@ const char* xxGetDeviceNameMetal2()
 //==============================================================================
 uint64_t xxGetCommandBufferMetal2(uint64_t device, uint64_t swapchain)
 {
+    uint64_t commandBuffer = xxGetCommandBufferMetal(device, swapchain);
+    if (commandBuffer == 0)
+        return 0;
+
     MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(swapchain);
 
-    id <MTLCommandBuffer> commandBuffer = [mtlSwapchain->commandQueue commandBuffer];
-    mtlSwapchain->commandBuffer = commandBuffer;
-
+    mtlSwapchain->commandEncoder = nil;
+    mtlSwapchain->argumentBufferIndex = (mtlSwapchain->argumentBufferIndex + 1) % xxCountOf(mtlSwapchain->argumentBuffers);
     mtlSwapchain->argumentBufferStep = 0;
+    mtlSwapchain->vertexArgumentEncoder = nil;
+    mtlSwapchain->fragmentArgumentEncoder = nil;
 
     return reinterpret_cast<uint64_t>(mtlSwapchain);
 }
@@ -225,6 +230,7 @@ uint64_t xxCreatePipelineMetal2(uint64_t device, uint64_t renderPass, uint64_t b
     uint64_t pipeline = xxCreatePipelineMetal(device, renderPass, blendState, depthStencilState, rasterizerState, vertexAttribute, vertexShader, fragmentShader);
     if (pipeline == 0)
         return 0;
+
     MTLPIPELINE* mtlPipeline = reinterpret_cast<MTLPIPELINE*>(pipeline);
     id <MTLFunction> mtlVertexShader = (__bridge id)reinterpret_cast<void*>(vertexShader);
     id <MTLFunction> mtlFragmentShader = (__bridge id)reinterpret_cast<void*>(fragmentShader);
@@ -284,13 +290,14 @@ void xxSetPipelineMetal2(uint64_t commandEncoder, uint64_t pipeline)
     NSUInteger fragmentOffset = vertexOffset + vertexLength;
     NSUInteger capacityLength = fragmentOffset + fragmentLength;
 
-    int argumentBufferIndex = mtlSwapchain->argumentBufferIndex = (mtlSwapchain->argumentBufferIndex + 1) % xxCountOf(mtlSwapchain->argumentBuffers);
+    int argumentBufferIndex = mtlSwapchain->argumentBufferIndex;
     id <MTLBuffer> argumentBuffer = mtlSwapchain->argumentBuffers[argumentBufferIndex];
     if (argumentBuffer == nil || [argumentBuffer length] < capacityLength)
     {
         argumentBuffer = mtlSwapchain->argumentBuffers[argumentBufferIndex] = [[mtlSwapchain->commandQueue device] newBufferWithLength:capacityLength * 2
                                                                                                                                options:MTLResourceStorageModeShared];
     }
+    mtlSwapchain->argumentBufferStep++;
 
     mtlSwapchain->vertexArgumentEncoder = mtlPipeline->vertexArgumentEncoder;
     mtlSwapchain->fragmentArgumentEncoder = mtlPipeline->fragmentArgumentEncoder;
@@ -305,8 +312,6 @@ void xxSetPipelineMetal2(uint64_t commandEncoder, uint64_t pipeline)
     [mtlSwapchain->commandEncoder setFragmentBuffer:argumentBuffer
                                              offset:fragmentOffset
                                             atIndex:0];
-
-    mtlSwapchain->argumentBufferStep++;
 }
 //------------------------------------------------------------------------------
 void xxSetIndexBufferMetal2(uint64_t commandEncoder, uint64_t buffer)

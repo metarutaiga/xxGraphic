@@ -22,17 +22,14 @@
 #undef MTLCreateSystemDefaultDevice
 #undef MTLCopyAllDevices
 
-extern void*                        g_metalLibrary;
-extern id <MTLDevice> __nullable    (*MTLCreateSystemDefaultDevice)();
-extern void*                        (*MTLCopyAllDevices)();
-extern Class                        classMTLCompileOptions;
-extern Class                        classMTLDepthStencilDescriptor;
-extern Class                        classMTLRenderPassDescriptor;
-extern Class                        classMTLRenderPipelineColorAttachmentDescriptor;
-extern Class                        classMTLRenderPipelineDescriptor;
-extern Class                        classMTLSamplerDescriptor;
-extern Class                        classMTLTextureDescriptor;
-extern Class                        classMTLVertexDescriptor;
+extern Class classMTLCompileOptions;
+extern Class classMTLDepthStencilDescriptor;
+extern Class classMTLRenderPassDescriptor;
+extern Class classMTLRenderPipelineColorAttachmentDescriptor;
+extern Class classMTLRenderPipelineDescriptor;
+extern Class classMTLSamplerDescriptor;
+extern Class classMTLTextureDescriptor;
+extern Class classMTLVertexDescriptor;
 
 //==============================================================================
 //  Framebuffer

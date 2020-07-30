@@ -8,17 +8,18 @@
 #include "internal/xxGraphicInternalMetal.h"
 #include "xxGraphicMetal.h"
 
-void*                       g_metalLibrary = nullptr;
-id <MTLDevice> __nullable   (*MTLCreateSystemDefaultDevice)() = nullptr;
-void*                       (*MTLCopyAllDevices)() = nullptr;
-Class                       classMTLCompileOptions = nil;
-Class                       classMTLDepthStencilDescriptor = nil;
-Class                       classMTLRenderPassDescriptor = nil;
-Class                       classMTLRenderPipelineColorAttachmentDescriptor = nil;
-Class                       classMTLRenderPipelineDescriptor = nil;
-Class                       classMTLSamplerDescriptor = nil;
-Class                       classMTLTextureDescriptor = nil;
-Class                       classMTLVertexDescriptor = nil;
+Class                   classMTLCompileOptions = nil;
+Class                   classMTLDepthStencilDescriptor = nil;
+Class                   classMTLRenderPassDescriptor = nil;
+Class                   classMTLRenderPipelineColorAttachmentDescriptor = nil;
+Class                   classMTLRenderPipelineDescriptor = nil;
+Class                   classMTLSamplerDescriptor = nil;
+Class                   classMTLTextureDescriptor = nil;
+Class                   classMTLVertexDescriptor = nil;
+
+static void*            g_metalLibrary = nullptr;
+static id <MTLDevice>   (*MTLCreateSystemDefaultDevice)() = nullptr;
+static void*            (*MTLCopyAllDevices)() = nullptr;
 
 //==============================================================================
 //  Instance
