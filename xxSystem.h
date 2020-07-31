@@ -21,20 +21,30 @@
 #include <float.h>
 #include <math.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
+#if defined(__ARM_NEON__) || defined(__ARM_NEON) || defined(_M_ARM) || defined(_M_ARM64)
+#   include <arm_neon.h>
+#elif defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
+#   include <immintrin.h>
+#   if defined(__GNUC__) || defined(__llvm__)
+#       define _mm_shuffle1_ps(v,i) _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(v), i))
+#   else
+#       define _mm_shuffle1_ps(v,i) _mm_shuffle_ps(v, v, i)
+#   endif
+#endif
+
 #if defined(__APPLE__)
 #   include <TargetConditionals.h>
 #   if TARGET_OS_IPHONE
 #       define xxIOS 1
-#   elif TARGET_OS_OSX
-#       if defined(__i386__) || defined(__amd64__)
-#           include <xmmintrin.h>
-#       endif
+#   endif
+#   if TARGET_OS_OSX
 #       define xxMACOS 1
 #   endif
 #   if TARGET_OS_MACCATALYST
@@ -84,22 +94,6 @@
 #   define xxWINDOWS 1
 #endif
 
-#if defined(__llvm__)
-#   if __has_feature(address_sanitizer)
-#       if defined(_M_AMD64)
-#           pragma comment(lib, "clang_rt.asan_dynamic-x86_64")
-#           pragma comment(lib, "clang_rt.asan_dynamic_runtime_thunk-x86_64")
-#       elif defined(_M_IX86)
-#           pragma comment(lib, "clang_rt.asan_dynamic-i386")
-#           pragma comment(lib, "clang_rt.asan_dynamic_runtime_thunk-i386")
-#       endif
-#   endif
-#endif
-
-#if !defined(__cplusplus)
-#   include <stdbool.h>
-#endif
-
 #ifndef nullptr
 #   if defined(__cplusplus)
 #   else
@@ -135,7 +129,7 @@
 #   endif
 #endif
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) || defined(__llvm__)
 #   define xxLikely(x)              __builtin_expect((x), 1)
 #   define xxUnlikely(x)            __builtin_expect((x), 0)
 #else
@@ -147,7 +141,7 @@
 #   define xxInline                 inline
 #   define xxConstexpr              constexpr
 #   define xxDefaultArgument(value) = value
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) || defined(__llvm__)
 #   define xxInline                 __inline__
 #   define xxConstexpr              const
 #   define xxDefaultArgument(value)
@@ -166,14 +160,8 @@
 
 #define xxLocalBreak()              switch (0) case 0:
 
-#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
-#   include <emmintrin.h>
-#   if defined(__llvm__)
-#       define _mm_shuffle1_ps(v,i) _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(v), i))
-#   else
-#       define _mm_shuffle1_ps(v,i) _mm_shuffle_ps(v, v, i)
-#   endif
-#endif
+#define xxStringify_(v)             #v
+#define xxStringify(v)              xxStringify_(v)
 
 //==============================================================================
 //  OS Dependency

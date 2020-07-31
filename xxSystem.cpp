@@ -275,7 +275,7 @@ int xxGetIncrementThreadId()
     if (xxUnlikely(threadId == 0))
     {
         static int increment = 0;
-#if defined(__GNUC__)
+#if defined(__GNUC__) || defined(__llvm__)
         threadId = __sync_fetch_and_add(&increment, 1);
 #elif defined(_MSC_VER)
         threadId = _InterlockedIncrement((long*)&increment);
