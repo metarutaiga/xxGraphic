@@ -443,6 +443,16 @@ uint64_t xxCreateTextureGLES2(uint64_t device, int format, unsigned int width, u
     glTexture->external = external;
     glTexture->image = nullptr;
 
+    GLuint externalTexture = static_cast<GLuint>(reinterpret_cast<size_t>(external));
+    if (glIsTexture(externalTexture))
+    {
+        glDeleteTextures(1, &texture);
+        glTexture->texture = externalTexture;
+        glTexture->type = GL_TEXTURE_2D;
+        glTexture->external = external;
+        external = nullptr;
+    }
+
     if (external)
     {
 #if defined(xxANDROID)
@@ -482,6 +492,12 @@ void xxDestroyTextureGLES2(uint64_t texture)
     if (glTexture == nullptr)
         return;
 
+    GLuint externalTexture = static_cast<GLuint>(reinterpret_cast<size_t>(glTexture->external));
+    if (glTexture->texture == externalTexture)
+    {
+        glTexture->texture = 0;
+    }
+
 #if defined(xxANDROID)
     if (glTexture->image)
     {
@@ -489,7 +505,10 @@ void xxDestroyTextureGLES2(uint64_t texture)
     }
 #endif
 
-    glDeleteTextures(1, &glTexture->texture);
+    if (glTexture->texture)
+    {
+        glDeleteTextures(1, &glTexture->texture);
+    }
     xxFree(glTexture->memory);
     delete glTexture;
 }
