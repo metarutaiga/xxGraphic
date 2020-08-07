@@ -102,10 +102,18 @@
 #endif
 
 #ifndef xxEXTERN
-#   if defined(__cplusplus)
-#       define xxEXTERN             extern "C"
+#   if defined(_MSC_VER)
+#       if defined(__cplusplus)
+#           define xxEXTERN         extern "C"
+#       else
+#           define xxEXTERN         extern
+#       endif
 #   else
-#       define xxEXTERN             extern
+#       if defined(__cplusplus)
+#           define xxEXTERN         __attribute__((visibility("default"))) extern "C"
+#       else
+#           define xxEXTERN         __attribute__((visibility("default"))) extern
+#       endif
 #   endif
 #endif
 
@@ -125,7 +133,7 @@
 #   elif defined(_MSC_VER)
 #       define xxCPPAPI             __declspec(dllimport)
 #   else
-#       define xxCPPAPI
+#       define xxCPPAPI             __attribute__((visibility("default")))
 #   endif
 #endif
 
@@ -174,10 +182,10 @@
 //  OS Dependency
 //==============================================================================
 #if defined(xxANDROID)
-extern struct _JavaVM* xxAndroidJavaVM;
-extern struct _JNIEnv* xxAndroidJNIEnv;
-extern class _jobject* xxAndroidContext;
-extern int xxAndroidJNIVersion;
+xxEXTERN struct _JavaVM* xxAndroidJavaVM;
+xxEXTERN struct _JNIEnv* xxAndroidJNIEnv;
+xxEXTERN class _jobject* xxAndroidContext;
+xxEXTERN int xxAndroidJNIVersion;
 #endif
 //==============================================================================
 //  Allocator

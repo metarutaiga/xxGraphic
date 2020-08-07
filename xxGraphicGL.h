@@ -29,11 +29,11 @@
 #define GL_UNSIGNED_INT_8_8_8_8_REV       0x8367
 #endif /* GL_UNSIGNED_INT_8_8_8_8_REV */
 
-#ifndef GL_EXPORT
-#   if defined(__GNUC__) || defined(__llvm__)
-#       define GLEXPORT extern __attribute__((visibility("hidden")))
-#   else
+#ifndef GLEXPORT
+#   if defined(_MSC_VER)
 #       define GLEXPORT extern
+#   else
+#       define GLEXPORT extern __attribute__((visibility("hidden")))
 #   endif
 #endif
 
