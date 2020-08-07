@@ -761,7 +761,7 @@ void xxDestroyPipelineMetal(uint64_t pipeline)
 //==============================================================================
 void xxSetViewportMetal(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ)
 {
-    id <MTLRenderCommandEncoder> mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
+    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
 
     MTLViewport vp;
     vp.originX = x;
@@ -775,7 +775,7 @@ void xxSetViewportMetal(uint64_t commandEncoder, int x, int y, int width, int he
 //------------------------------------------------------------------------------
 void xxSetScissorMetal(uint64_t commandEncoder, int x, int y, int width, int height)
 {
-    id <MTLRenderCommandEncoder> mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
+    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
 
     MTLScissorRect rect;
     rect.x = x;
@@ -787,7 +787,7 @@ void xxSetScissorMetal(uint64_t commandEncoder, int x, int y, int width, int hei
 //------------------------------------------------------------------------------
 void xxSetPipelineMetal(uint64_t commandEncoder, uint64_t pipeline)
 {
-    id <MTLRenderCommandEncoder> mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
+    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
     MTLPIPELINE* mtlPipeline = reinterpret_cast<MTLPIPELINE*>(pipeline);
 
     [mtlCommandEncoder setRenderPipelineState:mtlPipeline->pipeline];
@@ -801,8 +801,8 @@ void xxSetIndexBufferMetal(uint64_t commandEncoder, uint64_t buffer)
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersMetal(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
-    id <MTLRenderCommandEncoder> mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    id <MTLBuffer> mtlBuffers[8];
+    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
+    id <MTLBuffer> __unsafe_unretained mtlBuffers[8];
     NSUInteger offsets[8];
 
     for (int i = 0; i < count; ++i)
@@ -818,8 +818,8 @@ void xxSetVertexBuffersMetal(uint64_t commandEncoder, int count, const uint64_t*
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesMetal(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
-    id <MTLRenderCommandEncoder> mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    id <MTLTexture> mtlTextures[8];
+    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
+    id <MTLTexture> __unsafe_unretained mtlTextures[8];
 
     for (int i = 0; i < count; ++i)
     {
@@ -833,8 +833,8 @@ void xxSetVertexTexturesMetal(uint64_t commandEncoder, int count, const uint64_t
 //------------------------------------------------------------------------------
 void xxSetFragmentTexturesMetal(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
-    id <MTLRenderCommandEncoder> mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    id <MTLTexture> mtlTextures[8];
+    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
+    id <MTLTexture> __unsafe_unretained mtlTextures[8];
 
     for (int i = 0; i < count; ++i)
     {
@@ -848,8 +848,8 @@ void xxSetFragmentTexturesMetal(uint64_t commandEncoder, int count, const uint64
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersMetal(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
-    id <MTLRenderCommandEncoder> mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    id <MTLSamplerState> mtlSamplers[8];
+    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
+    id <MTLSamplerState> __unsafe_unretained mtlSamplers[8];
 
     for (int i = 0; i < count; ++i)
     {
@@ -862,8 +862,8 @@ void xxSetVertexSamplersMetal(uint64_t commandEncoder, int count, const uint64_t
 //------------------------------------------------------------------------------
 void xxSetFragmentSamplersMetal(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
-    id <MTLRenderCommandEncoder> mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    id <MTLSamplerState> mtlSamplers[8];
+    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
+    id <MTLSamplerState> __unsafe_unretained mtlSamplers[8];
 
     for (int i = 0; i < count; ++i)
     {
@@ -876,8 +876,8 @@ void xxSetFragmentSamplersMetal(uint64_t commandEncoder, int count, const uint64
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
 {
-    id <MTLRenderCommandEncoder> mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    id <MTLBuffer> mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);
+    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
+    id <MTLBuffer> __unsafe_unretained mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);
 
     [mtlCommandEncoder setVertexBuffer:mtlBuffer
                                 offset:0
@@ -886,8 +886,8 @@ void xxSetVertexConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, un
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
 {
-    id <MTLRenderCommandEncoder> mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    id <MTLBuffer> mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);
+    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
+    id <MTLBuffer> __unsafe_unretained mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);
 
     [mtlCommandEncoder setFragmentBuffer:mtlBuffer
                                   offset:0
@@ -896,8 +896,8 @@ void xxSetFragmentConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, 
 //------------------------------------------------------------------------------
 void xxDrawIndexedMetal(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
-    id <MTLRenderCommandEncoder> mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    id <MTLBuffer> mtlIndexBuffer = (__bridge id)reinterpret_cast<void*>(indexBuffer);
+    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
+    id <MTLBuffer> __unsafe_unretained mtlIndexBuffer = (__bridge id)reinterpret_cast<void*>(indexBuffer);
 
     MTLIndexType indexType = (INDEX_BUFFER_WIDTH == /* DISABLES CODE */(2)) ? MTLIndexTypeUInt16 : MTLIndexTypeUInt32;
     [mtlCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
