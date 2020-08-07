@@ -332,7 +332,7 @@ uint64_t xxCreateSwapchainMantle(uint64_t device, uint64_t renderPass, void* vie
     SWAPCHAINGR* grOldSwapchain = reinterpret_cast<SWAPCHAINGR*>(oldSwapchain);
     if (grOldSwapchain && grOldSwapchain->view == view && grOldSwapchain->width == width && grOldSwapchain->height == height)
         return oldSwapchain;
-    SWAPCHAINGR* grSwapchain = new SWAPCHAINGR;
+    SWAPCHAINGR* grSwapchain = xxAlloc(SWAPCHAINGR, 1);
     if (grSwapchain == nullptr)
         return 0;
 
@@ -421,7 +421,7 @@ void xxDestroySwapchainMantle(uint64_t swapchain)
     if (grSwapchain == nullptr)
         return;
 
-    delete grSwapchain;
+    xxFree(grSwapchain);
 }
 //------------------------------------------------------------------------------
 void xxPresentSwapchainMantle(uint64_t swapchain)
@@ -568,7 +568,7 @@ struct VERTEXATTRIBUTEGR
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeMantle(uint64_t device, int count, int* attribute)
 {
-    VERTEXATTRIBUTEGR* grVertexAttribute = new VERTEXATTRIBUTEGR;
+    VERTEXATTRIBUTEGR* grVertexAttribute = xxAlloc(VERTEXATTRIBUTEGR, 1);
     if (grVertexAttribute == nullptr)
         return 0;
 
@@ -629,7 +629,7 @@ void xxDestroyVertexAttributeMantle(uint64_t vertexAttribute)
 {
     VERTEXATTRIBUTEGR* grVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEGR*>(vertexAttribute);
 
-    delete grVertexAttribute;
+    xxFree(grVertexAttribute);
 }
 //==============================================================================
 //  Buffer

@@ -811,7 +811,7 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
     SWAPCHAINVK* vkOldSwapchain = reinterpret_cast<SWAPCHAINVK*>(oldSwapchain);
     if (vkOldSwapchain && vkOldSwapchain->view == view && vkOldSwapchain->width == width && vkOldSwapchain->height == height)
         return oldSwapchain;
-    SWAPCHAINVK* vkSwapchain = new SWAPCHAINVK;
+    SWAPCHAINVK* vkSwapchain = xxAlloc(SWAPCHAINVK);
     if (vkSwapchain == nullptr)
         return 0;
     memset(vkSwapchain, 0, sizeof(SWAPCHAINVK));
@@ -1145,7 +1145,7 @@ void xxDestroySwapchainVulkan(uint64_t swapchain)
     if (vkSwapchain->surface)
         vkDestroySurfaceKHR(g_instance, vkSwapchain->surface, g_callbacks);
 
-    delete vkSwapchain;
+    xxFree(vkSwapchain);
 }
 //------------------------------------------------------------------------------
 void xxPresentSwapchainVulkan(uint64_t swapchain)
@@ -1436,7 +1436,7 @@ struct VERTEXATTRIBUTEVK
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeVulkan(uint64_t device, int count, int* attribute)
 {
-    VERTEXATTRIBUTEVK* vkVertexAttribute = new VERTEXATTRIBUTEVK;
+    VERTEXATTRIBUTEVK* vkVertexAttribute = xxAlloc(VERTEXATTRIBUTEVK);
     if (vkVertexAttribute == nullptr)
         return 0;
     memset(vkVertexAttribute, 0, sizeof(VERTEXATTRIBUTEVK));
@@ -1500,7 +1500,7 @@ void xxDestroyVertexAttributeVulkan(uint64_t vertexAttribute)
     if (vkVertexAttribute == nullptr)
         return;
 
-    delete vkVertexAttribute;
+    xxFree(vkVertexAttribute);
 }
 //==============================================================================
 //  Buffer
@@ -1519,7 +1519,7 @@ uint64_t xxCreateConstantBufferVulkan(uint64_t device, unsigned int size)
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
 
-    BUFFERVK* vkBuffer = new BUFFERVK;
+    BUFFERVK* vkBuffer = xxAlloc(BUFFERVK);
     if (vkBuffer == nullptr)
         return 0;
     memset(vkBuffer, 0, sizeof(BUFFERVK));
@@ -1597,7 +1597,7 @@ uint64_t xxCreateIndexBufferVulkan(uint64_t device, unsigned int size)
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
 
-    BUFFERVK* vkBuffer = new BUFFERVK;
+    BUFFERVK* vkBuffer = xxAlloc(BUFFERVK);
     if (vkBuffer == nullptr)
         return 0;
     memset(vkBuffer, 0, sizeof(BUFFERVK));
@@ -1675,7 +1675,7 @@ uint64_t xxCreateVertexBufferVulkan(uint64_t device, unsigned int size, uint64_t
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
 
-    BUFFERVK* vkBuffer = new BUFFERVK;
+    BUFFERVK* vkBuffer = xxAlloc(BUFFERVK);
     if (vkBuffer == nullptr)
         return 0;
     memset(vkBuffer, 0, sizeof(BUFFERVK));
@@ -1762,7 +1762,8 @@ void xxDestroyBufferVulkan(uint64_t device, uint64_t buffer)
         vkDestroyBuffer(vkDevice, vkBuffer->buffer, g_callbacks);
     if (vkBuffer->memory)
         vkFreeMemory(vkDevice, vkBuffer->memory, g_callbacks);
-    delete vkBuffer;
+
+    xxFree(vkBuffer);
 }
 //------------------------------------------------------------------------------
 void* xxMapBufferVulkan(uint64_t device, uint64_t buffer)
@@ -1827,7 +1828,7 @@ uint64_t xxCreateTextureVulkan(uint64_t device, int format, unsigned int width, 
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
 
-    TEXTUREVK* vkTexture = new TEXTUREVK;
+    TEXTUREVK* vkTexture = xxAlloc(TEXTUREVK);
     if (vkTexture == nullptr)
         return 0;
     memset(vkTexture, 0, sizeof(TEXTUREVK));
@@ -1934,7 +1935,7 @@ void xxDestroyTextureVulkan(uint64_t texture)
     if (vkTexture->uploadMemory != VK_NULL_HANDLE)
         vkFreeMemory(g_device, vkTexture->uploadMemory, g_callbacks);
 
-    delete vkTexture;
+    xxFree(vkTexture);
 }
 //------------------------------------------------------------------------------
 void* xxMapTextureVulkan(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
@@ -2194,7 +2195,7 @@ void xxDestroyShaderVulkan(uint64_t device, uint64_t shader)
 //==============================================================================
 uint64_t xxCreateBlendStateVulkan(uint64_t device, bool blending)
 {
-    VkPipelineColorBlendAttachmentState* blendState = new VkPipelineColorBlendAttachmentState;
+    VkPipelineColorBlendAttachmentState* blendState = xxAlloc(VkPipelineColorBlendAttachmentState);
     if (blendState == nullptr)
         return 0;
     memset(blendState, 0, sizeof(VkPipelineColorBlendAttachmentState));
@@ -2213,7 +2214,7 @@ uint64_t xxCreateBlendStateVulkan(uint64_t device, bool blending)
 //------------------------------------------------------------------------------
 uint64_t xxCreateDepthStencilStateVulkan(uint64_t device, bool depthTest, bool depthWrite)
 {
-    VkPipelineDepthStencilStateCreateInfo* depthStencilState = new VkPipelineDepthStencilStateCreateInfo;
+    VkPipelineDepthStencilStateCreateInfo* depthStencilState = xxAlloc(VkPipelineDepthStencilStateCreateInfo);
     if (depthStencilState == nullptr)
         return 0;
     memset(depthStencilState, 0, sizeof(VkPipelineDepthStencilStateCreateInfo));
@@ -2225,7 +2226,7 @@ uint64_t xxCreateDepthStencilStateVulkan(uint64_t device, bool depthTest, bool d
 //------------------------------------------------------------------------------
 uint64_t xxCreateRasterizerStateVulkan(uint64_t device, bool cull, bool scissor)
 {
-    VkPipelineRasterizationStateCreateInfo* rasterizerState = new VkPipelineRasterizationStateCreateInfo;
+    VkPipelineRasterizationStateCreateInfo* rasterizerState = xxAlloc(VkPipelineRasterizationStateCreateInfo);
     if (rasterizerState == nullptr)
         return 0;
     memset(rasterizerState, 0, sizeof(VkPipelineRasterizationStateCreateInfo));
@@ -2335,21 +2336,21 @@ void xxDestroyBlendStateVulkan(uint64_t blendState)
 {
     VkPipelineColorBlendAttachmentState* vkBlendState = reinterpret_cast<VkPipelineColorBlendAttachmentState*>(blendState);
 
-    delete vkBlendState;
+    xxFree(vkBlendState);
 }
 //------------------------------------------------------------------------------
 void xxDestroyDepthStencilStateVulkan(uint64_t depthStencilState)
 {
     VkPipelineDepthStencilStateCreateInfo* vkDepthStencilState = reinterpret_cast<VkPipelineDepthStencilStateCreateInfo*>(depthStencilState);
 
-    delete vkDepthStencilState;
+    xxFree(vkDepthStencilState);
 }
 //------------------------------------------------------------------------------
 void xxDestroyRasterizerStateVulkan(uint64_t rasterizerState)
 {
     VkPipelineRasterizationStateCreateInfo* vkRasterizerState = reinterpret_cast<VkPipelineRasterizationStateCreateInfo*>(rasterizerState);
 
-    delete vkRasterizerState;
+    xxFree(vkRasterizerState);
 }
 //------------------------------------------------------------------------------
 void xxDestroyPipelineVulkan(uint64_t pipeline)

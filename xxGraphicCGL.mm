@@ -145,7 +145,7 @@ uint64_t glCreateContextCGL(uint64_t instance, void* view, void** display)
 
     if (display)
     {
-        CGLDISPLAY* cglDisplay = new CGLDISPLAY;
+        CGLDISPLAY* cglDisplay = xxAlloc(CGLDISPLAY);
         if (cglDisplay == nullptr)
             return 0;
 
@@ -183,7 +183,7 @@ void glDestroyContextCGL(uint64_t context, void* view, void* display)
         {
             glDeleteVertexArrays(1, &cglDisplay->vao);
         }
-        delete cglDisplay;
+        xxFree(cglDisplay);
     }
 
     [NSOpenGLContext clearCurrentContext];

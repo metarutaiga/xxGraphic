@@ -78,7 +78,7 @@ uint64_t glCreateContextEAGL(uint64_t instance, void* view, void** display)
 
     if (display)
     {
-        EAGLDISPLAY* eaglDisplay = new EAGLDISPLAY;
+        EAGLDISPLAY* eaglDisplay = xxAlloc(EAGLDISPLAY);
         if (eaglDisplay == nullptr)
             return 0;
 
@@ -144,7 +144,7 @@ void glDestroyContextEAGL(uint64_t context, void* view, void* display)
         {
             glDeleteVertexArrays(1, &eaglDisplay->vao);
         }
-        delete eaglDisplay;
+        xxFree(eaglDisplay);
     }
 
     [classEAGLContext setCurrentContext:nil];

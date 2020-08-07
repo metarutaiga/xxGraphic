@@ -122,7 +122,7 @@ uint64_t xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view
     SWAPCHAINGL* glOldSwapchain = reinterpret_cast<SWAPCHAINGL*>(oldSwapchain);
     if (glOldSwapchain && glOldSwapchain->view == view && glOldSwapchain->width == width && glOldSwapchain->height == height)
         return oldSwapchain;
-    SWAPCHAINGL* glSwapchain = new SWAPCHAINGL;
+    SWAPCHAINGL* glSwapchain = xxAlloc(SWAPCHAINGL);
     if (glSwapchain == nullptr)
         return 0;
 
@@ -132,7 +132,7 @@ uint64_t xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view
     uint64_t context = glCreateContext(device, view, &display);
     if (context == 0)
     {
-        delete glSwapchain;
+        xxFree(glSwapchain);
         return 0;
     }
 
@@ -156,7 +156,7 @@ void xxDestroySwapchainGLES2(uint64_t swapchain)
         return;
 
     glDestroyContext(glSwapchain->context, glSwapchain->view, glSwapchain->display);
-    delete glSwapchain;
+    xxFree(glSwapchain);
 }
 //------------------------------------------------------------------------------
 void xxPresentSwapchainGLES2(uint64_t swapchain)
@@ -264,7 +264,7 @@ void xxEndRenderPassGLES2(uint64_t commandEncoder, uint64_t framebuffer, uint64_
 //==============================================================================
 uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, int* attribute)
 {
-    VERTEXATTRIBUTEGL* glVertexAttribute = new VERTEXATTRIBUTEGL;
+    VERTEXATTRIBUTEGL* glVertexAttribute = xxAlloc(VERTEXATTRIBUTEGL);
     if (glVertexAttribute == nullptr)
         return 0;
 
@@ -327,14 +327,14 @@ void xxDestroyVertexAttributeGLES2(uint64_t vertexAttribute)
 {
     VERTEXATTRIBUTEGL* glVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEGL*>(vertexAttribute);
 
-    delete glVertexAttribute;
+    xxFree(glVertexAttribute);
 }
 //==============================================================================
 //  Buffer
 //==============================================================================
 uint64_t xxCreateConstantBufferGLES2(uint64_t device, unsigned int size)
 {
-    BUFFERGL* glBuffer = new BUFFERGL;
+    BUFFERGL* glBuffer = xxAlloc(BUFFERGL);
     if (glBuffer == nullptr)
         return 0;
 
@@ -348,7 +348,7 @@ uint64_t xxCreateConstantBufferGLES2(uint64_t device, unsigned int size)
 //------------------------------------------------------------------------------
 uint64_t xxCreateIndexBufferGLES2(uint64_t device, unsigned int size)
 {
-    BUFFERGL* glBuffer = new BUFFERGL;
+    BUFFERGL* glBuffer = xxAlloc(BUFFERGL);
     if (glBuffer == nullptr)
         return 0;
 
@@ -365,7 +365,7 @@ uint64_t xxCreateIndexBufferGLES2(uint64_t device, unsigned int size)
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexBufferGLES2(uint64_t device, unsigned int size, uint64_t vertexAttribute)
 {
-    BUFFERGL* glBuffer = new BUFFERGL;
+    BUFFERGL* glBuffer = xxAlloc(BUFFERGL);
     if (glBuffer == nullptr)
         return 0;
 
@@ -389,7 +389,7 @@ void xxDestroyBufferGLES2(uint64_t device, uint64_t buffer)
     if (glBuffer->buffer)
         glDeleteBuffers(1, &glBuffer->buffer);
     xxFree(glBuffer->memory);
-    delete glBuffer;
+    xxFree(glBuffer);
 }
 //------------------------------------------------------------------------------
 void* xxMapBufferGLES2(uint64_t device, uint64_t buffer)
@@ -420,7 +420,7 @@ uint64_t xxCreateTextureGLES2(uint64_t device, int format, unsigned int width, u
     if (width == 0 || height == 0 || depth == 0 || mipmap == 0 || array == 0)
         return 0;
 
-    TEXTUREGL* glTexture = new TEXTUREGL;
+    TEXTUREGL* glTexture = xxAlloc(TEXTUREGL);
     if (glTexture == nullptr)
         return 0;
 
@@ -428,7 +428,7 @@ uint64_t xxCreateTextureGLES2(uint64_t device, int format, unsigned int width, u
     glGenTextures(1, &texture);
     if (texture == 0)
     {
-        delete glTexture;
+        xxFree(glTexture);
         return 0;
     }
 
@@ -510,7 +510,7 @@ void xxDestroyTextureGLES2(uint64_t texture)
         glDeleteTextures(1, &glTexture->texture);
     }
     xxFree(glTexture->memory);
-    delete glTexture;
+    xxFree(glTexture);
 }
 //------------------------------------------------------------------------------
 void* xxMapTextureGLES2(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
@@ -748,7 +748,7 @@ uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t bl
     VERTEXATTRIBUTEGL* glVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEGL*>(vertexAttribute);
     if (glVertexAttribute == nullptr)
         return 0;
-    PIPELINEGL* glPipeline = new PIPELINEGL;
+    PIPELINEGL* glPipeline = xxAlloc(PIPELINEGL);
     if (glPipeline == nullptr)
         return 0;
 
@@ -807,7 +807,7 @@ void xxDestroyPipelineGLES2(uint64_t pipeline)
         return;
 
     glDeleteProgram(glPipeline->program);
-    delete glPipeline;
+    xxFree(glPipeline);
 }
 //==============================================================================
 //  Command

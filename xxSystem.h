@@ -163,6 +163,13 @@
 #define xxStringify_(v)             #v
 #define xxStringify(v)              xxStringify_(v)
 
+#define xxConcate_(x, y)            x ## y
+#define xxConcate(m, n)             xxConcate_(m, n)
+
+#define __NUM_ARGS___(_1, _2, _3, _4, _5, _6, _7, _8, total, ...) total
+#define __NUM_ARGS__(...)           __NUM_ARGS___(__VA_ARGS__, 8, 7, 6, 5, 4, 3, 2, 1)
+#define __VA_SELECT__(m, ...)       xxConcate(m, __NUM_ARGS__(__VA_ARGS__))(__VA_ARGS__)
+
 //==============================================================================
 //  OS Dependency
 //==============================================================================
@@ -176,14 +183,17 @@ extern int xxAndroidJNIVersion;
 //  Allocator
 //==============================================================================
 #if INTPTR_MAX == INT64_MAX
-#   define xxAlloc(T, count)        (T*)malloc(sizeof(T) * count)
+#   define xxAllocArray(T, count)   (T*)malloc(sizeof(T) * count)
 #   define xxRealloc(ptr, T, count) (T*)realloc(ptr, sizeof(T) * count)
 #   define xxFree(ptr)              free(ptr)
 #else
-#   define xxAlloc(T, count)        (T*)xxAlignedAlloc(sizeof(T) * count, 16)
+#   define xxAllocArray(T, count)   (T*)xxAlignedAlloc(sizeof(T) * count, 16)
 #   define xxRealloc(ptr, T, count) (T*)xxAlignedRealloc(ptr, sizeof(T) * count, 16)
 #   define xxFree(ptr)              xxAlignedFree(ptr)
 #endif
+#define xxAlloc(...)                __VA_SELECT__(xxAlloc, __VA_ARGS__)
+#define xxAlloc1(_1)                xxAllocArray(_1, 1)
+#define xxAlloc2(_1, _2)            xxAllocArray(_1, _2)
 xxAPI void* xxAlignedAlloc(size_t size, size_t alignment);
 xxAPI void* xxAlignedRealloc(void* ptr, size_t size, size_t alignment);
 xxAPI void xxAlignedFree(void* ptr);
