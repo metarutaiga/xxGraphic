@@ -465,7 +465,7 @@ uint64_t xxCreateSwapchainD3D12(uint64_t device, uint64_t renderPass, void* view
     D3D12SWAPCHAIN* d3dOldSwapchain = reinterpret_cast<D3D12SWAPCHAIN*>(oldSwapchain);
     if (d3dOldSwapchain && d3dOldSwapchain->hWnd == view && d3dOldSwapchain->width == width && d3dOldSwapchain->height == height)
         return oldSwapchain;
-    D3D12SWAPCHAIN* d3dSwapchain = new D3D12SWAPCHAIN;
+    D3D12SWAPCHAIN* d3dSwapchain = xxAlloc(D3D12SWAPCHAIN);
     if (d3dSwapchain == nullptr)
         return 0;
 
@@ -477,14 +477,14 @@ uint64_t xxCreateSwapchainD3D12(uint64_t device, uint64_t renderPass, void* view
         (void*&)CreateDXGIFactory1 = xxGetProcAddress(g_dxgiLibrary, "CreateDXGIFactory1");
         if (CreateDXGIFactory1 == nullptr)
         {
-            delete d3dSwapchain;
+            xxFree(d3dSwapchain);
             return 0;
         }
 
         HRESULT hResult = CreateDXGIFactory1(IID_PPV_ARGS(&g_dxgiFactory));
         if (hResult != S_OK)
         {
-            delete d3dSwapchain;
+            xxFree(d3dSwapchain);
             return 0;
         }
     }
@@ -506,7 +506,7 @@ uint64_t xxCreateSwapchainD3D12(uint64_t device, uint64_t renderPass, void* view
         HRESULT hResult = g_dxgiFactory->CreateSwapChainForHwnd(g_commandQueue, hWnd, &desc, nullptr, nullptr, &dxgiSwapchain1);
         if (hResult != S_OK)
         {
-            delete d3dSwapchain;
+            xxFree(d3dSwapchain);
             return 0;
         }
     }
@@ -518,7 +518,7 @@ uint64_t xxCreateSwapchainD3D12(uint64_t device, uint64_t renderPass, void* view
         if (hResult != S_OK)
         {
             dxgiSwapchain1->Release();
-            delete d3dSwapchain;
+            xxFree(d3dSwapchain);
             return 0;
         }
         dxgiSwapchain1->Release();
@@ -537,7 +537,7 @@ uint64_t xxCreateSwapchainD3D12(uint64_t device, uint64_t renderPass, void* view
         HRESULT hResult = d3dDevice->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&renderTargetHeap));
         if (hResult != S_OK)
         {
-            delete d3dSwapchain;
+            xxFree(d3dSwapchain);
             return 0;
         }
     }
@@ -607,7 +607,7 @@ void xxDestroySwapchainD3D12(uint64_t swapchain)
         SafeRelease(d3dSwapchain->commandAllocators[i]);
     }
     SafeRelease(d3dSwapchain->renderTargetHeap);
-    delete d3dSwapchain;
+    xxFree(d3dSwapchain);
 }
 //------------------------------------------------------------------------------
 void xxPresentSwapchainD3D12(uint64_t swapchain)
@@ -795,7 +795,7 @@ struct D3D12VERTEXATTRIBUTE
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeD3D12(uint64_t device, int count, int* attribute)
 {
-    D3D12VERTEXATTRIBUTE* d3dVertexAttribute = new D3D12VERTEXATTRIBUTE;
+    D3D12VERTEXATTRIBUTE* d3dVertexAttribute = xxAlloc(D3D12VERTEXATTRIBUTE);
     if (d3dVertexAttribute == nullptr)
         return 0;
 
@@ -878,7 +878,7 @@ void xxDestroyVertexAttributeD3D12(uint64_t vertexAttribute)
 {
     D3D12VERTEXATTRIBUTE* d3dVertexAttribute = reinterpret_cast<D3D12VERTEXATTRIBUTE*>(vertexAttribute);
 
-    delete d3dVertexAttribute;
+    xxFree(d3dVertexAttribute);
 }
 //==============================================================================
 //  Buffer
@@ -897,7 +897,7 @@ uint64_t xxCreateConstantBufferD3D12(uint64_t device, unsigned int size)
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
         return 0;
-    D3D12RESOURCE* d3dResource = new D3D12RESOURCE;
+    D3D12RESOURCE* d3dResource = xxAlloc(D3D12RESOURCE);
     if (d3dResource == nullptr)
         return 0;
 
@@ -943,7 +943,7 @@ uint64_t xxCreateIndexBufferD3D12(uint64_t device, unsigned int size)
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
         return 0;
-    D3D12RESOURCE* d3dResource = new D3D12RESOURCE;
+    D3D12RESOURCE* d3dResource = xxAlloc(D3D12RESOURCE);
     if (d3dResource == nullptr)
         return 0;
 
@@ -983,7 +983,7 @@ uint64_t xxCreateVertexBufferD3D12(uint64_t device, unsigned int size, uint64_t 
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
         return 0;
-    D3D12RESOURCE* d3dResource = new D3D12RESOURCE;
+    D3D12RESOURCE* d3dResource = xxAlloc(D3D12RESOURCE);
     if (d3dResource == nullptr)
         return 0;
 
@@ -1037,7 +1037,7 @@ void xxDestroyBufferD3D12(uint64_t device, uint64_t buffer)
         d3dResource->resource->Release();
     }
     destroyShaderHeap(d3dResource->resourceCPUHandle, d3dResource->resourceGPUHandle);
-    delete d3dResource;
+    xxFree(d3dResource);
 }
 //------------------------------------------------------------------------------
 void* xxMapBufferD3D12(uint64_t device, uint64_t buffer)
@@ -1093,7 +1093,7 @@ uint64_t xxCreateTextureD3D12(uint64_t device, int format, unsigned int width, u
     if (width == 0 || height == 0 || depth == 0 || mipmap == 0 || array == 0)
         return 0;
 
-    D3D12TEXTURE* d3dTexture = new D3D12TEXTURE;
+    D3D12TEXTURE* d3dTexture = xxAlloc(D3D12TEXTURE);
     if (d3dTexture == nullptr)
         return 0;
 
@@ -1120,7 +1120,7 @@ uint64_t xxCreateTextureD3D12(uint64_t device, int format, unsigned int width, u
         HRESULT hResult = d3dDevice->CreateCommittedResource(&properties, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&texture));
         if (hResult != S_OK)
         {
-            delete d3dTexture;
+            xxFree(d3dTexture);
             return 0;
         }
         d3dResource = texture;
@@ -1133,7 +1133,7 @@ uint64_t xxCreateTextureD3D12(uint64_t device, int format, unsigned int width, u
 
     if (d3dResource == nullptr)
     {
-        delete d3dTexture;
+        xxFree(d3dTexture);
         return 0;
     }
 
@@ -1164,7 +1164,7 @@ void xxDestroyTextureD3D12(uint64_t texture)
 
     SafeRelease(d3dTexture->texture);
     SafeRelease(d3dTexture->upload);
-    delete d3dTexture;
+    xxFree(d3dTexture);
 }
 //------------------------------------------------------------------------------
 void* xxMapTextureD3D12(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
@@ -1342,7 +1342,7 @@ void xxDestroyShaderD3D12(uint64_t device, uint64_t shader)
 //==============================================================================
 uint64_t xxCreateBlendStateD3D12(uint64_t device, bool blending)
 {
-    D3D12_BLEND_DESC* d3dDesc = new D3D12_BLEND_DESC;
+    D3D12_BLEND_DESC* d3dDesc = xxAlloc(D3D12_BLEND_DESC);
     if (d3dDesc == nullptr)
         return 0;
     memset(d3dDesc, 0, sizeof(D3D12_BLEND_DESC));
@@ -1362,7 +1362,7 @@ uint64_t xxCreateBlendStateD3D12(uint64_t device, bool blending)
 //------------------------------------------------------------------------------
 uint64_t xxCreateDepthStencilStateD3D12(uint64_t device, bool depthTest, bool depthWrite)
 {
-    D3D12_DEPTH_STENCIL_DESC* d3dDesc = new D3D12_DEPTH_STENCIL_DESC;
+    D3D12_DEPTH_STENCIL_DESC* d3dDesc = xxAlloc(D3D12_DEPTH_STENCIL_DESC);
     if (d3dDesc == nullptr)
         return 0;
     memset(d3dDesc, 0, sizeof(D3D12_DEPTH_STENCIL_DESC));
@@ -1382,7 +1382,7 @@ uint64_t xxCreateDepthStencilStateD3D12(uint64_t device, bool depthTest, bool de
 //------------------------------------------------------------------------------
 uint64_t xxCreateRasterizerStateD3D12(uint64_t device, bool cull, bool scissor)
 {
-    D3D12_RASTERIZER_DESC* d3dDesc = new D3D12_RASTERIZER_DESC;
+    D3D12_RASTERIZER_DESC* d3dDesc = xxAlloc(D3D12_RASTERIZER_DESC);
     if (d3dDesc == nullptr)
         return 0;
     memset(d3dDesc, 0, sizeof(D3D12_RASTERIZER_DESC));
@@ -1446,21 +1446,21 @@ void xxDestroyBlendStateD3D12(uint64_t blendState)
 {
     D3D12_BLEND_DESC* d3dBlendState = reinterpret_cast<D3D12_BLEND_DESC*>(blendState);
 
-    delete d3dBlendState;
+    xxFree(d3dBlendState);
 }
 //------------------------------------------------------------------------------
 void xxDestroyDepthStencilStateD3D12(uint64_t depthStencilState)
 {
     D3D12_DEPTH_STENCIL_DESC* d3dDepthStencilState = reinterpret_cast<D3D12_DEPTH_STENCIL_DESC*>(depthStencilState);
 
-    delete d3dDepthStencilState;
+    xxFree(d3dDepthStencilState);
 }
 //------------------------------------------------------------------------------
 void xxDestroyRasterizerStateD3D12(uint64_t rasterizerState)
 {
     D3D12_RASTERIZER_DESC* d3dRasterizerState = reinterpret_cast<D3D12_RASTERIZER_DESC*>(rasterizerState);
 
-    delete d3dRasterizerState;
+    xxFree(d3dRasterizerState);
 }
 //------------------------------------------------------------------------------
 void xxDestroyPipelineD3D12(uint64_t pipeline)

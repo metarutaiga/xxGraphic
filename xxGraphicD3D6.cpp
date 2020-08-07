@@ -205,7 +205,7 @@ uint64_t xxCreateSwapchainD3D6(uint64_t device, uint64_t renderPass, void* view,
     D3DSWAPCHAIN3* d3dOldSwapchain = reinterpret_cast<D3DSWAPCHAIN3*>(oldSwapchain);
     if (d3dOldSwapchain && d3dOldSwapchain->hWnd == view && d3dOldSwapchain->width == width && d3dOldSwapchain->height == height)
         return oldSwapchain;
-    D3DSWAPCHAIN3* swapchain = new D3DSWAPCHAIN3;
+    D3DSWAPCHAIN3* swapchain = xxAlloc(D3DSWAPCHAIN3);
     if (swapchain == nullptr)
         return 0;
 
@@ -280,7 +280,7 @@ void xxDestroySwapchainD3D6(uint64_t swapchain)
     SafeRelease(d3dSwapchain->backSurface);
     SafeRelease(d3dSwapchain->depthSurface);
     SafeRelease(d3dSwapchain->clipper);
-    delete d3dSwapchain;
+    xxFree(d3dSwapchain);
 }
 //------------------------------------------------------------------------------
 void xxPresentSwapchainD3D6(uint64_t swapchain)
@@ -726,7 +726,7 @@ uint64_t xxCreateRasterizerStateD3D6(uint64_t device, bool cull, bool scissor)
 //------------------------------------------------------------------------------
 uint64_t xxCreatePipelineD3D6(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
 {
-    D3DPIPELINE3* d3dPipeline = new D3DPIPELINE3;
+    D3DPIPELINE3* d3dPipeline = xxAlloc(D3DPIPELINE3);
     if (d3dPipeline == nullptr)
         return 0;
 
@@ -763,7 +763,7 @@ void xxDestroyPipelineD3D6(uint64_t pipeline)
 {
     D3DPIPELINE3* d3dPipeline = reinterpret_cast<D3DPIPELINE3*>(pipeline);
 
-    delete d3dPipeline;
+    xxFree(d3dPipeline);
 }
 //==============================================================================
 //  Command

@@ -50,7 +50,7 @@ uint64_t xxCreateVertexAttributeD3D9PS(uint64_t device, int count, int* attribut
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
     if (d3dDevice == nullptr)
         return 0;
-    D3DVERTEXATTRIBUTE9PS* d3dVertexAttribute = new D3DVERTEXATTRIBUTE9PS;
+    D3DVERTEXATTRIBUTE9PS* d3dVertexAttribute = xxAlloc(D3DVERTEXATTRIBUTE9PS);
     if (d3dVertexAttribute == nullptr)
         return 0;
 
@@ -129,7 +129,7 @@ uint64_t xxCreateVertexAttributeD3D9PS(uint64_t device, int count, int* attribut
     HRESULT hResult = d3dDevice->CreateVertexDeclaration(vertexElements, &vertexDeclaration);
     if (hResult != S_OK)
     {
-        delete d3dVertexAttribute;
+        xxFree(d3dVertexAttribute);
         return 0;
     }
     d3dVertexAttribute->vertexDeclaration = vertexDeclaration;
@@ -145,7 +145,7 @@ void xxDestroyVertexAttributeD3D9PS(uint64_t vertexAttribute)
         return;
 
     d3dVertexAttribute->vertexDeclaration->Release();
-    delete d3dVertexAttribute;
+    xxFree(d3dVertexAttribute);
 }
 //==============================================================================
 //  Shader

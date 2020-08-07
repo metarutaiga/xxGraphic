@@ -50,7 +50,7 @@ uint64_t xxCreateVertexAttributeD3D8PS(uint64_t device, int count, int* attribut
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(device);
     if (d3dDevice == nullptr)
         return 0;
-    D3DVERTEXATTRIBUTE8PS* d3dVertexAttribute = new D3DVERTEXATTRIBUTE8PS;
+    D3DVERTEXATTRIBUTE8PS* d3dVertexAttribute = xxAlloc(D3DVERTEXATTRIBUTE8PS);
     if (d3dVertexAttribute == nullptr)
         return 0;
 
@@ -101,7 +101,7 @@ void xxDestroyVertexAttributeD3D8PS(uint64_t vertexAttribute)
 {
     D3DVERTEXATTRIBUTE8PS* d3dVertexAttribute = reinterpret_cast<D3DVERTEXATTRIBUTE8PS*>(vertexAttribute);
 
-    delete d3dVertexAttribute;
+    xxFree(d3dVertexAttribute);
 }
 //==============================================================================
 //  Shader

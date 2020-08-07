@@ -139,7 +139,7 @@ uint64_t xxCreateSwapchainD3D11(uint64_t device, uint64_t renderPass, void* view
     D3D11SWAPCHAIN* d3dOldSwapchain = reinterpret_cast<D3D11SWAPCHAIN*>(oldSwapchain);
     if (d3dOldSwapchain && d3dOldSwapchain->hWnd == view && d3dOldSwapchain->width == width && d3dOldSwapchain->height == height)
         return oldSwapchain;
-    D3D11SWAPCHAIN* d3dSwapchain = new D3D11SWAPCHAIN;
+    D3D11SWAPCHAIN* d3dSwapchain = xxAlloc(D3D11SWAPCHAIN);
     if (d3dSwapchain == nullptr)
         return 0;
 
@@ -164,7 +164,7 @@ uint64_t xxCreateSwapchainD3D11(uint64_t device, uint64_t renderPass, void* view
         }
         if (g_dxgiFactory == nullptr)
         {
-            delete d3dSwapchain;
+            xxFree(d3dSwapchain);
             return 0;
         }
     }
@@ -193,7 +193,7 @@ uint64_t xxCreateSwapchainD3D11(uint64_t device, uint64_t renderPass, void* view
             HRESULT hResult = g_dxgiFactory->CreateSwapChain(d3dDevice, &desc, &dxgiSwapchain);
             if (hResult != S_OK)
             {
-                delete d3dSwapchain;
+                xxFree(d3dSwapchain);
                 return 0;
             }
         }
@@ -272,7 +272,7 @@ void xxDestroySwapchainD3D11(uint64_t swapchain)
     SafeRelease(d3dSwapchain->dxgiSwapchain);
     SafeRelease(d3dSwapchain->depthStencilTexture);
     SafeRelease(d3dSwapchain->deviceContext);
-    delete d3dSwapchain;
+    xxFree(d3dSwapchain);
 }
 //------------------------------------------------------------------------------
 void xxPresentSwapchainD3D11(uint64_t swapchain)
@@ -395,7 +395,7 @@ uint64_t xxCreateVertexAttributeD3D11(uint64_t device, int count, int* attribute
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
     if (d3dDevice == nullptr)
         return 0;
-    D3D11VERTEXATTRIBUTE* d3dVertexAttribute = new D3D11VERTEXATTRIBUTE;
+    D3D11VERTEXATTRIBUTE* d3dVertexAttribute = xxAlloc(D3D11VERTEXATTRIBUTE);
     if (d3dVertexAttribute == nullptr)
         return 0;
 
@@ -523,7 +523,7 @@ uint64_t xxCreateVertexAttributeD3D11(uint64_t device, int count, int* attribute
     HRESULT hResult = d3dDevice->CreateInputLayout(inputElements, count, dxbc, dxbcSize, &inputLayout);
     if (hResult != S_OK)
     {
-        delete d3dVertexAttribute;
+        xxFree(d3dVertexAttribute);
         return 0;
     }
     d3dVertexAttribute->inputLayout = inputLayout;
@@ -539,7 +539,7 @@ void xxDestroyVertexAttributeD3D11(uint64_t vertexAttribute)
         return;
 
     d3dVertexAttribute->inputLayout->Release();
-    delete d3dVertexAttribute;
+    xxFree(d3dVertexAttribute);
 }
 //==============================================================================
 //  Buffer
@@ -549,7 +549,7 @@ uint64_t xxCreateConstantBufferD3D11(uint64_t device, unsigned int size)
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
     if (d3dDevice == nullptr)
         return 0;
-    D3D11BUFFER* d3dBuffer = new D3D11BUFFER;
+    D3D11BUFFER* d3dBuffer = xxAlloc(D3D11BUFFER);
     if (d3dBuffer == nullptr)
         return 0;
 
@@ -579,7 +579,7 @@ uint64_t xxCreateIndexBufferD3D11(uint64_t device, unsigned int size)
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
     if (d3dDevice == nullptr)
         return 0;
-    D3D11BUFFER* d3dBuffer = new D3D11BUFFER;
+    D3D11BUFFER* d3dBuffer = xxAlloc(D3D11BUFFER);
     if (d3dBuffer == nullptr)
         return 0;
 
@@ -609,7 +609,7 @@ uint64_t xxCreateVertexBufferD3D11(uint64_t device, unsigned int size, uint64_t 
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
     if (d3dDevice == nullptr)
         return 0;
-    D3D11BUFFER* d3dBuffer = new D3D11BUFFER;
+    D3D11BUFFER* d3dBuffer = xxAlloc(D3D11BUFFER);
     if (d3dBuffer == nullptr)
         return 0;
 
@@ -656,7 +656,7 @@ void xxDestroyBufferD3D11(uint64_t device, uint64_t buffer)
         }
         d3dBuffer->buffer->Release();
     }
-    delete d3dBuffer;
+    xxFree(d3dBuffer);
 }
 //------------------------------------------------------------------------------
 void* xxMapBufferD3D11(uint64_t device, uint64_t buffer)
@@ -713,7 +713,7 @@ uint64_t xxCreateTextureD3D11(uint64_t device, int format, unsigned int width, u
     if (width == 0 || height == 0 || depth == 0 || mipmap == 0 || array == 0)
         return 0;
 
-    D3D11TEXTURE* d3dTexture = new D3D11TEXTURE;
+    D3D11TEXTURE* d3dTexture = xxAlloc(D3D11TEXTURE);
     if (d3dTexture == nullptr)
         return 0;
 
@@ -729,7 +729,7 @@ uint64_t xxCreateTextureD3D11(uint64_t device, int format, unsigned int width, u
         HRESULT hResult = unknown->QueryInterface(__uuidof(ID3D11Texture2D), (void**)&d3dTexture2D);
         if (hResult != S_OK)
         {
-            delete d3dTexture;
+            xxFree(d3dTexture);
             return 0;
         }
         d3dResource = d3dTexture2D;
@@ -757,7 +757,7 @@ uint64_t xxCreateTextureD3D11(uint64_t device, int format, unsigned int width, u
         HRESULT hResult = d3dDevice->CreateTexture2D(&texture2DDesc, nullptr, &d3dTexture2D);
         if (hResult != S_OK)
         {
-            delete d3dTexture;
+            xxFree(d3dTexture);
             return 0;
         }
         d3dResource = d3dTexture2D;
@@ -783,7 +783,7 @@ uint64_t xxCreateTextureD3D11(uint64_t device, int format, unsigned int width, u
         HRESULT hResult = d3dDevice->CreateTexture2D(&texture2DDesc, nullptr, &d3dTexture2D);
         if (hResult != S_OK)
         {
-            delete d3dTexture;
+            xxFree(d3dTexture);
             return 0;
         }
         d3dResource = d3dTexture2D;
@@ -807,7 +807,7 @@ uint64_t xxCreateTextureD3D11(uint64_t device, int format, unsigned int width, u
         HRESULT hResult = d3dDevice->CreateTexture3D(&texture3DDesc, nullptr, &d3dTexture3D);
         if (hResult != S_OK)
         {
-            delete d3dTexture;
+            xxFree(d3dTexture);
             return 0;
         }
         d3dResource = d3dTexture3D;
@@ -819,7 +819,7 @@ uint64_t xxCreateTextureD3D11(uint64_t device, int format, unsigned int width, u
 
     if (d3dResource == nullptr)
     {
-        delete d3dTexture;
+        xxFree(d3dTexture);
         return 0;
     }
 
@@ -828,7 +828,7 @@ uint64_t xxCreateTextureD3D11(uint64_t device, int format, unsigned int width, u
     if (hResult != S_OK)
     {
         d3dResource->Release();
-        delete d3dTexture;
+        xxFree(d3dTexture);
         return 0;
     }
 
@@ -851,7 +851,7 @@ void xxDestroyTextureD3D11(uint64_t texture)
     SafeRelease(d3dTexture->texture2D);
     SafeRelease(d3dTexture->texture3D);
     SafeRelease(d3dTexture->resourceView);
-    delete d3dTexture;
+    xxFree(d3dTexture);
 }
 //------------------------------------------------------------------------------
 void* xxMapTextureD3D11(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
@@ -1093,7 +1093,7 @@ uint64_t xxCreateRasterizerStateD3D11(uint64_t device, bool cull, bool scissor)
 //------------------------------------------------------------------------------
 uint64_t xxCreatePipelineD3D11(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
 {
-    D3D11PIPELINE* d3dPipeline = new D3D11PIPELINE;
+    D3D11PIPELINE* d3dPipeline = xxAlloc(D3D11PIPELINE);
     if (d3dPipeline == nullptr)
         return 0;
     D3D11VERTEXATTRIBUTE* d3dVertexAttribute = reinterpret_cast<D3D11VERTEXATTRIBUTE*>(vertexAttribute);
@@ -1140,7 +1140,7 @@ void xxDestroyPipelineD3D11(uint64_t pipeline)
 {
     D3D11PIPELINE* d3dPipeline = reinterpret_cast<D3D11PIPELINE*>(pipeline);
 
-    delete d3dPipeline;
+    xxFree(d3dPipeline);
 }
 //==============================================================================
 //  Command

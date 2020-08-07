@@ -139,7 +139,7 @@ uint64_t xxCreateSwapchainD3D8(uint64_t device, uint64_t renderPass, void* view,
     D3DSWAPCHAIN8* d3dOldSwapchain = reinterpret_cast<D3DSWAPCHAIN8*>(oldSwapchain);
     if (d3dOldSwapchain && d3dOldSwapchain->hWnd == view && d3dOldSwapchain->width == width && d3dOldSwapchain->height == height)
         return oldSwapchain;
-    D3DSWAPCHAIN8* swapchain = new D3DSWAPCHAIN8;
+    D3DSWAPCHAIN8* swapchain = xxAlloc(D3DSWAPCHAIN8);
     if (swapchain == nullptr)
         return 0;
 
@@ -161,7 +161,7 @@ uint64_t xxCreateSwapchainD3D8(uint64_t device, uint64_t renderPass, void* view,
         HRESULT hResult = d3dDevice->CreateAdditionalSwapChain(&d3dPresentParameters, &d3dSwapchain);
         if (hResult != S_OK)
         {
-            delete swapchain;
+            xxFree(swapchain);
             return 0;
         }
     }
@@ -194,7 +194,7 @@ void xxDestroySwapchainD3D8(uint64_t swapchain)
     SafeRelease(d3dSwapchain->backBuffer);
     SafeRelease(d3dSwapchain->depthStencil);
     SafeRelease(d3dSwapchain->swapchain);
-    delete d3dSwapchain;
+    xxFree(d3dSwapchain);
 }
 //------------------------------------------------------------------------------
 void xxPresentSwapchainD3D8(uint64_t swapchain)
@@ -706,7 +706,7 @@ uint64_t xxCreateRasterizerStateD3D8(uint64_t device, bool cull, bool scissor)
 //------------------------------------------------------------------------------
 uint64_t xxCreatePipelineD3D8(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
 {
-    D3DPIPELINE8* d3dPipeline = new D3DPIPELINE8;
+    D3DPIPELINE8* d3dPipeline = xxAlloc(D3DPIPELINE8);
     if (d3dPipeline == nullptr)
         return 0;
 
@@ -746,7 +746,7 @@ void xxDestroyPipelineD3D8(uint64_t pipeline)
 {
     D3DPIPELINE8* d3dPipeline = reinterpret_cast<D3DPIPELINE8*>(pipeline);
 
-    delete d3dPipeline;
+    xxFree(d3dPipeline);
 }
 //==============================================================================
 //  Command
