@@ -20,7 +20,7 @@ typedef std::shared_ptr<xxMesh> xxMeshPtr;
 template<class T>
 struct xxStrideIterator;
 
-class xxCPPAPI xxMesh
+class xxPlusAPI xxMesh
 {
 public:
     virtual ~xxMesh();

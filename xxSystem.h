@@ -127,13 +127,13 @@
 #   endif
 #endif
 
-#ifndef xxCPPAPI
-#   if defined(_MSC_VER) && defined(XX_BUILD_LIBRARY)
-#       define xxCPPAPI             __declspec(dllexport)
+#ifndef xxPlusAPI
+#   if defined(_MSC_VER) && defined(XXPLUS_BUILD_LIBRARY)
+#       define xxPlusAPI            __declspec(dllexport)
 #   elif defined(_MSC_VER)
-#       define xxCPPAPI             __declspec(dllimport)
+#       define xxPlusAPI            __declspec(dllimport)
 #   else
-#       define xxCPPAPI             __attribute__((visibility("default")))
+#       define xxPlusAPI            __attribute__((visibility("default")))
 #   endif
 #endif
 

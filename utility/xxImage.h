@@ -15,7 +15,7 @@
 class xxImage;
 typedef std::shared_ptr<xxImage> xxImagePtr;
 
-class xxCPPAPI xxImage
+class xxPlusAPI xxImage
 {
 public:
     virtual ~xxImage();

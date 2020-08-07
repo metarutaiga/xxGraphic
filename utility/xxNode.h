@@ -20,7 +20,7 @@ class xxNode;
 typedef std::shared_ptr<xxNode> xxNodePtr;
 typedef std::weak_ptr<xxNode> xxNodeWeakPtr;
 
-class xxCPPAPI xxNode
+class xxPlusAPI xxNode
 {
 public:
     virtual ~xxNode();

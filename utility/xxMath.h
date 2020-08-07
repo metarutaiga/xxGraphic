@@ -12,7 +12,7 @@
 #   pragma optimize("y", on)
 #endif
 
-union xxCPPAPI xxVector2
+union xxPlusAPI xxVector2
 {
     enum { N = 2 };
     struct { float x, y; };
@@ -49,7 +49,7 @@ union xxCPPAPI xxVector2
     static const xxVector2 Y;
 };
 
-union xxCPPAPI xxVector3
+union xxPlusAPI xxVector3
 {
     enum { N = 3 };
     struct { float x, y, z; };
@@ -94,7 +94,7 @@ union xxCPPAPI xxVector3
     static const xxVector3 WHITE;
 };
 
-union xxCPPAPI xxVector4
+union xxPlusAPI xxVector4
 {
     enum { N = 4 };
     struct { float x, y, z, w; };
@@ -144,7 +144,7 @@ typedef union xxMatrix2x2 xxMatrix2;
 typedef union xxMatrix3x3 xxMatrix3;
 typedef union xxMatrix4x4 xxMatrix4;
 
-union xxCPPAPI xxMatrix2x2
+union xxPlusAPI xxMatrix2x2
 {
     enum { M = 2, N = 2 };
     xxVector2 _[N];
@@ -179,7 +179,7 @@ union xxCPPAPI xxMatrix2x2
     static const xxMatrix2x2 IDENTITY;
 };
 
-union xxCPPAPI xxMatrix2x3
+union xxPlusAPI xxMatrix2x3
 {
     enum { M = 2, N = 3 };
     xxVector2 _[N];
@@ -207,7 +207,7 @@ union xxCPPAPI xxMatrix2x3
     static const xxMatrix2x3 IDENTITY;
 };
 
-union xxCPPAPI xxMatrix2x4
+union xxPlusAPI xxMatrix2x4
 {
     enum { M = 2, N = 4 };
     xxVector2 _[N];
@@ -236,7 +236,7 @@ union xxCPPAPI xxMatrix2x4
     static const xxMatrix2x4 IDENTITY;
 };
 
-union xxCPPAPI xxMatrix3x2
+union xxPlusAPI xxMatrix3x2
 {
     enum { M = 3, N = 2 };
     xxVector3 _[N];
@@ -263,7 +263,7 @@ union xxCPPAPI xxMatrix3x2
     static const xxMatrix3x2 IDENTITY;
 };
 
-union xxCPPAPI xxMatrix3x3
+union xxPlusAPI xxMatrix3x3
 {
     enum { M = 3, N = 3 };
     xxVector3 _[N];
@@ -299,7 +299,7 @@ union xxCPPAPI xxMatrix3x3
     static const xxMatrix3x3 IDENTITY;
 };
 
-union xxCPPAPI xxMatrix3x4
+union xxPlusAPI xxMatrix3x4
 {
     enum { M = 3, N = 4 };
     xxVector3 _[N];
@@ -328,7 +328,7 @@ union xxCPPAPI xxMatrix3x4
     static const xxMatrix3x4 IDENTITY;
 };
 
-union xxCPPAPI xxMatrix4x2
+union xxPlusAPI xxMatrix4x2
 {
     enum { M = 4, N = 2 };
     xxVector4 _[N];
@@ -355,7 +355,7 @@ union xxCPPAPI xxMatrix4x2
     static const xxMatrix4x2 IDENTITY;
 };
 
-union xxCPPAPI xxMatrix4x3
+union xxPlusAPI xxMatrix4x3
 {
     enum { M = 4, N = 3 };
     xxVector4 _[N];
@@ -383,7 +383,7 @@ union xxCPPAPI xxMatrix4x3
     static const xxMatrix4x3 IDENTITY;
 };
 
-union xxCPPAPI xxMatrix4x4
+union xxPlusAPI xxMatrix4x4
 {
     enum { M = 4, N = 4 };
     xxVector4 _[N];

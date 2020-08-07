@@ -16,7 +16,7 @@ class xxNode;
 class xxMaterial;
 typedef std::shared_ptr<xxMaterial> xxMaterialPtr;
 
-class xxCPPAPI xxMaterial
+class xxPlusAPI xxMaterial
 {
 public:
     virtual ~xxMaterial();
