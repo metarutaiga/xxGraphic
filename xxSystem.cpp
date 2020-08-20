@@ -91,7 +91,10 @@ void* xxLoadLibrary(const char* name)
 #if defined(_MSC_VER) && defined(_UNICODE)
     wchar_t temp[MAX_PATH];
     ::MultiByteToWideChar(CP_UTF8, 0, name, -1, temp, MAX_PATH);
-    return LoadLibraryW(temp);
+    void* library = LoadLibraryW(temp);
+    if (library == nullptr)
+        library = LoadLibraryExW(temp, nullptr, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+    return library;
 #elif defined(_MSC_VER)
     return LoadLibraryA(name);
 #else
