@@ -12,6 +12,7 @@
 #include "gl/wgl.h"
 static void*                                g_gdiLibrary = nullptr;
 static void*                                g_glLibrary = nullptr;
+static HWND                                 g_dummyWindow = nullptr;
 static int                                  (WINAPI *ChoosePixelFormat)(HDC, CONST PIXELFORMATDESCRIPTOR*);
 static BOOL                                 (WINAPI *SetPixelFormat)(HDC, int, CONST PIXELFORMATDESCRIPTOR*);
 static BOOL                                 (WINAPI *SwapBuffers)(HDC);
@@ -219,7 +220,13 @@ uint64_t xxGraphicCreateWGL(int version)
     if (wglSymbolFailed)
         return 0;
 
-    uint64_t context = glCreateContextWGL(0, GetDesktopWindow(), nullptr);
+    WNDCLASSEXA wc = { sizeof(WNDCLASSEXA), CS_OWNDC, nullptr, 0, 0, GetModuleHandleA(nullptr), nullptr, nullptr, nullptr, nullptr, "xxGraphic", nullptr };
+    ::RegisterClassExA(&wc);
+    g_dummyWindow = ::CreateWindowA(wc.lpszClassName, "xxGraphic", WS_OVERLAPPEDWINDOW, 0, 0, 1, 1, nullptr, nullptr, wc.hInstance, nullptr);
+    if (g_dummyWindow == nullptr)
+        return 0;
+
+    uint64_t context = glCreateContextWGL(0, g_dummyWindow, nullptr);
     if (context == 0)
         return 0;
 
@@ -227,8 +234,8 @@ uint64_t xxGraphicCreateWGL(int version)
     wglSymbol(wglCreateContextAttribsARB);
     if (wglSymbolFailed == false)
     {
-        glDestroyContextWGL(context, GetDesktopWindow(), nullptr);
-        context = glCreateContextWGL(0, GetDesktopWindow(), nullptr);
+        glDestroyContextWGL(context, g_dummyWindow, nullptr);
+        context = glCreateContextWGL(0, g_dummyWindow, nullptr);
     }
 
     bool success = false;
@@ -264,7 +271,14 @@ uint64_t xxGraphicCreateWGL(int version)
 //------------------------------------------------------------------------------
 void xxGraphicDestroyWGL(uint64_t context)
 {
-    glDestroyContextWGL(context, GetDesktopWindow(), nullptr);
+    glDestroyContextWGL(context, g_dummyWindow, nullptr);
+
+    if (g_dummyWindow)
+    {
+        ::DestroyWindow(g_dummyWindow);
+        ::UnregisterClassA("xxGraphic", GetModuleHandleA(nullptr));
+        g_dummyWindow = nullptr;
+    }
 
     if (g_glLibrary)
     {
