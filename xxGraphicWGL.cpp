@@ -220,7 +220,7 @@ uint64_t xxGraphicCreateWGL(int version)
     if (wglSymbolFailed)
         return 0;
 
-    WNDCLASSEXA wc = { sizeof(WNDCLASSEXA), CS_OWNDC, nullptr, 0, 0, GetModuleHandleA(nullptr), nullptr, nullptr, nullptr, nullptr, "xxGraphic", nullptr };
+    WNDCLASSEXA wc = { sizeof(WNDCLASSEXA), CS_OWNDC, ::DefWindowProcA, 0, 0, ::GetModuleHandleA(nullptr), nullptr, nullptr, nullptr, nullptr, "xxGraphic", nullptr };
     ::RegisterClassExA(&wc);
     g_dummyWindow = ::CreateWindowA(wc.lpszClassName, "xxGraphic", WS_OVERLAPPEDWINDOW, 0, 0, 1, 1, nullptr, nullptr, wc.hInstance, nullptr);
     if (g_dummyWindow == nullptr)
