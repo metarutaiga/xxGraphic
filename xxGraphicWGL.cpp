@@ -369,7 +369,7 @@ void xxGraphicDestroyWGL(uint64_t context)
     if (g_dummyWindow)
     {
         ::DestroyWindow(g_dummyWindow);
-        ::UnregisterClassA("xxGraphic", GetModuleHandleA(nullptr));
+        ::UnregisterClassA("xxGraphic", ::GetModuleHandleA(nullptr));
         g_dummyWindow = nullptr;
     }
 
