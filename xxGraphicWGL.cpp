@@ -289,36 +289,29 @@ uint64_t xxGraphicCreateWGL(int version)
     {
         glDestroyContextWGL(context, g_dummyWindow, nullptr);
         context = glCreateContextWGL(0, g_dummyWindow, nullptr);
-        if (context == 0)
-            return 0;
+    }
+    if (context == 0)
+    {
+        wglCreateContextAttribsARB = nullptr;
+        context = glCreateContextWGL(0, g_dummyWindow, nullptr);
     }
 
     bool success = false;
-    for (int i = 0; i < 2; ++i)
+    switch (version)
     {
-        switch (version)
-        {
-        case 320:
-            success = xxGraphicCreateGLES32(wglSymbol);
-            break;
-        case 310:
-            success = xxGraphicCreateGLES31(wglSymbol);
-            break;
-        case 300:
-            success = xxGraphicCreateGLES3(wglSymbol);
-            break;
-        case 200:
-        default:
-            success = xxGraphicCreateGLES2(wglSymbol);
-            break;
-        }
-        if (success || wglCreateContextAttribsARB == nullptr)
-            break;
-        wglCreateContextAttribsARB = nullptr;
-        glDestroyContextWGL(context, g_dummyWindow, nullptr);
-        context = glCreateContextWGL(0, g_dummyWindow, nullptr);
-        if (context == 0)
-            return 0;
+    case 320:
+        success = xxGraphicCreateGLES32(wglSymbol);
+        break;
+    case 310:
+        success = xxGraphicCreateGLES31(wglSymbol);
+        break;
+    case 300:
+        success = xxGraphicCreateGLES3(wglSymbol);
+        break;
+    case 200:
+    default:
+        success = xxGraphicCreateGLES2(wglSymbol);
+        break;
     }
     if (success == false)
     {
