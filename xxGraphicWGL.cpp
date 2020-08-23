@@ -52,6 +52,59 @@ static void GL_APIENTRY wglShaderBinary(GLsizei count, const GLuint *shaders, GL
     
 }
 //------------------------------------------------------------------------------
+static PFNGLSHADERSOURCEPROC glShaderSource_;
+//------------------------------------------------------------------------------
+static void GL_APIENTRY wglShaderSourceLegacy(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
+{
+    const GLchar** replaceString = xxAlloc(const GLchar*, count);
+
+    for (GLsizei i = 0; i < count; ++i)
+    {
+        const GLchar* var = string[i];
+        if (strcmp(var, "#version 100") == 0)
+            var = "#version 120";
+        if (strncmp(var, "precision", sizeof("precision") - 1) == 0)
+            var = "";
+        replaceString[i] = var;
+    }
+
+    glShaderSource_(shader, count, replaceString, length);
+
+    xxFree(replaceString);
+}
+//------------------------------------------------------------------------------
+static void GL_APIENTRY wglShaderSource(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
+{
+    const GLchar** replaceString = xxAlloc(const GLchar*, count);
+
+    bool fragmentShader = false;
+    for (GLsizei i = 0; i < count; ++i)
+    {
+        const GLchar* var = string[i];
+        if (strcmp(var, "#version 100") == 0)
+            var = "#version 140";
+        if (strncmp(var, "precision", sizeof("precision") - 1) == 0)
+            var = "";
+        if (strcmp(var, "#define __FRAGMENT__ 1") == 0)
+        {
+            var =   "#define __FRAGMENT__ 1\n"
+                    "#define gl_FragColor fragColor\n"
+                    "#define texture2D texture\n"
+                    "out vec4 fragColor;";
+            fragmentShader = true;
+        }
+        if (strncmp(var, "#define attribute", sizeof("#define attribute") - 1) == 0)
+            var = fragmentShader ? "#define attribute" : "#define attribute in";
+        if (strncmp(var, "#define varying", sizeof("#define varying") - 1) == 0)
+            var = fragmentShader ? "#define varying in" : "#define varying out";
+        replaceString[i] = var;
+    }
+
+    glShaderSource_(shader, count, replaceString, length);
+
+    xxFree(replaceString);
+}
+//------------------------------------------------------------------------------
 static bool wglSymbolFailed = false;
 static void* GL_APIENTRY wglSymbol(const char* name, bool* failed)
 {
@@ -226,27 +279,6 @@ void glPresentContextWGL(uint64_t context, void* display)
     SwapBuffers(hDC);
 }
 //------------------------------------------------------------------------------
-PFNGLSHADERSOURCEPROC glShaderSource_;
-//------------------------------------------------------------------------------
-void GL_APIENTRY wglShaderSourceLegacy(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
-{
-    const GLchar** replaceString = xxAlloc(const GLchar*, count);
-
-    for (GLsizei i = 0; i < count; ++i)
-    {
-        const GLchar* var = string[i];
-        if (strcmp(var, "#version 100") == 0)
-            var = "#version 120";
-        if (strncmp(var, "precision", sizeof("precision") - 1) == 0)
-            var = "";
-        replaceString[i] = var;
-    }
-
-    glShaderSource_(shader, count, replaceString, length);
-
-    xxFree(replaceString);
-}
-//------------------------------------------------------------------------------
 uint64_t xxGraphicCreateWGL(int version)
 {
     if (g_gdiLibrary == nullptr)
@@ -325,7 +357,7 @@ uint64_t xxGraphicCreateWGL(int version)
     glPresentContext = glPresentContextWGL;
 
     glShaderSource_ = glShaderSource;
-    glShaderSource = version <= 200 ? wglShaderSourceLegacy : glShaderSource;
+    glShaderSource = version <= 200 ? wglShaderSourceLegacy : wglShaderSource;
 
     return context;
 }

@@ -39,6 +39,85 @@ static float                            rectangleProgramMatrix[16];
 //==============================================================================
 //  Initialize - CGL
 //==============================================================================
+static PFNGLSHADERSOURCEPROC glShaderSource_;
+//------------------------------------------------------------------------------
+static void GL_APIENTRY cglShaderSourceLegacy(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
+{
+    const GLchar** replaceString = xxAlloc(const GLchar*, count);
+
+    for (GLsizei i = 0; i < count; ++i)
+    {
+        const GLchar* var = string[i];
+        if (strcmp(var, "#version 100") == 0)
+            var = "#version 120";
+        if (strncmp(var, "precision", sizeof("precision") - 1) == 0)
+            var = "";
+        replaceString[i] = var;
+    }
+
+    glShaderSource_(shader, count, replaceString, length);
+
+    xxFree(replaceString);
+}
+//------------------------------------------------------------------------------
+static void GL_APIENTRY cglShaderSource(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
+{
+    const GLchar** replaceString = xxAlloc(const GLchar*, count);
+
+    bool fragmentShader = false;
+    for (GLsizei i = 0; i < count; ++i)
+    {
+        const GLchar* var = string[i];
+        if (strcmp(var, "#version 100") == 0)
+            var = "#version 140";
+        if (strncmp(var, "precision", sizeof("precision") - 1) == 0)
+            var = "";
+        if (strcmp(var, "#define __FRAGMENT__ 1") == 0)
+        {
+            var =   "#define __FRAGMENT__ 1\n"
+                    "#define gl_FragColor fragColor\n"
+                    "#define texture2D texture\n"
+                    "#define texture2DRect texture\n"
+                    "#define textureSize2DRect(t, l) textureSize(t)\n"
+                    "out vec4 fragColor;";
+            fragmentShader = true;
+        }
+        if (strncmp(var, "#define attribute", sizeof("#define attribute") - 1) == 0)
+            var = fragmentShader ? "#define attribute" : "#define attribute in";
+        if (strncmp(var, "#define varying", sizeof("#define varying") - 1) == 0)
+            var = fragmentShader ? "#define varying in" : "#define varying out";
+        if (strcmp(var, "#extension GL_EXT_gpu_shader4 : enable") == 0)
+            var = "";
+        replaceString[i] = var;
+    }
+
+    glShaderSource_(shader, count, replaceString, length);
+
+    xxFree(replaceString);
+}
+//------------------------------------------------------------------------------
+static PFNGLBINDTEXTUREPROC glBindTexture_;
+//------------------------------------------------------------------------------
+static void GL_APIENTRY cglBindTexture(GLenum target, GLuint texture)
+{
+    glBindTexture_(target, texture);
+    if (target == GL_TEXTURE_RECTANGLE_ARB)
+    {
+        xxBindRectangleProgram();
+    }
+}
+//------------------------------------------------------------------------------
+static PFNGLUNIFORM4FVPROC glUniform4fv_;
+//------------------------------------------------------------------------------
+static void GL_APIENTRY cglUniform4fv(GLint location, GLsizei count, const GLfloat *value)
+{
+    glUniform4fv_(location, count, value);
+    if (location == 0 && count == 4)
+    {
+        memcpy(rectangleProgramMatrix, value, sizeof(rectangleProgramMatrix));
+    }
+}
+//------------------------------------------------------------------------------
 static bool cglSymbolFailed = false;
 static void* GL_APIENTRY cglSymbol(const char* name, bool* failed)
 {
@@ -207,85 +286,6 @@ void glPresentContextCGL(uint64_t context, void* display)
     NSOpenGLContext* __unsafe_unretained nsContext = (__bridge NSOpenGLContext*)reinterpret_cast<void*>(context);
 
     [nsContext flushBuffer];
-}
-//------------------------------------------------------------------------------
-PFNGLSHADERSOURCEPROC glShaderSource_;
-//------------------------------------------------------------------------------
-void cglShaderSourceLegacy(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
-{
-    const GLchar** replaceString = xxAlloc(const GLchar*, count);
-
-    for (GLsizei i = 0; i < count; ++i)
-    {
-        const GLchar* var = string[i];
-        if (strcmp(var, "#version 100") == 0)
-            var = "#version 120";
-        if (strncmp(var, "precision", sizeof("precision") - 1) == 0)
-            var = "";
-        replaceString[i] = var;
-    }
-
-    glShaderSource_(shader, count, replaceString, length);
-
-    xxFree(replaceString);
-}
-//------------------------------------------------------------------------------
-void cglShaderSource(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
-{
-    const GLchar** replaceString = xxAlloc(const GLchar*, count);
-
-    bool fragmentShader = false;
-    for (GLsizei i = 0; i < count; ++i)
-    {
-        const GLchar* var = string[i];
-        if (strcmp(var, "#version 100") == 0)
-            var = "#version 140";
-        if (strncmp(var, "precision", sizeof("precision") - 1) == 0)
-            var = "";
-        if (strcmp(var, "#define __FRAGMENT__ 1") == 0)
-        {
-            var =   "#define __FRAGMENT__ 1\n"
-                    "#define gl_FragColor fragColor\n"
-                    "#define texture2D texture\n"
-                    "#define texture2DRect texture\n"
-                    "#define textureSize2DRect(t, l) textureSize(t)\n"
-                    "out vec4 fragColor;";
-            fragmentShader = true;
-        }
-        if (strncmp(var, "#define attribute", sizeof("#define attribute") - 1) == 0)
-            var = fragmentShader ? "#define attribute" : "#define attribute in";
-        if (strcmp(var, "#define varying varying") == 0)
-            var = fragmentShader ? "#define varying in" : "#define varying out";
-        if (strcmp(var, "#extension GL_EXT_gpu_shader4 : enable") == 0)
-            var = "";
-        replaceString[i] = var;
-    }
-
-    glShaderSource_(shader, count, replaceString, length);
-
-    xxFree(replaceString);
-}
-//------------------------------------------------------------------------------
-PFNGLBINDTEXTUREPROC glBindTexture_;
-//------------------------------------------------------------------------------
-void cglBindTexture(GLenum target, GLuint texture)
-{
-    glBindTexture_(target, texture);
-    if (target == GL_TEXTURE_RECTANGLE_ARB)
-    {
-        xxBindRectangleProgram();
-    }
-}
-//------------------------------------------------------------------------------
-PFNGLUNIFORM4FVPROC glUniform4fv_;
-//------------------------------------------------------------------------------
-void cglUniform4fv(GLint location, GLsizei count, const GLfloat *value)
-{
-    glUniform4fv_(location, count, value);
-    if (location == 0 && count == 4)
-    {
-        memcpy(rectangleProgramMatrix, value, sizeof(rectangleProgramMatrix));
-    }
 }
 //------------------------------------------------------------------------------
 uint64_t xxGraphicCreateCGL(int version)
