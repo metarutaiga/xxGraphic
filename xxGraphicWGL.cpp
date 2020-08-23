@@ -30,12 +30,26 @@ static PFNWGLCREATECONTEXTATTRIBSARBPROC    wglCreateContextAttribsARB;
 //==============================================================================
 static void GL_APIENTRY wglBlendBarrier(void)
 {
-
+    
+}
+static void GL_APIENTRY wglGetShaderPrecisionFormat(GLenum shadertype, GLenum precisiontype, GLint *range, GLint *precision)
+{
+    
 }
 //------------------------------------------------------------------------------
 static void GL_APIENTRY wglPrimitiveBoundingBox(GLfloat minX, GLfloat minY, GLfloat minZ, GLfloat minW, GLfloat maxX, GLfloat maxY, GLfloat maxZ, GLfloat maxW)
 {
 
+}
+//------------------------------------------------------------------------------
+static void GL_APIENTRY wglReleaseShaderCompiler(void)
+{
+    
+}
+//------------------------------------------------------------------------------
+static void GL_APIENTRY wglShaderBinary(GLsizei count, const GLuint *shaders, GLenum binaryformat, const void *binary, GLsizei length)
+{
+    
 }
 //------------------------------------------------------------------------------
 static bool wglSymbolFailed = false;
@@ -61,11 +75,29 @@ static void* GL_APIENTRY wglSymbol(const char* name, bool* failed)
         ptr = getSymbolExtension(wglSymbol, name, &internal);
     }
 
-    if (ptr == nullptr && strcmp(name, "glBlendBarrier") == 0)
-        ptr = (void*)wglBlendBarrier;
+    if (ptr == nullptr)
+    {
+        bool failed = wglSymbolFailed;
+        if (strcmp(name, "glClearDepthf") == 0)
+            ptr = wglSymbol("glClearDepth", nullptr);
+        if (strcmp(name, "glDepthRangef") == 0)
+            ptr = wglSymbol("glDepthRange", nullptr);
+        wglSymbolFailed = failed;
+    }
 
-    if (ptr == nullptr && strcmp(name, "glPrimitiveBoundingBox") == 0)
-        ptr = (void*)wglPrimitiveBoundingBox;
+    if (ptr == nullptr)
+    {
+        if (strcmp(name, "glBlendBarrier") == 0)
+            ptr = (void*)wglBlendBarrier;
+        if (strcmp(name, "glGetShaderPrecisionFormat") == 0)
+            ptr = (void*)wglGetShaderPrecisionFormat;
+        if (strcmp(name, "glPrimitiveBoundingBox") == 0)
+            ptr = (void*)wglPrimitiveBoundingBox;
+        if (strcmp(name, "glReleaseShaderCompiler") == 0)
+            ptr = (void*)wglReleaseShaderCompiler;
+        if (strcmp(name, "glShaderBinary") == 0)
+            ptr = (void*)wglShaderBinary;
+    }
 
     if (ptr == nullptr)
         xxLog("WGL", "%s is not found", name);
@@ -194,6 +226,27 @@ void glPresentContextWGL(uint64_t context, void* display)
     SwapBuffers(hDC);
 }
 //------------------------------------------------------------------------------
+PFNGLSHADERSOURCEPROC glShaderSource_;
+//------------------------------------------------------------------------------
+void wglShaderSourceLegacy(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
+{
+    const GLchar** replaceString = xxAlloc(const GLchar*, count);
+
+    for (GLsizei i = 0; i < count; ++i)
+    {
+        const GLchar* var = string[i];
+        if (strcmp(var, "#version 100") == 0)
+            var = "#version 120";
+        if (strncmp(var, "precision", sizeof("precision") - 1) == 0)
+            var = "";
+        replaceString[i] = var;
+    }
+
+    glShaderSource_(shader, count, replaceString, length);
+
+    xxFree(replaceString);
+}
+//------------------------------------------------------------------------------
 uint64_t xxGraphicCreateWGL(int version)
 {
     if (g_gdiLibrary == nullptr)
@@ -236,24 +289,36 @@ uint64_t xxGraphicCreateWGL(int version)
     {
         glDestroyContextWGL(context, g_dummyWindow, nullptr);
         context = glCreateContextWGL(0, g_dummyWindow, nullptr);
+        if (context == 0)
+            return 0;
     }
 
     bool success = false;
-    switch (version)
+    for (int i = 0; i < 2; ++i)
     {
-    case 320:
-        success = xxGraphicCreateGLES32(wglSymbol);
-        break;
-    case 310:
-        success = xxGraphicCreateGLES31(wglSymbol);
-        break;
-    case 300:
-        success = xxGraphicCreateGLES3(wglSymbol);
-        break;
-    case 200:
-    default:
-        success = xxGraphicCreateGLES2(wglSymbol);
-        break;
+        switch (version)
+        {
+        case 320:
+            success = xxGraphicCreateGLES32(wglSymbol);
+            break;
+        case 310:
+            success = xxGraphicCreateGLES31(wglSymbol);
+            break;
+        case 300:
+            success = xxGraphicCreateGLES3(wglSymbol);
+            break;
+        case 200:
+        default:
+            success = xxGraphicCreateGLES2(wglSymbol);
+            break;
+        }
+        if (success || wglCreateContextAttribsARB == nullptr)
+            break;
+        wglCreateContextAttribsARB = nullptr;
+        glDestroyContextWGL(context, g_dummyWindow, nullptr);
+        context = glCreateContextWGL(0, g_dummyWindow, nullptr);
+        if (context == 0)
+            return 0;
     }
     if (success == false)
     {
@@ -265,6 +330,9 @@ uint64_t xxGraphicCreateWGL(int version)
     glDestroyContext = glDestroyContextWGL;
     glMakeCurrentContext = glMakeCurrentContextWGL;
     glPresentContext = glPresentContextWGL;
+
+    glShaderSource_ = glShaderSource;
+    glShaderSource = version <= 200 ? wglShaderSourceLegacy : glShaderSource;
 
     return context;
 }
