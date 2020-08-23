@@ -228,7 +228,7 @@ void glPresentContextWGL(uint64_t context, void* display)
 //------------------------------------------------------------------------------
 PFNGLSHADERSOURCEPROC glShaderSource_;
 //------------------------------------------------------------------------------
-void wglShaderSourceLegacy(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
+void GL_APIENTRY wglShaderSourceLegacy(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
 {
     const GLchar** replaceString = xxAlloc(const GLchar*, count);
 
