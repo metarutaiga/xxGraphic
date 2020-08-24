@@ -382,7 +382,17 @@ char* xxOpenDirectory(uint64_t* handle, const char* path, ...)
         va_start(args, path);
         while (const char* match = va_arg(args, const char*))
         {
-            if (match[0] && strstr(filename, match) == nullptr)
+#if defined(_MSC_VER)
+            auto strcasestr = [](const char* p1, const char* p2) -> const char*
+            {
+                for (size_t p2Length = strlen(p2); (*p1); p1++)
+                    if (strnicmp(p1, p2, p2Length) == 0)
+                        return p1;
+                return nullptr;
+            };
+#endif
+
+            if (match[0] && strcasestr(filename, match) == nullptr)
             {
                 filename = nullptr;
                 break;
