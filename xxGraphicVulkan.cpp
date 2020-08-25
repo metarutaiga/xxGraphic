@@ -15,12 +15,16 @@
 
 #if defined(xxMACOS)
 #   define VK_USE_PLATFORM_MACOS_MVK    1
+#   define VK_MVK_moltenvk              1
 #   include <CoreGraphics/CoreGraphics.h>
+#   include <Metal/Metal.h>
 #endif
 
 #if defined(xxIOS)
 #   define VK_USE_PLATFORM_IOS_MVK      1
+#   define VK_MVK_moltenvk              1
 #   include <CoreGraphics/CoreGraphics.h>
+#   include <Metal/Metal.h>
 #endif
 
 #if defined(xxWINDOWS)
@@ -35,6 +39,7 @@
 #define PERSISTENT_BUFFER               1
 
 static void*                            g_vulkanLibrary = nullptr;
+static void*                            g_vulkanBackendLibrary = nullptr;
 static VkInstance                       g_instance = VK_NULL_HANDLE;
 static VkDevice                         g_device = VK_NULL_HANDLE;
 static VkPhysicalDevice                 g_physicalDevice = VK_NULL_HANDLE;
@@ -127,6 +132,9 @@ static VKAPI_ATTR void* VKAPI_CALL vkSymbol(const char* name)
 
     if (ptr == nullptr && g_vulkanLibrary)
         ptr = xxGetProcAddress(g_vulkanLibrary, name);
+
+    if (ptr == nullptr && g_vulkanBackendLibrary)
+        ptr = xxGetProcAddress(g_vulkanBackendLibrary, name);
 
     if (ptr == nullptr)
         xxLog("Vulkan", "%s is not found", name);
@@ -348,6 +356,12 @@ static bool vkSymbols(void* (VKAPI_PTR *vkSymbol)(const char* name))
     vkSymbol(vkCmdPushDescriptorSetWithTemplateKHR);
     VK_KHR_push_descriptor = (vkSymbolFailed == false);
 
+#if defined(xxMACOS) || defined(xxIOS)
+    vkSymbolFailed = false;
+    vkSymbol(vkSetMTLTextureMVK);
+    VK_MVK_moltenvk = (vkSymbolFailed == false);
+#endif
+
     return true;
 }
 //------------------------------------------------------------------------------
@@ -369,6 +383,8 @@ uint64_t xxCreateInstanceVulkan()
         g_vulkanLibrary = xxLoadLibrary("libvulkan.dylib");
     if (g_vulkanLibrary == nullptr)
         g_vulkanLibrary = xxLoadLibrary("libMoltenVK.dylib");
+    if (g_vulkanBackendLibrary == nullptr)
+        g_vulkanBackendLibrary = xxLoadLibrary("libMoltenVK.dylib");
 #endif
 
 #if defined(xxWINDOWS)
@@ -501,6 +517,12 @@ void xxDestroyInstanceVulkan(uint64_t instance)
     {
         xxFreeLibrary(g_vulkanLibrary);
         g_vulkanLibrary = nullptr;
+    }
+
+    if (g_vulkanBackendLibrary)
+    {
+        xxFreeLibrary(g_vulkanBackendLibrary);
+        g_vulkanBackendLibrary = nullptr;
     }
 
     xxUnregisterFunction();
@@ -832,7 +854,7 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
         }
     }
 #elif defined(xxMACOS)
-    id nsWindow = (id)view;
+    id nsWindow = (__bridge id)view;
     if (nsWindow == nil)
         return 0;
     id nsViewController = objc_msgSend(nsWindow, sel_getUid("contentViewController"));
@@ -850,7 +872,7 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
 
     VkMacOSSurfaceCreateInfoMVK surfaceInfo = {};
     surfaceInfo.sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK;
-    surfaceInfo.pView = nsView;
+    surfaceInfo.pView = (__bridge void*)nsView;
 
     VkSurfaceKHR surface = VK_NULL_HANDLE;
     if (surface == VK_NULL_HANDLE)
@@ -863,7 +885,7 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
         }
     }
 #elif defined(xxIOS)
-    id nsWindow = (id)view;
+    id nsWindow = (__bridge id)view;
     if (nsWindow == nil)
         return 0;
     id nsViewController = objc_msgSend(nsWindow, sel_getUid("rootViewController"));
@@ -879,7 +901,7 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
 
     VkIOSSurfaceCreateInfoMVK surfaceInfo = {};
     surfaceInfo.sType = VK_STRUCTURE_TYPE_IOS_SURFACE_CREATE_INFO_MVK;
-    surfaceInfo.pView = nsView;
+    surfaceInfo.pView = (__bridge void*)nsView;
 
     VkSurfaceKHR surface = VK_NULL_HANDLE;
     if (surface == VK_NULL_HANDLE)
@@ -1912,6 +1934,33 @@ uint64_t xxCreateTextureVulkan(uint64_t device, int format, unsigned int width, 
     vkTexture->depth = depth;
     vkTexture->mipmap = mipmap;
     vkTexture->array = array;
+
+    if (external)
+    {
+#if defined(xxMACOS) || defined(xxIOS)
+        if (VK_MVK_moltenvk)
+        {
+            id mtlTexture = (__bridge id)external;
+            if ([NSStringFromClass([mtlTexture class]) containsString:@"MTLBuffer"])
+            {
+                id <MTLBuffer> mtlBuffer = mtlTexture;
+                MTLTextureDescriptor* desc = [NSClassFromString(@"MTLTextureDescriptor") texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
+                                                                                                                      width:width
+                                                                                                                     height:height
+                                                                                                                  mipmapped:NO];
+#if defined(xxMACOS) || defined(xxMACCATALYST)
+                desc.resourceOptions = MTLResourceStorageModeManaged;
+#else
+                desc.resourceOptions = MTLResourceStorageModeShared;
+#endif
+                mtlTexture = [mtlBuffer newTextureWithDescriptor:desc
+                                                          offset:0
+                                                     bytesPerRow:[mtlBuffer length] / height];
+            }
+            vkSetMTLTextureMVK(image, mtlTexture);
+        }
+#endif
+    }
 
     return reinterpret_cast<uint64_t>(vkTexture);
 }
