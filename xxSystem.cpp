@@ -174,31 +174,31 @@ static uint64_t xxTSCFrequencyImpl()
     LARGE_INTEGER performanceBegin;
     LARGE_INTEGER performanceEnd;
 
+    LARGE_INTEGER performanceFrequency;
+    QueryPerformanceFrequency(&performanceFrequency);
+    if (performanceFrequency.QuadPart == 0)
+        performanceFrequency.QuadPart = 1;
+
     QueryPerformanceCounter(&performanceBegin);
     uint64_t tscBegin = xxTSC();
     Sleep(100);
     uint64_t tscEnd = xxTSC();
     QueryPerformanceCounter(&performanceEnd);
 
-    LARGE_INTEGER performanceFrequency;
-    QueryPerformanceFrequency(&performanceFrequency);
-    if (performanceFrequency.QuadPart == 0)
-        performanceFrequency.QuadPart = 1;
-
-    double delta = (performanceEnd.QuadPart - performanceBegin.QuadPart) * 1000 / double(performanceFrequency.QuadPart);
+    double delta = ((performanceEnd.QuadPart - performanceBegin.QuadPart) * MSEC_PER_SEC) / double(performanceFrequency.QuadPart);
     if (delta == 0.0)
         delta = 100.0;
 
-    LONGLONG counter = LONGLONG((tscEnd - tscBegin) * 1000.0 / delta);
-    double mhz = counter / 1000000.0;
-    LONGLONG frequency = LONGLONG(LONGLONG(mhz / 100.0 + 0.5) * 100.0 * 1000000.0);
+    LONGLONG counter = LONGLONG((tscEnd - tscBegin) * MSEC_PER_SEC / delta);
+    double mhz = counter / double(NSEC_PER_MSEC);
+    LONGLONG frequency = LONGLONG(LONGLONG(mhz / 100.0 + 0.5) * 100.0 * NSEC_PER_MSEC);
 #else
     timeval tmBegin;
     timeval tmEnd;
 
     timespec ts;
     ts.tv_sec = 0;
-    ts.tv_nsec = 100 * 1000000;
+    ts.tv_nsec = 100 * NSEC_PER_MSEC;
 
     gettimeofday(&tmBegin, nullptr);
     uint64_t tscBegin = xxTSC();
@@ -206,13 +206,13 @@ static uint64_t xxTSCFrequencyImpl()
     uint64_t tscEnd = xxTSC();
     gettimeofday(&tmEnd, nullptr);
 
-    double delta = (((tmEnd.tv_sec - tmBegin.tv_sec) * 1000000 + (tmEnd.tv_usec - tmBegin.tv_usec)) * 1000) / double(1000000);
+    double delta = (((tmEnd.tv_sec - tmBegin.tv_sec) * USEC_PER_SEC + (tmEnd.tv_usec - tmBegin.tv_usec)) * NSEC_PER_USEC) / double(NSEC_PER_MSEC);
     if (delta == 0.0)
         delta = 100.0;
 
-    int64_t counter = int64_t((tscEnd - tscBegin) * 1000.0 / delta);
-    double mhz = counter / 1000000.0;
-    int64_t frequency = int64_t(int64_t(mhz / 100.0 + 0.5) * 100.0 * 1000000.0);
+    int64_t counter = int64_t((tscEnd - tscBegin) * MSEC_PER_SEC / delta);
+    double mhz = counter / double(NSEC_PER_MSEC);
+    int64_t frequency = int64_t(int64_t(mhz / 100.0 + 0.5) * 100.0 * NSEC_PER_MSEC);
 #endif
 
     xxLog("xxSystem", "Frequency : %llu", frequency);
@@ -463,40 +463,31 @@ void xxCloseDirectory(uint64_t* handle)
 //==============================================================================
 //  Logger
 //==============================================================================
-int xxLog(const char* tag, const char* format, ...)
+void xxLog(const char* tag, const char* format, ...)
 {
-    char buffer[1024];
-
     va_list va;
     va_start(va, format);
-    int tagLength = snprintf(buffer, sizeof(buffer), "[%s] ", tag);
-    int formatLength = vsnprintf(buffer + tagLength, sizeof(buffer) - tagLength - 1, format, va);
-    va_end(va);
-
 #if defined(xxANDROID)
-    __android_log_print(ANDROID_LOG_INFO, tag, "%s", buffer);
-#elif defined(xxWINDOWS) && defined(_UNICODE)
-    wchar_t temp[1024];
-    int length = ::MultiByteToWideChar(CP_UTF8, 0, buffer, -1, temp, MAX_PATH);
-    if (length > 0 && length < xxCountOf(temp))
-    {
-        temp[length - 1] = L'\n';
-        temp[length - 0] = L'\0';
-    }
-    OutputDebugStringW(temp);
-#elif defined(xxWINDOWS)
-    int length = tagLength + formatLength;
-    if (length > 0 && length < xxCountOf(buffer))
-    {
-        buffer[length - 1] = '\n';
-        buffer[length - 0] = '\0';
-    }
-    OutputDebugStringA(buffer);
+    __android_log_vprint(ANDROID_LOG_INFO, tag, format, va);
 #else
-    printf("%s\n", buffer);
+    char fmt[256];
+    snprintf(fmt, 256, "[%s] %s\n", tag, format);
+#if defined(xxWINDOWS)
+    int length = vsnprintf(nullptr, 0, fmt, va);
+    char* buffer = nullptr;
+    if (length > 1024)
+        buffer = (char*)malloc(length + 2);
+    if (buffer == nullptr)
+        buffer = (char*)alloca(length + 2);
+    vsnprintf(buffer, length + 1, fmt, va);
+    OutputDebugStringA(buffer);
+    if (length > 1024)
+        free(buffer);
+#else
+    vprintf(fmt, va);
 #endif
-
-    return formatLength - 1;
+#endif
+    va_end(va);
 }
 //==============================================================================
 //  MD5 - omaha

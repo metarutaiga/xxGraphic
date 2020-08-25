@@ -28,6 +28,13 @@
 #include <string.h>
 #include <time.h>
 
+#define MSEC_PER_SEC    1000ull
+#define USEC_PER_SEC    1000000ull
+#define NSEC_PER_SEC    1000000000ull
+#define USEC_PER_MSEC   1000ull
+#define NSEC_PER_MSEC   1000000ull
+#define NSEC_PER_USEC   1000ull
+
 #if defined(_M_ARM64) || defined(_M_HYBRID_X86_ARM64)
 #   include <arm64_neon.h>
 #elif defined(__ARM_NEON__) || defined(__ARM_NEON) || defined(_M_ARM) || defined(_M_ARM64)
@@ -228,7 +235,7 @@ xxAPI void xxCloseDirectory(uint64_t* handle);
 //==============================================================================
 //  Logger
 //==============================================================================
-xxAPI int xxLog(const char* tag, const char* format, ...);
+xxAPI void xxLog(const char* tag, const char* format, ...);
 //==============================================================================
 //  MD5
 //==============================================================================
