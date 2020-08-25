@@ -30,6 +30,12 @@
 
 #if defined(_MSC_VER)
 #   include <intrin.h>
+#   undef ARM64_CNTFRQ_EL0
+#   undef ARM64_CNTPCT_EL0
+#   undef ARM64_CNTVCT_EL0
+#   define ARM64_CNTFRQ_EL0 ARM64_SYSREG(3,3,14,0,0)    // Counter-timer Frequency register
+#   define ARM64_CNTPCT_EL0 ARM64_SYSREG(3,3,14,0,1)    // Counter-timer Physical Count register
+#   define ARM64_CNTVCT_EL0 ARM64_SYSREG(3,3,14,0,2)    // Counter-timer Virtual Count register
 #endif
 
 //==============================================================================
@@ -135,9 +141,12 @@ uint64_t xxTSC()
 #elif defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
     return __rdtsc();
 #elif defined(_M_ARM)
-    return __rdpmccntr64();
+    LARGE_INTEGER counter;
+    QueryPerformanceCounter(&counter);
+    return counter.QuadPart;
+//  return (uint64_t)_MoveFromCoprocessor(15, 0, 9, 13, 0) * 64;
 #elif defined(_M_ARM64)
-    return _ReadStatusReg(ARM64_PMCCNTR_EL0);
+    return _ReadStatusReg(ARM64_CNTPCT_EL0);
 #elif defined(__APPLE__)
     return mach_absolute_time();
 #else
@@ -153,7 +162,14 @@ static uint64_t xxTSCFrequencyImpl()
     unsigned long cntfrq;
     asm volatile("mrs %0, cntfrq_el0" : "=r" (cntfrq));
 
-    unsigned long counter = cntfrq;
+    unsigned long frequency = cntfrq;
+#elif defined(_M_ARM)
+    LARGE_INTEGER counter;
+    QueryPerformanceFrequency(&counter);
+    LONGLONG frequency = counter.QuadPart;
+//  unsigned long frequency = _MoveFromCoprocessor(15, 0, 14, 0, 0);
+#elif defined(_M_ARM64)
+    unsigned long frequency = _ReadStatusReg(ARM64_CNTFRQ_EL0);
 #elif defined(xxWINDOWS)
     LARGE_INTEGER performanceBegin;
     LARGE_INTEGER performanceEnd;
@@ -169,13 +185,13 @@ static uint64_t xxTSCFrequencyImpl()
     if (performanceFrequency.QuadPart == 0)
         performanceFrequency.QuadPart = 1;
 
-    double delta = (performanceEnd.QuadPart - performanceBegin.QuadPart) * 1000.0 / performanceFrequency.QuadPart;
+    double delta = (performanceEnd.QuadPart - performanceBegin.QuadPart) * 1000 / double(performanceFrequency.QuadPart);
     if (delta == 0.0)
         delta = 100.0;
 
     LONGLONG counter = LONGLONG((tscEnd - tscBegin) * 1000.0 / delta);
     double mhz = counter / 1000000.0;
-    counter = LONGLONG(LONGLONG(mhz / 100.0 + 0.5) * 100.0 * 1000000.0);
+    LONGLONG frequency = LONGLONG(LONGLONG(mhz / 100.0 + 0.5) * 100.0 * 1000000.0);
 #else
     timeval tmBegin;
     timeval tmEnd;
@@ -190,20 +206,18 @@ static uint64_t xxTSCFrequencyImpl()
     uint64_t tscEnd = xxTSC();
     gettimeofday(&tmEnd, nullptr);
 
-    uint64_t frequency = 1000000;
-
-    double delta = ((tmEnd.tv_sec - tmBegin.tv_sec) * 1000000 + (tmEnd.tv_usec - tmBegin.tv_usec)) * 1000.0 / frequency;
+    double delta = (((tmEnd.tv_sec - tmBegin.tv_sec) * 1000000 + (tmEnd.tv_usec - tmBegin.tv_usec)) * 1000) / double(1000000);
     if (delta == 0.0)
         delta = 100.0;
 
     int64_t counter = int64_t((tscEnd - tscBegin) * 1000.0 / delta);
     double mhz = counter / 1000000.0;
-    counter = int64_t(int64_t(mhz / 100.0 + 0.5) * 100.0 * 1000000.0);
+    int64_t frequency = int64_t(int64_t(mhz / 100.0 + 0.5) * 100.0 * 1000000.0);
 #endif
 
-    xxLog("xxSystem", "Frequency : %llu", counter);
+    xxLog("xxSystem", "Frequency : %llu", frequency);
 
-    return counter;
+    return frequency;
 }
 //------------------------------------------------------------------------------
 static uint64_t xxTSCFrequencyInteger = xxTSCFrequencyImpl();
