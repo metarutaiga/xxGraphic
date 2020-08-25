@@ -1957,7 +1957,11 @@ uint64_t xxCreateTextureVulkan(uint64_t device, int format, unsigned int width, 
                                                           offset:0
                                                      bytesPerRow:[mtlBuffer length] / height];
             }
+            vkBindBufferMemory(vkDevice, image, VK_NULL_HANDLE, 0);
+            vkFreeMemory(g_device, memory, g_callbacks);
             vkSetMTLTextureMVK(image, mtlTexture);
+
+            vkTexture->memory = VK_NULL_HANDLE;
         }
 #endif
     }
