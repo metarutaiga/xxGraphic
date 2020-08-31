@@ -12,6 +12,7 @@
 #   include <mach/mach_time.h>
 #   include <mach-o/dyld.h>
 #   include <pthread.h>
+#   include <sys/sysctl.h>
 #   include <sys/syscall.h>
 #   include <sys/time.h>
 #   include <unistd.h>
@@ -158,62 +159,70 @@ uint64_t xxTSC()
 //------------------------------------------------------------------------------
 static uint64_t xxTSCFrequencyImpl()
 {
+    int64_t frequency = 0;
+
+    // Hardware
+    if (frequency == 0)
+    {
 #if defined(__aarch64__)
-    unsigned long cntfrq;
-    asm volatile("mrs %0, cntfrq_el0" : "=r" (cntfrq));
-
-    unsigned long frequency = cntfrq;
+        unsigned long cntfrq;
+        asm volatile("mrs %0, cntfrq_el0" : "=r" (cntfrq));
+        frequency = cntfrq;
 #elif defined(_M_ARM)
-    LARGE_INTEGER counter;
-    QueryPerformanceFrequency(&counter);
-    LONGLONG frequency = counter.QuadPart;
-//  unsigned long frequency = _MoveFromCoprocessor(15, 0, 14, 0, 0);
+        LARGE_INTEGER counter;
+        QueryPerformanceFrequency(&counter);
+        frequency = counter.QuadPart;
+//      frequency = _MoveFromCoprocessor(15, 0, 14, 0, 0);
 #elif defined(_M_ARM64)
-    unsigned long frequency = _ReadStatusReg(ARM64_CNTFRQ_EL0);
-#elif defined(xxWINDOWS)
-    LARGE_INTEGER performanceBegin;
-    LARGE_INTEGER performanceEnd;
-
-    LARGE_INTEGER performanceFrequency;
-    QueryPerformanceFrequency(&performanceFrequency);
-    if (performanceFrequency.QuadPart == 0)
-        performanceFrequency.QuadPart = 1;
-
-    QueryPerformanceCounter(&performanceBegin);
-    uint64_t tscBegin = xxTSC();
-    Sleep(100);
-    uint64_t tscEnd = xxTSC();
-    QueryPerformanceCounter(&performanceEnd);
-
-    double delta = ((performanceEnd.QuadPart - performanceBegin.QuadPart) * MSEC_PER_SEC) / double(performanceFrequency.QuadPart);
-    if (delta == 0.0)
-        delta = 100.0;
-
-    LONGLONG counter = LONGLONG((tscEnd - tscBegin) * MSEC_PER_SEC / delta);
-    double mhz = counter / double(NSEC_PER_MSEC);
-    LONGLONG frequency = LONGLONG(LONGLONG(mhz / 100.0 + 0.5) * 100.0 * NSEC_PER_MSEC);
-#else
-    timeval tmBegin;
-    timeval tmEnd;
-
-    timespec ts;
-    ts.tv_sec = 0;
-    ts.tv_nsec = 100 * NSEC_PER_MSEC;
-
-    gettimeofday(&tmBegin, nullptr);
-    uint64_t tscBegin = xxTSC();
-    nanosleep(&ts, nullptr);
-    uint64_t tscEnd = xxTSC();
-    gettimeofday(&tmEnd, nullptr);
-
-    double delta = (((tmEnd.tv_sec - tmBegin.tv_sec) * USEC_PER_SEC + (tmEnd.tv_usec - tmBegin.tv_usec)) * NSEC_PER_USEC) / double(NSEC_PER_MSEC);
-    if (delta == 0.0)
-        delta = 100.0;
-
-    int64_t counter = int64_t((tscEnd - tscBegin) * MSEC_PER_SEC / delta);
-    double mhz = counter / double(NSEC_PER_MSEC);
-    int64_t frequency = int64_t(int64_t(mhz / 100.0 + 0.5) * 100.0 * NSEC_PER_MSEC);
+        frequency = _ReadStatusReg(ARM64_CNTFRQ_EL0);
+#elif defined(xxMACOS)
+        size_t sz = sizeof(frequency);
+        sysctlbyname("machdep.tsc.frequency", &frequency, &sz, nullptr, 0);
 #endif
+    }
+
+    // Measure
+    if (frequency == 0)
+    {
+#if defined(xxWINDOWS)
+        LARGE_INTEGER performanceBegin;
+        LARGE_INTEGER performanceEnd;
+
+        LARGE_INTEGER performanceFrequency;
+        QueryPerformanceFrequency(&performanceFrequency);
+        if (performanceFrequency.QuadPart == 0)
+            performanceFrequency.QuadPart = 1;
+
+        QueryPerformanceCounter(&performanceBegin);
+        uint64_t tscBegin = xxTSC();
+        Sleep(100);
+        uint64_t tscEnd = xxTSC();
+        QueryPerformanceCounter(&performanceEnd);
+
+        double delta = ((performanceEnd.QuadPart - performanceBegin.QuadPart) * MSEC_PER_SEC) / double(performanceFrequency.QuadPart);
+#else
+        timeval tmBegin;
+        timeval tmEnd;
+
+        timespec ts;
+        ts.tv_sec = 0;
+        ts.tv_nsec = 100 * NSEC_PER_MSEC;
+
+        gettimeofday(&tmBegin, nullptr);
+        uint64_t tscBegin = xxTSC();
+        nanosleep(&ts, nullptr);
+        uint64_t tscEnd = xxTSC();
+        gettimeofday(&tmEnd, nullptr);
+
+        double delta = (((tmEnd.tv_sec - tmBegin.tv_sec) * USEC_PER_SEC + (tmEnd.tv_usec - tmBegin.tv_usec)) * NSEC_PER_USEC) / double(NSEC_PER_MSEC);
+#endif
+        if (delta == 0.0)
+            delta = 100.0;
+
+        int64_t counter = int64_t((tscEnd - tscBegin) * MSEC_PER_SEC / delta);
+        double mhz = counter / double(NSEC_PER_MSEC);
+        frequency = int64_t(int64_t(mhz + 0.5) * NSEC_PER_MSEC);
+    }
 
     xxLog("xxSystem", "Frequency : %llu", frequency);
 
