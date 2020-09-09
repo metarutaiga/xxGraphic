@@ -474,11 +474,22 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, unsigned int width, u
     MTLResourceOptions options = MTLResourceStorageModeShared;
 #endif
 
-    id <MTLBuffer> buffer;
+    int stride = 0;
+    id <MTLBuffer> buffer = nil;
+    IOSurfaceRef ioSurface = nullptr;
     if (external)
     {
         pixelFormat = MTLPixelFormatBGRA8Unorm;
-        buffer = (__bridge id)external;
+        if ([NSStringFromClass([(__bridge id)external class]) containsString:@"IOSurface"])
+        {
+            ioSurface = (IOSurfaceRef)external;
+            stride = 0;
+        }
+        else
+        {
+            buffer = (__bridge id)external;
+            stride = (int)[buffer length] / height;
+        }
     }
     else
     {
@@ -487,21 +498,31 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, unsigned int width, u
         {
             alignment = (int)[mtlDevice minimumLinearTextureAlignmentForPixelFormat:pixelFormat];
         }
-        int stride = width * sizeof(int);
+        stride = width * sizeof(int);
         stride = (stride + (alignment - 1)) & ~(alignment - 1);
         buffer = [mtlDevice newBufferWithLength:stride * height
                                         options:options];
     }
-    int stride = (int)[buffer length] / height;
 
     MTLTextureDescriptor* desc = [classMTLTextureDescriptor texture2DDescriptorWithPixelFormat:pixelFormat
-                                                                                        width:width
+                                                                                         width:width
                                                                                         height:height
                                                                                      mipmapped:NO];
     desc.resourceOptions = options;
-    id <MTLTexture> texture = [buffer newTextureWithDescriptor:desc
-                                                        offset:0
-                                                   bytesPerRow:stride];
+
+    id <MTLTexture> texture;
+    if (ioSurface)
+    {
+        texture = [mtlDevice newTextureWithDescriptor:desc
+                                            iosurface:ioSurface
+                                                plane:0];
+    }
+    else
+    {
+        texture = [buffer newTextureWithDescriptor:desc
+                                            offset:0
+                                       bytesPerRow:stride];
+    }
 
     mtlTexture->texture = texture;
     mtlTexture->buffer = buffer;
