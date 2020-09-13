@@ -37,6 +37,10 @@
 #   define ARM64_CNTFRQ_EL0 ARM64_SYSREG(3,3,14,0,0)    // Counter-timer Frequency register
 #   define ARM64_CNTPCT_EL0 ARM64_SYSREG(3,3,14,0,1)    // Counter-timer Physical Count register
 #   define ARM64_CNTVCT_EL0 ARM64_SYSREG(3,3,14,0,2)    // Counter-timer Virtual Count register
+#   if defined(_WIN32)
+#       include <timeapi.h>
+#       pragma comment(lib, "winmm")
+#   endif
 #endif
 
 //==============================================================================
@@ -246,7 +250,9 @@ float xxGetCurrentTime()
 void xxSleep(unsigned int sleepMs)
 {
 #if defined(_MSC_VER)
+    timeBeginPeriod(1);
     Sleep(sleepMs);
+    timeEndPeriod(1);
 #else
     struct timespec timespec;
     timespec.tv_sec = (sleepMs / 1000);
