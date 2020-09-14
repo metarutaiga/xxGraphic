@@ -31,6 +31,7 @@
 
 #if defined(_MSC_VER)
 #   include <intrin.h>
+#   include <malloc.h>
 #   undef ARM64_CNTFRQ_EL0
 #   undef ARM64_CNTPCT_EL0
 #   undef ARM64_CNTVCT_EL0
