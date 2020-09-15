@@ -359,6 +359,7 @@ static bool vkSymbols(void* (VKAPI_PTR *vkSymbol)(const char* name))
 #if defined(xxMACOS) || defined(xxIOS)
     vkSymbolFailed = false;
     vkSymbol(vkSetMTLTextureMVK);
+    vkSymbol(vkGetMTLTextureMVK);
     VK_MVK_moltenvk = (vkSymbolFailed == false);
 #endif
 
@@ -1940,10 +1941,19 @@ uint64_t xxCreateTextureVulkan(uint64_t device, int format, unsigned int width, 
 #if defined(xxMACOS) || defined(xxIOS)
         if (VK_MVK_moltenvk)
         {
-            id mtlTexture = (__bridge id)external;
-            if ([NSStringFromClass([mtlTexture class]) containsString:@"MTLBuffer"])
+            id <MTLBuffer> mtlBuffer = nil;
+            IOSurfaceRef ioSurface = nullptr;
+
+            if ([NSStringFromClass([(__bridge id)external class]) containsString:@"MTLBuffer"])
+                mtlBuffer = (__bridge id)external;
+            if ([NSStringFromClass([(__bridge id)external class]) containsString:@"IOSurface"])
+                ioSurface = (IOSurfaceRef)external;
+
+            if (mtlBuffer || ioSurface)
             {
-                id <MTLBuffer> mtlBuffer = mtlTexture;
+                id <MTLTexture> mtlTexture = nil;
+                vkGetMTLTextureMVK(image, &mtlTexture);
+
                 MTLTextureDescriptor* desc = [NSClassFromString(@"MTLTextureDescriptor") texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
                                                                                                                       width:width
                                                                                                                      height:height
@@ -1953,15 +1963,20 @@ uint64_t xxCreateTextureVulkan(uint64_t device, int format, unsigned int width, 
 #else
                 desc.resourceOptions = MTLResourceStorageModeShared;
 #endif
-                mtlTexture = [mtlBuffer newTextureWithDescriptor:desc
-                                                          offset:0
-                                                     bytesPerRow:[mtlBuffer length] / height];
-            }
-            vkBindBufferMemory(vkDevice, image, VK_NULL_HANDLE, 0);
-            vkFreeMemory(g_device, memory, g_callbacks);
-            vkSetMTLTextureMVK(image, mtlTexture);
+                if (mtlBuffer)
+                    mtlTexture = [mtlBuffer newTextureWithDescriptor:desc
+                                                              offset:0
+                                                         bytesPerRow:[mtlBuffer length] / height];
+                if (ioSurface)
+                    mtlTexture = [[mtlTexture device] newTextureWithDescriptor:desc
+                                                                     iosurface:ioSurface
+                                                                         plane:0];
+                vkBindBufferMemory(vkDevice, image, VK_NULL_HANDLE, 0);
+                vkFreeMemory(g_device, memory, g_callbacks);
+                vkSetMTLTextureMVK(image, mtlTexture);
 
-            vkTexture->memory = VK_NULL_HANDLE;
+                vkTexture->memory = VK_NULL_HANDLE;
+            }
         }
 #endif
     }

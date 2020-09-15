@@ -223,8 +223,10 @@ VKEXPORT PFN_vkCmdPushDescriptorSetWithTemplateKHR          vkCmdPushDescriptorS
 #if VK_MVK_moltenvk
 #undef VK_MVK_moltenvk
 typedef VkResult (VKAPI_PTR *PFN_vkSetMTLTextureMVK)(VkImage image, id<MTLTexture> mtlTexture);
+typedef void (VKAPI_PTR *PFN_vkGetMTLTextureMVK)(VkImage image, id<MTLTexture>* pMTLTexture);
 VKEXPORT bool                                               VK_MVK_moltenvk;
 VKEXPORT PFN_vkSetMTLTextureMVK                             vkSetMTLTextureMVK;
+VKEXPORT PFN_vkGetMTLTextureMVK                             vkGetMTLTextureMVK;
 #endif
 
 #endif // VULKAN_PROTOTYPE_H_
