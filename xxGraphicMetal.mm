@@ -279,7 +279,7 @@ void xxDestroyRenderPassMetal(uint64_t renderPass)
     mtlRenderPass = nil;
 }
 //------------------------------------------------------------------------------
-uint64_t xxBeginRenderPassMetal(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float r, float g, float b, float a, float depth, unsigned char stencil)
+uint64_t xxBeginRenderPassMetal(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float color[4], float depth, unsigned char stencil)
 {
     id <MTLCommandBuffer> __unsafe_unretained mtlCommandBuffer = (__bridge id)reinterpret_cast<void*>(commandBuffer);
     MTLFRAMEBUFFER* mtlFramebuffer = reinterpret_cast<MTLFRAMEBUFFER*>(framebuffer);
@@ -287,7 +287,7 @@ uint64_t xxBeginRenderPassMetal(uint64_t commandBuffer, uint64_t framebuffer, ui
 
     mtlRenderPass.colorAttachments[0].texture = mtlFramebuffer->texture;
 
-    mtlRenderPass.colorAttachments[0].clearColor = MTLClearColorMake(r, g, b, a);
+    mtlRenderPass.colorAttachments[0].clearColor = MTLClearColorMake(color[0], color[1], color[2], color[3]);
     mtlRenderPass.depthAttachment.clearDepth = depth;
     mtlRenderPass.stencilAttachment.clearStencil = stencil;
 

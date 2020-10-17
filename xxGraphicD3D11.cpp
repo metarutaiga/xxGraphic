@@ -342,7 +342,7 @@ void xxDestroyRenderPassD3D11(uint64_t renderPass)
 
 }
 //------------------------------------------------------------------------------
-uint64_t xxBeginRenderPassD3D11(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float r, float g, float b, float a, float depth, unsigned char stencil)
+uint64_t xxBeginRenderPassD3D11(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float color[4], float depth, unsigned char stencil)
 {
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandBuffer);
     if (d3dDeviceContext == nullptr)
@@ -372,7 +372,6 @@ uint64_t xxBeginRenderPassD3D11(uint64_t commandBuffer, uint64_t framebuffer, ui
 
     if (d3dRenderPass.clearColor)
     {
-        float color[4] = { r, g, b, a };
         d3dDeviceContext->ClearRenderTargetView(d3dFramebuffer->renderTargetView, color);
     }
     if (d3dRenderPass.clearDepthStencil)

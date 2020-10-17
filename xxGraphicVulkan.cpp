@@ -1389,7 +1389,7 @@ void xxDestroyRenderPassVulkan(uint64_t renderPass)
     vkDestroyRenderPass(g_device, vkRenderPass, g_callbacks);
 }
 //------------------------------------------------------------------------------
-uint64_t xxBeginRenderPassVulkan(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float r, float g, float b, float a, float depth, unsigned char stencil)
+uint64_t xxBeginRenderPassVulkan(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float color[4], float depth, unsigned char stencil)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandBuffer);
     if (vkCommandBuffer == VK_NULL_HANDLE)
@@ -1402,10 +1402,10 @@ uint64_t xxBeginRenderPassVulkan(uint64_t commandBuffer, uint64_t framebuffer, u
         return 0;
 
     VkClearValue clearValues[2] = {};
-    clearValues[0].color.float32[0] = r;
-    clearValues[0].color.float32[1] = g;
-    clearValues[0].color.float32[2] = b;
-    clearValues[0].color.float32[3] = a;
+    clearValues[0].color.float32[0] = color[0];
+    clearValues[0].color.float32[1] = color[1];
+    clearValues[0].color.float32[2] = color[2];
+    clearValues[0].color.float32[3] = color[3];
     clearValues[1].depthStencil.depth = depth;
     clearValues[1].depthStencil.stencil = stencil;
 

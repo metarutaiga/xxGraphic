@@ -76,11 +76,11 @@ uint64_t xxGetCommandBufferMetal2(uint64_t device, uint64_t swapchain)
 //==============================================================================
 //  Render Pass
 //==============================================================================
-uint64_t xxBeginRenderPassMetal2(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float r, float g, float b, float a, float depth, unsigned char stencil)
+uint64_t xxBeginRenderPassMetal2(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float color[4], float depth, unsigned char stencil)
 {
     MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(commandBuffer);
 
-    uint64_t commandEncoder = xxBeginRenderPassMetal(reinterpret_cast<uint64_t>(mtlSwapchain->commandBuffer), framebuffer, renderPass, width, height, r, g, b, a, depth, stencil);
+    uint64_t commandEncoder = xxBeginRenderPassMetal(reinterpret_cast<uint64_t>(mtlSwapchain->commandBuffer), framebuffer, renderPass, width, height, color, depth, stencil);
     if (commandEncoder == 0)
         return 0;
 

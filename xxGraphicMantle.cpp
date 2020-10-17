@@ -529,7 +529,7 @@ void xxDestroyRenderPassMantle(uint64_t renderPass)
 
 }
 //------------------------------------------------------------------------------
-uint64_t xxBeginRenderPassMantle(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float r, float g, float b, float a, float depth, unsigned char stencil)
+uint64_t xxBeginRenderPassMantle(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float color[4], float depth, unsigned char stencil)
 {
     GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandBuffer);
     if (grCommandBuffer == GR_NULL_HANDLE)
@@ -541,7 +541,6 @@ uint64_t xxBeginRenderPassMantle(uint64_t commandBuffer, uint64_t framebuffer, u
 
     if (grRenderPass.clearColor)
     {
-        float color[4] = { r, g, b, a };
         grCmdClearColorImage(grCommandBuffer, grFramebuffer->colorImage, color, 0, nullptr);
     }
     if (grRenderPass.clearDepthStencil)

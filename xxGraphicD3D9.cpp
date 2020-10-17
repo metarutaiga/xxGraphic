@@ -305,7 +305,7 @@ void xxDestroyRenderPassD3D9(uint64_t renderPass)
 
 }
 //------------------------------------------------------------------------------
-uint64_t xxBeginRenderPassD3D9(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float r, float g, float b, float a, float depth, unsigned char stencil)
+uint64_t xxBeginRenderPassD3D9(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float color[4], float depth, unsigned char stencil)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandBuffer);
     if (d3dDevice == nullptr)
@@ -336,7 +336,7 @@ uint64_t xxBeginRenderPassD3D9(uint64_t commandBuffer, uint64_t framebuffer, uin
 
     if (d3dFlags)
     {
-        d3dDevice->Clear(0, nullptr, d3dFlags, D3DCOLOR_COLORVALUE(r, g, b, a), depth, stencil);
+        d3dDevice->Clear(0, nullptr, d3dFlags, D3DCOLOR_COLORVALUE(color[0], color[1], color[2], color[3]), depth, stencil);
     }
 
     return commandBuffer;

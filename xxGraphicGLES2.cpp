@@ -228,7 +228,7 @@ void xxDestroyRenderPassGLES2(uint64_t renderPass)
 
 }
 //------------------------------------------------------------------------------
-uint64_t xxBeginRenderPassGLES2(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float r, float g, float b, float a, float depth, unsigned char stencil)
+uint64_t xxBeginRenderPassGLES2(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float color[4], float depth, unsigned char stencil)
 {
     GLbitfield mask = static_cast<GLbitfield>(renderPass);
 
@@ -237,7 +237,7 @@ uint64_t xxBeginRenderPassGLES2(uint64_t commandBuffer, uint64_t framebuffer, ui
 
     if (mask & GL_COLOR_BUFFER_BIT)
     {
-        glClearColor(r, g, b, a);
+        glClearColor(color[0], color[1], color[2], color[3]);
     }
     if (mask & GL_DEPTH_BUFFER_BIT)
     {

@@ -718,7 +718,7 @@ void xxDestroyRenderPassD3D12(uint64_t renderPass)
 
 }
 //------------------------------------------------------------------------------
-uint64_t xxBeginRenderPassD3D12(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float r, float g, float b, float a, float depth, unsigned char stencil)
+uint64_t xxBeginRenderPassD3D12(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float color[4], float depth, unsigned char stencil)
 {
     ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandBuffer);
     if (d3dCommandList == nullptr)
@@ -757,7 +757,6 @@ uint64_t xxBeginRenderPassD3D12(uint64_t commandBuffer, uint64_t framebuffer, ui
     d3dCommandList->ResourceBarrier(1, &barrier);
     if (d3dRenderPass.clearColor)
     {
-        float color[4] = { r, g, b, a };
         d3dCommandList->ClearRenderTargetView(d3dFramebuffer->renderTargetHandle, color, 0, nullptr);
     }
 

@@ -365,7 +365,7 @@ void xxDestroyRenderPassD3D6(uint64_t renderPass)
 
 }
 //------------------------------------------------------------------------------
-uint64_t xxBeginRenderPassD3D6(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float r, float g, float b, float a, float depth, unsigned char stencil)
+uint64_t xxBeginRenderPassD3D6(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float color[4], float depth, unsigned char stencil)
 {
     LPDIRECT3DDEVICE3 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE3>(commandBuffer);
     if (d3dDevice == nullptr)
@@ -399,7 +399,7 @@ uint64_t xxBeginRenderPassD3D6(uint64_t commandBuffer, uint64_t framebuffer, uin
         rect.lX2 = width;
         rect.lY2 = height;
 
-        viewport->Clear2(1, &rect, d3dFlags, D3DRGBA(r, g, b, a), depth, stencil);
+        viewport->Clear2(1, &rect, d3dFlags, D3DRGBA(color[0], color[1], color[2], color[3]), depth, stencil);
     }
 
     return commandBuffer;
