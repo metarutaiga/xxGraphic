@@ -1253,6 +1253,11 @@ uint64_t xxGetCommandBufferVulkan(uint64_t device, uint64_t swapchain)
     return reinterpret_cast<uint64_t>(commandBuffer);
 }
 //------------------------------------------------------------------------------
+float xxGetFramebufferScaleVulkan(uint64_t swapchain)
+{
+    return 1.0f;
+}
+//------------------------------------------------------------------------------
 uint64_t xxGetFramebufferVulkan(uint64_t device, uint64_t swapchain)
 {
     SWAPCHAINVK* vkSwapchain = reinterpret_cast<SWAPCHAINVK*>(swapchain);

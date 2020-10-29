@@ -150,6 +150,15 @@ void glDestroyContextEAGL(uint64_t context, void* view, void* display)
     [classEAGLContext setCurrentContext:nil];
 }
 //------------------------------------------------------------------------------
+float glGetScaleContextEAGL(uint64_t context, void* view)
+{
+    UIWindow* nsWindow = (__bridge UIWindow*)view;
+    if (nsWindow == nil)
+        return 1.0f;
+
+    return [nsWindow contentScaleFactor];
+}
+//------------------------------------------------------------------------------
 void glMakeCurrentContextEAGL(uint64_t context, void* display)
 {
     EAGLContext* eaglContext = (__bridge EAGLContext*)reinterpret_cast<void*>(context);
@@ -218,6 +227,7 @@ uint64_t xxGraphicCreateEAGL(int version)
 
     glCreateContext = glCreateContextEAGL;
     glDestroyContext = glDestroyContextEAGL;
+    glGetScaleContext = glGetScaleContextEAGL;
     glMakeCurrentContext = glMakeCurrentContextEAGL;
     glPresentContext = glPresentContextEAGL;
 

@@ -32,6 +32,7 @@ xxAPI void          xxDestroySwapchainD3D6(uint64_t swapchain);
 xxAPI void          xxPresentSwapchainD3D6(uint64_t swapchain);
 xxAPI uint64_t      xxGetCommandBufferD3D6(uint64_t device, uint64_t swapchain);
 xxAPI uint64_t      xxGetFramebufferD3D6(uint64_t device, uint64_t swapchain);
+xxAPI float         xxGetFramebufferScaleD3D6(uint64_t swapchain);
 //==============================================================================
 //  Command Buffer
 //==============================================================================

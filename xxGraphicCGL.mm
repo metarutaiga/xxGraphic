@@ -268,6 +268,15 @@ void glDestroyContextCGL(uint64_t context, void* view, void* display)
     [NSOpenGLContext clearCurrentContext];
 }
 //------------------------------------------------------------------------------
+float glGetScaleContextCGL(uint64_t context, void* view)
+{
+    NSWindow* nsWindow = (__bridge NSWindow*)view;
+    if (nsWindow == nil)
+        return 1.0f;
+
+    return [nsWindow backingScaleFactor];
+}
+//------------------------------------------------------------------------------
 void glMakeCurrentContextCGL(uint64_t context, void* display)
 {
     NSOpenGLContext* __unsafe_unretained nsContext = (__bridge NSOpenGLContext*)reinterpret_cast<void*>(context);
@@ -348,6 +357,7 @@ uint64_t xxGraphicCreateCGL(int version)
 
     glCreateContext = glCreateContextCGL;
     glDestroyContext = glDestroyContextCGL;
+    glGetScaleContext = glGetScaleContextCGL;
     glMakeCurrentContext = glMakeCurrentContextCGL;
     glPresentContext = glPresentContextCGL;
 

@@ -458,6 +458,7 @@ void main()
 //==============================================================================
 uint64_t                                        (*glCreateContext)(uint64_t instance, void* view, void** display);
 void                                            (*glDestroyContext)(uint64_t context, void* view, void* display);
+float                                           (*glGetScaleContext)(uint64_t context, void* view);
 void                                            (*glMakeCurrentContext)(uint64_t context, void* display);
 void                                            (*glPresentContext)(uint64_t context, void* display);
 //------------------------------------------------------------------------------

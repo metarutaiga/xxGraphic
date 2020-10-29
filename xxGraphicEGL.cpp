@@ -160,6 +160,11 @@ void glDestroyContextEGL(uint64_t context, void* view, void* surface)
     eglDestroySurface(eglDisplay, eglSurface);
 }
 //------------------------------------------------------------------------------
+float glGetScaleContextEGL(uint64_t context, void* view)
+{
+    return 1.0f;
+}
+//------------------------------------------------------------------------------
 void glMakeCurrentContextEGL(uint64_t context, void* surface)
 {
     EGLContext eglContext = reinterpret_cast<EGLContext>(context);
@@ -279,6 +284,7 @@ uint64_t xxGraphicCreateEGL(int version)
 
     glCreateContext = glCreateContextEGL;
     glDestroyContext = glDestroyContextEGL;
+    glGetScaleContext = glGetScaleContextEGL;
     glMakeCurrentContext = glMakeCurrentContextEGL;
     glPresentContext = glPresentContextEGL;
 

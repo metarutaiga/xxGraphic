@@ -238,6 +238,20 @@ uint64_t xxGetFramebufferMetal(uint64_t device, uint64_t swapchain)
 
     return reinterpret_cast<uint64_t>(mtlSwapchain);
 }
+//------------------------------------------------------------------------------
+float xxGetFramebufferScaleMetal(uint64_t swapchain)
+{
+    MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(swapchain);
+
+#if defined(xxMACOS)
+    float scale = [[mtlSwapchain->view window] backingScaleFactor];
+#else
+    float scale = [mtlSwapchain->view contentScaleFactor];
+#endif
+    mtlSwapchain->metalLayer.contentsScale = scale;
+
+    return scale;
+}
 //==============================================================================
 //  Command Buffer
 //==============================================================================

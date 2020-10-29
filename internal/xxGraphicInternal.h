@@ -44,6 +44,7 @@ enum xxGraphicDescriptor
     xxGetDeviceName = xxGetDeviceName ## API; \
 \
     xxGetFramebuffer = xxGetFramebuffer ## API; \
+    xxGetFramebufferScale = xxGetFramebufferScale ## API; \
 \
     xxCreateSwapchain = xxCreateSwapchain ## API; \
     xxDestroySwapchain = xxDestroySwapchain ## API; \

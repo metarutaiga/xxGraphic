@@ -30,6 +30,7 @@ void        (*xxDestroySwapchain)(uint64_t swapchain);
 void        (*xxPresentSwapchain)(uint64_t swapchain);
 uint64_t    (*xxGetCommandBuffer)(uint64_t device, uint64_t swapchain);
 uint64_t    (*xxGetFramebuffer)(uint64_t device, uint64_t swapchain);
+float       (*xxGetFramebufferScale)(uint64_t swapchain);
 //==============================================================================
 //  Command Buffer
 //==============================================================================

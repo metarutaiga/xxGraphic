@@ -54,6 +54,7 @@ GLEXPORT const char* const                              glDefaultShaderCode;
 //==============================================================================
 GLEXPORT uint64_t                                       (*glCreateContext)(uint64_t device, void* view, void** display);
 GLEXPORT void                                           (*glDestroyContext)(uint64_t context, void* view, void* display);
+GLEXPORT float                                          (*glGetScaleContext)(uint64_t context, void* view);
 GLEXPORT void                                           (*glMakeCurrentContext)(uint64_t context, void* display);
 GLEXPORT void                                           (*glPresentContext)(uint64_t context, void* display);
 //------------------------------------------------------------------------------

@@ -264,6 +264,11 @@ void glDestroyContextWGL(uint64_t context, void* view, void* display)
     ReleaseDC(hWnd, hDC);
 }
 //------------------------------------------------------------------------------
+float glGetScaleContextWGL(uint64_t context, void* view)
+{
+    return 1.0f;
+}
+//------------------------------------------------------------------------------
 void glMakeCurrentContextWGL(uint64_t context, void* display)
 {
     HGLRC hGLRC = reinterpret_cast<HGLRC>(context);
@@ -353,6 +358,7 @@ uint64_t xxGraphicCreateWGL(int version)
 
     glCreateContext = glCreateContextWGL;
     glDestroyContext = glDestroyContextWGL;
+    glGetScaleContext = glGetScaleContextWGL;
     glMakeCurrentContext = glMakeCurrentContextWGL;
     glPresentContext = glPresentContextWGL;
 

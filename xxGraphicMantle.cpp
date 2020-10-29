@@ -472,6 +472,11 @@ uint64_t xxGetFramebufferMantle(uint64_t device, uint64_t swapchain)
 
     return reinterpret_cast<uint64_t>(grFramebuffer);
 }
+//------------------------------------------------------------------------------
+float xxGetFramebufferScaleMantle(uint64_t swapchain)
+{
+    return 1.0f;
+}
 //==============================================================================
 //  Command Buffer
 //==============================================================================

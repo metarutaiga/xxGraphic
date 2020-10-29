@@ -32,6 +32,7 @@ xxAPI void          xxDestroySwapchainVulkan(uint64_t swapchain);
 xxAPI void          xxPresentSwapchainVulkan(uint64_t swapchain);
 xxAPI uint64_t      xxGetCommandBufferVulkan(uint64_t device, uint64_t swapchain);
 xxAPI uint64_t      xxGetFramebufferVulkan(uint64_t device, uint64_t swapchain);
+xxAPI float         xxGetFramebufferScaleVulkan(uint64_t swapchain);
 //==============================================================================
 //  Command Buffer
 //==============================================================================

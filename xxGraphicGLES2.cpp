@@ -190,6 +190,15 @@ uint64_t xxGetFramebufferGLES2(uint64_t device, uint64_t swapchain)
 {
     return 0;
 }
+//------------------------------------------------------------------------------
+float xxGetFramebufferScaleGLES2(uint64_t swapchain)
+{
+    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(swapchain);
+    if (glSwapchain == nullptr)
+        return 1.0f;
+
+    return glGetScaleContext(glSwapchain->context, glSwapchain->view);
+}
 //==============================================================================
 //  Command Buffer
 //==============================================================================
