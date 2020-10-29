@@ -54,6 +54,7 @@ struct MTLSWAPCHAIN : public MTLFRAMEBUFFER
 #endif
     int                             width;
     int                             height;
+    float                           scale;
 
     // Metal 2
     id <MTLRenderCommandEncoder>    commandEncoder;

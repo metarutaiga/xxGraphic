@@ -31,8 +31,7 @@ xxAPI uint64_t      xxCreateSwapchainMantle(uint64_t device, uint64_t renderPass
 xxAPI void          xxDestroySwapchainMantle(uint64_t swapchain);
 xxAPI void          xxPresentSwapchainMantle(uint64_t swapchain);
 xxAPI uint64_t      xxGetCommandBufferMantle(uint64_t device, uint64_t swapchain);
-xxAPI uint64_t      xxGetFramebufferMantle(uint64_t device, uint64_t swapchain);
-xxAPI float         xxGetFramebufferScaleMantle(uint64_t swapchain);
+xxAPI uint64_t      xxGetFramebufferMantle(uint64_t device, uint64_t swapchain, float* scale);
 //==============================================================================
 //  Command Buffer
 //==============================================================================

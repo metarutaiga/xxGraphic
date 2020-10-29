@@ -37,6 +37,7 @@ struct SWAPCHAINGL
     void*       display;
     int         width;
     int         height;
+    float       scale;
     uint64_t    pipeline;
     uint64_t    vertexBuffers[8];
     GLenum      textureTypes[8];

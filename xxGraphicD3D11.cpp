@@ -296,14 +296,14 @@ uint64_t xxGetCommandBufferD3D11(uint64_t device, uint64_t swapchain)
     return reinterpret_cast<uint64_t>(d3dDeviceContext);
 }
 //------------------------------------------------------------------------------
-uint64_t xxGetFramebufferD3D11(uint64_t device, uint64_t swapchain)
+uint64_t xxGetFramebufferD3D11(uint64_t device, uint64_t swapchain, float* scale)
 {
+    if (scale)
+    {
+        (*scale) = 1.0f;
+    }
+
     return swapchain;
-}
-//------------------------------------------------------------------------------
-float xxGetFramebufferScaleD3D11(uint64_t swapchain)
-{
-    return 1.0f;
 }
 //==============================================================================
 //  Command Buffer

@@ -74,14 +74,9 @@ uint64_t xxGetCommandBufferNULL(uint64_t device, uint64_t swapchain)
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxGetFramebufferNULL(uint64_t device, uint64_t swapchain)
+uint64_t xxGetFramebufferNULL(uint64_t device, uint64_t swapchain, float* scale)
 {
     return 0;
-}
-//------------------------------------------------------------------------------
-float xxGetFramebufferScaleNULL(uint64_t swapchain)
-{
-    return 1.0f;
 }
 //==============================================================================
 //  Command Buffer

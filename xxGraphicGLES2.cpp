@@ -141,6 +141,7 @@ uint64_t xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view
     glSwapchain->display = display;
     glSwapchain->width = width;
     glSwapchain->height = height;
+    glSwapchain->scale = glGetScaleContext(glSwapchain->context, glSwapchain->view);
     glSwapchain->pipeline = 0;
     memset(glSwapchain->vertexBuffers, 0, sizeof(glSwapchain->vertexBuffers));
     memset(glSwapchain->textureTypes, 0, sizeof(glSwapchain->textureTypes));
@@ -186,18 +187,25 @@ uint64_t xxGetCommandBufferGLES2(uint64_t device, uint64_t swapchain)
     return reinterpret_cast<uint64_t>(glSwapchain);
 }
 //------------------------------------------------------------------------------
-uint64_t xxGetFramebufferGLES2(uint64_t device, uint64_t swapchain)
-{
-    return 0;
-}
-//------------------------------------------------------------------------------
-float xxGetFramebufferScaleGLES2(uint64_t swapchain)
+uint64_t xxGetFramebufferGLES2(uint64_t device, uint64_t swapchain, float* scale)
 {
     SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(swapchain);
-    if (glSwapchain == nullptr)
-        return 1.0f;
 
-    return glGetScaleContext(glSwapchain->context, glSwapchain->view);
+    if (scale)
+    {
+        float scaleFactor = glGetScaleContext(glSwapchain->context, glSwapchain->view);
+        if (glSwapchain->scale != scaleFactor)
+        {
+            glSwapchain->scale = scaleFactor;
+
+            glDestroyContext(glSwapchain->context, glSwapchain->view, glSwapchain->display);
+            glSwapchain->context = glCreateContext(device, glSwapchain->view, &glSwapchain->display);
+        }
+
+        (*scale) = scaleFactor;
+    }
+
+    return 0;
 }
 //==============================================================================
 //  Command Buffer

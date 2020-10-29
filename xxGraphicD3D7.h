@@ -31,8 +31,7 @@ xxAPI uint64_t      xxCreateSwapchainD3D7(uint64_t device, uint64_t renderPass, 
 xxAPI void          xxDestroySwapchainD3D7(uint64_t swapchain);
 xxAPI void          xxPresentSwapchainD3D7(uint64_t swapchain);
 xxAPI uint64_t      xxGetCommandBufferD3D7(uint64_t device, uint64_t swapchain);
-xxAPI uint64_t      xxGetFramebufferD3D7(uint64_t device, uint64_t swapchain);
-xxAPI float         xxGetFramebufferScaleD3D7(uint64_t swapchain);
+xxAPI uint64_t      xxGetFramebufferD3D7(uint64_t device, uint64_t swapchain, float* scale);
 //==============================================================================
 //  Command Buffer
 //==============================================================================

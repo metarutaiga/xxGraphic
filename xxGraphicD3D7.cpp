@@ -299,14 +299,14 @@ uint64_t xxGetCommandBufferD3D7(uint64_t device, uint64_t swapchain)
     return device;
 }
 //------------------------------------------------------------------------------
-uint64_t xxGetFramebufferD3D7(uint64_t device, uint64_t swapchain)
+uint64_t xxGetFramebufferD3D7(uint64_t device, uint64_t swapchain, float* scale)
 {
+    if (scale)
+    {
+        (*scale) = 1.0f;
+    }
+
     return swapchain;
-}
-//------------------------------------------------------------------------------
-float xxGetFramebufferScaleD3D7(uint64_t swapchain)
-{
-    return 1.0f;
 }
 //==============================================================================
 //  Command Buffer

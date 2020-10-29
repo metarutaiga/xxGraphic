@@ -241,8 +241,13 @@ uint64_t xxGetCommandBufferD3D9(uint64_t device, uint64_t swapchain)
     return device;
 }
 //------------------------------------------------------------------------------
-uint64_t xxGetFramebufferD3D9(uint64_t device, uint64_t swapchain)
+uint64_t xxGetFramebufferD3D9(uint64_t device, uint64_t swapchain, float* scale)
 {
+    if (scale)
+    {
+        (*scale) = 1.0f;
+    }
+
     D3DSWAPCHAIN9* d3dSwapchain = reinterpret_cast<D3DSWAPCHAIN9*>(swapchain);
     if (d3dSwapchain == nullptr)
         return 0;
@@ -256,11 +261,6 @@ uint64_t xxGetFramebufferD3D9(uint64_t device, uint64_t swapchain)
     d3dSwapchain->backBuffer = surface;
 
     return swapchain;
-}
-//------------------------------------------------------------------------------
-float xxGetFramebufferScaleD3D9(uint64_t swapchain)
-{
-    return 1.0f;
 }
 //==============================================================================
 //  Command Buffer

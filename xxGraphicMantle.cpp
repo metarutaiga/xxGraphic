@@ -464,18 +464,18 @@ uint64_t xxGetCommandBufferMantle(uint64_t device, uint64_t swapchain)
     return reinterpret_cast<uint64_t>(commandBuffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxGetFramebufferMantle(uint64_t device, uint64_t swapchain)
+uint64_t xxGetFramebufferMantle(uint64_t device, uint64_t swapchain, float* scale)
 {
+    if (scale)
+    {
+        (*scale) = 1.0f;
+    }
+
     FRAMEBUFFERGR* grFramebuffer = reinterpret_cast<SWAPCHAINGR*>(swapchain);
     if (grFramebuffer == nullptr)
         return 0;
 
     return reinterpret_cast<uint64_t>(grFramebuffer);
-}
-//------------------------------------------------------------------------------
-float xxGetFramebufferScaleMantle(uint64_t swapchain)
-{
-    return 1.0f;
 }
 //==============================================================================
 //  Command Buffer

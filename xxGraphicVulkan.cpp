@@ -819,6 +819,7 @@ struct SWAPCHAINVK : public FRAMEBUFFERVK
     void*               view;
     uint32_t            width;
     uint32_t            height;
+    float               scale;
     uint32_t            imageCount;
     uint32_t            imageIndex;
 };
@@ -840,6 +841,8 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
     memset(vkSwapchain, 0, sizeof(SWAPCHAINVK));
 
 #if defined(xxANDROID)
+    float contentsScale = 1.0f;
+
     VkAndroidSurfaceCreateInfoKHR surfaceInfo = {};
     surfaceInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
     surfaceInfo.window = (ANativeWindow*)view;
@@ -915,6 +918,8 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
         }
     }
 #elif defined(xxWINDOWS)
+    float contentsScale = 1.0f;
+
     VkWin32SurfaceCreateInfoKHR surfaceInfo = {};
     surfaceInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
     surfaceInfo.hinstance = GetModuleHandle(nullptr);
@@ -931,6 +936,8 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
         }
     }
 #else
+    float contentsScale = 1.0f;
+
     VkSurfaceKHR surface = VK_NULL_HANDLE;
 #endif
 
@@ -1132,6 +1139,7 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
     vkSwapchain->view = view;
     vkSwapchain->width = width;
     vkSwapchain->height = height;
+    vkSwapchain->scale = contentsScale;
 
     return reinterpret_cast<uint64_t>(vkSwapchain);
 }
@@ -1253,16 +1261,16 @@ uint64_t xxGetCommandBufferVulkan(uint64_t device, uint64_t swapchain)
     return reinterpret_cast<uint64_t>(commandBuffer);
 }
 //------------------------------------------------------------------------------
-float xxGetFramebufferScaleVulkan(uint64_t swapchain)
-{
-    return 1.0f;
-}
-//------------------------------------------------------------------------------
-uint64_t xxGetFramebufferVulkan(uint64_t device, uint64_t swapchain)
+uint64_t xxGetFramebufferVulkan(uint64_t device, uint64_t swapchain, float* scale)
 {
     SWAPCHAINVK* vkSwapchain = reinterpret_cast<SWAPCHAINVK*>(swapchain);
     if (vkSwapchain == nullptr)
         return 0;
+
+    if (scale)
+    {
+        (*scale) = vkSwapchain->scale;
+    }
 
     uint32_t imageIndex = vkSwapchain->imageIndex;
     VkFramebuffer framebuffer = vkSwapchain->framebuffers[imageIndex];

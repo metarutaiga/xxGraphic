@@ -31,8 +31,7 @@ xxAPI uint64_t      (*xxCreateSwapchain)(uint64_t device, uint64_t renderPass, v
 xxAPI void          (*xxDestroySwapchain)(uint64_t swapchain);
 xxAPI void          (*xxPresentSwapchain)(uint64_t swapchain);
 xxAPI uint64_t      (*xxGetCommandBuffer)(uint64_t device, uint64_t swapchain);
-xxAPI uint64_t      (*xxGetFramebuffer)(uint64_t device, uint64_t swapchain);
-xxAPI float         (*xxGetFramebufferScale)(uint64_t swapchain);
+xxAPI uint64_t      (*xxGetFramebuffer)(uint64_t device, uint64_t swapchain, float* scale);
 //==============================================================================
 //  Command Buffer
 //==============================================================================

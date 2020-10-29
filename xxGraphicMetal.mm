@@ -195,6 +195,7 @@ uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view
     swapchain->view = nsView;
     swapchain->width = width;
     swapchain->height = height;
+    swapchain->scale = contentsScale;
 
     return reinterpret_cast<uint64_t>(swapchain);
 }
@@ -229,28 +230,31 @@ uint64_t xxGetCommandBufferMetal(uint64_t device, uint64_t swapchain)
     return reinterpret_cast<uint64_t>((__bridge void*)commandBuffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxGetFramebufferMetal(uint64_t device, uint64_t swapchain)
+uint64_t xxGetFramebufferMetal(uint64_t device, uint64_t swapchain, float* scale)
 {
     MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(swapchain);
+
+    if (scale)
+    {
+#if defined(xxMACOS)
+        float scaleFactor = [[mtlSwapchain->view window] backingScaleFactor];
+#else
+        float scaleFactor = [mtlSwapchain->view contentScaleFactor];
+#endif
+        if (mtlSwapchain->scale != scaleFactor)
+        {
+            mtlSwapchain->scale = scaleFactor;
+            mtlSwapchain->metalLayer.contentsScale = scaleFactor;
+            mtlSwapchain->metalLayer.drawableSize = CGSizeMake(mtlSwapchain->width * scaleFactor, mtlSwapchain->height * scaleFactor);
+        }
+
+        (*scale) = scaleFactor;
+    }
 
     mtlSwapchain->drawable = [mtlSwapchain->metalLayer nextDrawable];
     mtlSwapchain->texture = [mtlSwapchain->drawable texture];
 
     return reinterpret_cast<uint64_t>(mtlSwapchain);
-}
-//------------------------------------------------------------------------------
-float xxGetFramebufferScaleMetal(uint64_t swapchain)
-{
-    MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(swapchain);
-
-#if defined(xxMACOS)
-    float scale = [[mtlSwapchain->view window] backingScaleFactor];
-#else
-    float scale = [mtlSwapchain->view contentScaleFactor];
-#endif
-    mtlSwapchain->metalLayer.contentsScale = scale;
-
-    return scale;
 }
 //==============================================================================
 //  Command Buffer

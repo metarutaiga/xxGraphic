@@ -31,8 +31,7 @@ xxAPI uint64_t      xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass,
 xxAPI void          xxDestroySwapchainGLES2(uint64_t swapchain);
 xxAPI void          xxPresentSwapchainGLES2(uint64_t swapchain);
 xxAPI uint64_t      xxGetCommandBufferGLES2(uint64_t device, uint64_t swapchain);
-xxAPI uint64_t      xxGetFramebufferGLES2(uint64_t device, uint64_t swapchain);
-xxAPI float         xxGetFramebufferScaleGLES2(uint64_t swapchain);
+xxAPI uint64_t      xxGetFramebufferGLES2(uint64_t device, uint64_t swapchain, float* scale);
 //==============================================================================
 //  Command Buffer
 //==============================================================================

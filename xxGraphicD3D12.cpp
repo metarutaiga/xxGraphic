@@ -647,8 +647,13 @@ uint64_t xxGetCommandBufferD3D12(uint64_t device, uint64_t swapchain)
     return reinterpret_cast<uint64_t>(commandList);
 }
 //------------------------------------------------------------------------------
-uint64_t xxGetFramebufferD3D12(uint64_t device, uint64_t swapchain)
+uint64_t xxGetFramebufferD3D12(uint64_t device, uint64_t swapchain, float* scale)
 {
+    if (scale)
+    {
+        (*scale) = 1.0f;
+    }
+
     D3D12SWAPCHAIN* d3dSwapchain = reinterpret_cast<D3D12SWAPCHAIN*>(swapchain);
     if (d3dSwapchain == nullptr)
         return 0;
@@ -658,11 +663,6 @@ uint64_t xxGetFramebufferD3D12(uint64_t device, uint64_t swapchain)
     d3dSwapchain->renderTargetHandle = d3dSwapchain->renderTargetHandles[bufferIndex];
 
     return swapchain;
-}
-//------------------------------------------------------------------------------
-float xxGetFramebufferScaleD3D12(uint64_t swapchain)
-{
-    return 1.0f;
 }
 //==============================================================================
 //  Command Buffer
