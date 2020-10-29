@@ -25,7 +25,7 @@ const char* (*xxGetDeviceName)();
 //==============================================================================
 //  Swapchain
 //==============================================================================
-uint64_t    (*xxCreateSwapchain)(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain);
+uint64_t    (*xxCreateSwapchain)(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain);
 void        (*xxDestroySwapchain)(uint64_t swapchain);
 void        (*xxPresentSwapchain)(uint64_t swapchain);
 uint64_t    (*xxGetCommandBuffer)(uint64_t device, uint64_t swapchain);
@@ -51,19 +51,19 @@ void        (*xxDestroyVertexAttribute)(uint64_t vertexAttribute);
 //==============================================================================
 //  Buffer
 //==============================================================================
-uint64_t    (*xxCreateConstantBuffer)(uint64_t device, unsigned int size);
-uint64_t    (*xxCreateIndexBuffer)(uint64_t device, unsigned int size);
-uint64_t    (*xxCreateVertexBuffer)(uint64_t device, unsigned int size, uint64_t vertexAttribute);
+uint64_t    (*xxCreateConstantBuffer)(uint64_t device, int size);
+uint64_t    (*xxCreateIndexBuffer)(uint64_t device, int size);
+uint64_t    (*xxCreateVertexBuffer)(uint64_t device, int size, uint64_t vertexAttribute);
 void        (*xxDestroyBuffer)(uint64_t device, uint64_t buffer);
 void*       (*xxMapBuffer)(uint64_t device, uint64_t buffer);
 void        (*xxUnmapBuffer)(uint64_t device, uint64_t buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t    (*xxCreateTexture)(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array, const void* external);
+uint64_t    (*xxCreateTexture)(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external);
 void        (*xxDestroyTexture)(uint64_t texture);
-void*       (*xxMapTexture)(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array);
-void        (*xxUnmapTexture)(uint64_t device, uint64_t texture, unsigned int level, unsigned int array);
+void*       (*xxMapTexture)(uint64_t device, uint64_t texture, int* stride, int level, int array);
+void        (*xxUnmapTexture)(uint64_t device, uint64_t texture, int level, int array);
 //==============================================================================
 //  Sampler
 //==============================================================================
@@ -98,8 +98,8 @@ void        (*xxSetVertexTextures)(uint64_t commandEncoder, int count, const uin
 void        (*xxSetFragmentTextures)(uint64_t commandEncoder, int count, const uint64_t* textures);
 void        (*xxSetVertexSamplers)(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void        (*xxSetFragmentSamplers)(uint64_t commandEncoder, int count, const uint64_t* samplers);
-void        (*xxSetVertexConstantBuffer)(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
-void        (*xxSetFragmentConstantBuffer)(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+void        (*xxSetVertexConstantBuffer)(uint64_t commandEncoder, uint64_t buffer, int size);
+void        (*xxSetFragmentConstantBuffer)(uint64_t commandEncoder, uint64_t buffer, int size);
 void        (*xxDrawIndexed)(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function

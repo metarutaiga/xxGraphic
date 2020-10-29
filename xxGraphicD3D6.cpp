@@ -197,7 +197,7 @@ const char* xxGetDeviceNameD3D6()
 //==============================================================================
 //  Swapchain
 //==============================================================================
-uint64_t xxCreateSwapchainD3D6(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
+uint64_t xxCreateSwapchainD3D6(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain)
 {
     LPDIRECT3DDEVICE3 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE3>(device);
     if (d3dDevice == nullptr)
@@ -448,21 +448,21 @@ void xxDestroyVertexAttributeD3D6(uint64_t vertexAttribute)
 //==============================================================================
 //  Buffer
 //==============================================================================
-uint64_t xxCreateConstantBufferD3D6(uint64_t device, unsigned int size)
+uint64_t xxCreateConstantBufferD3D6(uint64_t device, int size)
 {
     char* d3dBuffer = xxAlloc(char, size);
 
     return reinterpret_cast<uint64_t>(d3dBuffer) | D3DRTYPE_CONSTANTBUFFER;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateIndexBufferD3D6(uint64_t device, unsigned int size)
+uint64_t xxCreateIndexBufferD3D6(uint64_t device, int size)
 {
     char* d3dBuffer = xxAlloc(char, size);
 
     return reinterpret_cast<uint64_t>(d3dBuffer) | D3DRTYPE_INDEXBUFFER;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferD3D6(uint64_t device, unsigned int size, uint64_t vertexAttribute)
+uint64_t xxCreateVertexBufferD3D6(uint64_t device, int size, uint64_t vertexAttribute)
 {
     LPDIRECT3DDEVICE3 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE3>(device);
     if (d3dDevice == nullptr)
@@ -575,7 +575,7 @@ void xxUnmapBufferD3D6(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureD3D6(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array, const void* external)
+uint64_t xxCreateTextureD3D6(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external)
 {
     DDSURFACEDESC2 desc = {};
     desc.dwSize = sizeof(DDSURFACEDESC2);
@@ -611,7 +611,7 @@ void xxDestroyTextureD3D6(uint64_t texture)
     SafeRelease(d3dTexture);
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureD3D6(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
+void* xxMapTextureD3D6(uint64_t device, uint64_t texture, int* stride, int level, int array)
 {
     LPDIRECT3DTEXTURE2 d3dTexture = reinterpret_cast<LPDIRECT3DTEXTURE2>(texture);
     if (d3dTexture == nullptr)
@@ -640,7 +640,7 @@ void* xxMapTextureD3D6(uint64_t device, uint64_t texture, unsigned int* stride, 
     return desc.lpSurface;
 }
 //------------------------------------------------------------------------------
-void xxUnmapTextureD3D6(uint64_t device, uint64_t texture, unsigned int level, unsigned int array)
+void xxUnmapTextureD3D6(uint64_t device, uint64_t texture, int level, int array)
 {
     LPDIRECT3DTEXTURE2 d3dTexture = reinterpret_cast<LPDIRECT3DTEXTURE2>(texture);
     if (d3dTexture == nullptr)
@@ -885,12 +885,12 @@ void xxSetFragmentSamplersD3D6(uint64_t commandEncoder, int count, const uint64_
     }
 }
 //------------------------------------------------------------------------------
-void xxSetVertexConstantBufferD3D6(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
+void xxSetVertexConstantBufferD3D6(uint64_t commandEncoder, uint64_t buffer, int size)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentConstantBufferD3D6(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
+void xxSetFragmentConstantBufferD3D6(uint64_t commandEncoder, uint64_t buffer, int size)
 {
 
 }

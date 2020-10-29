@@ -27,7 +27,7 @@ xxAPI const char*   xxGetDeviceNameD3D12();
 //==============================================================================
 //  Swapchain
 //==============================================================================
-xxAPI uint64_t      xxCreateSwapchainD3D12(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain);
+xxAPI uint64_t      xxCreateSwapchainD3D12(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain);
 xxAPI void          xxDestroySwapchainD3D12(uint64_t swapchain);
 xxAPI void          xxPresentSwapchainD3D12(uint64_t swapchain);
 xxAPI uint64_t      xxGetCommandBufferD3D12(uint64_t device, uint64_t swapchain);
@@ -53,19 +53,19 @@ xxAPI void          xxDestroyVertexAttributeD3D12(uint64_t vertexAttribute);
 //==============================================================================
 //  Buffer
 //==============================================================================
-xxAPI uint64_t      xxCreateConstantBufferD3D12(uint64_t device, unsigned int size);
-xxAPI uint64_t      xxCreateIndexBufferD3D12(uint64_t device, unsigned int size);
-xxAPI uint64_t      xxCreateVertexBufferD3D12(uint64_t device, unsigned int size, uint64_t vertexAttribute);
+xxAPI uint64_t      xxCreateConstantBufferD3D12(uint64_t device, int size);
+xxAPI uint64_t      xxCreateIndexBufferD3D12(uint64_t device, int size);
+xxAPI uint64_t      xxCreateVertexBufferD3D12(uint64_t device, int size, uint64_t vertexAttribute);
 xxAPI void          xxDestroyBufferD3D12(uint64_t device, uint64_t buffer);
 xxAPI void*         xxMapBufferD3D12(uint64_t device, uint64_t buffer);
 xxAPI void          xxUnmapBufferD3D12(uint64_t device, uint64_t buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
-xxAPI uint64_t      xxCreateTextureD3D12(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array, const void* external);
+xxAPI uint64_t      xxCreateTextureD3D12(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external);
 xxAPI void          xxDestroyTextureD3D12(uint64_t texture);
-xxAPI void*         xxMapTextureD3D12(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array);
-xxAPI void          xxUnmapTextureD3D12(uint64_t device, uint64_t texture, unsigned int level, unsigned int array);
+xxAPI void*         xxMapTextureD3D12(uint64_t device, uint64_t texture, int* stride, int level, int array);
+xxAPI void          xxUnmapTextureD3D12(uint64_t device, uint64_t texture, int level, int array);
 //==============================================================================
 //  Sampler
 //==============================================================================
@@ -100,8 +100,8 @@ xxAPI void          xxSetVertexTexturesD3D12(uint64_t commandEncoder, int count,
 xxAPI void          xxSetFragmentTexturesD3D12(uint64_t commandEncoder, int count, const uint64_t* textures);
 xxAPI void          xxSetVertexSamplersD3D12(uint64_t commandEncoder, int count, const uint64_t* samplers);
 xxAPI void          xxSetFragmentSamplersD3D12(uint64_t commandEncoder, int count, const uint64_t* samplers);
-xxAPI void          xxSetVertexConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
-xxAPI void          xxSetFragmentConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          xxSetVertexConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, int size);
+xxAPI void          xxSetFragmentConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, int size);
 xxAPI void          xxDrawIndexedD3D12(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function

@@ -27,7 +27,7 @@ xxAPI const char*   xxGetDeviceNameNULL();
 //==============================================================================
 //  Swapchain
 //==============================================================================
-xxAPI uint64_t      xxCreateSwapchainNULL(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain);
+xxAPI uint64_t      xxCreateSwapchainNULL(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain);
 xxAPI void          xxDestroySwapchainNULL(uint64_t swapchain);
 xxAPI void          xxPresentSwapchainNULL(uint64_t swapchain);
 xxAPI uint64_t      xxGetCommandBufferNULL(uint64_t device, uint64_t swapchain);
@@ -53,19 +53,19 @@ xxAPI void          xxDestroyVertexAttributeNULL(uint64_t vertexAttribute);
 //==============================================================================
 //  Buffer
 //==============================================================================
-xxAPI uint64_t      xxCreateConstantBufferNULL(uint64_t device, unsigned int size);
-xxAPI uint64_t      xxCreateIndexBufferNULL(uint64_t device, unsigned int size);
-xxAPI uint64_t      xxCreateVertexBufferNULL(uint64_t device, unsigned int size, uint64_t vertexAttribute);
+xxAPI uint64_t      xxCreateConstantBufferNULL(uint64_t device, int size);
+xxAPI uint64_t      xxCreateIndexBufferNULL(uint64_t device, int size);
+xxAPI uint64_t      xxCreateVertexBufferNULL(uint64_t device, int size, uint64_t vertexAttribute);
 xxAPI void          xxDestroyBufferNULL(uint64_t device, uint64_t buffer);
 xxAPI void*         xxMapBufferNULL(uint64_t device, uint64_t buffer);
 xxAPI void          xxUnmapBufferNULL(uint64_t device, uint64_t buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
-xxAPI uint64_t      xxCreateTextureNULL(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array, const void* external);
+xxAPI uint64_t      xxCreateTextureNULL(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external);
 xxAPI void          xxDestroyTextureNULL(uint64_t texture);
-xxAPI void*         xxMapTextureNULL(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array);
-xxAPI void          xxUnmapTextureNULL(uint64_t device, uint64_t texture, unsigned int level, unsigned int array);
+xxAPI void*         xxMapTextureNULL(uint64_t device, uint64_t texture, int* stride, int level, int array);
+xxAPI void          xxUnmapTextureNULL(uint64_t device, uint64_t texture, int level, int array);
 //==============================================================================
 //  Sampler
 //==============================================================================
@@ -100,8 +100,8 @@ xxAPI void          xxSetVertexTexturesNULL(uint64_t commandEncoder, int count, 
 xxAPI void          xxSetFragmentTexturesNULL(uint64_t commandEncoder, int count, const uint64_t* textures);
 xxAPI void          xxSetVertexSamplersNULL(uint64_t commandEncoder, int count, const uint64_t* samplers);
 xxAPI void          xxSetFragmentSamplersNULL(uint64_t commandEncoder, int count, const uint64_t* samplers);
-xxAPI void          xxSetVertexConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
-xxAPI void          xxSetFragmentConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          xxSetVertexConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, int size);
+xxAPI void          xxSetFragmentConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, int size);
 xxAPI void          xxDrawIndexedNULL(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function

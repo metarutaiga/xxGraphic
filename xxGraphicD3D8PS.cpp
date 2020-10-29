@@ -207,7 +207,7 @@ void xxSetVertexBuffersD3D8PS(uint64_t commandEncoder, int count, const uint64_t
     }
 }
 //------------------------------------------------------------------------------
-void xxSetVertexConstantBufferD3D8PS(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
+void xxSetVertexConstantBufferD3D8PS(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
     const float* d3dBuffer = reinterpret_cast<float*>(buffer);
@@ -215,7 +215,7 @@ void xxSetVertexConstantBufferD3D8PS(uint64_t commandEncoder, uint64_t buffer, u
     d3dDevice->SetVertexShaderConstant(0, d3dBuffer, size / sizeof(float));
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentConstantBufferD3D8PS(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
+void xxSetFragmentConstantBufferD3D8PS(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
     const float* d3dBuffer = reinterpret_cast<float*>(buffer);

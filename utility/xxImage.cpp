@@ -142,7 +142,7 @@ void xxImage::Update(uint64_t device)
             if (source == nullptr)
                 continue;
 
-            unsigned int stride = 0;
+            int stride = 0;
             void* target = xxMapTexture(m_device, m_texture, &stride, mipmap, array);
             if (target == nullptr)
                 continue;

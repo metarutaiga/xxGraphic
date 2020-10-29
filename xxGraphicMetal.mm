@@ -143,7 +143,7 @@ const char* xxGetDeviceNameMetal()
 //==============================================================================
 //  Swapchain
 //==============================================================================
-uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
+uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
     if (mtlDevice == nil)
@@ -399,7 +399,7 @@ void xxDestroyVertexAttributeMetal(uint64_t vertexAttribute)
 //==============================================================================
 //  Buffer
 //==============================================================================
-uint64_t xxCreateConstantBufferMetal(uint64_t device, unsigned int size)
+uint64_t xxCreateConstantBufferMetal(uint64_t device, int size)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
     if (mtlDevice == nil)
@@ -411,7 +411,7 @@ uint64_t xxCreateConstantBufferMetal(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>((__bridge_retained void*)buffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateIndexBufferMetal(uint64_t device, unsigned int size)
+uint64_t xxCreateIndexBufferMetal(uint64_t device, int size)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
     if (mtlDevice == nil)
@@ -423,7 +423,7 @@ uint64_t xxCreateIndexBufferMetal(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>((__bridge_retained void*)buffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferMetal(uint64_t device, unsigned int size, uint64_t vertexAttribute)
+uint64_t xxCreateVertexBufferMetal(uint64_t device, int size, uint64_t vertexAttribute)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
     if (mtlDevice == nil)
@@ -456,7 +456,7 @@ void xxUnmapBufferMetal(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureMetal(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array, const void* external)
+uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
     if (mtlDevice == nil)
@@ -538,7 +538,7 @@ void xxDestroyTextureMetal(uint64_t texture)
     delete mtlTexture;
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureMetal(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
+void* xxMapTextureMetal(uint64_t device, uint64_t texture, int* stride, int level, int array)
 {
     MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);
 
@@ -546,7 +546,7 @@ void* xxMapTextureMetal(uint64_t device, uint64_t texture, unsigned int* stride,
     return [mtlTexture->buffer contents];
 }
 //------------------------------------------------------------------------------
-void xxUnmapTextureMetal(uint64_t device, uint64_t texture, unsigned int level, unsigned int array)
+void xxUnmapTextureMetal(uint64_t device, uint64_t texture, int level, int array)
 {
 #if defined(xxMACOS) || defined(xxMACCATALYST)
     MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);
@@ -895,7 +895,7 @@ void xxSetFragmentSamplersMetal(uint64_t commandEncoder, int count, const uint64
                                       withRange:NSMakeRange(0, count)];
 }
 //------------------------------------------------------------------------------
-void xxSetVertexConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
+void xxSetVertexConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
     id <MTLBuffer> __unsafe_unretained mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);
@@ -905,7 +905,7 @@ void xxSetVertexConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, un
                                atIndex:0];
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
+void xxSetFragmentConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
     id <MTLBuffer> __unsafe_unretained mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);

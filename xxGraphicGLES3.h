@@ -19,7 +19,7 @@ xxAPI const char*   xxGetDeviceNameGLES3();
 //==============================================================================
 //  Buffer
 //==============================================================================
-xxAPI uint64_t      xxCreateIndexBufferGLES3(uint64_t device, unsigned int size);
-xxAPI uint64_t      xxCreateVertexBufferGLES3(uint64_t device, unsigned int size, uint64_t vertexAttribute);
+xxAPI uint64_t      xxCreateIndexBufferGLES3(uint64_t device, int size);
+xxAPI uint64_t      xxCreateVertexBufferGLES3(uint64_t device, int size, uint64_t vertexAttribute);
 xxAPI void*         xxMapBufferGLES3(uint64_t device, uint64_t buffer);
 xxAPI void          xxUnmapBufferGLES3(uint64_t device, uint64_t buffer);

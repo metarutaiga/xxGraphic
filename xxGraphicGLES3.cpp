@@ -77,7 +77,7 @@ const char* xxGetDeviceNameGLES3()
 //==============================================================================
 //  Buffer
 //==============================================================================
-uint64_t xxCreateIndexBufferGLES3(uint64_t device, unsigned int size)
+uint64_t xxCreateIndexBufferGLES3(uint64_t device, int size)
 {
     BUFFERGL* glBuffer = xxAlloc(BUFFERGL);
     if (glBuffer == nullptr)
@@ -97,7 +97,7 @@ uint64_t xxCreateIndexBufferGLES3(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(glBuffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferGLES3(uint64_t device, unsigned int size, uint64_t vertexAttribute)
+uint64_t xxCreateVertexBufferGLES3(uint64_t device, int size, uint64_t vertexAttribute)
 {
     BUFFERGL* glBuffer = xxAlloc(BUFFERGL);
     if (glBuffer == nullptr)

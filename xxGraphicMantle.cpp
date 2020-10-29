@@ -324,7 +324,7 @@ struct SWAPCHAINGR : public FRAMEBUFFERGR
     int             height;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateSwapchainMantle(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
+uint64_t xxCreateSwapchainMantle(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
@@ -633,7 +633,7 @@ void xxDestroyVertexAttributeMantle(uint64_t vertexAttribute)
 //==============================================================================
 //  Buffer
 //==============================================================================
-uint64_t xxCreateConstantBufferMantle(uint64_t device, unsigned int size)
+uint64_t xxCreateConstantBufferMantle(uint64_t device, int size)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
@@ -654,7 +654,7 @@ uint64_t xxCreateConstantBufferMantle(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(memory);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateIndexBufferMantle(uint64_t device, unsigned int size)
+uint64_t xxCreateIndexBufferMantle(uint64_t device, int size)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
@@ -675,7 +675,7 @@ uint64_t xxCreateIndexBufferMantle(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(memory);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferMantle(uint64_t device, unsigned int size, uint64_t vertexAttribute)
+uint64_t xxCreateVertexBufferMantle(uint64_t device, int size, uint64_t vertexAttribute)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
@@ -728,7 +728,7 @@ void xxUnmapBufferMantle(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureMantle(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array, const void* external)
+uint64_t xxCreateTextureMantle(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external)
 {
     return 0;
 }
@@ -738,12 +738,12 @@ void xxDestroyTextureMantle(uint64_t texture)
 
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureMantle(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
+void* xxMapTextureMantle(uint64_t device, uint64_t texture, int* stride, int level, int array)
 {
     return nullptr;
 }
 //------------------------------------------------------------------------------
-void xxUnmapTextureMantle(uint64_t device, uint64_t texture, unsigned int level, unsigned int array)
+void xxUnmapTextureMantle(uint64_t device, uint64_t texture, int level, int array)
 {
 
 }
@@ -1073,7 +1073,7 @@ void xxSetFragmentSamplersMantle(uint64_t commandEncoder, int count, const uint6
     grAttachSamplerDescriptors(0, BASE_PIXEL_SAMPLER, count, grSamplers);
 }
 //------------------------------------------------------------------------------
-void xxSetVertexConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
+void xxSetVertexConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     GR_GPU_MEMORY grMemory = reinterpret_cast<GR_GPU_MEMORY>(buffer);
 
@@ -1089,7 +1089,7 @@ void xxSetVertexConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer, u
     grAttachMemoryViewDescriptors(0, BASE_VERTEX_CONSTANT, 1, &info);
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
+void xxSetFragmentConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     GR_GPU_MEMORY grMemory = reinterpret_cast<GR_GPU_MEMORY>(buffer);
 

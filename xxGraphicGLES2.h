@@ -27,7 +27,7 @@ xxAPI const char*   xxGetDeviceNameGLES2();
 //==============================================================================
 //  Swapchain
 //==============================================================================
-xxAPI uint64_t      xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain);
+xxAPI uint64_t      xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain);
 xxAPI void          xxDestroySwapchainGLES2(uint64_t swapchain);
 xxAPI void          xxPresentSwapchainGLES2(uint64_t swapchain);
 xxAPI uint64_t      xxGetCommandBufferGLES2(uint64_t device, uint64_t swapchain);
@@ -53,19 +53,19 @@ xxAPI void          xxDestroyVertexAttributeGLES2(uint64_t vertexAttribute);
 //==============================================================================
 //  Buffer
 //==============================================================================
-xxAPI uint64_t      xxCreateConstantBufferGLES2(uint64_t device, unsigned int size);
-xxAPI uint64_t      xxCreateIndexBufferGLES2(uint64_t device, unsigned int size);
-xxAPI uint64_t      xxCreateVertexBufferGLES2(uint64_t device, unsigned int size, uint64_t vertexAttribute);
+xxAPI uint64_t      xxCreateConstantBufferGLES2(uint64_t device, int size);
+xxAPI uint64_t      xxCreateIndexBufferGLES2(uint64_t device, int size);
+xxAPI uint64_t      xxCreateVertexBufferGLES2(uint64_t device, int size, uint64_t vertexAttribute);
 xxAPI void          xxDestroyBufferGLES2(uint64_t device, uint64_t buffer);
 xxAPI void*         xxMapBufferGLES2(uint64_t device, uint64_t buffer);
 xxAPI void          xxUnmapBufferGLES2(uint64_t device, uint64_t buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
-xxAPI uint64_t      xxCreateTextureGLES2(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array, const void* external);
+xxAPI uint64_t      xxCreateTextureGLES2(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external);
 xxAPI void          xxDestroyTextureGLES2(uint64_t texture);
-xxAPI void*         xxMapTextureGLES2(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array);
-xxAPI void          xxUnmapTextureGLES2(uint64_t device, uint64_t texture, unsigned int level, unsigned int array);
+xxAPI void*         xxMapTextureGLES2(uint64_t device, uint64_t texture, int* stride, int level, int array);
+xxAPI void          xxUnmapTextureGLES2(uint64_t device, uint64_t texture, int level, int array);
 //==============================================================================
 //  Sampler
 //==============================================================================
@@ -100,8 +100,8 @@ xxAPI void          xxSetVertexTexturesGLES2(uint64_t commandEncoder, int count,
 xxAPI void          xxSetFragmentTexturesGLES2(uint64_t commandEncoder, int count, const uint64_t* textures);
 xxAPI void          xxSetVertexSamplersGLES2(uint64_t commandEncoder, int count, const uint64_t* samplers);
 xxAPI void          xxSetFragmentSamplersGLES2(uint64_t commandEncoder, int count, const uint64_t* samplers);
-xxAPI void          xxSetVertexConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
-xxAPI void          xxSetFragmentConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          xxSetVertexConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, int size);
+xxAPI void          xxSetFragmentConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, int size);
 xxAPI void          xxDrawIndexedGLES2(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function

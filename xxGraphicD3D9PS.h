@@ -35,8 +35,8 @@ xxAPI uint64_t      xxCreatePipelineD3D9PS(uint64_t device, uint64_t renderPass,
 //  Command
 //==============================================================================
 xxAPI void          xxSetVertexBuffersD3D9PS(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
-xxAPI void          xxSetVertexConstantBufferD3D9PS(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
-xxAPI void          xxSetFragmentConstantBufferD3D9PS(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          xxSetVertexConstantBufferD3D9PS(uint64_t commandEncoder, uint64_t buffer, int size);
+xxAPI void          xxSetFragmentConstantBufferD3D9PS(uint64_t commandEncoder, uint64_t buffer, int size);
 //==============================================================================
 //  Fixed-Function
 //==============================================================================

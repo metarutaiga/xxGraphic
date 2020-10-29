@@ -117,7 +117,7 @@ const char* xxGetDeviceNameGLES2()
 //==============================================================================
 //  Swapchain
 //==============================================================================
-uint64_t xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
+uint64_t xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain)
 {
     SWAPCHAINGL* glOldSwapchain = reinterpret_cast<SWAPCHAINGL*>(oldSwapchain);
     if (glOldSwapchain && glOldSwapchain->view == view && glOldSwapchain->width == width && glOldSwapchain->height == height)
@@ -332,7 +332,7 @@ void xxDestroyVertexAttributeGLES2(uint64_t vertexAttribute)
 //==============================================================================
 //  Buffer
 //==============================================================================
-uint64_t xxCreateConstantBufferGLES2(uint64_t device, unsigned int size)
+uint64_t xxCreateConstantBufferGLES2(uint64_t device, int size)
 {
     BUFFERGL* glBuffer = xxAlloc(BUFFERGL);
     if (glBuffer == nullptr)
@@ -346,7 +346,7 @@ uint64_t xxCreateConstantBufferGLES2(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(glBuffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateIndexBufferGLES2(uint64_t device, unsigned int size)
+uint64_t xxCreateIndexBufferGLES2(uint64_t device, int size)
 {
     BUFFERGL* glBuffer = xxAlloc(BUFFERGL);
     if (glBuffer == nullptr)
@@ -363,7 +363,7 @@ uint64_t xxCreateIndexBufferGLES2(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(glBuffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferGLES2(uint64_t device, unsigned int size, uint64_t vertexAttribute)
+uint64_t xxCreateVertexBufferGLES2(uint64_t device, int size, uint64_t vertexAttribute)
 {
     BUFFERGL* glBuffer = xxAlloc(BUFFERGL);
     if (glBuffer == nullptr)
@@ -415,7 +415,7 @@ void xxUnmapBufferGLES2(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureGLES2(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array, const void* external)
+uint64_t xxCreateTextureGLES2(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external)
 {
     if (width == 0 || height == 0 || depth == 0 || mipmap == 0 || array == 0)
         return 0;
@@ -513,7 +513,7 @@ void xxDestroyTextureGLES2(uint64_t texture)
     xxFree(glTexture);
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureGLES2(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
+void* xxMapTextureGLES2(uint64_t device, uint64_t texture, int* stride, int level, int array)
 {
     TEXTUREGL* glTexture = reinterpret_cast<TEXTUREGL*>(texture);
     if (glTexture == nullptr)
@@ -539,7 +539,7 @@ void* xxMapTextureGLES2(uint64_t device, uint64_t texture, unsigned int* stride,
     return glTexture->memory;
 }
 //------------------------------------------------------------------------------
-void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, unsigned int level, unsigned int array)
+void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, int level, int array)
 {
     TEXTUREGL* glTexture = reinterpret_cast<TEXTUREGL*>(texture);
     if (glTexture == nullptr)
@@ -925,7 +925,7 @@ void xxSetFragmentSamplersGLES2(uint64_t commandEncoder, int count, const uint64
     }
 }
 //------------------------------------------------------------------------------
-void xxSetVertexConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
+void xxSetVertexConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
     PIPELINEGL* glPipeline = reinterpret_cast<PIPELINEGL*>(glSwapchain->pipeline);
@@ -934,7 +934,7 @@ void xxSetVertexConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, un
     glUniform4fv(glPipeline->uniform, size / sizeof(float) / 4, (GLfloat*)glBuffer->memory);
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
+void xxSetFragmentConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, int size)
 {
 
 }

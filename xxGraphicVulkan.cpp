@@ -823,7 +823,7 @@ struct SWAPCHAINVK : public FRAMEBUFFERVK
     uint32_t            imageIndex;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
+uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
@@ -1536,7 +1536,7 @@ struct BUFFERVK
     void*           ptr;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateConstantBufferVulkan(uint64_t device, unsigned int size)
+uint64_t xxCreateConstantBufferVulkan(uint64_t device, int size)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
@@ -1614,7 +1614,7 @@ uint64_t xxCreateConstantBufferVulkan(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(vkBuffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateIndexBufferVulkan(uint64_t device, unsigned int size)
+uint64_t xxCreateIndexBufferVulkan(uint64_t device, int size)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
@@ -1692,7 +1692,7 @@ uint64_t xxCreateIndexBufferVulkan(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(vkBuffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferVulkan(uint64_t device, unsigned int size, uint64_t vertexAttribute)
+uint64_t xxCreateVertexBufferVulkan(uint64_t device, int size, uint64_t vertexAttribute)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
@@ -1845,7 +1845,7 @@ struct TEXTUREVK
     VkDeviceSize    uploadStride;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateTextureVulkan(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array, const void* external)
+uint64_t xxCreateTextureVulkan(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
@@ -2006,7 +2006,7 @@ void xxDestroyTextureVulkan(uint64_t texture)
     xxFree(vkTexture);
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureVulkan(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
+void* xxMapTextureVulkan(uint64_t device, uint64_t texture, int* stride, int level, int array)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
@@ -2073,7 +2073,7 @@ void* xxMapTextureVulkan(uint64_t device, uint64_t texture, unsigned int* stride
     return ptr;
 }
 //------------------------------------------------------------------------------
-void xxUnmapTextureVulkan(uint64_t device, uint64_t texture, unsigned int level, unsigned int array)
+void xxUnmapTextureVulkan(uint64_t device, uint64_t texture, int level, int array)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
@@ -2601,7 +2601,7 @@ void xxSetFragmentSamplersVulkan(uint64_t commandEncoder, int count, const uint6
     vkCmdPushDescriptorSetKHR(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
 }
 //------------------------------------------------------------------------------
-void xxSetVertexConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
+void xxSetVertexConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
     BUFFERVK* vkBuffer = reinterpret_cast<BUFFERVK*>(buffer);
@@ -2625,7 +2625,7 @@ void xxSetVertexConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, u
     vkCmdPushDescriptorSetKHR(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, 1, &set);
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
+void xxSetFragmentConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
     BUFFERVK* vkBuffer = reinterpret_cast<BUFFERVK*>(buffer);

@@ -27,7 +27,7 @@ xxAPI const char*   xxGetDeviceNameVulkan();
 //==============================================================================
 //  Swapchain
 //==============================================================================
-xxAPI uint64_t      xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain);
+xxAPI uint64_t      xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain);
 xxAPI void          xxDestroySwapchainVulkan(uint64_t swapchain);
 xxAPI void          xxPresentSwapchainVulkan(uint64_t swapchain);
 xxAPI uint64_t      xxGetCommandBufferVulkan(uint64_t device, uint64_t swapchain);
@@ -53,19 +53,19 @@ xxAPI void          xxDestroyVertexAttributeVulkan(uint64_t vertexAttribute);
 //==============================================================================
 //  Buffer
 //==============================================================================
-xxAPI uint64_t      xxCreateConstantBufferVulkan(uint64_t device, unsigned int size);
-xxAPI uint64_t      xxCreateIndexBufferVulkan(uint64_t device, unsigned int size);
-xxAPI uint64_t      xxCreateVertexBufferVulkan(uint64_t device, unsigned int size, uint64_t vertexAttribute);
+xxAPI uint64_t      xxCreateConstantBufferVulkan(uint64_t device, int size);
+xxAPI uint64_t      xxCreateIndexBufferVulkan(uint64_t device, int size);
+xxAPI uint64_t      xxCreateVertexBufferVulkan(uint64_t device, int size, uint64_t vertexAttribute);
 xxAPI void          xxDestroyBufferVulkan(uint64_t device, uint64_t buffer);
 xxAPI void*         xxMapBufferVulkan(uint64_t device, uint64_t buffer);
 xxAPI void          xxUnmapBufferVulkan(uint64_t device, uint64_t buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
-xxAPI uint64_t      xxCreateTextureVulkan(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array, const void* external);
+xxAPI uint64_t      xxCreateTextureVulkan(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external);
 xxAPI void          xxDestroyTextureVulkan(uint64_t texture);
-xxAPI void*         xxMapTextureVulkan(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array);
-xxAPI void          xxUnmapTextureVulkan(uint64_t device, uint64_t texture, unsigned int level, unsigned int array);
+xxAPI void*         xxMapTextureVulkan(uint64_t device, uint64_t texture, int* stride, int level, int array);
+xxAPI void          xxUnmapTextureVulkan(uint64_t device, uint64_t texture, int level, int array);
 //==============================================================================
 //  Sampler
 //==============================================================================
@@ -100,8 +100,8 @@ xxAPI void          xxSetVertexTexturesVulkan(uint64_t commandEncoder, int count
 xxAPI void          xxSetFragmentTexturesVulkan(uint64_t commandEncoder, int count, const uint64_t* textures);
 xxAPI void          xxSetVertexSamplersVulkan(uint64_t commandEncoder, int count, const uint64_t* samplers);
 xxAPI void          xxSetFragmentSamplersVulkan(uint64_t commandEncoder, int count, const uint64_t* samplers);
-xxAPI void          xxSetVertexConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
-xxAPI void          xxSetFragmentConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          xxSetVertexConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, int size);
+xxAPI void          xxSetFragmentConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, int size);
 xxAPI void          xxDrawIndexedVulkan(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function

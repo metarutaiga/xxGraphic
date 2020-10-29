@@ -400,7 +400,7 @@ void xxSetFragmentSamplersMetal2(uint64_t commandEncoder, int count, const uint6
                                                   withRange:NSMakeRange(xxGraphicDescriptor::FRAGMENT_SAMPLER, count)];
 }
 //------------------------------------------------------------------------------
-void xxSetVertexConstantBufferMetal2(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
+void xxSetVertexConstantBufferMetal2(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(commandEncoder);
     id <MTLBuffer> __unsafe_unretained mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);
@@ -412,7 +412,7 @@ void xxSetVertexConstantBufferMetal2(uint64_t commandEncoder, uint64_t buffer, u
                                         usage:MTLResourceUsageRead];
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentConstantBufferMetal2(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
+void xxSetFragmentConstantBufferMetal2(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(commandEncoder);
     id <MTLBuffer> __unsafe_unretained mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);

@@ -457,7 +457,7 @@ struct D3D12SWAPCHAIN : public D3D12FRAMEBUFFER
     int                         height;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateSwapchainD3D12(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
+uint64_t xxCreateSwapchainD3D12(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
@@ -891,7 +891,7 @@ struct D3D12RESOURCE
     void*                       cpuAddress;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateConstantBufferD3D12(uint64_t device, unsigned int size)
+uint64_t xxCreateConstantBufferD3D12(uint64_t device, int size)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
@@ -937,7 +937,7 @@ uint64_t xxCreateConstantBufferD3D12(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(d3dResource);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateIndexBufferD3D12(uint64_t device, unsigned int size)
+uint64_t xxCreateIndexBufferD3D12(uint64_t device, int size)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
@@ -977,7 +977,7 @@ uint64_t xxCreateIndexBufferD3D12(uint64_t device, unsigned int size)
     return reinterpret_cast<uint64_t>(d3dResource);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferD3D12(uint64_t device, unsigned int size, uint64_t vertexAttribute)
+uint64_t xxCreateVertexBufferD3D12(uint64_t device, int size, uint64_t vertexAttribute)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
@@ -1083,7 +1083,7 @@ struct D3D12TEXTURE
     UINT                        uploadSize;
 };
 //------------------------------------------------------------------------------
-uint64_t xxCreateTextureD3D12(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array, const void* external)
+uint64_t xxCreateTextureD3D12(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
@@ -1166,7 +1166,7 @@ void xxDestroyTextureD3D12(uint64_t texture)
     xxFree(d3dTexture);
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureD3D12(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
+void* xxMapTextureD3D12(uint64_t device, uint64_t texture, int* stride, int level, int array)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
@@ -1206,7 +1206,7 @@ void* xxMapTextureD3D12(uint64_t device, uint64_t texture, unsigned int* stride,
     return ptr;
 }
 //------------------------------------------------------------------------------
-void xxUnmapTextureD3D12(uint64_t device, uint64_t texture, unsigned int level, unsigned int array)
+void xxUnmapTextureD3D12(uint64_t device, uint64_t texture, int level, int array)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
@@ -1581,7 +1581,7 @@ void xxSetFragmentSamplersD3D12(uint64_t commandEncoder, int count, const uint64
     }
 }
 //------------------------------------------------------------------------------
-void xxSetVertexConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
+void xxSetVertexConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
     D3D12RESOURCE* d3dBuffer = reinterpret_cast<D3D12RESOURCE*>(buffer);
@@ -1589,7 +1589,7 @@ void xxSetVertexConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, un
     d3dCommandList->SetGraphicsRootDescriptorTable(xxGraphicDescriptor::VERTEX_UNIFORM, d3dBuffer->resourceGPUHandle);
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
+void xxSetFragmentConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
     D3D12RESOURCE* d3dBuffer = reinterpret_cast<D3D12RESOURCE*>(buffer);

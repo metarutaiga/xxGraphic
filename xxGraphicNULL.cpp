@@ -54,7 +54,7 @@ const char* xxGetDeviceNameNULL()
 //==============================================================================
 //  Swapchain
 //==============================================================================
-uint64_t xxCreateSwapchainNULL(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain)
+uint64_t xxCreateSwapchainNULL(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain)
 {
     return 0;
 }
@@ -131,17 +131,17 @@ void xxDestroyVertexAttributeNULL(uint64_t vertexAttribute)
 //==============================================================================
 //  Buffer
 //==============================================================================
-uint64_t xxCreateConstantBufferNULL(uint64_t device, unsigned int size)
+uint64_t xxCreateConstantBufferNULL(uint64_t device, int size)
 {
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateIndexBufferNULL(uint64_t device, unsigned int size)
+uint64_t xxCreateIndexBufferNULL(uint64_t device, int size)
 {
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferNULL(uint64_t device, unsigned int size, uint64_t vertexAttribute)
+uint64_t xxCreateVertexBufferNULL(uint64_t device, int size, uint64_t vertexAttribute)
 {
     return 0;
 }
@@ -163,7 +163,7 @@ void xxUnmapBufferNULL(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureNULL(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array, const void* external)
+uint64_t xxCreateTextureNULL(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external)
 {
     return 0;
 }
@@ -173,12 +173,12 @@ void xxDestroyTextureNULL(uint64_t texture)
 
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureNULL(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array)
+void* xxMapTextureNULL(uint64_t device, uint64_t texture, int* stride, int level, int array)
 {
     return nullptr;
 }
 //------------------------------------------------------------------------------
-void xxUnmapTextureNULL(uint64_t device, uint64_t texture, unsigned int level, unsigned int array)
+void xxUnmapTextureNULL(uint64_t device, uint64_t texture, int level, int array)
 {
 
 }
@@ -301,12 +301,12 @@ void xxSetFragmentSamplersNULL(uint64_t commandEncoder, int count, const uint64_
 
 }
 //------------------------------------------------------------------------------
-void xxSetVertexConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
+void xxSetVertexConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, int size)
 {
 
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, unsigned int size)
+void xxSetFragmentConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, int size)
 {
 
 }

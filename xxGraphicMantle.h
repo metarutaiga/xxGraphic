@@ -27,7 +27,7 @@ xxAPI const char*   xxGetDeviceNameMantle();
 //==============================================================================
 //  Swapchain
 //==============================================================================
-xxAPI uint64_t      xxCreateSwapchainMantle(uint64_t device, uint64_t renderPass, void* view, unsigned int width, unsigned int height, uint64_t oldSwapchain);
+xxAPI uint64_t      xxCreateSwapchainMantle(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain);
 xxAPI void          xxDestroySwapchainMantle(uint64_t swapchain);
 xxAPI void          xxPresentSwapchainMantle(uint64_t swapchain);
 xxAPI uint64_t      xxGetCommandBufferMantle(uint64_t device, uint64_t swapchain);
@@ -53,19 +53,19 @@ xxAPI void          xxDestroyVertexAttributeMantle(uint64_t vertexAttribute);
 //==============================================================================
 //  Buffer
 //==============================================================================
-xxAPI uint64_t      xxCreateConstantBufferMantle(uint64_t device, unsigned int size);
-xxAPI uint64_t      xxCreateIndexBufferMantle(uint64_t device, unsigned int size);
-xxAPI uint64_t      xxCreateVertexBufferMantle(uint64_t device, unsigned int size, uint64_t vertexAttribute);
+xxAPI uint64_t      xxCreateConstantBufferMantle(uint64_t device, int size);
+xxAPI uint64_t      xxCreateIndexBufferMantle(uint64_t device, int size);
+xxAPI uint64_t      xxCreateVertexBufferMantle(uint64_t device, int size, uint64_t vertexAttribute);
 xxAPI void          xxDestroyBufferMantle(uint64_t device, uint64_t buffer);
 xxAPI void*         xxMapBufferMantle(uint64_t device, uint64_t buffer);
 xxAPI void          xxUnmapBufferMantle(uint64_t device, uint64_t buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
-xxAPI uint64_t      xxCreateTextureMantle(uint64_t device, int format, unsigned int width, unsigned int height, unsigned int depth, unsigned int mipmap, unsigned int array, const void* external);
+xxAPI uint64_t      xxCreateTextureMantle(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external);
 xxAPI void          xxDestroyTextureMantle(uint64_t texture);
-xxAPI void*         xxMapTextureMantle(uint64_t device, uint64_t texture, unsigned int* stride, unsigned int level, unsigned int array);
-xxAPI void          xxUnmapTextureMantle(uint64_t device, uint64_t texture, unsigned int level, unsigned int array);
+xxAPI void*         xxMapTextureMantle(uint64_t device, uint64_t texture, int* stride, int level, int array);
+xxAPI void          xxUnmapTextureMantle(uint64_t device, uint64_t texture, int level, int array);
 //==============================================================================
 //  Sampler
 //==============================================================================
@@ -100,8 +100,8 @@ xxAPI void          xxSetVertexTexturesMantle(uint64_t commandEncoder, int count
 xxAPI void          xxSetFragmentTexturesMantle(uint64_t commandEncoder, int count, const uint64_t* textures);
 xxAPI void          xxSetVertexSamplersMantle(uint64_t commandEncoder, int count, const uint64_t* samplers);
 xxAPI void          xxSetFragmentSamplersMantle(uint64_t commandEncoder, int count, const uint64_t* samplers);
-xxAPI void          xxSetVertexConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
-xxAPI void          xxSetFragmentConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer, unsigned int size);
+xxAPI void          xxSetVertexConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer, int size);
+xxAPI void          xxSetFragmentConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer, int size);
 xxAPI void          xxDrawIndexedMantle(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 //  Fixed-Function
