@@ -838,7 +838,7 @@ void xxSetScissorGLES2(uint64_t commandEncoder, int x, int y, int width, int hei
 {
     SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
 
-    glScissor(x, glSwapchain->height - y - height, width, height);
+    glScissor(x, glSwapchain->height * glSwapchain->scale - y - height, width, height);
 }
 //------------------------------------------------------------------------------
 void xxSetPipelineGLES2(uint64_t commandEncoder, uint64_t pipeline)
