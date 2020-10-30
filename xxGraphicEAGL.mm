@@ -9,6 +9,8 @@
 #include "xxGraphicGL.h"
 #include "xxGraphicEAGL.h"
 
+#if defined(xxIOS) && !defined(xxMACCATALYST)
+
 #define GLES_SILENCE_DEPRECATION
 #import <UIKit/UIKit.h>
 #import <QuartzCore/CAEAGLLayer.h>
@@ -284,3 +286,5 @@ void xxBindTextureWithSurface(const void* surface)
     }
 }
 //------------------------------------------------------------------------------
+
+#endif
