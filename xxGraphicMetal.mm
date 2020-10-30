@@ -182,7 +182,7 @@ uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view
     [nsView setWantsLayer:YES];
 #elif defined(xxIOS)
     CAMetalLayer* layer = (CAMetalLayer*)[nsView layer];
-    layer.drawableSize = CGSizeMake(width, height);
+    layer.drawableSize = CGSizeMake(width * contentsScale, height * contentsScale);
 #endif
     layer.contentsScale = contentsScale;
     layer.device = mtlDevice;
