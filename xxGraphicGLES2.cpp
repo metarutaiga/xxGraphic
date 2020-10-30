@@ -489,6 +489,7 @@ uint64_t xxCreateTextureGLES2(uint64_t device, int format, int width, int height
         glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexture->type = GL_TEXTURE_RECTANGLE_ARB;
         xxBindTextureWithSurface(glTexture->external);
+#elif defined(xxMACCATALYST)
 #elif defined(xxIOS)
         glBindTexture(GL_TEXTURE_2D, texture);
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
