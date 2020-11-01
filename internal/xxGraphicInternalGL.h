@@ -86,6 +86,7 @@ struct TEXTUREGL
     unsigned int    array;
     const void*     external;
     const void*     image;
+    const void*     device;
 };
 //==============================================================================
 //  Sampler

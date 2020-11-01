@@ -459,6 +459,7 @@ uint64_t xxCreateTextureGLES2(uint64_t device, int format, int width, int height
     glTexture->array = array;
     glTexture->external = external;
     glTexture->image = nullptr;
+    glTexture->device = nullptr;
 
     GLuint externalTexture = static_cast<GLuint>(reinterpret_cast<size_t>(external));
     if (glIsTexture(externalTexture))
@@ -498,6 +499,15 @@ uint64_t xxCreateTextureGLES2(uint64_t device, int format, int width, int height
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexture->type = GL_TEXTURE_2D;
         xxBindTextureWithSurface(glTexture->external);
+#elif defined(xxWINDOWS)
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexture->type = GL_TEXTURE_2D;
+        glTexture->device = xxGetDeviceFromDirect3DTexture(external);
+        glTexture->image = xxCreateImageFromDirect3DTexture(glTexture->device, external, texture);
 #endif
     }
 
@@ -516,12 +526,14 @@ void xxDestroyTextureGLES2(uint64_t texture)
         glTexture->texture = 0;
     }
 
-#if defined(xxANDROID)
     if (glTexture->image)
     {
+#if defined(xxANDROID)
         xxDestroyImage(glTexture->image);
-    }
+#elif defined(xxWINDOWS)
+        xxDestroyImage(glTexture->device, glTexture->image);
 #endif
+    }   
 
     if (glTexture->texture)
     {
@@ -839,7 +851,8 @@ void xxSetScissorGLES2(uint64_t commandEncoder, int x, int y, int width, int hei
 {
     SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
 
-    glScissor(x, glSwapchain->height * glSwapchain->scale - y - height, width, height);
+    y = (int)(glSwapchain->height * glSwapchain->scale) - y - height;
+    glScissor(x, y, width, height);
 }
 //------------------------------------------------------------------------------
 void xxSetPipelineGLES2(uint64_t commandEncoder, uint64_t pipeline)

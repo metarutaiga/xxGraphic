@@ -6,6 +6,9 @@
 //==============================================================================
 #include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalGL.h"
+#include <d3d11.h>
+#include <d3d10.h>
+#include <d3d9.h>
 #include "xxGraphicGL.h"
 #include "xxGraphicWGL.h"
 
@@ -24,6 +27,12 @@ static PFNWGLGETPROCADDRESSPROC             wglGetProcAddress;
 static PFNWGLMAKECURRENTPROC                wglMakeCurrent;
 static PFNWGLSHARELISTSPROC                 wglShareLists;
 static PFNWGLCREATECONTEXTATTRIBSARBPROC    wglCreateContextAttribsARB;
+static PFNWGLDXOPENDEVICENVPROC             wglDXOpenDeviceNV;
+static PFNWGLDXCLOSEDEVICENVPROC            wglDXCloseDeviceNV;
+static PFNWGLDXREGISTEROBJECTNVPROC         wglDXRegisterObjectNV;
+static PFNWGLDXUNREGISTEROBJECTNVPROC       wglDXUnregisterObjectNV;
+static PFNWGLDXLOCKOBJECTSNVPROC            wglDXLockObjectsNV;
+static PFNWGLDXUNLOCKOBJECTSNVPROC          wglDXUnlockObjectsNV;
 
 //==============================================================================
 //  Initialize - WGL
@@ -333,6 +342,13 @@ uint64_t xxGraphicCreateWGL(int version)
         context = glCreateContextWGL(0, g_dummyWindow, nullptr);
     }
 
+    wglSymbol(wglDXOpenDeviceNV);
+    wglSymbol(wglDXCloseDeviceNV);
+    wglSymbol(wglDXRegisterObjectNV);
+    wglSymbol(wglDXUnregisterObjectNV);
+    wglSymbol(wglDXLockObjectsNV);
+    wglSymbol(wglDXUnlockObjectsNV);
+
     bool success = false;
     switch (version)
     {
@@ -392,5 +408,68 @@ void xxGraphicDestroyWGL(uint64_t context)
     }
 
     xxGraphicDestroyGL();
+}
+//==============================================================================
+//  Extension
+//==============================================================================
+const void* xxGetDeviceFromDirect3DTexture(const void* texture)
+{
+    if (wglDXOpenDeviceNV == nullptr)
+        return nullptr;
+
+    IUnknown* unknown = (IUnknown*)texture;
+    if (unknown == nullptr)
+        return nullptr;
+
+    ID3D11Texture2D* d3d11Texture = nullptr;
+    ID3D10Texture2D* d3d10Texture = nullptr;
+    IDirect3DTexture9* d3d9Texture = nullptr;
+
+    if (SUCCEEDED(unknown->QueryInterface(IID_PPV_ARGS(&d3d11Texture))))
+    {
+        ID3D11Device* d3d11Device = nullptr;
+        d3d11Texture->GetDevice(&d3d11Device);
+        d3d11Texture->Release();
+        if (d3d11Device)
+            d3d11Device->Release();
+        return wglDXOpenDeviceNV(d3d11Device);
+    }
+    else if (SUCCEEDED(unknown->QueryInterface(IID_PPV_ARGS(&d3d10Texture))))
+    {
+        ID3D10Device* d3d10Device = nullptr;
+        d3d10Texture->GetDevice(&d3d10Device);
+        d3d10Texture->Release();
+        if (d3d10Device)
+            d3d10Device->Release();
+        return wglDXOpenDeviceNV(d3d10Device);
+    }
+    else if (SUCCEEDED(unknown->QueryInterface(IID_PPV_ARGS(&d3d9Texture))))
+    {
+        IDirect3DDevice9* d3d9Device = nullptr;
+        d3d9Texture->GetDevice(&d3d9Device);
+        d3d9Texture->Release();
+        if (d3d9Device)
+            d3d9Device->Release();
+        return wglDXOpenDeviceNV(d3d9Device);
+    }
+
+    return nullptr;
+}
+//------------------------------------------------------------------------------
+const void* xxCreateImageFromDirect3DTexture(const void* device, const void* texture, int id)
+{
+    if (wglDXRegisterObjectNV == nullptr)
+        return nullptr;
+
+    return wglDXRegisterObjectNV((HANDLE)device, (void*)texture, id, GL_TEXTURE_2D, WGL_ACCESS_READ_ONLY_NV);
+}
+//------------------------------------------------------------------------------
+void xxDestroyImage(const void* device, const void* image)
+{
+    if (wglDXUnregisterObjectNV == nullptr || wglDXCloseDeviceNV == nullptr)
+        return;
+
+    wglDXUnregisterObjectNV((HANDLE)device, (HANDLE)image);
+    wglDXCloseDeviceNV((HANDLE)device);
 }
 //==============================================================================
