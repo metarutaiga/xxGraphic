@@ -496,7 +496,7 @@ uint64_t xxCreateSwapchainD3D12(uint64_t device, uint64_t renderPass, void* view
     desc.Height = height;
     desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
     desc.SampleDesc.Count = 1;
-    desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    desc.BufferUsage = DXGI_USAGE_SHADER_INPUT | DXGI_USAGE_RENDER_TARGET_OUTPUT;
     desc.BufferCount = NUM_BACK_BUFFERS;
     desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 

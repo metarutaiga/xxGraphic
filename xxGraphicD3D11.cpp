@@ -176,7 +176,7 @@ uint64_t xxCreateSwapchainD3D11(uint64_t device, uint64_t renderPass, void* view
     desc.BufferDesc.Height = height;
     desc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
     desc.SampleDesc.Count = 1;
-    desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    desc.BufferUsage = DXGI_USAGE_SHADER_INPUT | DXGI_USAGE_RENDER_TARGET_OUTPUT;
     desc.BufferCount = NUM_BACK_BUFFERS;
     desc.OutputWindow = hWnd;
     desc.Windowed = TRUE;
