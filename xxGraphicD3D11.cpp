@@ -986,10 +986,23 @@ uint64_t xxCreateVertexShaderD3D11(uint64_t device, const char* shader, uint64_t
     if (d3dDevice == nullptr)
         return 0;
 
+    ID3D11VertexShader* d3dShader = nullptr;
     if (strcmp(shader, "default") == 0)
     {
-        ID3D11VertexShader* d3dShader = nullptr;
         HRESULT hResult = d3dDevice->CreateVertexShader(vertexShaderCode40, vertexShaderCode40[6], nullptr, &d3dShader);
+        if (hResult != S_OK)
+            return 0;
+
+        return reinterpret_cast<uint64_t>(d3dShader);
+    }
+    else
+    {
+        ID3D10Blob* blob = CreateD3D10Shader(shader, "VSMain", "vs_4_0");
+        if (blob == nullptr)
+            return 0;
+
+        HRESULT hResult = d3dDevice->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &d3dShader);
+        blob->Release();
         if (hResult != S_OK)
             return 0;
 
@@ -1005,10 +1018,23 @@ uint64_t xxCreateFragmentShaderD3D11(uint64_t device, const char* shader)
     if (d3dDevice == nullptr)
         return 0;
 
+    ID3D11PixelShader* d3dShader = nullptr;
     if (strcmp(shader, "default") == 0)
     {
-        ID3D11PixelShader* d3dShader = nullptr;
         HRESULT hResult = d3dDevice->CreatePixelShader(pixelShaderCode40, pixelShaderCode40[6], nullptr, &d3dShader);
+        if (hResult != S_OK)
+            return 0;
+
+        return reinterpret_cast<uint64_t>(d3dShader);
+    }
+    else
+    {
+        ID3D10Blob* blob = CreateD3D10Shader(shader, "FSMain", "ps_4_0");
+        if (blob == nullptr)
+            return 0;
+
+        HRESULT hResult = d3dDevice->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &d3dShader);
+        blob->Release();
         if (hResult != S_OK)
             return 0;
 

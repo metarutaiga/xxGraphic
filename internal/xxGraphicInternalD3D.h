@@ -342,6 +342,23 @@ inline void PatchD3DIM(const char* name)
     xxFreeLibrary(d3dim);
 }
 
+inline struct ID3D10Blob* CreateD3D10Shader(const char* shader, const char* entry, const char* target)
+{
+    static HRESULT(WINAPI * D3D10CompileShader)(const char*, size_t, void*, void*, void*, const char*, const char*, int, ID3D10Blob**, ID3D10Blob**);
+    if (D3D10CompileShader == nullptr)
+    {
+        (void*&)D3D10CompileShader = GetProcAddress(LoadLibraryA("d3d10.dll"), "D3D10CompileShader");
+    }
+    if (D3D10CompileShader)
+    {
+        ID3D10Blob* blob = nullptr;
+        D3D10CompileShader(shader, strlen(shader), nullptr, nullptr, nullptr, entry, target, 0, &blob, nullptr);
+        return blob;
+    }
+
+    return nullptr;
+}
+
 //==============================================================================
 //  Resource Type
 //==============================================================================

@@ -1317,7 +1317,25 @@ uint64_t xxCreateVertexShaderD3D12(uint64_t device, const char* shader, uint64_t
 
     if (strcmp(shader, "default") == 0)
     {
-        return reinterpret_cast<uint64_t>(vertexShaderCode40);
+        void* d3dShader = xxAlloc(char, vertexShaderCode40[6]);
+        if (d3dShader == nullptr)
+            return 0;
+        memcpy(d3dShader, vertexShaderCode40, vertexShaderCode40[6]);
+
+        return reinterpret_cast<uint64_t>(d3dShader);
+    }
+    else
+    {
+        ID3D10Blob* blob = CreateD3D10Shader(shader, "VSMain", "vs_4_0");
+        if (blob == nullptr)
+            return 0;
+
+        void* d3dShader = xxAlloc(char, blob->GetBufferSize());
+        if (d3dShader == nullptr)
+            return 0;
+        memcpy(d3dShader, blob->GetBufferPointer(), blob->GetBufferSize());
+
+        return reinterpret_cast<uint64_t>(d3dShader);
     }
 
     return 0;
@@ -1331,7 +1349,25 @@ uint64_t xxCreateFragmentShaderD3D12(uint64_t device, const char* shader)
 
     if (strcmp(shader, "default") == 0)
     {
-        return reinterpret_cast<uint64_t>(pixelShaderCode40);
+        void* d3dShader = xxAlloc(char, pixelShaderCode40[6]);
+        if (d3dShader == nullptr)
+            return 0;
+        memcpy(d3dShader, pixelShaderCode40, pixelShaderCode40[6]);
+
+        return reinterpret_cast<uint64_t>(d3dShader);
+    }
+    else
+    {
+        ID3D10Blob* blob = CreateD3D10Shader(shader, "FSMain", "ps_4_0");
+        if (blob == nullptr)
+            return 0;
+
+        void* d3dShader = xxAlloc(char, blob->GetBufferSize());
+        if (d3dShader == nullptr)
+            return 0;
+        memcpy(d3dShader, blob->GetBufferPointer(), blob->GetBufferSize());
+
+        return reinterpret_cast<uint64_t>(d3dShader);
     }
 
     return 0;
@@ -1339,7 +1375,8 @@ uint64_t xxCreateFragmentShaderD3D12(uint64_t device, const char* shader)
 //------------------------------------------------------------------------------
 void xxDestroyShaderD3D12(uint64_t device, uint64_t shader)
 {
-
+    void* d3dShader = reinterpret_cast<void*>(shader);
+    xxFree(d3dShader);
 }
 //==============================================================================
 //  Pipeline
