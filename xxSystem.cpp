@@ -296,7 +296,7 @@ uint64_t xxGetCurrentThreadId()
 //------------------------------------------------------------------------------
 int xxGetIncrementThreadId()
 {
-    static int thread_local threadId;
+    static int thread_local threadId = 0;
     if (xxUnlikely(threadId == 0))
     {
         static int increment = 0;
