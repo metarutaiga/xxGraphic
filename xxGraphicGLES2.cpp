@@ -672,50 +672,50 @@ uint64_t xxCreateVertexShaderGLES2(uint64_t device, const char* shader, uint64_t
 {
     if (strcmp(shader, "default") == 0)
     {
-        const char* sources[] =
-        {
-            "#version 100", "\n",
-            "#define __VERTEX__ 1", "\n",
-            "#define attribute attribute", "\n",
-            "#define varying varying", "\n",
-            "precision highp float;", "\n",
-            glDefaultShaderCode
-        };
-
-        GLuint glShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(glShader, xxCountOf(sources), sources, nullptr);
-        glCompileShader(glShader);
-        checkShader(glShader, shader);
-
-        return static_cast<uint64_t>(glShader);
+        shader = glDefaultShaderCode;
     }
 
-    return 0;
+    const char* sources[] =
+    {
+        "#version 100", "\n",
+        "#define __VERTEX__ 1", "\n",
+        "#define attribute attribute", "\n",
+        "#define varying varying", "\n",
+        "precision highp float;", "\n",
+        shader
+    };
+
+    GLuint glShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(glShader, xxCountOf(sources), sources, nullptr);
+    glCompileShader(glShader);
+    checkShader(glShader, shader);
+
+    return static_cast<uint64_t>(glShader);
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateFragmentShaderGLES2(uint64_t device, const char* shader)
 {
     if (strcmp(shader, "default") == 0)
     {
-        const char* sources[] =
-        {
-            "#version 100", "\n",
-            "#define __FRAGMENT__ 1", "\n",
-            "#define attribute", "\n",
-            "#define varying varying", "\n",
-            "precision mediump float;", "\n",
-            glDefaultShaderCode
-        };
-
-        GLuint glShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(glShader, xxCountOf(sources), sources, nullptr);
-        glCompileShader(glShader);
-        checkShader(glShader, shader);
-
-        return static_cast<uint64_t>(glShader);
+        shader = glDefaultShaderCode;
     }
 
-    return 0;
+    const char* sources[] =
+    {
+        "#version 100", "\n",
+        "#define __FRAGMENT__ 1", "\n",
+        "#define attribute", "\n",
+        "#define varying varying", "\n",
+        "precision mediump float;", "\n",
+        shader
+    };
+
+    GLuint glShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(glShader, xxCountOf(sources), sources, nullptr);
+    glCompileShader(glShader);
+    checkShader(glShader, shader);
+
+    return static_cast<uint64_t>(glShader);
 }
 //------------------------------------------------------------------------------
 void xxDestroyShaderGLES2(uint64_t device, uint64_t shader)
