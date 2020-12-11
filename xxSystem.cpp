@@ -332,7 +332,11 @@ const char* xxGetExecutablePath()
     {
         while (fgets(path, sizeof(path), maps))
         {
-            const char* temp = strstr(path, "/data/app/");
+            const char* temp = nullptr;
+            if (temp == nullptr)
+                temp = strstr(path, "/data/app/");
+            if (temp == nullptr)
+                temp = strstr(path, "/data/app-lib/");
             if (temp && strstr(path, ".so"))
             {
                 strcpy(path, temp);
