@@ -72,9 +72,9 @@ static void GL_APIENTRY cglShaderSource(GLuint shader, GLsizei count, const GLch
             var = "#version 140";
         if (strncmp(var, "precision", sizeof("precision") - 1) == 0)
             var = "";
-        if (strcmp(var, "#define __FRAGMENT__ 1") == 0)
+        if (strcmp(var, "#define _FRAGMENT_ 1") == 0)
         {
-            var =   "#define __FRAGMENT__ 1\n"
+            var =   "#define _FRAGMENT_ 1\n"
                     "#define gl_FragColor fragColor\n"
                     "#define texture2D texture\n"
                     "#define texture2DRect texture\n"
@@ -412,7 +412,7 @@ void xxBindRectangleProgram()
         const char* vertexShaderCodes[] =
         {
             "#version 100", "\n",
-            "#define __VERTEX__ 1", "\n",
+            "#define _VERTEX_ 1", "\n",
             "#define attribute attribute", "\n",
             "#define varying varying", "\n",
             glDefaultShaderCode
@@ -421,7 +421,7 @@ void xxBindRectangleProgram()
         const char* fragmentShaderCodes[] =
         {
             "#version 100", "\n",
-            "#define __FRAGMENT__ 1", "\n",
+            "#define _FRAGMENT_ 1", "\n",
             "#define attribute", "\n",
             "#define varying varying", "\n",
             "#define sampler2D sampler2DRect", "\n",

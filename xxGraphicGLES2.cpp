@@ -678,7 +678,7 @@ uint64_t xxCreateVertexShaderGLES2(uint64_t device, const char* shader, uint64_t
     const char* sources[] =
     {
         "#version 100", "\n",
-        "#define __VERTEX__ 1", "\n",
+        "#define _VERTEX_ 1", "\n",
         "#define attribute attribute", "\n",
         "#define varying varying", "\n",
         "precision highp float;", "\n",
@@ -703,7 +703,7 @@ uint64_t xxCreateFragmentShaderGLES2(uint64_t device, const char* shader)
     const char* sources[] =
     {
         "#version 100", "\n",
-        "#define __FRAGMENT__ 1", "\n",
+        "#define _FRAGMENT_ 1", "\n",
         "#define attribute", "\n",
         "#define varying varying", "\n",
         "precision mediump float;", "\n",

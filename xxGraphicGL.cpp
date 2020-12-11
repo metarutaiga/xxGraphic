@@ -433,7 +433,7 @@ attribute vec2 uv;
 varying vec2 varyUV;
 varying vec4 varyColor;
 
-#ifdef __VERTEX__
+#ifdef _VERTEX_
 void main()
 {
     vec4 projection;
@@ -447,7 +447,7 @@ void main()
 }
 #endif
 
-#ifdef __FRAGMENT__
+#ifdef _FRAGMENT_
 void main()
 {
     gl_FragColor = varyColor * texture2D(tex, varyUV);
