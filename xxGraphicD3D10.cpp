@@ -19,6 +19,7 @@ typedef HRESULT (WINAPI *PFN_D3D10_CREATE_DEVICE)(IDXGIAdapter*, D3D10_DRIVER_TY
 
 static void*                        g_d3dLibrary = nullptr;
 static IDXGIFactory*                g_dxgiFactory = nullptr;
+static D3D10_MAP                    g_bufferMapFlags = D3D10_MAP_WRITE_NO_OVERWRITE;
 static bool                         g_unsupportedBGRA = false;
 
 //==============================================================================
@@ -638,9 +639,16 @@ void* xxMapBufferD3D10(uint64_t device, uint64_t buffer)
         return d3dBuffer->address;
 
     void* ptr = nullptr;
-    HRESULT hResult = d3dBuffer->buffer->Map(D3D10_MAP_WRITE_NO_OVERWRITE, 0, &ptr);
+    HRESULT hResult = d3dBuffer->buffer->Map(g_bufferMapFlags, 0, &ptr);
+    if (hResult != S_OK && g_bufferMapFlags == D3D10_MAP_WRITE_NO_OVERWRITE)
+    {
+        g_bufferMapFlags = D3D10_MAP_WRITE_DISCARD;
+        hResult = d3dBuffer->buffer->Map(g_bufferMapFlags, 0, &ptr);
+    }
     if (hResult != S_OK)
+    {
         return nullptr;
+    }
 
     return ptr;
 }

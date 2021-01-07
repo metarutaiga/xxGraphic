@@ -17,6 +17,7 @@
 
 static void*                        g_d3dLibrary = nullptr;
 static IDXGIFactory*                g_dxgiFactory = nullptr;
+static D3D11_MAP                    g_bufferMapFlags = D3D11_MAP_WRITE_NO_OVERWRITE;
 
 //==============================================================================
 //  Instance
@@ -680,7 +681,12 @@ void* xxMapBufferD3D11(uint64_t device, uint64_t buffer)
     d3dDeviceContext->Release();
 
     D3D11_MAPPED_SUBRESOURCE mappedSubresource = {};
-    HRESULT hResult = d3dDeviceContext->Map(d3dBuffer->buffer, 0, D3D11_MAP_WRITE_NO_OVERWRITE, 0, &mappedSubresource);
+    HRESULT hResult = d3dDeviceContext->Map(d3dBuffer->buffer, 0, g_bufferMapFlags, 0, &mappedSubresource);
+    if (hResult != S_OK && g_bufferMapFlags == D3D11_MAP_WRITE_NO_OVERWRITE)
+    {
+        g_bufferMapFlags = D3D11_MAP_WRITE_DISCARD;
+        hResult = d3dDeviceContext->Map(d3dBuffer->buffer, 0, g_bufferMapFlags, 0, &mappedSubresource);
+    }
     if (hResult != S_OK)
         return nullptr;
 
