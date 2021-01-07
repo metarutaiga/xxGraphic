@@ -372,11 +372,7 @@ uint64_t xxCreateVertexAttributeMetal(uint64_t device, int count, int* attribute
                 attribute.format = MTLVertexFormatUChar3Normalized;
                 break;
             case 4:
-#if defined(xxMACOS) || defined(xxMACCATALYST)
-                attribute.format = MTLVertexFormatUChar4Normalized_BGRA;
-#elif defined(xxIOS)
                 attribute.format = MTLVertexFormatUChar4Normalized;
-#endif
                 break;
             }
             break;
@@ -484,11 +480,10 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height
     if (mtlTexture == nullptr)
         return 0;
 
+    MTLPixelFormat pixelFormat = MTLPixelFormatRGBA8Unorm;
 #if defined(xxMACOS) || defined(xxMACCATALYST)
-    MTLPixelFormat pixelFormat = MTLPixelFormatBGRA8Unorm;
     MTLResourceOptions options = MTLResourceStorageModeManaged;
 #elif defined(xxIOS)
-    MTLPixelFormat pixelFormat = MTLPixelFormatRGBA8Unorm;
     MTLResourceOptions options = MTLResourceStorageModeShared;
 #endif
 
