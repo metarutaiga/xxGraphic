@@ -9,7 +9,7 @@
 #include "xxGraphicD3DAsm.h"
 #include "xxGraphicD3D11.h"
 
-#include <d3d11.h>
+#include "dxsdk/d3d11.h"
 #define NUM_BACK_BUFFERS            3
 #ifndef _DEBUG
 #define PERSISTENT_BUFFER           1

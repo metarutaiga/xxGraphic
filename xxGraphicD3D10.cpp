@@ -9,7 +9,7 @@
 #include "xxGraphicD3DAsm.h"
 #include "xxGraphicD3D10.h"
 
-#include <d3d10.h>
+#include "dxsdk/d3d10.h"
 typedef HRESULT (WINAPI *PFN_D3D10_CREATE_DEVICE)(IDXGIAdapter*, D3D10_DRIVER_TYPE, HMODULE, UINT, UINT, ID3D10Device**);
 #define NUM_BACK_BUFFERS            3
 #ifndef _DEBUG

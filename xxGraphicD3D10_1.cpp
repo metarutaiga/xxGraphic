@@ -9,7 +9,7 @@
 #include "xxGraphicD3D10.h"
 #include "xxGraphicD3D10_1.h"
 
-#include <d3d10_1.h>
+#include "dxsdk/d3d10_1.h"
 
 static void*                        g_d3dLibrary = nullptr;
 

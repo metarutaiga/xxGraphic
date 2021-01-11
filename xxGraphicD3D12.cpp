@@ -9,8 +9,8 @@
 #include "xxGraphicD3DAsm.h"
 #include "xxGraphicD3D12.h"
 
-#include <d3d12.h>
-#include <dxgi1_4.h>
+#include "dxsdk/d3d12.h"
+#include "dxsdk/dxgi1_4.h"
 typedef HRESULT (WINAPI *PFN_CREATE_DXGI_FACTORY1)(REFIID, void**);
 #define NUM_BACK_BUFFERS            3
 #define PERSISTENT_BUFFER           1
