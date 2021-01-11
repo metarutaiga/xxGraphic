@@ -124,10 +124,7 @@ If possibly targeting d3d10.1, include d3d10_1.h instead of d3d10.h, or ensure d
 #define	D3D10_1_VS_OUTPUT_REGISTER_COUNT	( 32 )
 
 #endif
-#include <winapifamily.h>
 #include "d3d10.h" //
-#pragma region Desktop Family
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 
 typedef 
 enum D3D10_FEATURE_LEVEL1
@@ -1768,8 +1765,6 @@ HRESULT WINAPI D3D10CreateDeviceAndSwapChain1(
     _Out_opt_ IDXGISwapChain **ppSwapChain,
     _Out_opt_ ID3D10Device1 **ppDevice);
 
-#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) */
-#pragma endregion
 DEFINE_GUID(IID_ID3D10BlendState1,0xEDAD8D99,0x8A35,0x4d6d,0x85,0x66,0x2E,0xA2,0x76,0xCD,0xE1,0x61);
 DEFINE_GUID(IID_ID3D10ShaderResourceView1,0x9B7E4C87,0x342C,0x4106,0xA1,0x9F,0x4F,0x27,0x04,0xF6,0x89,0xF0);
 DEFINE_GUID(IID_ID3D10Device1,0x9B7E4C8F,0x342C,0x4106,0xA1,0x9F,0x4F,0x27,0x04,0xF6,0x89,0xF0);

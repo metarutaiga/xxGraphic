@@ -99,10 +99,6 @@ extern "C"{
 /* interface __MIDL_itf_d3d11sdklayers_0000_0000 */
 /* [local] */ 
 
-#include <winapifamily.h>
-#pragma region Application Family
-#pragma region Application Family
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
 #define	D3D11_SDK_LAYERS_VERSION	( 1 )
 
 #define	D3D11_DEBUG_FEATURE_FLUSH_PER_RENDER_OP	( 0x1 )
@@ -300,11 +296,6 @@ EXTERN_C const IID IID_ID3D11Debug;
 /* interface __MIDL_itf_d3d11sdklayers_0000_0001 */
 /* [local] */ 
 
-#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) */
-#pragma endregion
-#pragma endregion
-#pragma region Desktop Family
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 
 
 extern RPC_IF_HANDLE __MIDL_itf_d3d11sdklayers_0000_0001_v0_0_c_ifspec;
@@ -401,11 +392,6 @@ EXTERN_C const IID IID_ID3D11SwitchToRef;
 /* interface __MIDL_itf_d3d11sdklayers_0000_0002 */
 /* [local] */ 
 
-#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) */
-#pragma endregion
-#pragma region PC Application Family
-#pragma region PC Application Family
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_PC_APP)
 typedef 
 enum D3D11_SHADER_TRACKING_RESOURCE_TYPE
     {
@@ -711,12 +697,6 @@ EXTERN_C const IID IID_ID3D11RefDefaultTrackingOptions;
 /* interface __MIDL_itf_d3d11sdklayers_0000_0005 */
 /* [local] */ 
 
-#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_PC_APP) */
-#pragma endregion
-#pragma endregion
-#pragma region Application Family
-#pragma region Application Family
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
 DEFINE_GUID(DXGI_DEBUG_D3D11, 0x4b99317b, 0xac39, 0x4aa6, 0xbb, 0xb, 0xba, 0xa0, 0x47, 0x84, 0x79, 0x8f);
 #define D3D11_REGKEY_PATH __TEXT("Software\\Microsoft\\Direct3D")
 #define D3D11_MUTE_DEBUG_OUTPUT __TEXT("MuteDebugOutput")
@@ -2602,9 +2582,6 @@ EXTERN_C const IID IID_ID3D11InfoQueue;
 /* interface __MIDL_itf_d3d11sdklayers_0000_0006 */
 /* [local] */ 
 
-#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) */
-#pragma endregion
-#pragma endregion
 DEFINE_GUID(IID_ID3D11Debug,0x79cf2233,0x7536,0x4948,0x9d,0x36,0x1e,0x46,0x92,0xdc,0x57,0x60);
 DEFINE_GUID(IID_ID3D11SwitchToRef,0x1ef337e3,0x58e7,0x4f83,0xa6,0x92,0xdb,0x22,0x1f,0x5e,0xd4,0x7e);
 DEFINE_GUID(IID_ID3D11TracingDevice,0x1911c771,0x1587,0x413e,0xa7,0xe0,0xfb,0x26,0xc3,0xde,0x02,0x68);

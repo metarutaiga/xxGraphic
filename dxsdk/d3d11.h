@@ -13539,7 +13539,6 @@ EXTERN_C const IID IID_ID3D11VideoDevice;
 /* interface __MIDL_itf_d3d11_0000_0040 */
 /* [local] */ 
 
-#include <winapifamily.h>
 
 
 extern RPC_IF_HANDLE __MIDL_itf_d3d11_0000_0040_v0_0_c_ifspec;
@@ -14447,8 +14446,6 @@ HRESULT WINAPI D3D11CreateDevice(
     _Out_opt_ D3D_FEATURE_LEVEL* pFeatureLevel,
     _COM_Outptr_opt_ ID3D11DeviceContext** ppImmediateContext );
 
-#pragma region Desktop Family
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 ///////////////////////////////////////////////////////////////////////////
 // D3D11CreateDeviceAndSwapChain
 // ------------------------------
@@ -14523,8 +14520,6 @@ HRESULT WINAPI D3D11CreateDeviceAndSwapChain(
     _Out_opt_ D3D_FEATURE_LEVEL* pFeatureLevel,
     _COM_Outptr_opt_ ID3D11DeviceContext** ppImmediateContext );
 
-#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) */
-#pragma endregion
 DEFINE_GUID(IID_ID3D11DeviceChild,0x1841e5c8,0x16b0,0x489b,0xbc,0xc8,0x44,0xcf,0xb0,0xd5,0xde,0xae);
 DEFINE_GUID(IID_ID3D11DepthStencilState,0x03823efb,0x8d8f,0x4e1c,0x9a,0xa2,0xf6,0x4b,0xb2,0xcb,0xfd,0xf1);
 DEFINE_GUID(IID_ID3D11BlendState,0x75b68faa,0x347d,0x4159,0x8f,0x45,0xa0,0x64,0x0f,0x01,0xcd,0x9a);

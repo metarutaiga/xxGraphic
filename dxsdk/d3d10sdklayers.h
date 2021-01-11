@@ -78,9 +78,6 @@ extern "C"{
 /* interface __MIDL_itf_d3d10sdklayers_0000_0000 */
 /* [local] */ 
 
-#include <winapifamily.h>
-#pragma region Desktop Family
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 #define	D3D10_SDK_LAYERS_VERSION	( 11 )
 
 #define	D3D10_DEBUG_FEATURE_FLUSH_PER_RENDER_OP	( 0x1 )
@@ -1377,8 +1374,6 @@ EXTERN_C const IID IID_ID3D10InfoQueue;
 /* interface __MIDL_itf_d3d10sdklayers_0000_0003 */
 /* [local] */ 
 
-#endif /* WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) */
-#pragma endregion
 DEFINE_GUID(IID_ID3D10Debug,0x9B7E4E01,0x342C,0x4106,0xA1,0x9F,0x4F,0x27,0x04,0xF6,0x89,0xF0);
 DEFINE_GUID(IID_ID3D10SwitchToRef,0x9B7E4E02,0x342C,0x4106,0xA1,0x9F,0x4F,0x27,0x04,0xF6,0x89,0xF0);
 DEFINE_GUID(IID_ID3D10InfoQueue,0x1b940b17,0x2642,0x4d1f,0xab,0x1f,0xb9,0x9b,0xad,0x0c,0x39,0x5f);
