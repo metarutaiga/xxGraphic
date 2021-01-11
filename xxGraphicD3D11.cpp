@@ -226,7 +226,7 @@ uint64_t xxCreateSwapchainD3D11(uint64_t device, uint64_t renderPass, void* view
         textureDesc.ArraySize = 1;
         textureDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
         textureDesc.SampleDesc.Count = 1;
-        textureDesc.BindFlags = D3D10_BIND_DEPTH_STENCIL | D3D10_BIND_SHADER_RESOURCE;
+        textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 
         HRESULT hResult = d3dDevice->CreateTexture2D(&textureDesc, nullptr, &depthStencilTexture);
         if (hResult != S_OK)
@@ -1281,7 +1281,7 @@ void xxSetFragmentTexturesD3D11(uint64_t commandEncoder, int count, const uint64
 void xxSetVertexSamplersD3D11(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandEncoder);
-    ID3D11SamplerState* d3dSamplerStates[D3D10_COMMONSHADER_SAMPLER_SLOT_COUNT];
+    ID3D11SamplerState* d3dSamplerStates[D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT];
 
     for (int i = 0; i < count; ++i)
     {
@@ -1294,7 +1294,7 @@ void xxSetVertexSamplersD3D11(uint64_t commandEncoder, int count, const uint64_t
 void xxSetFragmentSamplersD3D11(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandEncoder);
-    ID3D11SamplerState* d3dSamplerStates[D3D10_COMMONSHADER_SAMPLER_SLOT_COUNT];
+    ID3D11SamplerState* d3dSamplerStates[D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT];
 
     for (int i = 0; i < count; ++i)
     {

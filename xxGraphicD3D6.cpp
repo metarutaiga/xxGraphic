@@ -676,7 +676,7 @@ uint64_t xxCreateSamplerD3D6(uint64_t device, bool clampU, bool clampV, bool cla
     if (anisotropy > 1)
     {
         d3dSampler.magFilter = linearMag ? D3DTFG_ANISOTROPIC : D3DTFG_POINT;
-        d3dSampler.minFilter = linearMin ? D3DTFN_ANISOTROPIC : D3DTFG_POINT;
+        d3dSampler.minFilter = linearMin ? D3DTFN_ANISOTROPIC : D3DTFN_POINT;
     }
 
     return d3dSampler.value;
