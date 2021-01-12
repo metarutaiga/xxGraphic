@@ -6,7 +6,7 @@
 //==============================================================================
 #include "xxMath.h"
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(__llvm__)
 #   pragma optimize("y", on)
 #endif
 

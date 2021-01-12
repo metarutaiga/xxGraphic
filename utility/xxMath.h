@@ -8,7 +8,7 @@
 
 #include "xxSystem.h"
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(__llvm__)
 #   pragma optimize("y", on)
 #endif
 
@@ -424,6 +424,6 @@ union xxPlusAPI xxMatrix4x4
     static const xxMatrix4x4 IDENTITY;
 };
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(__llvm__)
 #   pragma optimize("", on)
 #endif
