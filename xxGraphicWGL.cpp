@@ -162,6 +162,23 @@ static void* GL_APIENTRY wglSymbol(const char* name, bool* failed)
     }
 
     if (ptr == nullptr)
+    {
+        if (strcmp(name, "glBindTransformFeedback") == 0 ||
+            strcmp(name, "glDeleteTransformFeedbacks") == 0 ||
+            strcmp(name, "glGenTransformFeedbacks") == 0 ||
+            strcmp(name, "glIsTransformFeedback") == 0 ||
+            strcmp(name, "glPauseTransformFeedback") == 0 ||
+            strcmp(name, "glResumeTransformFeedback") == 0 ||
+            strcmp(name, "glInvalidateFramebuffer") == 0 ||
+            strcmp(name, "glInvalidateSubFramebuffer") == 0 ||
+            strcmp(name, "glTexStorage2D") == 0 ||
+            strcmp(name, "glTexStorage3D") == 0)
+        {
+            ptr = (void*)&[](){};
+        }
+    }
+
+    if (ptr == nullptr)
         xxLog("WGL", "%s is not found", name);
 
     wglSymbolFailed |= (ptr == nullptr);
