@@ -533,6 +533,7 @@ struct D3D10BUFFER
 {
     ID3D10Buffer*   buffer;
     UINT            size;
+    enum D3D10_MAP  map;
     void*           address;
 };
 //------------------------------------------------------------------------------
@@ -540,6 +541,7 @@ struct D3D11BUFFER
 {
     ID3D11Buffer*   buffer;
     UINT            size;
+    enum D3D11_MAP  map;
     void*           address;
 };
 //==============================================================================

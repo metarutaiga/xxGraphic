@@ -19,7 +19,6 @@ typedef HRESULT (WINAPI *PFN_D3D10_CREATE_DEVICE)(IDXGIAdapter*, D3D10_DRIVER_TY
 
 static void*                        g_d3dLibrary = nullptr;
 static IDXGIFactory*                g_dxgiFactory = nullptr;
-static D3D10_MAP                    g_bufferMapFlags = D3D10_MAP_WRITE_NO_OVERWRITE;
 static bool                         g_unsupportedBGRA = false;
 
 //==============================================================================
@@ -545,6 +544,7 @@ uint64_t xxCreateConstantBufferD3D10(uint64_t device, int size)
 
     d3dBuffer->buffer = buffer;
     d3dBuffer->size = size;
+    d3dBuffer->map = D3D10_MAP_WRITE_NO_OVERWRITE;
     d3dBuffer->address = nullptr;
 #if PERSISTENT_BUFFER
     d3dBuffer->address = xxMapBuffer(device, reinterpret_cast<uint64_t>(d3dBuffer));
@@ -575,6 +575,7 @@ uint64_t xxCreateIndexBufferD3D10(uint64_t device, int size)
 
     d3dBuffer->buffer = buffer;
     d3dBuffer->size = size;
+    d3dBuffer->map = D3D10_MAP_WRITE_NO_OVERWRITE;
     d3dBuffer->address = nullptr;
 #if PERSISTENT_BUFFER
     d3dBuffer->address = xxMapBuffer(device, reinterpret_cast<uint64_t>(d3dBuffer));
@@ -605,6 +606,7 @@ uint64_t xxCreateVertexBufferD3D10(uint64_t device, int size, uint64_t vertexAtt
 
     d3dBuffer->buffer = buffer;
     d3dBuffer->size = size;
+    d3dBuffer->map = D3D10_MAP_WRITE_NO_OVERWRITE;
     d3dBuffer->address = nullptr;
 #if PERSISTENT_BUFFER
     d3dBuffer->address = xxMapBuffer(device, reinterpret_cast<uint64_t>(d3dBuffer));
@@ -639,11 +641,11 @@ void* xxMapBufferD3D10(uint64_t device, uint64_t buffer)
         return d3dBuffer->address;
 
     void* ptr = nullptr;
-    HRESULT hResult = d3dBuffer->buffer->Map(g_bufferMapFlags, 0, &ptr);
-    if (hResult != S_OK && g_bufferMapFlags == D3D10_MAP_WRITE_NO_OVERWRITE)
+    HRESULT hResult = d3dBuffer->buffer->Map(d3dBuffer->map, 0, &ptr);
+    if (hResult != S_OK && d3dBuffer->map == D3D10_MAP_WRITE_NO_OVERWRITE)
     {
-        g_bufferMapFlags = D3D10_MAP_WRITE_DISCARD;
-        hResult = d3dBuffer->buffer->Map(g_bufferMapFlags, 0, &ptr);
+        d3dBuffer->map = D3D10_MAP_WRITE_DISCARD;
+        hResult = d3dBuffer->buffer->Map(d3dBuffer->map, 0, &ptr);
     }
     if (hResult != S_OK)
     {
