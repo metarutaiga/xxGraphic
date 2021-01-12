@@ -61,6 +61,56 @@ static void GL_APIENTRY wglShaderBinary(GLsizei count, const GLuint *shaders, GL
     
 }
 //------------------------------------------------------------------------------
+static void GL_APIENTRY wglBindTransformFeedback(GLenum target, GLuint id)
+{
+    
+}
+//------------------------------------------------------------------------------
+static void GL_APIENTRY wglDeleteTransformFeedbacks(GLsizei n, const GLuint *ids)
+{
+
+}
+//------------------------------------------------------------------------------
+static void GL_APIENTRY wglGenTransformFeedbacks(GLsizei n, GLuint *ids)
+{
+    
+}
+//------------------------------------------------------------------------------
+static GLboolean GL_APIENTRY wglIsTransformFeedback(GLuint id)
+{
+    return GL_FALSE;
+}
+//------------------------------------------------------------------------------
+static void GL_APIENTRY wglPauseTransformFeedback(void)
+{
+    
+}
+//------------------------------------------------------------------------------
+static void GL_APIENTRY wglResumeTransformFeedback(void)
+{
+    
+}
+//------------------------------------------------------------------------------
+static void GL_APIENTRY wglInvalidateFramebuffer(GLenum target, GLsizei numAttachments, const GLenum *attachments)
+{
+    
+}
+//------------------------------------------------------------------------------
+static void GL_APIENTRY wglInvalidateSubFramebuffer(GLenum target, GLsizei numAttachments, const GLenum *attachments, GLint x, GLint y, GLsizei width, GLsizei height)
+{
+    
+}
+//------------------------------------------------------------------------------
+static void GL_APIENTRY wglTexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height)
+{
+    
+}
+//------------------------------------------------------------------------------
+static void GL_APIENTRY wglTexStorage3D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth)
+{
+    
+}
+//------------------------------------------------------------------------------
 static PFNGLSHADERSOURCEPROC glShaderSource_;
 //------------------------------------------------------------------------------
 static void GL_APIENTRY wglShaderSourceLegacy(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
@@ -159,23 +209,26 @@ static void* GL_APIENTRY wglSymbol(const char* name, bool* failed)
             ptr = (void*)wglReleaseShaderCompiler;
         if (strcmp(name, "glShaderBinary") == 0)
             ptr = (void*)wglShaderBinary;
-    }
-
-    if (ptr == nullptr)
-    {
-        if (strcmp(name, "glBindTransformFeedback") == 0 ||
-            strcmp(name, "glDeleteTransformFeedbacks") == 0 ||
-            strcmp(name, "glGenTransformFeedbacks") == 0 ||
-            strcmp(name, "glIsTransformFeedback") == 0 ||
-            strcmp(name, "glPauseTransformFeedback") == 0 ||
-            strcmp(name, "glResumeTransformFeedback") == 0 ||
-            strcmp(name, "glInvalidateFramebuffer") == 0 ||
-            strcmp(name, "glInvalidateSubFramebuffer") == 0 ||
-            strcmp(name, "glTexStorage2D") == 0 ||
-            strcmp(name, "glTexStorage3D") == 0)
-        {
-            ptr = (void*)&[](){};
-        }
+        if (strcmp(name, "glBindTransformFeedback") == 0)
+            ptr = (void*)wglBindTransformFeedback;
+        if (strcmp(name, "glDeleteTransformFeedbacks") == 0)
+            ptr = (void*)wglDeleteTransformFeedbacks;
+        if (strcmp(name, "glGenTransformFeedbacks") == 0)
+            ptr = (void*)wglGenTransformFeedbacks;
+        if (strcmp(name, "glIsTransformFeedback") == 0)
+            ptr = (void*)wglIsTransformFeedback;
+        if (strcmp(name, "glPauseTransformFeedback") == 0)
+            ptr = (void*)wglPauseTransformFeedback;
+        if (strcmp(name, "glResumeTransformFeedback") == 0)
+            ptr = (void*)wglResumeTransformFeedback;
+        if (strcmp(name, "glInvalidateFramebuffer") == 0)
+            ptr = (void*)wglInvalidateFramebuffer;
+        if (strcmp(name, "glInvalidateSubFramebuffer") == 0)
+            ptr = (void*)wglInvalidateSubFramebuffer;
+        if (strcmp(name, "glTexStorage2D") == 0)
+            ptr = (void*)wglTexStorage2D;
+        if (strcmp(name, "glTexStorage3D") == 0)
+            ptr = (void*)wglTexStorage3D;
     }
 
     if (ptr == nullptr)
