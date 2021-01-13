@@ -1503,7 +1503,7 @@ uint64_t xxCreateVertexAttributeVulkan(uint64_t device, int count, int* attribut
 
         if (element == 4 && size == sizeof(char) * 4)
         {
-#if defined(xxMACOS) || defined(xxMACCATALYST) || defined(xxWINDOWS)
+#if defined(xxWINDOWS)
             attributeDesc.format = VK_FORMAT_B8G8R8A8_UNORM;
 #else
             attributeDesc.format = VK_FORMAT_R8G8B8A8_UNORM;
@@ -1869,7 +1869,7 @@ uint64_t xxCreateTextureVulkan(uint64_t device, int format, int width, int heigh
         return 0;
     memset(vkTexture, 0, sizeof(TEXTUREVK));
 
-#if defined(xxMACOS) || defined(xxMACCATALYST) || defined(xxWINDOWS)
+#if defined(xxWINDOWS)
     VkFormat imageFormat = VK_FORMAT_B8G8R8A8_UNORM;
 #else
     VkFormat imageFormat = VK_FORMAT_R8G8B8A8_UNORM;

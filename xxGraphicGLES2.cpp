@@ -315,7 +315,7 @@ uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, int* attribute
         }
         if (offset != 0 && element == 4 && size == sizeof(char) * 4)
         {
-#if defined(xxMACOS) || defined(xxWINDOWS)
+#if defined(xxWINDOWS)
             attributes[i].size = GL_BGRA_EXT;
 #else
             attributes[i].size = 4;
@@ -589,7 +589,7 @@ void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, int level, int array
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glTexture->mipmap > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
         }
-#if defined(xxMACOS) || defined(xxWINDOWS)
+#if defined(xxWINDOWS)
         int format = GL_BGRA_EXT;
 #else
         int format = GL_RGBA;
@@ -607,7 +607,7 @@ void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, int level, int array
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, glTexture->mipmap > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
         }
-#if defined(xxMACOS) || defined(xxWINDOWS)
+#if defined(xxWINDOWS)
         int format = GL_BGRA_EXT;
 #else
         int format = GL_RGBA;
