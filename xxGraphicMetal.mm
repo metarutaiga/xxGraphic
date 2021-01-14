@@ -488,14 +488,20 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height
 #endif
 
     int stride = 0;
-    id <MTLBuffer> buffer = nil;
     IOSurfaceRef ioSurface = nullptr;
+    id <MTLTexture> texture = nil;
+    id <MTLBuffer> buffer = nil;
     if (external)
     {
         pixelFormat = MTLPixelFormatBGRA8Unorm;
         if ([NSStringFromClass([(__bridge id)external class]) containsString:@"IOSurface"])
         {
             ioSurface = (IOSurfaceRef)external;
+            stride = 0;
+        }
+        else if ([NSStringFromClass([(__bridge id)external class]) containsString:@"Texture"])
+        {
+            texture = (__bridge id)external;
             stride = 0;
         }
         else
@@ -523,12 +529,15 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height
                                                                                      mipmapped:NO];
     desc.resourceOptions = options;
 
-    id <MTLTexture> texture;
     if (ioSurface)
     {
         texture = [mtlDevice newTextureWithDescriptor:desc
                                             iosurface:ioSurface
                                                 plane:0];
+    }
+    else if (texture)
+    {
+        
     }
     else
     {
