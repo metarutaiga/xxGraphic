@@ -409,7 +409,7 @@ void xxBindRectangleProgram()
 {
     if (rectangleProgram == 0)
     {
-        const char* vertexShaderCodes[] =
+        const GLchar* vertexShaderCodes[] =
         {
             "#version 100", "\n",
             "#define _VERTEX_ 1", "\n",
@@ -418,13 +418,14 @@ void xxBindRectangleProgram()
             glDefaultShaderCode
         };
 
-        const char* fragmentShaderCodes[] =
+        const GLchar* fragmentShaderCodes[] =
         {
             "#version 100", "\n",
             "#define _FRAGMENT_ 1", "\n",
             "#define attribute", "\n",
             "#define varying varying", "\n",
             "#define sampler2D sampler2DRect", "\n",
+            "#undef texture2D", "\n",
             "#define texture2D(t,c) texture2DRect(t, (c) * vec2(textureSize2DRect(t, 0)))", "\n",
             "#extension GL_EXT_gpu_shader4 : enable", "\n",
             glDefaultShaderCode
