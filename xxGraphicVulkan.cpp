@@ -1843,8 +1843,8 @@ void xxUnmapBufferVulkan(uint64_t device, uint64_t buffer)
 //==============================================================================
 struct TEXTUREVK
 {
-    VkImage         image;
     VkImageView     imageView;
+    VkImage         image;
     VkDeviceMemory  memory;
     VkDeviceSize    size;
     uint32_t        width;

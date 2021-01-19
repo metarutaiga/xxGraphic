@@ -549,19 +549,19 @@ struct D3D11BUFFER
 //==============================================================================
 struct D3D10TEXTURE
 {
+    ID3D10ShaderResourceView*   resourceView;
     ID3D10Texture1D*            texture1D;
     ID3D10Texture2D*            texture2D;
     ID3D10Texture3D*            texture3D;
-    ID3D10ShaderResourceView*   resourceView;
     unsigned int                mipmap;
 };
 //------------------------------------------------------------------------------
 struct D3D11TEXTURE
 {
+    ID3D11ShaderResourceView*   resourceView;
     ID3D11Texture1D*            texture1D;
     ID3D11Texture2D*            texture2D;
     ID3D11Texture3D*            texture3D;
-    ID3D11ShaderResourceView*   resourceView;
     unsigned int                mipmap;
 };
 //==============================================================================
