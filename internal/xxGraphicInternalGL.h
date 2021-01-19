@@ -76,8 +76,8 @@ struct BUFFERGL
 //==============================================================================
 struct TEXTUREGL
 {
-    GLenum          type;
     GLuint          texture;
+    GLenum          type;
     void*           memory;
     unsigned int    width;
     unsigned int    height;
