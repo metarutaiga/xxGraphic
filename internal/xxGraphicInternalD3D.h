@@ -352,7 +352,18 @@ inline struct ID3D10Blob* CreateD3D10Shader(const char* shader, const char* entr
     if (D3D10CompileShader)
     {
         ID3D10Blob* blob = nullptr;
-        D3D10CompileShader(shader, strlen(shader), nullptr, nullptr, nullptr, entry, target, 0, &blob, nullptr);
+        ID3D10Blob* error = nullptr;
+        D3D10CompileShader(shader, strlen(shader), nullptr, nullptr, nullptr, entry, target, 0, &blob, &error);
+        if (error)
+        {
+            struct Blob : public IUnknown
+            {
+                virtual LPCSTR STDMETHODCALLTYPE GetBufferPointer() = 0;
+            };
+            Blob* blob = (Blob*)error;
+            OutputDebugStringA(blob->GetBufferPointer());
+            blob->Release();
+        }
         return blob;
     }
 
