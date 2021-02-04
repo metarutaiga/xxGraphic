@@ -264,6 +264,10 @@ void xxSleep(unsigned int sleepMs)
 //==============================================================================
 //  Process / Thread ID
 //==============================================================================
+#if defined(_MSC_VER) && defined(__llvm__)
+static DWORD tlsIndexThreadId = TlsAlloc();
+#endif
+//------------------------------------------------------------------------------
 uint64_t xxGetCurrentProcessId()
 {
 #if defined(_M_IX86)
@@ -296,7 +300,11 @@ uint64_t xxGetCurrentThreadId()
 //------------------------------------------------------------------------------
 int xxGetIncrementThreadId()
 {
-    static int thread_local threadId = 0;
+#if defined(_MSC_VER) && defined(__llvm__)
+    int threadId = (int)(size_t)TlsGetValue(tlsIndexThreadId);
+#else
+    static int thread_local threadId;
+#endif
     if (xxUnlikely(threadId == 0))
     {
         static int increment = 0;
@@ -304,6 +312,9 @@ int xxGetIncrementThreadId()
         threadId = __sync_fetch_and_add(&increment, 1);
 #elif defined(_MSC_VER)
         threadId = _InterlockedIncrement((long*)&increment);
+#endif
+#if defined(_MSC_VER) && defined(__llvm__)
+        TlsSetValue(tlsIndexThreadId, (LPVOID)(size_t)threadId);
 #endif
     }
     return threadId - 1;
