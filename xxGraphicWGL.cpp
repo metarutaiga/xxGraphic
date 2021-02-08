@@ -283,6 +283,12 @@ uint64_t xxGraphicCreateWGL(int version)
     if (g_dummyWindow == nullptr)
         return 0;
 
+    glCreateContext = glCreateContextWGL;
+    glDestroyContext = glDestroyContextWGL;
+    glGetProcAddress = glGetProcAddressWGL;
+    glGetScaleContext = glGetScaleContextWGL;
+    glMakeCurrentContext = glMakeCurrentContextWGL;
+    glPresentContext = glPresentContextWGL;
     uint64_t context = glCreateContextWGL(0, g_dummyWindow, nullptr);
     if (context == 0)
         return 0;
@@ -306,13 +312,6 @@ uint64_t xxGraphicCreateWGL(int version)
     wglSymbol(wglDXUnregisterObjectNV);
     wglSymbol(wglDXLockObjectsNV);
     wglSymbol(wglDXUnlockObjectsNV);
-
-    glCreateContext = glCreateContextWGL;
-    glDestroyContext = glDestroyContextWGL;
-    glGetProcAddress = glGetProcAddressWGL;
-    glGetScaleContext = glGetScaleContextWGL;
-    glMakeCurrentContext = glMakeCurrentContextWGL;
-    glPresentContext = glPresentContextWGL;
 
     (void*&)glShaderSourceInternal = glGetProcAddress("glShaderSource");
 

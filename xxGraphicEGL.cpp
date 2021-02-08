@@ -250,16 +250,15 @@ uint64_t xxGraphicCreateEGL(int version)
         return 0;
     g_eglConfig = eglConfig;
 
-    uint64_t context = glCreateContextEGL(0, nullptr, nullptr);
-    if (context == 0)
-        return 0;
-
     glCreateContext = glCreateContextEGL;
     glDestroyContext = glDestroyContextEGL;
     glGetProcAddress = glGetProcAddressEGL;
     glGetScaleContext = glGetScaleContextEGL;
     glMakeCurrentContext = glMakeCurrentContextEGL;
     glPresentContext = glPresentContextEGL;
+    uint64_t context = glCreateContextEGL(0, nullptr, nullptr);
+    if (context == 0)
+        return 0;
 
     return context;
 }
