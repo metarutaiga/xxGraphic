@@ -44,7 +44,7 @@ static PFNEGLDESTROYIMAGEKHRPROC                eglDestroyImageKHR;
 //  Initialize - EGL
 //==============================================================================
 static bool eglSymbolFailed = false;
-static void* GL_APIENTRY eglSymbol(const char* name, bool* failed)
+static void* GL_APIENTRY eglSymbolImpl(const char* name, bool* failed = nullptr)
 {
     void* ptr = nullptr;
 
@@ -63,7 +63,7 @@ static void* GL_APIENTRY eglSymbol(const char* name, bool* failed)
         if (failed == &internal)
             return nullptr;
 
-        ptr = getSymbolExtension(eglSymbol, name, &internal);
+        ptr = getSymbolExtension(eglSymbolImpl, name, &internal);
     }
 
     if (ptr == nullptr)
@@ -75,7 +75,7 @@ static void* GL_APIENTRY eglSymbol(const char* name, bool* failed)
 
     return ptr;
 }
-#define eglSymbol(var) (void*&)var = eglSymbol(#var, nullptr);
+#define eglSymbol(var) (void*&)var = eglSymbolImpl(#var);
 //------------------------------------------------------------------------------
 uint64_t glCreateContextEGL(uint64_t instance, void* view, void** surface)
 {
@@ -114,16 +114,9 @@ uint64_t glCreateContextEGL(uint64_t instance, void* view, void** surface)
     eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext);
     eglSwapInterval(eglDisplay, 0);
 
-    eglSymbol(glGetIntegerv);
-    eglSymbol(glGenVertexArrays);
-    eglSymbol(glDeleteVertexArrays);
-    eglSymbol(glBindVertexArray);
-    if (glGenVertexArrays && glBindVertexArray)
-    {
-        GLuint vao = 0;
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
-    }
+    GLuint vao = 0;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
 
     if (surface)
     {
@@ -147,17 +140,19 @@ void glDestroyContextEGL(uint64_t context, void* view, void* surface)
 
     eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext);
 
-    if (glGetIntegerv && glDeleteVertexArrays && glBindVertexArray)
-    {
-        GLuint vao = 0;
-        glGetIntegerv(GL_VERTEX_ARRAY_BINDING, (GLint*)&vao);
-        glDeleteVertexArrays(1, &vao);
-        glBindVertexArray(0);
-    }
+    GLuint vao = 0;
+    glGetIntegerv(GL_VERTEX_ARRAY_BINDING, (GLint*)&vao);
+    glDeleteVertexArrays(1, &vao);
+    glBindVertexArray(0);
 
     eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglDestroyContext(eglDisplay, eglContext);
     eglDestroySurface(eglDisplay, eglSurface);
+}
+//------------------------------------------------------------------------------
+void* glGetProcAddressEGL(const char* name)
+{
+    return eglSymbolImpl(name);
 }
 //------------------------------------------------------------------------------
 float glGetScaleContextEGL(uint64_t context, void* view)
@@ -259,31 +254,9 @@ uint64_t xxGraphicCreateEGL(int version)
     if (context == 0)
         return 0;
 
-    bool success = false;
-    switch (version)
-    {
-    case 320:
-        success = xxGraphicCreateGLES32(eglSymbol);
-        break;
-    case 310:
-        success = xxGraphicCreateGLES31(eglSymbol);
-        break;
-    case 300:
-        success = xxGraphicCreateGLES3(eglSymbol);
-        break;
-    case 200:
-    default:
-        success = xxGraphicCreateGLES2(eglSymbol);
-        break;
-    }
-    if (success == false)
-    {
-        xxGraphicDestroyEGL(context);
-        return 0;
-    }
-
     glCreateContext = glCreateContextEGL;
     glDestroyContext = glDestroyContextEGL;
+    glGetProcAddress = glGetProcAddressEGL;
     glGetScaleContext = glGetScaleContextEGL;
     glMakeCurrentContext = glMakeCurrentContextEGL;
     glPresentContext = glPresentContextEGL;
@@ -309,8 +282,6 @@ void xxGraphicDestroyEGL(uint64_t context)
 
     g_eglConfig = nullptr;
     g_eglDisplay = EGL_NO_DISPLAY;
-
-    xxGraphicDestroyGL();
 }
 //==============================================================================
 //  Extension

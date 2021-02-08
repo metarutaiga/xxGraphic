@@ -8,7 +8,8 @@
 
 #include "xxSystem.h"
 
-#define GL_GLES_PROTOTYPES 0
+#define KHRONOS_STATIC
+#define GL_GLES_PROTOTYPES 1
 #include "gl/gl32.h"
 
 inline void* getSymbolExtension(void* (GL_APIENTRYP getSymbol)(const char* name, bool* failed), const char* name, bool* failed)

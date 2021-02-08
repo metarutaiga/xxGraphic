@@ -39,7 +39,8 @@ static float                            rectangleProgramMatrix[16];
 //==============================================================================
 //  Initialize - CGL
 //==============================================================================
-static PFNGLSHADERSOURCEPROC glShaderSource_;
+extern PFNGLSHADERSOURCEPROC glShaderSourceEntry;
+static PFNGLSHADERSOURCEPROC glShaderSourceInternal;
 //------------------------------------------------------------------------------
 static void GL_APIENTRY cglShaderSourceLegacy(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
 {
@@ -55,7 +56,7 @@ static void GL_APIENTRY cglShaderSourceLegacy(GLuint shader, GLsizei count, cons
         replaceString[i] = var;
     }
 
-    glShaderSource_(shader, count, replaceString, length);
+    glShaderSourceInternal(shader, count, replaceString, length);
 
     xxFree(replaceString);
 }
@@ -91,27 +92,29 @@ static void GL_APIENTRY cglShaderSource(GLuint shader, GLsizei count, const GLch
         replaceString[i] = var;
     }
 
-    glShaderSource_(shader, count, replaceString, length);
+    glShaderSourceInternal(shader, count, replaceString, length);
 
     xxFree(replaceString);
 }
 //------------------------------------------------------------------------------
-static PFNGLBINDTEXTUREPROC glBindTexture_;
+extern PFNGLBINDTEXTUREPROC glBindTextureEntry;
+static PFNGLBINDTEXTUREPROC glBindTextureInternal;
 //------------------------------------------------------------------------------
 static void GL_APIENTRY cglBindTexture(GLenum target, GLuint texture)
 {
-    glBindTexture_(target, texture);
+    glBindTextureInternal(target, texture);
     if (target == GL_TEXTURE_RECTANGLE_ARB)
     {
         xxBindRectangleProgram();
     }
 }
 //------------------------------------------------------------------------------
-static PFNGLUNIFORM4FVPROC glUniform4fv_;
+extern PFNGLUNIFORM4FVPROC glUniform4fvEntry;
+static PFNGLUNIFORM4FVPROC glUniform4fvInternal;
 //------------------------------------------------------------------------------
 static void GL_APIENTRY cglUniform4fv(GLint location, GLsizei count, const GLfloat *value)
 {
-    glUniform4fv_(location, count, value);
+    glUniform4fvInternal(location, count, value);
     if (location == 0 && count == 4)
     {
         memcpy(rectangleProgramMatrix, value, sizeof(rectangleProgramMatrix));
@@ -119,7 +122,7 @@ static void GL_APIENTRY cglUniform4fv(GLint location, GLsizei count, const GLflo
 }
 //------------------------------------------------------------------------------
 static bool cglSymbolFailed = false;
-static void* GL_APIENTRY cglSymbol(const char* name, bool* failed)
+static void* GL_APIENTRY cglSymbolImpl(const char* name, bool* failed = nullptr)
 {
     void* ptr = nullptr;
 
@@ -132,53 +135,7 @@ static void* GL_APIENTRY cglSymbol(const char* name, bool* failed)
         if (failed == &internal)
             return nullptr;
 
-        ptr = getSymbolExtension(cglSymbol, name, &internal);
-    }
-
-    if (ptr == nullptr)
-    {
-        if (strcmp(name, "glInvalidateFramebuffer") == 0 ||
-            strcmp(name, "glInvalidateSubFramebuffer") == 0 ||
-            strcmp(name, "glDispatchCompute") == 0 ||
-            strcmp(name, "glDispatchComputeIndirect") == 0 ||
-            strcmp(name, "glFramebufferParameteri") == 0 ||
-            strcmp(name, "glGetFramebufferParameteriv") == 0 ||
-            strcmp(name, "glGetProgramInterfaceiv") == 0 ||
-            strcmp(name, "glGetProgramResourceIndex") == 0 ||
-            strcmp(name, "glGetProgramResourceName") == 0 ||
-            strcmp(name, "glGetProgramResourceiv") == 0 ||
-            strcmp(name, "glGetProgramResourceLocation") == 0 ||
-            strcmp(name, "glBindImageTexture") == 0 ||
-            strcmp(name, "glMemoryBarrier") == 0 ||
-            strcmp(name, "glMemoryBarrierByRegion") == 0 ||
-            strcmp(name, "glTexStorage2DMultisample") == 0 ||
-            strcmp(name, "glBindVertexBuffer") == 0 ||
-            strcmp(name, "glVertexAttribFormat") == 0 ||
-            strcmp(name, "glVertexAttribIFormat") == 0 ||
-            strcmp(name, "glVertexAttribBinding") == 0 ||
-            strcmp(name, "glVertexBindingDivisor") == 0 ||
-            strcmp(name, "glBlendBarrier") == 0 ||
-            strcmp(name, "glCopyImageSubData") == 0 ||
-            strcmp(name, "glDebugMessageControl") == 0 ||
-            strcmp(name, "glDebugMessageInsert") == 0 ||
-            strcmp(name, "glDebugMessageCallback") == 0 ||
-            strcmp(name, "glGetDebugMessageLog") == 0 ||
-            strcmp(name, "glPushDebugGroup") == 0 ||
-            strcmp(name, "glPopDebugGroup") == 0 ||
-            strcmp(name, "glObjectLabel") == 0 ||
-            strcmp(name, "glObjectPtrLabel") == 0 ||
-            strcmp(name, "glGetObjectPtrLabel") == 0 ||
-            strcmp(name, "glPrimitiveBoundingBox") == 0 ||
-            strcmp(name, "glGetGraphicsResetStatus") == 0 ||
-            strcmp(name, "glReadnPixels") == 0 ||
-            strcmp(name, "glGetnUniformfv") == 0 ||
-            strcmp(name, "glGetnUniformiv") == 0 ||
-            strcmp(name, "glGetnUniformuiv") == 0 ||
-            strcmp(name, "glTexBufferRange") == 0 ||
-            strcmp(name, "glTexStorage3DMultisample") == 0)
-        {
-            ptr = (void*)[](){};
-        }
+        ptr = getSymbolExtension(cglSymbolImpl, name, &internal);
     }
 
     if (ptr == nullptr)
@@ -190,7 +147,7 @@ static void* GL_APIENTRY cglSymbol(const char* name, bool* failed)
 
     return ptr;
 }
-#define cglSymbol(var) (void*&)var = cglSymbol(#var, nullptr);
+#define cglSymbol(var) (void*&)var = cglSymbolImpl(#var);
 //------------------------------------------------------------------------------
 struct CGLDISPLAY
 {
@@ -231,16 +188,10 @@ uint64_t glCreateContextCGL(uint64_t instance, void* view, void** display)
         cglDisplay->vao = 0;
         (*display) = cglDisplay;
 
-        cglSymbol(glGenVertexArrays);
-        cglSymbol(glDeleteVertexArrays);
-        cglSymbol(glBindVertexArray);
-        if (glGenVertexArrays && glBindVertexArray)
-        {
-            GLuint vao = 0;
-            glGenVertexArrays(1, &vao);
-            glBindVertexArray(vao);
-            cglDisplay->vao = vao;
-        }
+        GLuint vao = 0;
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
+        cglDisplay->vao = vao;
     }
 
     return reinterpret_cast<uint64_t>((__bridge_retained void*)nsContext);
@@ -258,14 +209,16 @@ void glDestroyContextCGL(uint64_t context, void* view, void* display)
 
     if (cglDisplay)
     {
-        if (glDeleteVertexArrays)
-        {
-            glDeleteVertexArrays(1, &cglDisplay->vao);
-        }
+        glDeleteVertexArrays(1, &cglDisplay->vao);
         xxFree(cglDisplay);
     }
 
     [NSOpenGLContext clearCurrentContext];
+}
+//------------------------------------------------------------------------------
+void* glGetProcAddressCGL(const char* name)
+{
+    return cglSymbolImpl(name);
 }
 //------------------------------------------------------------------------------
 float glGetScaleContextCGL(uint64_t context, void* view)
@@ -284,10 +237,7 @@ void glMakeCurrentContextCGL(uint64_t context, void* display)
 
     [nsContext makeCurrentContext];
 
-    if (glBindVertexArray)
-    {
-        glBindVertexArray(cglDisplay->vao);
-    }
+    glBindVertexArray(cglDisplay->vao);
 }
 //------------------------------------------------------------------------------
 void glPresentContextCGL(uint64_t context, void* display)
@@ -332,41 +282,20 @@ uint64_t xxGraphicCreateCGL(int version)
     [[g_rootView openGLContext] makeCurrentContext];
     NSOpenGLContext* rootContext = [g_rootView openGLContext];
 
-    bool success = false;
-    switch (version)
-    {
-    case 320:
-        success = xxGraphicCreateGLES32(cglSymbol);
-        break;
-    case 310:
-        success = xxGraphicCreateGLES31(cglSymbol);
-        break;
-    case 300:
-        success = xxGraphicCreateGLES3(cglSymbol);
-        break;
-    case 200:
-    default:
-        success = xxGraphicCreateGLES2(cglSymbol);
-        break;
-    }
-    if (success == false)
-    {
-        xxGraphicDestroyCGL(reinterpret_cast<uint64_t>((__bridge_retained void*)rootContext));
-        return 0;
-    }
-
     glCreateContext = glCreateContextCGL;
     glDestroyContext = glDestroyContextCGL;
+    glGetProcAddress = glGetProcAddressCGL;
     glGetScaleContext = glGetScaleContextCGL;
     glMakeCurrentContext = glMakeCurrentContextCGL;
     glPresentContext = glPresentContextCGL;
 
-    glShaderSource_ = glShaderSource;
-    glShaderSource = version <= 200 ? cglShaderSourceLegacy : cglShaderSource;
-    glBindTexture_ = glBindTexture;
-    glBindTexture = cglBindTexture;
-    glUniform4fv_ = glUniform4fv;
-    glUniform4fv = cglUniform4fv;
+    (void*&)glShaderSourceInternal = glGetProcAddress("glShaderSource");
+    (void*&)glBindTextureInternal = glGetProcAddress("glBindTexture");
+    (void*&)glUniform4fvInternal = glGetProcAddress("glUniform4fv");
+
+    glShaderSourceEntry = version <= 200 ? cglShaderSourceLegacy : cglShaderSource;
+    glBindTextureEntry = cglBindTexture;
+    glUniform4fvEntry = cglUniform4fv;
 
     return reinterpret_cast<uint64_t>((__bridge_retained void*)rootContext);
 }
@@ -388,8 +317,6 @@ void xxGraphicDestroyCGL(uint64_t context)
         xxFreeLibrary(g_glLibrary);
         g_glLibrary = nullptr;
     }
-
-    xxGraphicDestroyGL();
 }
 //==============================================================================
 //  Extension

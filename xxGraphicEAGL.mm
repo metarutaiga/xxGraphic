@@ -21,7 +21,7 @@ static Class                            classEAGLContext = nil;
 //  Initialize - EAGL
 //==============================================================================
 static bool eaglSymbolFailed = false;
-static void* GL_APIENTRY eaglSymbol(const char* name, bool* failed)
+static void* GL_APIENTRY eaglSymbolImpl(const char* name, bool* failed = nullptr)
 {
     void* ptr = nullptr;
 
@@ -34,7 +34,7 @@ static void* GL_APIENTRY eaglSymbol(const char* name, bool* failed)
         if (failed == &internal)
             return nullptr;
 
-        ptr = getSymbolExtension(eaglSymbol, name, &internal);
+        ptr = getSymbolExtension(eaglSymbolImpl, name, &internal);
     }
 
     if (ptr == nullptr)
@@ -46,7 +46,7 @@ static void* GL_APIENTRY eaglSymbol(const char* name, bool* failed)
 
     return ptr;
 }
-#define eaglSymbol(var) (void*&)var = eaglSymbol(#var, nullptr);
+#define eaglSymbol(var) (void*&)var = eaglSymbolImpl(#var);
 //------------------------------------------------------------------------------
 struct EAGLDISPLAY
 {
@@ -113,16 +113,10 @@ uint64_t glCreateContextEAGL(uint64_t instance, void* view, void** display)
         eaglDisplay->vao = 0;
         (*display) = eaglDisplay;
 
-        eaglSymbol(glGenVertexArrays);
-        eaglSymbol(glDeleteVertexArrays);
-        eaglSymbol(glBindVertexArray);
-        if (glGenVertexArrays && glBindVertexArray)
-        {
-            GLuint vao = 0;
-            glGenVertexArrays(1, &vao);
-            glBindVertexArray(vao);
-            eaglDisplay->vao = vao;
-        }
+        GLuint vao = 0;
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
+        eaglDisplay->vao = vao;
     }
 
     return reinterpret_cast<uint64_t>((__bridge_retained void*)eaglContext);
@@ -142,14 +136,16 @@ void glDestroyContextEAGL(uint64_t context, void* view, void* display)
         glDeleteFramebuffers(1, &eaglDisplay->framebuffer);
         glDeleteRenderbuffers(1, &eaglDisplay->colorRenderbuffer);
         glDeleteRenderbuffers(1, &eaglDisplay->depthRenderbuffer);
-        if (glDeleteVertexArrays)
-        {
-            glDeleteVertexArrays(1, &eaglDisplay->vao);
-        }
+        glDeleteVertexArrays(1, &eaglDisplay->vao);
         xxFree(eaglDisplay);
     }
 
     [classEAGLContext setCurrentContext:nil];
+}
+//------------------------------------------------------------------------------
+void* glGetProcAddressEAGL(const char* name)
+{
+    return eaglSymbolImpl(name);
 }
 //------------------------------------------------------------------------------
 float glGetScaleContextEAGL(uint64_t context, void* view)
@@ -170,10 +166,7 @@ void glMakeCurrentContextEAGL(uint64_t context, void* display)
 
     glBindFramebuffer(GL_FRAMEBUFFER, eaglDisplay->framebuffer);
 
-    if (glBindVertexArray)
-    {
-        glBindVertexArray(eaglDisplay->vao);
-    }
+    glBindVertexArray(eaglDisplay->vao);
 }
 //------------------------------------------------------------------------------
 void glPresentContextEAGL(uint64_t context, void* display)
@@ -204,31 +197,9 @@ uint64_t xxGraphicCreateEAGL(int version)
         rootContext = [[classEAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
     }
 
-    bool success = false;
-    switch (version)
-    {
-    case 320:
-        success = xxGraphicCreateGLES32(eaglSymbol);
-        break;
-    case 310:
-        success = xxGraphicCreateGLES31(eaglSymbol);
-        break;
-    case 300:
-        success = xxGraphicCreateGLES3(eaglSymbol);
-        break;
-    case 200:
-    default:
-        success = xxGraphicCreateGLES2(eaglSymbol);
-        break;
-    }
-    if (success == false)
-    {
-        xxGraphicDestroyEAGL(reinterpret_cast<uint64_t>(rootContext));
-        return 0;
-    }
-
     glCreateContext = glCreateContextEAGL;
     glDestroyContext = glDestroyContextEAGL;
+    glGetProcAddress = glGetProcAddressEAGL;
     glGetScaleContext = glGetScaleContextEAGL;
     glMakeCurrentContext = glMakeCurrentContextEAGL;
     glPresentContext = glPresentContextEAGL;
@@ -247,8 +218,6 @@ void xxGraphicDestroyEAGL(uint64_t context)
         xxFreeLibrary(g_glLibrary);
         g_glLibrary = nullptr;
     }
-
-    xxGraphicDestroyGL();
 }
 //==============================================================================
 //  Extension

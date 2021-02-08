@@ -37,81 +37,8 @@ static PFNWGLDXUNLOCKOBJECTSNVPROC          wglDXUnlockObjectsNV;
 //==============================================================================
 //  Initialize - WGL
 //==============================================================================
-static void GL_APIENTRY wglBlendBarrier(void)
-{
-    
-}
-static void GL_APIENTRY wglGetShaderPrecisionFormat(GLenum shadertype, GLenum precisiontype, GLint *range, GLint *precision)
-{
-    
-}
-//------------------------------------------------------------------------------
-static void GL_APIENTRY wglPrimitiveBoundingBox(GLfloat minX, GLfloat minY, GLfloat minZ, GLfloat minW, GLfloat maxX, GLfloat maxY, GLfloat maxZ, GLfloat maxW)
-{
-
-}
-//------------------------------------------------------------------------------
-static void GL_APIENTRY wglReleaseShaderCompiler(void)
-{
-    
-}
-//------------------------------------------------------------------------------
-static void GL_APIENTRY wglShaderBinary(GLsizei count, const GLuint *shaders, GLenum binaryformat, const void *binary, GLsizei length)
-{
-    
-}
-//------------------------------------------------------------------------------
-static void GL_APIENTRY wglBindTransformFeedback(GLenum target, GLuint id)
-{
-    
-}
-//------------------------------------------------------------------------------
-static void GL_APIENTRY wglDeleteTransformFeedbacks(GLsizei n, const GLuint *ids)
-{
-
-}
-//------------------------------------------------------------------------------
-static void GL_APIENTRY wglGenTransformFeedbacks(GLsizei n, GLuint *ids)
-{
-    
-}
-//------------------------------------------------------------------------------
-static GLboolean GL_APIENTRY wglIsTransformFeedback(GLuint id)
-{
-    return GL_FALSE;
-}
-//------------------------------------------------------------------------------
-static void GL_APIENTRY wglPauseTransformFeedback(void)
-{
-    
-}
-//------------------------------------------------------------------------------
-static void GL_APIENTRY wglResumeTransformFeedback(void)
-{
-    
-}
-//------------------------------------------------------------------------------
-static void GL_APIENTRY wglInvalidateFramebuffer(GLenum target, GLsizei numAttachments, const GLenum *attachments)
-{
-    
-}
-//------------------------------------------------------------------------------
-static void GL_APIENTRY wglInvalidateSubFramebuffer(GLenum target, GLsizei numAttachments, const GLenum *attachments, GLint x, GLint y, GLsizei width, GLsizei height)
-{
-    
-}
-//------------------------------------------------------------------------------
-static void GL_APIENTRY wglTexStorage2D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height)
-{
-    
-}
-//------------------------------------------------------------------------------
-static void GL_APIENTRY wglTexStorage3D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth)
-{
-    
-}
-//------------------------------------------------------------------------------
-static PFNGLSHADERSOURCEPROC glShaderSource_;
+extern PFNGLSHADERSOURCEPROC glShaderSourceEntry;
+static PFNGLSHADERSOURCEPROC glShaderSourceInternal;
 //------------------------------------------------------------------------------
 static void GL_APIENTRY wglShaderSourceLegacy(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
 {
@@ -127,7 +54,7 @@ static void GL_APIENTRY wglShaderSourceLegacy(GLuint shader, GLsizei count, cons
         replaceString[i] = var;
     }
 
-    glShaderSource_(shader, count, replaceString, length);
+    glShaderSourceInternal(shader, count, replaceString, length);
 
     xxFree(replaceString);
 }
@@ -159,13 +86,13 @@ static void GL_APIENTRY wglShaderSource(GLuint shader, GLsizei count, const GLch
         replaceString[i] = var;
     }
 
-    glShaderSource_(shader, count, replaceString, length);
+    glShaderSourceInternal(shader, count, replaceString, length);
 
     xxFree(replaceString);
 }
 //------------------------------------------------------------------------------
 static bool wglSymbolFailed = false;
-static void* GL_APIENTRY wglSymbol(const char* name, bool* failed)
+static void* GL_APIENTRY wglSymbolImpl(const char* name, bool* failed = nullptr)
 {
     void* ptr = nullptr;
 
@@ -184,51 +111,17 @@ static void* GL_APIENTRY wglSymbol(const char* name, bool* failed)
         if (failed == &internal)
             return nullptr;
 
-        ptr = getSymbolExtension(wglSymbol, name, &internal);
+        ptr = getSymbolExtension(wglSymbolImpl, name, &internal);
     }
 
     if (ptr == nullptr)
     {
         bool failed = wglSymbolFailed;
         if (strcmp(name, "glClearDepthf") == 0)
-            ptr = wglSymbol("glClearDepth", nullptr);
+            ptr = wglSymbolImpl("glClearDepth");
         if (strcmp(name, "glDepthRangef") == 0)
-            ptr = wglSymbol("glDepthRange", nullptr);
+            ptr = wglSymbolImpl("glDepthRange");
         wglSymbolFailed = failed;
-    }
-
-    if (ptr == nullptr)
-    {
-        if (strcmp(name, "glBlendBarrier") == 0)
-            ptr = (void*)wglBlendBarrier;
-        if (strcmp(name, "glGetShaderPrecisionFormat") == 0)
-            ptr = (void*)wglGetShaderPrecisionFormat;
-        if (strcmp(name, "glPrimitiveBoundingBox") == 0)
-            ptr = (void*)wglPrimitiveBoundingBox;
-        if (strcmp(name, "glReleaseShaderCompiler") == 0)
-            ptr = (void*)wglReleaseShaderCompiler;
-        if (strcmp(name, "glShaderBinary") == 0)
-            ptr = (void*)wglShaderBinary;
-        if (strcmp(name, "glBindTransformFeedback") == 0)
-            ptr = (void*)wglBindTransformFeedback;
-        if (strcmp(name, "glDeleteTransformFeedbacks") == 0)
-            ptr = (void*)wglDeleteTransformFeedbacks;
-        if (strcmp(name, "glGenTransformFeedbacks") == 0)
-            ptr = (void*)wglGenTransformFeedbacks;
-        if (strcmp(name, "glIsTransformFeedback") == 0)
-            ptr = (void*)wglIsTransformFeedback;
-        if (strcmp(name, "glPauseTransformFeedback") == 0)
-            ptr = (void*)wglPauseTransformFeedback;
-        if (strcmp(name, "glResumeTransformFeedback") == 0)
-            ptr = (void*)wglResumeTransformFeedback;
-        if (strcmp(name, "glInvalidateFramebuffer") == 0)
-            ptr = (void*)wglInvalidateFramebuffer;
-        if (strcmp(name, "glInvalidateSubFramebuffer") == 0)
-            ptr = (void*)wglInvalidateSubFramebuffer;
-        if (strcmp(name, "glTexStorage2D") == 0)
-            ptr = (void*)wglTexStorage2D;
-        if (strcmp(name, "glTexStorage3D") == 0)
-            ptr = (void*)wglTexStorage3D;
     }
 
     if (ptr == nullptr)
@@ -240,7 +133,7 @@ static void* GL_APIENTRY wglSymbol(const char* name, bool* failed)
 
     return ptr;
 }
-#define wglSymbol(var) (void*&)var = wglSymbol(#var, nullptr);
+#define wglSymbol(var) (void*&)var = wglSymbolImpl(#var);
 //------------------------------------------------------------------------------
 uint64_t glCreateContextWGL(uint64_t instance, void* view, void** display)
 {
@@ -295,16 +188,9 @@ uint64_t glCreateContextWGL(uint64_t instance, void* view, void** display)
     }
     wglMakeCurrent(hDC, hGLRC);
 
-    wglSymbol(glGetIntegerv);
-    wglSymbol(glGenVertexArrays);
-    wglSymbol(glDeleteVertexArrays);
-    wglSymbol(glBindVertexArray);
-    if (glGenVertexArrays && glBindVertexArray)
-    {
-        GLuint vao = 0;
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
-    }
+    GLuint vao = 0;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
 
     if (display)
     {
@@ -330,17 +216,19 @@ void glDestroyContextWGL(uint64_t context, void* view, void* display)
 
     wglMakeCurrent(hDC, hGLRC);
 
-    if (glGetIntegerv && glDeleteVertexArrays && glBindVertexArray)
-    {
-        GLuint vao = 0;
-        glGetIntegerv(GL_VERTEX_ARRAY_BINDING, (GLint*)&vao);
-        glDeleteVertexArrays(1, &vao);
-        glBindVertexArray(0);
-    }
+    GLuint vao = 0;
+    glGetIntegerv(GL_VERTEX_ARRAY_BINDING, (GLint*)&vao);
+    glDeleteVertexArrays(1, &vao);
+    glBindVertexArray(0);
 
     wglMakeCurrent(hDC, nullptr);
     wglDeleteContext(hGLRC);
     ReleaseDC(hWnd, hDC);
+}
+//------------------------------------------------------------------------------
+void* glGetProcAddressWGL(const char* name)
+{
+    return wglSymbolImpl(name);
 }
 //------------------------------------------------------------------------------
 float glGetScaleContextWGL(uint64_t context, void* view)
@@ -419,37 +307,16 @@ uint64_t xxGraphicCreateWGL(int version)
     wglSymbol(wglDXLockObjectsNV);
     wglSymbol(wglDXUnlockObjectsNV);
 
-    bool success = false;
-    switch (version)
-    {
-    case 320:
-        success = xxGraphicCreateGLES32(wglSymbol);
-        break;
-    case 310:
-        success = xxGraphicCreateGLES31(wglSymbol);
-        break;
-    case 300:
-        success = xxGraphicCreateGLES3(wglSymbol);
-        break;
-    case 200:
-    default:
-        success = xxGraphicCreateGLES2(wglSymbol);
-        break;
-    }
-    if (success == false)
-    {
-        xxGraphicDestroyWGL(context);
-        return 0;
-    }
-
     glCreateContext = glCreateContextWGL;
     glDestroyContext = glDestroyContextWGL;
+    glGetProcAddress = glGetProcAddressWGL;
     glGetScaleContext = glGetScaleContextWGL;
     glMakeCurrentContext = glMakeCurrentContextWGL;
     glPresentContext = glPresentContextWGL;
 
-    glShaderSource_ = glShaderSource;
-    glShaderSource = version <= 200 ? wglShaderSourceLegacy : wglShaderSource;
+    (void*&)glShaderSourceInternal = glGetProcAddress("glShaderSource");
+
+    glShaderSourceEntry = version <= 200 ? wglShaderSourceLegacy : wglShaderSource;
 
     return context;
 }
@@ -476,8 +343,6 @@ void xxGraphicDestroyWGL(uint64_t context)
         xxFreeLibrary(g_gdiLibrary);
         g_gdiLibrary = nullptr;
     }
-
-    xxGraphicDestroyGL();
 }
 //==============================================================================
 //  Extension
