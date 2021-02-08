@@ -997,7 +997,7 @@ extern "C" type prototype parameter \
     static type (GR_STDCALL* prototype ## Entry) parameter = nullptr; \
     if (prototype ## Entry == nullptr) \
     { \
-        (void*&)prototype ## Entry = grSymbol(#prototype); \
+        (void*&)prototype ## Entry = grSymbolImpl(#prototype); \
         if (prototype ## Entry == nullptr) \
         { \
             return type(); \
