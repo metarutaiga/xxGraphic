@@ -102,7 +102,7 @@ GL_PROTOTYPE(void, glBindAttribLocation, (GLuint program, GLuint index, const GL
 GL_PROTOTYPE(void, glBindBuffer, (GLenum target, GLuint buffer), target, buffer);
 GL_PROTOTYPE(void, glBindFramebuffer, (GLenum target, GLuint framebuffer), target, framebuffer);
 GL_PROTOTYPE(void, glBindRenderbuffer, (GLenum target, GLuint renderbuffer), target, renderbuffer);
-GL_PROTOTYPE(void, glBindTexture, (GLenum target, GLuint texture), target, texture);
+GL_PROTOTYPEE(void, glBindTexture, (GLenum target, GLuint texture), target, texture);
 GL_PROTOTYPE(void, glBlendColor, (GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha), red, green, blue, alpha);
 GL_PROTOTYPE(void, glBlendEquation, (GLenum mode), mode);
 GL_PROTOTYPE(void, glBlendEquationSeparate, (GLenum modeRGB, GLenum modeAlpha), modeRGB, modeAlpha);
@@ -220,7 +220,7 @@ GL_PROTOTYPE(void, glUniform3fv, (GLint location, GLsizei count, const GLfloat *
 GL_PROTOTYPE(void, glUniform3i, (GLint location, GLint v0, GLint v1, GLint v2), location, v0, v1, v2);
 GL_PROTOTYPE(void, glUniform3iv, (GLint location, GLsizei count, const GLint *value), location, count, value);
 GL_PROTOTYPE(void, glUniform4f, (GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3), location, v0, v1, v2, v3);
-GL_PROTOTYPE(void, glUniform4fv, (GLint location, GLsizei count, const GLfloat *value), location, count, value);
+GL_PROTOTYPEE(void, glUniform4fv, (GLint location, GLsizei count, const GLfloat *value), location, count, value);
 GL_PROTOTYPE(void, glUniform4i, (GLint location, GLint v0, GLint v1, GLint v2, GLint v3), location, v0, v1, v2, v3);
 GL_PROTOTYPE(void, glUniform4iv, (GLint location, GLsizei count, const GLint *value), location, count, value);
 GL_PROTOTYPE(void, glUniformMatrix2fv, (GLint location, GLsizei count, GLboolean transpose, const GLfloat *value), location, count, transpose, value);

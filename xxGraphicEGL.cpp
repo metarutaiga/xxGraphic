@@ -48,7 +48,7 @@ static void* GL_APIENTRY eglSymbolImpl(const char* name, bool* failed = nullptr)
 {
     void* ptr = nullptr;
 
-    if (ptr == nullptr && eglGetProcAddress)
+    if (ptr == nullptr && strcmp(name, "eglGetProcAddress") != 0)
         ptr = (void*)eglGetProcAddress(name);
 
     if (ptr == nullptr && g_glLibrary)
