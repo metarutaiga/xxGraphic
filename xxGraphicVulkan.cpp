@@ -177,6 +177,7 @@ uint64_t xxCreateInstanceVulkan()
         g_vulkanLibrary = xxLoadLibrary("libMoltenVK.dylib");
     if (g_vulkanBackendLibrary == nullptr)
         g_vulkanBackendLibrary = xxLoadLibrary("libMoltenVK.dylib");
+    VK_MVK_moltenvk = true;
 #endif
 
 #if defined(xxWINDOWS)
