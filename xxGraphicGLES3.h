@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : OpenGL ES 3.0 Header
 //
-// Copyright (c) 2019-2020 TAiGA
+// Copyright (c) 2019-2021 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #pragma once
