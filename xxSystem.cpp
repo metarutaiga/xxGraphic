@@ -234,17 +234,28 @@ static uint64_t xxTSCFrequencyImpl()
     return frequency;
 }
 //------------------------------------------------------------------------------
-static uint64_t xxTSCFrequencyInteger = xxTSCFrequencyImpl();
-static uint64_t xxTSCInitialized = xxTSC();
-static float xxTSCInvFrequencyFloat = 1.0f / xxTSCFrequencyInteger;
+static uint64_t xxTSCFrequencyInteger = 0;
+static uint64_t xxTSCInitialized = 0;
+static float xxTSCInvFrequencyFloat = 0.0f;
+//------------------------------------------------------------------------------
+static void xxTSCInitialize()
+{
+    xxTSCFrequencyInteger = xxTSCFrequencyImpl();
+    xxTSCInitialized = xxTSC();
+    xxTSCInvFrequencyFloat = 1.0f / xxTSCFrequencyInteger;
+}
 //------------------------------------------------------------------------------
 uint64_t xxTSCFrequency()
 {
+    if (xxTSCInitialized == 0)
+        xxTSCInitialize();
     return xxTSCFrequencyInteger;
 }
 //------------------------------------------------------------------------------
 float xxGetCurrentTime()
 {
+    if (xxTSCInitialized == 0)
+        xxTSCInitialize();
     return (float)(xxTSC() - xxTSCInitialized) * xxTSCInvFrequencyFloat;
 }
 //------------------------------------------------------------------------------
@@ -264,10 +275,6 @@ void xxSleep(unsigned int sleepMs)
 //==============================================================================
 //  Process / Thread ID
 //==============================================================================
-#if defined(_MSC_VER) && defined(__llvm__)
-static DWORD tlsIndexThreadId = TlsAlloc();
-#endif
-//------------------------------------------------------------------------------
 uint64_t xxGetCurrentProcessId()
 {
 #if defined(_M_IX86)
