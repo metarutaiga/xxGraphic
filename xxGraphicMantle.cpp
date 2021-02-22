@@ -992,7 +992,7 @@ void xxSetTransformMantle(uint64_t commandEncoder, const float* world, const flo
 //  Loader
 //==============================================================================
 #define GR_PROTOTYPE(type, prototype, parameter, ...) \
-extern "C" type prototype parameter \
+extern "C" type GR_STDCALL prototype parameter \
 { \
     static type (GR_STDCALL* prototype ## Entry) parameter = nullptr; \
     if (prototype ## Entry == nullptr) \

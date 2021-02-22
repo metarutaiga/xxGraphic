@@ -2469,7 +2469,7 @@ void xxSetTransformVulkan(uint64_t commandEncoder, const float* world, const flo
 //  Loader
 //==============================================================================
 #define VK_PROTOTYPE(type, prototype, parameter, ...) \
-extern "C" type prototype parameter \
+extern "C" type VKAPI_CALL prototype parameter \
 { \
     static type (VKAPI_CALL* prototype ## Entry) parameter = nullptr; \
     if (prototype ## Entry == nullptr) \

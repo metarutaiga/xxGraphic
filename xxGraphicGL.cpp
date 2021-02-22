@@ -52,7 +52,7 @@ void                                            (*glMakeCurrentContext)(uint64_t
 void                                            (*glPresentContext)(uint64_t context, void* display);
 //------------------------------------------------------------------------------
 #define GL_PROTOTYPE(type, prototype, parameter, ...) \
-extern "C" type prototype parameter \
+extern "C" type GL_APIENTRY prototype parameter \
 { \
     static type (GL_APIENTRYP prototype ## Entry) parameter = nullptr; \
     if (prototype ## Entry == nullptr) \
@@ -68,7 +68,7 @@ extern "C" type prototype parameter \
 //------------------------------------------------------------------------------
 #define GL_PROTOTYPEE(type, prototype, parameter, ...) \
 type (GL_APIENTRYP prototype ## Entry) parameter = nullptr; \
-extern "C" type prototype parameter \
+extern "C" type GL_APIENTRY prototype parameter \
 { \
     if (prototype ## Entry == nullptr) \
     { \
@@ -82,7 +82,7 @@ extern "C" type prototype parameter \
 }
 //------------------------------------------------------------------------------
 #define GL_PROTOTYPEP(type, prototype, parameter, ...) \
-extern "C" type prototype parameter \
+extern "C" type GL_APIENTRY prototype parameter \
 { \
     static type (GL_APIENTRYP prototype ## Entry) parameter = nullptr; \
     if (prototype ## Entry == nullptr) \
