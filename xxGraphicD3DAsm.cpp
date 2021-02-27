@@ -141,7 +141,7 @@ const DWORD pixelShaderCode20[] =
 //------------------------------------------------------------------------------
 const DWORD vertexShaderCode40[] =
 {
-    _DXBC, 0xb6dc22aa, 0xf98b1ce9, 0x38da62c7, 0x5a4afb34,
+    _DXBC, 0x52a32347, 0x4f404d39, 0xfdbf50ab, 0x42abc0a7,
     0x00000001, 0x00000388, 3,
     0x0000002c, 0x000000a8, 0x00000128,
     _ISGN, 0x00000074, 3, 0x00000008,
@@ -166,7 +166,7 @@ const DWORD vertexShaderCode40[] =
     _OP(DCL_OUTPUT_SIV, 4), _4M(1D, OUTPUT), 0, 1,                                                                  // dcl_output_siv o0.xyzw
     _OP(DCL_OUTPUT, 3), _4M(1D, OUTPUT), 1,                                                                         // dcl_output o1.xyzw
     _OP(DCL_OUTPUT, 3), _4MM(1D, OUTPUT, XY), 2,                                                                    // dcl_output o2.xy
-    _OP(DCL_TEMPS, 2), 1,                                                                                           // dcl_temps 1
+    _OP(DCL_TEMPS, 2), 2,                                                                                           // dcl_temps 2
     _OP(MUL, 8), _4M(1D, TEMP), 0, _4S(2D, CONSTANT_BUFFER), 0, 0, _4SS(1D, INPUT, XXXX), 0,                        // mul r0.xyzw, cb0[0].xyzw, v0.xxxx
     _OP(MAD, 10), _4M(1D, TEMP), 0, _4S(2D, CONSTANT_BUFFER), 0, 1, _4SS(1D, INPUT, YYYY), 0, _4S(1D, TEMP), 0,     // mad r0.xyzw, cb0[1].xyzw, v0.yyyy, r0.xyzw
     _OP(MAD, 10), _4M(1D, TEMP), 0, _4S(2D, CONSTANT_BUFFER), 0, 2, _4SS(1D, INPUT, ZZZZ), 0, _4S(1D, TEMP), 0,     // mad r0.xyzw, cb0[2].xyzw, v0.zzzz, r0.xyzw
