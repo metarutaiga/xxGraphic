@@ -141,7 +141,7 @@ const DWORD pixelShaderCode20[] =
 //------------------------------------------------------------------------------
 const DWORD vertexShaderCode40[] =
 {
-    _DXBC, 0x52a32347, 0x4f404d39, 0xfdbf50ab, 0x42abc0a7,
+    _DXBC, 0x594d7a0d, 0x1efb9a50, 0x00b96a57, 0xf05960a9,
     0x00000001, 0x00000388, 3,
     0x0000002c, 0x000000a8, 0x00000128,
     _ISGN, 0x00000074, 3, 0x00000008,
@@ -174,11 +174,11 @@ const DWORD vertexShaderCode40[] =
     _OP(MUL, 8), _4M(1D, TEMP), 1, _4S(2D, CONSTANT_BUFFER), 0, 4, _4SS(1D, TEMP, XXXX), 0,                         // mul r1.xyzw, cb0[4].xyzw, r0.xxxx
     _OP(MAD, 10), _4M(1D, TEMP), 1, _4S(2D, CONSTANT_BUFFER), 0, 5, _4SS(1D, TEMP, YYYY), 0, _4S(1D, TEMP), 1,      // mad r1.xyzw, cb0[5].xyzw, r0.yyyy, r1.xyzw
     _OP(MAD, 10), _4M(1D, TEMP), 1, _4S(2D, CONSTANT_BUFFER), 0, 6, _4SS(1D, TEMP, ZZZZ), 0, _4S(1D, TEMP), 1,      // mad r1.xyzw, cb0[6].xyzw, r0.zzzz, r1.xyzw
-    _OP(MAD, 10), _4M(1D, TEMP), 1, _4S(2D, CONSTANT_BUFFER), 0, 7, _4SS(1D, TEMP, ZZZZ), 0, _4S(1D, TEMP), 1,      // mad r1.xyzw, cb0[7].xyzw, r0.zzzz, r1.xyzw
+    _OP(MAD, 10), _4M(1D, TEMP), 1, _4S(2D, CONSTANT_BUFFER), 0, 7, _4SS(1D, TEMP, WWWW), 0, _4S(1D, TEMP), 1,      // mad r1.xyzw, cb0[7].xyzw, r0.zzzz, r1.xyzw
     _OP(MUL, 8), _4M(1D, TEMP), 0, _4S(2D, CONSTANT_BUFFER), 0, 8, _4SS(1D, TEMP, XXXX), 1,                         // mul r0.xyzw, cb0[8].xyzw, r1.xxxx
     _OP(MAD, 10), _4M(1D, TEMP), 0, _4S(2D, CONSTANT_BUFFER), 0, 9, _4SS(1D, TEMP, YYYY), 1, _4S(1D, TEMP), 0,      // mad r0.xyzw, cb0[9].xyzw, r1.yyyy, r0.xyzw
     _OP(MAD, 10), _4M(1D, TEMP), 0, _4S(2D, CONSTANT_BUFFER), 0, 10, _4SS(1D, TEMP, ZZZZ), 1, _4S(1D, TEMP), 0,     // mad r0.xyzw, cb0[10].xyzw, r1.zzzz, r0.xyzw
-    _OP(MAD, 10), _4M(1D, OUTPUT), 0, _4S(2D, CONSTANT_BUFFER), 0, 11, _4SS(1D, TEMP, ZZZZ), 1, _4S(1D, TEMP), 0,   // mad o0.xyzw, cb0[11].xyzw, r1.zzzz, r0.xyzw
+    _OP(MAD, 10), _4M(1D, OUTPUT), 0, _4S(2D, CONSTANT_BUFFER), 0, 11, _4SS(1D, TEMP, WWWW), 1, _4S(1D, TEMP), 0,   // mad o0.xyzw, cb0[11].xyzw, r1.zzzz, r0.xyzw
     _OP(MOV, 5), _4M(1D, OUTPUT), 1, _4S(1D, INPUT), 1,                                                             // mov o1.xyzw, v1.xyzw
     _OP(MOV, 5), _4MM(1D, OUTPUT, XY), 2, _4SS(1D, INPUT, XYXX), 2,                                                 // mov o2.xy, v2.xyxx
     _OP(RET, 1)                                                                                                     // ret
