@@ -880,7 +880,15 @@ void xxSetFragmentSamplersD3D8(uint64_t commandEncoder, int count, const uint64_
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferD3D8(uint64_t commandEncoder, uint64_t buffer, int size)
 {
+    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
+    D3DMATRIX* d3dMatrix = reinterpret_cast<D3DMATRIX*>(getResourceData(buffer));
 
+    if (size >= sizeof(D3DMATRIX) * 1)
+        d3dDevice->SetTransform(D3DTS_WORLD, &d3dMatrix[0]);
+    if (size >= sizeof(D3DMATRIX) * 2)
+        d3dDevice->SetTransform(D3DTS_VIEW, &d3dMatrix[1]);
+    if (size >= sizeof(D3DMATRIX) * 3)
+        d3dDevice->SetTransform(D3DTS_PROJECTION, &d3dMatrix[2]);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferD3D8(uint64_t commandEncoder, uint64_t buffer, int size)
@@ -899,19 +907,5 @@ void xxDrawIndexedD3D8(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
     SafeRelease(d3dIndexBuffer);
 
     d3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, firstIndex, indexCount / 3);
-}
-//==============================================================================
-//  Fixed-Function
-//==============================================================================
-void xxSetTransformD3D8(uint64_t commandEncoder, const float* world, const float* view, const float* projection)
-{
-    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
-
-    if (world)
-        d3dDevice->SetTransform(D3DTS_WORLD, (const D3DMATRIX*)world);
-    if (view)
-        d3dDevice->SetTransform(D3DTS_VIEW, (const D3DMATRIX*)view);
-    if (projection)
-        d3dDevice->SetTransform(D3DTS_PROJECTION, (const D3DMATRIX*)projection);
 }
 //==============================================================================

@@ -2422,10 +2422,3 @@ void xxDrawIndexedVulkan(uint64_t commandEncoder, uint64_t indexBuffer, int inde
     vkCmdDrawIndexed(vkCommandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 //==============================================================================
-//  Fixed-Function
-//==============================================================================
-void xxSetTransformVulkan(uint64_t commandEncoder, const float* world, const float* view, const float* projection)
-{
-
-}
-//==============================================================================

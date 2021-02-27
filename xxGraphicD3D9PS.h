@@ -38,6 +38,3 @@ xxAPI void          xxSetVertexBuffersD3D9PS(uint64_t commandEncoder, int count,
 xxAPI void          xxSetVertexConstantBufferD3D9PS(uint64_t commandEncoder, uint64_t buffer, int size);
 xxAPI void          xxSetFragmentConstantBufferD3D9PS(uint64_t commandEncoder, uint64_t buffer, int size);
 //==============================================================================
-//  Fixed-Function
-//==============================================================================
-xxAPI void          xxSetTransformD3D9PS(uint64_t commandEncoder, const float* world, const float* view, const float* projection);

@@ -316,10 +316,3 @@ void xxDrawIndexedNULL(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
 
 }
 //==============================================================================
-//  Fixed-Function
-//==============================================================================
-void xxSetTransformNULL(uint64_t commandEncoder, const float* world, const float* view, const float* projection)
-{
-
-}
-//==============================================================================

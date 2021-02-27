@@ -104,6 +104,3 @@ xxAPI void          xxSetVertexConstantBufferGLES2(uint64_t commandEncoder, uint
 xxAPI void          xxSetFragmentConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, int size);
 xxAPI void          xxDrawIndexedGLES2(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
-//  Fixed-Function
-//==============================================================================
-xxAPI void          xxSetTransformGLES2(uint64_t commandEncoder, const float* world, const float* view, const float* projection);

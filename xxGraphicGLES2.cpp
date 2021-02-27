@@ -994,10 +994,3 @@ void xxDrawIndexedGLES2(uint64_t commandEncoder, uint64_t indexBuffer, int index
     glDrawElements(GL_TRIANGLES, indexCount, indexType, (char*)nullptr + firstIndex * INDEX_BUFFER_WIDTH);
 }
 //==============================================================================
-//  Fixed-Function
-//==============================================================================
-void xxSetTransformGLES2(uint64_t commandEncoder, const float* world, const float* view, const float* projection)
-{
-
-}
-//==============================================================================

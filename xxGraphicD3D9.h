@@ -104,6 +104,3 @@ xxAPI void          xxSetVertexConstantBufferD3D9(uint64_t commandEncoder, uint6
 xxAPI void          xxSetFragmentConstantBufferD3D9(uint64_t commandEncoder, uint64_t buffer, int size);
 xxAPI void          xxDrawIndexedD3D9(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
-//  Fixed-Function
-//==============================================================================
-xxAPI void          xxSetTransformD3D9(uint64_t commandEncoder, const float* world, const float* view, const float* projection);

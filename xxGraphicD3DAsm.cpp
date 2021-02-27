@@ -38,10 +38,18 @@
 const DWORD vertexShaderCode10[] =
 { 
     D3DVS_VERSION(1, 0),                                                            // vs_1_0
-    D3DSIO_MUL, _DST(TEMP, 0), _SRC(CONST, 0), _SRCM(INPUT, 0, X),                  // mul r0, c0, v0.x,
+    D3DSIO_MUL, _DST(TEMP, 0), _SRC(CONST, 0), _SRCM(INPUT, 0, X),                  // mul r0, c0, v0.x
     D3DSIO_MAD, _DST(TEMP, 0), _SRC(CONST, 1), _SRCM(INPUT, 0, Y), _SRC(TEMP, 0),   // mad r0, c1, v0.y, r0
     D3DSIO_MAD, _DST(TEMP, 0), _SRC(CONST, 2), _SRCM(INPUT, 0, Z), _SRC(TEMP, 0),   // mad r0, c2, v0.z, r0
-    D3DSIO_ADD, _DST(RASTOUT, 0), _SRC(TEMP, 0), _SRC(CONST, 3),                    // add oPos, r0, c3
+    D3DSIO_ADD, _DST(TEMP, 0), _SRC(CONST, 3), _SRC(TEMP, 0),                       // add r0, c3, r0
+    D3DSIO_MUL, _DST(TEMP, 1), _SRC(CONST, 4), _SRCM(TEMP, 0, X),                   // mul r1, c4, r0.x
+    D3DSIO_MAD, _DST(TEMP, 1), _SRC(CONST, 5), _SRCM(TEMP, 0, Y), _SRC(TEMP, 1),    // mad r1, c5, r0.y, r1
+    D3DSIO_MAD, _DST(TEMP, 1), _SRC(CONST, 6), _SRCM(TEMP, 0, Z), _SRC(TEMP, 1),    // mad r1, c6, r0.z, r1
+    D3DSIO_MAD, _DST(TEMP, 1), _SRC(CONST, 7), _SRCM(TEMP, 0, W), _SRC(TEMP, 1),    // mad r1, c7, r0.w, r1
+    D3DSIO_MUL, _DST(TEMP, 0), _SRC(CONST, 8), _SRCM(TEMP, 1, X),                   // mul r0, c8, r1.x
+    D3DSIO_MAD, _DST(TEMP, 0), _SRC(CONST, 9), _SRCM(TEMP, 1, Y), _SRC(TEMP, 0),    // mad r0, c9, r1.y, r0
+    D3DSIO_MAD, _DST(TEMP, 0), _SRC(CONST, 10), _SRCM(TEMP, 1, Z), _SRC(TEMP, 0),   // mad r0, c10, r1.z, r0
+    D3DSIO_MAD, _DST(RASTOUT, 0), _SRC(CONST, 11), _SRCM(TEMP, 1, W), _SRC(TEMP, 0),// mad oPos, c11, r1.w, r0
     D3DSIO_MOV, _DST(ATTROUT, 0), _SRC(INPUT, 1),                                   // mov oD0, v1
     D3DSIO_MOV, _DSTM(TEXCRDOUT, 0, XY), _SRC(INPUT, 2),                            // mov oT0.xy, v2
     D3DSIO_END
@@ -53,10 +61,18 @@ const DWORD vertexShaderCode11[] =
     D3DSIO_DCL, _DCL(POSITION), _DST(INPUT, 0),                                     // dcl_position v0
     D3DSIO_DCL, _DCL(COLOR), _DST(INPUT, 1),                                        // dcl_color v1
     D3DSIO_DCL, _DCL(TEXCOORD), _DST(INPUT, 2),                                     // dcl_texcoord v2
-    D3DSIO_MUL, _DST(TEMP, 0), _SRC(CONST, 0), _SRCM(INPUT, 0, X),                  // mul r0, c0, v0.x,
+    D3DSIO_MUL, _DST(TEMP, 0), _SRC(CONST, 0), _SRCM(INPUT, 0, X),                  // mul r0, c0, v0.x
     D3DSIO_MAD, _DST(TEMP, 0), _SRC(CONST, 1), _SRCM(INPUT, 0, Y), _SRC(TEMP, 0),   // mad r0, c1, v0.y, r0
     D3DSIO_MAD, _DST(TEMP, 0), _SRC(CONST, 2), _SRCM(INPUT, 0, Z), _SRC(TEMP, 0),   // mad r0, c2, v0.z, r0
-    D3DSIO_ADD, _DST(RASTOUT, 0), _SRC(TEMP, 0), _SRC(CONST, 3),                    // add oPos, r0, c3
+    D3DSIO_ADD, _DST(TEMP, 0), _SRC(CONST, 3), _SRC(TEMP, 0),                       // add r0, c3, r0
+    D3DSIO_MUL, _DST(TEMP, 1), _SRC(CONST, 4), _SRCM(TEMP, 0, X),                   // mul r1, c4, r0.x
+    D3DSIO_MAD, _DST(TEMP, 1), _SRC(CONST, 5), _SRCM(TEMP, 0, Y), _SRC(TEMP, 1),    // mad r1, c5, r0.y, r1
+    D3DSIO_MAD, _DST(TEMP, 1), _SRC(CONST, 6), _SRCM(TEMP, 0, Z), _SRC(TEMP, 1),    // mad r1, c6, r0.z, r1
+    D3DSIO_MAD, _DST(TEMP, 1), _SRC(CONST, 7), _SRCM(TEMP, 0, W), _SRC(TEMP, 1),    // mad r1, c7, r0.w, r1
+    D3DSIO_MUL, _DST(TEMP, 0), _SRC(CONST, 8), _SRCM(TEMP, 1, X),                   // mul r0, c8, r1.x
+    D3DSIO_MAD, _DST(TEMP, 0), _SRC(CONST, 9), _SRCM(TEMP, 1, Y), _SRC(TEMP, 0),    // mad r0, c9, r1.y, r0
+    D3DSIO_MAD, _DST(TEMP, 0), _SRC(CONST, 10), _SRCM(TEMP, 1, Z), _SRC(TEMP, 0),   // mad r0, c10, r1.z, r0
+    D3DSIO_MAD, _DST(RASTOUT, 0), _SRC(CONST, 11), _SRCM(TEMP, 1, W), _SRC(TEMP, 0),// mad oPos, c11, r1.w, r0
     D3DSIO_MOV, _DST(ATTROUT, 0), _SRC(INPUT, 1),                                   // mov oD0, v1
     D3DSIO_MOV, _DSTM(TEXCRDOUT, 0, XY), _SRC(INPUT, 2),                            // mov oT0.xy, v2
     D3DSIO_END
@@ -125,8 +141,8 @@ const DWORD pixelShaderCode20[] =
 //------------------------------------------------------------------------------
 const DWORD vertexShaderCode40[] =
 {
-    _DXBC, 0x97f66d1a, 0x57e3bff3, 0x64b9ebf9, 0x84763d6e,
-    0x00000001, 0x00000258, 3,
+    _DXBC, 0xb6dc22aa, 0xf98b1ce9, 0x38da62c7, 0x5a4afb34,
+    0x00000001, 0x00000388, 3,
     0x0000002c, 0x000000a8, 0x00000128,
     _ISGN, 0x00000074, 3, 0x00000008,
     0x00000050, 0, 0, 3, 0, 0x0707,
@@ -142,22 +158,30 @@ const DWORD vertexShaderCode40[] =
     _SV_POSITION, 0,
     _COLOR, 0,
     _TEXCOORD, 0,
-    _SHDR, 0x00000128, _VER(VERTEX_SHADER, 4, 0), 0x0000004a,
-    _OP(DCL_CONSTANT_BUFFER, 4), _4S(2D, CONSTANT_BUFFER), D3D10_SB_CONSTANT_BUFFER_IMMEDIATE_INDEXED, 4,       // dcl_constantbuffer CB0[4], immediateIndexed
-    _OP(DCL_INPUT, 3), _4MM(1D, INPUT, XYZ), 0,                                                                 // dcl_input v0.xyz
-    _OP(DCL_INPUT, 3), _4M(1D, INPUT), 1,                                                                       // dcl_input v1.xyzw
-    _OP(DCL_INPUT, 3), _4MM(1D, INPUT, XY), 2,                                                                  // dcl_input v2.xy
-    _OP(DCL_OUTPUT_SIV, 4), _4M(1D, OUTPUT), 0, 1,                                                              // dcl_output_siv o0.xyzw
-    _OP(DCL_OUTPUT, 3), _4M(1D, OUTPUT), 1,                                                                     // dcl_output o1.xyzw
-    _OP(DCL_OUTPUT, 3), _4MM(1D, OUTPUT, XY), 2,                                                                // dcl_output o2.xy
-    _OP(DCL_TEMPS, 2), 1,                                                                                       // dcl_temps 1
-    _OP(MUL, 8), _4M(1D, TEMP), 0, _4S(2D, CONSTANT_BUFFER), 0, 0, _4SS(1D, INPUT, XXXX), 0,                    // mul r0.xyzw, cb0[0].xyzw, v0.xxxx
-    _OP(MAD, 10), _4M(1D, TEMP), 0, _4S(2D, CONSTANT_BUFFER), 0, 1, _4SS(1D, INPUT, YYYY), 0, _4S(1D, TEMP), 0, // mad r0.xyzw, cb0[1].xyzw, v0.yyyy, r0.xyzw
-    _OP(MAD, 10), _4M(1D, TEMP), 0, _4S(2D, CONSTANT_BUFFER), 0, 2, _4SS(1D, INPUT, ZZZZ), 0, _4S(1D, TEMP), 0, // mad r0.xyzw, cb0[2].xyzw, v0.zzzz, r0.xyzw
-    _OP(ADD, 8), _4M(1D, OUTPUT), 0, _4S(1D, TEMP), 0, _4S(2D, CONSTANT_BUFFER), 0, 3,                          // add o0.xyzw, r0.xyzw, cb0[3].xyzw
-    _OP(MOV, 5), _4M(1D, OUTPUT), 1, _4S(1D, INPUT), 1,                                                         // mov o1.xyzw, v1.xyzw
-    _OP(MOV, 5), _4MM(1D, OUTPUT, XY), 2, _4SS(1D, INPUT, XYXX), 2,                                             // mov o2.xy, v2.xyxx
-    _OP(RET, 1)                                                                                                 // ret
+    _SHDR, 0x00000258, _VER(VERTEX_SHADER, 4, 0), 0x00000096,
+    _OP(DCL_CONSTANT_BUFFER, 4), _4S(2D, CONSTANT_BUFFER), D3D10_SB_CONSTANT_BUFFER_IMMEDIATE_INDEXED, 12,          // dcl_constantbuffer CB0[12], immediateIndexed
+    _OP(DCL_INPUT, 3), _4MM(1D, INPUT, XYZ), 0,                                                                     // dcl_input v0.xyz
+    _OP(DCL_INPUT, 3), _4M(1D, INPUT), 1,                                                                           // dcl_input v1.xyzw
+    _OP(DCL_INPUT, 3), _4MM(1D, INPUT, XY), 2,                                                                      // dcl_input v2.xy
+    _OP(DCL_OUTPUT_SIV, 4), _4M(1D, OUTPUT), 0, 1,                                                                  // dcl_output_siv o0.xyzw
+    _OP(DCL_OUTPUT, 3), _4M(1D, OUTPUT), 1,                                                                         // dcl_output o1.xyzw
+    _OP(DCL_OUTPUT, 3), _4MM(1D, OUTPUT, XY), 2,                                                                    // dcl_output o2.xy
+    _OP(DCL_TEMPS, 2), 1,                                                                                           // dcl_temps 1
+    _OP(MUL, 8), _4M(1D, TEMP), 0, _4S(2D, CONSTANT_BUFFER), 0, 0, _4SS(1D, INPUT, XXXX), 0,                        // mul r0.xyzw, cb0[0].xyzw, v0.xxxx
+    _OP(MAD, 10), _4M(1D, TEMP), 0, _4S(2D, CONSTANT_BUFFER), 0, 1, _4SS(1D, INPUT, YYYY), 0, _4S(1D, TEMP), 0,     // mad r0.xyzw, cb0[1].xyzw, v0.yyyy, r0.xyzw
+    _OP(MAD, 10), _4M(1D, TEMP), 0, _4S(2D, CONSTANT_BUFFER), 0, 2, _4SS(1D, INPUT, ZZZZ), 0, _4S(1D, TEMP), 0,     // mad r0.xyzw, cb0[2].xyzw, v0.zzzz, r0.xyzw
+    _OP(ADD, 8), _4M(1D, TEMP), 0, _4S(2D, CONSTANT_BUFFER), 0, 3, _4S(1D, TEMP), 0,                                // add r0.xyzw, cb0[3].xyzw, r0.xyzw
+    _OP(MUL, 8), _4M(1D, TEMP), 1, _4S(2D, CONSTANT_BUFFER), 0, 4, _4SS(1D, TEMP, XXXX), 0,                         // mul r1.xyzw, cb0[4].xyzw, r0.xxxx
+    _OP(MAD, 10), _4M(1D, TEMP), 1, _4S(2D, CONSTANT_BUFFER), 0, 5, _4SS(1D, TEMP, YYYY), 0, _4S(1D, TEMP), 1,      // mad r1.xyzw, cb0[5].xyzw, r0.yyyy, r1.xyzw
+    _OP(MAD, 10), _4M(1D, TEMP), 1, _4S(2D, CONSTANT_BUFFER), 0, 6, _4SS(1D, TEMP, ZZZZ), 0, _4S(1D, TEMP), 1,      // mad r1.xyzw, cb0[6].xyzw, r0.zzzz, r1.xyzw
+    _OP(MAD, 10), _4M(1D, TEMP), 1, _4S(2D, CONSTANT_BUFFER), 0, 7, _4SS(1D, TEMP, ZZZZ), 0, _4S(1D, TEMP), 1,      // mad r1.xyzw, cb0[7].xyzw, r0.zzzz, r1.xyzw
+    _OP(MUL, 8), _4M(1D, TEMP), 0, _4S(2D, CONSTANT_BUFFER), 0, 8, _4SS(1D, TEMP, XXXX), 1,                         // mul r0.xyzw, cb0[8].xyzw, r1.xxxx
+    _OP(MAD, 10), _4M(1D, TEMP), 0, _4S(2D, CONSTANT_BUFFER), 0, 9, _4SS(1D, TEMP, YYYY), 1, _4S(1D, TEMP), 0,      // mad r0.xyzw, cb0[9].xyzw, r1.yyyy, r0.xyzw
+    _OP(MAD, 10), _4M(1D, TEMP), 0, _4S(2D, CONSTANT_BUFFER), 0, 10, _4SS(1D, TEMP, ZZZZ), 1, _4S(1D, TEMP), 0,     // mad r0.xyzw, cb0[10].xyzw, r1.zzzz, r0.xyzw
+    _OP(MAD, 10), _4M(1D, OUTPUT), 0, _4S(2D, CONSTANT_BUFFER), 0, 11, _4SS(1D, TEMP, ZZZZ), 1, _4S(1D, TEMP), 0,   // mad o0.xyzw, cb0[11].xyzw, r1.zzzz, r0.xyzw
+    _OP(MOV, 5), _4M(1D, OUTPUT), 1, _4S(1D, INPUT), 1,                                                             // mov o1.xyzw, v1.xyzw
+    _OP(MOV, 5), _4MM(1D, OUTPUT, XY), 2, _4SS(1D, INPUT, XYXX), 2,                                                 // mov o2.xy, v2.xyxx
+    _OP(RET, 1)                                                                                                     // ret
 };
 //------------------------------------------------------------------------------
 const DWORD pixelShaderCode40[] =
@@ -176,14 +200,14 @@ const DWORD pixelShaderCode40[] =
     0x00000020, 0, 0, 3, 0, 0x000f,
     _SV_TARGET, 0,
     _SHDR, 0x00000094, _VER(PIXEL_SHADER, 4, 0), 0x00000025,
-    _OP(DCL_SAMPLER, 3), _0(1D, SAMPLER), D3D10_SB_SAMPLER_MODE_DEFAULT,                                        // dcl_sampler s0, mode_default
-    _OPDIM(DCL_RESOURCE, 4, TEXTURE2D), _0(1D, RESOURCE), 0, D3D10_SB_RETURN_TYPE_FLOAT4,                       // dcl_resource_texture2d(float,float,float,float) t0
-    _OPINT(DCL_INPUT_PS, 3, LINEAR), _4M(1D, INPUT), 1,                                                         // dcl_input_ps linear v1.xyzw
-    _OPINT(DCL_INPUT_PS, 3, LINEAR), _4MM(1D, INPUT, XY), 2,                                                    // dcl_input_ps linear v2.xy
-    _OP(DCL_OUTPUT, 3), _4M(1D, OUTPUT), 0,                                                                     // dcl_output o0.xyzw
-    _OP(DCL_TEMPS, 2), 1,                                                                                       // dcl_temps 1
-    _OP(SAMPLE, 9), _4M(1D, TEMP), 0, _4SS(1D, INPUT, XYXX), 2, _4S(1D, RESOURCE), 0, _0(1D, SAMPLER), 0,       // sample r0.xyzw, v2.xyxx, t0.xyzw, s0
-    _OP(MUL, 7), _4M(1D, OUTPUT), 0, _4S(1D, TEMP), 0, _4S(1D, INPUT), 1,                                       // mul o0.xyzw, r0.xyzw, v1.xyzw
-    _OP(RET, 1)                                                                                                 // ret
+    _OP(DCL_SAMPLER, 3), _0(1D, SAMPLER), D3D10_SB_SAMPLER_MODE_DEFAULT,                                            // dcl_sampler s0, mode_default
+    _OPDIM(DCL_RESOURCE, 4, TEXTURE2D), _0(1D, RESOURCE), 0, D3D10_SB_RETURN_TYPE_FLOAT4,                           // dcl_resource_texture2d(float,float,float,float) t0
+    _OPINT(DCL_INPUT_PS, 3, LINEAR), _4M(1D, INPUT), 1,                                                             // dcl_input_ps linear v1.xyzw
+    _OPINT(DCL_INPUT_PS, 3, LINEAR), _4MM(1D, INPUT, XY), 2,                                                        // dcl_input_ps linear v2.xy
+    _OP(DCL_OUTPUT, 3), _4M(1D, OUTPUT), 0,                                                                         // dcl_output o0.xyzw
+    _OP(DCL_TEMPS, 2), 1,                                                                                           // dcl_temps 1
+    _OP(SAMPLE, 9), _4M(1D, TEMP), 0, _4SS(1D, INPUT, XYXX), 2, _4S(1D, RESOURCE), 0, _0(1D, SAMPLER), 0,           // sample r0.xyzw, v2.xyxx, t0.xyzw, s0
+    _OP(MUL, 7), _4M(1D, OUTPUT), 0, _4S(1D, TEMP), 0, _4S(1D, INPUT), 1,                                           // mul o0.xyzw, r0.xyzw, v1.xyzw
+    _OP(RET, 1)                                                                                                     // ret
 };
 //------------------------------------------------------------------------------

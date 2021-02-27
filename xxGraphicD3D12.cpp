@@ -1646,10 +1646,3 @@ void xxDrawIndexedD3D12(uint64_t commandEncoder, uint64_t indexBuffer, int index
     d3dCommandList->DrawIndexedInstanced(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 //==============================================================================
-//  Fixed-Function
-//==============================================================================
-void xxSetTransformD3D12(uint64_t commandEncoder, const float* world, const float* view, const float* projection)
-{
-
-}
-//==============================================================================

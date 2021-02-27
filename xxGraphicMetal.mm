@@ -606,43 +606,6 @@ void xxDestroySamplerMetal(uint64_t sampler)
 //==============================================================================
 //  Shader
 //==============================================================================
-static const char* const defaultShaderCode =
-R"(#include <metal_stdlib>
-using namespace metal;
-
-struct Uniforms
-{
-    float4x4 projectionMatrix;
-};
-
-struct VertexIn
-{
-    float3 position [[attribute(0)]];
-    float4 color    [[attribute(1)]];
-    float2 uv       [[attribute(2)]];
-};
-
-struct VertexOut
-{
-    float4 position [[position]];
-    float4 color;
-    float2 uv;
-};
-
-vertex VertexOut VSMain(VertexIn in [[stage_in]], constant Uniforms& uniforms [[buffer(0)]])
-{
-    VertexOut out;
-    out.position = uniforms.projectionMatrix * float4(in.position, 1);
-    out.color = in.color;
-    out.uv = in.uv;
-    return out;
-}
-
-fragment float4 FSMain(VertexOut in [[stage_in]], texture2d<float> tex [[texture(0)]], sampler sam [[sampler(0)]])
-{
-    return in.color * tex.sample(sam, in.uv);
-})";
-//------------------------------------------------------------------------------
 uint64_t xxCreateVertexShaderMetal(uint64_t device, const char* shader, uint64_t vertexAttribute)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
@@ -651,7 +614,7 @@ uint64_t xxCreateVertexShaderMetal(uint64_t device, const char* shader, uint64_t
 
     if (strcmp(shader, "default") == 0)
     {
-        shader = defaultShaderCode;
+        shader = mtlDefaultShaderCode;
     }
 
     NSError* error;
@@ -680,7 +643,7 @@ uint64_t xxCreateFragmentShaderMetal(uint64_t device, const char* shader)
 
     if (strcmp(shader, "default") == 0)
     {
-        shader = defaultShaderCode;
+        shader = mtlDefaultShaderCode;
     }
 
     NSError* error;
@@ -949,12 +912,5 @@ void xxDrawIndexedMetal(uint64_t commandEncoder, uint64_t indexBuffer, int index
                                instanceCount:instanceCount
                                   baseVertex:vertexOffset
                                 baseInstance:firstInstance];
-}
-//==============================================================================
-//  Fixed-Function
-//==============================================================================
-void xxSetTransformMetal(uint64_t commandEncoder, const float* world, const float* view, const float* projection)
-{
-
 }
 //==============================================================================

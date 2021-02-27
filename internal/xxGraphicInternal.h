@@ -101,9 +101,7 @@ enum xxGraphicDescriptor
     xxSetFragmentSamplers = xxSetFragmentSamplers ## API; \
     xxSetVertexConstantBuffer = xxSetVertexConstantBuffer ## API; \
     xxSetFragmentConstantBuffer = xxSetFragmentConstantBuffer ## API; \
-    xxDrawIndexed = xxDrawIndexed ## API; \
-\
-    xxSetTransform = xxSetTransform ## API;
+    xxDrawIndexed = xxDrawIndexed ## API;
 
 #define xxUnregisterFunction() \
     xxCreateInstance = nullptr; \
@@ -173,6 +171,4 @@ enum xxGraphicDescriptor
     xxSetFragmentSamplers = nullptr; \
     xxSetVertexConstantBuffer = nullptr; \
     xxSetFragmentConstantBuffer = nullptr; \
-    xxDrawIndexed = nullptr; \
-\
-    xxSetTransform = nullptr;
+    xxDrawIndexed = nullptr;

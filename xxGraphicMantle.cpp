@@ -668,7 +668,7 @@ uint64_t xxCreateVertexShaderMantle(uint64_t device, const char* shader, uint64_
     {
         GR_SHADER_CREATE_INFO info = {};
         info.pCode = vertexShaderCodeIL;
-        info.codeSize = sizeof(vertexShaderCodeIL);
+        info.codeSize = vertexShaderCodeILSize;
 
         GR_SHADER grShader = GR_NULL_HANDLE;
         grCreateShader(grDevice, &info, &grShader);
@@ -689,7 +689,7 @@ uint64_t xxCreateFragmentShaderMantle(uint64_t device, const char* shader)
     {
         GR_SHADER_CREATE_INFO info = {};
         info.pCode = pixelShaderCodeIL;
-        info.codeSize = sizeof(pixelShaderCodeIL);
+        info.codeSize = pixelShaderCodeILSize;
 
         GR_SHADER grShader = GR_NULL_HANDLE;
         grCreateShader(grDevice, &info, &grShader);
@@ -976,12 +976,5 @@ void xxDrawIndexedMantle(uint64_t commandEncoder, uint64_t indexBuffer, int inde
     GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandEncoder);
 
     grCmdDrawIndexed(grCommandBuffer, firstIndex, indexCount, vertexOffset, firstInstance, instanceCount);
-}
-//==============================================================================
-//  Fixed-Function
-//==============================================================================
-void xxSetTransformMantle(uint64_t commandEncoder, const float* world, const float* view, const float* projection)
-{
-
 }
 //==============================================================================

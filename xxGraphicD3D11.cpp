@@ -1329,10 +1329,3 @@ void xxDrawIndexedD3D11(uint64_t commandEncoder, uint64_t indexBuffer, int index
     d3dDeviceContext->DrawIndexedInstanced(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 //==============================================================================
-//  Fixed-Function
-//==============================================================================
-void xxSetTransformD3D11(uint64_t commandEncoder, const float* world, const float* view, const float* projection)
-{
-
-}
-//==============================================================================

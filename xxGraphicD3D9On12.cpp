@@ -64,7 +64,6 @@ uint64_t xxCreateInstanceD3D9On12PS()
     xxSetVertexBuffers = xxSetVertexBuffersD3D9PS;
     xxSetVertexConstantBuffer = xxSetVertexConstantBufferD3D9PS;
     xxSetFragmentConstantBuffer = xxSetFragmentConstantBufferD3D9PS;
-    xxSetTransform = xxSetTransformD3D9PS;
 
     xxDestroyInstance = xxDestroyInstanceD3D9On12;
     xxGetDeviceName = xxGetDeviceNameD3D9On12PS;
@@ -118,7 +117,6 @@ uint64_t xxCreateInstanceD3D9On12ExPS()
     xxSetVertexBuffers = xxSetVertexBuffersD3D9PS;
     xxSetVertexConstantBuffer = xxSetVertexConstantBufferD3D9PS;
     xxSetFragmentConstantBuffer = xxSetFragmentConstantBufferD3D9PS;
-    xxSetTransform = xxSetTransformD3D9PS;
 
     xxTestDevice = xxTestDeviceD3D9On12Ex;
     xxDestroyInstance = xxDestroyInstanceD3D9On12;

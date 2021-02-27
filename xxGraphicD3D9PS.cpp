@@ -31,7 +31,6 @@ uint64_t xxCreateInstanceD3D9PS()
     xxSetVertexBuffers = xxSetVertexBuffersD3D9PS;
     xxSetVertexConstantBuffer = xxSetVertexConstantBufferD3D9PS;
     xxSetFragmentConstantBuffer = xxSetFragmentConstantBufferD3D9PS;
-    xxSetTransform = xxSetTransformD3D9PS;
 
     return instance;
 }
@@ -240,12 +239,5 @@ void xxSetFragmentConstantBufferD3D9PS(uint64_t commandEncoder, uint64_t buffer,
     const float* d3dBuffer = reinterpret_cast<float*>(buffer);
 
     d3dDevice->SetPixelShaderConstantF(0, d3dBuffer, size / sizeof(float) / 4);
-}
-//==============================================================================
-//  Fixed-Function
-//==============================================================================
-void xxSetTransformD3D9PS(uint64_t commandEncoder, const float* world, const float* view, const float* projection)
-{
-
 }
 //==============================================================================

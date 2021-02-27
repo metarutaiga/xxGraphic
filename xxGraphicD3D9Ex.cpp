@@ -64,7 +64,6 @@ uint64_t xxCreateInstanceD3D9ExPS()
     xxSetVertexBuffers = xxSetVertexBuffersD3D9PS;
     xxSetVertexConstantBuffer = xxSetVertexConstantBufferD3D9PS;
     xxSetFragmentConstantBuffer = xxSetFragmentConstantBufferD3D9PS;
-    xxSetTransform = xxSetTransformD3D9PS;
 
     xxDestroyInstance = xxDestroyInstanceD3D9Ex;
     xxTestDevice = xxTestDeviceD3D9Ex;
