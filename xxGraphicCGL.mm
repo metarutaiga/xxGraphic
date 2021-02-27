@@ -6,7 +6,6 @@
 //==============================================================================
 #include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalGL.h"
-#include "xxGraphicGL.h"
 #include "xxGraphicCGL.h"
 
 #define IOSurfaceGetWidth IOSurfaceGetWidth_unused

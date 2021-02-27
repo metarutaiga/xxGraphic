@@ -344,7 +344,7 @@ inline void PatchD3DIM(const char* name)
 
 inline struct ID3D10Blob* CreateD3D10Shader(const char* shader, const char* entry, const char* target)
 {
-    static HRESULT(WINAPI * D3D10CompileShader)(const char*, size_t, void*, void*, void*, const char*, const char*, int, ID3D10Blob**, ID3D10Blob**);
+    static HRESULT(WINAPI * D3D10CompileShader)(const char*, size_t, void*, void*, void*, const char*, const char*, int, ID3D10Blob**, ID3D10Blob**) = nullptr;
     if (D3D10CompileShader == nullptr)
     {
         (void*&)D3D10CompileShader = GetProcAddress(LoadLibraryA("d3d10.dll"), "D3D10CompileShader");

@@ -6,7 +6,6 @@
 //==============================================================================
 #include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalGL.h"
-#include "xxGraphicGL.h"
 #include "xxGraphicEGL.h"
 
 #define GL_GLEXT_PROTOTYPES 0

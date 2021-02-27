@@ -25,7 +25,7 @@ static void*            (*MTLCopyAllDevices)() = nullptr;
 //  Instance
 //==============================================================================
 static bool MTLSymbolFailed = false;
-static void* MTLSymbol(const char* name, bool* failed)
+static void* MTLSymbol(const char* name)
 {
     void* ptr = nullptr;
 
@@ -36,12 +36,10 @@ static void* MTLSymbol(const char* name, bool* failed)
         xxLog("Metal", "%s is not found", name);
 
     MTLSymbolFailed |= (ptr == nullptr);
-    if (failed)
-        (*failed) |= (ptr == nullptr);
 
     return ptr;
 }
-#define MTLSymbol(var) (void*&)var = MTLSymbol(#var, nullptr);
+#define MTLSymbol(var) (void*&)var = MTLSymbol(#var);
 //------------------------------------------------------------------------------
 uint64_t xxCreateInstanceMetal()
 {

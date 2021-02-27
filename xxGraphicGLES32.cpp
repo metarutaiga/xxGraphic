@@ -10,7 +10,6 @@
 #undef  GL_ES_VERSION_3_2
 #include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalGL.h"
-#include "xxGraphicGL.h"
 #include "xxGraphicGLES2.h"
 #include "xxGraphicGLES3.h"
 #include "xxGraphicGLES31.h"

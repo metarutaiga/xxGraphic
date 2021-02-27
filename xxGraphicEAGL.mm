@@ -6,7 +6,6 @@
 //==============================================================================
 #include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalGL.h"
-#include "xxGraphicGL.h"
 #include "xxGraphicEAGL.h"
 
 #if defined(xxIOS) && !defined(xxMACCATALYST)

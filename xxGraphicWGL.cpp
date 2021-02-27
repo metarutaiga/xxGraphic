@@ -9,7 +9,6 @@
 #include "dxsdk/d3d11.h"
 #include "dxsdk/d3d10.h"
 #include "dxsdk/d3d9.h"
-#include "xxGraphicGL.h"
 #include "xxGraphicWGL.h"
 
 #include "gl/wgl.h"

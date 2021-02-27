@@ -1,11 +1,10 @@
 //==============================================================================
-// xxGraphic : OpenGL Function Source
+// xxGraphic : OpenGL Internal Source
 //
 // Copyright (c) 2019-2021 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
-#include "internal/xxGraphicInternal.h"
-#include "xxGraphicGL.h"
+#include "xxGraphicInternalGL.h"
 
 //==============================================================================
 //  GLSL Shader
@@ -44,13 +43,15 @@ void main()
 //==============================================================================
 //  Function
 //==============================================================================
-uint64_t                                        (*glCreateContext)(uint64_t instance, void* view, void** display);
-void                                            (*glDestroyContext)(uint64_t context, void* view, void* display);
-void*                                           (*glGetProcAddress)(const char* name);
-float                                           (*glGetScaleContext)(uint64_t context, void* view);
-void                                            (*glMakeCurrentContext)(uint64_t context, void* display);
-void                                            (*glPresentContext)(uint64_t context, void* display);
-//------------------------------------------------------------------------------
+uint64_t    (*glCreateContext)(uint64_t instance, void* view, void** display);
+void        (*glDestroyContext)(uint64_t context, void* view, void* display);
+void*       (*glGetProcAddress)(const char* name);
+float       (*glGetScaleContext)(uint64_t context, void* view);
+void        (*glMakeCurrentContext)(uint64_t context, void* display);
+void        (*glPresentContext)(uint64_t context, void* display);
+//==============================================================================
+//  Loader
+//==============================================================================
 #define GL_PROTOTYPE(type, prototype, parameter, ...) \
 extern "C" type GL_APIENTRY prototype parameter \
 { \
