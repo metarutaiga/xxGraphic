@@ -6,6 +6,8 @@
 //==============================================================================
 #include "xxGraphicInternalMantle.h"
 
+#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
+
 //==============================================================================
 //  Loader
 //==============================================================================
@@ -138,3 +140,5 @@ GR_PROTOTYPE(GR_RESULT, grWsiWinCreatePresentableImage, (GR_DEVICE device, const
 GR_PROTOTYPE(GR_RESULT, grWsiWinQueuePresent, (GR_QUEUE queue, const GR_WSI_WIN_PRESENT_INFO* pPresentInfo), queue, pPresentInfo);
 GR_PROTOTYPE(GR_RESULT, grWsiWinSetMaxQueuedFrames, (GR_DEVICE device, GR_UINT maxFrames), device, maxFrames);
 //==============================================================================
+
+#endif
