@@ -53,6 +53,12 @@
 #   endif
 #   if TARGET_OS_OSX
 #       define xxMACOS 1
+#       if TARGET_CPU_X86_64
+#           define xxMACOS_INTEL 1
+#       endif
+#       if TARGET_CPU_ARM64
+#           define xxMACOS_ARM 1
+#       endif
 #   endif
 #   if TARGET_OS_MACCATALYST
 #       define xxMACCATALYST 1

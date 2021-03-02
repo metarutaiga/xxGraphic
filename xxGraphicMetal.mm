@@ -479,9 +479,9 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height
         return 0;
 
     MTLPixelFormat pixelFormat = MTLPixelFormatRGBA8Unorm;
-#if defined(xxMACOS) || defined(xxMACCATALYST)
+#if defined(xxMACOS_INTEL)
     MTLResourceOptions options = MTLResourceStorageModeManaged;
-#elif defined(xxIOS)
+#else
     MTLResourceOptions options = MTLResourceStorageModeShared;
 #endif
 
@@ -568,7 +568,7 @@ void* xxMapTextureMetal(uint64_t device, uint64_t texture, int* stride, int leve
 //------------------------------------------------------------------------------
 void xxUnmapTextureMetal(uint64_t device, uint64_t texture, int level, int array)
 {
-#if defined(xxMACOS) || defined(xxMACCATALYST)
+#if defined(xxMACOS_INTEL)
     MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);
 
     [mtlTexture->buffer didModifyRange:NSMakeRange(0, [mtlTexture->buffer length])];

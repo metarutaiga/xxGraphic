@@ -1087,7 +1087,7 @@ uint64_t xxCreateRenderPassVulkan(uint64_t device, bool clearColor, bool clearDe
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
 
-#if defined(xxMACOS) || defined(xxMACCATALYST) || defined(xxWINDOWS)
+#if defined(xxWINDOWS)
     VkFormat imageFormat = VK_FORMAT_B8G8R8A8_UNORM;
 #else
     VkFormat imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
@@ -1715,7 +1715,7 @@ uint64_t xxCreateTextureVulkan(uint64_t device, int format, int width, int heigh
                                                                                                                       width:width
                                                                                                                      height:height
                                                                                                                   mipmapped:NO];
-#if defined(xxMACOS) || defined(xxMACCATALYST)
+#if defined(xxMACOS_INTEL)
                 desc.resourceOptions = MTLResourceStorageModeManaged;
 #else
                 desc.resourceOptions = MTLResourceStorageModeShared;

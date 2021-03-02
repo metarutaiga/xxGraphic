@@ -122,49 +122,6 @@ uint64_t xxCreateSamplerMetal2(uint64_t device, bool clampU, bool clampV, bool c
 //==============================================================================
 //  Shader
 //==============================================================================
-static const char* const defaultShaderCode =
-R"(#include <metal_stdlib>
-using namespace metal;
-
-struct Uniforms
-{
-    device float4x4* projectionMatrix [[id(0)]];
-};
-
-struct VertexIn
-{
-    float3 position [[attribute(0)]];
-    float4 color    [[attribute(1)]];
-    float2 uv       [[attribute(2)]];
-};
-
-struct VertexOut
-{
-    float4 position [[position]];
-    float4 color;
-    float2 uv;
-};
-
-struct TextureSampler
-{
-    texture2d<float> tex [[id(6)]];
-    sampler sam          [[id(18)]];
-};
-
-vertex VertexOut VSMain(VertexIn in [[stage_in]], constant Uniforms& uniforms [[buffer(0)]])
-{
-    VertexOut out;
-    out.position = uniforms.projectionMatrix[0] * float4(in.position, 1);
-    out.color = in.color;
-    out.uv = in.uv;
-    return out;
-}
-
-fragment float4 FSMain(VertexOut in [[stage_in]], constant TextureSampler& textureSampler [[buffer(0)]])
-{
-    return in.color * textureSampler.tex.sample(textureSampler.sam, in.uv);
-})";
-//------------------------------------------------------------------------------
 uint64_t xxCreateVertexShaderMetal2(uint64_t device, const char* shader, uint64_t vertexAttribute)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
@@ -173,7 +130,7 @@ uint64_t xxCreateVertexShaderMetal2(uint64_t device, const char* shader, uint64_
 
     if (strcmp(shader, "default") == 0)
     {
-        shader = defaultShaderCode;
+        shader = mtlArgumentShaderCode;
     }
 
     NSError* error;
@@ -202,7 +159,7 @@ uint64_t xxCreateFragmentShaderMetal2(uint64_t device, const char* shader)
 
     if (strcmp(shader, "default") == 0)
     {
-        shader = defaultShaderCode;
+        shader = mtlArgumentShaderCode;
     }
 
     NSError* error;

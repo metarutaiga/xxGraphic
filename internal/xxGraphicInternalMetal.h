@@ -32,9 +32,10 @@ extern Class classMTLTextureDescriptor;
 extern Class classMTLVertexDescriptor;
 
 //==============================================================================
-//  Framebuffer
+//  MSL Shader
 //==============================================================================
 extern const char* const mtlDefaultShaderCode;
+extern const char* const mtlArgumentShaderCode;
 //==============================================================================
 //  Framebuffer
 //==============================================================================
