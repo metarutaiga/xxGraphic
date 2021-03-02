@@ -479,7 +479,7 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height
         return 0;
 
     MTLPixelFormat pixelFormat = MTLPixelFormatRGBA8Unorm;
-#if defined(xxMACOS_INTEL)
+#if defined(xxMACOS)
     MTLResourceOptions options = MTLResourceStorageModeManaged;
 #else
     MTLResourceOptions options = MTLResourceStorageModeShared;
@@ -506,6 +506,7 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height
         {
             buffer = (__bridge id)external;
             stride = (int)[buffer length] / height;
+            options = [buffer storageMode] << MTLResourceStorageModeShift;
         }
     }
     else
