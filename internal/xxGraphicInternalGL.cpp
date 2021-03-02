@@ -17,8 +17,8 @@ attribute vec3 position;
 attribute vec4 color;
 attribute vec2 uv;
 
-varying vec2 varyUV;
 varying vec4 varyColor;
+varying vec2 varyUV;
 
 #ifdef _VERTEX_
 void main()
@@ -38,8 +38,8 @@ void main()
     r0 += uniformBuffer[10] * r1.z;
     r0 += uniformBuffer[11] * r1.w;
     gl_Position = r0;
-    varyUV = uv;
     varyColor = color;
+    varyUV = uv;
 }
 #endif
 
@@ -62,21 +62,6 @@ void        (*glPresentContext)(uint64_t context, void* display);
 //  Loader
 //==============================================================================
 #define GL_PROTOTYPE(type, prototype, parameter, ...) \
-extern "C" type GL_APIENTRY prototype parameter \
-{ \
-    static type (GL_APIENTRYP prototype ## Entry) parameter = nullptr; \
-    if (prototype ## Entry == nullptr) \
-    { \
-        (void*&)prototype ## Entry = glGetProcAddress(#prototype); \
-        if (prototype ## Entry == nullptr) \
-        { \
-            return type(); \
-        } \
-    } \
-    return prototype ## Entry(__VA_ARGS__); \
-}
-//------------------------------------------------------------------------------
-#define GL_PROTOTYPEE(type, prototype, parameter, ...) \
 type (GL_APIENTRYP prototype ## Entry) parameter = nullptr; \
 extern "C" type GL_APIENTRY prototype parameter \
 { \
@@ -85,22 +70,8 @@ extern "C" type GL_APIENTRY prototype parameter \
         (void*&)prototype ## Entry = glGetProcAddress(#prototype); \
         if (prototype ## Entry == nullptr) \
         { \
-            return type(); \
-        } \
-    } \
-    return prototype ## Entry(__VA_ARGS__); \
-}
-//------------------------------------------------------------------------------
-#define GL_PROTOTYPEP(type, prototype, parameter, ...) \
-extern "C" type GL_APIENTRY prototype parameter \
-{ \
-    static type (GL_APIENTRYP prototype ## Entry) parameter = nullptr; \
-    if (prototype ## Entry == nullptr) \
-    { \
-        (void*&)prototype ## Entry = glGetProcAddress(#prototype); \
-        if (prototype ## Entry == nullptr) \
-        { \
-            return nullptr; \
+            typedef type returnType; \
+            return returnType(); \
         } \
     } \
     return prototype ## Entry(__VA_ARGS__); \
@@ -112,7 +83,7 @@ GL_PROTOTYPE(void, glBindAttribLocation, (GLuint program, GLuint index, const GL
 GL_PROTOTYPE(void, glBindBuffer, (GLenum target, GLuint buffer), target, buffer);
 GL_PROTOTYPE(void, glBindFramebuffer, (GLenum target, GLuint framebuffer), target, framebuffer);
 GL_PROTOTYPE(void, glBindRenderbuffer, (GLenum target, GLuint renderbuffer), target, renderbuffer);
-GL_PROTOTYPEE(void, glBindTexture, (GLenum target, GLuint texture), target, texture);
+GL_PROTOTYPE(void, glBindTexture, (GLenum target, GLuint texture), target, texture);
 GL_PROTOTYPE(void, glBlendColor, (GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha), red, green, blue, alpha);
 GL_PROTOTYPE(void, glBlendEquation, (GLenum mode), mode);
 GL_PROTOTYPE(void, glBlendEquationSeparate, (GLenum modeRGB, GLenum modeAlpha), modeRGB, modeAlpha);
@@ -177,7 +148,7 @@ GL_PROTOTYPE(void, glGetShaderiv, (GLuint shader, GLenum pname, GLint *params), 
 GL_PROTOTYPE(void, glGetShaderInfoLog, (GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *infoLog), shader, bufSize, length, infoLog);
 GL_PROTOTYPE(void, glGetShaderPrecisionFormat, (GLenum shadertype, GLenum precisiontype, GLint *range, GLint *precision), shadertype, precisiontype, range, precision);
 GL_PROTOTYPE(void, glGetShaderSource, (GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *source), shader, bufSize, length, source);
-GL_PROTOTYPEP(const GLubyte*, glGetString, (GLenum name), name);
+GL_PROTOTYPE(const GLubyte*, glGetString, (GLenum name), name);
 GL_PROTOTYPE(void, glGetTexParameterfv, (GLenum target, GLenum pname, GLfloat *params), target, pname, params);
 GL_PROTOTYPE(void, glGetTexParameteriv, (GLenum target, GLenum pname, GLint *params), target, pname, params);
 GL_PROTOTYPE(void, glGetUniformfv, (GLuint program, GLint location, GLfloat *params), program, location, params);
@@ -204,7 +175,7 @@ GL_PROTOTYPE(void, glRenderbufferStorage, (GLenum target, GLenum internalformat,
 GL_PROTOTYPE(void, glSampleCoverage, (GLfloat value, GLboolean invert), value, invert);
 GL_PROTOTYPE(void, glScissor, (GLint x, GLint y, GLsizei width, GLsizei height), x, y, width, height);
 GL_PROTOTYPE(void, glShaderBinary, (GLsizei count, const GLuint *shaders, GLenum binaryformat, const void *binary, GLsizei length), count, shaders, binaryformat, binary, length);
-GL_PROTOTYPEE(void, glShaderSource, (GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length), shader, count, string, length);
+GL_PROTOTYPE(void, glShaderSource, (GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length), shader, count, string, length);
 GL_PROTOTYPE(void, glStencilFunc, (GLenum func, GLint ref, GLuint mask), func, ref, mask);
 GL_PROTOTYPE(void, glStencilFuncSeparate, (GLenum face, GLenum func, GLint ref, GLuint mask), face, func, ref, mask);
 GL_PROTOTYPE(void, glStencilMask, (GLuint mask), mask);
@@ -230,7 +201,7 @@ GL_PROTOTYPE(void, glUniform3fv, (GLint location, GLsizei count, const GLfloat *
 GL_PROTOTYPE(void, glUniform3i, (GLint location, GLint v0, GLint v1, GLint v2), location, v0, v1, v2);
 GL_PROTOTYPE(void, glUniform3iv, (GLint location, GLsizei count, const GLint *value), location, count, value);
 GL_PROTOTYPE(void, glUniform4f, (GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3), location, v0, v1, v2, v3);
-GL_PROTOTYPEE(void, glUniform4fv, (GLint location, GLsizei count, const GLfloat *value), location, count, value);
+GL_PROTOTYPE(void, glUniform4fv, (GLint location, GLsizei count, const GLfloat *value), location, count, value);
 GL_PROTOTYPE(void, glUniform4i, (GLint location, GLint v0, GLint v1, GLint v2, GLint v3), location, v0, v1, v2, v3);
 GL_PROTOTYPE(void, glUniform4iv, (GLint location, GLsizei count, const GLint *value), location, count, value);
 GL_PROTOTYPE(void, glUniformMatrix2fv, (GLint location, GLsizei count, GLboolean transpose, const GLfloat *value), location, count, transpose, value);
@@ -275,7 +246,7 @@ GL_PROTOTYPE(void, glUniformMatrix4x3fv, (GLint location, GLsizei count, GLboole
 GL_PROTOTYPE(void, glBlitFramebuffer, (GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter), srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
 GL_PROTOTYPE(void, glRenderbufferStorageMultisample, (GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height), target, samples, internalformat, width, height);
 GL_PROTOTYPE(void, glFramebufferTextureLayer, (GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer), target, attachment, texture, level, layer);
-GL_PROTOTYPEP(void*, glMapBufferRange, (GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access), target, offset, length, access);
+GL_PROTOTYPE(void*, glMapBufferRange, (GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access), target, offset, length, access);
 GL_PROTOTYPE(void, glFlushMappedBufferRange, (GLenum target, GLintptr offset, GLsizeiptr length), target, offset, length);
 GL_PROTOTYPE(void, glBindVertexArray, (GLuint array), array);
 GL_PROTOTYPE(void, glDeleteVertexArrays, (GLsizei n, const GLuint *arrays), n, arrays);
@@ -309,7 +280,7 @@ GL_PROTOTYPE(void, glClearBufferiv, (GLenum buffer, GLint drawbuffer, const GLin
 GL_PROTOTYPE(void, glClearBufferuiv, (GLenum buffer, GLint drawbuffer, const GLuint *value), buffer, drawbuffer, value);
 GL_PROTOTYPE(void, glClearBufferfv, (GLenum buffer, GLint drawbuffer, const GLfloat *value), buffer, drawbuffer, value);
 GL_PROTOTYPE(void, glClearBufferfi, (GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil), buffer, drawbuffer, depth, stencil);
-GL_PROTOTYPEP(const GLubyte*, glGetStringi, (GLenum name, GLuint index), name, index);
+GL_PROTOTYPE(const GLubyte*, glGetStringi, (GLenum name, GLuint index), name, index);
 GL_PROTOTYPE(void, glCopyBufferSubData, (GLenum readTarget, GLenum writeTarget, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size), readTarget, writeTarget, readOffset, writeOffset, size);
 GL_PROTOTYPE(void, glGetUniformIndices, (GLuint program, GLsizei uniformCount, const GLchar *const*uniformNames, GLuint *uniformIndices), program, uniformCount, uniformNames, uniformIndices);
 GL_PROTOTYPE(void, glGetActiveUniformsiv, (GLuint program, GLsizei uniformCount, const GLuint *uniformIndices, GLenum pname, GLint *params), program, uniformCount, uniformIndices, pname, params);

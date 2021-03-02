@@ -13,15 +13,16 @@ bool VK_MVK_moltenvk;
 //  Loader
 //==============================================================================
 #define VK_PROTOTYPE(type, prototype, parameter, ...) \
+type (VKAPI_CALL* prototype ## Entry) parameter = nullptr; \
 extern "C" type VKAPI_CALL prototype parameter \
 { \
-    static type (VKAPI_CALL* prototype ## Entry) parameter = nullptr; \
     if (prototype ## Entry == nullptr) \
     { \
         (void*&)prototype ## Entry = vkGetProcAddress(#prototype); \
         if (prototype ## Entry == nullptr) \
         { \
-            return type(); \
+            typedef type returnType; \
+            return returnType(); \
         } \
     } \
     return prototype ## Entry(__VA_ARGS__); \

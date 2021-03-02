@@ -12,15 +12,16 @@
 //  Loader
 //==============================================================================
 #define GR_PROTOTYPE(type, prototype, parameter, ...) \
+type (GR_STDCALL* prototype ## Entry) parameter = nullptr; \
 extern "C" type GR_STDCALL prototype parameter \
 { \
-    static type (GR_STDCALL* prototype ## Entry) parameter = nullptr; \
     if (prototype ## Entry == nullptr) \
     { \
         (void*&)prototype ## Entry = grGetProcAddress(#prototype); \
         if (prototype ## Entry == nullptr) \
         { \
-            return type(); \
+            typedef type returnType; \
+            return returnType(); \
         } \
     } \
     return prototype ## Entry(__VA_ARGS__); \

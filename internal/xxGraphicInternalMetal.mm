@@ -35,7 +35,7 @@ struct VertexOut
 vertex VertexOut VSMain(VertexIn in [[stage_in]], constant Uniforms& uniforms [[buffer(0)]])
 {
     VertexOut out;
-    out.position = uniforms.projection * (uniforms.view * (uniforms.world * float4(in.position, 1)));
+    out.position = uniforms.projection * (uniforms.view * (uniforms.world * float4(in.position, 1.0)));
     out.color = in.color;
     out.uv = in.uv;
     return out;
