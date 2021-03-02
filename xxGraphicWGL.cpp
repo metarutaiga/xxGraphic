@@ -73,9 +73,10 @@ static void GL_APIENTRY wglShaderSource(GLuint shader, GLsizei count, const GLch
         if (strcmp(var, "#define _FRAGMENT_ 1") == 0)
         {
             var =   "#define _FRAGMENT_ 1\n"
+                    "#ifndef gl_FragColor\n"
                     "#define gl_FragColor fragColor\n"
-                    "#define texture2D texture\n"
-                    "out vec4 fragColor;";
+                    "out vec4 fragColor;\n"
+                    "#endif";
             fragmentShader = true;
         }
         if (strncmp(var, "#define attribute", sizeof("#define attribute") - 1) == 0)

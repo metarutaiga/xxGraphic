@@ -31,9 +31,9 @@ static size_t                           (*IOSurfaceGetHeight)(IOSurfaceRef);
 static kern_return_t                    (*IOSurfaceLock)(IOSurfaceRef, IOSurfaceLockOptions, uint32_t*);
 static kern_return_t                    (*IOSurfaceUnlock)(IOSurfaceRef, IOSurfaceLockOptions, uint32_t*);
 static CGLError                         (*CGLTexImageIOSurface2D)(CGLContextObj, GLenum, GLenum, GLsizei, GLsizei, GLenum, GLenum, IOSurfaceRef, GLuint);
-static GLint                            rectangleProgram = 0;
+static struct { GLint x; GLint y; }     rectanglePrograms[16];
 static GLint                            rectangleProgramTexture = 0;
-static float                            rectangleProgramMatrix[16];
+static float                            rectangleProgramMatrix[16 * 3];
 
 //==============================================================================
 //  Initialize - CGL
@@ -75,11 +75,19 @@ static void GL_APIENTRY cglShaderSource(GLuint shader, GLsizei count, const GLch
         if (strcmp(var, "#define _FRAGMENT_ 1") == 0)
         {
             var =   "#define _FRAGMENT_ 1\n"
-                    "#define gl_FragColor fragColor\n"
+                    "#ifndef texture2D\n"
                     "#define texture2D texture\n"
+                    "#endif\n"
+                    "#ifndef texture2DRect\n"
                     "#define texture2DRect texture\n"
+                    "#endif\n"
+                    "#ifndef textureSize2DRect\n"
                     "#define textureSize2DRect(t, l) textureSize(t)\n"
-                    "out vec4 fragColor;";
+                    "#endif\n"
+                    "#ifndef gl_FragColor\n"
+                    "#define gl_FragColor fragColor\n"
+                    "out vec4 fragColor;\n"
+                    "#endif";
             fragmentShader = true;
         }
         if (strncmp(var, "#define attribute", sizeof("#define attribute") - 1) == 0)
@@ -114,7 +122,7 @@ static PFNGLUNIFORM4FVPROC glUniform4fvInternal;
 static void GL_APIENTRY cglUniform4fv(GLint location, GLsizei count, const GLfloat *value)
 {
     glUniform4fvInternal(location, count, value);
-    if (location == 0 && count == 4)
+    if (location == 0 && count == 4 * 3)
     {
         memcpy(rectangleProgramMatrix, value, sizeof(rectangleProgramMatrix));
     }
@@ -301,10 +309,18 @@ uint64_t xxGraphicCreateCGL(int version)
 //------------------------------------------------------------------------------
 void xxGraphicDestroyCGL(uint64_t context)
 {
-    if (rectangleProgram)
+    for (int i = 0; i < xxCountOf(rectanglePrograms); ++i)
     {
-        glDeleteProgram(rectangleProgram);
-        rectangleProgram = 0;
+        if (rectanglePrograms[i].x)
+        {
+            glDeleteProgram(rectanglePrograms[i].x);
+            rectanglePrograms[i].x = 0;
+        }
+        if (rectanglePrograms[i].y)
+        {
+            glDeleteProgram(rectanglePrograms[i].y);
+            rectanglePrograms[i].y = 0;
+        }
     }
 
     glDestroyContextCGL(context, 0, nullptr);
@@ -333,55 +349,67 @@ void xxBindTextureWithSurface(const void* surface)
 //------------------------------------------------------------------------------
 void xxBindRectangleProgram()
 {
-    if (rectangleProgram == 0)
+    GLint program = 0;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &program);
+
+    for (int i = 0; i < xxCountOf(rectanglePrograms); ++i)
     {
-        const GLchar* vertexShaderCodes[] =
+        if (rectanglePrograms[i].x == program)
         {
-            "#version 100", "\n",
-            "#define _VERTEX_ 1", "\n",
-            "#define attribute attribute", "\n",
-            "#define varying varying", "\n",
-            glDefaultShaderCode
-        };
-
-        const GLchar* fragmentShaderCodes[] =
-        {
-            "#version 100", "\n",
-            "#define _FRAGMENT_ 1", "\n",
-            "#define attribute", "\n",
-            "#define varying varying", "\n",
-            "#define sampler2D sampler2DRect", "\n",
-            "#undef texture2D", "\n",
-            "#define texture2D(t,c) texture2DRect(t, (c) * vec2(textureSize2DRect(t, 0)))", "\n",
-            "#extension GL_EXT_gpu_shader4 : enable", "\n",
-            glDefaultShaderCode
-        };
-
-        GLuint glVertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(glVertexShader, xxCountOf(vertexShaderCodes), vertexShaderCodes, nullptr);
-        glCompileShader(glVertexShader);
-
-        GLuint glFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(glFragmentShader, xxCountOf(fragmentShaderCodes), fragmentShaderCodes, nullptr);
-        glCompileShader(glFragmentShader);
-
-        GLuint glProgram = glCreateProgram();
-        glBindAttribLocation(glProgram, 0, "position");
-        glBindAttribLocation(glProgram, 1, "color");
-        glBindAttribLocation(glProgram, 2, "uv");
-        glAttachShader(glProgram, glVertexShader);
-        glAttachShader(glProgram, glFragmentShader);
-        glLinkProgram(glProgram);
-
-        glDeleteShader(glVertexShader);
-        glDeleteShader(glFragmentShader);
-
-        rectangleProgram = glProgram;
-        rectangleProgramTexture = glGetUniformLocation(rectangleProgram, "tex");
+            glUseProgram(rectanglePrograms[i].y);
+            glUniform4fv(0, 4 * 3, rectangleProgramMatrix);
+            glUniform1i(rectangleProgramTexture, 0);
+            return;
+        }
     }
 
-    glUseProgram(rectangleProgram);
-    glUniform4fv(0, 4, rectangleProgramMatrix);
+    GLuint shaders[2];
+    GLsizei shaderCount = 2;
+    glGetAttachedShaders(program, 2, &shaderCount, shaders);
+
+    GLchar* source = xxAlloc(char, 4096);
+    GLsizei length = 4096;
+    glGetShaderSource(shaders[1], 4096, &length, source);
+
+    const GLchar* fragmentShaderCodes[] =
+    {
+        "#version 100", "\n",
+        "#define _FRAGMENT_ 1", "\n",
+        "#define sampler2D sampler2DRect", "\n",
+        "#undef texture2D", "\n",
+        "#define texture2D(t,c) texture2DRect(t, (c) * vec2(textureSize2DRect(t, 0)))", "\n",
+        "#extension GL_EXT_gpu_shader4 : enable", "\n",
+        "//", source
+    };
+
+    GLuint glFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(glFragmentShader, xxCountOf(fragmentShaderCodes), fragmentShaderCodes, nullptr);
+    glCompileShader(glFragmentShader);
+
+    xxFree(source);
+
+    GLuint glProgram = glCreateProgram();
+    glBindAttribLocation(glProgram, 0, "position");
+    glBindAttribLocation(glProgram, 1, "color");
+    glBindAttribLocation(glProgram, 2, "uv");
+    glAttachShader(glProgram, shaders[0]);
+    glAttachShader(glProgram, glFragmentShader);
+    glLinkProgram(glProgram);
+
+    glDeleteShader(glFragmentShader);
+
+    for (int i = 0; i < xxCountOf(rectanglePrograms); ++i)
+    {
+        if (rectanglePrograms[i].x == 0)
+        {
+            rectanglePrograms[i].x = program;
+            rectanglePrograms[i].y = glProgram;
+            break;
+        }
+    }
+
+    glUseProgram(glProgram);
+    glUniform4fv(0, 4 * 3, rectangleProgramMatrix);
     glUniform1i(rectangleProgramTexture, 0);
 }
 //==============================================================================
