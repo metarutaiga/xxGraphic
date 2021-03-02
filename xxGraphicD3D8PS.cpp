@@ -185,14 +185,21 @@ uint64_t xxCreatePipelineD3D8PS(uint64_t device, uint64_t renderPass, uint64_t b
 //==============================================================================
 void xxSetScissorD3D8PS(uint64_t commandEncoder, int x, int y, int width, int height)
 {
-    xxSetScissorD3D8(commandEncoder, x, y, width, height);
-
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
 
-    D3DMATRIX projection;
-    d3dDevice->GetTransform(D3DTS_PROJECTION, &projection);
+    D3DVIEWPORT8 vp;
+    d3dDevice->GetViewport(&vp);
 
-    d3dDevice->SetVertexShaderConstant(0, projection.m[0], 16);
+    D3DMATRIX projection;
+    d3dDevice->GetVertexShaderConstant(8, &projection, 4);
+    ViewportFromScissor(projection.m, vp.X, vp.Y, vp.Width, vp.Height, x, y, width, height);
+    d3dDevice->SetVertexShaderConstant(8, &projection, 4);
+
+    vp.X = x;
+    vp.Y = y;
+    vp.Width = width;
+    vp.Height = height;
+    d3dDevice->SetViewport(&vp);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersD3D8PS(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
@@ -212,7 +219,7 @@ void xxSetVertexConstantBufferD3D8PS(uint64_t commandEncoder, uint64_t buffer, i
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
     const float* d3dBuffer = reinterpret_cast<float*>(buffer);
 
-    d3dDevice->SetVertexShaderConstant(0, d3dBuffer, size / sizeof(float));
+    d3dDevice->SetVertexShaderConstant(0, d3dBuffer, size / sizeof(float) / 4);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferD3D8PS(uint64_t commandEncoder, uint64_t buffer, int size)
@@ -220,6 +227,6 @@ void xxSetFragmentConstantBufferD3D8PS(uint64_t commandEncoder, uint64_t buffer,
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
     const float* d3dBuffer = reinterpret_cast<float*>(buffer);
 
-    d3dDevice->SetPixelShaderConstant(0, d3dBuffer, size / sizeof(float));
+    d3dDevice->SetPixelShaderConstant(0, d3dBuffer, size / sizeof(float) / 4);
 }
 //==============================================================================
