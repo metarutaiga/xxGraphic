@@ -137,7 +137,7 @@ uint64_t xxCreateFragmentShaderD3D8PS(uint64_t device, const char* shader)
     if (strcmp(shader, "default") == 0)
     {
         DWORD d3dShader = 0;
-        HRESULT hResult = d3dDevice->CreatePixelShader(pixelShaderCode11, &d3dShader);
+        HRESULT hResult = d3dDevice->CreatePixelShader(pixelShaderCode10, &d3dShader);
         if (hResult != S_OK)
             return 0;
 

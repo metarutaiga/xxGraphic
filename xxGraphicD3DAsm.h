@@ -13,7 +13,7 @@
 //==============================================================================
 xxEXTERN const DWORD vertexShaderCode10[];
 xxEXTERN const DWORD vertexShaderCode11[];
-xxEXTERN const DWORD pixelShaderCode11[];
+xxEXTERN const DWORD pixelShaderCode10[];
 //==============================================================================
 //  Direct3D 10.0 Assembly Shader
 //==============================================================================

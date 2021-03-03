@@ -78,9 +78,9 @@ const DWORD vertexShaderCode11[] =
     D3DSIO_END
 };
 //------------------------------------------------------------------------------
-const DWORD pixelShaderCode11[] =
+const DWORD pixelShaderCode10[] =
 {
-    D3DPS_VERSION(1, 1),                                                            // ps_1_1
+    D3DPS_VERSION(1, 0),                                                            // ps_1_0
     D3DSIO_TEX, _DST(TEXTURE, 0),                                                   // tex t0
     D3DSIO_MUL, _DST(TEMP, 0), _SRC(TEXTURE, 0), _SRC(INPUT, 0),                    // mul r0, t0, v0
     D3DSIO_END
