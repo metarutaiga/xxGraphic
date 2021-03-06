@@ -6,10 +6,6 @@
 //==============================================================================
 #pragma once
 
-#if defined(_MSC_VER)
-#   pragma const_seg(push, internal, ".rdata$const")
-#endif
-
 enum xxGraphicDescriptor
 {
     VERTEX_UNIFORM          = 0,
