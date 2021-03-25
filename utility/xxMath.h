@@ -100,7 +100,9 @@ union xxPlusAPI xxVector4
     struct { float x, y, z, w; };
     struct { float r, g, b, a; };
     float f[N];
-#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
+#if defined(__llvm__)
+    __attribute__((vector_size(16))) float v;
+#elif defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
     __m128 v;
 #endif
 

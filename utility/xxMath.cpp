@@ -272,8 +272,17 @@ void xxMatrix4::MultiplyArray(size_t count, const xxVector4* __restrict input, i
 
     for (size_t i = 0; i < count; ++i)
     {
-#if defined(__ARM_NEON__) || defined(__ARM_NEON) || defined(_M_ARM) || defined(_M_ARM64) || defined(_M_HYBRID_X86_ARM64)
-        (*output) = matrix * (*input);
+#if defined(__llvm__)
+        auto vv = (*input).v;
+        auto v0 = __builtin_shufflevector(vv, vv, 0, 0, 0, 0);
+        auto v1 = __builtin_shufflevector(vv, vv, 1, 1, 1, 1);
+        auto v2 = __builtin_shufflevector(vv, vv, 2, 2, 2, 2);
+        auto v3 = __builtin_shufflevector(vv, vv, 3, 3, 3, 3);
+
+        (*output).v =               matrix._[0].v * v0;
+        (*output).v = (*output).v + matrix._[1].v * v1;
+        (*output).v = (*output).v + matrix._[2].v * v2;
+        (*output).v = (*output).v + matrix._[3].v * v3;
 #elif defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
         __m128 vv = (*input).v;
         __m128 v0 = _mm_shuffle1_ps(vv, _MM_SHUFFLE(0, 0, 0, 0));
@@ -299,8 +308,46 @@ void xxMatrix4::MultiplyArray(size_t count, const xxMatrix4* __restrict input, i
 
     for (size_t i = 0; i < count; ++i)
     {
-#if defined(__ARM_NEON__) || defined(__ARM_NEON) || defined(_M_ARM) || defined(_M_ARM64) || defined(_M_HYBRID_X86_ARM64)
-        (*output) = matrix * (*input);
+#if defined(__llvm__)
+        auto v0 = (*input)._[0].v;
+        auto v00 = __builtin_shufflevector(v0, v0, 0, 0, 0, 0);
+        auto v01 = __builtin_shufflevector(v0, v0, 1, 1, 1, 1);
+        auto v02 = __builtin_shufflevector(v0, v0, 2, 2, 2, 2);
+        auto v03 = __builtin_shufflevector(v0, v0, 3, 3, 3, 3);
+        (*output)._[0].v =                    matrix._[0].v * v00;
+        (*output)._[0].v = (*output)._[0].v + matrix._[1].v * v01;
+        (*output)._[0].v = (*output)._[0].v + matrix._[2].v * v02;
+        (*output)._[0].v = (*output)._[0].v + matrix._[3].v * v03;
+
+        auto v1 = (*input)._[1].v;
+        auto v10 = __builtin_shufflevector(v1, v1, 0, 0, 0, 0);
+        auto v11 = __builtin_shufflevector(v1, v1, 1, 1, 1, 1);
+        auto v12 = __builtin_shufflevector(v1, v1, 2, 2, 2, 2);
+        auto v13 = __builtin_shufflevector(v1, v1, 3, 3, 3, 3);
+        (*output)._[1].v =                    matrix._[0].v * v10;
+        (*output)._[1].v = (*output)._[1].v + matrix._[1].v * v11;
+        (*output)._[1].v = (*output)._[1].v + matrix._[2].v * v12;
+        (*output)._[1].v = (*output)._[1].v + matrix._[3].v * v13;
+
+        auto v2 = (*input)._[2].v;
+        auto v20 = __builtin_shufflevector(v2, v2, 0, 0, 0, 0);
+        auto v21 = __builtin_shufflevector(v2, v2, 1, 1, 1, 1);
+        auto v22 = __builtin_shufflevector(v2, v2, 2, 2, 2, 2);
+        auto v23 = __builtin_shufflevector(v2, v2, 3, 3, 3, 3);
+        (*output)._[2].v =                    matrix._[0].v * v20;
+        (*output)._[2].v = (*output)._[2].v + matrix._[1].v * v21;
+        (*output)._[2].v = (*output)._[2].v + matrix._[2].v * v22;
+        (*output)._[2].v = (*output)._[2].v + matrix._[3].v * v23;
+
+        auto v3 = (*input)._[3].v;
+        auto v30 = __builtin_shufflevector(v3, v3, 0, 0, 0, 0);
+        auto v31 = __builtin_shufflevector(v3, v3, 1, 1, 1, 1);
+        auto v32 = __builtin_shufflevector(v3, v3, 2, 2, 2, 2);
+        auto v33 = __builtin_shufflevector(v3, v3, 3, 3, 3, 3);
+        (*output)._[3].v =                    matrix._[0].v * v30;
+        (*output)._[3].v = (*output)._[3].v + matrix._[1].v * v31;
+        (*output)._[3].v = (*output)._[3].v + matrix._[2].v * v32;
+        (*output)._[3].v = (*output)._[3].v + matrix._[3].v * v33;
 #elif defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
         __m128 v0 = (*input)._[0].v;
         __m128 v00 = _mm_shuffle1_ps(v0, _MM_SHUFFLE(0, 0, 0, 0));
