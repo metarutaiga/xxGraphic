@@ -817,7 +817,7 @@ void xxSetVertexBuffersD3D5(uint64_t commandEncoder, int count, const uint64_t* 
         }
     }
 
-    d3dDevice->SetRenderState(D3DRENDERSTATE_LINEPATTERN, (DWORD)d3dVertexBuffer);
+    d3dDevice->SetRenderState(D3DRENDERSTATE_LINEPATTERN, (DWORD)getResourceData(buffers[0]));
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesD3D5(uint64_t commandEncoder, int count, const uint64_t* textures)
