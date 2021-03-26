@@ -872,21 +872,8 @@ void xxDrawIndexedD3D7(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
         DWORD* d3dIndexBuffer = reinterpret_cast<DWORD*>(getResourceData(indexBuffer));
         DWORD* p = d3dIndexBuffer + firstIndex;
         WORD* q = wordIndexBuffer;
-#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
-        int headIndexCount = indexCount / 8;
-        for (int i = 0; i < headIndexCount; ++i)
-        {
-            __m128i a = _mm_loadu_si128((__m128i*)p);
-            __m128i b = _mm_loadu_si128((__m128i*)p + 1);
-            _mm_store_si128((__m128i*)q, _mm_packs_epi32(a, b));
-            p += 8;
-            q += 8;
-        }
-        int tailIndexCount = indexCount % 8;
-#else
-        int tailIndexCount = indexCount;
-#endif
-        for (int i = 0; i < tailIndexCount; ++i)
+        #pragma loop(ivdep)
+        for (int i = 0; i < indexCount; ++i)
         {
             (*q++) = (WORD)(*p++);
         }

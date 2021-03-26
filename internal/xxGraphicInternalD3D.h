@@ -385,6 +385,12 @@ inline uint64_t getResourceData(uint64_t resource)
 //==============================================================================
 //  Framebuffer
 //==============================================================================
+struct D3DFRAMEBUFFER2
+{
+    IDirectDrawSurface*     backSurface;
+    IDirectDrawSurface*     depthSurface;
+};
+//------------------------------------------------------------------------------
 struct D3DFRAMEBUFFER3
 {
     IDirectDrawSurface4*    backSurface;
@@ -423,6 +429,14 @@ struct D3D11FRAMEBUFFER
 //==============================================================================
 //  Swapchain
 //==============================================================================
+struct D3DSWAPCHAIN2 : public D3DFRAMEBUFFER2
+{
+    IDirectDrawClipper*     clipper;
+    HWND                    hWnd;
+    int                     width;
+    int                     height;
+};
+//------------------------------------------------------------------------------
 struct D3DSWAPCHAIN3 : public D3DFRAMEBUFFER3
 {
     IDirectDrawClipper*     clipper;
@@ -540,6 +554,15 @@ struct D3D11VERTEXATTRIBUTE
 //==============================================================================
 //  Buffer
 //==============================================================================
+struct D3DVERTEXBUFFER2
+{
+    void*           buffer;
+    UINT            size;
+    UINT            count;
+    bool            dirty;
+    void*           address;
+};
+//------------------------------------------------------------------------------
 struct D3D10BUFFER
 {
     ID3D10Buffer*   buffer;
@@ -578,7 +601,7 @@ struct D3D11TEXTURE
 //==============================================================================
 //  Sampler
 //==============================================================================
-union D3DSAMPLER3
+union D3DSAMPLER2
 {
     uint64_t    value;
     struct
@@ -593,9 +616,10 @@ union D3DSAMPLER3
     };
 };
 //------------------------------------------------------------------------------
-typedef D3DSAMPLER3 D3DSAMPLER7;
-typedef D3DSAMPLER3 D3DSAMPLER8;
-typedef D3DSAMPLER3 D3DSAMPLER9;
+typedef D3DSAMPLER2 D3DSAMPLER3;
+typedef D3DSAMPLER2 D3DSAMPLER7;
+typedef D3DSAMPLER2 D3DSAMPLER8;
+typedef D3DSAMPLER2 D3DSAMPLER9;
 //==============================================================================
 //  Pipeline
 //==============================================================================
