@@ -6,8 +6,22 @@
 //==============================================================================
 #include "xxMath.h"
 
-#if defined(_MSC_VER) && !defined(__llvm__)
-#   pragma optimize("y", on)
+#if defined(__llvm__)
+#else
+#   if defined(_M_ARM) || defined(_M_ARM64) || defined(_M_HYBRID_X86_ARM64)
+        v4sf v4sf::operator + (const v4sf& other) const { return v4sf{ vaddq_f32(v, other.v) }; }
+        v4sf v4sf::operator * (const v4sf& other) const { return v4sf{ vmulq_f32(v, other.v) }; }
+        template<int x, int y, int z, int w> inline v4sf __builtin_shufflevector(const v4sf& a, const v4sf& b);
+        template<> inline v4sf __builtin_shufflevector<0, 0, 0, 0>(const v4sf& a, const v4sf& b) { return v4sf{ vdupq_lane_f32(vget_low_f32(a.v), 0) }; }
+        template<> inline v4sf __builtin_shufflevector<1, 1, 1, 1>(const v4sf& a, const v4sf& b) { return v4sf{ vdupq_lane_f32(vget_low_f32(a.v), 1) }; }
+        template<> inline v4sf __builtin_shufflevector<2, 2, 2, 2>(const v4sf& a, const v4sf& b) { return v4sf{ vdupq_lane_f32(vget_high_f32(a.v), 0) }; }
+        template<> inline v4sf __builtin_shufflevector<3, 3, 3, 3>(const v4sf& a, const v4sf& b) { return v4sf{ vdupq_lane_f32(vget_high_f32(a.v), 1) }; }
+#       define __builtin_shufflevector(a, b, c, d, e, f) __builtin_shufflevector<c, d, e, f>(a, b)
+#   elif defined(_M_IX86) || defined(_M_AMD64)
+        v4sf v4sf::operator + (const v4sf& other) const { return v4sf{ _mm_add_ps(v, other.v) }; }
+        v4sf v4sf::operator * (const v4sf& other) const { return v4sf{ _mm_mul_ps(v, other.v) }; }
+#       define __builtin_shufflevector(a, b, c, d, e, f) v4sf{ _mm_shuffle_ps(a.v, b.v, _MM_SHUFFLE(f, e, d, c)) }
+#   endif
 #endif
 
 const xxVector2 xxVector2::ZERO         = { 0, 0 };
@@ -272,7 +286,7 @@ void xxMatrix4::MultiplyArray(size_t count, const xxVector4* __restrict input, i
 
     for (size_t i = 0; i < count; ++i)
     {
-#if defined(__llvm__)
+#if xxVectorExtension
         auto vv = (*input).v;
         auto v0 = __builtin_shufflevector(vv, vv, 0, 0, 0, 0);
         auto v1 = __builtin_shufflevector(vv, vv, 1, 1, 1, 1);
@@ -283,17 +297,6 @@ void xxMatrix4::MultiplyArray(size_t count, const xxVector4* __restrict input, i
         (*output).v = (*output).v + matrix._[1].v * v1;
         (*output).v = (*output).v + matrix._[2].v * v2;
         (*output).v = (*output).v + matrix._[3].v * v3;
-#elif defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
-        __m128 vv = (*input).v;
-        __m128 v0 = _mm_shuffle1_ps(vv, _MM_SHUFFLE(0, 0, 0, 0));
-        __m128 v1 = _mm_shuffle1_ps(vv, _MM_SHUFFLE(1, 1, 1, 1));
-        __m128 v2 = _mm_shuffle1_ps(vv, _MM_SHUFFLE(2, 2, 2, 2));
-        __m128 v3 = _mm_shuffle1_ps(vv, _MM_SHUFFLE(3, 3, 3, 3));
-
-        (*output).v =                         _mm_mul_ps(matrix._[0].v, v0);
-        (*output).v = _mm_add_ps((*output).v, _mm_mul_ps(matrix._[1].v, v1));
-        (*output).v = _mm_add_ps((*output).v, _mm_mul_ps(matrix._[2].v, v2));
-        (*output).v = _mm_add_ps((*output).v, _mm_mul_ps(matrix._[3].v, v3));
 #else
         (*output) = matrix * (*input);
 #endif
@@ -308,7 +311,7 @@ void xxMatrix4::MultiplyArray(size_t count, const xxMatrix4* __restrict input, i
 
     for (size_t i = 0; i < count; ++i)
     {
-#if defined(__llvm__)
+#if xxVectorExtension
         auto v0 = (*input)._[0].v;
         auto v00 = __builtin_shufflevector(v0, v0, 0, 0, 0, 0);
         auto v01 = __builtin_shufflevector(v0, v0, 1, 1, 1, 1);
@@ -348,46 +351,6 @@ void xxMatrix4::MultiplyArray(size_t count, const xxMatrix4* __restrict input, i
         (*output)._[3].v = (*output)._[3].v + matrix._[1].v * v31;
         (*output)._[3].v = (*output)._[3].v + matrix._[2].v * v32;
         (*output)._[3].v = (*output)._[3].v + matrix._[3].v * v33;
-#elif defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
-        __m128 v0 = (*input)._[0].v;
-        __m128 v00 = _mm_shuffle1_ps(v0, _MM_SHUFFLE(0, 0, 0, 0));
-        __m128 v01 = _mm_shuffle1_ps(v0, _MM_SHUFFLE(1, 1, 1, 1));
-        __m128 v02 = _mm_shuffle1_ps(v0, _MM_SHUFFLE(2, 2, 2, 2));
-        __m128 v03 = _mm_shuffle1_ps(v0, _MM_SHUFFLE(3, 3, 3, 3));
-        (*output)._[0].v =                              _mm_mul_ps(matrix._[0].v, v00);
-        (*output)._[0].v = _mm_add_ps((*output)._[0].v, _mm_mul_ps(matrix._[1].v, v01));
-        (*output)._[0].v = _mm_add_ps((*output)._[0].v, _mm_mul_ps(matrix._[2].v, v02));
-        (*output)._[0].v = _mm_add_ps((*output)._[0].v, _mm_mul_ps(matrix._[3].v, v03));
-
-        __m128 v1 = (*input)._[1].v;
-        __m128 v10 = _mm_shuffle1_ps(v1, _MM_SHUFFLE(0, 0, 0, 0));
-        __m128 v11 = _mm_shuffle1_ps(v1, _MM_SHUFFLE(1, 1, 1, 1));
-        __m128 v12 = _mm_shuffle1_ps(v1, _MM_SHUFFLE(2, 2, 2, 2));
-        __m128 v13 = _mm_shuffle1_ps(v1, _MM_SHUFFLE(3, 3, 3, 3));
-        (*output)._[1].v =                              _mm_mul_ps(matrix._[0].v, v10);
-        (*output)._[1].v = _mm_add_ps((*output)._[1].v, _mm_mul_ps(matrix._[1].v, v11));
-        (*output)._[1].v = _mm_add_ps((*output)._[1].v, _mm_mul_ps(matrix._[2].v, v12));
-        (*output)._[1].v = _mm_add_ps((*output)._[1].v, _mm_mul_ps(matrix._[3].v, v13));
-
-        __m128 v2 = (*input)._[2].v;
-        __m128 v20 = _mm_shuffle1_ps(v2, _MM_SHUFFLE(0, 0, 0, 0));
-        __m128 v21 = _mm_shuffle1_ps(v2, _MM_SHUFFLE(1, 1, 1, 1));
-        __m128 v22 = _mm_shuffle1_ps(v2, _MM_SHUFFLE(2, 2, 2, 2));
-        __m128 v23 = _mm_shuffle1_ps(v2, _MM_SHUFFLE(3, 3, 3, 3));
-        (*output)._[2].v =                              _mm_mul_ps(matrix._[0].v, v20);
-        (*output)._[2].v = _mm_add_ps((*output)._[2].v, _mm_mul_ps(matrix._[1].v, v21));
-        (*output)._[2].v = _mm_add_ps((*output)._[2].v, _mm_mul_ps(matrix._[2].v, v22));
-        (*output)._[2].v = _mm_add_ps((*output)._[2].v, _mm_mul_ps(matrix._[3].v, v23));
-
-        __m128 v3 = (*input)._[3].v;
-        __m128 v30 = _mm_shuffle1_ps(v3, _MM_SHUFFLE(0, 0, 0, 0));
-        __m128 v31 = _mm_shuffle1_ps(v3, _MM_SHUFFLE(1, 1, 1, 1));
-        __m128 v32 = _mm_shuffle1_ps(v3, _MM_SHUFFLE(2, 2, 2, 2));
-        __m128 v33 = _mm_shuffle1_ps(v3, _MM_SHUFFLE(3, 3, 3, 3));
-        (*output)._[3].v =                              _mm_mul_ps(matrix._[0].v, v30);
-        (*output)._[3].v = _mm_add_ps((*output)._[3].v, _mm_mul_ps(matrix._[1].v, v31));
-        (*output)._[3].v = _mm_add_ps((*output)._[3].v, _mm_mul_ps(matrix._[2].v, v32));
-        (*output)._[3].v = _mm_add_ps((*output)._[3].v, _mm_mul_ps(matrix._[3].v, v33));
 #else
         (*output) = matrix * (*input);
 #endif
