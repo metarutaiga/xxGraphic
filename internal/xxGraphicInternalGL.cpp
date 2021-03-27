@@ -62,20 +62,25 @@ void        (*glPresentContext)(uint64_t context, void* display);
 //  Loader
 //==============================================================================
 #define GL_PROTOTYPE(type, prototype, parameter, ...) \
-type (GL_APIENTRYP prototype ## Entry) parameter = nullptr; \
+extern type (GL_APIENTRYP prototype ## Entry) parameter; \
 extern "C" type GL_APIENTRY prototype parameter \
 { \
+    return prototype ## Entry(__VA_ARGS__); \
+} \
+static type GL_APIENTRY prototype ## Trunk parameter \
+{ \
+    (void*&)prototype ## Entry = glGetProcAddress(#prototype); \
     if (prototype ## Entry == nullptr) \
     { \
-        (void*&)prototype ## Entry = glGetProcAddress(#prototype); \
-        if (prototype ## Entry == nullptr) \
+        prototype ## Entry = [] parameter -> type \
         { \
             typedef type returnType; \
             return returnType(); \
-        } \
+        }; \
     } \
     return prototype ## Entry(__VA_ARGS__); \
-}
+} \
+type (GL_APIENTRYP prototype ## Entry) parameter = prototype ## Trunk;
 //------------------------------------------------------------------------------
 GL_PROTOTYPE(void, glActiveTexture, (GLenum texture), texture);
 GL_PROTOTYPE(void, glAttachShader, (GLuint program, GLuint shader), program, shader);

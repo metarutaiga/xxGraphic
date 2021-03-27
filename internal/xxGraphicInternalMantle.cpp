@@ -10,20 +10,25 @@
 //  Loader
 //==============================================================================
 #define GR_PROTOTYPE(type, prototype, parameter, ...) \
-type (GR_STDCALL* prototype ## Entry) parameter = nullptr; \
+extern type (GR_STDCALL* prototype ## Entry) parameter; \
 extern "C" type GR_STDCALL prototype parameter \
 { \
+    return prototype ## Entry(__VA_ARGS__); \
+} \
+static type GR_STDCALL prototype ## Trunk parameter \
+{ \
+    (void*&)prototype ## Entry = grGetProcAddress(#prototype); \
     if (prototype ## Entry == nullptr) \
     { \
-        (void*&)prototype ## Entry = grGetProcAddress(#prototype); \
-        if (prototype ## Entry == nullptr) \
+        prototype ## Entry = [] parameter -> type \
         { \
             typedef type returnType; \
             return returnType(); \
-        } \
+        }; \
     } \
     return prototype ## Entry(__VA_ARGS__); \
-}
+} \
+type (GR_STDCALL* prototype ## Entry) parameter = prototype ## Trunk;
 //------------------------------------------------------------------------------
 GR_PROTOTYPE(GR_RESULT, grInitAndEnumerateGpus, (const GR_APPLICATION_INFO* pAppInfo, const GR_ALLOC_CALLBACKS* pAllocCb, GR_UINT* pGpuCount, GR_PHYSICAL_GPU gpus[GR_MAX_PHYSICAL_GPUS]), pAppInfo, pAllocCb, pGpuCount, gpus);
 GR_PROTOTYPE(GR_RESULT, grGetGpuInfo, (GR_PHYSICAL_GPU gpu, GR_ENUM infoType, GR_SIZE* pDataSize, GR_VOID* pData), gpu, infoType, pDataSize, pData);

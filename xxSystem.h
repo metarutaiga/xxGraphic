@@ -39,11 +39,6 @@
 #   include <arm_neon.h>
 #elif defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
 #   include <immintrin.h>
-#   if defined(__GNUC__) || defined(__llvm__)
-#       define _mm_shuffle1_ps(v,i) _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(v), i))
-#   else
-#       define _mm_shuffle1_ps(v,i) _mm_shuffle_ps(v, v, i)
-#   endif
 #endif
 
 #if defined(__APPLE__)
