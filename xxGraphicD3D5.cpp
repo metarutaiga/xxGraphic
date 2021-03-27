@@ -24,7 +24,7 @@ typedef HRESULT (WINAPI *PFN_DIRECT_DRAW_CREATE)(GUID*, LPDIRECTDRAW*, IUnknown*
 static void*                        g_ddrawLibrary = nullptr;
 static LPDIRECTDRAW                 g_ddraw = nullptr;
 static LPDIRECTDRAWSURFACE          g_primarySurface = nullptr;
-static float                        g_clearColor[4] = {};
+static LPDIRECT3DMATERIAL2          g_clearColorMaterial = nullptr;
 
 //==============================================================================
 //  Instance
@@ -55,6 +55,12 @@ uint64_t xxCreateInstanceD3D5()
     HRESULT result = ddraw->QueryInterface(IID_PPV_ARGS(&d3d));
     if (result != S_OK)
         return 0;
+    d3d->CreateMaterial(&g_clearColorMaterial, nullptr);
+    if (g_clearColorMaterial == nullptr)
+    {
+        d3d->Release();
+        return 0;
+    }
 
     PatchD3DIM("d3dim.dll");
 
@@ -67,6 +73,7 @@ void xxDestroyInstanceD3D5(uint64_t instance)
 {
     LPDIRECT3D2 d3d = reinterpret_cast<LPDIRECT3D2>(instance);
 
+    SafeRelease(g_clearColorMaterial);
     SafeRelease(d3d);
     SafeRelease(g_ddraw);
 
@@ -75,8 +82,6 @@ void xxDestroyInstanceD3D5(uint64_t instance)
         xxFreeLibrary(g_ddrawLibrary);
         g_ddrawLibrary = nullptr;
     }
-
-    memset(g_clearColor, 0, sizeof(g_clearColor));
 
     xxUnregisterFunction();
 }
@@ -380,34 +385,17 @@ uint64_t xxBeginRenderPassD3D5(uint64_t commandBuffer, uint64_t framebuffer, uin
         rect.lX2 = width;
         rect.lY2 = height;
 
-        if (memcmp(g_clearColor, color, sizeof(g_clearColor)) != 0)
-        {
-            memcpy(g_clearColor, color, sizeof(g_clearColor));
+        D3DMATERIAL clearColor = {};
+        clearColor.dwSize = sizeof(D3DMATERIAL);
+        clearColor.diffuse.r = color[0];
+        clearColor.diffuse.g = color[1];
+        clearColor.diffuse.b = color[2];
+        clearColor.diffuse.a = color[3];
+        g_clearColorMaterial->SetMaterial(&clearColor);
 
-            D3DMATERIAL clearColor = {};
-            clearColor.dwSize = sizeof(D3DMATERIAL);
-            clearColor.diffuse.r = color[0];
-            clearColor.diffuse.g = color[1];
-            clearColor.diffuse.b = color[2];
-            clearColor.diffuse.a = color[3];
-
-            LPDIRECT3D2 d3d = nullptr;
-            if (d3d == nullptr)
-            {
-                HRESULT result = d3dDevice->GetDirect3D(&d3d);
-                if (result != S_OK)
-                    return 0;
-                d3d->Release();
-            }
-            LPDIRECT3DMATERIAL2 material = nullptr;
-            d3d->CreateMaterial(&material, nullptr);
-            material->SetMaterial(&clearColor);
-
-            D3DMATERIALHANDLE materialHandle = 0;
-            material->GetHandle(d3dDevice, &materialHandle);
-            viewport->SetBackground(materialHandle);
-            material->Release();
-        }
+        D3DMATERIALHANDLE materialHandle = 0;
+        g_clearColorMaterial->GetHandle(d3dDevice, &materialHandle);
+        viewport->SetBackground(materialHandle);
 
         viewport->Clear(1, &rect, d3dFlags);
     }
@@ -801,7 +789,9 @@ void xxSetPipelineD3D5(uint64_t commandEncoder, uint64_t pipeline)
     D3DPIPELINE3* d3dPipeline = reinterpret_cast<D3DPIPELINE3*>(pipeline);
 
     d3dDevice->SetRenderState(D3DRENDERSTATE_SHADEMODE, D3DSHADE_GOURAUD);
+    d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREMAPBLEND, D3DTBLEND_MODULATE);
     d3dDevice->SetRenderState(D3DRENDERSTATE_FOGENABLE, FALSE);
+    d3dDevice->SetRenderState(D3DRENDERSTATE_SPECULARENABLE, FALSE);
     d3dDevice->SetRenderState(D3DRENDERSTATE_CULLMODE, D3DCULL_NONE);
     d3dDevice->SetRenderState(D3DRENDERSTATE_ZENABLE, d3dPipeline->renderState.depthWrite);
     d3dDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, d3dPipeline->renderState.alphaBlending);

@@ -783,6 +783,7 @@ void xxSetPipelineD3D7(uint64_t commandEncoder, uint64_t pipeline)
     d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE);
     d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
     d3dDevice->SetRenderState(D3DRENDERSTATE_FOGENABLE, FALSE);
+    d3dDevice->SetRenderState(D3DRENDERSTATE_SPECULARENABLE, FALSE);
     d3dDevice->SetRenderState(D3DRENDERSTATE_CULLMODE, D3DCULL_NONE);
     d3dDevice->SetRenderState(D3DRENDERSTATE_ZENABLE, d3dPipeline->renderState.depthWrite);
     d3dDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, d3dPipeline->renderState.alphaBlending);

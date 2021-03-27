@@ -860,6 +860,7 @@ void xxSetPipelineD3D9(uint64_t commandEncoder, uint64_t pipeline)
     d3dDevice->SetVertexShader(d3dPipeline->vertexShader);
     d3dDevice->SetPixelShader(d3dPipeline->pixelShader);
     d3dDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
+    d3dDevice->SetRenderState(D3DRS_SPECULARENABLE, FALSE);
     d3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
     d3dDevice->SetRenderState(D3DRS_ZENABLE, d3dPipeline->renderState.depthWrite);
     d3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, d3dPipeline->renderState.alphaBlending);
