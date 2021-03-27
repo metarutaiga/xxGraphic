@@ -4,6 +4,9 @@
 // Copyright (c) 2019-2021 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
+#ifndef _M_IX86
+#define xxAPI xxEXTERN
+#endif
 #include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalD3D.h"
 #include "xxGraphicD3D6.h"

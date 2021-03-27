@@ -4,11 +4,12 @@
 // Copyright (c) 2019-2021 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
+#if !defined(_M_IX86) && !defined(_M_AMD64)
+#define xxAPI xxEXTERN
+#endif
 #include "internal/xxGraphicInternal.h"
 #include "xxGraphicMantleAsm.h"
 #include "xxGraphicMantle.h"
-
-#if defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
 
 #define GR_PROTOTYPES 1
 #include "mantle/mantle.h"
@@ -980,5 +981,3 @@ void xxDrawIndexedMantle(uint64_t commandEncoder, uint64_t indexBuffer, int inde
     grCmdDrawIndexed(grCommandBuffer, firstIndex, indexCount, vertexOffset, firstInstance, instanceCount);
 }
 //==============================================================================
-
-#endif
