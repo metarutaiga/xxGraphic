@@ -246,7 +246,10 @@ uint64_t xxCreateSwapchainD3D6(uint64_t device, uint64_t renderPass, void* view,
 
         HRESULT result = g_ddraw->CreateSurface(&desc, &depthSurface, nullptr);
         if (result != S_OK)
+        {
+            backSurface->Release();
             return 0;
+        }
 
         backSurface->AddAttachedSurface(depthSurface);
     }
@@ -256,7 +259,11 @@ uint64_t xxCreateSwapchainD3D6(uint64_t device, uint64_t renderPass, void* view,
     {
         HRESULT result = g_ddraw->CreateClipper(0, &clipper, nullptr);
         if (result != S_OK)
+        {
+            backSurface->Release();
+            depthSurface->Release();
             return 0;
+        }
 
         clipper->SetHWnd(0, hWnd);
     }
@@ -916,6 +923,8 @@ void xxDrawIndexedD3D6(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
 
     LPDIRECT3DVERTEXBUFFER vertexBuffer = nullptr;
     d3dDevice->GetRenderState(D3DRENDERSTATE_LINEPATTERN, (DWORD*)&vertexBuffer);
+    if (vertexBuffer == nullptr)
+        return;
 
     static WORD wordIndexBuffer[65536];
     WORD* indexArray = nullptr;

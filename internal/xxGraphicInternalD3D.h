@@ -514,7 +514,7 @@ typedef D3D10RENDERPASS D3D11RENDERPASS;
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-union D3DVERTEXATTRIBUTE3
+union D3DVERTEXATTRIBUTE2
 {
     uint64_t    value;
     struct
@@ -524,9 +524,10 @@ union D3DVERTEXATTRIBUTE3
     };
 };
 //------------------------------------------------------------------------------
-typedef D3DVERTEXATTRIBUTE3 D3DVERTEXATTRIBUTE7;
-typedef D3DVERTEXATTRIBUTE3 D3DVERTEXATTRIBUTE8;
-typedef D3DVERTEXATTRIBUTE3 D3DVERTEXATTRIBUTE9;
+typedef D3DVERTEXATTRIBUTE2 D3DVERTEXATTRIBUTE3;
+typedef D3DVERTEXATTRIBUTE2 D3DVERTEXATTRIBUTE7;
+typedef D3DVERTEXATTRIBUTE2 D3DVERTEXATTRIBUTE8;
+typedef D3DVERTEXATTRIBUTE2 D3DVERTEXATTRIBUTE9;
 //------------------------------------------------------------------------------
 struct D3DVERTEXATTRIBUTE8PS
 {

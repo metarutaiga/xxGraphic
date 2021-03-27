@@ -17,10 +17,14 @@ typedef HRESULT (WINAPI *PFN_DIRECT_DRAW_CREATE)(GUID*, LPDIRECTDRAW*, IUnknown*
 #define D3DRTYPE_CONSTANTBUFFER     0
 #define D3DRTYPE_INDEXBUFFER        1
 #define D3DRTYPE_VERTEXBUFFER       2
+#define D3DFVF_XYZ                  0x002
+#define D3DFVF_DIFFUSE              0x040
+#define D3DFVF_TEX1                 0x100
 
 static void*                        g_ddrawLibrary = nullptr;
 static LPDIRECTDRAW                 g_ddraw = nullptr;
 static LPDIRECTDRAWSURFACE          g_primarySurface = nullptr;
+static float                        g_clearColor[4] = {};
 
 //==============================================================================
 //  Instance
@@ -72,6 +76,8 @@ void xxDestroyInstanceD3D5(uint64_t instance)
         g_ddrawLibrary = nullptr;
     }
 
+    memset(g_clearColor, 0, sizeof(g_clearColor));
+
     xxUnregisterFunction();
 }
 //==============================================================================
@@ -113,13 +119,8 @@ uint64_t xxCreateDeviceD3D5(uint64_t instance)
             return 0;
     }
 
-    const IID* iid = nullptr;
     LPDIRECT3DDEVICE2 d3dDevice = nullptr;
-    if (d3dDevice == nullptr)
-    {
-        iid = &__uuidof(IDirect3DHALDevice);
-        d3d->CreateDevice(*iid, backSurface, &d3dDevice);
-    }
+    d3d->CreateDevice(__uuidof(IDirect3DHALDevice), backSurface, &d3dDevice);
     if (d3dDevice == nullptr)
     {
         backSurface->Release();
@@ -213,11 +214,14 @@ uint64_t xxCreateSwapchainD3D5(uint64_t device, uint64_t renderPass, void* view,
         desc.dwWidth = width;
         desc.dwHeight = height;
         desc.dwZBufferBitDepth = 24;
-    
+
         HRESULT result = g_ddraw->CreateSurface(&desc, &depthSurface, nullptr);
         if (result != S_OK)
+        {
+            backSurface->Release();
             return 0;
-    
+        }
+
         backSurface->AddAttachedSurface(depthSurface);
     }
 
@@ -226,7 +230,11 @@ uint64_t xxCreateSwapchainD3D5(uint64_t device, uint64_t renderPass, void* view,
     {
         HRESULT result = g_ddraw->CreateClipper(0, &clipper, nullptr);
         if (result != S_OK)
+        {
+            backSurface->Release();
+            depthSurface->Release();
             return 0;
+        }
 
         clipper->SetHWnd(0, hWnd);
     }
@@ -372,29 +380,34 @@ uint64_t xxBeginRenderPassD3D5(uint64_t commandBuffer, uint64_t framebuffer, uin
         rect.lX2 = width;
         rect.lY2 = height;
 
-        D3DMATERIAL clearColor = {};
-        clearColor.dwSize = sizeof(D3DMATERIAL);
-        clearColor.diffuse.r = color[0];
-        clearColor.diffuse.g = color[1];
-        clearColor.diffuse.b = color[2];
-        clearColor.diffuse.a = color[3];
-
-        LPDIRECT3D2 d3d = nullptr;
-        if (d3d == nullptr)
+        if (memcmp(g_clearColor, color, sizeof(g_clearColor)) != 0)
         {
-            HRESULT result = d3dDevice->GetDirect3D(&d3d);
-            if (result != S_OK)
-                return 0;
-            d3d->Release();
-        }
-        LPDIRECT3DMATERIAL2 material = nullptr;
-        d3d->CreateMaterial(&material, nullptr);
-        material->SetMaterial(&clearColor);
+            memcpy(g_clearColor, color, sizeof(g_clearColor));
 
-        D3DMATERIALHANDLE materialHandle = 0;
-        material->GetHandle(d3dDevice, &materialHandle);
-        viewport->SetBackground(materialHandle);
-        material->Release();
+            D3DMATERIAL clearColor = {};
+            clearColor.dwSize = sizeof(D3DMATERIAL);
+            clearColor.diffuse.r = color[0];
+            clearColor.diffuse.g = color[1];
+            clearColor.diffuse.b = color[2];
+            clearColor.diffuse.a = color[3];
+
+            LPDIRECT3D2 d3d = nullptr;
+            if (d3d == nullptr)
+            {
+                HRESULT result = d3dDevice->GetDirect3D(&d3d);
+                if (result != S_OK)
+                    return 0;
+                d3d->Release();
+            }
+            LPDIRECT3DMATERIAL2 material = nullptr;
+            d3d->CreateMaterial(&material, nullptr);
+            material->SetMaterial(&clearColor);
+
+            D3DMATERIALHANDLE materialHandle = 0;
+            material->GetHandle(d3dDevice, &materialHandle);
+            viewport->SetBackground(materialHandle);
+            material->Release();
+        }
 
         viewport->Clear(1, &rect, d3dFlags);
     }
@@ -411,6 +424,7 @@ void xxEndRenderPassD3D5(uint64_t commandEncoder, uint64_t framebuffer, uint64_t
 //==============================================================================
 uint64_t xxCreateVertexAttributeD3D5(uint64_t device, int count, int* attribute)
 {
+    D3DVERTEXATTRIBUTE2 d3dVertexAttribute = {};
     int stride = 0;
 
     for (int i = 0; i < count; ++i)
@@ -421,9 +435,18 @@ uint64_t xxCreateVertexAttributeD3D5(uint64_t device, int count, int* attribute)
         int size = (*attribute++);
 
         stride += size;
+
+        if (offset == 0 && element == 3 && size == sizeof(float) * 3)
+            d3dVertexAttribute.fvf |= D3DFVF_XYZ;
+        if (offset != 0 && element == 4 && size == sizeof(char) * 4)
+            d3dVertexAttribute.fvf |= D3DFVF_DIFFUSE;
+        if (offset != 0 && element == 2 && size == sizeof(float) * 2)
+            d3dVertexAttribute.fvf += D3DFVF_TEX1;
     }
 
-    return stride;
+    d3dVertexAttribute.stride = stride;
+
+    return d3dVertexAttribute.value;
 }
 //------------------------------------------------------------------------------
 void xxDestroyVertexAttributeD3D5(uint64_t vertexAttribute)
@@ -449,15 +472,16 @@ uint64_t xxCreateIndexBufferD3D5(uint64_t device, int size)
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexBufferD3D5(uint64_t device, int size, uint64_t vertexAttribute)
 {
-    if (vertexAttribute == 0)
+    D3DVERTEXATTRIBUTE3 d3dVertexAttribute = { vertexAttribute };
+    if (d3dVertexAttribute.stride == 0)
         return 0;
-    D3DVERTEXBUFFER2* d3dVertexBuffer = new D3DVERTEXBUFFER2;
+    D3DVERTEXBUFFER2* d3dVertexBuffer = xxAlloc(D3DVERTEXBUFFER2);
     if (d3dVertexBuffer == nullptr)
         return 0;
 
     d3dVertexBuffer->buffer = xxAlloc(char, size);
     d3dVertexBuffer->size = size;
-    d3dVertexBuffer->count = size / (int)vertexAttribute;
+    d3dVertexBuffer->count = size / d3dVertexAttribute.stride;
     d3dVertexBuffer->dirty = false;
     d3dVertexBuffer->address = xxAlloc(char, d3dVertexBuffer->count * sizeof(D3DLVERTEX));
 
@@ -484,7 +508,7 @@ void xxDestroyBufferD3D5(uint64_t device, uint64_t buffer)
 
         xxFree(d3dVertexBuffer->buffer);
         xxFree(d3dVertexBuffer->address);
-        delete d3dVertexBuffer;
+        xxFree(d3dVertexBuffer);
         break;
     }
     default:
@@ -795,8 +819,9 @@ void xxSetVertexBuffersD3D5(uint64_t commandEncoder, int count, const uint64_t* 
 {
     LPDIRECT3DDEVICE2 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE2>(commandEncoder);
     D3DVERTEXBUFFER2* d3dVertexBuffer = reinterpret_cast<D3DVERTEXBUFFER2*>(getResourceData(buffers[0]));
+    D3DVERTEXATTRIBUTE3 d3dVertexAttribute = { vertexAttribute };
 
-    if (d3dVertexBuffer && d3dVertexBuffer->dirty && vertexAttribute)
+    if (d3dVertexBuffer && d3dVertexBuffer->dirty)
     {
         d3dVertexBuffer->dirty = false;
 
@@ -804,15 +829,24 @@ void xxSetVertexBuffersD3D5(uint64_t commandEncoder, int count, const uint64_t* 
         D3DLVERTEX* target = (D3DLVERTEX*)d3dVertexBuffer->address;
         for (UINT i = 0; i < d3dVertexBuffer->count; ++i)
         {
-            target->dvX = source[0];
-            target->dvY = source[1];
-            target->dvZ = source[2];
-            target->dcColor = (D3DCOLOR&)source[3];
-            target->dcSpecular = 0;
-            target->dvTU = source[4];
-            target->dvTV = source[5];
+            int offset = 0;
+            if (d3dVertexAttribute.fvf & D3DFVF_XYZ)
+            {
+                target->dvX = source[offset++];
+                target->dvY = source[offset++];
+                target->dvZ = source[offset++];
+            }
+            if (d3dVertexAttribute.fvf & D3DFVF_DIFFUSE)
+            {
+                target->dcColor = (D3DCOLOR&)source[offset++];
+            }
+            if (d3dVertexAttribute.fvf & D3DFVF_TEX1)
+            {
+                target->dvTU = source[offset++];
+                target->dvTV = source[offset++];
+            }
 
-            source = (float*)((char*)source + vertexAttribute);
+            source = (float*)((char*)source + d3dVertexAttribute.stride);
             target++;
         }
     }
@@ -881,8 +915,10 @@ void xxDrawIndexedD3D5(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
     if (d3dDevice == nullptr)
         return;
 
-    D3DVERTEXBUFFER2* d3dVertexBuffer = nullptr;
-    d3dDevice->GetRenderState(D3DRENDERSTATE_LINEPATTERN, (DWORD*)&d3dVertexBuffer);
+    D3DVERTEXBUFFER2* vertexBuffer = nullptr;
+    d3dDevice->GetRenderState(D3DRENDERSTATE_LINEPATTERN, (DWORD*)&vertexBuffer);
+    if (vertexBuffer == nullptr)
+        return;
 
     static WORD wordIndexBuffer[65536];
     WORD* indexArray = nullptr;
@@ -916,6 +952,6 @@ void xxDrawIndexedD3D5(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
         indexArray = wordIndexBuffer;
     }
 
-    d3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, D3DVT_LVERTEX, d3dVertexBuffer->address, d3dVertexBuffer->count, indexArray, indexCount, 0);
+    d3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, D3DVT_LVERTEX, vertexBuffer->address, vertexBuffer->count, indexArray, indexCount, 0);
 }
 //==============================================================================
