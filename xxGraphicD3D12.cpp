@@ -894,6 +894,7 @@ struct D3D12RESOURCE
     D3D12_GPU_DESCRIPTOR_HANDLE resourceGPUHandle;
     UINT                        size;
     void*                       cpuAddress;
+    D3D12_GPU_VIRTUAL_ADDRESS   gpuAddress;
 };
 //------------------------------------------------------------------------------
 uint64_t xxCreateConstantBufferD3D12(uint64_t device, int size)
@@ -924,20 +925,21 @@ uint64_t xxCreateConstantBufferD3D12(uint64_t device, int size)
     if (hResult != S_OK)
         return 0;
 
-    D3D12_CONSTANT_BUFFER_VIEW_DESC viewDesc = {};
-    viewDesc.BufferLocation = resource->GetGPUVirtualAddress();
-    viewDesc.SizeInBytes = (size + 255) & ~255;
-
     d3dResource->resource = resource;
     d3dResource->resourceCPUHandle = {};
     d3dResource->resourceGPUHandle = {};
-    createShaderHeap(d3dResource->resourceCPUHandle, d3dResource->resourceGPUHandle);
-    d3dDevice->CreateConstantBufferView(&viewDesc, d3dResource->resourceCPUHandle);
     d3dResource->size = size;
     d3dResource->cpuAddress = nullptr;
 #if PERSISTENT_BUFFER
     d3dResource->cpuAddress = xxMapBuffer(device, reinterpret_cast<uint64_t>(d3dResource));
 #endif
+    d3dResource->gpuAddress = resource->GetGPUVirtualAddress();
+    createShaderHeap(d3dResource->resourceCPUHandle, d3dResource->resourceGPUHandle);
+
+    D3D12_CONSTANT_BUFFER_VIEW_DESC viewDesc = {};
+    viewDesc.BufferLocation = d3dResource->gpuAddress;
+    viewDesc.SizeInBytes = (size + 255) & ~255;
+    d3dDevice->CreateConstantBufferView(&viewDesc, d3dResource->resourceCPUHandle);
 
     return reinterpret_cast<uint64_t>(d3dResource);
 }
@@ -978,6 +980,7 @@ uint64_t xxCreateIndexBufferD3D12(uint64_t device, int size)
 #if PERSISTENT_BUFFER
     d3dResource->cpuAddress = xxMapBuffer(device, reinterpret_cast<uint64_t>(d3dResource));
 #endif
+    d3dResource->gpuAddress = resource->GetGPUVirtualAddress();
 
     return reinterpret_cast<uint64_t>(d3dResource);
 }
@@ -1018,6 +1021,7 @@ uint64_t xxCreateVertexBufferD3D12(uint64_t device, int size, uint64_t vertexAtt
 #if PERSISTENT_BUFFER
     d3dResource->cpuAddress = xxMapBuffer(device, reinterpret_cast<uint64_t>(d3dResource));
 #endif
+    d3dResource->gpuAddress = resource->GetGPUVirtualAddress();
 
     return reinterpret_cast<uint64_t>(d3dResource);
 }
@@ -1142,14 +1146,17 @@ uint64_t xxCreateTextureD3D12(uint64_t device, int format, int width, int height
     }
 
     d3dTexture->texture = d3dResource;
-    createShaderHeap(d3dTexture->textureCPUHandle, d3dTexture->textureGPUHandle);
-    d3dDevice->CreateShaderResourceView(d3dResource, &viewDesc, d3dTexture->textureCPUHandle);
+    d3dTexture->textureCPUHandle = {};
+    d3dTexture->textureGPUHandle = {};
     d3dTexture->width = width;
     d3dTexture->height = height;
     d3dTexture->depth = depth;
     d3dTexture->upload = nullptr;
     d3dTexture->uploadPitch = (width * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
     d3dTexture->uploadSize = height * d3dTexture->uploadPitch;
+
+    createShaderHeap(d3dTexture->textureCPUHandle, d3dTexture->textureGPUHandle);
+    d3dDevice->CreateShaderResourceView(d3dResource, &viewDesc, d3dTexture->textureCPUHandle);
 
     return reinterpret_cast<uint64_t>(d3dTexture);
 }
@@ -1558,7 +1565,7 @@ void xxSetVertexBuffersD3D12(uint64_t commandEncoder, int count, const uint64_t*
     for (int i = 0; i < count; ++i)
     {
         D3D12RESOURCE* d3dBuffer = reinterpret_cast<D3D12RESOURCE*>(buffers[i]);
-        views[i].BufferLocation = d3dBuffer->resource->GetGPUVirtualAddress();
+        views[i].BufferLocation = d3dBuffer->gpuAddress;
         views[i].SizeInBytes = d3dBuffer->size;
         views[i].StrideInBytes = d3dVertexAttribute->stride;
     }
@@ -1633,7 +1640,7 @@ void xxDrawIndexedD3D12(uint64_t commandEncoder, uint64_t indexBuffer, int index
 
     DXGI_FORMAT format = (INDEX_BUFFER_WIDTH == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
     D3D12_INDEX_BUFFER_VIEW d3dIndexBufferView = {};
-    d3dIndexBufferView.BufferLocation = d3dIndexBuffer->resource->GetGPUVirtualAddress();
+    d3dIndexBufferView.BufferLocation = d3dIndexBuffer->gpuAddress;
     d3dIndexBufferView.SizeInBytes = d3dIndexBuffer->size;
     d3dIndexBufferView.Format = format;
     d3dCommandList->IASetIndexBuffer(&d3dIndexBufferView);
