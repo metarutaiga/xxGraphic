@@ -11,17 +11,30 @@
 #include "glide/glide.h"
 
 //==============================================================================
+//  Context
+//==============================================================================
+union GrContext
+{
+    uint64_t            value;
+    struct
+    {
+        GrContext_t     context;
+        unsigned short  width;
+        unsigned short  height;
+    };
+};
+//==============================================================================
 //  Vertex
 //==============================================================================
 struct GrVertex
 {
-    float x;
-    float y;
-    float ooz;
-    float oow;
-    int rgba;
-    float sow;
-    float tow;
+    float   x;
+    float   y;
+    float   ooz;
+    float   oow;
+    int     rgba;
+    float   sow;
+    float   tow;
 };
 //==============================================================================
 //  Vertex Attribute

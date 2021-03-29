@@ -8,6 +8,7 @@
 #include "internal/xxGraphicInternalGlide.h"
 #include "xxGraphicGlide.h"
 
+static void*    g_glideLibrary = nullptr;
 static FxU32    g_startAddress = 0;
 static uint64_t g_vertexBuffer = 0;
 static uint64_t g_vertexAttribute = 0;
@@ -18,8 +19,26 @@ static float    g_projectionMatrix[4 * 4];
 //==============================================================================
 //  Instance
 //==============================================================================
-GrProc grGetProcAddress(char* name)
+GrProc FX_CALL grGetProcAddress(char* name)
 {
+#if defined(xxWINDOWS)
+    if (g_glideLibrary == nullptr)
+        g_glideLibrary = xxLoadLibrary("glide3x.dll");
+    if (g_glideLibrary == nullptr)
+        return nullptr;
+#if defined(_M_IX86)
+    for (int i = 0; i <= 40; i += 4)
+    {
+        char temp[64];
+        snprintf(temp, 64, "_%s@%d", name, i);
+        GrProc proc = (GrProc)xxGetProcAddress(g_glideLibrary, temp);
+        if (proc == nullptr)
+            continue;
+        return proc;
+    }
+#endif
+    return (GrProc)xxGetProcAddress(g_glideLibrary, name);
+#endif
     return nullptr;
 }
 //------------------------------------------------------------------------------
@@ -85,16 +104,19 @@ uint64_t xxCreateSwapchainGlide(uint64_t device, uint64_t renderPass, void* view
 {
     xxDestroySwapchainGlide(oldSwapchain);
 
-    GrContext_t context = grSstWinOpen(view, GR_RESOLUTION_NONE, GR_REFRESH_NONE, GR_COLORFORMAT_ABGR, GR_ORIGIN_UPPER_LEFT, 2, 0);
+    GrContext grContext = {};
+    grContext.context = grSstWinOpen(view, width | (height << 16), GR_REFRESH_NONE, GR_COLORFORMAT_ABGR, GR_ORIGIN_LOWER_LEFT, 2, 0);
+    grContext.width = width;
+    grContext.height = height;
 
-    return static_cast<uint64_t>(context);
+    return grContext.value;
 }
 //------------------------------------------------------------------------------
 void xxDestroySwapchainGlide(uint64_t swapchain)
 {
-    GrContext_t context = static_cast<GrContext_t>(swapchain);
+    GrContext grContext = { swapchain };
 
-    grSstWinClose(context);
+    grSstWinClose(grContext.context);
 }
 //------------------------------------------------------------------------------
 void xxPresentSwapchainGlide(uint64_t swapchain)
@@ -104,18 +126,23 @@ void xxPresentSwapchainGlide(uint64_t swapchain)
 //------------------------------------------------------------------------------
 uint64_t xxGetCommandBufferGlide(uint64_t device, uint64_t swapchain)
 {
-    GrContext_t context = static_cast<GrContext_t>(swapchain);
+    GrContext grContext = { swapchain };
 
-    return static_cast<uint64_t>(context);
+    grSelectContext(grContext.context);
+
+    return grContext.value;
 }
 //------------------------------------------------------------------------------
 uint64_t xxGetFramebufferGlide(uint64_t device, uint64_t swapchain, float* scale)
 {
-    GrContext_t context = static_cast<GrContext_t>(swapchain);
+    GrContext grContext = { swapchain };
 
-    grSelectContext(context);
+    if (scale)
+    {
+        (*scale) = 1.0f;
+    }
 
-    return static_cast<uint64_t>(context);
+    return grContext.value;
 }
 //==============================================================================
 //  Command Buffer
@@ -145,7 +172,7 @@ uint64_t xxCreateRenderPassGlide(uint64_t device, bool clearColor, bool clearDep
     if (clearDepth)
         renderPass |= GR_PARAM_Z;
 
-    return 0;
+    return renderPass;
 }
 //------------------------------------------------------------------------------
 void xxDestroyRenderPassGlide(uint64_t renderPass)
@@ -169,7 +196,7 @@ uint64_t xxBeginRenderPassGlide(uint64_t commandBuffer, uint64_t framebuffer, ui
     grColorMask(FXTRUE, FXTRUE);
     grDepthMask(FXTRUE);
 
-    return 0;
+    return commandBuffer;
 }
 //------------------------------------------------------------------------------
 void xxEndRenderPassGlide(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass)
@@ -287,8 +314,8 @@ uint64_t xxCreateTextureGlide(uint64_t device, int format, int width, int height
 
     int small = (width < height) ? width : height;
     int large = (width > height) ? width : height;
-    info->smallLodLog2 = 31 - __builtin_clz(small);
-    info->largeLodLog2 = 31 - __builtin_clz(large);
+    info->smallLodLog2 = 31 - xxCountLeadingZeros(small);
+    info->largeLodLog2 = 31 - xxCountLeadingZeros(large);
     info->aspectRatioLog2 = aspect;
     info->format = GR_TEXFMT_ARGB_4444;
     info->data = xxAlloc(uint32_t, width * height);
@@ -523,22 +550,57 @@ void xxSetFragmentConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, 
 //------------------------------------------------------------------------------
 void xxDrawIndexedGlide(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
+    GrContext grContext = { commandEncoder };
     GrVertexAttribute grVertexAttribute = { g_vertexAttribute };
-    uint16_t* grIndexBuffer = reinterpret_cast<uint16_t*>(indexBuffer);
+    uint16_t* grIndexBuffer = reinterpret_cast<uint16_t*>(indexBuffer) + firstIndex;
     for (int i = 0; i < indexCount; i += 3)
     {
-        float* v0 = reinterpret_cast<float*>(g_vertexBuffer + grIndexBuffer[i + 0] * grVertexAttribute.stride);
-        float* v1 = reinterpret_cast<float*>(g_vertexBuffer + grIndexBuffer[i + 1] * grVertexAttribute.stride);
-        float* v2 = reinterpret_cast<float*>(g_vertexBuffer + grIndexBuffer[i + 2] * grVertexAttribute.stride);
+        float* v0 = reinterpret_cast<float*>(g_vertexBuffer + (vertexOffset + grIndexBuffer[i + 0]) * grVertexAttribute.stride);
+        float* v1 = reinterpret_cast<float*>(g_vertexBuffer + (vertexOffset + grIndexBuffer[i + 1]) * grVertexAttribute.stride);
+        float* v2 = reinterpret_cast<float*>(g_vertexBuffer + (vertexOffset + grIndexBuffer[i + 2]) * grVertexAttribute.stride);
         GrVertex t0;
         GrVertex t1;
         GrVertex t2;
 
         if (grVertexAttribute.flags & GR_PARAM_XY)
         {
-            t0.x = v0[0];   t0.y = v0[1];   t0.ooz = v0[2]; v0 += 3;
-            t1.x = v1[0];   t1.y = v1[1];   t1.ooz = v1[2]; v1 += 3;
-            t2.x = v2[0];   t2.y = v2[1];   t2.ooz = v2[2]; v2 += 3;
+            auto* p = g_projectionMatrix;
+
+            t0.x = v0[0] * p[0] + v0[0] * p[4] + v0[0] * p[8] + p[12];
+            t1.x = v1[0] * p[0] + v1[0] * p[4] + v1[0] * p[8] + p[12];
+            t2.x = v2[0] * p[0] + v2[0] * p[4] + v2[0] * p[8] + p[12];
+
+            t0.y = v0[1] * p[1] + v0[1] * p[5] + v0[1] * p[9] + p[13];
+            t1.y = v1[1] * p[1] + v1[1] * p[5] + v1[1] * p[9] + p[13];
+            t2.y = v2[1] * p[1] + v2[1] * p[5] + v2[1] * p[9] + p[13];
+
+            t0.ooz = v0[2] * p[2] + v0[2] * p[6] + v0[3] * p[10] + p[14];
+            t1.ooz = v1[2] * p[2] + v1[2] * p[6] + v1[3] * p[10] + p[14];
+            t2.ooz = v2[2] * p[2] + v2[2] * p[6] + v2[3] * p[10] + p[14];
+
+            t0.oow = p[3] + p[7] + p[11] + p[15];
+            t1.oow = p[3] + p[7] + p[11] + p[15];
+            t2.oow = p[3] + p[7] + p[11] + p[15];
+
+            t0.x = grContext.width * (t0.x * 0.5f + 0.5f);
+            t1.x = grContext.width * (t1.x * 0.5f + 0.5f);
+            t2.x = grContext.width * (t2.x * 0.5f + 0.5f);
+
+            t0.y = grContext.height * (t0.y * 0.5f + 0.5f);
+            t1.y = grContext.height * (t1.y * 0.5f + 0.5f);
+            t2.y = grContext.height * (t2.y * 0.5f + 0.5f);
+
+            t0.ooz = 65535.0f / t0.ooz;
+            t1.ooz = 65535.0f / t1.ooz;
+            t2.ooz = 65535.0f / t2.ooz;
+
+            t0.oow = 1.0f / t0.oow;
+            t1.oow = 1.0f / t1.oow;
+            t2.oow = 1.0f / t2.oow;
+
+            v0 += 3;
+            v1 += 3;
+            v2 += 3;
         }
         if (grVertexAttribute.flags & GR_PARAM_PARGB)
         {

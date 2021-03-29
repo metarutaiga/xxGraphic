@@ -247,3 +247,16 @@ xxAPI xxInline xxConstexpr unsigned int xxHash(const char* key, const unsigned i
 {
     return (*key) ? xxHash(key + 1, (hash << 5) ^ (*key)) : hash;
 }
+//==============================================================================
+//  Bitwise
+//==============================================================================
+xxAPI xxInline int xxCountLeadingZeros(int value)
+{
+#if defined(__GNUC__) || defined(__llvm__)
+    return __builtin_clz(value);
+#elif defined(_M_IX86) || defined(_M_AMD64)
+    return __lzcnt(value);
+#elif defined(_M_ARM) || defined(_M_ARM64)
+    return _CountLeadingZeros(value);
+#endif
+}
