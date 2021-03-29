@@ -94,7 +94,6 @@ xxAPI void          xxDestroyPipelineMantle(uint64_t pipeline);
 xxAPI void          xxSetViewportMantle(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
 xxAPI void          xxSetScissorMantle(uint64_t commandEncoder, int x, int y, int width, int height);
 xxAPI void          xxSetPipelineMantle(uint64_t commandEncoder, uint64_t pipeline);
-xxAPI void          xxSetIndexBufferMantle(uint64_t commandEncoder, uint64_t buffer);
 xxAPI void          xxSetVertexBuffersMantle(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
 xxAPI void          xxSetVertexTexturesMantle(uint64_t commandEncoder, int count, const uint64_t* textures);
 xxAPI void          xxSetFragmentTexturesMantle(uint64_t commandEncoder, int count, const uint64_t* textures);

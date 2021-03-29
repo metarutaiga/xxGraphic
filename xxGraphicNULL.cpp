@@ -271,11 +271,6 @@ void xxSetPipelineNULL(uint64_t commandEncoder, uint64_t pipeline)
 
 }
 //------------------------------------------------------------------------------
-void xxSetIndexBufferNULL(uint64_t commandEncoder, uint64_t buffer)
-{
-
-}
-//------------------------------------------------------------------------------
 void xxSetVertexBuffersNULL(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
 

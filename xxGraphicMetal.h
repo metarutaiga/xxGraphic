@@ -94,7 +94,6 @@ xxAPI void          xxDestroyPipelineMetal(uint64_t pipeline);
 xxAPI void          xxSetViewportMetal(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
 xxAPI void          xxSetScissorMetal(uint64_t commandEncoder, int x, int y, int width, int height);
 xxAPI void          xxSetPipelineMetal(uint64_t commandEncoder, uint64_t pipeline);
-xxAPI void          xxSetIndexBufferMetal(uint64_t commandEncoder, uint64_t buffer);
 xxAPI void          xxSetVertexBuffersMetal(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
 xxAPI void          xxSetVertexTexturesMetal(uint64_t commandEncoder, int count, const uint64_t* textures);
 xxAPI void          xxSetFragmentTexturesMetal(uint64_t commandEncoder, int count, const uint64_t* textures);

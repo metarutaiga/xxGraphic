@@ -89,7 +89,6 @@ enum xxGraphicDescriptor
     xxSetViewport = xxSetViewport ## API; \
     xxSetScissor = xxSetScissor ## API; \
     xxSetPipeline = xxSetPipeline ## API; \
-    xxSetIndexBuffer = xxSetIndexBuffer ## API; \
     xxSetVertexBuffers = xxSetVertexBuffers ## API; \
     xxSetVertexTextures = xxSetVertexTextures ## API; \
     xxSetFragmentTextures = xxSetFragmentTextures ## API; \
@@ -159,7 +158,6 @@ enum xxGraphicDescriptor
     xxSetViewport = nullptr; \
     xxSetScissor = nullptr; \
     xxSetPipeline = nullptr; \
-    xxSetIndexBuffer = nullptr; \
     xxSetVertexBuffers = nullptr; \
     xxSetVertexTextures = nullptr; \
     xxSetFragmentTextures = nullptr; \

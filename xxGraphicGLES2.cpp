@@ -887,13 +887,6 @@ void xxSetPipelineGLES2(uint64_t commandEncoder, uint64_t pipeline)
     glSwapchain->pipeline = pipeline;
 }
 //------------------------------------------------------------------------------
-void xxSetIndexBufferGLES2(uint64_t commandEncoder, uint64_t buffer)
-{
-    BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(buffer);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glBuffer->buffer);
-}
-//------------------------------------------------------------------------------
 void xxSetVertexBuffersGLES2(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
@@ -972,6 +965,7 @@ void xxSetFragmentConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, 
 void xxDrawIndexedGLES2(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
+    BUFFERGL* glIndexBuffer = reinterpret_cast<BUFFERGL*>(indexBuffer);
     PIPELINEGL* glPipeline = reinterpret_cast<PIPELINEGL*>(glSwapchain->pipeline);
     VERTEXATTRIBUTEGL* vertexAttribute = glPipeline->vertexAttribute;
     VERTEXATTRIBUTEGL::Attribute* attributes = vertexAttribute->attributes;
@@ -991,6 +985,7 @@ void xxDrawIndexedGLES2(uint64_t commandEncoder, uint64_t indexBuffer, int index
     }
 
     GLenum indexType = (INDEX_BUFFER_WIDTH == 2) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glIndexBuffer->buffer);
     glDrawElements(GL_TRIANGLES, indexCount, indexType, (char*)nullptr + firstIndex * INDEX_BUFFER_WIDTH);
 }
 //==============================================================================

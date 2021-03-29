@@ -236,7 +236,6 @@ void xxMesh::Update(xxNode& node, uint64_t device)
 void xxMesh::Draw(uint64_t commandEncoder, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     xxSetVertexBuffers(commandEncoder, 1, &m_vertexBuffers[m_vertexBufferIndex], m_vertexAttribute);
-    xxSetIndexBuffer(commandEncoder, m_indexBuffers[m_indexBufferIndex]);
     xxDrawIndexed(commandEncoder, m_indexBuffers[m_indexBufferIndex], GetIndexCount(), instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 //------------------------------------------------------------------------------

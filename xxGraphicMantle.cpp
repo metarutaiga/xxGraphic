@@ -865,14 +865,6 @@ void xxSetPipelineMantle(uint64_t commandEncoder, uint64_t pipeline)
     grCmdBindPipeline(grCommandBuffer, GR_PIPELINE_BIND_POINT_GRAPHICS, grPipeline);
 }
 //------------------------------------------------------------------------------
-void xxSetIndexBufferMantle(uint64_t commandEncoder, uint64_t buffer)
-{
-    GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandEncoder);
-    GR_GPU_MEMORY grMemory = reinterpret_cast<GR_GPU_MEMORY>(buffer);
-
-    grCmdBindIndexData(grCommandBuffer, grMemory, 0, GR_INDEX_32);
-}
-//------------------------------------------------------------------------------
 void xxSetVertexBuffersMantle(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     VERTEXATTRIBUTEGR* grVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEGR*>(vertexAttribute);
@@ -977,7 +969,10 @@ void xxSetFragmentConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer,
 void xxDrawIndexedMantle(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandEncoder);
+    GR_GPU_MEMORY grIndexBuffer = reinterpret_cast<GR_GPU_MEMORY>(indexBuffer);
 
+    GR_INDEX_TYPE format = (INDEX_BUFFER_WIDTH == 2) ? GR_INDEX_16 : GR_INDEX_32;
+    grCmdBindIndexData(grCommandBuffer, grIndexBuffer, 0, format);
     grCmdDrawIndexed(grCommandBuffer, firstIndex, indexCount, vertexOffset, firstInstance, instanceCount);
 }
 //==============================================================================

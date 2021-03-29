@@ -94,7 +94,6 @@ xxAPI void          xxDestroyPipelineVulkan(uint64_t pipeline);
 xxAPI void          xxSetViewportVulkan(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
 xxAPI void          xxSetScissorVulkan(uint64_t commandEncoder, int x, int y, int width, int height);
 xxAPI void          xxSetPipelineVulkan(uint64_t commandEncoder, uint64_t pipeline);
-xxAPI void          xxSetIndexBufferVulkan(uint64_t commandEncoder, uint64_t buffer);
 xxAPI void          xxSetVertexBuffersVulkan(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
 xxAPI void          xxSetVertexTexturesVulkan(uint64_t commandEncoder, int count, const uint64_t* textures);
 xxAPI void          xxSetFragmentTexturesVulkan(uint64_t commandEncoder, int count, const uint64_t* textures);

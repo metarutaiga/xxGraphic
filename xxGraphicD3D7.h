@@ -94,7 +94,6 @@ xxAPI void          xxDestroyPipelineD3D7(uint64_t pipeline);
 xxAPI void          xxSetViewportD3D7(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
 xxAPI void          xxSetScissorD3D7(uint64_t commandEncoder, int x, int y, int width, int height);
 xxAPI void          xxSetPipelineD3D7(uint64_t commandEncoder, uint64_t pipeline);
-xxAPI void          xxSetIndexBufferD3D7(uint64_t commandEncoder, uint64_t buffer);
 xxAPI void          xxSetVertexBuffersD3D7(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
 xxAPI void          xxSetVertexTexturesD3D7(uint64_t commandEncoder, int count, const uint64_t* textures);
 xxAPI void          xxSetFragmentTexturesD3D7(uint64_t commandEncoder, int count, const uint64_t* textures);

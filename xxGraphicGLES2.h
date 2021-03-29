@@ -94,7 +94,6 @@ xxAPI void          xxDestroyPipelineGLES2(uint64_t pipeline);
 xxAPI void          xxSetViewportGLES2(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
 xxAPI void          xxSetScissorGLES2(uint64_t commandEncoder, int x, int y, int width, int height);
 xxAPI void          xxSetPipelineGLES2(uint64_t commandEncoder, uint64_t pipeline);
-xxAPI void          xxSetIndexBufferGLES2(uint64_t commandEncoder, uint64_t buffer);
 xxAPI void          xxSetVertexBuffersGLES2(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
 xxAPI void          xxSetVertexTexturesGLES2(uint64_t commandEncoder, int count, const uint64_t* textures);
 xxAPI void          xxSetFragmentTexturesGLES2(uint64_t commandEncoder, int count, const uint64_t* textures);

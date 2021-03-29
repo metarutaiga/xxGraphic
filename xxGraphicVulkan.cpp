@@ -2225,15 +2225,6 @@ void xxSetPipelineVulkan(uint64_t commandEncoder, uint64_t pipeline)
     vkCmdBindPipeline(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline);
 }
 //------------------------------------------------------------------------------
-void xxSetIndexBufferVulkan(uint64_t commandEncoder, uint64_t buffer)
-{
-    VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
-    BUFFERVK* vkBuffer = reinterpret_cast<BUFFERVK*>(buffer);
-
-    VkIndexType indexType = (INDEX_BUFFER_WIDTH == /* DISABLES CODE */(2)) ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
-    vkCmdBindIndexBuffer(vkCommandBuffer, vkBuffer->buffer, 0, indexType);
-}
-//------------------------------------------------------------------------------
 void xxSetVertexBuffersVulkan(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
@@ -2409,6 +2400,7 @@ void xxSetFragmentConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer,
 void xxDrawIndexedVulkan(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
+    BUFFERVK* vkIndexBuffer = reinterpret_cast<BUFFERVK*>(indexBuffer);
 
     if (VK_KHR_push_descriptor == false)
     {
@@ -2419,6 +2411,9 @@ void xxDrawIndexedVulkan(uint64_t commandEncoder, uint64_t indexBuffer, int inde
             g_descriptorSetCurrent = VK_NULL_HANDLE;
         }
     }
+
+    VkIndexType indexType = (INDEX_BUFFER_WIDTH == 2) ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
+    vkCmdBindIndexBuffer(vkCommandBuffer, vkIndexBuffer->buffer, 0, indexType);
     vkCmdDrawIndexed(vkCommandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 //==============================================================================

@@ -1549,19 +1549,6 @@ void xxSetPipelineD3D12(uint64_t commandEncoder, uint64_t pipeline)
     d3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 //------------------------------------------------------------------------------
-void xxSetIndexBufferD3D12(uint64_t commandEncoder, uint64_t buffer)
-{
-    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
-    D3D12RESOURCE* d3dBuffer = reinterpret_cast<D3D12RESOURCE*>(buffer);
-
-    DXGI_FORMAT format = (INDEX_BUFFER_WIDTH == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
-    D3D12_INDEX_BUFFER_VIEW view = {};
-    view.BufferLocation = d3dBuffer->resource->GetGPUVirtualAddress();
-    view.SizeInBytes = d3dBuffer->size;
-    view.Format = format;
-    d3dCommandList->IASetIndexBuffer(&view);
-}
-//------------------------------------------------------------------------------
 void xxSetVertexBuffersD3D12(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
@@ -1642,7 +1629,14 @@ void xxSetFragmentConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, 
 void xxDrawIndexedD3D12(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
+    D3D12RESOURCE* d3dIndexBuffer = reinterpret_cast<D3D12RESOURCE*>(indexBuffer);
 
+    DXGI_FORMAT format = (INDEX_BUFFER_WIDTH == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+    D3D12_INDEX_BUFFER_VIEW d3dIndexBufferView = {};
+    d3dIndexBufferView.BufferLocation = d3dIndexBuffer->resource->GetGPUVirtualAddress();
+    d3dIndexBufferView.SizeInBytes = d3dIndexBuffer->size;
+    d3dIndexBufferView.Format = format;
+    d3dCommandList->IASetIndexBuffer(&d3dIndexBufferView);
     d3dCommandList->DrawIndexedInstanced(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 //==============================================================================

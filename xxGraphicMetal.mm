@@ -799,11 +799,6 @@ void xxSetPipelineMetal(uint64_t commandEncoder, uint64_t pipeline)
     [mtlCommandEncoder setDepthStencilState:mtlPipeline->depthStencil];
 }
 //------------------------------------------------------------------------------
-void xxSetIndexBufferMetal(uint64_t commandEncoder, uint64_t buffer)
-{
-
-}
-//------------------------------------------------------------------------------
 void xxSetVertexBuffersMetal(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);

@@ -852,11 +852,6 @@ void xxSetPipelineD3D6(uint64_t commandEncoder, uint64_t pipeline)
     d3dDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_INVSRCALPHA);
 }
 //------------------------------------------------------------------------------
-void xxSetIndexBufferD3D6(uint64_t commandEncoder, uint64_t buffer)
-{
-
-}
-//------------------------------------------------------------------------------
 void xxSetVertexBuffersD3D6(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     LPDIRECT3DDEVICE3 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE3>(commandEncoder);
@@ -922,13 +917,6 @@ void xxSetFragmentConstantBufferD3D6(uint64_t commandEncoder, uint64_t buffer, i
 void xxDrawIndexedD3D6(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     LPDIRECT3DDEVICE3 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE3>(commandEncoder);
-    if (d3dDevice == nullptr)
-        return;
-
-    LPDIRECT3DVERTEXBUFFER vertexBuffer = nullptr;
-    d3dDevice->GetRenderState(D3DRENDERSTATE_LINEPATTERN, (DWORD*)&vertexBuffer);
-    if (vertexBuffer == nullptr)
-        return;
 
     static WORD wordIndexBuffer[65536];
     WORD* indexArray = nullptr;
@@ -962,6 +950,8 @@ void xxDrawIndexedD3D6(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
         indexArray = wordIndexBuffer;
     }
 
+    LPDIRECT3DVERTEXBUFFER vertexBuffer = nullptr;
+    d3dDevice->GetRenderState(D3DRENDERSTATE_LINEPATTERN, (DWORD*)&vertexBuffer);
     d3dDevice->DrawIndexedPrimitiveVB(D3DPT_TRIANGLELIST, vertexBuffer, indexArray, indexCount, 0);
 }
 //==============================================================================

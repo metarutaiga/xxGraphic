@@ -92,7 +92,6 @@ void        (*xxDestroyPipeline)(uint64_t pipeline);
 void        (*xxSetViewport)(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
 void        (*xxSetScissor)(uint64_t commandEncoder, int x, int y, int width, int height);
 void        (*xxSetPipeline)(uint64_t commandEncoder, uint64_t pipeline);
-void        (*xxSetIndexBuffer)(uint64_t commandEncoder, uint64_t buffer);
 void        (*xxSetVertexBuffers)(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
 void        (*xxSetVertexTextures)(uint64_t commandEncoder, int count, const uint64_t* textures);
 void        (*xxSetFragmentTextures)(uint64_t commandEncoder, int count, const uint64_t* textures);

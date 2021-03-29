@@ -871,14 +871,6 @@ void xxSetPipelineD3D9(uint64_t commandEncoder, uint64_t pipeline)
     d3dDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, d3dPipeline->renderState.scissor);
 }
 //------------------------------------------------------------------------------
-void xxSetIndexBufferD3D9(uint64_t commandEncoder, uint64_t buffer)
-{
-    LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandEncoder);
-    LPDIRECT3DINDEXBUFFER9 d3dIndexBuffer = reinterpret_cast<LPDIRECT3DINDEXBUFFER9>(getResourceData(buffer));
-
-    d3dDevice->SetIndices(d3dIndexBuffer);
-}
-//------------------------------------------------------------------------------
 void xxSetVertexBuffersD3D9(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandEncoder);
@@ -956,7 +948,9 @@ void xxSetFragmentConstantBufferD3D9(uint64_t commandEncoder, uint64_t buffer, i
 void xxDrawIndexedD3D9(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(commandEncoder);
+    LPDIRECT3DINDEXBUFFER9 d3dIndexBuffer = reinterpret_cast<LPDIRECT3DINDEXBUFFER9>(getResourceData(indexBuffer));
 
+    d3dDevice->SetIndices(d3dIndexBuffer);
     d3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, vertexOffset, 0, 0, firstIndex, indexCount / 3);
 }
 //==============================================================================

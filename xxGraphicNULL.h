@@ -94,7 +94,6 @@ xxAPI void          xxDestroyPipelineNULL(uint64_t pipeline);
 xxAPI void          xxSetViewportNULL(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
 xxAPI void          xxSetScissorNULL(uint64_t commandEncoder, int x, int y, int width, int height);
 xxAPI void          xxSetPipelineNULL(uint64_t commandEncoder, uint64_t pipeline);
-xxAPI void          xxSetIndexBufferNULL(uint64_t commandEncoder, uint64_t buffer);
 xxAPI void          xxSetVertexBuffersNULL(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
 xxAPI void          xxSetVertexTexturesNULL(uint64_t commandEncoder, int count, const uint64_t* textures);
 xxAPI void          xxSetFragmentTexturesNULL(uint64_t commandEncoder, int count, const uint64_t* textures);

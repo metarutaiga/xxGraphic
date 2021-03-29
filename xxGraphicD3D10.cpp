@@ -1159,15 +1159,6 @@ void xxSetPipelineD3D10(uint64_t commandEncoder, uint64_t pipeline)
     d3dDevice->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 //------------------------------------------------------------------------------
-void xxSetIndexBufferD3D10(uint64_t commandEncoder, uint64_t buffer)
-{
-    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
-    D3D10BUFFER* d3dBuffer = reinterpret_cast<D3D10BUFFER*>(buffer);
-
-    DXGI_FORMAT format = (INDEX_BUFFER_WIDTH == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
-    d3dDevice->IASetIndexBuffer(d3dBuffer->buffer, format, 0);
-}
-//------------------------------------------------------------------------------
 void xxSetVertexBuffersD3D10(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
@@ -1260,7 +1251,10 @@ void xxSetFragmentConstantBufferD3D10(uint64_t commandEncoder, uint64_t buffer, 
 void xxDrawIndexedD3D10(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
+    D3D10BUFFER* d3dIndexBuffer = reinterpret_cast<D3D10BUFFER*>(indexBuffer);
 
+    DXGI_FORMAT format = (INDEX_BUFFER_WIDTH == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+    d3dDevice->IASetIndexBuffer(d3dIndexBuffer->buffer, format, 0);
     d3dDevice->DrawIndexedInstanced(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 //==============================================================================

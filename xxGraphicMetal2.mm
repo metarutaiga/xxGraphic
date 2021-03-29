@@ -35,7 +35,6 @@ uint64_t xxCreateInstanceMetal2()
     xxSetViewport = xxSetViewportMetal2;
     xxSetScissor = xxSetScissorMetal2;
     xxSetPipeline = xxSetPipelineMetal2;
-    xxSetIndexBuffer = xxSetIndexBufferMetal2;
     xxSetVertexBuffers = xxSetVertexBuffersMetal2;
     xxSetVertexTextures = xxSetVertexTexturesMetal2;
     xxSetFragmentTextures = xxSetFragmentTexturesMetal2;
@@ -269,11 +268,6 @@ void xxSetPipelineMetal2(uint64_t commandEncoder, uint64_t pipeline)
     [mtlSwapchain->commandEncoder setFragmentBuffer:argumentBuffer
                                              offset:fragmentOffset
                                             atIndex:0];
-}
-//------------------------------------------------------------------------------
-void xxSetIndexBufferMetal2(uint64_t commandEncoder, uint64_t buffer)
-{
-
 }
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersMetal2(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
