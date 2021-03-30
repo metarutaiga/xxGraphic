@@ -17,26 +17,34 @@
 #if defined(__llvm__)
 typedef float v4sf __attribute__((vector_size(16)));
 #elif defined(__ARM_NEON__) || defined(__ARM_NEON) || defined(_M_ARM) || defined(_M_ARM64) || defined(_M_HYBRID_X86_ARM64)
-struct v4sf
+union v4sf
 {
+    struct { float _[4]; };
     float32x4_t v;
-    float   operator [] (int i) const { return v[i]; }
-    v4sf    operator + (const v4sf& other) const { return v4sf{ vaddq_f32(v, other.v) }; }
-    v4sf    operator - (const v4sf& other) const { return v4sf{ vsubq_f32(v, other.v) }; }
-    v4sf    operator * (const v4sf& other) const { return v4sf{ vmulq_f32(v, other.v) }; }
-    v4sf    operator / (const v4sf& other) const { return v4sf{ vdivq_f32(v, other.v) }; }
+    float   operator [] (int i) const { return v.n128_f32[i]; }
+    v4sf    operator + (const v4sf& other) const { return v4sf{ .v = vaddq_f32(v, other.v) }; }
+    v4sf    operator - (const v4sf& other) const { return v4sf{ .v = vsubq_f32(v, other.v) }; }
+    v4sf    operator * (const v4sf& other) const { return v4sf{ .v = vmulq_f32(v, other.v) }; }
+#if defined(_M_ARM64) || defined(_M_HYBRID_X86_ARM64)
+    v4sf    operator / (const v4sf& other) const { return v4sf{ .v = vdivq_f32(v, other.v) }; }
+#else
+    v4sf    operator / (const v4sf& other) const { return v4sf{ v.n128_f32[0] / other.v.n128_f32[0],
+                                                                v.n128_f32[1] / other.v.n128_f32[1],
+                                                                v.n128_f32[2] / other.v.n128_f32[2],
+                                                                v.n128_f32[3] / other.v.n128_f32[3] }; }
+#endif
 };
 template<int x, int y, int z, int w> inline v4sf __builtin_shufflevector(const v4sf& a, const v4sf& b);
-template<> inline v4sf __builtin_shufflevector<0, 0, 0, 0>(const v4sf& a, const v4sf& b) { return v4sf{ vdupq_lane_f32(vget_low_f32(a.v), 0) }; }
-template<> inline v4sf __builtin_shufflevector<1, 1, 1, 1>(const v4sf& a, const v4sf& b) { return v4sf{ vdupq_lane_f32(vget_low_f32(a.v), 1) }; }
-template<> inline v4sf __builtin_shufflevector<2, 2, 2, 2>(const v4sf& a, const v4sf& b) { return v4sf{ vdupq_lane_f32(vget_high_f32(a.v), 0) }; }
-template<> inline v4sf __builtin_shufflevector<3, 3, 3, 3>(const v4sf& a, const v4sf& b) { return v4sf{ vdupq_lane_f32(vget_high_f32(a.v), 1) }; }
+template<> inline v4sf __builtin_shufflevector<0, 0, 0, 0>(const v4sf& a, const v4sf& b) { return v4sf{ .v = vdupq_lane_f32(vget_low_f32(a.v), 0) }; }
+template<> inline v4sf __builtin_shufflevector<1, 1, 1, 1>(const v4sf& a, const v4sf& b) { return v4sf{ .v = vdupq_lane_f32(vget_low_f32(a.v), 1) }; }
+template<> inline v4sf __builtin_shufflevector<2, 2, 2, 2>(const v4sf& a, const v4sf& b) { return v4sf{ .v = vdupq_lane_f32(vget_high_f32(a.v), 0) }; }
+template<> inline v4sf __builtin_shufflevector<3, 3, 3, 3>(const v4sf& a, const v4sf& b) { return v4sf{ .v = vdupq_lane_f32(vget_high_f32(a.v), 1) }; }
 #define __builtin_shufflevector(a, b, c, d, e, f) __builtin_shufflevector<c, d, e, f>(a, b)
 #elif defined(__i386__) || defined(__amd64__) || defined(_M_IX86) || defined(_M_AMD64)
 struct v4sf
 {
     __m128 v;
-    float   operator [] (int i) const { return v[i]; }
+    float   operator [] (int i) const { return v.m128_f32[i]; }
     v4sf    operator + (const v4sf& other) const { return v4sf{ _mm_add_ps(v, other.v) }; }
     v4sf    operator - (const v4sf& other) const { return v4sf{ _mm_sub_ps(v, other.v) }; }
     v4sf    operator * (const v4sf& other) const { return v4sf{ _mm_mul_ps(v, other.v) }; }
