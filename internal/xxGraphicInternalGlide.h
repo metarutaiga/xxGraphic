@@ -53,7 +53,9 @@ union GrVertexAttribute
 //==============================================================================
 struct GrTexture : public GrTexInfo
 {
-    FxU32 startAddress;
+    FxU32   startAddress;
+    int     width;
+    int     height;
 };
 //==============================================================================
 //  Sampler

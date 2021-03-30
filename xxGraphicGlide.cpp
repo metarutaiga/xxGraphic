@@ -292,40 +292,49 @@ uint64_t xxCreateTextureGlide(uint64_t device, int format, int width, int height
 {
     GrTexture* info = xxAlloc(GrTexture);
 
+    int lod = width;
     GrAspectRatio_t aspect = GR_ASPECT_LOG2_1x1;
     switch ((int)(8.0 * (float)width / (float)height))
     {
     case 1:
+        lod = width;
         aspect = GR_ASPECT_LOG2_1x8;
         break;
     case 2:
+        lod = width;
         aspect = GR_ASPECT_LOG2_1x4;
         break;
     case 4:
+        lod = width;
         aspect = GR_ASPECT_LOG2_1x2;
         break;
     case 8:
+        lod = width = height;
         aspect = GR_ASPECT_LOG2_1x1;
         break;
     case 16:
+        lod = height;
         aspect = GR_ASPECT_LOG2_2x1;
         break;
     case 32:
+        lod = height;
         aspect = GR_ASPECT_LOG2_4x1;
         break;
     case 64:
+        lod = height;
         aspect = GR_ASPECT_LOG2_8x1;
         break;
     }
 
-    int small = (width < height) ? width : height;
-    int large = (width > height) ? width : height;
-    info->smallLodLog2 = 31 - xxCountLeadingZeros(small);
-    info->largeLodLog2 = 31 - xxCountLeadingZeros(large);
+    int lodLog2 = 31 - xxCountLeadingZeros(lod);
+    info->smallLodLog2 = lodLog2 >> (mipmap - 1);
+    info->largeLodLog2 = lodLog2;
     info->aspectRatioLog2 = aspect;
     info->format = GR_TEXFMT_ARGB_4444;
     info->data = xxAlloc(uint32_t, width * height);
     info->startAddress = g_startAddress;
+    info->width = width;
+    info->height = height;
     g_startAddress = grTexCalcMemRequired(info->smallLodLog2, info->largeLodLog2, info->aspectRatioLog2, info->format);
 
     return reinterpret_cast<uint64_t>(info);
@@ -355,7 +364,7 @@ void xxUnmapTextureGlide(uint64_t device, uint64_t texture, int level, int array
 
     uint32_t* tex8888 = (uint32_t*)info->data;
     uint16_t* tex4444 = (uint16_t*)info->data;
-    int count = (1 << info->smallLodLog2) * (1 << info->largeLodLog2);
+    int count = info->width * info->height;
     for (int i = 0; i < count; ++i)
     {
         uint32_t pixel8888 = tex8888[i];
