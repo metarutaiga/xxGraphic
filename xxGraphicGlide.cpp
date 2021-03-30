@@ -111,7 +111,7 @@ uint64_t xxCreateSwapchainGlide(uint64_t device, uint64_t renderPass, void* view
     xxDestroySwapchainGlide(oldSwapchain);
 
     GrContext grContext = {};
-    grContext.context = grSstWinOpen(view, width | (height << 16), GR_REFRESH_NONE, GR_COLORFORMAT_ABGR, GR_ORIGIN_LOWER_LEFT, 2, 0);
+    grContext.context = grSstWinOpen(view, width | (height << 16), GR_REFRESH_NONE, GR_COLORFORMAT_ARGB, GR_ORIGIN_LOWER_LEFT, 2, 0);
     grContext.width = width;
     grContext.height = height;
 
@@ -248,7 +248,7 @@ void xxDestroyVertexAttributeGlide(uint64_t vertexAttribute)
 //==============================================================================
 uint64_t xxCreateConstantBufferGlide(uint64_t device, int size)
 {
-    v4sf* grBuffer = xxAlloc(v4sf, size);
+    char* grBuffer = xxAlloc(char, size);
 
     return reinterpret_cast<uint64_t>(grBuffer);
 }
@@ -481,7 +481,7 @@ void xxSetViewportGlide(uint64_t commandEncoder, int x, int y, int width, int he
 //------------------------------------------------------------------------------
 void xxSetScissorGlide(uint64_t commandEncoder, int x, int y, int width, int height)
 {
-
+    grClipWindow(x, y, width, height);
 }
 //------------------------------------------------------------------------------
 void xxSetPipelineGlide(uint64_t commandEncoder, uint64_t pipeline)
@@ -517,7 +517,7 @@ void xxSetFragmentTexturesGlide(uint64_t commandEncoder, int count, const uint64
     for (int i = 0; i < count; ++i)
     {
         GrTexture* info = reinterpret_cast<GrTexture*>(textures[i]);
-        grTexDownloadMipMap(GR_TMU0, info->startAddress, GR_MIPMAPLEVELMASK_BOTH, info);
+        grTexDownloadMipMap(GR_TMU0 + i, info->startAddress, GR_MIPMAPLEVELMASK_BOTH, info);
     }
 }
 //------------------------------------------------------------------------------
@@ -531,9 +531,9 @@ void xxSetFragmentSamplersGlide(uint64_t commandEncoder, int count, const uint64
     for (int i = 0; i < count; ++i)
     {
         GrSampler grSampler = { samplers[i] };
-        grTexClampMode(GR_TMU0, grSampler.addressU, grSampler.addressV);
-        grTexFilterMode(GR_TMU0, grSampler.minFilter, grSampler.magFilter);
-        grTexMipMapMode(GR_TMU0, grSampler.mipFilter, grSampler.mipFilter == GR_MIPMAP_NEAREST_DITHER ? FXTRUE : FXFALSE);
+        grTexClampMode(GR_TMU0 + i, grSampler.addressU, grSampler.addressV);
+        grTexFilterMode(GR_TMU0 + i, grSampler.minFilter, grSampler.magFilter);
+        grTexMipMapMode(GR_TMU0 + i, grSampler.mipFilter, grSampler.mipFilter == GR_MIPMAP_NEAREST_DITHER ? FXTRUE : FXFALSE);
     }
 }
 //------------------------------------------------------------------------------
@@ -624,15 +624,23 @@ void xxDrawIndexedGlide(uint64_t commandEncoder, uint64_t indexBuffer, int index
         }
         if (grVertexAttribute.flags & GR_PARAM_PARGB)
         {
-            t0.rgba = (int&)v0[0];  v0++;
-            t1.rgba = (int&)v1[0];  v1++;
-            t2.rgba = (int&)v2[0];  v2++;
+            t0.rgba = (int&)v0[0];
+            t1.rgba = (int&)v1[0];
+            t2.rgba = (int&)v2[0];
+
+            v0++;
+            v1++;
+            v2++;
         }
         if (grVertexAttribute.flags & GR_PARAM_ST0)
         {
-            t0.sow = v0[0]; t0.tow = v0[1]; v0 += 2;
-            t1.sow = v1[0]; t1.tow = v1[1]; v1 += 2;
-            t2.sow = v2[0]; t2.tow = v2[1]; v2 += 2;
+            t0.sow = v0[0]; t0.tow = v0[1];
+            t1.sow = v1[0]; t1.tow = v1[1];
+            t2.sow = v2[0]; t2.tow = v2[1];
+
+            v0 += 2;
+            v1 += 2;
+            v2 += 2;
         }
 
         grDrawTriangle(&t0, &t1, &t2);
