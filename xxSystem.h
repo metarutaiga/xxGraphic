@@ -35,12 +35,6 @@
 #define NSEC_PER_MSEC   1000000ull
 #define NSEC_PER_USEC   1000ull
 
-#if defined(__ARM_NEON__) || defined(__ARM_NEON) || defined(_M_ARM) || defined(_M_ARM64) || defined(_M_HYBRID_X86_ARM64)
-#   include <arm_neon.h>
-#elif defined(_M_IX86) || defined(_M_AMD64) || defined(__i386__) || defined(__amd64__)
-#   include <immintrin.h>
-#endif
-
 #if defined(__APPLE__)
 #   include <TargetConditionals.h>
 #   if TARGET_OS_IPHONE

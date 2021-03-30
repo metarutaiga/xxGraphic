@@ -7,24 +7,7 @@
 #pragma once
 
 #include "xxSystem.h"
-
-#if defined(__llvm__)
-#   define xxVectorExtension 1
-    typedef float v4sf __attribute__((vector_size(16)));
-#else
-    struct v4sf
-    {
-#   if defined(_M_ARM) || defined(_M_ARM64) || defined(_M_HYBRID_X86_ARM64)
-#       define xxVectorExtension 1
-        float32x4_t v;
-#   elif defined(_M_IX86) || defined(_M_AMD64)
-#       define xxVectorExtension 1
-        __m128 v;
-#   endif
-        v4sf operator + (const v4sf& other) const;
-        v4sf operator * (const v4sf& other) const;
-    };
-#endif
+#include "xxVector.h"
 
 union xxPlusAPI xxVector2
 {
@@ -114,9 +97,7 @@ union xxPlusAPI xxVector4
     struct { float x, y, z, w; };
     struct { float r, g, b, a; };
     float f[N];
-#if xxVectorExtension
     v4sf v;
-#endif
 
     typedef xxVector4 type;
 

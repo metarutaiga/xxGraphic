@@ -6,22 +6,29 @@
 //==============================================================================
 #include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalGlide.h"
+#include "xxVector.h"
 #include "xxGraphicGlide.h"
 
 static void*    g_glideLibrary = nullptr;
 static FxU32    g_startAddress = 0;
 static uint64_t g_vertexBuffer = 0;
 static uint64_t g_vertexAttribute = 0;
-static float    g_worldMatrix[4 * 4];
-static float    g_viewMatrix[4 * 4];
-static float    g_projectionMatrix[4 * 4];
+static v4sf     g_worldMatrix[4];
+static v4sf     g_viewMatrix[4];
+static v4sf     g_projectionMatrix[4];
+static v4sf     g_worldViewProjectionMatrix[4];
 
 //==============================================================================
 //  Instance
 //==============================================================================
 GrProc FX_CALL grGetProcAddress(char* name)
 {
-#if defined(xxWINDOWS)
+#if defined(xxMACOS)
+    if (g_glideLibrary == nullptr)
+        g_glideLibrary = xxLoadLibrary("glide3x.dylib");
+    if (g_glideLibrary == nullptr)
+        return nullptr;
+#elif defined(xxWINDOWS)
     if (g_glideLibrary == nullptr)
         g_glideLibrary = xxLoadLibrary("glide3x.dll");
     if (g_glideLibrary == nullptr)
@@ -37,9 +44,8 @@ GrProc FX_CALL grGetProcAddress(char* name)
         return proc;
     }
 #endif
-    return (GrProc)xxGetProcAddress(g_glideLibrary, name);
 #endif
-    return nullptr;
+    return (GrProc)xxGetProcAddress(g_glideLibrary, name);
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateInstanceGlide()
@@ -242,7 +248,7 @@ void xxDestroyVertexAttributeGlide(uint64_t vertexAttribute)
 //==============================================================================
 uint64_t xxCreateConstantBufferGlide(uint64_t device, int size)
 {
-    char* grBuffer = xxAlloc(char, size);
+    v4sf* grBuffer = xxAlloc(v4sf, size);
 
     return reinterpret_cast<uint64_t>(grBuffer);
 }
@@ -533,14 +539,42 @@ void xxSetFragmentSamplersGlide(uint64_t commandEncoder, int count, const uint64
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, int size)
 {
-    float* grBuffer = reinterpret_cast<float*>(buffer);
+    v4sf* grBuffer = reinterpret_cast<v4sf*>(buffer);
 
-    if (size >= sizeof(float[4 * 4]) * 1)
-        memcpy(g_worldMatrix, grBuffer + 4 * 4 * 0, sizeof(float[4 * 4]));
-    if (size >= sizeof(float[4 * 4]) * 2)
-        memcpy(g_viewMatrix, grBuffer + 4 * 4 * 1, sizeof(float[4 * 4]));
-    if (size >= sizeof(float[4 * 4]) * 3)
-        memcpy(g_projectionMatrix, grBuffer + 4 * 4 * 2, sizeof(float[4 * 4]));
+    if (size >= sizeof(g_worldMatrix))
+    {
+        size -= sizeof(g_worldMatrix);
+        g_worldMatrix[0] = (*grBuffer++);
+        g_worldMatrix[1] = (*grBuffer++);
+        g_worldMatrix[2] = (*grBuffer++);
+        g_worldMatrix[3] = (*grBuffer++);
+    }
+    if (size >= sizeof(g_viewMatrix))
+    {
+        size -= sizeof(g_viewMatrix);
+        g_viewMatrix[0] = (*grBuffer++);
+        g_viewMatrix[1] = (*grBuffer++);
+        g_viewMatrix[2] = (*grBuffer++);
+        g_viewMatrix[3] = (*grBuffer++);
+    }
+    if (size >= sizeof(g_projectionMatrix))
+    {
+        size -= sizeof(g_projectionMatrix);
+        g_projectionMatrix[0] = (*grBuffer++);
+        g_projectionMatrix[1] = (*grBuffer++);
+        g_projectionMatrix[2] = (*grBuffer++);
+        g_projectionMatrix[3] = (*grBuffer++);
+    }
+
+    v4sf tempMatrix[4];
+    tempMatrix[0] = __builtin_multiplyvector(g_worldMatrix, g_viewMatrix[0]);
+    tempMatrix[1] = __builtin_multiplyvector(g_worldMatrix, g_viewMatrix[1]);
+    tempMatrix[2] = __builtin_multiplyvector(g_worldMatrix, g_viewMatrix[2]);
+    tempMatrix[3] = __builtin_multiplyvector(g_worldMatrix, g_viewMatrix[3]);
+    g_worldViewProjectionMatrix[0] = __builtin_multiplyvector(tempMatrix, g_projectionMatrix[0]);
+    g_worldViewProjectionMatrix[1] = __builtin_multiplyvector(tempMatrix, g_projectionMatrix[1]);
+    g_worldViewProjectionMatrix[2] = __builtin_multiplyvector(tempMatrix, g_projectionMatrix[2]);
+    g_worldViewProjectionMatrix[3] = __builtin_multiplyvector(tempMatrix, g_projectionMatrix[3]);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, int size)
@@ -564,39 +598,25 @@ void xxDrawIndexedGlide(uint64_t commandEncoder, uint64_t indexBuffer, int index
 
         if (grVertexAttribute.flags & GR_PARAM_XY)
         {
-            auto* p = g_projectionMatrix;
+            v4sf p0 = __builtin_multiplyvector(g_worldViewProjectionMatrix, v4sf{ v0[0], v0[1], v0[2], 1.0f });
+            v4sf p1 = __builtin_multiplyvector(g_worldViewProjectionMatrix, v4sf{ v1[0], v1[1], v1[2], 1.0f });
+            v4sf p2 = __builtin_multiplyvector(g_worldViewProjectionMatrix, v4sf{ v2[0], v2[1], v2[2], 1.0f });
 
-            t0.x = v0[0] * p[0] + v0[0] * p[4] + v0[0] * p[8] + p[12];
-            t1.x = v1[0] * p[0] + v1[0] * p[4] + v1[0] * p[8] + p[12];
-            t2.x = v2[0] * p[0] + v2[0] * p[4] + v2[0] * p[8] + p[12];
+            t0.x = grContext.width * (p0[0] * 0.5f + 0.5f);
+            t1.x = grContext.width * (p1[0] * 0.5f + 0.5f);
+            t2.x = grContext.width * (p2[0] * 0.5f + 0.5f);
 
-            t0.y = v0[1] * p[1] + v0[1] * p[5] + v0[1] * p[9] + p[13];
-            t1.y = v1[1] * p[1] + v1[1] * p[5] + v1[1] * p[9] + p[13];
-            t2.y = v2[1] * p[1] + v2[1] * p[5] + v2[1] * p[9] + p[13];
+            t0.y = grContext.height * (p0[1] * 0.5f + 0.5f);
+            t1.y = grContext.height * (p1[1] * 0.5f + 0.5f);
+            t2.y = grContext.height * (p2[1] * 0.5f + 0.5f);
 
-            t0.ooz = v0[2] * p[2] + v0[2] * p[6] + v0[3] * p[10] + p[14];
-            t1.ooz = v1[2] * p[2] + v1[2] * p[6] + v1[3] * p[10] + p[14];
-            t2.ooz = v2[2] * p[2] + v2[2] * p[6] + v2[3] * p[10] + p[14];
+            t0.ooz = 65535.0f / p0[2];
+            t1.ooz = 65535.0f / p1[2];
+            t2.ooz = 65535.0f / p2[2];
 
-            t0.oow = p[3] + p[7] + p[11] + p[15];
-            t1.oow = p[3] + p[7] + p[11] + p[15];
-            t2.oow = p[3] + p[7] + p[11] + p[15];
-
-            t0.x = grContext.width * (t0.x * 0.5f + 0.5f);
-            t1.x = grContext.width * (t1.x * 0.5f + 0.5f);
-            t2.x = grContext.width * (t2.x * 0.5f + 0.5f);
-
-            t0.y = grContext.height * (t0.y * 0.5f + 0.5f);
-            t1.y = grContext.height * (t1.y * 0.5f + 0.5f);
-            t2.y = grContext.height * (t2.y * 0.5f + 0.5f);
-
-            t0.ooz = 65535.0f / t0.ooz;
-            t1.ooz = 65535.0f / t1.ooz;
-            t2.ooz = 65535.0f / t2.ooz;
-
-            t0.oow = 1.0f / t0.oow;
-            t1.oow = 1.0f / t1.oow;
-            t2.oow = 1.0f / t2.oow;
+            t0.oow = 1.0f / p0[3];
+            t1.oow = 1.0f / p1[3];
+            t2.oow = 1.0f / p2[3];
 
             v0 += 3;
             v1 += 3;
