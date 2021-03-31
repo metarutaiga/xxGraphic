@@ -123,3 +123,250 @@ FX_PROTOTYPE(void, grGlideSetState, (const void *state), state);
 FX_PROTOTYPE(void, grGlideGetVertexLayout, (void *layout), layout);
 FX_PROTOTYPE(void, grGlideSetVertexLayout, (const void *layout), layout);
 //==============================================================================
+//  Glide to OpenGL
+//==============================================================================
+#if defined(xxMACOS)
+#define GL_SILENCE_DEPRECATION
+#import <AppKit/NSOpenGL.h>
+#import <AppKit/NSOpenGLView.h>
+#import <AppKit/NSWindow.h>
+#import <Cocoa/Cocoa.h>
+#import <OpenGL/gl.h>
+#import <OpenGL/OpenGL.h>
+static void*            g_glLibrary = nullptr;
+static NSOpenGLView*    g_rootView = nil;
+static NSOpenGLContext* g_openGLContext[256] = {};
+static FxU8             g_openGLContextIndex = 0;
+static FxU32            g_texMinAddress = 0;
+static FxU8             g_vertexLayout[256] = {};
+//------------------------------------------------------------------------------
+static void (*gto_glBegin)(GLenum mode);
+static void (*gto_glVertex2f)(GLfloat x, GLfloat y);
+static void (*gto_glVertex3f)(GLfloat x, GLfloat y, GLfloat z);
+static void (*gto_glVertex4f)(GLfloat x, GLfloat y, GLfloat z, GLfloat w);
+static void (*gto_glColor4f)(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
+static void (*gto_glTexCoord2f)(GLfloat s, GLfloat t);
+static void (*gto_glEnd)(void);
+static void (*gto_glMatrixMode)(GLenum mode);
+static void (*gto_glLoadIdentity)(void);
+static void (*gto_glOrtho)(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar);
+static void (*gto_glDepthRange)(GLclampd zNear, GLclampd zFar);
+static void (*gto_glViewport)(GLint x, GLint y, GLsizei width, GLsizei height);
+static void (*gto_glClearColor)(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
+static void (*gto_glClearDepth)(GLclampd depth);
+static void (*gto_glClear)(GLbitfield mask);
+//------------------------------------------------------------------------------
+static void gto_grDrawTriangle(const void *a, const void *b, const void *c)
+{
+    gto_glBegin(GL_TRIANGLES);
+
+    for (int i = 0; i < 3; ++i)
+    {
+        const void *p = (i != 2) ? (i != 1) ? a : b : c;
+        if (g_vertexLayout[GR_PARAM_ST0] != 0xFF)
+        {
+            GLfloat *v = (GLfloat*)((char*)p + g_vertexLayout[GR_PARAM_ST0]);
+            gto_glTexCoord2f(v[0], v[1]);
+        }
+        if (g_vertexLayout[GR_PARAM_PARGB] != 0xFF)
+        {
+            GLubyte *v = (GLubyte*)((char*)p + g_vertexLayout[GR_PARAM_PARGB]);
+            gto_glColor4f(v[0] / 255.0f, v[1] / 255.0f, v[2] / 255.0f, v[3] / 255.0f);
+        }
+        if (g_vertexLayout[GR_PARAM_XY] != 0xFF)
+        {
+            GLfloat *v = (GLfloat*)((char*)p + g_vertexLayout[GR_PARAM_XY]);
+            if (g_vertexLayout[GR_PARAM_Z] != 0xFF)
+            {
+                if (g_vertexLayout[GR_PARAM_W] != 0xFF)
+                {
+                    gto_glVertex4f(v[0], v[1], -65535.0f / v[2], v[3]);
+                }
+                else
+                {
+                    gto_glVertex3f(v[0], v[1], -65535.0f / v[2]);
+                }
+            }
+            else
+            {
+                gto_glVertex2f(v[0], v[1]);
+            }
+        }
+    }
+
+    gto_glEnd();
+}
+//------------------------------------------------------------------------------
+static void gto_grVertexLayout(FxU32 param, FxI32 offset, FxU32 mode)
+{
+    g_vertexLayout[param] = (mode == GR_PARAM_ENABLE) ? offset : 0xFF;
+}
+//------------------------------------------------------------------------------
+static void gto_grBufferClear(GrColor_t color, GrAlpha_t alpha, FxU32 depth)
+{
+    GLclampf glRed = ((color >> 0) & 0xFF) / 255.0f;
+    GLclampf glGreen = ((color >> 8) & 0xFF) / 255.0f;
+    GLclampf glBlue = ((color >> 16) & 0xFF) / 255.0f;
+    GLclampf glAlpha = alpha;
+    GLclampd glDepth = (depth & 0xFFFF) / 65535.0;
+    gto_glClearColor(glRed, glGreen, glBlue, glAlpha);
+    gto_glClearDepth(glDepth);
+    gto_glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+//------------------------------------------------------------------------------
+static void gto_grBufferSwap(FxU32 swap_interval)
+{
+    [[NSOpenGLContext currentContext] flushBuffer];
+}
+//------------------------------------------------------------------------------
+static GrContext_t gto_grSstWinOpen(void *hWnd, GrScreenResolution_t screen_resolution, GrScreenRefresh_t refresh_rate, GrColorFormat_t color_format, GrOriginLocation_t origin_location, int nColBuffers, int nAuxBuffers)
+{
+    NSOpenGLContext* nsContext = [[NSOpenGLContext alloc] initWithFormat:[g_rootView pixelFormat]
+                                                            shareContext:[g_rootView openGLContext]];
+    [nsContext setView:[[(__bridge NSWindow*)hWnd contentViewController] view]];
+    for (int i = 0; i < 256; ++i)
+    {
+        if (g_openGLContext[i] == nil)
+        {
+            g_openGLContext[i] = nsContext;
+            return static_cast<GrContext_t>(i);
+        }
+    }
+    return 0;
+}
+//------------------------------------------------------------------------------
+static FxBool gto_grSstWinClose(GrContext_t context)
+{
+    NSOpenGLContext* nsContext = g_openGLContext[context % 256];
+    [nsContext makeCurrentContext];
+    [nsContext clearDrawable];
+    [NSOpenGLContext clearCurrentContext];
+    g_openGLContext[context % 256] = nil;
+    return FXTRUE;
+}
+//------------------------------------------------------------------------------
+static FxBool gto_grSelectContext(GrContext_t context)
+{
+    [g_openGLContext[context % 256] makeCurrentContext];
+    return FXTRUE;
+}
+//------------------------------------------------------------------------------
+static const char * gto_grGetString(FxU32 pname)
+{
+    switch (pname)
+    {
+    case GR_HARDWARE:   return "Voodoo";
+    case GR_VENDOR:     return "3Dfx Interactive";
+    case GR_RENDERER:   return "Glide";
+    case GR_VERSION:    return "3.0";
+    }
+    return nullptr;
+}
+//------------------------------------------------------------------------------
+static void gto_grDepthRange(FxFloat n, FxFloat f)
+{
+    gto_glDepthRange(n, f);
+}
+//------------------------------------------------------------------------------
+static void gto_grViewport(FxI32 x, FxI32 y, FxI32 width, FxI32 height)
+{
+    gto_glMatrixMode(GL_PROJECTION);
+    gto_glLoadIdentity();
+    gto_glOrtho(0, width, 0, height, 0, 1);
+    gto_glViewport(x, y, width, height);
+}
+//------------------------------------------------------------------------------
+static FxU32 gto_grTexMinAddress(GrChipID_t tmu)
+{
+    return g_texMinAddress;
+}
+//------------------------------------------------------------------------------
+static void gto_grGlideInit(void)
+{
+    if (g_glLibrary == nullptr)
+    {
+        g_glLibrary = xxLoadLibrary("/System/Library/Frameworks/OpenGL.framework/OpenGL");
+    }
+    (void*&)gto_glBegin = xxGetProcAddress(g_glLibrary, "glBegin");
+    (void*&)gto_glVertex2f = xxGetProcAddress(g_glLibrary, "glVertex2f");
+    (void*&)gto_glVertex3f = xxGetProcAddress(g_glLibrary, "glVertex3f");
+    (void*&)gto_glVertex4f = xxGetProcAddress(g_glLibrary, "glVertex4f");
+    (void*&)gto_glColor4f = xxGetProcAddress(g_glLibrary, "glColor4f");
+    (void*&)gto_glTexCoord2f = xxGetProcAddress(g_glLibrary, "glTexCoord2f");
+    (void*&)gto_glEnd = xxGetProcAddress(g_glLibrary, "glEnd");
+    (void*&)gto_glMatrixMode = xxGetProcAddress(g_glLibrary, "glMatrixMode");
+    (void*&)gto_glLoadIdentity = xxGetProcAddress(g_glLibrary, "glLoadIdentity");
+    (void*&)gto_glOrtho = xxGetProcAddress(g_glLibrary, "glOrtho");
+    (void*&)gto_glDepthRange = xxGetProcAddress(g_glLibrary, "glDepthRange");
+    (void*&)gto_glViewport = xxGetProcAddress(g_glLibrary, "glViewport");
+    (void*&)gto_glClearColor = xxGetProcAddress(g_glLibrary, "glClearColor");
+    (void*&)gto_glClearDepth = xxGetProcAddress(g_glLibrary, "glClearDepth");
+    (void*&)gto_glClear = xxGetProcAddress(g_glLibrary, "glClear");
+
+    NSOpenGLPixelFormatAttribute attributes[] =
+    {
+        NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersionLegacy,
+        NSOpenGLPFAColorSize, 24,
+        NSOpenGLPFAAlphaSize, 8,
+        NSOpenGLPFADepthSize, 24,
+        NSOpenGLPFAStencilSize, 8,
+        NSOpenGLPFADoubleBuffer,
+        NSOpenGLPFAAccelerated,
+        NSOpenGLPFANoRecovery,
+        0
+    };
+
+    g_rootView = [[NSOpenGLView alloc] initWithFrame:CGRectMake(0, 0, 1, 1)
+                                         pixelFormat:[[NSOpenGLPixelFormat alloc] initWithAttributes:attributes]];
+
+    memset(g_vertexLayout, 0xFF, sizeof(g_vertexLayout));
+}
+//------------------------------------------------------------------------------
+static void gto_grGlideShutdown(void)
+{
+    if (g_glLibrary)
+    {
+        xxFreeLibrary(g_glLibrary);
+        g_glLibrary = nullptr;
+    }
+    g_rootView = nil;
+    g_texMinAddress = 0;
+    gto_glBegin = nullptr;
+    gto_glVertex2f = nullptr;
+    gto_glVertex3f = nullptr;
+    gto_glVertex4f = nullptr;
+    gto_glColor4f = nullptr;
+    gto_glTexCoord2f = nullptr;
+    gto_glEnd = nullptr;
+    gto_glMatrixMode = nullptr;
+    gto_glLoadIdentity = nullptr;
+    gto_glOrtho = nullptr;
+    gto_glDepthRange = nullptr;
+    gto_glViewport = nullptr;
+    gto_glClearColor = nullptr;
+    gto_glClearDepth = nullptr;
+    gto_glClear = nullptr;
+}
+//------------------------------------------------------------------------------
+GrProc FX_CALL gto_grGetProcAddress(char* name)
+{
+    switch (xxHash(name))
+    {
+    case xxHash("grDrawTriangle"):      return (GrProc)gto_grDrawTriangle;
+    case xxHash("grVertexLayout"):      return (GrProc)gto_grVertexLayout;
+    case xxHash("grBufferClear"):       return (GrProc)gto_grBufferClear;
+    case xxHash("grBufferSwap"):        return (GrProc)gto_grBufferSwap;
+    case xxHash("grSstWinOpen"):        return (GrProc)gto_grSstWinOpen;
+    case xxHash("grSstWinClose"):       return (GrProc)gto_grSstWinClose;
+    case xxHash("grSelectContext"):     return (GrProc)gto_grSelectContext;
+    case xxHash("grGetString"):         return (GrProc)gto_grGetString;
+    case xxHash("grDepthRange"):        return (GrProc)gto_grDepthRange;
+    case xxHash("grViewport"):          return (GrProc)gto_grViewport;
+    case xxHash("grTexMinAddress"):     return (GrProc)gto_grTexMinAddress;
+    case xxHash("grGlideInit"):         return (GrProc)gto_grGlideInit;
+    case xxHash("grGlideShutdown"):     return (GrProc)gto_grGlideShutdown;
+    }
+    return nullptr;
+}
+#endif
+//==============================================================================

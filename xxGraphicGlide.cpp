@@ -27,7 +27,7 @@ GrProc FX_CALL grGetProcAddress(char* name)
     if (g_glideLibrary == nullptr)
         g_glideLibrary = xxLoadLibrary("glide3x.dylib");
     if (g_glideLibrary == nullptr)
-        return nullptr;
+        return gto_grGetProcAddress(name);
 #elif defined(xxWINDOWS)
     if (g_glideLibrary == nullptr)
         g_glideLibrary = xxLoadLibrary("glide3x.dll");
@@ -112,8 +112,13 @@ uint64_t xxCreateSwapchainGlide(uint64_t device, uint64_t renderPass, void* view
 
     GrContext grContext = {};
     grContext.context = grSstWinOpen(view, width | (height << 16), GR_REFRESH_NONE, GR_COLORFORMAT_ARGB, GR_ORIGIN_LOWER_LEFT, 2, 0);
+#if defined(xxMACOS)
+    grContext.width = width * 2.0f;
+    grContext.height = height * 2.0f;
+#else
     grContext.width = width;
     grContext.height = height;
+#endif
 
     return static_cast<uint64_t>(grContext.value);
 }
@@ -145,7 +150,11 @@ uint64_t xxGetFramebufferGlide(uint64_t device, uint64_t swapchain, float* scale
 
     if (scale)
     {
+#if defined(xxMACOS)
+        (*scale) = 2.0f;
+#else
         (*scale) = 1.0f;
+#endif
     }
 
     return static_cast<uint64_t>(grContext.value);
@@ -573,14 +582,14 @@ void xxSetVertexConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, in
     }
 
     v4sf tempMatrix[4];
-    tempMatrix[0] = __builtin_multiplyvector(g_worldMatrix, g_viewMatrix[0]);
-    tempMatrix[1] = __builtin_multiplyvector(g_worldMatrix, g_viewMatrix[1]);
-    tempMatrix[2] = __builtin_multiplyvector(g_worldMatrix, g_viewMatrix[2]);
-    tempMatrix[3] = __builtin_multiplyvector(g_worldMatrix, g_viewMatrix[3]);
-    g_worldViewProjectionMatrix[0] = __builtin_multiplyvector(tempMatrix, g_projectionMatrix[0]);
-    g_worldViewProjectionMatrix[1] = __builtin_multiplyvector(tempMatrix, g_projectionMatrix[1]);
-    g_worldViewProjectionMatrix[2] = __builtin_multiplyvector(tempMatrix, g_projectionMatrix[2]);
-    g_worldViewProjectionMatrix[3] = __builtin_multiplyvector(tempMatrix, g_projectionMatrix[3]);
+    tempMatrix[0] = __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[0]);
+    tempMatrix[1] = __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[1]);
+    tempMatrix[2] = __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[2]);
+    tempMatrix[3] = __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[3]);
+    g_worldViewProjectionMatrix[0] = __builtin_multiplyvector(g_projectionMatrix, tempMatrix[0]);
+    g_worldViewProjectionMatrix[1] = __builtin_multiplyvector(g_projectionMatrix, tempMatrix[1]);
+    g_worldViewProjectionMatrix[2] = __builtin_multiplyvector(g_projectionMatrix, tempMatrix[2]);
+    g_worldViewProjectionMatrix[3] = __builtin_multiplyvector(g_projectionMatrix, tempMatrix[3]);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, int size)
