@@ -380,7 +380,7 @@ uint64_t xxCreateVertexAttributeD3D9(uint64_t device, int count, int* attribute)
 
     d3dVertexAttribute.stride = stride;
 
-    return d3dVertexAttribute.value;
+    return static_cast<uint64_t>(d3dVertexAttribute.value);
 }
 //------------------------------------------------------------------------------
 void xxDestroyVertexAttributeD3D9(uint64_t vertexAttribute)
@@ -708,7 +708,7 @@ uint64_t xxCreateSamplerD3D9(uint64_t device, bool clampU, bool clampV, bool cla
         d3dSampler.mipFilter = linearMip ? D3DTEXF_ANISOTROPIC : D3DTEXF_POINT;
     }
 
-    return d3dSampler.value;
+    return static_cast<uint64_t>(d3dSampler.value);
 }
 //------------------------------------------------------------------------------
 void xxDestroySamplerD3D9(uint64_t sampler)
@@ -739,7 +739,7 @@ uint64_t xxCreateBlendStateD3D9(uint64_t device, bool blending)
 {
     D3DRENDERSTATE9 d3dRenderState = {};
     d3dRenderState.alphaBlending = blending;
-    return d3dRenderState.value;
+    return static_cast<uint64_t>(d3dRenderState.value);
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateDepthStencilStateD3D9(uint64_t device, bool depthTest, bool depthWrite)
@@ -747,7 +747,7 @@ uint64_t xxCreateDepthStencilStateD3D9(uint64_t device, bool depthTest, bool dep
     D3DRENDERSTATE9 d3dRenderState = {};
     d3dRenderState.depthTest = depthTest;
     d3dRenderState.depthWrite = depthWrite;
-    return d3dRenderState.value;
+    return static_cast<uint64_t>(d3dRenderState.value);
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateRasterizerStateD3D9(uint64_t device, bool cull, bool scissor)
@@ -755,7 +755,7 @@ uint64_t xxCreateRasterizerStateD3D9(uint64_t device, bool cull, bool scissor)
     D3DRENDERSTATE9 d3dRenderState = {};
     d3dRenderState.cull = cull;
     d3dRenderState.scissor = scissor;
-    return d3dRenderState.value;
+    return static_cast<uint64_t>(d3dRenderState.value);
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreatePipelineD3D9(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)

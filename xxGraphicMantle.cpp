@@ -390,7 +390,7 @@ uint64_t xxCreateRenderPassMantle(uint64_t device, bool clearColor, bool clearDe
     if (clearDepth || clearStencil)
         grRenderPass.clearDepthStencil = true;
 
-    return grRenderPass.value;
+    return static_cast<uint64_t>(grRenderPass.value);
 }
 //------------------------------------------------------------------------------
 void xxDestroyRenderPassMantle(uint64_t renderPass)

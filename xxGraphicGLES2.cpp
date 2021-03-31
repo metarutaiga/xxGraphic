@@ -636,7 +636,7 @@ uint64_t xxCreateSamplerGLES2(uint64_t device, bool clampU, bool clampV, bool cl
     glSampler.mipFilter = linearMip;
     glSampler.anisotropy = anisotropy;
 
-    return glSampler.value;
+    return static_cast<uint64_t>(glSampler.value);
 }
 //------------------------------------------------------------------------------
 void xxDestroySamplerGLES2(uint64_t sampler)
@@ -753,7 +753,7 @@ uint64_t xxCreateBlendStateGLES2(uint64_t device, bool blending)
 {
     STATEGL glState = {};
     glState.alphaBlending = blending;
-    return glState.value;
+    return static_cast<uint64_t>(glState.value);
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateDepthStencilStateGLES2(uint64_t device, bool depthTest, bool depthWrite)
@@ -761,7 +761,7 @@ uint64_t xxCreateDepthStencilStateGLES2(uint64_t device, bool depthTest, bool de
     STATEGL glState = {};
     glState.depthTest = depthTest;
     glState.depthWrite = depthWrite;
-    return glState.value;
+    return static_cast<uint64_t>(glState.value);
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateRasterizerStateGLES2(uint64_t device, bool cull, bool scissor)
@@ -769,7 +769,7 @@ uint64_t xxCreateRasterizerStateGLES2(uint64_t device, bool cull, bool scissor)
     STATEGL glState = {};
     glState.cull = cull;
     glState.scissor = scissor;
-    return glState.value;
+    return static_cast<uint64_t>(glState.value);
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)

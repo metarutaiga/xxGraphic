@@ -715,7 +715,7 @@ uint64_t xxCreateRenderPassD3D12(uint64_t device, bool clearColor, bool clearDep
     if (clearDepth || clearStencil)
         d3dRenderPass.clearDepthStencil = true;
 
-    return d3dRenderPass.value;
+    return static_cast<uint64_t>(d3dRenderPass.value);
 }
 //------------------------------------------------------------------------------
 void xxDestroyRenderPassD3D12(uint64_t renderPass)

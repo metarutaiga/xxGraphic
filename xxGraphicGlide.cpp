@@ -115,7 +115,7 @@ uint64_t xxCreateSwapchainGlide(uint64_t device, uint64_t renderPass, void* view
     grContext.width = width;
     grContext.height = height;
 
-    return grContext.value;
+    return static_cast<uint64_t>(grContext.value);
 }
 //------------------------------------------------------------------------------
 void xxDestroySwapchainGlide(uint64_t swapchain)
@@ -136,7 +136,7 @@ uint64_t xxGetCommandBufferGlide(uint64_t device, uint64_t swapchain)
 
     grSelectContext(grContext.context);
 
-    return grContext.value;
+    return static_cast<uint64_t>(grContext.value);
 }
 //------------------------------------------------------------------------------
 uint64_t xxGetFramebufferGlide(uint64_t device, uint64_t swapchain, float* scale)
@@ -148,7 +148,7 @@ uint64_t xxGetFramebufferGlide(uint64_t device, uint64_t swapchain, float* scale
         (*scale) = 1.0f;
     }
 
-    return grContext.value;
+    return static_cast<uint64_t>(grContext.value);
 }
 //==============================================================================
 //  Command Buffer
@@ -236,7 +236,7 @@ uint64_t xxCreateVertexAttributeGlide(uint64_t device, int count, int* attribute
 
     grVertexAttribute.stride = stride;
 
-    return grVertexAttribute.value;
+    return static_cast<uint64_t>(grVertexAttribute.value);
 }
 //------------------------------------------------------------------------------
 void xxDestroyVertexAttributeGlide(uint64_t vertexAttribute)
@@ -391,7 +391,7 @@ uint64_t xxCreateSamplerGlide(uint64_t device, bool clampU, bool clampV, bool cl
     grSampler.minFilter = linearMin ? GR_TEXTUREFILTER_BILINEAR : GR_TEXTUREFILTER_POINT_SAMPLED;
     grSampler.mipFilter = linearMip ? GR_MIPMAP_NEAREST_DITHER : GR_MIPMAP_NEAREST;
 
-    return grSampler.value;
+    return static_cast<uint64_t>(grSampler.value);
 }
 //------------------------------------------------------------------------------
 void xxDestroySamplerGlide(uint64_t sampler)
@@ -422,7 +422,6 @@ uint64_t xxCreateBlendStateGlide(uint64_t device, bool blending)
 {
     GrPipeline grPipeline = {};
     grPipeline.alphaBlending = blending;
-
     return static_cast<uint64_t>(grPipeline.value);
 }
 //------------------------------------------------------------------------------
@@ -431,7 +430,6 @@ uint64_t xxCreateDepthStencilStateGlide(uint64_t device, bool depthTest, bool de
     GrPipeline grPipeline = {};
     grPipeline.depthTest = depthTest;
     grPipeline.depthWrite = depthWrite;
-
     return static_cast<uint64_t>(grPipeline.value);
 }
 //------------------------------------------------------------------------------
@@ -440,7 +438,6 @@ uint64_t xxCreateRasterizerStateGlide(uint64_t device, bool cull, bool scissor)
     GrPipeline grPipeline = {};
     grPipeline.cull = cull;
     grPipeline.scissor = scissor;
-
     return static_cast<uint64_t>(grPipeline.value);
 }
 //------------------------------------------------------------------------------
