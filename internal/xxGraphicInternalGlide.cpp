@@ -136,7 +136,6 @@ FX_PROTOTYPE(void, grGlideSetVertexLayout, (const void *layout), layout);
 static void*            g_glLibrary = nullptr;
 static NSOpenGLView*    g_rootView = nil;
 static NSOpenGLContext* g_openGLContext[256] = {};
-static FxU8             g_openGLContextIndex = 0;
 static FxU32            g_texMinAddress = 0;
 static FxU8             g_vertexLayout[256] = {};
 //------------------------------------------------------------------------------
@@ -180,11 +179,11 @@ static void gto_grDrawTriangle(const void *a, const void *b, const void *c)
             {
                 if (g_vertexLayout[GR_PARAM_W] != 0xFF)
                 {
-                    gto_glVertex4f(v[0], v[1], -65535.0f / v[2], v[3]);
+                    gto_glVertex4f(v[0], v[1], 65535.0f / v[2], 1.0f / v[3]);
                 }
                 else
                 {
-                    gto_glVertex3f(v[0], v[1], -65535.0f / v[2]);
+                    gto_glVertex3f(v[0], v[1], 65535.0f / v[2]);
                 }
             }
             else
@@ -224,7 +223,10 @@ static GrContext_t gto_grSstWinOpen(void *hWnd, GrScreenResolution_t screen_reso
     NSOpenGLContext* nsContext = [[NSOpenGLContext alloc] initWithFormat:[g_rootView pixelFormat]
                                                             shareContext:[g_rootView openGLContext]];
     [nsContext setView:[[(__bridge NSWindow*)hWnd contentViewController] view]];
-    for (int i = 0; i < 256; ++i)
+    int swapInterval = 0;
+    [nsContext setValues:&swapInterval
+            forParameter:NSOpenGLContextParameterSwapInterval];
+    for (int i = 1; i < 256; ++i)
     {
         if (g_openGLContext[i] == nil)
         {
@@ -237,6 +239,8 @@ static GrContext_t gto_grSstWinOpen(void *hWnd, GrScreenResolution_t screen_reso
 //------------------------------------------------------------------------------
 static FxBool gto_grSstWinClose(GrContext_t context)
 {
+    if (context == 0)
+        return FXFALSE;
     NSOpenGLContext* nsContext = g_openGLContext[context % 256];
     [nsContext makeCurrentContext];
     [nsContext clearDrawable];
@@ -247,7 +251,10 @@ static FxBool gto_grSstWinClose(GrContext_t context)
 //------------------------------------------------------------------------------
 static FxBool gto_grSelectContext(GrContext_t context)
 {
-    [g_openGLContext[context % 256] makeCurrentContext];
+    if (context == 0)
+        return FXFALSE;
+    NSOpenGLContext* nsContext = g_openGLContext[context % 256];
+    [nsContext makeCurrentContext];
     return FXTRUE;
 }
 //------------------------------------------------------------------------------
@@ -272,7 +279,7 @@ static void gto_grViewport(FxI32 x, FxI32 y, FxI32 width, FxI32 height)
 {
     gto_glMatrixMode(GL_PROJECTION);
     gto_glLoadIdentity();
-    gto_glOrtho(0, width, 0, height, 0, 1);
+    gto_glOrtho(0, width, 0, height, -1, 1);
     gto_glViewport(x, y, width, height);
 }
 //------------------------------------------------------------------------------
@@ -303,19 +310,7 @@ static void gto_grGlideInit(void)
     (void*&)gto_glClearDepth = xxGetProcAddress(g_glLibrary, "glClearDepth");
     (void*&)gto_glClear = xxGetProcAddress(g_glLibrary, "glClear");
 
-    NSOpenGLPixelFormatAttribute attributes[] =
-    {
-        NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersionLegacy,
-        NSOpenGLPFAColorSize, 24,
-        NSOpenGLPFAAlphaSize, 8,
-        NSOpenGLPFADepthSize, 24,
-        NSOpenGLPFAStencilSize, 8,
-        NSOpenGLPFADoubleBuffer,
-        NSOpenGLPFAAccelerated,
-        NSOpenGLPFANoRecovery,
-        0
-    };
-
+    NSOpenGLPixelFormatAttribute attributes[2] = { NSOpenGLPFADoubleBuffer };
     g_rootView = [[NSOpenGLView alloc] initWithFrame:CGRectMake(0, 0, 1, 1)
                                          pixelFormat:[[NSOpenGLPixelFormat alloc] initWithAttributes:attributes]];
 

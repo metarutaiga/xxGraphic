@@ -581,15 +581,10 @@ void xxSetVertexConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, in
         g_projectionMatrix[3] = (*grBuffer++);
     }
 
-    v4sf tempMatrix[4];
-    tempMatrix[0] = __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[0]);
-    tempMatrix[1] = __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[1]);
-    tempMatrix[2] = __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[2]);
-    tempMatrix[3] = __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[3]);
-    g_worldViewProjectionMatrix[0] = __builtin_multiplyvector(g_projectionMatrix, tempMatrix[0]);
-    g_worldViewProjectionMatrix[1] = __builtin_multiplyvector(g_projectionMatrix, tempMatrix[1]);
-    g_worldViewProjectionMatrix[2] = __builtin_multiplyvector(g_projectionMatrix, tempMatrix[2]);
-    g_worldViewProjectionMatrix[3] = __builtin_multiplyvector(g_projectionMatrix, tempMatrix[3]);
+    g_worldViewProjectionMatrix[0] = __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[0]));
+    g_worldViewProjectionMatrix[1] = __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[1]));
+    g_worldViewProjectionMatrix[2] = __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[2]));
+    g_worldViewProjectionMatrix[3] = __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[3]));
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, int size)
