@@ -17,15 +17,13 @@ GrProc FX_CALL gto_grGetProcAddress(char* name);
 //==============================================================================
 //  Context
 //==============================================================================
-union GrContext
+struct GrContext
 {
-    uint64_t            value;
-    struct
-    {
-        GrContext_t     context;
-        unsigned short  width;
-        unsigned short  height;
-    };
+    GrContext_t context;
+    void*       view;
+    int         width;
+    int         height;
+    float       scale;
 };
 //==============================================================================
 //  Vertex

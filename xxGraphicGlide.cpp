@@ -9,6 +9,10 @@
 #include "xxVector.h"
 #include "xxGraphicGlide.h"
 
+#if defined(xxMACOS)
+#import <AppKit/AppKit.h>
+#endif
+
 static void*    g_glideLibrary = nullptr;
 static FxU32    g_startAddress = 0;
 static uint64_t g_vertexBuffer = 0;
@@ -110,24 +114,27 @@ uint64_t xxCreateSwapchainGlide(uint64_t device, uint64_t renderPass, void* view
 {
     xxDestroySwapchainGlide(oldSwapchain);
 
-    GrContext grContext = {};
-    grContext.context = grSstWinOpen(view, width | (height << 16), GR_REFRESH_NONE, GR_COLORFORMAT_ARGB, GR_ORIGIN_LOWER_LEFT, 2, 0);
-#if defined(xxMACOS)
-    grContext.width = width * 2.0f;
-    grContext.height = height * 2.0f;
-#else
-    grContext.width = width;
-    grContext.height = height;
-#endif
+    GrContext* grContext = xxAlloc(GrContext);
+    if (grContext == nullptr)
+        return 0;
 
-    return static_cast<uint64_t>(grContext.value);
+    grContext->context = grSstWinOpen(view, width | (height << 16), GR_REFRESH_NONE, GR_COLORFORMAT_ARGB, GR_ORIGIN_LOWER_LEFT, 2, 0);
+    grContext->view = view;
+    grContext->width = width;
+    grContext->height = height;
+    grContext->scale = 1.0f;
+
+    return reinterpret_cast<uint64_t>(grContext);
 }
 //------------------------------------------------------------------------------
 void xxDestroySwapchainGlide(uint64_t swapchain)
 {
-    GrContext grContext = { swapchain };
+    GrContext* grContext = reinterpret_cast<GrContext*>(swapchain);
+    if (grContext == nullptr)
+        return;
 
-    grSstWinClose(grContext.context);
+    grSstWinClose(grContext->context);
+    xxFree(grContext);
 }
 //------------------------------------------------------------------------------
 void xxPresentSwapchainGlide(uint64_t swapchain)
@@ -137,27 +144,26 @@ void xxPresentSwapchainGlide(uint64_t swapchain)
 //------------------------------------------------------------------------------
 uint64_t xxGetCommandBufferGlide(uint64_t device, uint64_t swapchain)
 {
-    GrContext grContext = { swapchain };
+    GrContext* grContext = reinterpret_cast<GrContext*>(swapchain);
 
-    grSelectContext(grContext.context);
+    grSelectContext(grContext->context);
 
-    return static_cast<uint64_t>(grContext.value);
+    return reinterpret_cast<uint64_t>(grContext);
 }
 //------------------------------------------------------------------------------
 uint64_t xxGetFramebufferGlide(uint64_t device, uint64_t swapchain, float* scale)
 {
-    GrContext grContext = { swapchain };
+    GrContext* grContext = reinterpret_cast<GrContext*>(swapchain);
 
     if (scale)
     {
 #if defined(xxMACOS)
-        (*scale) = 2.0f;
-#else
-        (*scale) = 1.0f;
+        grContext->scale = [(__bridge NSWindow*)grContext->view backingScaleFactor];
 #endif
+        (*scale) = grContext->scale;
     }
 
-    return static_cast<uint64_t>(grContext.value);
+    return reinterpret_cast<uint64_t>(grContext);
 }
 //==============================================================================
 //  Command Buffer
@@ -518,7 +524,7 @@ void xxSetFragmentSamplersGlide(uint64_t commandEncoder, int count, const uint64
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, int size)
 {
-    GrContext grContext = { commandEncoder };
+    GrContext* grContext = reinterpret_cast<GrContext*>(commandEncoder);
     v4sf* grBuffer = reinterpret_cast<v4sf*>(buffer);
 
     if (size >= sizeof(g_worldMatrix))
@@ -548,10 +554,10 @@ void xxSetVertexConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, in
 
     v4sf screenMatrix[4] =
     {
-        { grContext.width * 0.5f,                    0.0f, 0.0f, 0.0f },
-        {                   0.0f, grContext.height * 0.5f, 0.0f, 0.0f },
-        {                   0.0f,                    0.0f, 1.0f, 0.0f },
-        { grContext.width * 0.5f, grContext.height * 0.5f, 0.0f, 1.0f },
+        { grContext->width * 0.5f,                     0.0f, 0.0f, 0.0f },
+        {                    0.0f, grContext->height * 0.5f, 0.0f, 0.0f },
+        {                    0.0f,                     0.0f, 1.0f, 0.0f },
+        { grContext->width * 0.5f, grContext->height * 0.5f, 0.0f, 1.0f },
     };
     g_worldViewProjectionScreenMatrix[0] = __builtin_multiplyvector(screenMatrix, __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[0])));
     g_worldViewProjectionScreenMatrix[1] = __builtin_multiplyvector(screenMatrix, __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[1])));
