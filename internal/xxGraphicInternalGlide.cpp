@@ -142,7 +142,7 @@ static FxU32            g_baseTexture = 0;
 static FxU8             g_vertexLayout[256] = {};
 //------------------------------------------------------------------------------
 static void (*gto_glEnable)(GLenum cap);
-static void (*gto_glBlendFunc)(GLenum sfactor, GLenum dfactor);
+static void (*gto_glBlendFuncSeparate)(GLenum sfactorRGB, GLenum dfactorRGB, GLenum sfactorAlpha, GLenum dfactorAlpha);
 static void (*gto_glBegin)(GLenum mode);
 static void (*gto_glVertex4f)(GLfloat x, GLfloat y, GLfloat z, GLfloat w);
 static void (*gto_glColor4f)(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
@@ -163,6 +163,7 @@ static void (*gto_glClearColor)(GLclampf red, GLclampf green, GLclampf blue, GLc
 static void (*gto_glClearDepth)(GLclampd depth);
 static void (*gto_glClear)(GLbitfield mask);
 //------------------------------------------------------------------------------
+template<int R, int G, int B, int A>
 static void gto_grDrawTriangle(const void *a, const void *b, const void *c)
 {
     gto_glBegin(GL_TRIANGLES);
@@ -178,7 +179,7 @@ static void gto_grDrawTriangle(const void *a, const void *b, const void *c)
         if (g_vertexLayout[GR_PARAM_PARGB] != 0xFF)
         {
             GLubyte *v = (GLubyte*)((char*)p + g_vertexLayout[GR_PARAM_PARGB]);
-            gto_glColor4f(v[2] / 255.0f, v[1] / 255.0f, v[0] / 255.0f, v[3] / 255.0f);
+            gto_glColor4f(v[R] / 255.0f, v[G] / 255.0f, v[B] / 255.0f, v[A] / 255.0f);
         }
         if (g_vertexLayout[GR_PARAM_XY] != 0xFF)
         {
@@ -214,6 +215,16 @@ static void gto_grBufferSwap(FxU32 swap_interval)
 //------------------------------------------------------------------------------
 static GrContext_t gto_grSstWinOpen(void *hWnd, GrScreenResolution_t screen_resolution, GrScreenRefresh_t refresh_rate, GrColorFormat_t color_format, GrOriginLocation_t origin_location, int nColBuffers, int nAuxBuffers)
 {
+    switch (color_format)
+    {
+    case GR_COLORFORMAT_ARGB:
+        grDrawTriangleEntry = gto_grDrawTriangle<2, 1, 0, 3>;
+        break;
+    case GR_COLORFORMAT_ABGR:
+        grDrawTriangleEntry = gto_grDrawTriangle<0, 1, 2, 3>;
+        break;
+    }
+
     NSOpenGLContext* nsContext = [[NSOpenGLContext alloc] initWithFormat:[g_rootView pixelFormat]
                                                             shareContext:[g_rootView openGLContext]];
     [nsContext setView:[[(__bridge NSWindow*)hWnd contentViewController] view]];
@@ -249,18 +260,28 @@ static FxBool gto_grSelectContext(GrContext_t context)
         return FXFALSE;
     NSOpenGLContext* nsContext = g_openGLContext[context % 256];
     [nsContext makeCurrentContext];
-    NSRect frame = [[nsContext view] frame];
+    NSView* nsView = [nsContext view];
+    NSRect frame = [nsView convertRectToBacking:[nsView frame]];
     g_width = frame.size.width;
     g_height = frame.size.height;
-    gto_glViewport(0, 0, g_width, g_height);
-    gto_glScissor(0, 0, g_width, g_height);
     return FXTRUE;
 }
 //------------------------------------------------------------------------------
 static void gto_grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf, GrAlphaBlendFnc_t rgb_df, GrAlphaBlendFnc_t alpha_sf, GrAlphaBlendFnc_t alpha_df)
 {
+    static const GLenum glAlphaBlend[8] =
+    {
+        GL_ZERO,
+        GL_SRC_ALPHA,
+        GL_SRC_COLOR,
+        GL_DST_ALPHA,
+        GL_ONE,
+        GL_ONE_MINUS_SRC_ALPHA,
+        GL_ONE_MINUS_SRC_COLOR,
+        GL_ONE_MINUS_DST_ALPHA,
+    };
     gto_glEnable(GL_BLEND);
-    gto_glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    gto_glBlendFuncSeparate(glAlphaBlend[rgb_sf], glAlphaBlend[rgb_df], glAlphaBlend[alpha_sf], glAlphaBlend[alpha_df]);
 }
 //------------------------------------------------------------------------------
 static void gto_grClipWindow(FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy)
@@ -344,7 +365,7 @@ static void gto_grGlideInit(void)
         g_glLibrary = xxLoadLibrary("/System/Library/Frameworks/OpenGL.framework/OpenGL");
     }
     (void*&)gto_glEnable = xxGetProcAddress(g_glLibrary, "glEnable");
-    (void*&)gto_glBlendFunc = xxGetProcAddress(g_glLibrary, "glBlendFunc");
+    (void*&)gto_glBlendFuncSeparate = xxGetProcAddress(g_glLibrary, "glBlendFuncSeparate");
     (void*&)gto_glBegin = xxGetProcAddress(g_glLibrary, "glBegin");
     (void*&)gto_glVertex4f = xxGetProcAddress(g_glLibrary, "glVertex4f");
     (void*&)gto_glColor4f = xxGetProcAddress(g_glLibrary, "glColor4f");
@@ -388,7 +409,7 @@ static void gto_grGlideShutdown(void)
     }
     g_rootView = nil;
     gto_glEnable = nullptr;
-    gto_glBlendFunc = nullptr;
+    gto_glBlendFuncSeparate = nullptr;
     gto_glBegin = nullptr;
     gto_glVertex4f = nullptr;
     gto_glColor4f = nullptr;
@@ -414,7 +435,7 @@ GrProc FX_CALL gto_grGetProcAddress(char* name)
 {
     switch (xxHash(name))
     {
-    case xxHash("grDrawTriangle"):          return (GrProc)gto_grDrawTriangle;
+    case xxHash("grDrawTriangle"):          return (GrProc)gto_grDrawTriangle<0, 1, 2, 3>;
     case xxHash("grVertexLayout"):          return (GrProc)gto_grVertexLayout;
     case xxHash("grBufferClear"):           return (GrProc)gto_grBufferClear;
     case xxHash("grBufferSwap"):            return (GrProc)gto_grBufferSwap;

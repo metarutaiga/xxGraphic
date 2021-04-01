@@ -239,7 +239,7 @@ xxAPI const uint8_t* xxDXBCChecksum(const void* data, int len, uint8_t* digest);
 //==============================================================================
 xxAPI xxInline xxConstexpr unsigned int xxHash(const char* key, const unsigned int hash xxDefaultArgument(0))
 {
-    return (*key) ? xxHash(key + 1, (hash << 5) ^ (*key)) : hash;
+    return (*key) ? xxHash(key + 1, (hash * 16777219) ^ (*key)) : hash;
 }
 //==============================================================================
 //  Bitwise

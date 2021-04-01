@@ -118,7 +118,7 @@ uint64_t xxCreateSwapchainGlide(uint64_t device, uint64_t renderPass, void* view
     if (grContext == nullptr)
         return 0;
 
-    grContext->context = grSstWinOpen(view, width | (height << 16), GR_REFRESH_NONE, GR_COLORFORMAT_ARGB, GR_ORIGIN_LOWER_LEFT, 2, 0);
+    grContext->context = grSstWinOpen(view, width | (height << 16), GR_REFRESH_NONE, GR_COLORFORMAT_ABGR, GR_ORIGIN_LOWER_LEFT, 2, 0);
     grContext->view = view;
     grContext->width = width;
     grContext->height = height;
@@ -211,6 +211,8 @@ uint64_t xxBeginRenderPassGlide(uint64_t commandBuffer, uint64_t framebuffer, ui
     grColor |= (int)(color[2] * 255) << 16;
     grAlpha |= (int)(color[3] * 255);
 
+    grViewport(0, 0, width, height);
+    grClipWindow(0, 0, width, height);
     grColorMask(renderPass & GR_PARAM_RGB ? FXTRUE : FXFALSE, renderPass & GR_PARAM_A ? FXTRUE : FXFALSE);
     grDepthMask(renderPass & GR_PARAM_Z ? FXTRUE : FXFALSE);
     grBufferClear(grColor, grAlpha, -1);
@@ -552,12 +554,14 @@ void xxSetVertexConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, in
         g_projectionMatrix[3] = (*grBuffer++);
     }
 
+    float halfWidth = grContext->width * grContext->scale * 0.5f;
+    float halfHeight = grContext->height * grContext->scale * 0.5f;
     v4sf screenMatrix[4] =
     {
-        { grContext->width * 0.5f,                     0.0f, 0.0f, 0.0f },
-        {                    0.0f, grContext->height * 0.5f, 0.0f, 0.0f },
-        {                    0.0f,                     0.0f, 1.0f, 0.0f },
-        { grContext->width * 0.5f, grContext->height * 0.5f, 0.0f, 1.0f },
+        { halfWidth,    0.0f,       0.0f, 0.0f },
+        { 0.0f,         halfHeight, 0.0f, 0.0f },
+        { 0.0f,         0.0f,       1.0f, 0.0f },
+        { halfWidth,    halfHeight, 0.0f, 1.0f },
     };
     g_worldViewProjectionScreenMatrix[0] = __builtin_multiplyvector(screenMatrix, __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[0])));
     g_worldViewProjectionScreenMatrix[1] = __builtin_multiplyvector(screenMatrix, __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[1])));
