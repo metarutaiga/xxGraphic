@@ -60,6 +60,7 @@ struct GrTexture : public GrTexInfo
     FxU32   startAddress;
     int     width;
     int     height;
+    int     stride;
 };
 //==============================================================================
 //  Sampler

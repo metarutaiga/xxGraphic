@@ -290,6 +290,9 @@ typedef struct {
 } GrLfbInfo_t;
 
 typedef FxI32 GrLOD_t;
+#define GR_LOD_LOG2_2048        0xb
+#define GR_LOD_LOG2_1024        0xa
+#define GR_LOD_LOG2_512         0x9
 #define GR_LOD_LOG2_256         0x8
 #define GR_LOD_LOG2_128         0x7
 #define GR_LOD_LOG2_64          0x6
@@ -350,6 +353,17 @@ typedef FxI32 GrTextureFormat_t;
 #define GR_TEXFMT_ALPHA_INTENSITY_88    0xd
 #define GR_TEXFMT_AP_88                 0xe /* 8-bit alpha 8-bit palette */
 #define GR_TEXFMT_RSVD2                 0xf
+#define GR_TEXFMT_ARGB_CMP_FXT1         0x11
+#define GR_TEXFMT_ARGB_8888             0x12
+#define GR_TEXFMT_YUYV_422              0x13
+#define GR_TEXFMT_UYVY_422              0x14
+#define GR_TEXFMT_AYUV_444              0x15
+#define GR_TEXFMT_ARGB_CMP_DXT1         0x16
+#define GR_TEXFMT_ARGB_CMP_DXT2         0x17
+#define GR_TEXFMT_ARGB_CMP_DXT3         0x18
+#define GR_TEXFMT_ARGB_CMP_DXT4         0x19
+#define GR_TEXFMT_ARGB_CMP_DXT5         0x1A
+#define GR_TEXTFMT_RGB_888              0xFF
 
 typedef FxU32 GrTexTable_t;
 #define GR_TEXTABLE_NCC0                 0x0
@@ -362,6 +376,10 @@ typedef FxU32 GrNCCTable_t;
 #define GR_NCCTABLE_NCC1    0x1
 
 typedef FxU32 GrTexBaseRange_t;
+#define GR_TEXBASE_2048     0x7
+#define GR_TEXBASE_1024     0x6
+#define GR_TEXBASE_512      0x5
+#define GR_TEXBASE_256_TO_1 0x4
 #define GR_TEXBASE_256      0x3
 #define GR_TEXBASE_128      0x2
 #define GR_TEXBASE_64       0x1

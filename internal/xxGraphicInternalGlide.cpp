@@ -123,7 +123,7 @@ FX_PROTOTYPE(void, grGlideSetState, (const void *state), state);
 FX_PROTOTYPE(void, grGlideGetVertexLayout, (void *layout), layout);
 FX_PROTOTYPE(void, grGlideSetVertexLayout, (const void *layout), layout);
 //==============================================================================
-//  Glide to OpenGL
+//  Glide to OpenGL prototype
 //==============================================================================
 #if defined(xxMACOS)
 #define GL_SILENCE_DEPRECATION
@@ -136,21 +136,29 @@ FX_PROTOTYPE(void, grGlideSetVertexLayout, (const void *layout), layout);
 static void*            g_glLibrary = nullptr;
 static NSOpenGLView*    g_rootView = nil;
 static NSOpenGLContext* g_openGLContext[256] = {};
-static FxU32            g_texMinAddress = 0;
+static FxU32            g_width = 0;
+static FxU32            g_height = 0;
+static FxU32            g_baseTexture = 0;
 static FxU8             g_vertexLayout[256] = {};
 //------------------------------------------------------------------------------
+static void (*gto_glEnable)(GLenum cap);
+static void (*gto_glBlendFunc)(GLenum sfactor, GLenum dfactor);
 static void (*gto_glBegin)(GLenum mode);
-static void (*gto_glVertex2f)(GLfloat x, GLfloat y);
-static void (*gto_glVertex3f)(GLfloat x, GLfloat y, GLfloat z);
 static void (*gto_glVertex4f)(GLfloat x, GLfloat y, GLfloat z, GLfloat w);
 static void (*gto_glColor4f)(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
-static void (*gto_glTexCoord2f)(GLfloat s, GLfloat t);
+static void (*gto_glTexCoord4f)(GLfloat s, GLfloat t, GLfloat r, GLfloat q);
 static void (*gto_glEnd)(void);
+static void (*gto_glGenTextures)(GLsizei n, GLuint* textures);
+static void (*gto_glBindTexture)(GLenum target, GLuint texture);
+static void (*gto_glDeleteTextures)(GLsizei n, const GLuint* textures);
+static void (*gto_glTexParameteri)(GLenum target, GLenum pname, GLint param);
+static void (*gto_glTexImage2D)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const void* pixels);
 static void (*gto_glMatrixMode)(GLenum mode);
 static void (*gto_glLoadIdentity)(void);
 static void (*gto_glOrtho)(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar);
 static void (*gto_glDepthRange)(GLclampd zNear, GLclampd zFar);
 static void (*gto_glViewport)(GLint x, GLint y, GLsizei width, GLsizei height);
+static void (*gto_glScissor)(GLint x, GLint y, GLsizei width, GLsizei height);
 static void (*gto_glClearColor)(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
 static void (*gto_glClearDepth)(GLclampd depth);
 static void (*gto_glClear)(GLbitfield mask);
@@ -165,31 +173,17 @@ static void gto_grDrawTriangle(const void *a, const void *b, const void *c)
         if (g_vertexLayout[GR_PARAM_ST0] != 0xFF)
         {
             GLfloat *v = (GLfloat*)((char*)p + g_vertexLayout[GR_PARAM_ST0]);
-            gto_glTexCoord2f(v[0], v[1]);
+            gto_glTexCoord4f(v[0], v[1], 0.0f, 1.0f);
         }
         if (g_vertexLayout[GR_PARAM_PARGB] != 0xFF)
         {
             GLubyte *v = (GLubyte*)((char*)p + g_vertexLayout[GR_PARAM_PARGB]);
-            gto_glColor4f(v[0] / 255.0f, v[1] / 255.0f, v[2] / 255.0f, v[3] / 255.0f);
+            gto_glColor4f(v[2] / 255.0f, v[1] / 255.0f, v[0] / 255.0f, v[3] / 255.0f);
         }
         if (g_vertexLayout[GR_PARAM_XY] != 0xFF)
         {
             GLfloat *v = (GLfloat*)((char*)p + g_vertexLayout[GR_PARAM_XY]);
-            if (g_vertexLayout[GR_PARAM_Z] != 0xFF)
-            {
-                if (g_vertexLayout[GR_PARAM_W] != 0xFF)
-                {
-                    gto_glVertex4f(v[0], v[1], 65535.0f / v[2], 1.0f / v[3]);
-                }
-                else
-                {
-                    gto_glVertex3f(v[0], v[1], 65535.0f / v[2]);
-                }
-            }
-            else
-            {
-                gto_glVertex2f(v[0], v[1]);
-            }
+            gto_glVertex4f(v[0], v[1], 0.0f, 1.0f);
         }
     }
 
@@ -255,7 +249,24 @@ static FxBool gto_grSelectContext(GrContext_t context)
         return FXFALSE;
     NSOpenGLContext* nsContext = g_openGLContext[context % 256];
     [nsContext makeCurrentContext];
+    NSRect frame = [[nsContext view] frame];
+    g_width = frame.size.width;
+    g_height = frame.size.height;
+    gto_glViewport(0, 0, g_width, g_height);
+    gto_glScissor(0, 0, g_width, g_height);
     return FXTRUE;
+}
+//------------------------------------------------------------------------------
+static void gto_grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf, GrAlphaBlendFnc_t rgb_df, GrAlphaBlendFnc_t alpha_sf, GrAlphaBlendFnc_t alpha_df)
+{
+    gto_glEnable(GL_BLEND);
+    gto_glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+//------------------------------------------------------------------------------
+static void gto_grClipWindow(FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy)
+{
+    gto_glEnable(GL_SCISSOR_TEST);
+    gto_glScissor(minx, g_height - maxy, maxx - minx, maxy - miny);
 }
 //------------------------------------------------------------------------------
 static const char * gto_grGetString(FxU32 pname)
@@ -283,9 +294,47 @@ static void gto_grViewport(FxI32 x, FxI32 y, FxI32 width, FxI32 height)
     gto_glViewport(x, y, width, height);
 }
 //------------------------------------------------------------------------------
+static FxU32 gto_grTexCalcMemRequired(GrLOD_t lodmin, GrLOD_t lodmax, GrAspectRatio_t aspect, GrTextureFormat_t fmt)
+{
+    GLuint texture = 0;
+    gto_glGenTextures(1, &texture);
+    return texture - g_baseTexture;
+}
+//------------------------------------------------------------------------------
 static FxU32 gto_grTexMinAddress(GrChipID_t tmu)
 {
-    return g_texMinAddress;
+    return g_baseTexture;
+}
+//------------------------------------------------------------------------------
+static void gto_grTexSource(GrChipID_t tmu, FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info)
+{
+    GLuint texture = startAddress;
+    gto_glEnable(GL_TEXTURE_2D);
+    gto_glBindTexture(GL_TEXTURE_2D, texture);
+}
+//------------------------------------------------------------------------------
+static void gto_grTexDownloadMipMap(GrChipID_t tmu, FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info)
+{
+    GLuint texture = startAddress;
+    gto_glBindTexture(GL_TEXTURE_2D, texture);
+    gto_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    gto_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    gto_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    gto_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    GLsizei width = 1;
+    GLsizei height = 1;
+    if (info->aspectRatioLog2 < 0)
+    {
+        width = (1 << (info->largeLodLog2 + info->aspectRatioLog2));
+        height = (1 << info->largeLodLog2);
+    }
+    else
+    {
+        width = (1 << info->largeLodLog2);
+        height = (1 << (info->largeLodLog2 - info->aspectRatioLog2));
+    }
+    gto_glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, info->data);
+    gto_glBindTexture(GL_TEXTURE_2D, 0);
 }
 //------------------------------------------------------------------------------
 static void gto_grGlideInit(void)
@@ -294,18 +343,24 @@ static void gto_grGlideInit(void)
     {
         g_glLibrary = xxLoadLibrary("/System/Library/Frameworks/OpenGL.framework/OpenGL");
     }
+    (void*&)gto_glEnable = xxGetProcAddress(g_glLibrary, "glEnable");
+    (void*&)gto_glBlendFunc = xxGetProcAddress(g_glLibrary, "glBlendFunc");
     (void*&)gto_glBegin = xxGetProcAddress(g_glLibrary, "glBegin");
-    (void*&)gto_glVertex2f = xxGetProcAddress(g_glLibrary, "glVertex2f");
-    (void*&)gto_glVertex3f = xxGetProcAddress(g_glLibrary, "glVertex3f");
     (void*&)gto_glVertex4f = xxGetProcAddress(g_glLibrary, "glVertex4f");
     (void*&)gto_glColor4f = xxGetProcAddress(g_glLibrary, "glColor4f");
-    (void*&)gto_glTexCoord2f = xxGetProcAddress(g_glLibrary, "glTexCoord2f");
+    (void*&)gto_glTexCoord4f = xxGetProcAddress(g_glLibrary, "glTexCoord2f");
     (void*&)gto_glEnd = xxGetProcAddress(g_glLibrary, "glEnd");
+    (void*&)gto_glGenTextures = xxGetProcAddress(g_glLibrary, "glGenTextures");
+    (void*&)gto_glBindTexture = xxGetProcAddress(g_glLibrary, "glBindTexture");
+    (void*&)gto_glDeleteTextures = xxGetProcAddress(g_glLibrary, "glDeleteTextures");
+    (void*&)gto_glTexParameteri = xxGetProcAddress(g_glLibrary, "glTexParameteri");
+    (void*&)gto_glTexImage2D = xxGetProcAddress(g_glLibrary, "glTexImage2D");
     (void*&)gto_glMatrixMode = xxGetProcAddress(g_glLibrary, "glMatrixMode");
     (void*&)gto_glLoadIdentity = xxGetProcAddress(g_glLibrary, "glLoadIdentity");
     (void*&)gto_glOrtho = xxGetProcAddress(g_glLibrary, "glOrtho");
     (void*&)gto_glDepthRange = xxGetProcAddress(g_glLibrary, "glDepthRange");
     (void*&)gto_glViewport = xxGetProcAddress(g_glLibrary, "glViewport");
+    (void*&)gto_glScissor = xxGetProcAddress(g_glLibrary, "glScissor");
     (void*&)gto_glClearColor = xxGetProcAddress(g_glLibrary, "glClearColor");
     (void*&)gto_glClearDepth = xxGetProcAddress(g_glLibrary, "glClearDepth");
     (void*&)gto_glClear = xxGetProcAddress(g_glLibrary, "glClear");
@@ -313,31 +368,43 @@ static void gto_grGlideInit(void)
     NSOpenGLPixelFormatAttribute attributes[2] = { NSOpenGLPFADoubleBuffer };
     g_rootView = [[NSOpenGLView alloc] initWithFrame:CGRectMake(0, 0, 1, 1)
                                          pixelFormat:[[NSOpenGLPixelFormat alloc] initWithAttributes:attributes]];
+    [[g_rootView openGLContext] makeCurrentContext];
 
+    gto_glGenTextures(1, &g_baseTexture);
     memset(g_vertexLayout, 0xFF, sizeof(g_vertexLayout));
 }
 //------------------------------------------------------------------------------
 static void gto_grGlideShutdown(void)
 {
+    if (g_baseTexture)
+    {
+        gto_glDeleteTextures(1, &g_baseTexture);
+        g_baseTexture = 0;
+    }
     if (g_glLibrary)
     {
         xxFreeLibrary(g_glLibrary);
         g_glLibrary = nullptr;
     }
     g_rootView = nil;
-    g_texMinAddress = 0;
+    gto_glEnable = nullptr;
+    gto_glBlendFunc = nullptr;
     gto_glBegin = nullptr;
-    gto_glVertex2f = nullptr;
-    gto_glVertex3f = nullptr;
     gto_glVertex4f = nullptr;
     gto_glColor4f = nullptr;
-    gto_glTexCoord2f = nullptr;
+    gto_glTexCoord4f = nullptr;
     gto_glEnd = nullptr;
+    gto_glGenTextures = nullptr;
+    gto_glBindTexture = nullptr;
+    gto_glDeleteTextures = nullptr;
+    gto_glTexParameteri = nullptr;
+    gto_glTexImage2D = nullptr;
     gto_glMatrixMode = nullptr;
     gto_glLoadIdentity = nullptr;
     gto_glOrtho = nullptr;
     gto_glDepthRange = nullptr;
     gto_glViewport = nullptr;
+    gto_glScissor = nullptr;
     gto_glClearColor = nullptr;
     gto_glClearDepth = nullptr;
     gto_glClear = nullptr;
@@ -347,19 +414,24 @@ GrProc FX_CALL gto_grGetProcAddress(char* name)
 {
     switch (xxHash(name))
     {
-    case xxHash("grDrawTriangle"):      return (GrProc)gto_grDrawTriangle;
-    case xxHash("grVertexLayout"):      return (GrProc)gto_grVertexLayout;
-    case xxHash("grBufferClear"):       return (GrProc)gto_grBufferClear;
-    case xxHash("grBufferSwap"):        return (GrProc)gto_grBufferSwap;
-    case xxHash("grSstWinOpen"):        return (GrProc)gto_grSstWinOpen;
-    case xxHash("grSstWinClose"):       return (GrProc)gto_grSstWinClose;
-    case xxHash("grSelectContext"):     return (GrProc)gto_grSelectContext;
-    case xxHash("grGetString"):         return (GrProc)gto_grGetString;
-    case xxHash("grDepthRange"):        return (GrProc)gto_grDepthRange;
-    case xxHash("grViewport"):          return (GrProc)gto_grViewport;
-    case xxHash("grTexMinAddress"):     return (GrProc)gto_grTexMinAddress;
-    case xxHash("grGlideInit"):         return (GrProc)gto_grGlideInit;
-    case xxHash("grGlideShutdown"):     return (GrProc)gto_grGlideShutdown;
+    case xxHash("grDrawTriangle"):          return (GrProc)gto_grDrawTriangle;
+    case xxHash("grVertexLayout"):          return (GrProc)gto_grVertexLayout;
+    case xxHash("grBufferClear"):           return (GrProc)gto_grBufferClear;
+    case xxHash("grBufferSwap"):            return (GrProc)gto_grBufferSwap;
+    case xxHash("grSstWinOpen"):            return (GrProc)gto_grSstWinOpen;
+    case xxHash("grSstWinClose"):           return (GrProc)gto_grSstWinClose;
+    case xxHash("grSelectContext"):         return (GrProc)gto_grSelectContext;
+    case xxHash("grAlphaBlendFunction"):    return (GrProc)gto_grAlphaBlendFunction;
+    case xxHash("grClipWindow"):            return (GrProc)gto_grClipWindow;
+    case xxHash("grGetString"):             return (GrProc)gto_grGetString;
+    case xxHash("grDepthRange"):            return (GrProc)gto_grDepthRange;
+    case xxHash("grViewport"):              return (GrProc)gto_grViewport;
+    case xxHash("grTexCalcMemRequired"):    return (GrProc)gto_grTexCalcMemRequired;
+    case xxHash("grTexMinAddress"):         return (GrProc)gto_grTexMinAddress;
+    case xxHash("grTexSource"):             return (GrProc)gto_grTexSource;
+    case xxHash("grTexDownloadMipMap"):     return (GrProc)gto_grTexDownloadMipMap;
+    case xxHash("grGlideInit"):             return (GrProc)gto_grGlideInit;
+    case xxHash("grGlideShutdown"):         return (GrProc)gto_grGlideShutdown;
     }
     return nullptr;
 }

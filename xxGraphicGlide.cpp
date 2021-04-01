@@ -16,7 +16,7 @@ static uint64_t g_vertexAttribute = 0;
 static v4sf     g_worldMatrix[4];
 static v4sf     g_viewMatrix[4];
 static v4sf     g_projectionMatrix[4];
-static v4sf     g_worldViewProjectionMatrix[4];
+static v4sf     g_worldViewProjectionScreenMatrix[4];
 
 //==============================================================================
 //  Instance
@@ -300,51 +300,24 @@ void xxUnmapBufferGlide(uint64_t device, uint64_t buffer)
 uint64_t xxCreateTextureGlide(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external)
 {
     GrTexture* info = xxAlloc(GrTexture);
+    if (info == nullptr)
+        return 0;
 
-    int lod = width;
-    GrAspectRatio_t aspect = GR_ASPECT_LOG2_1x1;
-    switch ((int)(8.0 * (float)width / (float)height))
-    {
-    case 1:
-        lod = width;
-        aspect = GR_ASPECT_LOG2_1x8;
-        break;
-    case 2:
-        lod = width;
-        aspect = GR_ASPECT_LOG2_1x4;
-        break;
-    case 4:
-        lod = width;
-        aspect = GR_ASPECT_LOG2_1x2;
-        break;
-    case 8:
-        lod = width = height;
-        aspect = GR_ASPECT_LOG2_1x1;
-        break;
-    case 16:
-        lod = height;
-        aspect = GR_ASPECT_LOG2_2x1;
-        break;
-    case 32:
-        lod = height;
-        aspect = GR_ASPECT_LOG2_4x1;
-        break;
-    case 64:
-        lod = height;
-        aspect = GR_ASPECT_LOG2_8x1;
-        break;
-    }
+    int widthLog2 = 31 - xxCountLeadingZeros(width);
+    int heightLog2 = 31 - xxCountLeadingZeros(height);
+    int largeLodLog2 = widthLog2 > heightLog2 ? widthLog2 : heightLog2;
+    GrAspectRatio_t aspectRatioLog2 = widthLog2 - heightLog2;
 
-    int lodLog2 = 31 - xxCountLeadingZeros(lod);
-    info->smallLodLog2 = lodLog2 >> (mipmap - 1);
-    info->largeLodLog2 = lodLog2;
-    info->aspectRatioLog2 = aspect;
-    info->format = GR_TEXFMT_ARGB_4444;
+    info->smallLodLog2 = largeLodLog2 >> (mipmap - 1);
+    info->largeLodLog2 = largeLodLog2;
+    info->aspectRatioLog2 = aspectRatioLog2;
+    info->format = GR_TEXFMT_ARGB_8888;
     info->data = xxAlloc(uint32_t, width * height);
     info->startAddress = g_startAddress;
     info->width = width;
     info->height = height;
-    g_startAddress = grTexCalcMemRequired(info->smallLodLog2, info->largeLodLog2, info->aspectRatioLog2, info->format);
+    info->stride = width * sizeof(uint32_t);
+    g_startAddress += grTexCalcMemRequired(info->smallLodLog2, info->largeLodLog2, info->aspectRatioLog2, info->format);
 
     return reinterpret_cast<uint64_t>(info);
 }
@@ -362,6 +335,11 @@ void* xxMapTextureGlide(uint64_t device, uint64_t texture, int* stride, int leve
     if (info == nullptr)
         return nullptr;
 
+    if (stride)
+    {
+        (*stride) = info->stride;
+    }
+
     return info->data;
 }
 //------------------------------------------------------------------------------
@@ -370,20 +348,6 @@ void xxUnmapTextureGlide(uint64_t device, uint64_t texture, int level, int array
     GrTexture* info = reinterpret_cast<GrTexture*>(texture);
     if (info == nullptr)
         return;
-
-    uint32_t* tex8888 = (uint32_t*)info->data;
-    uint16_t* tex4444 = (uint16_t*)info->data;
-    int count = info->width * info->height;
-    for (int i = 0; i < count; ++i)
-    {
-        uint32_t pixel8888 = tex8888[i];
-        uint16_t pixel4444 = 0;
-        pixel4444 |= (pixel8888 >>  4) & 0x000F;
-        pixel4444 |= (pixel8888 >>  8) & 0x00F0;
-        pixel4444 |= (pixel8888 >> 12) & 0x0F00;
-        pixel4444 |= (pixel8888 >> 16) & 0xF000;
-        tex4444[i] = pixel4444;
-    }
 
     grTexDownloadMipMap(GR_TMU0, info->startAddress, GR_MIPMAPLEVELMASK_BOTH, info);
 }
@@ -496,7 +460,7 @@ void xxSetViewportGlide(uint64_t commandEncoder, int x, int y, int width, int he
 //------------------------------------------------------------------------------
 void xxSetScissorGlide(uint64_t commandEncoder, int x, int y, int width, int height)
 {
-    grClipWindow(x, y, width, height);
+    grClipWindow(x, y, x + width, y + height);
 }
 //------------------------------------------------------------------------------
 void xxSetPipelineGlide(uint64_t commandEncoder, uint64_t pipeline)
@@ -532,7 +496,7 @@ void xxSetFragmentTexturesGlide(uint64_t commandEncoder, int count, const uint64
     for (int i = 0; i < count; ++i)
     {
         GrTexture* info = reinterpret_cast<GrTexture*>(textures[i]);
-        grTexDownloadMipMap(GR_TMU0 + i, info->startAddress, GR_MIPMAPLEVELMASK_BOTH, info);
+        grTexSource(GR_TMU0 + i, info->startAddress, GR_MIPMAPLEVELMASK_BOTH, info);
     }
 }
 //------------------------------------------------------------------------------
@@ -554,6 +518,7 @@ void xxSetFragmentSamplersGlide(uint64_t commandEncoder, int count, const uint64
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, int size)
 {
+    GrContext grContext = { commandEncoder };
     v4sf* grBuffer = reinterpret_cast<v4sf*>(buffer);
 
     if (size >= sizeof(g_worldMatrix))
@@ -581,10 +546,17 @@ void xxSetVertexConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, in
         g_projectionMatrix[3] = (*grBuffer++);
     }
 
-    g_worldViewProjectionMatrix[0] = __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[0]));
-    g_worldViewProjectionMatrix[1] = __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[1]));
-    g_worldViewProjectionMatrix[2] = __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[2]));
-    g_worldViewProjectionMatrix[3] = __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[3]));
+    v4sf screenMatrix[4] =
+    {
+        { grContext.width * 0.5f,                    0.0f, 0.0f, 0.0f },
+        {                   0.0f, grContext.height * 0.5f, 0.0f, 0.0f },
+        {                   0.0f,                    0.0f, 1.0f, 0.0f },
+        { grContext.width * 0.5f, grContext.height * 0.5f, 0.0f, 1.0f },
+    };
+    g_worldViewProjectionScreenMatrix[0] = __builtin_multiplyvector(screenMatrix, __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[0])));
+    g_worldViewProjectionScreenMatrix[1] = __builtin_multiplyvector(screenMatrix, __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[1])));
+    g_worldViewProjectionScreenMatrix[2] = __builtin_multiplyvector(screenMatrix, __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[2])));
+    g_worldViewProjectionScreenMatrix[3] = __builtin_multiplyvector(screenMatrix, __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[3])));
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, int size)
@@ -594,7 +566,6 @@ void xxSetFragmentConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, 
 //------------------------------------------------------------------------------
 void xxDrawIndexedGlide(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
-    GrContext grContext = { commandEncoder };
     GrVertexAttribute grVertexAttribute = { g_vertexAttribute };
     uint16_t* grIndexBuffer = reinterpret_cast<uint16_t*>(indexBuffer) + firstIndex;
     for (int i = 0; i < indexCount; i += 3)
@@ -608,17 +579,17 @@ void xxDrawIndexedGlide(uint64_t commandEncoder, uint64_t indexBuffer, int index
 
         if (grVertexAttribute.flags & GR_PARAM_XY)
         {
-            v4sf p0 = __builtin_multiplyvector(g_worldViewProjectionMatrix, v4sf{ v0[0], v0[1], v0[2], 1.0f });
-            v4sf p1 = __builtin_multiplyvector(g_worldViewProjectionMatrix, v4sf{ v1[0], v1[1], v1[2], 1.0f });
-            v4sf p2 = __builtin_multiplyvector(g_worldViewProjectionMatrix, v4sf{ v2[0], v2[1], v2[2], 1.0f });
+            v4sf p0 = __builtin_multiplyvector(g_worldViewProjectionScreenMatrix, v4sf{ v0[0], v0[1], v0[2], 1.0f });
+            v4sf p1 = __builtin_multiplyvector(g_worldViewProjectionScreenMatrix, v4sf{ v1[0], v1[1], v1[2], 1.0f });
+            v4sf p2 = __builtin_multiplyvector(g_worldViewProjectionScreenMatrix, v4sf{ v2[0], v2[1], v2[2], 1.0f });
 
-            t0.x = grContext.width * (p0[0] * 0.5f + 0.5f);
-            t1.x = grContext.width * (p1[0] * 0.5f + 0.5f);
-            t2.x = grContext.width * (p2[0] * 0.5f + 0.5f);
+            t0.x = p0[0];
+            t1.x = p1[0];
+            t2.x = p2[0];
 
-            t0.y = grContext.height * (p0[1] * 0.5f + 0.5f);
-            t1.y = grContext.height * (p1[1] * 0.5f + 0.5f);
-            t2.y = grContext.height * (p2[1] * 0.5f + 0.5f);
+            t0.y = p0[1];
+            t1.y = p1[1];
+            t2.y = p2[1];
 
             t0.ooz = 65535.0f / p0[2];
             t1.ooz = 65535.0f / p1[2];
