@@ -36,7 +36,7 @@ GrProc FX_CALL grGetProcAddress(char* name)
     if (g_glideLibrary == nullptr)
         g_glideLibrary = xxLoadLibrary("glide3x.dll");
     if (g_glideLibrary == nullptr)
-        return nullptr;
+        return gto_grGetProcAddress(name);
 #if defined(_M_IX86)
     for (int i = 0; i <= 40; i += 4)
     {
@@ -118,7 +118,11 @@ uint64_t xxCreateSwapchainGlide(uint64_t device, uint64_t renderPass, void* view
     if (grContext == nullptr)
         return 0;
 
+#if defined(xxWINDOWS)
+    grContext->context = grSstWinOpen(view, width | (height << 16), GR_REFRESH_NONE, GR_COLORFORMAT_ARGB, GR_ORIGIN_LOWER_LEFT, 2, 0);
+#else
     grContext->context = grSstWinOpen(view, width | (height << 16), GR_REFRESH_NONE, GR_COLORFORMAT_ABGR, GR_ORIGIN_LOWER_LEFT, 2, 0);
+#endif
     grContext->view = view;
     grContext->width = width;
     grContext->height = height;

@@ -10,7 +10,7 @@
 
 #include "glide/glide.h"
 
-#if defined(xxMACOS)
+#if defined(xxMACOS) || defined(xxWINDOWS)
 GrProc FX_CALL gto_grGetProcAddress(char* name);
 #endif
 

@@ -133,38 +133,64 @@ FX_PROTOTYPE(void, grGlideSetVertexLayout, (const void *layout), layout);
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/gl.h>
 #import <OpenGL/OpenGL.h>
-static void*            g_glLibrary = nullptr;
-static NSOpenGLView*    g_rootView = nil;
-static NSOpenGLContext* g_openGLContext[256] = {};
-static FxU32            g_width = 0;
-static FxU32            g_height = 0;
-static FxU32            g_baseTexture = 0;
-static FxU8             g_vertexLayout[256] = {};
 //------------------------------------------------------------------------------
-static void (*gto_glEnable)(GLenum cap);
-static void (*gto_glBlendFuncSeparate)(GLenum sfactorRGB, GLenum dfactorRGB, GLenum sfactorAlpha, GLenum dfactorAlpha);
-static void (*gto_glBegin)(GLenum mode);
-static void (*gto_glVertex4f)(GLfloat x, GLfloat y, GLfloat z, GLfloat w);
-static void (*gto_glColor4f)(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
-static void (*gto_glTexCoord4f)(GLfloat s, GLfloat t, GLfloat r, GLfloat q);
-static void (*gto_glEnd)(void);
-static void (*gto_glGenTextures)(GLsizei n, GLuint* textures);
-static void (*gto_glBindTexture)(GLenum target, GLuint texture);
-static void (*gto_glDeleteTextures)(GLsizei n, const GLuint* textures);
-static void (*gto_glTexParameteri)(GLenum target, GLenum pname, GLint param);
-static void (*gto_glTexImage2D)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const void* pixels);
-static void (*gto_glMatrixMode)(GLenum mode);
-static void (*gto_glLoadIdentity)(void);
-static void (*gto_glOrtho)(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar);
-static void (*gto_glDepthRange)(GLclampd zNear, GLclampd zFar);
-static void (*gto_glViewport)(GLint x, GLint y, GLsizei width, GLsizei height);
-static void (*gto_glScissor)(GLint x, GLint y, GLsizei width, GLsizei height);
-static void (*gto_glClearColor)(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
-static void (*gto_glClearDepth)(GLclampd depth);
-static void (*gto_glClear)(GLbitfield mask);
+static void*                    g_glLibrary = nullptr;
+static NSOpenGLView*            g_rootView = nil;
+static NSOpenGLContext*         g_openGLContext[256] = {};
+#elif defined(xxWINDOWS)
+#include "../gl/gl.h"
+#include "../gl/wgl.h"
+typedef double GLdouble;
+typedef double GLclampd;
+static int                      (WINAPI* ChoosePixelFormat)(HDC, CONST PIXELFORMATDESCRIPTOR*);
+static BOOL                     (WINAPI* SetPixelFormat)(HDC, int, CONST PIXELFORMATDESCRIPTOR*);
+static BOOL                     (WINAPI* SwapBuffers)(HDC);
+static PFNWGLCREATECONTEXTPROC  wglCreateContext;
+static PFNWGLDELETECONTEXTPROC  wglDeleteContext;
+static PFNWGLGETCURRENTDCPROC   wglGetCurrentDC;
+static PFNWGLMAKECURRENTPROC    wglMakeCurrent;
+static PFNWGLSHARELISTSPROC     wglShareLists;
+//------------------------------------------------------------------------------
+static void*                    g_gdiLibrary = nullptr;
+static void*                    g_glLibrary = nullptr;
+static HWND                     g_dummyWindow = nullptr;
+static PIXELFORMATDESCRIPTOR    g_desc = {};
+static HGLRC                    g_instance = nullptr;
+static HGLRC                    g_openGLContext[256] = {};
+static HDC                      g_openGLDC[256] = {};
+static HWND                     g_openGLHWND[256] = {};
+#endif
+#if defined(xxMACOS) || defined(xxWINDOWS)
+static FxU32                    g_width = 0;
+static FxU32                    g_height = 0;
+static FxU32                    g_baseTexture = 0;
+static FxU8                     g_vertexLayout[256] = {};
+//------------------------------------------------------------------------------
+static void (GL_APIENTRY* gto_glEnable)(GLenum cap);
+static void (GL_APIENTRY* gto_glBlendFunc)(GLenum sfactor, GLenum dfactor);
+static void (GL_APIENTRY* gto_glBlendFuncSeparate)(GLenum sfactorRGB, GLenum dfactorRGB, GLenum sfactorAlpha, GLenum dfactorAlpha);
+static void (GL_APIENTRY* gto_glBegin)(GLenum mode);
+static void (GL_APIENTRY* gto_glVertex4f)(GLfloat x, GLfloat y, GLfloat z, GLfloat w);
+static void (GL_APIENTRY* gto_glColor4f)(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
+static void (GL_APIENTRY* gto_glTexCoord4f)(GLfloat s, GLfloat t, GLfloat r, GLfloat q);
+static void (GL_APIENTRY* gto_glEnd)(void);
+static void (GL_APIENTRY* gto_glGenTextures)(GLsizei n, GLuint* textures);
+static void (GL_APIENTRY* gto_glBindTexture)(GLenum target, GLuint texture);
+static void (GL_APIENTRY* gto_glDeleteTextures)(GLsizei n, const GLuint* textures);
+static void (GL_APIENTRY* gto_glTexParameteri)(GLenum target, GLenum pname, GLint param);
+static void (GL_APIENTRY* gto_glTexImage2D)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const void* pixels);
+static void (GL_APIENTRY* gto_glMatrixMode)(GLenum mode);
+static void (GL_APIENTRY* gto_glLoadIdentity)(void);
+static void (GL_APIENTRY* gto_glOrtho)(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar);
+static void (GL_APIENTRY* gto_glDepthRange)(GLclampd zNear, GLclampd zFar);
+static void (GL_APIENTRY* gto_glViewport)(GLint x, GLint y, GLsizei width, GLsizei height);
+static void (GL_APIENTRY* gto_glScissor)(GLint x, GLint y, GLsizei width, GLsizei height);
+static void (GL_APIENTRY* gto_glClearColor)(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
+static void (GL_APIENTRY* gto_glClearDepth)(GLclampd depth);
+static void (GL_APIENTRY* gto_glClear)(GLbitfield mask);
 //------------------------------------------------------------------------------
 template<int R, int G, int B, int A>
-static void gto_grDrawTriangle(const void *a, const void *b, const void *c)
+static void FX_CALL gto_grDrawTriangle(const void *a, const void *b, const void *c)
 {
     gto_glBegin(GL_TRIANGLES);
 
@@ -191,12 +217,12 @@ static void gto_grDrawTriangle(const void *a, const void *b, const void *c)
     gto_glEnd();
 }
 //------------------------------------------------------------------------------
-static void gto_grVertexLayout(FxU32 param, FxI32 offset, FxU32 mode)
+static void FX_CALL gto_grVertexLayout(FxU32 param, FxI32 offset, FxU32 mode)
 {
     g_vertexLayout[param] = (mode == GR_PARAM_ENABLE) ? offset : 0xFF;
 }
 //------------------------------------------------------------------------------
-static void gto_grBufferClear(GrColor_t color, GrAlpha_t alpha, FxU32 depth)
+static void FX_CALL gto_grBufferClear(GrColor_t color, GrAlpha_t alpha, FxU32 depth)
 {
     GLclampf glRed = ((color >> 0) & 0xFF) / 255.0f;
     GLclampf glGreen = ((color >> 8) & 0xFF) / 255.0f;
@@ -208,12 +234,16 @@ static void gto_grBufferClear(GrColor_t color, GrAlpha_t alpha, FxU32 depth)
     gto_glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 //------------------------------------------------------------------------------
-static void gto_grBufferSwap(FxU32 swap_interval)
+static void FX_CALL gto_grBufferSwap(FxU32 swap_interval)
 {
+#if defined(xxMACOS)
     [[NSOpenGLContext currentContext] flushBuffer];
+#elif defined(xxWINDOWS)
+    SwapBuffers(wglGetCurrentDC());
+#endif
 }
 //------------------------------------------------------------------------------
-static GrContext_t gto_grSstWinOpen(void *hWnd, GrScreenResolution_t screen_resolution, GrScreenRefresh_t refresh_rate, GrColorFormat_t color_format, GrOriginLocation_t origin_location, int nColBuffers, int nAuxBuffers)
+static GrContext_t FX_CALL gto_grSstWinOpen(void *hWnd, GrScreenResolution_t screen_resolution, GrScreenRefresh_t refresh_rate, GrColorFormat_t color_format, GrOriginLocation_t origin_location, int nColBuffers, int nAuxBuffers)
 {
     switch (color_format)
     {
@@ -224,7 +254,7 @@ static GrContext_t gto_grSstWinOpen(void *hWnd, GrScreenResolution_t screen_reso
         grDrawTriangleEntry = gto_grDrawTriangle<0, 1, 2, 3>;
         break;
     }
-
+#if defined(xxMACOS)
     NSOpenGLContext* nsContext = [[NSOpenGLContext alloc] initWithFormat:[g_rootView pixelFormat]
                                                             shareContext:[g_rootView openGLContext]];
     [nsContext setView:[[(__bridge NSWindow*)hWnd contentViewController] view]];
@@ -239,35 +269,74 @@ static GrContext_t gto_grSstWinOpen(void *hWnd, GrScreenResolution_t screen_reso
             return static_cast<GrContext_t>(i);
         }
     }
+#elif defined(xxWINDOWS)
+    HDC hDC = GetDC((HWND)hWnd);
+    SetPixelFormat(hDC, ChoosePixelFormat(hDC, &g_desc), &g_desc);
+    HGLRC hGLRC = wglCreateContext(hDC);
+    wglShareLists(g_instance, hGLRC);
+    for (int i = 1; i < 256; ++i)
+    {
+        if (g_openGLContext[i] == nullptr)
+        {
+            g_openGLContext[i] = hGLRC;
+            g_openGLDC[i] = hDC;
+            g_openGLHWND[i] = (HWND)hWnd;
+            return static_cast<GrContext_t>(i);
+        }
+    }
+#endif
     return 0;
 }
 //------------------------------------------------------------------------------
-static FxBool gto_grSstWinClose(GrContext_t context)
+static FxBool FX_CALL gto_grSstWinClose(GrContext_t context)
 {
     if (context == 0)
         return FXFALSE;
+#if defined(xxMACOS)
     NSOpenGLContext* nsContext = g_openGLContext[context % 256];
     [nsContext makeCurrentContext];
     [nsContext clearDrawable];
     [NSOpenGLContext clearCurrentContext];
     g_openGLContext[context % 256] = nil;
+#elif defined(xxWINDOWS)
+    HGLRC hGLRC = g_openGLContext[context % 256];
+    HDC hDC = g_openGLDC[context % 256];
+    HWND hWnd = g_openGLHWND[context % 256];
+    wglMakeCurrent(hDC, nullptr);
+    wglDeleteContext(hGLRC);
+    ReleaseDC(hWnd, hDC);
+    g_openGLContext[context % 256] = nullptr;
+    g_openGLDC[context % 256] = nullptr;
+    g_openGLHWND[context % 256] = nullptr;
+#endif
     return FXTRUE;
 }
 //------------------------------------------------------------------------------
-static FxBool gto_grSelectContext(GrContext_t context)
+static FxBool FX_CALL gto_grSelectContext(GrContext_t context)
 {
     if (context == 0)
         return FXFALSE;
+#if defined(xxMACOS)
     NSOpenGLContext* nsContext = g_openGLContext[context % 256];
     [nsContext makeCurrentContext];
     NSView* nsView = [nsContext view];
     NSRect frame = [nsView convertRectToBacking:[nsView frame]];
     g_width = frame.size.width;
     g_height = frame.size.height;
+#elif defined(xxWINDOWS)
+    HGLRC hGLRC = g_openGLContext[context % 256];
+    HDC hDC = g_openGLDC[context % 256];
+    HWND hWnd = g_openGLHWND[context % 256];
+    wglMakeCurrent(hDC, hGLRC);
+    RECT rect = {};
+    GetClientRect(hWnd, &rect);
+    g_width = rect.right - rect.left;
+    g_height = rect.bottom - rect.top;
+#endif
     return FXTRUE;
 }
 //------------------------------------------------------------------------------
-static void gto_grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf, GrAlphaBlendFnc_t rgb_df, GrAlphaBlendFnc_t alpha_sf, GrAlphaBlendFnc_t alpha_df)
+static void FX_CALL gto_grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf, GrAlphaBlendFnc_t rgb_df, GrAlphaBlendFnc_t alpha_sf, GrAlphaBlendFnc_t alpha_df)
 {
     static const GLenum glAlphaBlend[8] =
     {
@@ -281,16 +350,19 @@ static void gto_grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf, GrAlphaBlendFnc_t
         GL_ONE_MINUS_DST_ALPHA,
     };
     gto_glEnable(GL_BLEND);
-    gto_glBlendFuncSeparate(glAlphaBlend[rgb_sf], glAlphaBlend[rgb_df], glAlphaBlend[alpha_sf], glAlphaBlend[alpha_df]);
+    if (gto_glBlendFuncSeparate)
+        gto_glBlendFuncSeparate(glAlphaBlend[rgb_sf], glAlphaBlend[rgb_df], glAlphaBlend[alpha_sf], glAlphaBlend[alpha_df]);
+    else
+        gto_glBlendFunc(glAlphaBlend[rgb_sf], glAlphaBlend[rgb_df]);
 }
 //------------------------------------------------------------------------------
-static void gto_grClipWindow(FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy)
+static void FX_CALL gto_grClipWindow(FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 maxy)
 {
     gto_glEnable(GL_SCISSOR_TEST);
     gto_glScissor(minx, g_height - maxy, maxx - minx, maxy - miny);
 }
 //------------------------------------------------------------------------------
-static const char * gto_grGetString(FxU32 pname)
+static const char * FX_CALL gto_grGetString(FxU32 pname)
 {
     switch (pname)
     {
@@ -302,12 +374,12 @@ static const char * gto_grGetString(FxU32 pname)
     return nullptr;
 }
 //------------------------------------------------------------------------------
-static void gto_grDepthRange(FxFloat n, FxFloat f)
+static void FX_CALL gto_grDepthRange(FxFloat n, FxFloat f)
 {
     gto_glDepthRange(n, f);
 }
 //------------------------------------------------------------------------------
-static void gto_grViewport(FxI32 x, FxI32 y, FxI32 width, FxI32 height)
+static void FX_CALL gto_grViewport(FxI32 x, FxI32 y, FxI32 width, FxI32 height)
 {
     gto_glMatrixMode(GL_PROJECTION);
     gto_glLoadIdentity();
@@ -315,31 +387,31 @@ static void gto_grViewport(FxI32 x, FxI32 y, FxI32 width, FxI32 height)
     gto_glViewport(x, y, width, height);
 }
 //------------------------------------------------------------------------------
-static FxU32 gto_grTexCalcMemRequired(GrLOD_t lodmin, GrLOD_t lodmax, GrAspectRatio_t aspect, GrTextureFormat_t fmt)
+static FxU32 FX_CALL gto_grTexCalcMemRequired(GrLOD_t lodmin, GrLOD_t lodmax, GrAspectRatio_t aspect, GrTextureFormat_t fmt)
 {
     GLuint texture = 0;
     gto_glGenTextures(1, &texture);
     return texture - g_baseTexture;
 }
 //------------------------------------------------------------------------------
-static FxU32 gto_grTexMinAddress(GrChipID_t tmu)
+static FxU32 FX_CALL gto_grTexMinAddress(GrChipID_t tmu)
 {
     return g_baseTexture;
 }
 //------------------------------------------------------------------------------
-static void gto_grTexSource(GrChipID_t tmu, FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info)
+static void FX_CALL gto_grTexSource(GrChipID_t tmu, FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info)
 {
     GLuint texture = startAddress;
     gto_glEnable(GL_TEXTURE_2D);
     gto_glBindTexture(GL_TEXTURE_2D, texture);
 }
 //------------------------------------------------------------------------------
-static void gto_grTexDownloadMipMap(GrChipID_t tmu, FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info)
+static void FX_CALL gto_grTexDownloadMipMap(GrChipID_t tmu, FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info)
 {
     GLuint texture = startAddress;
     gto_glBindTexture(GL_TEXTURE_2D, texture);
-    gto_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    gto_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    gto_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gto_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     gto_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     gto_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     GLsizei width = 1;
@@ -358,18 +430,23 @@ static void gto_grTexDownloadMipMap(GrChipID_t tmu, FxU32 startAddress, FxU32 ev
     gto_glBindTexture(GL_TEXTURE_2D, 0);
 }
 //------------------------------------------------------------------------------
-static void gto_grGlideInit(void)
+static void FX_CALL gto_grGlideInit(void)
 {
     if (g_glLibrary == nullptr)
     {
+#if defined(xxMACOS)
         g_glLibrary = xxLoadLibrary("/System/Library/Frameworks/OpenGL.framework/OpenGL");
+#elif defined(xxWINDOWS)
+        g_glLibrary = xxLoadLibrary("opengl32.dll");
+#endif
     }
     (void*&)gto_glEnable = xxGetProcAddress(g_glLibrary, "glEnable");
+    (void*&)gto_glBlendFunc = xxGetProcAddress(g_glLibrary, "glBlendFunc");
     (void*&)gto_glBlendFuncSeparate = xxGetProcAddress(g_glLibrary, "glBlendFuncSeparate");
     (void*&)gto_glBegin = xxGetProcAddress(g_glLibrary, "glBegin");
     (void*&)gto_glVertex4f = xxGetProcAddress(g_glLibrary, "glVertex4f");
     (void*&)gto_glColor4f = xxGetProcAddress(g_glLibrary, "glColor4f");
-    (void*&)gto_glTexCoord4f = xxGetProcAddress(g_glLibrary, "glTexCoord2f");
+    (void*&)gto_glTexCoord4f = xxGetProcAddress(g_glLibrary, "glTexCoord4f");
     (void*&)gto_glEnd = xxGetProcAddress(g_glLibrary, "glEnd");
     (void*&)gto_glGenTextures = xxGetProcAddress(g_glLibrary, "glGenTextures");
     (void*&)gto_glBindTexture = xxGetProcAddress(g_glLibrary, "glBindTexture");
@@ -385,29 +462,76 @@ static void gto_grGlideInit(void)
     (void*&)gto_glClearColor = xxGetProcAddress(g_glLibrary, "glClearColor");
     (void*&)gto_glClearDepth = xxGetProcAddress(g_glLibrary, "glClearDepth");
     (void*&)gto_glClear = xxGetProcAddress(g_glLibrary, "glClear");
-
+#if defined(xxMACOS)
     NSOpenGLPixelFormatAttribute attributes[2] = { NSOpenGLPFADoubleBuffer };
     g_rootView = [[NSOpenGLView alloc] initWithFrame:CGRectMake(0, 0, 1, 1)
                                          pixelFormat:[[NSOpenGLPixelFormat alloc] initWithAttributes:attributes]];
     [[g_rootView openGLContext] makeCurrentContext];
-
+#elif defined(xxWINDOWS)
+    (void*&)wglCreateContext = xxGetProcAddress(g_glLibrary, "wglCreateContext");
+    (void*&)wglDeleteContext = xxGetProcAddress(g_glLibrary, "wglDeleteContext");
+    (void*&)wglGetCurrentDC = xxGetProcAddress(g_glLibrary, "wglGetCurrentDC");
+    (void*&)wglMakeCurrent = xxGetProcAddress(g_glLibrary, "wglMakeCurrent");
+    (void*&)wglShareLists = xxGetProcAddress(g_glLibrary, "wglShareLists");
+    if (g_gdiLibrary == nullptr)
+    {
+        g_gdiLibrary = xxLoadLibrary("gdi32.dll");
+    }
+    (void*&)ChoosePixelFormat = xxGetProcAddress(g_gdiLibrary, "ChoosePixelFormat");
+    (void*&)SetPixelFormat = xxGetProcAddress(g_gdiLibrary, "SetPixelFormat");
+    (void*&)SwapBuffers = xxGetProcAddress(g_gdiLibrary, "SwapBuffers");
+    WNDCLASSEXA wc = { sizeof(WNDCLASSEXA), CS_OWNDC, ::DefWindowProcA, 0, 0, ::GetModuleHandleA(nullptr), nullptr, nullptr, nullptr, nullptr, "Glide", nullptr };
+    ::RegisterClassExA(&wc);
+    g_dummyWindow = ::CreateWindowA(wc.lpszClassName, "Glide", WS_OVERLAPPEDWINDOW, 0, 0, 1, 1, nullptr, nullptr, wc.hInstance, nullptr);
+    HDC hDC = GetDC(g_dummyWindow);
+    g_desc.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+    g_desc.nVersion = 1;
+    g_desc.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    g_desc.iPixelType = PFD_TYPE_RGBA;
+    g_desc.cColorBits = 32;
+    g_desc.cDepthBits = 24;
+    g_desc.cStencilBits = 8;
+    g_desc.iLayerType = PFD_MAIN_PLANE;
+    SetPixelFormat(hDC, ChoosePixelFormat(hDC, &g_desc), &g_desc);
+    g_instance = wglCreateContext(hDC);
+    wglMakeCurrent(hDC, g_instance);
+    ReleaseDC(g_dummyWindow, hDC);
+#endif
     gto_glGenTextures(1, &g_baseTexture);
     memset(g_vertexLayout, 0xFF, sizeof(g_vertexLayout));
 }
 //------------------------------------------------------------------------------
-static void gto_grGlideShutdown(void)
+static void FX_CALL gto_grGlideShutdown(void)
 {
     if (g_baseTexture)
     {
         gto_glDeleteTextures(1, &g_baseTexture);
         g_baseTexture = 0;
     }
+#if defined(xxMACOS)
+    g_rootView = nil;
+#elif defined(xxWINDOWS)
+    if (g_instance)
+    {
+        wglDeleteContext(g_instance);
+        g_instance = nullptr;
+    }
+    if (g_gdiLibrary)
+    {
+        xxFreeLibrary(g_gdiLibrary);
+        g_gdiLibrary = nullptr;
+    }
+    if (g_dummyWindow)
+    {
+        CloseWindow(g_dummyWindow);
+        g_dummyWindow = nullptr;
+    }
+#endif
     if (g_glLibrary)
     {
         xxFreeLibrary(g_glLibrary);
         g_glLibrary = nullptr;
     }
-    g_rootView = nil;
     gto_glEnable = nullptr;
     gto_glBlendFuncSeparate = nullptr;
     gto_glBegin = nullptr;
