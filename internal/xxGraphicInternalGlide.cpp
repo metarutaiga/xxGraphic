@@ -133,6 +133,7 @@ FX_PROTOTYPE(void, grGlideSetVertexLayout, (const void *layout), layout);
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/gl.h>
 #import <OpenGL/OpenGL.h>
+#define GL_APIENTRY
 //------------------------------------------------------------------------------
 static void*                    g_glLibrary = nullptr;
 static NSOpenGLView*            g_rootView = nil;
