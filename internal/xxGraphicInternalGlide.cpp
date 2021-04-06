@@ -136,7 +136,7 @@ FX_PROTOTYPE(void, grGlideSetVertexLayout, (const void *layout), layout);
 #define GL_APIENTRY
 //------------------------------------------------------------------------------
 static void*                                        g_glLibrary = nullptr;
-static NSOpenGLView*                                g_rootView = nil;
+static NSOpenGLContext*                             g_instance = nil;
 static NSOpenGLContext*                             g_openGLContext[256] = {};
 #elif defined(xxWINDOWS)
 #include "../gl/gl.h"
@@ -149,8 +149,10 @@ static BOOL                                         (WINAPI* SwapBuffers)(HDC);
 static PFNWGLCREATECONTEXTPROC                      wglCreateContext;
 static PFNWGLDELETECONTEXTPROC                      wglDeleteContext;
 static PFNWGLGETCURRENTDCPROC                       wglGetCurrentDC;
+static PFNWGLGETPROCADDRESSPROC                     wglGetProcAddress;
 static PFNWGLMAKECURRENTPROC                        wglMakeCurrent;
 static PFNWGLSHARELISTSPROC                         wglShareLists;
+static PFNWGLSWAPINTERVALEXTPROC                    wglSwapIntervalEXT;
 //------------------------------------------------------------------------------
 static void*                                        g_gdiLibrary = nullptr;
 static void*                                        g_glLibrary = nullptr;
@@ -252,9 +254,17 @@ static GrContext_t FX_CALL gto_grSstWinOpen(void *window, GrScreenResolution_t s
         break;
     }
 #if defined(xxMACOS)
-    NSOpenGLContext* nsContext = [[NSOpenGLContext alloc] initWithFormat:[g_rootView pixelFormat]
-                                                            shareContext:[g_rootView openGLContext]];
-    [nsContext setView:[[(__bridge NSWindow*)window contentViewController] view]];
+    static const NSOpenGLPixelFormatAttribute attributes[2] =
+    {
+        NSOpenGLPFADoubleBuffer
+    };
+    NSWindow* nsWindows = (__bridge NSWindow*)window;
+    NSOpenGLContext* nsContext = [[NSOpenGLContext alloc] initWithFormat:[[NSOpenGLPixelFormat alloc] initWithAttributes:attributes]
+                                                            shareContext:g_instance];
+    if (g_instance == nullptr)
+        g_instance = nsContext;
+    [nsContext setView:[[nsWindows contentViewController] view]];
+    [nsContext makeCurrentContext];
     int swapInterval = 0;
     [nsContext setValues:&swapInterval
             forParameter:NSOpenGLContextParameterSwapInterval];
@@ -282,6 +292,10 @@ static GrContext_t FX_CALL gto_grSstWinOpen(void *window, GrScreenResolution_t s
     else
         wglShareLists(g_instance, hGLRC);
     wglMakeCurrent(hDC, hGLRC);
+    if (wglSwapIntervalEXT == nullptr)
+        (void*&)wglSwapIntervalEXT = wglGetProcAddress("wglSwapIntervalEXT");
+    if (wglSwapIntervalEXT)
+        wglSwapIntervalEXT(0);
     for (int i = 1; i < 256; ++i)
     {
         if (g_openGLContext[i].hGLRC == nullptr)
@@ -299,21 +313,21 @@ static FxBool FX_CALL gto_grSstWinClose(GrContext_t context)
 {
     if (context == 0)
         return FXFALSE;
-#if defined(xxMACOS)
-    NSOpenGLContext* nsContext = g_openGLContext[context % 256];
-    [nsContext makeCurrentContext];
-    [nsContext clearDrawable];
-    [NSOpenGLContext clearCurrentContext];
-    g_openGLContext[context % 256] = nil;
-#elif defined(xxWINDOWS)
     auto glContext = g_openGLContext[context % 256];
+#if defined(xxMACOS)
+    [glContext makeCurrentContext];
+    [glContext clearDrawable];
+    [NSOpenGLContext clearCurrentContext];
+    if (g_instance == glContext)
+        g_instance = nil;
+#elif defined(xxWINDOWS)
     wglMakeCurrent(nullptr, nullptr);
     wglDeleteContext(glContext.hGLRC);
     ReleaseDC(glContext.hWnd, glContext.hDC);
     if (g_instance == glContext.hGLRC)
         g_instance = nullptr;
-    g_openGLContext[context % 256] = {};
 #endif
+    g_openGLContext[context % 256] = {};
     return FXTRUE;
 }
 //------------------------------------------------------------------------------
@@ -321,15 +335,14 @@ static FxBool FX_CALL gto_grSelectContext(GrContext_t context)
 {
     if (context == 0)
         return FXFALSE;
+    auto glContext = g_openGLContext[context % 256];
 #if defined(xxMACOS)
-    NSOpenGLContext* nsContext = g_openGLContext[context % 256];
-    [nsContext makeCurrentContext];
-    NSView* nsView = [nsContext view];
+    [glContext makeCurrentContext];
+    NSView* nsView = [glContext view];
     NSRect frame = [nsView convertRectToBacking:[nsView frame]];
     g_width = frame.size.width;
     g_height = frame.size.height;
 #elif defined(xxWINDOWS)
-    auto glContext = g_openGLContext[context % 256];
     wglMakeCurrent(glContext.hDC, glContext.hGLRC);
     RECT rect = {};
     GetClientRect(glContext.hWnd, &rect);
@@ -467,15 +480,11 @@ static void FX_CALL gto_grGlideInit(void)
     (void*&)gto_glClearColor = xxGetProcAddress(g_glLibrary, "glClearColor");
     (void*&)gto_glClearDepth = xxGetProcAddress(g_glLibrary, "glClearDepth");
     (void*&)gto_glClear = xxGetProcAddress(g_glLibrary, "glClear");
-#if defined(xxMACOS)
-    NSOpenGLPixelFormatAttribute attributes[2] = { NSOpenGLPFADoubleBuffer };
-    g_rootView = [[NSOpenGLView alloc] initWithFrame:CGRectMake(0, 0, 1, 1)
-                                         pixelFormat:[[NSOpenGLPixelFormat alloc] initWithAttributes:attributes]];
-    [[g_rootView openGLContext] makeCurrentContext];
-#elif defined(xxWINDOWS)
+#if defined(xxWINDOWS)
     (void*&)wglCreateContext = xxGetProcAddress(g_glLibrary, "wglCreateContext");
     (void*&)wglDeleteContext = xxGetProcAddress(g_glLibrary, "wglDeleteContext");
     (void*&)wglGetCurrentDC = xxGetProcAddress(g_glLibrary, "wglGetCurrentDC");
+    (void*&)wglGetProcAddress = xxGetProcAddress(g_glLibrary, "wglGetProcAddress");
     (void*&)wglMakeCurrent = xxGetProcAddress(g_glLibrary, "wglMakeCurrent");
     (void*&)wglShareLists = xxGetProcAddress(g_glLibrary, "wglShareLists");
     if (g_gdiLibrary == nullptr)
@@ -493,7 +502,7 @@ static void FX_CALL gto_grGlideInit(void)
 static void FX_CALL gto_grGlideShutdown(void)
 {
 #if defined(xxMACOS)
-    g_rootView = nil;
+    g_instance = nil;
 #elif defined(xxWINDOWS)
     if (g_instance)
     {

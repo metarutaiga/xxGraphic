@@ -143,6 +143,9 @@ void xxDestroySwapchainGlide(uint64_t swapchain)
 //------------------------------------------------------------------------------
 void xxPresentSwapchainGlide(uint64_t swapchain)
 {
+    GrContext* grContext = reinterpret_cast<GrContext*>(swapchain);
+
+    grSelectContext(grContext->context);
     grBufferSwap(0);
 }
 //------------------------------------------------------------------------------
