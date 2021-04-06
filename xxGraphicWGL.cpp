@@ -25,6 +25,7 @@ static PFNWGLGETCURRENTDCPROC               wglGetCurrentDC;
 static PFNWGLGETPROCADDRESSPROC             wglGetProcAddress;
 static PFNWGLMAKECURRENTPROC                wglMakeCurrent;
 static PFNWGLSHARELISTSPROC                 wglShareLists;
+static PFNWGLSWAPINTERVALEXTPROC            wglSwapIntervalEXT;
 static PFNWGLCREATECONTEXTATTRIBSARBPROC    wglCreateContextAttribsARB;
 static PFNWGLDXOPENDEVICENVPROC             wglDXOpenDeviceNV;
 static PFNWGLDXCLOSEDEVICENVPROC            wglDXCloseDeviceNV;
@@ -187,6 +188,10 @@ uint64_t glCreateContextWGL(uint64_t instance, void* view, void** display)
         }
     }
     wglMakeCurrent(hDC, hGLRC);
+    if (wglSwapIntervalEXT == nullptr)
+        (void*&)wglSwapIntervalEXT = wglGetProcAddress("wglSwapIntervalEXT");
+    if (wglSwapIntervalEXT)
+        wglSwapIntervalEXT(0);
 
     GLuint vao = 0;
     glGenVertexArrays(1, &vao);
@@ -246,8 +251,10 @@ void glMakeCurrentContextWGL(uint64_t context, void* display)
 //------------------------------------------------------------------------------
 void glPresentContextWGL(uint64_t context, void* display)
 {
+    HGLRC hGLRC = reinterpret_cast<HGLRC>(context);
     HDC hDC = reinterpret_cast<HDC>(display);
 
+    wglMakeCurrent(hDC, hGLRC);
     SwapBuffers(hDC);
 }
 //------------------------------------------------------------------------------
