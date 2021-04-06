@@ -47,7 +47,7 @@ FX_PROTOTYPE(void, grErrorSetCallback, (GrErrorCallbackFnc_t fnc), fnc);
 //------------------------------------------------------------------------------
 FX_PROTOTYPE(void, grFinish, (void));
 FX_PROTOTYPE(void, grFlush, (void));
-FX_PROTOTYPE(GrContext_t, grSstWinOpen, (void *hWnd, GrScreenResolution_t screen_resolution, GrScreenRefresh_t refresh_rate, GrColorFormat_t color_format, GrOriginLocation_t origin_location, int nColBuffers, int nAuxBuffers), hWnd, screen_resolution, refresh_rate, color_format, origin_location, nColBuffers, nAuxBuffers);
+FX_PROTOTYPE(GrContext_t, grSstWinOpen, (void *window, GrScreenResolution_t screen_resolution, GrScreenRefresh_t refresh_rate, GrColorFormat_t color_format, GrOriginLocation_t origin_location, int nColBuffers, int nAuxBuffers), window, screen_resolution, refresh_rate, color_format, origin_location, nColBuffers, nAuxBuffers);
 FX_PROTOTYPE(FxBool, grSstWinClose, (GrContext_t context), context);
 FX_PROTOTYPE(FxBool, grSelectContext, (GrContext_t context), context);
 FX_PROTOTYPE(void, grSstOrigin, (GrOriginLocation_t origin), origin);
@@ -135,37 +135,33 @@ FX_PROTOTYPE(void, grGlideSetVertexLayout, (const void *layout), layout);
 #import <OpenGL/OpenGL.h>
 #define GL_APIENTRY
 //------------------------------------------------------------------------------
-static void*                    g_glLibrary = nullptr;
-static NSOpenGLView*            g_rootView = nil;
-static NSOpenGLContext*         g_openGLContext[256] = {};
+static void*                                        g_glLibrary = nullptr;
+static NSOpenGLView*                                g_rootView = nil;
+static NSOpenGLContext*                             g_openGLContext[256] = {};
 #elif defined(xxWINDOWS)
 #include "../gl/gl.h"
 #include "../gl/wgl.h"
 typedef double GLdouble;
 typedef double GLclampd;
-static int                      (WINAPI* ChoosePixelFormat)(HDC, CONST PIXELFORMATDESCRIPTOR*);
-static BOOL                     (WINAPI* SetPixelFormat)(HDC, int, CONST PIXELFORMATDESCRIPTOR*);
-static BOOL                     (WINAPI* SwapBuffers)(HDC);
-static PFNWGLCREATECONTEXTPROC  wglCreateContext;
-static PFNWGLDELETECONTEXTPROC  wglDeleteContext;
-static PFNWGLGETCURRENTDCPROC   wglGetCurrentDC;
-static PFNWGLMAKECURRENTPROC    wglMakeCurrent;
-static PFNWGLSHARELISTSPROC     wglShareLists;
+static int                                          (WINAPI* ChoosePixelFormat)(HDC, CONST PIXELFORMATDESCRIPTOR*);
+static BOOL                                         (WINAPI* SetPixelFormat)(HDC, int, CONST PIXELFORMATDESCRIPTOR*);
+static BOOL                                         (WINAPI* SwapBuffers)(HDC);
+static PFNWGLCREATECONTEXTPROC                      wglCreateContext;
+static PFNWGLDELETECONTEXTPROC                      wglDeleteContext;
+static PFNWGLGETCURRENTDCPROC                       wglGetCurrentDC;
+static PFNWGLMAKECURRENTPROC                        wglMakeCurrent;
+static PFNWGLSHARELISTSPROC                         wglShareLists;
 //------------------------------------------------------------------------------
-static void*                    g_gdiLibrary = nullptr;
-static void*                    g_glLibrary = nullptr;
-static HWND                     g_dummyWindow = nullptr;
-static PIXELFORMATDESCRIPTOR    g_desc = {};
-static HGLRC                    g_instance = nullptr;
-static HGLRC                    g_openGLContext[256] = {};
-static HDC                      g_openGLDC[256] = {};
-static HWND                     g_openGLHWND[256] = {};
+static void*                                        g_gdiLibrary = nullptr;
+static void*                                        g_glLibrary = nullptr;
+static HGLRC                                        g_instance = nullptr;
+static struct { HGLRC hGLRC; HDC hDC; HWND hWnd; }  g_openGLContext[256] = {};
 #endif
 #if defined(xxMACOS) || defined(xxWINDOWS)
-static FxU32                    g_width = 0;
-static FxU32                    g_height = 0;
-static FxU32                    g_baseTexture = 0;
-static FxU8                     g_vertexLayout[256] = {};
+static FxU32                                        g_width = 0;
+static FxU32                                        g_height = 0;
+static FxU32                                        g_baseTexture = 0;
+static FxU8                                         g_vertexLayout[256] = {};
 //------------------------------------------------------------------------------
 static void (GL_APIENTRY* gto_glEnable)(GLenum cap);
 static void (GL_APIENTRY* gto_glBlendFunc)(GLenum sfactor, GLenum dfactor);
@@ -244,7 +240,7 @@ static void FX_CALL gto_grBufferSwap(FxU32 swap_interval)
 #endif
 }
 //------------------------------------------------------------------------------
-static GrContext_t FX_CALL gto_grSstWinOpen(void *hWnd, GrScreenResolution_t screen_resolution, GrScreenRefresh_t refresh_rate, GrColorFormat_t color_format, GrOriginLocation_t origin_location, int nColBuffers, int nAuxBuffers)
+static GrContext_t FX_CALL gto_grSstWinOpen(void *window, GrScreenResolution_t screen_resolution, GrScreenRefresh_t refresh_rate, GrColorFormat_t color_format, GrOriginLocation_t origin_location, int nColBuffers, int nAuxBuffers)
 {
     switch (color_format)
     {
@@ -258,7 +254,7 @@ static GrContext_t FX_CALL gto_grSstWinOpen(void *hWnd, GrScreenResolution_t scr
 #if defined(xxMACOS)
     NSOpenGLContext* nsContext = [[NSOpenGLContext alloc] initWithFormat:[g_rootView pixelFormat]
                                                             shareContext:[g_rootView openGLContext]];
-    [nsContext setView:[[(__bridge NSWindow*)hWnd contentViewController] view]];
+    [nsContext setView:[[(__bridge NSWindow*)window contentViewController] view]];
     int swapInterval = 0;
     [nsContext setValues:&swapInterval
             forParameter:NSOpenGLContextParameterSwapInterval];
@@ -271,20 +267,30 @@ static GrContext_t FX_CALL gto_grSstWinOpen(void *hWnd, GrScreenResolution_t scr
         }
     }
 #elif defined(xxWINDOWS)
-    HDC hDC = GetDC((HWND)hWnd);
-    SetPixelFormat(hDC, ChoosePixelFormat(hDC, &g_desc), &g_desc);
+    static const PIXELFORMATDESCRIPTOR desc =
+    {
+        .nSize = sizeof(PIXELFORMATDESCRIPTOR),
+        .nVersion = 1,
+        .dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+    };
+    HWND hWnd = (HWND)window;
+    HDC hDC = GetDC(hWnd);
+    SetPixelFormat(hDC, ChoosePixelFormat(hDC, &desc), &desc);
     HGLRC hGLRC = wglCreateContext(hDC);
-    wglShareLists(g_instance, hGLRC);
+    if (g_instance == nullptr)
+        g_instance = hGLRC;
+    else
+        wglShareLists(g_instance, hGLRC);
+    wglMakeCurrent(hDC, hGLRC);
     for (int i = 1; i < 256; ++i)
     {
-        if (g_openGLContext[i] == nullptr)
+        if (g_openGLContext[i].hGLRC == nullptr)
         {
-            g_openGLContext[i] = hGLRC;
-            g_openGLDC[i] = hDC;
-            g_openGLHWND[i] = (HWND)hWnd;
+            g_openGLContext[i] = { hGLRC, hDC, hWnd };
             return static_cast<GrContext_t>(i);
         }
     }
+    ReleaseDC(hWnd, hDC);
 #endif
     return 0;
 }
@@ -300,15 +306,13 @@ static FxBool FX_CALL gto_grSstWinClose(GrContext_t context)
     [NSOpenGLContext clearCurrentContext];
     g_openGLContext[context % 256] = nil;
 #elif defined(xxWINDOWS)
-    HGLRC hGLRC = g_openGLContext[context % 256];
-    HDC hDC = g_openGLDC[context % 256];
-    HWND hWnd = g_openGLHWND[context % 256];
-    wglMakeCurrent(hDC, nullptr);
-    wglDeleteContext(hGLRC);
-    ReleaseDC(hWnd, hDC);
-    g_openGLContext[context % 256] = nullptr;
-    g_openGLDC[context % 256] = nullptr;
-    g_openGLHWND[context % 256] = nullptr;
+    auto glContext = g_openGLContext[context % 256];
+    wglMakeCurrent(nullptr, nullptr);
+    wglDeleteContext(glContext.hGLRC);
+    ReleaseDC(glContext.hWnd, glContext.hDC);
+    if (g_instance == glContext.hGLRC)
+        g_instance = nullptr;
+    g_openGLContext[context % 256] = {};
 #endif
     return FXTRUE;
 }
@@ -325,12 +329,10 @@ static FxBool FX_CALL gto_grSelectContext(GrContext_t context)
     g_width = frame.size.width;
     g_height = frame.size.height;
 #elif defined(xxWINDOWS)
-    HGLRC hGLRC = g_openGLContext[context % 256];
-    HDC hDC = g_openGLDC[context % 256];
-    HWND hWnd = g_openGLHWND[context % 256];
-    wglMakeCurrent(hDC, hGLRC);
+    auto glContext = g_openGLContext[context % 256];
+    wglMakeCurrent(glContext.hDC, glContext.hGLRC);
     RECT rect = {};
-    GetClientRect(hWnd, &rect);
+    GetClientRect(glContext.hWnd, &rect);
     g_width = rect.right - rect.left;
     g_height = rect.bottom - rect.top;
 #endif
@@ -397,6 +399,8 @@ static FxU32 FX_CALL gto_grTexCalcMemRequired(GrLOD_t lodmin, GrLOD_t lodmax, Gr
 //------------------------------------------------------------------------------
 static FxU32 FX_CALL gto_grTexMinAddress(GrChipID_t tmu)
 {
+    if (g_baseTexture == 0)
+        gto_glGenTextures(1, &g_baseTexture);
     return g_baseTexture;
 }
 //------------------------------------------------------------------------------
@@ -481,34 +485,13 @@ static void FX_CALL gto_grGlideInit(void)
     (void*&)ChoosePixelFormat = xxGetProcAddress(g_gdiLibrary, "ChoosePixelFormat");
     (void*&)SetPixelFormat = xxGetProcAddress(g_gdiLibrary, "SetPixelFormat");
     (void*&)SwapBuffers = xxGetProcAddress(g_gdiLibrary, "SwapBuffers");
-    WNDCLASSEXA wc = { sizeof(WNDCLASSEXA), CS_OWNDC, ::DefWindowProcA, 0, 0, ::GetModuleHandleA(nullptr), nullptr, nullptr, nullptr, nullptr, "Glide", nullptr };
-    ::RegisterClassExA(&wc);
-    g_dummyWindow = ::CreateWindowA(wc.lpszClassName, "Glide", WS_OVERLAPPEDWINDOW, 0, 0, 1, 1, nullptr, nullptr, wc.hInstance, nullptr);
-    HDC hDC = GetDC(g_dummyWindow);
-    g_desc.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-    g_desc.nVersion = 1;
-    g_desc.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    g_desc.iPixelType = PFD_TYPE_RGBA;
-    g_desc.cColorBits = 32;
-    g_desc.cDepthBits = 24;
-    g_desc.cStencilBits = 8;
-    g_desc.iLayerType = PFD_MAIN_PLANE;
-    SetPixelFormat(hDC, ChoosePixelFormat(hDC, &g_desc), &g_desc);
-    g_instance = wglCreateContext(hDC);
-    wglMakeCurrent(hDC, g_instance);
-    ReleaseDC(g_dummyWindow, hDC);
 #endif
-    gto_glGenTextures(1, &g_baseTexture);
+    g_baseTexture = 0;
     memset(g_vertexLayout, 0xFF, sizeof(g_vertexLayout));
 }
 //------------------------------------------------------------------------------
 static void FX_CALL gto_grGlideShutdown(void)
 {
-    if (g_baseTexture)
-    {
-        gto_glDeleteTextures(1, &g_baseTexture);
-        g_baseTexture = 0;
-    }
 #if defined(xxMACOS)
     g_rootView = nil;
 #elif defined(xxWINDOWS)
@@ -521,11 +504,6 @@ static void FX_CALL gto_grGlideShutdown(void)
     {
         xxFreeLibrary(g_gdiLibrary);
         g_gdiLibrary = nullptr;
-    }
-    if (g_dummyWindow)
-    {
-        CloseWindow(g_dummyWindow);
-        g_dummyWindow = nullptr;
     }
 #endif
     if (g_glLibrary)

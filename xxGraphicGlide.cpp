@@ -62,7 +62,7 @@ uint64_t xxCreateInstanceGlide()
     grVertexLayout(GR_PARAM_PARGB, xxOffsetOf(GrVertex, rgba), GR_PARAM_ENABLE);
     grVertexLayout(GR_PARAM_ST0, xxOffsetOf(GrVertex, sow), GR_PARAM_ENABLE);
 
-    g_startAddress = grTexMinAddress(GR_TMU0);
+    g_startAddress = 0;
     g_vertexBuffer = 0;
     g_vertexAttribute = 0;
 
@@ -119,9 +119,9 @@ uint64_t xxCreateSwapchainGlide(uint64_t device, uint64_t renderPass, void* view
         return 0;
 
 #if defined(xxWINDOWS)
-    grContext->context = grSstWinOpen(view, width | (height << 16), GR_REFRESH_NONE, GR_COLORFORMAT_ARGB, GR_ORIGIN_LOWER_LEFT, 2, 0);
+    grContext->context = grSstWinOpen(view, GR_RESOLUTION_NONE, GR_REFRESH_NONE, GR_COLORFORMAT_ARGB, GR_ORIGIN_LOWER_LEFT, 2, 0);
 #else
-    grContext->context = grSstWinOpen(view, width | (height << 16), GR_REFRESH_NONE, GR_COLORFORMAT_ABGR, GR_ORIGIN_LOWER_LEFT, 2, 0);
+    grContext->context = grSstWinOpen(view, GR_RESOLUTION_NONE, GR_REFRESH_NONE, GR_COLORFORMAT_ABGR, GR_ORIGIN_LOWER_LEFT, 2, 0);
 #endif
     grContext->view = view;
     grContext->width = width;
@@ -314,6 +314,9 @@ uint64_t xxCreateTextureGlide(uint64_t device, int format, int width, int height
     GrTexture* info = xxAlloc(GrTexture);
     if (info == nullptr)
         return 0;
+
+    if (g_startAddress == 0)
+        g_startAddress = grTexMinAddress(GR_TMU0);
 
     int widthLog2 = 31 - xxCountLeadingZeros(width);
     int heightLog2 = 31 - xxCountLeadingZeros(height);

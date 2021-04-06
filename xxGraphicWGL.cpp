@@ -221,7 +221,7 @@ void glDestroyContextWGL(uint64_t context, void* view, void* display)
     glDeleteVertexArrays(1, &vao);
     glBindVertexArray(0);
 
-    wglMakeCurrent(hDC, nullptr);
+    wglMakeCurrent(nullptr, nullptr);
     wglDeleteContext(hGLRC);
     ReleaseDC(hWnd, hDC);
 }
