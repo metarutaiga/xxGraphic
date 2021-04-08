@@ -343,7 +343,10 @@ uint64_t xxCreateTextureGlide(uint64_t device, int format, int width, int height
 void xxDestroyTextureGlide(uint64_t texture)
 {
     GrTexture* info = reinterpret_cast<GrTexture*>(texture);
+    if (info == nullptr)
+        return;
 
+    xxFree(info->data);
     xxFree(info);
 }
 //------------------------------------------------------------------------------
