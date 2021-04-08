@@ -28,6 +28,12 @@
 #include <string.h>
 #include <time.h>
 
+#undef MSEC_PER_SEC
+#undef USEC_PER_SEC
+#undef NSEC_PER_SEC
+#undef USEC_PER_MSEC
+#undef NSEC_PER_MSEC
+#undef NSEC_PER_USEC
 #define MSEC_PER_SEC    1000ull
 #define USEC_PER_SEC    1000000ull
 #define NSEC_PER_SEC    1000000000ull
