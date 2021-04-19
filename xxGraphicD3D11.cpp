@@ -109,6 +109,18 @@ uint64_t xxCreateDeviceD3D11(uint64_t instance)
 void xxDestroyDeviceD3D11(uint64_t device)
 {
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
+#if defined(_DEBUG)
+    if (d3dDevice)
+    {
+        ID3D11Debug* debug = nullptr;
+        d3dDevice->QueryInterface(IID_PPV_ARGS(&debug));
+        if (debug)
+        {
+            debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+            debug->Release();
+        }
+    }
+#endif
 
     SafeRelease(g_dxgiFactory);
     SafeRelease(d3dDevice);
