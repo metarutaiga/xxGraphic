@@ -18,6 +18,7 @@ Class                   classMTLTextureDescriptor = nil;
 Class                   classMTLVertexDescriptor = nil;
 
 static void*            g_metalLibrary = nullptr;
+static uint64_t         g_metalVertexAttribute = 0;
 static id <MTLDevice>   (*MTLCreateSystemDefaultDevice)() = nullptr;
 static void*            (*MTLCopyAllDevices)() = nullptr;
 
@@ -540,9 +541,13 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height
     }
     else
     {
+#if TARGET_OS_SIMULATOR
+        texture = [mtlDevice newTextureWithDescriptor:desc];
+#else
         texture = [buffer newTextureWithDescriptor:desc
                                             offset:0
                                        bytesPerRow:stride];
+#endif
     }
 
     mtlTexture->texture = texture;
@@ -569,9 +574,13 @@ void* xxMapTextureMetal(uint64_t device, uint64_t texture, int* stride, int leve
 //------------------------------------------------------------------------------
 void xxUnmapTextureMetal(uint64_t device, uint64_t texture, int level, int array)
 {
-#if defined(xxMACOS_INTEL)
     MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);
-
+#if TARGET_OS_SIMULATOR
+    [mtlTexture->texture replaceRegion:MTLRegionMake2D(0, 0, mtlTexture->texture.width, mtlTexture->texture.height)
+                           mipmapLevel:0
+                             withBytes:[mtlTexture->buffer contents]
+                           bytesPerRow:[mtlTexture->buffer length] / mtlTexture->texture.height];
+#elif defined(xxMACOS_INTEL)
     [mtlTexture->buffer didModifyRange:NSMakeRange(0, [mtlTexture->buffer length])];
 #endif
 }
@@ -814,6 +823,9 @@ void xxSetVertexBuffersMetal(uint64_t commandEncoder, int count, const uint64_t*
     [mtlCommandEncoder setVertexBuffers:mtlBuffers
                                 offsets:offsets
                               withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_BUFFER, count)];
+#if TARGET_OS_SIMULATOR
+    g_metalVertexAttribute = vertexAttribute;
+#endif
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesMetal(uint64_t commandEncoder, int count, const uint64_t* textures)
@@ -900,6 +912,17 @@ void xxDrawIndexedMetal(uint64_t commandEncoder, uint64_t indexBuffer, int index
     id <MTLBuffer> __unsafe_unretained mtlIndexBuffer = (__bridge id)reinterpret_cast<void*>(indexBuffer);
 
     MTLIndexType indexType = (INDEX_BUFFER_WIDTH == /* DISABLES CODE */(2)) ? MTLIndexTypeUInt16 : MTLIndexTypeUInt32;
+#if TARGET_OS_SIMULATOR
+    MTLVertexDescriptor* __unsafe_unretained desc = (__bridge id)reinterpret_cast<void*>(g_metalVertexAttribute);
+    MTLVertexBufferLayoutDescriptor* __unsafe_unretained layout = desc.layouts[xxGraphicDescriptor::VERTEX_BUFFER];
+    [mtlCommandEncoder setVertexBufferOffset:vertexOffset * layout.stride
+                                     atIndex:xxGraphicDescriptor::VERTEX_BUFFER];
+    [mtlCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
+                                  indexCount:indexCount
+                                   indexType:indexType
+                                 indexBuffer:mtlIndexBuffer
+                           indexBufferOffset:firstIndex * INDEX_BUFFER_WIDTH];
+#else
     [mtlCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
                                   indexCount:indexCount
                                    indexType:indexType
@@ -908,5 +931,6 @@ void xxDrawIndexedMetal(uint64_t commandEncoder, uint64_t indexBuffer, int index
                                instanceCount:instanceCount
                                   baseVertex:vertexOffset
                                 baseInstance:firstInstance];
+#endif
 }
 //==============================================================================
