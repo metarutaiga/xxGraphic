@@ -6,7 +6,7 @@
 //==============================================================================
 #pragma once
 
-#include "xxSystem.h"
+#include "../xxSystem.h"
 #include "xxMath.h"
 
 #include "xxImage.h"

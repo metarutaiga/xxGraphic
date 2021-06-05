@@ -6,8 +6,8 @@
 //==============================================================================
 #pragma once
 
-#include "xxSystem.h"
-#include "xxVector.h"
+#include "../xxSystem.h"
+#include "../xxVector.h"
 
 union xxPlusAPI xxVector2
 {
