@@ -678,6 +678,7 @@ uint64_t xxCreateVertexShaderGLES2(uint64_t device, const char* shader, uint64_t
     {
         "#version 100", "\n",
         "#define _VERTEX_ 1", "\n",
+        "#define uniform uniform highp", "\n",
         "#define attribute attribute", "\n",
         "#define varying varying", "\n",
         "precision highp float;", "\n",
@@ -703,6 +704,7 @@ uint64_t xxCreateFragmentShaderGLES2(uint64_t device, const char* shader)
     {
         "#version 100", "\n",
         "#define _FRAGMENT_ 1", "\n",
+        "#define uniform uniform highp", "\n",
         "#define attribute", "\n",
         "#define varying varying", "\n",
         "precision mediump float;", "\n",

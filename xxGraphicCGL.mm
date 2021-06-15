@@ -52,6 +52,8 @@ static void GL_APIENTRY cglShaderSourceLegacy(GLuint shader, GLsizei count, cons
             var = "#version 120";
         if (strncmp(var, "precision", sizeof("precision") - 1) == 0)
             var = "";
+        if (strncmp(var, "#define uniform uniform highp", sizeof("#define uniform uniform highp") - 1) == 0)
+            var = "";
         replaceString[i] = var;
     }
 
@@ -90,6 +92,8 @@ static void GL_APIENTRY cglShaderSource(GLuint shader, GLsizei count, const GLch
                     "#endif";
             fragmentShader = true;
         }
+        if (strncmp(var, "#define uniform uniform highp", sizeof("#define uniform uniform highp") - 1) == 0)
+            var = "";
         if (strncmp(var, "#define attribute", sizeof("#define attribute") - 1) == 0)
             var = fragmentShader ? "#define attribute" : "#define attribute in";
         if (strncmp(var, "#define varying", sizeof("#define varying") - 1) == 0)
