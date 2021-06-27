@@ -415,8 +415,8 @@ void xxDestroyShaderGlide(uint64_t device, uint64_t shader)
 uint64_t xxCreateBlendStateGlide(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor)
 {
     GrPipeline grPipeline = {};
-    grPipeline.blendSourceColor = sourceColor;
-    grPipeline.blendDestinationColor = destinationColor;
+    grPipeline.blendSourceColor = grBlendFactor(sourceColor);
+    grPipeline.blendDestinationColor = grBlendFactor(destinationColor);
     return static_cast<uint64_t>(grPipeline.value);
 }
 //------------------------------------------------------------------------------
@@ -490,7 +490,7 @@ void xxSetPipelineGlide(uint64_t commandEncoder, uint64_t pipeline)
 {
     GrPipeline grPipeline = { pipeline };
 
-    grAlphaBlendFunction(grBlendFactor(grPipeline.blendSourceColor), grBlendFactor(grPipeline.blendDestinationColor), GR_BLEND_ONE, GR_BLEND_ZERO);
+    grAlphaBlendFunction(grPipeline.blendSourceColor, grPipeline.blendDestinationColor, GR_BLEND_ONE, GR_BLEND_ZERO);
     grDepthBufferFunction(grPipeline.depthTest ? GR_CMP_LESS : GR_CMP_ALWAYS);
     grDepthMask(grPipeline.depthWrite ? FXTRUE : FXFALSE);
     grCullMode(grPipeline.cull ? GR_CULL_NEGATIVE : GR_CULL_DISABLE);
