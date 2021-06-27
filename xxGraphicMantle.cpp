@@ -8,6 +8,7 @@
 #define xxAPI xxEXTERN
 #endif
 #include "internal/xxGraphicInternal.h"
+#include "internal/xxGraphicInternalMantle.h"
 #include "xxGraphicMantleAsm.h"
 #include "xxGraphicMantle.h"
 
@@ -714,16 +715,16 @@ void xxDestroyShaderMantle(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateMantle(uint64_t device, bool blending)
+uint64_t xxCreateBlendStateMantle(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
         return 0;
 
     GR_COLOR_BLEND_STATE_CREATE_INFO info = {};
-    info.target[0].blendEnable = blending ? GR_TRUE : GR_FALSE;
-    info.target[0].srcBlendColor = GR_BLEND_SRC_ALPHA;
-    info.target[0].destBlendColor = GR_BLEND_ONE_MINUS_SRC_ALPHA;
+    info.target[0].blendEnable = (sourceColor != BLEND_FACTOR_ONE || destinationColor != BLEND_FACTOR_ZERO) ? GR_TRUE : GR_FALSE;
+    info.target[0].srcBlendColor = grBlendFactor(sourceColor);
+    info.target[0].destBlendColor = grBlendFactor(destinationColor);
     info.target[0].blendFuncColor = GR_BLEND_FUNC_ADD;
     info.target[0].srcBlendAlpha = GR_BLEND_SRC_ALPHA;
     info.target[0].destBlendAlpha = GR_BLEND_ONE_MINUS_SRC_ALPHA;

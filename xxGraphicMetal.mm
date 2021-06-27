@@ -683,13 +683,13 @@ void xxDestroyShaderMetal(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateMetal(uint64_t device, bool blending)
+uint64_t xxCreateBlendStateMetal(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor)
 {
     MTLRenderPipelineColorAttachmentDescriptor* desc = [classMTLRenderPipelineColorAttachmentDescriptor new];
     desc.pixelFormat = MTLPixelFormatBGRA8Unorm;
-    desc.blendingEnabled = blending;
-    desc.sourceRGBBlendFactor = MTLBlendFactorSourceAlpha;
-    desc.destinationRGBBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
+    desc.blendingEnabled = (sourceColor != BLEND_FACTOR_ONE || destinationColor != BLEND_FACTOR_ZERO);
+    desc.sourceRGBBlendFactor = mtlBlendFactor(sourceColor);
+    desc.destinationRGBBlendFactor = mtlBlendFactor(destinationColor);
     desc.rgbBlendOperation = MTLBlendOperationAdd;
 
     return reinterpret_cast<uint64_t>((__bridge_retained void*)desc);

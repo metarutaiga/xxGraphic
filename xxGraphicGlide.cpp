@@ -412,10 +412,11 @@ void xxDestroyShaderGlide(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateGlide(uint64_t device, bool blending)
+uint64_t xxCreateBlendStateGlide(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor)
 {
     GrPipeline grPipeline = {};
-    grPipeline.alphaBlending = blending;
+    grPipeline.blendSourceColor = sourceColor;
+    grPipeline.blendDestinationColor = destinationColor;
     return static_cast<uint64_t>(grPipeline.value);
 }
 //------------------------------------------------------------------------------
@@ -442,7 +443,8 @@ uint64_t xxCreatePipelineGlide(uint64_t device, uint64_t renderPass, uint64_t bl
     GrPipeline grRasterizerState = { rasterizerState };
 
     GrPipeline grPipeline = {};
-    grPipeline.alphaBlending = grBlendState.alphaBlending;
+    grPipeline.blendSourceColor = grBlendState.blendSourceColor;
+    grPipeline.blendDestinationColor = grBlendState.blendDestinationColor;
     grPipeline.depthTest = grDepthStencilState.depthTest;
     grPipeline.depthWrite = grDepthStencilState.depthWrite;
     grPipeline.cull = grRasterizerState.cull;
@@ -488,14 +490,7 @@ void xxSetPipelineGlide(uint64_t commandEncoder, uint64_t pipeline)
 {
     GrPipeline grPipeline = { pipeline };
 
-    if (grPipeline.alphaBlending)
-    {
-        grAlphaBlendFunction(GR_BLEND_SRC_ALPHA, GR_BLEND_ONE_MINUS_SRC_ALPHA, GR_BLEND_ONE, GR_BLEND_ZERO);
-    }
-    else
-    {
-        grAlphaBlendFunction(GR_BLEND_ONE, GR_BLEND_ZERO, GR_BLEND_ONE, GR_BLEND_ZERO);
-    }
+    grAlphaBlendFunction(grBlendFactor(grPipeline.blendSourceColor), grBlendFactor(grPipeline.blendDestinationColor), GR_BLEND_ONE, GR_BLEND_ZERO);
     grDepthBufferFunction(grPipeline.depthTest ? GR_CMP_LESS : GR_CMP_ALWAYS);
     grDepthMask(grPipeline.depthWrite ? FXTRUE : FXFALSE);
     grCullMode(grPipeline.cull ? GR_CULL_NEGATIVE : GR_CULL_DISABLE);

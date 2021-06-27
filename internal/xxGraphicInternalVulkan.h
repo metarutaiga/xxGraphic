@@ -6,7 +6,7 @@
 //==============================================================================
 #pragma once
 
-#include "xxSystem.h"
+#include "xxGraphic.h"
 
 #if defined(xxANDROID)
 #   define VK_USE_PLATFORM_ANDROID_KHR  1
@@ -45,3 +45,33 @@ extern "C" void VKAPI_CALL vkGetMTLTextureMVK(VkImage image, id<MTLTexture>* pMT
 #endif
 
 extern VKAPI_ATTR void* VKAPI_CALL vkGetProcAddress(const char* name);
+//==============================================================================
+//  Blend Factor
+//==============================================================================
+inline VkBlendFactor vkBlendFactor(xxGraphicBlendFactor blend)
+{
+    switch (blend)
+    {
+    default:
+    case BLEND_FACTOR_ZERO:                     return VK_BLEND_FACTOR_ZERO;
+    case BLEND_FACTOR_ONE:                      return VK_BLEND_FACTOR_ONE;
+    case BLEND_FACTOR_SRC_COLOR:                return VK_BLEND_FACTOR_SRC_COLOR;
+    case BLEND_FACTOR_ONE_MINUS_SRC_COLOR:      return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
+    case BLEND_FACTOR_DST_COLOR:                return VK_BLEND_FACTOR_DST_COLOR;
+    case BLEND_FACTOR_ONE_MINUS_DST_COLOR:      return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
+    case BLEND_FACTOR_SRC_ALPHA:                return VK_BLEND_FACTOR_SRC_ALPHA;
+    case BLEND_FACTOR_ONE_MINUS_SRC_ALPHA:      return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    case BLEND_FACTOR_DST_ALPHA:                return VK_BLEND_FACTOR_DST_ALPHA;
+    case BLEND_FACTOR_ONE_MINUS_DST_ALPHA:      return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+    case BLEND_FACTOR_CONSTANT_COLOR:           return VK_BLEND_FACTOR_CONSTANT_COLOR;
+    case BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR: return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
+    case BLEND_FACTOR_CONSTANT_ALPHA:           return VK_BLEND_FACTOR_CONSTANT_ALPHA;
+    case BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA: return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA;
+    case BLEND_FACTOR_SRC_ALPHA_SATURATE:       return VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
+    case BLEND_FACTOR_SRC1_COLOR:               return VK_BLEND_FACTOR_SRC1_COLOR;
+    case BLEND_FACTOR_ONE_MINUS_SRC1_COLOR:     return VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR;
+    case BLEND_FACTOR_SRC1_ALPHA:               return VK_BLEND_FACTOR_SRC1_ALPHA;
+    case BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA:     return VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA;
+    }
+}
+//==============================================================================

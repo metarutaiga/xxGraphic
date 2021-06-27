@@ -80,7 +80,7 @@ xxAPI void          xxDestroyShaderNULL(uint64_t device, uint64_t shader);
 //==============================================================================
 //  Pipeline
 //==============================================================================
-xxAPI uint64_t      xxCreateBlendStateNULL(uint64_t device, bool blending);
+xxAPI uint64_t      xxCreateBlendStateNULL(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor);
 xxAPI uint64_t      xxCreateDepthStencilStateNULL(uint64_t device, bool depthTest, bool depthWrite);
 xxAPI uint64_t      xxCreateRasterizerStateNULL(uint64_t device, bool cull, bool scissor);
 xxAPI uint64_t      xxCreatePipelineNULL(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);

@@ -2018,18 +2018,18 @@ void xxDestroyShaderVulkan(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateVulkan(uint64_t device, bool blending)
+uint64_t xxCreateBlendStateVulkan(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor)
 {
     VkPipelineColorBlendAttachmentState* blendState = xxAlloc(VkPipelineColorBlendAttachmentState);
     if (blendState == nullptr)
         return 0;
     memset(blendState, 0, sizeof(VkPipelineColorBlendAttachmentState));
 
-    blendState->blendEnable = blending ? VK_TRUE : VK_FALSE;
-    blendState->srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-    blendState->dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    blendState->blendEnable = (sourceColor != BLEND_FACTOR_ONE || destinationColor != BLEND_FACTOR_ZERO) ? VK_TRUE : VK_FALSE;
+    blendState->srcColorBlendFactor = vkBlendFactor(sourceColor);
+    blendState->dstColorBlendFactor = vkBlendFactor(destinationColor);
     blendState->colorBlendOp = VK_BLEND_OP_ADD;
-    blendState->srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+    blendState->srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
     blendState->dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
     blendState->alphaBlendOp = VK_BLEND_OP_ADD;
     blendState->colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;

@@ -7,12 +7,12 @@
 #ifndef _M_IX86
 #define xxAPI xxEXTERN
 #endif
+#include "xxSystem.h"
+#include "dxsdk/d3d8.h"
 #include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalD3D.h"
 #include "xxGraphicD3DAsm.h"
 #include "xxGraphicD3D8PS.h"
-
-#include "dxsdk/d3d8.h"
 
 //==============================================================================
 //  Instance

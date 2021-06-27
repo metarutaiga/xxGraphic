@@ -4,14 +4,15 @@
 // Copyright (c) 2019-2021 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
+#include "xxSystem.h"
+#include "dxsdk/d3d12.h"
+#include "dxsdk/d3d11on12.h"
+#include "dxsdk/dxgi1_4.h"
 #include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalD3D.h"
 #include "xxGraphicD3D11.h"
 #include "xxGraphicD3D11On12.h"
 
-#include "dxsdk/d3d12.h"
-#include "dxsdk/d3d11on12.h"
-#include "dxsdk/dxgi1_4.h"
 #define NUM_BACK_BUFFERS            3
 
 static void*                        g_d3d11Library = nullptr;

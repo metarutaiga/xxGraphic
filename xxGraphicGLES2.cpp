@@ -751,10 +751,11 @@ static void checkProgram(GLuint glProgram)
     }
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateBlendStateGLES2(uint64_t device, bool blending)
+uint64_t xxCreateBlendStateGLES2(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor)
 {
     STATEGL glState = {};
-    glState.alphaBlending = blending;
+    glState.blendSourceColor = sourceColor;
+    glState.blendDestinationColor = destinationColor;
     return static_cast<uint64_t>(glState.value);
 }
 //------------------------------------------------------------------------------
@@ -807,7 +808,8 @@ uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t bl
     glPipeline->vertexAttribute = glVertexAttribute;
     glPipeline->texture = glGetUniformLocation(glProgram, "tex");
     glPipeline->uniform = glGetUniformLocation(glProgram, "uniformBuffer");
-    glPipeline->state.alphaBlending = glBlendState.alphaBlending;
+    glPipeline->state.blendSourceColor = glBlendState.blendSourceColor;
+    glPipeline->state.blendDestinationColor = glBlendState.blendDestinationColor;
     glPipeline->state.depthTest = glDepthStencilState.depthTest;
     glPipeline->state.depthWrite = glDepthStencilState.depthWrite;
     glPipeline->state.cull = glRasterizerState.cull;
@@ -869,11 +871,11 @@ void xxSetPipelineGLES2(uint64_t commandEncoder, uint64_t pipeline)
         glEnableVertexAttribArray(attribute.index);
     }
 
-    if (glPipeline->state.alphaBlending)
+    if (glPipeline->state.blendSourceColor != BLEND_FACTOR_ONE || glPipeline->state.blendDestinationColor != BLEND_FACTOR_ZERO)
     {
         glEnable(GL_BLEND);
         glBlendEquation(GL_FUNC_ADD);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendFunc(glBlendFactor(glPipeline->state.blendSourceColor), glBlendFactor(glPipeline->state.blendDestinationColor));
     }
     else
     {

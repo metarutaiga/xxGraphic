@@ -6,7 +6,7 @@
 //==============================================================================
 #pragma once
 
-#include "xxSystem.h"
+#include "xxGraphic.h"
 
 #define KHRONOS_STATIC
 #define GL_GLES_PROTOTYPES 1
@@ -34,6 +34,31 @@
 //  GLSL Shader
 //==============================================================================
 extern const char* const    glDefaultShaderCode;
+//==============================================================================
+//  Blend Factor
+//==============================================================================
+inline GLenum glBlendFactor(/*xxGraphicBlendFactor*/int blend)
+{
+    switch (blend)
+    {
+    default:
+    case BLEND_FACTOR_ZERO:                     return GL_ZERO;
+    case BLEND_FACTOR_ONE:                      return GL_ONE;
+    case BLEND_FACTOR_SRC_COLOR:                return GL_SRC_COLOR;
+    case BLEND_FACTOR_ONE_MINUS_SRC_COLOR:      return GL_ONE_MINUS_SRC_COLOR;
+    case BLEND_FACTOR_DST_COLOR:                return GL_DST_COLOR;
+    case BLEND_FACTOR_ONE_MINUS_DST_COLOR:      return GL_ONE_MINUS_DST_COLOR;
+    case BLEND_FACTOR_SRC_ALPHA:                return GL_SRC_ALPHA;
+    case BLEND_FACTOR_ONE_MINUS_SRC_ALPHA:      return GL_ONE_MINUS_SRC_ALPHA;
+    case BLEND_FACTOR_DST_ALPHA:                return GL_DST_ALPHA;
+    case BLEND_FACTOR_ONE_MINUS_DST_ALPHA:      return GL_ONE_MINUS_DST_ALPHA;
+    case BLEND_FACTOR_CONSTANT_COLOR:           return GL_CONSTANT_COLOR;
+    case BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR: return GL_ONE_MINUS_CONSTANT_COLOR;
+    case BLEND_FACTOR_CONSTANT_ALPHA:           return GL_CONSTANT_ALPHA;
+    case BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA: return GL_ONE_MINUS_CONSTANT_ALPHA;
+    case BLEND_FACTOR_SRC_ALPHA_SATURATE:       return GL_SRC_ALPHA_SATURATE;
+    }
+}
 //==============================================================================
 //  Function
 //==============================================================================
@@ -145,8 +170,8 @@ union STATEGL
     uint64_t        value;
     struct
     {
-        uint64_t    alphaBlending:1;
-        uint64_t    alphaTesting:1;
+        uint64_t    blendSourceColor:4;
+        uint64_t    blendDestinationColor:4;
         uint64_t    depthTest:1;
         uint64_t    depthWrite:1;
         uint64_t    cull:1;

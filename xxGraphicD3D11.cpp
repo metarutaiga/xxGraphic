@@ -4,12 +4,13 @@
 // Copyright (c) 2019-2021 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
+#include "xxSystem.h"
+#include "dxsdk/d3d11.h"
 #include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalD3D.h"
 #include "xxGraphicD3DAsm.h"
 #include "xxGraphicD3D11.h"
 
-#include "dxsdk/d3d11.h"
 #define NUM_BACK_BUFFERS            3
 #ifndef _DEBUG
 #define PERSISTENT_BUFFER           1
@@ -1073,16 +1074,16 @@ void xxDestroyShaderD3D11(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateD3D11(uint64_t device, bool blending)
+uint64_t xxCreateBlendStateD3D11(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor)
 {
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
     if (d3dDevice == nullptr)
         return 0;
 
     D3D11_BLEND_DESC desc = {};
-    desc.RenderTarget[0].BlendEnable = blending;
-    desc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-    desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+    desc.RenderTarget[0].BlendEnable = (sourceColor != BLEND_FACTOR_ONE || destinationColor != BLEND_FACTOR_ZERO);
+    desc.RenderTarget[0].SrcBlend = d3d11BlendFactor(sourceColor);
+    desc.RenderTarget[0].DestBlend = d3d11BlendFactor(destinationColor);
     desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
     desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
     desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;

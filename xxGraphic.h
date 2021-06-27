@@ -9,6 +9,31 @@
 #include "xxSystem.h"
 
 //==============================================================================
+//  Blend Factor
+//==============================================================================
+enum xxGraphicBlendFactor
+{
+    BLEND_FACTOR_ZERO                       = 0,
+    BLEND_FACTOR_ONE                        = 1,
+    BLEND_FACTOR_SRC_COLOR                  = 2,
+    BLEND_FACTOR_ONE_MINUS_SRC_COLOR        = 3,
+    BLEND_FACTOR_DST_COLOR                  = 4,
+    BLEND_FACTOR_ONE_MINUS_DST_COLOR        = 5,
+    BLEND_FACTOR_SRC_ALPHA                  = 6,
+    BLEND_FACTOR_ONE_MINUS_SRC_ALPHA        = 7,
+    BLEND_FACTOR_DST_ALPHA                  = 8,
+    BLEND_FACTOR_ONE_MINUS_DST_ALPHA        = 9,
+    BLEND_FACTOR_CONSTANT_COLOR             = 10,
+    BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR   = 11,
+    BLEND_FACTOR_CONSTANT_ALPHA             = 12,
+    BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA   = 13,
+    BLEND_FACTOR_SRC_ALPHA_SATURATE         = 14,
+    BLEND_FACTOR_SRC1_COLOR                 = 15,
+    BLEND_FACTOR_ONE_MINUS_SRC1_COLOR       = 16,
+    BLEND_FACTOR_SRC1_ALPHA                 = 17,
+    BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA       = 18,
+};
+//==============================================================================
 //  Instance
 //==============================================================================
 xxAPI uint64_t      (*xxCreateInstance)();
@@ -80,7 +105,7 @@ xxAPI void          (*xxDestroyShader)(uint64_t device, uint64_t shader);
 //==============================================================================
 //  Pipeline
 //==============================================================================
-xxAPI uint64_t      (*xxCreateBlendState)(uint64_t device, bool blending);
+xxAPI uint64_t      (*xxCreateBlendState)(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor);
 xxAPI uint64_t      (*xxCreateDepthStencilState)(uint64_t device, bool depthTest, bool depthWrite);
 xxAPI uint64_t      (*xxCreateRasterizerState)(uint64_t device, bool cull, bool scissor);
 xxAPI uint64_t      (*xxCreatePipeline)(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);

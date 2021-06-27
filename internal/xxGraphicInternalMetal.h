@@ -6,7 +6,7 @@
 //==============================================================================
 #pragma once
 
-#include "xxSystem.h"
+#include "xxGraphic.h"
 
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 
@@ -36,6 +36,35 @@ extern Class classMTLVertexDescriptor;
 //==============================================================================
 extern const char* const mtlDefaultShaderCode;
 extern const char* const mtlArgumentShaderCode;
+//==============================================================================
+//  Blend Factor
+//==============================================================================
+inline MTLBlendFactor mtlBlendFactor(xxGraphicBlendFactor blend)
+{
+    switch (blend)
+    {
+    default:
+    case BLEND_FACTOR_ZERO:                     return MTLBlendFactorZero;
+    case BLEND_FACTOR_ONE:                      return MTLBlendFactorOne;
+    case BLEND_FACTOR_SRC_COLOR:                return MTLBlendFactorSourceColor;
+    case BLEND_FACTOR_ONE_MINUS_SRC_COLOR:      return MTLBlendFactorOneMinusSourceColor;
+    case BLEND_FACTOR_DST_COLOR:                return MTLBlendFactorDestinationColor;
+    case BLEND_FACTOR_ONE_MINUS_DST_COLOR:      return MTLBlendFactorOneMinusDestinationColor;
+    case BLEND_FACTOR_SRC_ALPHA:                return MTLBlendFactorSourceAlpha;
+    case BLEND_FACTOR_ONE_MINUS_SRC_ALPHA:      return MTLBlendFactorOneMinusSourceAlpha;
+    case BLEND_FACTOR_DST_ALPHA:                return MTLBlendFactorDestinationAlpha;
+    case BLEND_FACTOR_ONE_MINUS_DST_ALPHA:      return MTLBlendFactorOneMinusDestinationAlpha;
+    case BLEND_FACTOR_CONSTANT_COLOR:           return MTLBlendFactorBlendColor;
+    case BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR: return MTLBlendFactorOneMinusBlendColor;
+    case BLEND_FACTOR_CONSTANT_ALPHA:           return MTLBlendFactorBlendAlpha;
+    case BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA: return MTLBlendFactorOneMinusBlendAlpha;
+    case BLEND_FACTOR_SRC_ALPHA_SATURATE:       return MTLBlendFactorSourceAlphaSaturated;
+    case BLEND_FACTOR_SRC1_COLOR:               return MTLBlendFactorSource1Color;
+    case BLEND_FACTOR_ONE_MINUS_SRC1_COLOR:     return MTLBlendFactorOneMinusSource1Color;
+    case BLEND_FACTOR_SRC1_ALPHA:               return MTLBlendFactorSource1Alpha;
+    case BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA:     return MTLBlendFactorOneMinusSource1Alpha;
+    }
+}
 //==============================================================================
 //  Framebuffer
 //==============================================================================

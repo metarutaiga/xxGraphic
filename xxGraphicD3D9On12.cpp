@@ -4,16 +4,17 @@
 // Copyright (c) 2019-2021 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
+#if defined(_DEBUG)
+#define D3D_DEBUG_INFO 1
+#endif
+#include "xxSystem.h"
+#include "dxsdk/d3d9on12.h"
 #include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalD3D.h"
 #include "xxGraphicD3D9.h"
 #include "xxGraphicD3D9PS.h"
 #include "xxGraphicD3D9On12.h"
 
-#if defined(_DEBUG)
-#define D3D_DEBUG_INFO 1
-#endif
-#include "dxsdk/d3d9on12.h"
 
 static void*                        g_d3dLibrary = nullptr;
 

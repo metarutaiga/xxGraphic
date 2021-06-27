@@ -6,7 +6,7 @@
 //==============================================================================
 #pragma once
 
-#include "xxSystem.h"
+#include "xxGraphic.h"
 
 #define COM_NO_WINDOWS_H
 #include <objbase.h>
@@ -371,6 +371,74 @@ inline struct ID3D10Blob* CreateD3D10Shader(const char* shader, const char* entr
 }
 
 //==============================================================================
+//  Blend Factor
+//==============================================================================
+#if defined(DIRECT3D_VERSION)
+#if (DIRECT3D_VERSION < 0x0900)
+inline DWORD d3dBlendFactor(/*xxGraphicBlendFactor*/int blend)
+#elif (DIRECT3D_VERSION >= 0x0900)
+inline DWORD d3d9BlendFactor(/*xxGraphicBlendFactor*/int blend)
+#endif
+{
+    switch (blend)
+    {
+    default:
+    case BLEND_FACTOR_ZERO:                     return D3DBLEND_ZERO;
+    case BLEND_FACTOR_ONE:                      return D3DBLEND_ONE;
+    case BLEND_FACTOR_SRC_COLOR:                return D3DBLEND_SRCCOLOR;
+    case BLEND_FACTOR_ONE_MINUS_SRC_COLOR:      return D3DBLEND_INVSRCCOLOR;
+    case BLEND_FACTOR_DST_COLOR:                return D3DBLEND_DESTCOLOR;
+    case BLEND_FACTOR_ONE_MINUS_DST_COLOR:      return D3DBLEND_INVDESTCOLOR;
+    case BLEND_FACTOR_SRC_ALPHA:                return D3DBLEND_SRCALPHA;
+    case BLEND_FACTOR_ONE_MINUS_SRC_ALPHA:      return D3DBLEND_INVSRCALPHA;
+    case BLEND_FACTOR_DST_ALPHA:                return D3DBLEND_DESTALPHA;
+    case BLEND_FACTOR_ONE_MINUS_DST_ALPHA:      return D3DBLEND_INVDESTALPHA;
+    case BLEND_FACTOR_SRC_ALPHA_SATURATE:       return D3DBLEND_SRCALPHASAT;
+#if (DIRECT3D_VERSION >= 0x0900)
+    case BLEND_FACTOR_CONSTANT_COLOR:           return D3DBLEND_BLENDFACTOR;
+    case BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR: return D3DBLEND_INVBLENDFACTOR;
+    case BLEND_FACTOR_SRC1_COLOR:               return D3DBLEND_SRCCOLOR2;
+    case BLEND_FACTOR_ONE_MINUS_SRC1_COLOR:     return D3DBLEND_INVSRCCOLOR2;
+#endif
+    }
+}
+#endif
+#if defined(__d3d10_h__) || defined(__d3d11_h__) || defined(__d3d12_h__)
+#if defined(__d3d10_h__)
+#define D3D1X_BLEND(value) D3D10_BLEND_ ## value
+inline D3D10_BLEND d3d10BlendFactor(xxGraphicBlendFactor blend)
+#elif defined(__d3d11_h__)
+#define D3D1X_BLEND(value) D3D11_BLEND_ ## value
+inline D3D11_BLEND d3d11BlendFactor(xxGraphicBlendFactor blend)
+#elif defined(__d3d12_h__)
+#define D3D1X_BLEND(value) D3D12_BLEND_ ## value
+inline D3D12_BLEND d3d12BlendFactor(xxGraphicBlendFactor blend)
+#endif
+{
+    switch (blend)
+    {
+    default:
+    case BLEND_FACTOR_ZERO:                     return D3D1X_BLEND(ZERO);
+    case BLEND_FACTOR_ONE:                      return D3D1X_BLEND(ONE);
+    case BLEND_FACTOR_SRC_COLOR:                return D3D1X_BLEND(SRC_COLOR);
+    case BLEND_FACTOR_ONE_MINUS_SRC_COLOR:      return D3D1X_BLEND(INV_SRC_COLOR);
+    case BLEND_FACTOR_DST_COLOR:                return D3D1X_BLEND(DEST_COLOR);
+    case BLEND_FACTOR_ONE_MINUS_DST_COLOR:      return D3D1X_BLEND(INV_DEST_COLOR);
+    case BLEND_FACTOR_SRC_ALPHA:                return D3D1X_BLEND(SRC_ALPHA);
+    case BLEND_FACTOR_ONE_MINUS_SRC_ALPHA:      return D3D1X_BLEND(INV_SRC_ALPHA);
+    case BLEND_FACTOR_DST_ALPHA:                return D3D1X_BLEND(DEST_ALPHA);
+    case BLEND_FACTOR_ONE_MINUS_DST_ALPHA:      return D3D1X_BLEND(INV_DEST_ALPHA);
+    case BLEND_FACTOR_CONSTANT_COLOR:           return D3D1X_BLEND(BLEND_FACTOR);
+    case BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR: return D3D1X_BLEND(INV_BLEND_FACTOR);
+    case BLEND_FACTOR_SRC_ALPHA_SATURATE:       return D3D1X_BLEND(SRC_ALPHA_SAT);
+    case BLEND_FACTOR_SRC1_COLOR:               return D3D1X_BLEND(SRC1_COLOR);
+    case BLEND_FACTOR_ONE_MINUS_SRC1_COLOR:     return D3D1X_BLEND(INV_SRC1_COLOR);
+    case BLEND_FACTOR_SRC1_ALPHA:               return D3D1X_BLEND(SRC1_ALPHA);
+    case BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA:     return D3D1X_BLEND(INV_SRC1_ALPHA);
+    }
+}
+#endif
+//==============================================================================
 //  Resource Type
 //==============================================================================
 inline uint64_t getResourceType(uint64_t resource)
@@ -629,8 +697,8 @@ union D3DRENDERSTATE3
     uint64_t        value;
     struct
     {
-        uint64_t    alphaBlending:1;
-        uint64_t    alphaTesting:1;
+        uint64_t    blendSourceColor:4;
+        uint64_t    blendDestinationColor:4;
         uint64_t    depthTest:1;
         uint64_t    depthWrite:1;
         uint64_t    cull:1;

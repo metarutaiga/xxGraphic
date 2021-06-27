@@ -214,7 +214,7 @@ void xxDestroyShaderNULL(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateNULL(uint64_t device, bool blending)
+uint64_t xxCreateBlendStateNULL(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor)
 {
     return 0;
 }

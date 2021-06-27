@@ -4,12 +4,13 @@
 // Copyright (c) 2019-2021 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
+#include "xxSystem.h"
+#include "dxsdk/d3d10.h"
 #include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalD3D.h"
 #include "xxGraphicD3DAsm.h"
 #include "xxGraphicD3D10.h"
 
-#include "dxsdk/d3d10.h"
 typedef HRESULT (WINAPI *PFN_D3D10_CREATE_DEVICE)(IDXGIAdapter*, D3D10_DRIVER_TYPE, HMODULE, UINT, UINT, ID3D10Device**);
 #define NUM_BACK_BUFFERS            3
 #ifndef _DEBUG
@@ -996,16 +997,16 @@ void xxDestroyShaderD3D10(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateD3D10(uint64_t device, bool blending)
+uint64_t xxCreateBlendStateD3D10(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(device);
     if (d3dDevice == nullptr)
         return 0;
 
     D3D10_BLEND_DESC desc = {};
-    desc.BlendEnable[0] = blending;
-    desc.SrcBlend = D3D10_BLEND_SRC_ALPHA;
-    desc.DestBlend = D3D10_BLEND_INV_SRC_ALPHA;
+    desc.BlendEnable[0] = (sourceColor != BLEND_FACTOR_ONE || destinationColor != BLEND_FACTOR_ZERO);
+    desc.SrcBlend = d3d10BlendFactor(sourceColor);
+    desc.DestBlend = d3d10BlendFactor(destinationColor);
     desc.BlendOp = D3D10_BLEND_OP_ADD;
     desc.SrcBlendAlpha = D3D10_BLEND_INV_SRC_ALPHA;
     desc.DestBlendAlpha = D3D10_BLEND_ZERO;

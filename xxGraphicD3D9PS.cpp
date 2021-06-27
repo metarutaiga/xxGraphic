@@ -4,12 +4,12 @@
 // Copyright (c) 2019-2021 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
+#include "xxSystem.h"
+#include "dxsdk/d3d9.h"
 #include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalD3D.h"
 #include "xxGraphicD3DAsm.h"
 #include "xxGraphicD3D9PS.h"
-
-#include "dxsdk/d3d9.h"
 
 //==============================================================================
 //  Instance

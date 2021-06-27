@@ -7,15 +7,16 @@
 #ifndef _M_IX86
 #define xxAPI xxEXTERN
 #endif
+#define DIRECTDRAW_VERSION          0x700
+#define DIRECT3D_VERSION            0x700
+#define D3D_OVERLOADS
+#include "xxSystem.h"
+#include "dxsdk/ddraw.h"
+#include "dxsdk/d3d.h"
 #include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalD3D.h"
 #include "xxGraphicD3D7.h"
 
-#define DIRECTDRAW_VERSION          0x700
-#define DIRECT3D_VERSION            0x700
-#define D3D_OVERLOADS
-#include "dxsdk/ddraw.h"
-#include "dxsdk/d3d.h"
 typedef HRESULT (WINAPI *PFN_DIRECT_DRAW_CREATE_EX)(GUID*, LPVOID*, REFIID, IUnknown*);
 #define D3DRTYPE_CONSTANTBUFFER     0
 #define D3DRTYPE_INDEXBUFFER        1
@@ -672,10 +673,11 @@ void xxDestroyShaderD3D7(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateD3D7(uint64_t device, bool blending)
+uint64_t xxCreateBlendStateD3D7(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor)
 {
     D3DRENDERSTATE7 d3dRenderState = {};
-    d3dRenderState.alphaBlending = blending;
+    d3dRenderState.blendSourceColor = d3dBlendFactor(sourceColor);
+    d3dRenderState.blendDestinationColor = d3dBlendFactor(destinationColor);
     return static_cast<uint64_t>(d3dRenderState.value);
 }
 //------------------------------------------------------------------------------
@@ -701,16 +703,17 @@ uint64_t xxCreatePipelineD3D7(uint64_t device, uint64_t renderPass, uint64_t ble
     if (d3dPipeline == nullptr)
         return 0;
 
-    DWORD d3dVertexShader                   = static_cast<DWORD>(vertexShader);
-    DWORD d3dPixelShader                    = static_cast<DWORD>(fragmentShader);
-    D3DRENDERSTATE7 d3dBlendState           = { blendState };
-    D3DRENDERSTATE7 d3dDepthStencilState    = { depthStencilState };
-    D3DRENDERSTATE7 d3dRasterizerState      = { rasterizerState };
-    d3dPipeline->renderState.alphaBlending  = d3dBlendState.alphaBlending;
-    d3dPipeline->renderState.depthTest      = d3dDepthStencilState.depthTest;
-    d3dPipeline->renderState.depthWrite     = d3dDepthStencilState.depthWrite;
-    d3dPipeline->renderState.cull           = d3dRasterizerState.cull;
-    d3dPipeline->renderState.scissor        = d3dRasterizerState.scissor;
+    DWORD d3dVertexShader                           = static_cast<DWORD>(vertexShader);
+    DWORD d3dPixelShader                            = static_cast<DWORD>(fragmentShader);
+    D3DRENDERSTATE7 d3dBlendState                   = { blendState };
+    D3DRENDERSTATE7 d3dDepthStencilState            = { depthStencilState };
+    D3DRENDERSTATE7 d3dRasterizerState              = { rasterizerState };
+    d3dPipeline->renderState.blendSourceColor       = d3dBlendState.blendSourceColor;
+    d3dPipeline->renderState.blendDestinationColor  = d3dBlendState.blendDestinationColor;
+    d3dPipeline->renderState.depthTest              = d3dDepthStencilState.depthTest;
+    d3dPipeline->renderState.depthWrite             = d3dDepthStencilState.depthWrite;
+    d3dPipeline->renderState.cull                   = d3dRasterizerState.cull;
+    d3dPipeline->renderState.scissor                = d3dRasterizerState.scissor;
 
     return reinterpret_cast<uint64_t>(d3dPipeline);
 }
@@ -789,10 +792,9 @@ void xxSetPipelineD3D7(uint64_t commandEncoder, uint64_t pipeline)
     d3dDevice->SetRenderState(D3DRENDERSTATE_SPECULARENABLE, FALSE);
     d3dDevice->SetRenderState(D3DRENDERSTATE_CULLMODE, D3DCULL_NONE);
     d3dDevice->SetRenderState(D3DRENDERSTATE_ZENABLE, d3dPipeline->renderState.depthWrite);
-    d3dDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, d3dPipeline->renderState.alphaBlending);
-    d3dDevice->SetRenderState(D3DRENDERSTATE_ALPHATESTENABLE, d3dPipeline->renderState.alphaTesting);
-    d3dDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_SRCALPHA);
-    d3dDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_INVSRCALPHA);
+    d3dDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, (d3dPipeline->renderState.blendSourceColor != D3DBLEND_ONE || d3dPipeline->renderState.blendDestinationColor != D3DBLEND_ZERO));
+    d3dDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, d3dPipeline->renderState.blendSourceColor);
+    d3dDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, d3dPipeline->renderState.blendDestinationColor);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersD3D7(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)

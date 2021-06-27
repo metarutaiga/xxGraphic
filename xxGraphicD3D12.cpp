@@ -4,13 +4,14 @@
 // Copyright (c) 2019-2021 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
+#include "xxSystem.h"
+#include "dxsdk/d3d12.h"
+#include "dxsdk/dxgi1_4.h"
 #include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalD3D.h"
 #include "xxGraphicD3DAsm.h"
 #include "xxGraphicD3D12.h"
 
-#include "dxsdk/d3d12.h"
-#include "dxsdk/dxgi1_4.h"
 typedef HRESULT (WINAPI *PFN_CREATE_DXGI_FACTORY1)(REFIID, void**);
 #define NUM_BACK_BUFFERS            3
 #define PERSISTENT_BUFFER           1
@@ -1388,7 +1389,7 @@ void xxDestroyShaderD3D12(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateD3D12(uint64_t device, bool blending)
+uint64_t xxCreateBlendStateD3D12(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor)
 {
     D3D12_BLEND_DESC* d3dDesc = xxAlloc(D3D12_BLEND_DESC);
     if (d3dDesc == nullptr)
@@ -1396,9 +1397,9 @@ uint64_t xxCreateBlendStateD3D12(uint64_t device, bool blending)
     memset(d3dDesc, 0, sizeof(D3D12_BLEND_DESC));
 
     D3D12_BLEND_DESC& desc = (*d3dDesc);
-    desc.RenderTarget[0].BlendEnable = blending;
-    desc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
-    desc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+    desc.RenderTarget[0].BlendEnable = (sourceColor != BLEND_FACTOR_ONE || destinationColor != BLEND_FACTOR_ZERO);
+    desc.RenderTarget[0].SrcBlend = d3d12BlendFactor(sourceColor);
+    desc.RenderTarget[0].DestBlend = d3d12BlendFactor(destinationColor);
     desc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
     desc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
     desc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
