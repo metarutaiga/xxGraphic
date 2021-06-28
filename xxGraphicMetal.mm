@@ -18,6 +18,9 @@ Class                   classMTLTextureDescriptor = nil;
 Class                   classMTLVertexDescriptor = nil;
 
 static void*            g_metalLibrary = nullptr;
+static MTLViewport      g_metalViewport;
+static MTLScissorRect   g_metalScissor;
+static bool             g_metalScissorEnable = false;
 static uint64_t         g_metalVertexAttribute = 0;
 static id <MTLDevice>   (*MTLCreateSystemDefaultDevice)() = nullptr;
 static void*            (*MTLCopyAllDevices)() = nullptr;
@@ -574,13 +577,14 @@ void* xxMapTextureMetal(uint64_t device, uint64_t texture, int* stride, int leve
 //------------------------------------------------------------------------------
 void xxUnmapTextureMetal(uint64_t device, uint64_t texture, int level, int array)
 {
-    MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);
 #if TARGET_OS_SIMULATOR
+    MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);
     [mtlTexture->texture replaceRegion:MTLRegionMake2D(0, 0, mtlTexture->texture.width, mtlTexture->texture.height)
                            mipmapLevel:0
                              withBytes:[mtlTexture->buffer contents]
                            bytesPerRow:[mtlTexture->buffer length] / mtlTexture->texture.height];
 #elif defined(xxMACOS_INTEL)
+    MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);
     [mtlTexture->buffer didModifyRange:NSMakeRange(0, [mtlTexture->buffer length])];
 #endif
 }
@@ -712,7 +716,10 @@ uint64_t xxCreateDepthStencilStateMetal(uint64_t device, bool depthTest, bool de
 //------------------------------------------------------------------------------
 uint64_t xxCreateRasterizerStateMetal(uint64_t device, bool cull, bool scissor)
 {
-    return 0;
+    uint64_t state = 0;
+    state |= (cull << 0);
+    state |= (scissor << 1);
+    return state;
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreatePipelineMetal(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
@@ -741,6 +748,8 @@ uint64_t xxCreatePipelineMetal(uint64_t device, uint64_t renderPass, uint64_t bl
 
     mtlPipeline->pipeline = pipeline;
     mtlPipeline->depthStencil = mtlDepthStencilState;
+    mtlPipeline->cullMode = (rasterizerState & 1) ? MTLCullModeBack : MTLCullModeNone;
+    mtlPipeline->scissorEnable = (rasterizerState & 2) != 0;
 
     return reinterpret_cast<uint64_t>(mtlPipeline);
 }
@@ -785,6 +794,8 @@ void xxSetViewportMetal(uint64_t commandEncoder, int x, int y, int width, int he
     vp.znear = minZ;
     vp.zfar = maxZ;
     [mtlCommandEncoder setViewport:vp];
+
+    g_metalViewport = vp;
 }
 //------------------------------------------------------------------------------
 void xxSetScissorMetal(uint64_t commandEncoder, int x, int y, int width, int height)
@@ -797,6 +808,9 @@ void xxSetScissorMetal(uint64_t commandEncoder, int x, int y, int width, int hei
     rect.width = width;
     rect.height = height;
     [mtlCommandEncoder setScissorRect:rect];
+
+    g_metalScissor = rect;
+    g_metalScissorEnable = (width != g_metalViewport.width || height != g_metalViewport.height);
 }
 //------------------------------------------------------------------------------
 void xxSetPipelineMetal(uint64_t commandEncoder, uint64_t pipeline)
@@ -806,6 +820,26 @@ void xxSetPipelineMetal(uint64_t commandEncoder, uint64_t pipeline)
 
     [mtlCommandEncoder setRenderPipelineState:mtlPipeline->pipeline];
     [mtlCommandEncoder setDepthStencilState:mtlPipeline->depthStencil];
+    [mtlCommandEncoder setCullMode:mtlPipeline->cullMode];
+
+    if (g_metalScissorEnable != mtlPipeline->scissorEnable)
+    {
+        if (mtlPipeline->scissorEnable)
+        {
+            [mtlCommandEncoder setScissorRect:g_metalScissor];
+            g_metalScissorEnable = true;
+        }
+        else
+        {
+            MTLScissorRect rect;
+            rect.x = 0;
+            rect.y = 0;
+            rect.width = g_metalViewport.width;
+            rect.height = g_metalViewport.height;
+            [mtlCommandEncoder setScissorRect:rect];
+            g_metalScissorEnable = false;
+        }
+    }
 }
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersMetal(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)

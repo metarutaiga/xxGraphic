@@ -114,6 +114,8 @@ struct MTLPIPELINE
 {
     id <MTLRenderPipelineState>     pipeline;
     id <MTLDepthStencilState>       depthStencil;
+    MTLCullMode                     cullMode;
+    bool                            scissorEnable;
 
     // Metal 2
     id <MTLFunction>                vertexShader;
