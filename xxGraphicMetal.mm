@@ -321,6 +321,7 @@ uint64_t xxBeginRenderPassMetal(uint64_t commandBuffer, uint64_t framebuffer, ui
     vp.znear = 0.0f;
     vp.zfar = 1.0f;
     [commandEncoder setViewport:vp];
+    g_metalViewport = vp;
 
     MTLScissorRect rect;
     rect.x = 0;
@@ -328,6 +329,7 @@ uint64_t xxBeginRenderPassMetal(uint64_t commandBuffer, uint64_t framebuffer, ui
     rect.width = width;
     rect.height = height;
     [commandEncoder setScissorRect:rect];
+    g_metalScissor = rect;
 
     return reinterpret_cast<uint64_t>((__bridge_retained void*)commandEncoder);
 }
