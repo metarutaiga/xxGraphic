@@ -36,34 +36,94 @@ extern Class classMTLVertexDescriptor;
 //==============================================================================
 extern const char* const mtlDefaultShaderCode;
 extern const char* const mtlArgumentShaderCode;
+
 //==============================================================================
 //  Blend Factor
 //==============================================================================
-inline MTLBlendFactor mtlBlendFactor(xxGraphicBlendFactor blend)
+inline MTLBlendFactor mtlBlendFactor(const char* name)
 {
-    switch (blend)
+    bool a = false;
+    bool c = false;
+    bool d = false;
+    bool o = false;
+    bool s = false;
+    for (char x; (x = (*name)); name++)
     {
-    default:
-    case BLEND_FACTOR_ZERO:                     return MTLBlendFactorZero;
-    case BLEND_FACTOR_ONE:                      return MTLBlendFactorOne;
-    case BLEND_FACTOR_SRC_COLOR:                return MTLBlendFactorSourceColor;
-    case BLEND_FACTOR_ONE_MINUS_SRC_COLOR:      return MTLBlendFactorOneMinusSourceColor;
-    case BLEND_FACTOR_DST_COLOR:                return MTLBlendFactorDestinationColor;
-    case BLEND_FACTOR_ONE_MINUS_DST_COLOR:      return MTLBlendFactorOneMinusDestinationColor;
-    case BLEND_FACTOR_SRC_ALPHA:                return MTLBlendFactorSourceAlpha;
-    case BLEND_FACTOR_ONE_MINUS_SRC_ALPHA:      return MTLBlendFactorOneMinusSourceAlpha;
-    case BLEND_FACTOR_DST_ALPHA:                return MTLBlendFactorDestinationAlpha;
-    case BLEND_FACTOR_ONE_MINUS_DST_ALPHA:      return MTLBlendFactorOneMinusDestinationAlpha;
-    case BLEND_FACTOR_CONSTANT_COLOR:           return MTLBlendFactorBlendColor;
-    case BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR: return MTLBlendFactorOneMinusBlendColor;
-    case BLEND_FACTOR_CONSTANT_ALPHA:           return MTLBlendFactorBlendAlpha;
-    case BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA: return MTLBlendFactorOneMinusBlendAlpha;
-    case BLEND_FACTOR_SRC_ALPHA_SATURATE:       return MTLBlendFactorSourceAlphaSaturated;
-    case BLEND_FACTOR_SRC1_COLOR:               return MTLBlendFactorSource1Color;
-    case BLEND_FACTOR_ONE_MINUS_SRC1_COLOR:     return MTLBlendFactorOneMinusSource1Color;
-    case BLEND_FACTOR_SRC1_ALPHA:               return MTLBlendFactorSource1Alpha;
-    case BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA:     return MTLBlendFactorOneMinusSource1Alpha;
+        switch (x)
+        {
+        case 'A':
+        case 'a':
+            a = true;
+            c = false;
+            break;
+        case 'C':
+        case 'c':
+            a = false;
+            c = true;
+            break;
+        case 'D':
+        case 'd':
+            if (s) break;
+            d = true;
+            break;
+        case 'O':
+        case 'o':
+        case '1':
+            o = true;
+            break;
+        case 'S':
+        case 's':
+            if (s) break;
+            s = true;
+            break;
+        case 'Z':
+        case 'z':
+        case '0':
+            return MTLBlendFactorZero;
+        }
     }
+    if (d)
+    {
+        if (c) return o ? MTLBlendFactorOneMinusDestinationColor : MTLBlendFactorDestinationColor;
+        if (a) return o ? MTLBlendFactorOneMinusDestinationAlpha : MTLBlendFactorDestinationAlpha;
+    }
+    if (s)
+    {
+        if (c) return o ? MTLBlendFactorOneMinusSourceColor : MTLBlendFactorSourceColor;
+        if (a) return o ? MTLBlendFactorOneMinusSourceAlpha : MTLBlendFactorSourceAlpha;
+    }
+    return o ? MTLBlendFactorOne : MTLBlendFactorZero;
+}
+//==============================================================================
+//  Blend Operation
+//==============================================================================
+inline MTLBlendOperation mtlBlendOp(const char* name)
+{
+    for (char x; (x = (*name)); name++)
+    {
+        switch (x)
+        {
+        case 'A':
+        case 'a':
+        case '+':
+            return MTLBlendOperationAdd;
+        case 'S':
+        case 's':
+        case '-':
+            return MTLBlendOperationSubtract;
+        case 'I':
+        case 'i':
+        case 'R':
+        case 'r':
+            return MTLBlendOperationReverseSubtract;
+        case 'M':
+        case 'm':
+            name++;
+            x = (*name);
+            return (x == 'I' || x == 'i') ? MTLBlendOperationMin : MTLBlendOperationMax;
+        }
+    }
+    return MTLBlendOperationAdd;
 }
 //==============================================================================
 //  Framebuffer

@@ -17,23 +17,59 @@ GrProc FX_CALL gto_grGetProcAddress(char* name);
 //==============================================================================
 //  Blend Factor
 //==============================================================================
-inline GrAlphaBlendFnc_t grBlendFactor(/*xxGraphicBlendFactor*/int blend)
+inline GrAlphaBlendFnc_t grBlendFactor(const char* name)
 {
-    switch (blend)
+    bool a = false;
+    bool c = false;
+    bool d = false;
+    bool o = false;
+    bool s = false;
+    for (char x; (x = (*name)); name++)
     {
-    default:
-    case BLEND_FACTOR_ZERO:                     return GR_BLEND_ZERO;
-    case BLEND_FACTOR_ONE:                      return GR_BLEND_ONE;
-    case BLEND_FACTOR_SRC_COLOR:                return GR_BLEND_SRC_COLOR;
-    case BLEND_FACTOR_ONE_MINUS_SRC_COLOR:      return GR_BLEND_ONE_MINUS_SRC_COLOR;
-    case BLEND_FACTOR_DST_COLOR:                return GR_BLEND_DST_COLOR;
-    case BLEND_FACTOR_ONE_MINUS_DST_COLOR:      return GR_BLEND_ONE_MINUS_DST_COLOR;
-    case BLEND_FACTOR_SRC_ALPHA:                return GR_BLEND_SRC_ALPHA;
-    case BLEND_FACTOR_ONE_MINUS_SRC_ALPHA:      return GR_BLEND_ONE_MINUS_SRC_ALPHA;
-    case BLEND_FACTOR_DST_ALPHA:                return GR_BLEND_DST_ALPHA;
-    case BLEND_FACTOR_ONE_MINUS_DST_ALPHA:      return GR_BLEND_ONE_MINUS_DST_ALPHA;
-    case BLEND_FACTOR_SRC_ALPHA_SATURATE:       return GR_BLEND_ALPHA_SATURATE;
+        switch (x)
+        {
+        case 'A':
+        case 'a':
+            a = true;
+            c = false;
+            break;
+        case 'C':
+        case 'c':
+            a = false;
+            c = true;
+            break;
+        case 'D':
+        case 'd':
+            if (s) break;
+            d = true;
+            break;
+        case 'O':
+        case 'o':
+        case '1':
+            o = true;
+            break;
+        case 'S':
+        case 's':
+            if (s) break;
+            s = true;
+            break;
+        case 'Z':
+        case 'z':
+        case '0':
+            return GR_BLEND_ZERO;
+        }
     }
+    if (d)
+    {
+        if (c) return o ? GR_BLEND_ONE_MINUS_DST_COLOR : GR_BLEND_DST_COLOR;
+        if (a) return o ? GR_BLEND_ONE_MINUS_DST_ALPHA : GR_BLEND_DST_ALPHA;
+    }
+    if (s)
+    {
+        if (c) return o ? GR_BLEND_ONE_MINUS_SRC_COLOR : GR_BLEND_SRC_COLOR;
+        if (a) return o ? GR_BLEND_ONE_MINUS_SRC_ALPHA : GR_BLEND_SRC_ALPHA;
+    }
+    return o ? GR_BLEND_ONE : GR_BLEND_ZERO;
 }
 //==============================================================================
 //  Context
@@ -106,6 +142,8 @@ union GrPipeline
     {
         uint64_t    blendSourceColor:4;
         uint64_t    blendDestinationColor:4;
+        uint64_t    blendSourceAlpha:4;
+        uint64_t    blendDestinationAlpha:4;
         uint64_t    depthTest:1;
         uint64_t    depthWrite:1;
         uint64_t    cull:1;

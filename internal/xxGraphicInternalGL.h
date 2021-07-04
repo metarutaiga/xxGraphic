@@ -37,27 +37,92 @@ extern const char* const    glDefaultShaderCode;
 //==============================================================================
 //  Blend Factor
 //==============================================================================
-inline GLenum glBlendFactor(/*xxGraphicBlendFactor*/int blend)
+inline GLenum glBlendFactor(const char* name)
 {
-    switch (blend)
+    bool a = false;
+    bool c = false;
+    bool d = false;
+    bool o = false;
+    bool s = false;
+    for (char x; (x = (*name)); name++)
     {
-    default:
-    case BLEND_FACTOR_ZERO:                     return GL_ZERO;
-    case BLEND_FACTOR_ONE:                      return GL_ONE;
-    case BLEND_FACTOR_SRC_COLOR:                return GL_SRC_COLOR;
-    case BLEND_FACTOR_ONE_MINUS_SRC_COLOR:      return GL_ONE_MINUS_SRC_COLOR;
-    case BLEND_FACTOR_DST_COLOR:                return GL_DST_COLOR;
-    case BLEND_FACTOR_ONE_MINUS_DST_COLOR:      return GL_ONE_MINUS_DST_COLOR;
-    case BLEND_FACTOR_SRC_ALPHA:                return GL_SRC_ALPHA;
-    case BLEND_FACTOR_ONE_MINUS_SRC_ALPHA:      return GL_ONE_MINUS_SRC_ALPHA;
-    case BLEND_FACTOR_DST_ALPHA:                return GL_DST_ALPHA;
-    case BLEND_FACTOR_ONE_MINUS_DST_ALPHA:      return GL_ONE_MINUS_DST_ALPHA;
-    case BLEND_FACTOR_CONSTANT_COLOR:           return GL_CONSTANT_COLOR;
-    case BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR: return GL_ONE_MINUS_CONSTANT_COLOR;
-    case BLEND_FACTOR_CONSTANT_ALPHA:           return GL_CONSTANT_ALPHA;
-    case BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA: return GL_ONE_MINUS_CONSTANT_ALPHA;
-    case BLEND_FACTOR_SRC_ALPHA_SATURATE:       return GL_SRC_ALPHA_SATURATE;
+        switch (x)
+        {
+        case 'A':
+        case 'a':
+            a = true;
+            c = false;
+            break;
+        case 'C':
+        case 'c':
+            a = false;
+            c = true;
+            break;
+        case 'D':
+        case 'd':
+            if (s) break;
+            d = true;
+            break;
+        case 'O':
+        case 'o':
+        case '1':
+            o = true;
+            break;
+        case 'S':
+        case 's':
+            if (s) break;
+            s = true;
+            break;
+        case 'Z':
+        case 'z':
+        case '0':
+            return GL_ZERO;
+        }
     }
+    if (d)
+    {
+        if (c) return o ? GL_ONE_MINUS_DST_COLOR : GL_DST_COLOR;
+        if (a) return o ? GL_ONE_MINUS_DST_ALPHA : GL_DST_ALPHA;
+    }
+    if (s)
+    {
+        if (c) return o ? GL_ONE_MINUS_SRC_COLOR : GL_SRC_COLOR;
+        if (a) return o ? GL_ONE_MINUS_SRC_ALPHA : GL_SRC_ALPHA;
+    }
+    return o ? GL_ONE : GL_ZERO;
+}
+//==============================================================================
+//  Blend Operation
+//==============================================================================
+inline GLenum glBlendOp(const char* name)
+{
+    for (char x; (x = (*name)); name++)
+    {
+        switch (x)
+        {
+        case 'A':
+        case 'a':
+        case '+':
+            return GL_FUNC_ADD;
+        case 'S':
+        case 's':
+        case '-':
+            return GL_FUNC_SUBTRACT;
+        case 'I':
+        case 'i':
+        case 'R':
+        case 'r':
+            return GL_FUNC_REVERSE_SUBTRACT;
+#if 0
+        case 'M':
+        case 'm':
+            name++;
+            x = (*name);
+            return (x == 'I' || x == 'i') ? GL_MIN : GL_MAX;
+#endif
+        }
+    }
+    return GL_FUNC_ADD;
 }
 //==============================================================================
 //  Function
@@ -165,13 +230,22 @@ union SAMPLERGL
 //==============================================================================
 //  Pipeline
 //==============================================================================
+struct BLENDGL
+{
+    GLboolean   blendEnable;
+    GLenum      blendSourceColor;
+    GLenum      blendFunctionColor;
+    GLenum      blendDestinationColor;
+    GLenum      blendSourceAlpha;
+    GLenum      blendFunctionAlpha;
+    GLenum      blendDestinationAlpha;
+};
+//------------------------------------------------------------------------------
 union STATEGL
 {
     uint64_t        value;
     struct
     {
-        uint64_t    blendSourceColor:4;
-        uint64_t    blendDestinationColor:4;
         uint64_t    depthTest:1;
         uint64_t    depthWrite:1;
         uint64_t    cull:1;
@@ -185,6 +259,7 @@ struct PIPELINEGL
     VERTEXATTRIBUTEGL*  vertexAttribute;
     GLint               texture;
     GLint               uniform;
+    BLENDGL             blend;
     STATEGL             state;
 };
 //==============================================================================

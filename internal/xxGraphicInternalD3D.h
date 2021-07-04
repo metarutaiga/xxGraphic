@@ -374,68 +374,196 @@ inline struct ID3D10Blob* CreateD3D10Shader(const char* shader, const char* entr
 //  Blend Factor
 //==============================================================================
 #if defined(DIRECT3D_VERSION)
-#if (DIRECT3D_VERSION < 0x0900)
-inline DWORD d3dBlendFactor(/*xxGraphicBlendFactor*/int blend)
-#elif (DIRECT3D_VERSION >= 0x0900)
-inline DWORD d3d9BlendFactor(/*xxGraphicBlendFactor*/int blend)
-#endif
+inline DWORD d3dBlendFactor(const char* name)
 {
-    switch (blend)
+    bool a = false;
+    bool c = false;
+    bool d = false;
+    bool o = false;
+    bool s = false;
+    for (char x; (x = (*name)); name++)
     {
-    default:
-    case BLEND_FACTOR_ZERO:                     return D3DBLEND_ZERO;
-    case BLEND_FACTOR_ONE:                      return D3DBLEND_ONE;
-    case BLEND_FACTOR_SRC_COLOR:                return D3DBLEND_SRCCOLOR;
-    case BLEND_FACTOR_ONE_MINUS_SRC_COLOR:      return D3DBLEND_INVSRCCOLOR;
-    case BLEND_FACTOR_DST_COLOR:                return D3DBLEND_DESTCOLOR;
-    case BLEND_FACTOR_ONE_MINUS_DST_COLOR:      return D3DBLEND_INVDESTCOLOR;
-    case BLEND_FACTOR_SRC_ALPHA:                return D3DBLEND_SRCALPHA;
-    case BLEND_FACTOR_ONE_MINUS_SRC_ALPHA:      return D3DBLEND_INVSRCALPHA;
-    case BLEND_FACTOR_DST_ALPHA:                return D3DBLEND_DESTALPHA;
-    case BLEND_FACTOR_ONE_MINUS_DST_ALPHA:      return D3DBLEND_INVDESTALPHA;
-    case BLEND_FACTOR_SRC_ALPHA_SATURATE:       return D3DBLEND_SRCALPHASAT;
-#if (DIRECT3D_VERSION >= 0x0900)
-    case BLEND_FACTOR_CONSTANT_COLOR:           return D3DBLEND_BLENDFACTOR;
-    case BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR: return D3DBLEND_INVBLENDFACTOR;
-    case BLEND_FACTOR_SRC1_COLOR:               return D3DBLEND_SRCCOLOR2;
-    case BLEND_FACTOR_ONE_MINUS_SRC1_COLOR:     return D3DBLEND_INVSRCCOLOR2;
-#endif
+        switch (x)
+        {
+        case 'A':
+        case 'a':
+            a = true;
+            c = false;
+            break;
+        case 'C':
+        case 'c':
+            a = false;
+            c = true;
+            break;
+        case 'D':
+        case 'd':
+            if (s) break;
+            d = true;
+            break;
+        case 'O':
+        case 'o':
+        case '1':
+            o = true;
+            break;
+        case 'S':
+        case 's':
+            if (s) break;
+            s = true;
+            break;
+        case 'Z':
+        case 'z':
+        case '0':
+            return D3DBLEND_ZERO;
+        }
     }
+    if (d)
+    {
+        if (c) return o ? D3DBLEND_INVDESTCOLOR : D3DBLEND_DESTCOLOR;
+        if (a) return o ? D3DBLEND_INVDESTALPHA : D3DBLEND_DESTALPHA;
+    }
+    if (s)
+    {
+        if (c) return o ? D3DBLEND_INVSRCCOLOR : D3DBLEND_SRCCOLOR;
+        if (a) return o ? D3DBLEND_INVSRCALPHA : D3DBLEND_SRCALPHA;
+    }
+    return o ? D3DBLEND_ONE : D3DBLEND_ZERO;
 }
 #endif
 #if defined(__d3d10_h__) || defined(__d3d11_h__) || defined(__d3d12_h__)
 #if defined(__d3d10_h__)
 #define D3D1X_BLEND(value) D3D10_BLEND_ ## value
-inline D3D10_BLEND d3d10BlendFactor(xxGraphicBlendFactor blend)
+inline D3D10_BLEND d3d10BlendFactor(const char* name)
 #elif defined(__d3d11_h__)
 #define D3D1X_BLEND(value) D3D11_BLEND_ ## value
-inline D3D11_BLEND d3d11BlendFactor(xxGraphicBlendFactor blend)
+inline D3D11_BLEND d3d11BlendFactor(const char* name)
 #elif defined(__d3d12_h__)
 #define D3D1X_BLEND(value) D3D12_BLEND_ ## value
-inline D3D12_BLEND d3d12BlendFactor(xxGraphicBlendFactor blend)
+inline D3D12_BLEND d3d12BlendFactor(const char* name)
 #endif
 {
-    switch (blend)
+    bool a = false;
+    bool c = false;
+    bool d = false;
+    bool o = false;
+    bool s = false;
+    for (char x; (x = (*name)); name++)
     {
-    default:
-    case BLEND_FACTOR_ZERO:                     return D3D1X_BLEND(ZERO);
-    case BLEND_FACTOR_ONE:                      return D3D1X_BLEND(ONE);
-    case BLEND_FACTOR_SRC_COLOR:                return D3D1X_BLEND(SRC_COLOR);
-    case BLEND_FACTOR_ONE_MINUS_SRC_COLOR:      return D3D1X_BLEND(INV_SRC_COLOR);
-    case BLEND_FACTOR_DST_COLOR:                return D3D1X_BLEND(DEST_COLOR);
-    case BLEND_FACTOR_ONE_MINUS_DST_COLOR:      return D3D1X_BLEND(INV_DEST_COLOR);
-    case BLEND_FACTOR_SRC_ALPHA:                return D3D1X_BLEND(SRC_ALPHA);
-    case BLEND_FACTOR_ONE_MINUS_SRC_ALPHA:      return D3D1X_BLEND(INV_SRC_ALPHA);
-    case BLEND_FACTOR_DST_ALPHA:                return D3D1X_BLEND(DEST_ALPHA);
-    case BLEND_FACTOR_ONE_MINUS_DST_ALPHA:      return D3D1X_BLEND(INV_DEST_ALPHA);
-    case BLEND_FACTOR_CONSTANT_COLOR:           return D3D1X_BLEND(BLEND_FACTOR);
-    case BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR: return D3D1X_BLEND(INV_BLEND_FACTOR);
-    case BLEND_FACTOR_SRC_ALPHA_SATURATE:       return D3D1X_BLEND(SRC_ALPHA_SAT);
-    case BLEND_FACTOR_SRC1_COLOR:               return D3D1X_BLEND(SRC1_COLOR);
-    case BLEND_FACTOR_ONE_MINUS_SRC1_COLOR:     return D3D1X_BLEND(INV_SRC1_COLOR);
-    case BLEND_FACTOR_SRC1_ALPHA:               return D3D1X_BLEND(SRC1_ALPHA);
-    case BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA:     return D3D1X_BLEND(INV_SRC1_ALPHA);
+        switch (x)
+        {
+        case 'A':
+        case 'a':
+            a = true;
+            c = false;
+            break;
+        case 'C':
+        case 'c':
+            a = false;
+            c = true;
+            break;
+        case 'D':
+        case 'd':
+            if (s) break;
+            d = true;
+            break;
+        case 'O':
+        case 'o':
+        case '1':
+            o = true;
+            break;
+        case 'S':
+        case 's':
+            if (s) break;
+            s = true;
+            break;
+        case 'Z':
+        case 'z':
+        case '0':
+            return D3D1X_BLEND(ZERO);
+        }
     }
+    if (d)
+    {
+        if (c) return o ? D3D1X_BLEND(INV_DEST_COLOR) : D3D1X_BLEND(DEST_COLOR);
+        if (a) return o ? D3D1X_BLEND(INV_DEST_ALPHA) : D3D1X_BLEND(DEST_ALPHA);
+    }
+    if (s)
+    {
+        if (c) return o ? D3D1X_BLEND(INV_SRC_COLOR) : D3D1X_BLEND(SRC_COLOR);
+        if (a) return o ? D3D1X_BLEND(INV_SRC_ALPHA) : D3D1X_BLEND(SRC_ALPHA);
+    }
+    return o ? D3D1X_BLEND(ONE) : D3D1X_BLEND(ZERO);
+}
+#endif
+//==============================================================================
+//  Blend Operation
+//==============================================================================
+#if (DIRECT3D_VERSION >= 0x0800)
+inline DWORD d3dBlendOp(const char* name)
+{
+    for (char x; (x = (*name)); name++)
+    {
+        switch (x)
+        {
+        case 'A':
+        case 'a':
+        case '+':
+            return D3DBLENDOP_ADD;
+        case 'S':
+        case 's':
+        case '-':
+            return D3DBLENDOP_SUBTRACT;
+        case 'I':
+        case 'i':
+        case 'R':
+        case 'r':
+            return D3DBLENDOP_REVSUBTRACT;
+        case 'M':
+        case 'm':
+            name++;
+            x = (*name);
+            return (x == 'I' || x == 'i') ? D3DBLENDOP_MIN : D3DBLENDOP_MAX;
+        }
+    }
+    return D3DBLENDOP_ADD;
+}
+#endif
+#if defined(__d3d10_h__) || defined(__d3d11_h__) || defined(__d3d12_h__)
+#if defined(__d3d10_h__)
+#define D3D1X_BLEND_OP(value) D3D10_BLEND_OP_ ## value
+inline D3D10_BLEND_OP d3d10BlendOp(const char* name)
+#elif defined(__d3d11_h__)
+#define D3D1X_BLEND_OP(value) D3D11_BLEND_OP_ ## value
+inline D3D11_BLEND_OP d3d11BlendOp(const char* name)
+#elif defined(__d3d12_h__)
+#define D3D1X_BLEND_OP(value) D3D12_BLEND_OP_ ## value
+inline D3D12_BLEND_OP d3d12BlendOp(const char* name)
+#endif
+{
+    for (char x; (x = (*name)); name++)
+    {
+        switch (x)
+        {
+        case 'A':
+        case 'a':
+        case '+':
+            return D3D1X_BLEND_OP(ADD);
+        case 'S':
+        case 's':
+        case '-':
+            return D3D1X_BLEND_OP(SUBTRACT);
+        case 'I':
+        case 'i':
+        case 'R':
+        case 'r':
+            return D3D1X_BLEND_OP(REV_SUBTRACT);
+        case 'M':
+        case 'm':
+            name++;
+            x = (*name);
+            return (x == 'I' || x == 'i') ? D3D1X_BLEND_OP(MIN) : D3D1X_BLEND_OP(MAX);
+        }
+    }
+    return D3D1X_BLEND_OP(ADD);
 }
 #endif
 //==============================================================================
@@ -697,8 +825,13 @@ union D3DRENDERSTATE3
     uint64_t        value;
     struct
     {
+        uint64_t    blendEnable:1;
         uint64_t    blendSourceColor:4;
         uint64_t    blendDestinationColor:4;
+        uint64_t    blendOperationColor:3;
+        uint64_t    blendSourceAlpha:4;
+        uint64_t    blendDestinationAlpha:4;
+        uint64_t    blendOperationAlpha:3;
         uint64_t    depthTest:1;
         uint64_t    depthWrite:1;
         uint64_t    cull:1;

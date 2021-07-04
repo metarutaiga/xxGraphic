@@ -997,20 +997,25 @@ void xxDestroyShaderD3D10(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateD3D10(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor)
+uint64_t xxCreateBlendStateD3D10(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(device);
     if (d3dDevice == nullptr)
         return 0;
 
     D3D10_BLEND_DESC desc = {};
-    desc.BlendEnable[0] = (sourceColor != BLEND_FACTOR_ONE || destinationColor != BLEND_FACTOR_ZERO);
     desc.SrcBlend = d3d10BlendFactor(sourceColor);
     desc.DestBlend = d3d10BlendFactor(destinationColor);
-    desc.BlendOp = D3D10_BLEND_OP_ADD;
-    desc.SrcBlendAlpha = D3D10_BLEND_INV_SRC_ALPHA;
-    desc.DestBlendAlpha = D3D10_BLEND_ZERO;
-    desc.BlendOpAlpha = D3D10_BLEND_OP_ADD;
+    desc.BlendOp = d3d10BlendOp(operationColor);
+    desc.SrcBlendAlpha = d3d10BlendFactor(sourceAlpha);
+    desc.DestBlendAlpha = d3d10BlendFactor(destinationAlpha);
+    desc.BlendOpAlpha = d3d10BlendOp(operationAlpha);
+    desc.BlendEnable[0] = (desc.SrcBlend != D3D10_BLEND_ONE ||
+                           desc.DestBlend != D3D10_BLEND_ZERO ||
+                           desc.BlendOp != D3D10_BLEND_OP_ADD ||
+                           desc.SrcBlendAlpha != D3D10_BLEND_ONE ||
+                           desc.DestBlendAlpha != D3D10_BLEND_ZERO ||
+                           desc.BlendOpAlpha != D3D10_BLEND_OP_ADD) ? TRUE : FALSE;
     desc.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
 
     ID3D10BlendState* d3dBlendState = nullptr;

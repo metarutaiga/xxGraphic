@@ -715,20 +715,25 @@ void xxDestroyShaderMantle(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateMantle(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor)
+uint64_t xxCreateBlendStateMantle(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
         return 0;
 
     GR_COLOR_BLEND_STATE_CREATE_INFO info = {};
-    info.target[0].blendEnable = (sourceColor != BLEND_FACTOR_ONE || destinationColor != BLEND_FACTOR_ZERO) ? GR_TRUE : GR_FALSE;
     info.target[0].srcBlendColor = grBlendFactor(sourceColor);
     info.target[0].destBlendColor = grBlendFactor(destinationColor);
-    info.target[0].blendFuncColor = GR_BLEND_FUNC_ADD;
-    info.target[0].srcBlendAlpha = GR_BLEND_SRC_ALPHA;
-    info.target[0].destBlendAlpha = GR_BLEND_ONE_MINUS_SRC_ALPHA;
-    info.target[0].blendFuncAlpha = GR_BLEND_FUNC_ADD;
+    info.target[0].blendFuncColor = grBlendOp(operationColor);
+    info.target[0].srcBlendAlpha = grBlendFactor(sourceAlpha);
+    info.target[0].destBlendAlpha = grBlendFactor(destinationAlpha);
+    info.target[0].blendFuncAlpha = grBlendOp(operationAlpha);
+    info.target[0].blendEnable = (info.target[0].srcBlendColor != GR_BLEND_ONE ||
+                                  info.target[0].destBlendColor != GR_BLEND_ZERO ||
+                                  info.target[0].blendFuncColor != GR_BLEND_FUNC_ADD ||
+                                  info.target[0].srcBlendAlpha != GR_BLEND_ONE ||
+                                  info.target[0].destBlendAlpha != GR_BLEND_ZERO ||
+                                  info.target[0].blendFuncAlpha != GR_BLEND_FUNC_ADD) ? GR_TRUE : GR_FALSE;
 
     GR_COLOR_BLEND_STATE_OBJECT blendState = GR_NULL_HANDLE;
     grCreateColorBlendState(grDevice, &info, &blendState);

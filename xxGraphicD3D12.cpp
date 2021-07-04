@@ -1389,7 +1389,7 @@ void xxDestroyShaderD3D12(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateD3D12(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor)
+uint64_t xxCreateBlendStateD3D12(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha)
 {
     D3D12_BLEND_DESC* d3dDesc = xxAlloc(D3D12_BLEND_DESC);
     if (d3dDesc == nullptr)
@@ -1397,13 +1397,18 @@ uint64_t xxCreateBlendStateD3D12(uint64_t device, xxGraphicBlendFactor sourceCol
     memset(d3dDesc, 0, sizeof(D3D12_BLEND_DESC));
 
     D3D12_BLEND_DESC& desc = (*d3dDesc);
-    desc.RenderTarget[0].BlendEnable = (sourceColor != BLEND_FACTOR_ONE || destinationColor != BLEND_FACTOR_ZERO);
     desc.RenderTarget[0].SrcBlend = d3d12BlendFactor(sourceColor);
     desc.RenderTarget[0].DestBlend = d3d12BlendFactor(destinationColor);
-    desc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-    desc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_INV_SRC_ALPHA;
-    desc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
-    desc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+    desc.RenderTarget[0].BlendOp = d3d12BlendOp(operationColor);
+    desc.RenderTarget[0].SrcBlendAlpha = d3d12BlendFactor(sourceAlpha);
+    desc.RenderTarget[0].DestBlendAlpha = d3d12BlendFactor(destinationAlpha);
+    desc.RenderTarget[0].BlendOpAlpha = d3d12BlendOp(operationAlpha);
+    desc.RenderTarget[0].BlendEnable = (desc.RenderTarget[0].SrcBlend != D3D12_BLEND_ONE ||
+                                        desc.RenderTarget[0].DestBlend != D3D12_BLEND_ZERO ||
+                                        desc.RenderTarget[0].BlendOp != D3D12_BLEND_OP_ADD ||
+                                        desc.RenderTarget[0].SrcBlendAlpha != D3D12_BLEND_ONE ||
+                                        desc.RenderTarget[0].DestBlendAlpha != D3D12_BLEND_ZERO ||
+                                        desc.RenderTarget[0].BlendOpAlpha != D3D12_BLEND_OP_ADD) ? TRUE : FALSE;
     desc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
     return reinterpret_cast<uint64_t>(d3dDesc);

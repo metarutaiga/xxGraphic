@@ -689,14 +689,22 @@ void xxDestroyShaderMetal(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateMetal(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor)
+uint64_t xxCreateBlendStateMetal(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha)
 {
     MTLRenderPipelineColorAttachmentDescriptor* desc = [classMTLRenderPipelineColorAttachmentDescriptor new];
     desc.pixelFormat = MTLPixelFormatBGRA8Unorm;
-    desc.blendingEnabled = (sourceColor != BLEND_FACTOR_ONE || destinationColor != BLEND_FACTOR_ZERO);
     desc.sourceRGBBlendFactor = mtlBlendFactor(sourceColor);
     desc.destinationRGBBlendFactor = mtlBlendFactor(destinationColor);
-    desc.rgbBlendOperation = MTLBlendOperationAdd;
+    desc.rgbBlendOperation = mtlBlendOp(operationColor);
+    desc.sourceAlphaBlendFactor = mtlBlendFactor(sourceAlpha);
+    desc.destinationAlphaBlendFactor = mtlBlendFactor(destinationAlpha);
+    desc.alphaBlendOperation = mtlBlendOp(operationAlpha);
+    desc.blendingEnabled = (desc.sourceRGBBlendFactor != MTLBlendFactorOne ||
+                            desc.destinationRGBBlendFactor != MTLBlendFactorZero ||
+                            desc.rgbBlendOperation != MTLBlendOperationAdd ||
+                            desc.sourceAlphaBlendFactor != MTLBlendFactorOne ||
+                            desc.destinationAlphaBlendFactor != MTLBlendFactorZero ||
+                            desc.alphaBlendOperation != MTLBlendOperationAdd) ? YES : NO;
 
     return reinterpret_cast<uint64_t>((__bridge_retained void*)desc);
 }

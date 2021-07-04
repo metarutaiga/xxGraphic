@@ -736,11 +736,21 @@ void xxDestroyShaderD3D9(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateD3D9(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor)
+uint64_t xxCreateBlendStateD3D9(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha)
 {
     D3DRENDERSTATE9 d3dRenderState = {};
-    d3dRenderState.blendSourceColor = d3d9BlendFactor(sourceColor);
-    d3dRenderState.blendDestinationColor = d3d9BlendFactor(destinationColor);
+    d3dRenderState.blendSourceColor = d3dBlendFactor(sourceColor);
+    d3dRenderState.blendDestinationColor = d3dBlendFactor(destinationColor);
+    d3dRenderState.blendOperationColor = d3dBlendOp(operationColor);
+    d3dRenderState.blendSourceAlpha = d3dBlendFactor(sourceAlpha);
+    d3dRenderState.blendDestinationAlpha = d3dBlendFactor(destinationAlpha);
+    d3dRenderState.blendOperationAlpha = d3dBlendOp(operationAlpha);
+    d3dRenderState.blendEnable = (d3dRenderState.blendSourceColor != D3DBLEND_ONE ||
+                                  d3dRenderState.blendDestinationColor != D3DBLEND_ZERO ||
+                                  d3dRenderState.blendOperationColor != D3DBLENDOP_ADD ||
+                                  d3dRenderState.blendSourceAlpha != D3DBLEND_ONE ||
+                                  d3dRenderState.blendDestinationAlpha != D3DBLEND_ZERO ||
+                                  d3dRenderState.blendOperationAlpha != D3DBLENDOP_ADD) ? TRUE : FALSE;
     return static_cast<uint64_t>(d3dRenderState.value);
 }
 //------------------------------------------------------------------------------
@@ -776,8 +786,13 @@ uint64_t xxCreatePipelineD3D9(uint64_t device, uint64_t renderPass, uint64_t ble
     d3dPipeline->fvf                                = d3dVertexAttribute.fvf;
     d3dPipeline->vertexShader                       = d3dVertexShader;
     d3dPipeline->pixelShader                        = d3dPixelShader;
+    d3dPipeline->renderState.blendEnable            = d3dBlendState.blendEnable;
     d3dPipeline->renderState.blendSourceColor       = d3dBlendState.blendSourceColor;
     d3dPipeline->renderState.blendDestinationColor  = d3dBlendState.blendDestinationColor;
+    d3dPipeline->renderState.blendOperationColor    = d3dBlendState.blendOperationColor;
+    d3dPipeline->renderState.blendSourceAlpha       = d3dBlendState.blendSourceAlpha;
+    d3dPipeline->renderState.blendDestinationAlpha  = d3dBlendState.blendDestinationAlpha;
+    d3dPipeline->renderState.blendOperationAlpha    = d3dBlendState.blendOperationAlpha;
     d3dPipeline->renderState.depthTest              = d3dDepthStencilState.depthTest;
     d3dPipeline->renderState.depthWrite             = d3dDepthStencilState.depthWrite;
     d3dPipeline->renderState.cull                   = d3dRasterizerState.cull;
@@ -866,10 +881,17 @@ void xxSetPipelineD3D9(uint64_t commandEncoder, uint64_t pipeline)
     d3dDevice->SetRenderState(D3DRS_SPECULARENABLE, FALSE);
     d3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
     d3dDevice->SetRenderState(D3DRS_ZENABLE, d3dPipeline->renderState.depthWrite);
-    d3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, (d3dPipeline->renderState.blendSourceColor != D3DBLEND_ONE || d3dPipeline->renderState.blendDestinationColor != D3DBLEND_ZERO));
-    d3dDevice->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-    d3dDevice->SetRenderState(D3DRS_SRCBLEND, d3dPipeline->renderState.blendSourceColor);
-    d3dDevice->SetRenderState(D3DRS_DESTBLEND, d3dPipeline->renderState.blendDestinationColor);
+    d3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, d3dPipeline->renderState.blendEnable);
+    if (d3dPipeline->renderState.blendEnable)
+    {
+        d3dDevice->SetRenderState(D3DRS_SEPARATEALPHABLENDENABLE, d3dPipeline->renderState.blendEnable);
+        d3dDevice->SetRenderState(D3DRS_SRCBLEND, d3dPipeline->renderState.blendSourceColor);
+        d3dDevice->SetRenderState(D3DRS_DESTBLEND, d3dPipeline->renderState.blendDestinationColor);
+        d3dDevice->SetRenderState(D3DRS_BLENDOP, d3dPipeline->renderState.blendOperationColor);
+        d3dDevice->SetRenderState(D3DRS_SRCBLENDALPHA, d3dPipeline->renderState.blendSourceAlpha);
+        d3dDevice->SetRenderState(D3DRS_DESTBLENDALPHA, d3dPipeline->renderState.blendDestinationAlpha);
+        d3dDevice->SetRenderState(D3DRS_BLENDOPALPHA, d3dPipeline->renderState.blendOperationAlpha);
+    }
     d3dDevice->SetRenderState(D3DRS_SCISSORTESTENABLE, d3dPipeline->renderState.scissor);
 }
 //------------------------------------------------------------------------------

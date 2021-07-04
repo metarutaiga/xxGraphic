@@ -60,7 +60,7 @@ void xxMaterial::Update(xxNode& node, uint64_t device)
 
     if (m_blendState == 0)
     {
-        m_blendState = xxCreateBlendState(m_device, BLEND_FACTOR_ONE, BLEND_FACTOR_ZERO);
+        m_blendState = xxCreateBlendState(m_device, "1", "+", "0", "1", "+", "0");
     }
     if (m_depthStencilState == 0)
     {

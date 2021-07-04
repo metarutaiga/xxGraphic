@@ -48,30 +48,89 @@ extern VKAPI_ATTR void* VKAPI_CALL vkGetProcAddress(const char* name);
 //==============================================================================
 //  Blend Factor
 //==============================================================================
-inline VkBlendFactor vkBlendFactor(xxGraphicBlendFactor blend)
+inline VkBlendFactor vkBlendFactor(const char* name)
 {
-    switch (blend)
+    bool a = false;
+    bool c = false;
+    bool d = false;
+    bool o = false;
+    bool s = false;
+    for (char x; (x = (*name)); name++)
     {
-    default:
-    case BLEND_FACTOR_ZERO:                     return VK_BLEND_FACTOR_ZERO;
-    case BLEND_FACTOR_ONE:                      return VK_BLEND_FACTOR_ONE;
-    case BLEND_FACTOR_SRC_COLOR:                return VK_BLEND_FACTOR_SRC_COLOR;
-    case BLEND_FACTOR_ONE_MINUS_SRC_COLOR:      return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
-    case BLEND_FACTOR_DST_COLOR:                return VK_BLEND_FACTOR_DST_COLOR;
-    case BLEND_FACTOR_ONE_MINUS_DST_COLOR:      return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
-    case BLEND_FACTOR_SRC_ALPHA:                return VK_BLEND_FACTOR_SRC_ALPHA;
-    case BLEND_FACTOR_ONE_MINUS_SRC_ALPHA:      return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-    case BLEND_FACTOR_DST_ALPHA:                return VK_BLEND_FACTOR_DST_ALPHA;
-    case BLEND_FACTOR_ONE_MINUS_DST_ALPHA:      return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
-    case BLEND_FACTOR_CONSTANT_COLOR:           return VK_BLEND_FACTOR_CONSTANT_COLOR;
-    case BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR: return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
-    case BLEND_FACTOR_CONSTANT_ALPHA:           return VK_BLEND_FACTOR_CONSTANT_ALPHA;
-    case BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA: return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA;
-    case BLEND_FACTOR_SRC_ALPHA_SATURATE:       return VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
-    case BLEND_FACTOR_SRC1_COLOR:               return VK_BLEND_FACTOR_SRC1_COLOR;
-    case BLEND_FACTOR_ONE_MINUS_SRC1_COLOR:     return VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR;
-    case BLEND_FACTOR_SRC1_ALPHA:               return VK_BLEND_FACTOR_SRC1_ALPHA;
-    case BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA:     return VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA;
+        switch (x)
+        {
+        case 'A':
+        case 'a':
+            a = true;
+            c = false;
+            break;
+        case 'C':
+        case 'c':
+            a = false;
+            c = true;
+            break;
+        case 'D':
+        case 'd':
+            if (s) break;
+            d = true;
+            break;
+        case 'O':
+        case 'o':
+        case '1':
+            o = true;
+            break;
+        case 'S':
+        case 's':
+            if (s) break;
+            s = true;
+            break;
+        case 'Z':
+        case 'z':
+        case '0':
+            return VK_BLEND_FACTOR_ZERO;
+        }
     }
+    if (d)
+    {
+        if (c) return o ? VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR : VK_BLEND_FACTOR_DST_COLOR;
+        if (a) return o ? VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA : VK_BLEND_FACTOR_DST_ALPHA;
+    }
+    if (s)
+    {
+        if (c) return o ? VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR : VK_BLEND_FACTOR_SRC_COLOR;
+        if (a) return o ? VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA : VK_BLEND_FACTOR_SRC_ALPHA;
+    }
+    return o ? VK_BLEND_FACTOR_ONE : VK_BLEND_FACTOR_ZERO;
+}
+//==============================================================================
+//  Blend Operation
+//==============================================================================
+inline VkBlendOp vkBlendOp(const char* name)
+{
+    for (char x; (x = (*name)); name++)
+    {
+        switch (x)
+        {
+        case 'A':
+        case 'a':
+        case '+':
+            return VK_BLEND_OP_ADD;
+        case 'S':
+        case 's':
+        case '-':
+            return VK_BLEND_OP_SUBTRACT;
+        case 'I':
+        case 'i':
+        case 'R':
+        case 'r':
+            return VK_BLEND_OP_REVERSE_SUBTRACT;
+        case 'M':
+        case 'm':
+            name++;
+            x = (*name);
+            return (x == 'I' || x == 'i') ? VK_BLEND_OP_MIN : VK_BLEND_OP_MAX;
+        }
+    }
+    return VK_BLEND_OP_ADD;
 }
 //==============================================================================

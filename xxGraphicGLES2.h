@@ -80,7 +80,7 @@ xxAPI void          xxDestroyShaderGLES2(uint64_t device, uint64_t shader);
 //==============================================================================
 //  Pipeline
 //==============================================================================
-xxAPI uint64_t      xxCreateBlendStateGLES2(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor);
+xxAPI uint64_t      xxCreateBlendStateGLES2(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha);
 xxAPI uint64_t      xxCreateDepthStencilStateGLES2(uint64_t device, bool depthTest, bool depthWrite);
 xxAPI uint64_t      xxCreateRasterizerStateGLES2(uint64_t device, bool cull, bool scissor);
 xxAPI uint64_t      xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);

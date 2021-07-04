@@ -751,12 +751,24 @@ static void checkProgram(GLuint glProgram)
     }
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateBlendStateGLES2(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor)
+uint64_t xxCreateBlendStateGLES2(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha)
 {
-    STATEGL glState = {};
-    glState.blendSourceColor = sourceColor;
-    glState.blendDestinationColor = destinationColor;
-    return static_cast<uint64_t>(glState.value);
+    BLENDGL* glBlend = xxAlloc(BLENDGL);
+    if (glBlend == nullptr)
+        return 0;
+    glBlend->blendSourceColor = glBlendFactor(sourceColor);
+    glBlend->blendFunctionColor = glBlendOp(operationColor);
+    glBlend->blendDestinationColor = glBlendFactor(destinationColor);
+    glBlend->blendSourceAlpha = glBlendFactor(sourceAlpha);
+    glBlend->blendFunctionAlpha = glBlendOp(operationAlpha);
+    glBlend->blendDestinationAlpha = glBlendFactor(destinationAlpha);
+    glBlend->blendEnable = (glBlend->blendSourceColor != GL_ONE ||
+                            glBlend->blendFunctionColor != GL_ZERO ||
+                            glBlend->blendDestinationColor != GL_FUNC_ADD ||
+                            glBlend->blendSourceAlpha != GL_ONE ||
+                            glBlend->blendFunctionAlpha != GL_FUNC_ADD ||
+                            glBlend->blendDestinationAlpha != GL_FUNC_ADD) ? GL_TRUE : GL_FALSE;
+    return reinterpret_cast<uint64_t>(glBlend);
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateDepthStencilStateGLES2(uint64_t device, bool depthTest, bool depthWrite)
@@ -784,7 +796,7 @@ uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t bl
     if (glPipeline == nullptr)
         return 0;
 
-    STATEGL glBlendState = { blendState };
+    BLENDGL* glBlendState = reinterpret_cast<BLENDGL*>(blendState);
     STATEGL glDepthStencilState = { depthStencilState };
     STATEGL glRasterizerState = { rasterizerState };
 
@@ -808,8 +820,7 @@ uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t bl
     glPipeline->vertexAttribute = glVertexAttribute;
     glPipeline->texture = glGetUniformLocation(glProgram, "tex");
     glPipeline->uniform = glGetUniformLocation(glProgram, "uniformBuffer");
-    glPipeline->state.blendSourceColor = glBlendState.blendSourceColor;
-    glPipeline->state.blendDestinationColor = glBlendState.blendDestinationColor;
+    glPipeline->blend = glBlendState ? (*glBlendState) : BLENDGL{ .blendEnable = GL_FALSE };
     glPipeline->state.depthTest = glDepthStencilState.depthTest;
     glPipeline->state.depthWrite = glDepthStencilState.depthWrite;
     glPipeline->state.cull = glRasterizerState.cull;
@@ -871,11 +882,11 @@ void xxSetPipelineGLES2(uint64_t commandEncoder, uint64_t pipeline)
         glEnableVertexAttribArray(attribute.index);
     }
 
-    if (glPipeline->state.blendSourceColor != BLEND_FACTOR_ONE || glPipeline->state.blendDestinationColor != BLEND_FACTOR_ZERO)
+    if (glPipeline->blend.blendEnable)
     {
         glEnable(GL_BLEND);
-        glBlendEquation(GL_FUNC_ADD);
-        glBlendFunc(glBlendFactor(glPipeline->state.blendSourceColor), glBlendFactor(glPipeline->state.blendDestinationColor));
+        glBlendEquation(glPipeline->blend.blendFunctionColor);
+        glBlendFunc(glPipeline->blend.blendSourceColor, glPipeline->blend.blendDestinationColor);
     }
     else
     {

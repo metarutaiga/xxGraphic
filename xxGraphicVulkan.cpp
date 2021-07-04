@@ -2018,20 +2018,25 @@ void xxDestroyShaderVulkan(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateVulkan(uint64_t device, xxGraphicBlendFactor sourceColor, xxGraphicBlendFactor destinationColor)
+uint64_t xxCreateBlendStateVulkan(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha)
 {
     VkPipelineColorBlendAttachmentState* blendState = xxAlloc(VkPipelineColorBlendAttachmentState);
     if (blendState == nullptr)
         return 0;
     memset(blendState, 0, sizeof(VkPipelineColorBlendAttachmentState));
 
-    blendState->blendEnable = (sourceColor != BLEND_FACTOR_ONE || destinationColor != BLEND_FACTOR_ZERO) ? VK_TRUE : VK_FALSE;
     blendState->srcColorBlendFactor = vkBlendFactor(sourceColor);
     blendState->dstColorBlendFactor = vkBlendFactor(destinationColor);
-    blendState->colorBlendOp = VK_BLEND_OP_ADD;
-    blendState->srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-    blendState->dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-    blendState->alphaBlendOp = VK_BLEND_OP_ADD;
+    blendState->colorBlendOp = vkBlendOp(operationColor);
+    blendState->srcAlphaBlendFactor = vkBlendFactor(sourceAlpha);
+    blendState->dstAlphaBlendFactor = vkBlendFactor(destinationAlpha);
+    blendState->alphaBlendOp = vkBlendOp(operationAlpha);
+    blendState->blendEnable = (blendState->srcColorBlendFactor != VK_BLEND_FACTOR_ONE ||
+                               blendState->dstColorBlendFactor != VK_BLEND_FACTOR_ZERO ||
+                               blendState->colorBlendOp != VK_BLEND_OP_ADD ||
+                               blendState->srcAlphaBlendFactor != VK_BLEND_FACTOR_ONE ||
+                               blendState->dstAlphaBlendFactor != VK_BLEND_FACTOR_ZERO ||
+                               blendState->alphaBlendOp != VK_BLEND_OP_ADD) ? VK_TRUE : VK_FALSE;
     blendState->colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 
     return reinterpret_cast<uint64_t>(blendState);
