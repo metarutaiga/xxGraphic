@@ -10,7 +10,7 @@
 //  GLSL Shader
 //==============================================================================
 const char* const glDefaultShaderCode =
-R"(uniform vec4 uniformBuffer[12];
+R"(uniform vec4 buf[12];
 uniform sampler2D tex;
 
 attribute vec3 position;
@@ -23,21 +23,10 @@ varying vec2 varyUV;
 #ifdef _VERTEX_
 void main()
 {
-    vec4 r0;
-    vec4 r1;
-    r0 = uniformBuffer[0] * position.x;
-    r0 += uniformBuffer[1] * position.y;
-    r0 += uniformBuffer[2] * position.z;
-    r0 += uniformBuffer[3];
-    r1 = uniformBuffer[4] * r0.x;
-    r1 += uniformBuffer[5] * r0.y;
-    r1 += uniformBuffer[6] * r0.z;
-    r1 += uniformBuffer[7] * r0.w;
-    r0 = uniformBuffer[8] * r1.x;
-    r0 += uniformBuffer[9] * r1.y;
-    r0 += uniformBuffer[10] * r1.z;
-    r0 += uniformBuffer[11] * r1.w;
-    gl_Position = r0;
+    mat4 world = mat4(buf[0], buf[1], buf[2], buf[3]);
+    mat4 view = mat4(buf[4], buf[5], buf[6], buf[7]);
+    mat4 projection = mat4(buf[8], buf[9], buf[10], buf[11]);
+    gl_Position = projection * (view * (world * vec4(position, 1)));
     varyColor = color;
     varyUV = uv;
 }

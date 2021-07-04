@@ -819,7 +819,7 @@ uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t bl
     glPipeline->program = glProgram;
     glPipeline->vertexAttribute = glVertexAttribute;
     glPipeline->texture = glGetUniformLocation(glProgram, "tex");
-    glPipeline->uniform = glGetUniformLocation(glProgram, "uniformBuffer");
+    glPipeline->uniform = glGetUniformLocation(glProgram, "buf");
     glPipeline->blend = glBlendState ? (*glBlendState) : BLENDGL{ .blendEnable = GL_FALSE };
     glPipeline->state.depthTest = glDepthStencilState.depthTest;
     glPipeline->state.depthWrite = glDepthStencilState.depthWrite;
