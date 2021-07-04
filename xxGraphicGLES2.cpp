@@ -831,7 +831,9 @@ uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t bl
 //------------------------------------------------------------------------------
 void xxDestroyBlendStateGLES2(uint64_t blendState)
 {
+    BLENDGL* glBlend = reinterpret_cast<BLENDGL*>(blendState);
 
+    xxFree(glBlend);
 }
 //------------------------------------------------------------------------------
 void xxDestroyDepthStencilStateGLES2(uint64_t depthStencilState)
