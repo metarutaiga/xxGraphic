@@ -209,26 +209,14 @@ void xxSetViewportMetal2(uint64_t commandEncoder, int x, int y, int width, int h
 {
     MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(commandEncoder);
 
-    MTLViewport vp;
-    vp.originX = x;
-    vp.originY = y;
-    vp.width = width;
-    vp.height = height;
-    vp.znear = minZ;
-    vp.zfar = maxZ;
-    [mtlSwapchain->commandEncoder setViewport:vp];
+    xxSetViewportMetal(reinterpret_cast<uint64_t>(mtlSwapchain->commandEncoder), x, y, width, height, minZ, maxZ);
 }
 //------------------------------------------------------------------------------
 void xxSetScissorMetal2(uint64_t commandEncoder, int x, int y, int width, int height)
 {
     MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(commandEncoder);
 
-    MTLScissorRect rect;
-    rect.x = x;
-    rect.y = y;
-    rect.width = width;
-    rect.height = height;
-    [mtlSwapchain->commandEncoder setScissorRect:rect];
+    xxSetScissorMetal(reinterpret_cast<uint64_t>(mtlSwapchain->commandEncoder), x, y, width, height);
 }
 //------------------------------------------------------------------------------
 void xxSetPipelineMetal2(uint64_t commandEncoder, uint64_t pipeline)
@@ -236,8 +224,7 @@ void xxSetPipelineMetal2(uint64_t commandEncoder, uint64_t pipeline)
     MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(commandEncoder);
     MTLPIPELINE* mtlPipeline = reinterpret_cast<MTLPIPELINE*>(pipeline);
 
-    [mtlSwapchain->commandEncoder setRenderPipelineState:mtlPipeline->pipeline];
-    [mtlSwapchain->commandEncoder setDepthStencilState:mtlPipeline->depthStencil];
+    xxSetPipelineMetal(reinterpret_cast<uint64_t>(mtlSwapchain->commandEncoder), pipeline);
 
     NSUInteger vertexLength = mtlPipeline->vertexArgumentEncodedLength;
     NSUInteger fragmentLength = mtlPipeline->fragmentArgumentEncodedLength;
@@ -273,18 +260,8 @@ void xxSetPipelineMetal2(uint64_t commandEncoder, uint64_t pipeline)
 void xxSetVertexBuffersMetal2(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(commandEncoder);
-    id <MTLBuffer> __unsafe_unretained mtlBuffers[8];
-    NSUInteger offsets[8];
 
-    for (int i = 0; i < count; ++i)
-    {
-        mtlBuffers[i] = (__bridge id)reinterpret_cast<void*>(buffers[i]);
-        offsets[i] = 0;
-    }
-
-    [mtlSwapchain->commandEncoder setVertexBuffers:mtlBuffers
-                                           offsets:offsets
-                                         withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_BUFFER, count)];
+    xxSetVertexBuffersMetal(reinterpret_cast<uint64_t>(mtlSwapchain->commandEncoder), count, buffers, vertexAttribute);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesMetal2(uint64_t commandEncoder, int count, const uint64_t* textures)
@@ -378,16 +355,7 @@ void xxSetFragmentConstantBufferMetal2(uint64_t commandEncoder, uint64_t buffer,
 void xxDrawIndexedMetal2(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(commandEncoder);
-    id <MTLBuffer> __unsafe_unretained mtlIndexBuffer = (__bridge id)reinterpret_cast<void*>(indexBuffer);
 
-    MTLIndexType indexType = (INDEX_BUFFER_WIDTH == /* DISABLES CODE */(2)) ? MTLIndexTypeUInt16 : MTLIndexTypeUInt32;
-    [mtlSwapchain->commandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
-                                             indexCount:indexCount
-                                              indexType:indexType
-                                            indexBuffer:mtlIndexBuffer
-                                      indexBufferOffset:firstIndex * INDEX_BUFFER_WIDTH
-                                          instanceCount:instanceCount
-                                             baseVertex:vertexOffset
-                                           baseInstance:firstInstance];
+    xxDrawIndexedMetal(reinterpret_cast<uint64_t>(mtlSwapchain->commandEncoder), indexBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 //------------------------------------------------------------------------------
