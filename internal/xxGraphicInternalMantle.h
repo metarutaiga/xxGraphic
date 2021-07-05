@@ -102,3 +102,54 @@ inline GR_BLEND_FUNC grBlendOp(const char* name)
     return GR_BLEND_FUNC_ADD;
 }
 //==============================================================================
+//  Depth Comparison
+//==============================================================================
+inline GR_COMPARE_FUNC grCompareOp(const char* name)
+{
+    bool e = false;
+    bool g = false;
+    bool l = false;
+    for (char x; (x = (*name)); name++)
+    {
+        switch (x)
+        {
+        case 'V':
+        case 'v':
+            return GR_COMPARE_NEVER;
+        case 'W':
+        case 'w':
+            return GR_COMPARE_ALWAYS;
+        case 'N':
+        case 'n':
+        case '!':
+            return GR_COMPARE_NOT_EQUAL;
+        case 'Q':
+        case 'q':
+        case '=':
+            e = true;
+            break;
+        case 'G':
+        case 'g':
+        case '>':
+            if (e) break;
+            g = true;
+            break;
+        case 'L':
+        case 'l':
+        case '<':
+            if (e) break;
+            l = true;
+            break;
+        }
+    }
+    if (e)
+    {
+        if (l) return GR_COMPARE_LESS_EQUAL;
+        if (g) return GR_COMPARE_GREATER_EQUAL;
+        return GR_COMPARE_EQUAL;
+    }
+    if (l) return GR_COMPARE_LESS;
+    if (g) return GR_COMPARE_GREATER;
+    return GR_COMPARE_ALWAYS;
+}
+//==============================================================================

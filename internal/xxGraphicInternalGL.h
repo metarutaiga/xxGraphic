@@ -125,6 +125,57 @@ inline GLenum glBlendOp(const char* name)
     return GL_FUNC_ADD;
 }
 //==============================================================================
+//  Depth Comparison
+//==============================================================================
+inline GLenum glCompareOp(const char* name)
+{
+    bool e = false;
+    bool g = false;
+    bool l = false;
+    for (char x; (x = (*name)); name++)
+    {
+        switch (x)
+        {
+        case 'V':
+        case 'v':
+            return GL_NEVER;
+        case 'W':
+        case 'w':
+            return GL_ALWAYS;
+        case 'N':
+        case 'n':
+        case '!':
+            return GL_NOTEQUAL;
+        case 'Q':
+        case 'q':
+        case '=':
+            e = true;
+            break;
+        case 'G':
+        case 'g':
+        case '>':
+            if (e) break;
+            g = true;
+            break;
+        case 'L':
+        case 'l':
+        case '<':
+            if (e) break;
+            l = true;
+            break;
+        }
+    }
+    if (e)
+    {
+        if (l) return GL_LEQUAL;
+        if (g) return GL_GEQUAL;
+        return GL_EQUAL;
+    }
+    if (l) return GL_LESS;
+    if (g) return GL_GREATER;
+    return GL_ALWAYS;
+}
+//==============================================================================
 //  Function
 //==============================================================================
 extern uint64_t             (*glCreateContext)(uint64_t device, void* view, void** display);
@@ -246,7 +297,7 @@ union STATEGL
     uint64_t        value;
     struct
     {
-        uint64_t    depthTest:1;
+        uint64_t    depthTest:16;
         uint64_t    depthWrite:1;
         uint64_t    cull:1;
         uint64_t    scissor:1;

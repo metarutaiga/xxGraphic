@@ -219,7 +219,7 @@ uint64_t xxCreateBlendStateNULL(uint64_t device, const char* sourceColor, const 
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateDepthStencilStateNULL(uint64_t device, bool depthTest, bool depthWrite)
+uint64_t xxCreateDepthStencilStateNULL(uint64_t device, const char* depthTest, bool depthWrite)
 {
     return 0;
 }

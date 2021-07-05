@@ -2042,7 +2042,7 @@ uint64_t xxCreateBlendStateVulkan(uint64_t device, const char* sourceColor, cons
     return reinterpret_cast<uint64_t>(blendState);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateDepthStencilStateVulkan(uint64_t device, bool depthTest, bool depthWrite)
+uint64_t xxCreateDepthStencilStateVulkan(uint64_t device, const char* depthTest, bool depthWrite)
 {
     VkPipelineDepthStencilStateCreateInfo* depthStencilState = xxAlloc(VkPipelineDepthStencilStateCreateInfo);
     if (depthStencilState == nullptr)
@@ -2050,6 +2050,9 @@ uint64_t xxCreateDepthStencilStateVulkan(uint64_t device, bool depthTest, bool d
     memset(depthStencilState, 0, sizeof(VkPipelineDepthStencilStateCreateInfo));
 
     depthStencilState->sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    depthStencilState->depthCompareOp = vkCompareOp(depthTest);
+    depthStencilState->depthTestEnable = (depthStencilState->depthCompareOp != VK_COMPARE_OP_ALWAYS);
+    depthStencilState->depthWriteEnable = depthWrite;
 
     return reinterpret_cast<uint64_t>(depthStencilState);
 }

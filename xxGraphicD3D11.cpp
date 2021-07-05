@@ -1103,16 +1103,16 @@ uint64_t xxCreateBlendStateD3D11(uint64_t device, const char* sourceColor, const
     return reinterpret_cast<uint64_t>(d3dBlendState);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateDepthStencilStateD3D11(uint64_t device, bool depthTest, bool depthWrite)
+uint64_t xxCreateDepthStencilStateD3D11(uint64_t device, const char* depthTest, bool depthWrite)
 {
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
     if (d3dDevice == nullptr)
         return 0;
 
     D3D11_DEPTH_STENCIL_DESC desc = {};
-    desc.DepthEnable = depthTest;
+    desc.DepthFunc = d3d11CompareOp(depthTest);
+    desc.DepthEnable = (desc.DepthFunc != D3D11_COMPARISON_ALWAYS) ? TRUE : FALSE;
     desc.DepthWriteMask = depthWrite ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
-    desc.DepthFunc = D3D11_COMPARISON_ALWAYS;
     desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
     desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
     desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;

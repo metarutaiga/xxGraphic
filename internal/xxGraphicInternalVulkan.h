@@ -134,3 +134,54 @@ inline VkBlendOp vkBlendOp(const char* name)
     return VK_BLEND_OP_ADD;
 }
 //==============================================================================
+//  Depth Comparison
+//==============================================================================
+inline VkCompareOp vkCompareOp(const char* name)
+{
+    bool e = false;
+    bool g = false;
+    bool l = false;
+    for (char x; (x = (*name)); name++)
+    {
+        switch (x)
+        {
+        case 'V':
+        case 'v':
+            return VK_COMPARE_OP_NEVER;
+        case 'W':
+        case 'w':
+            return VK_COMPARE_OP_ALWAYS;
+        case 'N':
+        case 'n':
+        case '!':
+            return VK_COMPARE_OP_NOT_EQUAL;
+        case 'Q':
+        case 'q':
+        case '=':
+            e = true;
+            break;
+        case 'G':
+        case 'g':
+        case '>':
+            if (e) break;
+            g = true;
+            break;
+        case 'L':
+        case 'l':
+        case '<':
+            if (e) break;
+            l = true;
+            break;
+        }
+    }
+    if (e)
+    {
+        if (l) return VK_COMPARE_OP_LESS_OR_EQUAL;
+        if (g) return VK_COMPARE_OP_GREATER_OR_EQUAL;
+        return VK_COMPARE_OP_EQUAL;
+    }
+    if (l) return VK_COMPARE_OP_LESS;
+    if (g) return VK_COMPARE_OP_GREATER;
+    return VK_COMPARE_OP_ALWAYS;
+}
+//==============================================================================

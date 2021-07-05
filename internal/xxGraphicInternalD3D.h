@@ -567,6 +567,118 @@ inline D3D12_BLEND_OP d3d12BlendOp(const char* name)
 }
 #endif
 //==============================================================================
+//  Depth Comparison
+//==============================================================================
+#if defined(DIRECT3D_VERSION)
+inline D3DCMPFUNC d3dCompareOp(const char* name)
+{
+    bool e = false;
+    bool g = false;
+    bool l = false;
+    for (char x; (x = (*name)); name++)
+    {
+        switch (x)
+        {
+        case 'V':
+        case 'v':
+            return D3DCMP_NEVER;
+        case 'W':
+        case 'w':
+            return D3DCMP_ALWAYS;
+        case 'N':
+        case 'n':
+        case '!':
+            return D3DCMP_NOTEQUAL;
+        case 'Q':
+        case 'q':
+        case '=':
+            e = true;
+            break;
+        case 'G':
+        case 'g':
+        case '>':
+            if (e) break;
+            g = true;
+            break;
+        case 'L':
+        case 'l':
+        case '<':
+            if (e) break;
+            l = true;
+            break;
+        }
+    }
+    if (e)
+    {
+        if (l) return D3DCMP_LESSEQUAL;
+        if (g) return D3DCMP_GREATEREQUAL;
+        return D3DCMP_EQUAL;
+    }
+    if (l) return D3DCMP_LESS;
+    if (g) return D3DCMP_GREATER;
+    return D3DCMP_ALWAYS;
+}
+#endif
+#if defined(__d3d10_h__) || defined(__d3d11_h__) || defined(__d3d12_h__)
+#if defined(__d3d10_h__)
+#define D3D1X_COMPARISON(value) D3D10_COMPARISON_ ## value
+inline D3D10_COMPARISON_FUNC d3d10CompareOp(const char* name)
+#elif defined(__d3d11_h__)
+#define D3D1X_COMPARISON(value) D3D11_COMPARISON_ ## value
+inline D3D11_COMPARISON_FUNC d3d11CompareOp(const char* name)
+#elif defined(__d3d12_h__)
+#define D3D1X_COMPARISON(value) D3D12_COMPARISON_FUNC_ ## value
+inline D3D12_COMPARISON_FUNC d3d12CompareOp(const char* name)
+#endif
+{
+    bool e = false;
+    bool g = false;
+    bool l = false;
+    for (char x; (x = (*name)); name++)
+    {
+        switch (x)
+        {
+        case 'V':
+        case 'v':
+            return D3D1X_COMPARISON(NEVER);
+        case 'W':
+        case 'w':
+            return D3D1X_COMPARISON(ALWAYS);
+        case 'N':
+        case 'n':
+        case '!':
+            return D3D1X_COMPARISON(NOT_EQUAL);
+        case 'Q':
+        case 'q':
+        case '=':
+            e = true;
+            break;
+        case 'G':
+        case 'g':
+        case '>':
+            if (e) break;
+            g = true;
+            break;
+        case 'L':
+        case 'l':
+        case '<':
+            if (e) break;
+            l = true;
+            break;
+        }
+    }
+    if (e)
+    {
+        if (l) return D3D1X_COMPARISON(LESS_EQUAL);
+        if (g) return D3D1X_COMPARISON(GREATER_EQUAL);
+        return D3D1X_COMPARISON(EQUAL);
+    }
+    if (l) return D3D1X_COMPARISON(LESS);
+    if (g) return D3D1X_COMPARISON(GREATER);
+    return D3D1X_COMPARISON(ALWAYS);
+}
+#endif
+//==============================================================================
 //  Resource Type
 //==============================================================================
 inline uint64_t getResourceType(uint64_t resource)
@@ -832,7 +944,8 @@ union D3DRENDERSTATE3
         uint64_t    blendSourceAlpha:4;
         uint64_t    blendDestinationAlpha:4;
         uint64_t    blendOperationAlpha:3;
-        uint64_t    depthTest:1;
+        uint64_t    depthEnable:1;
+        uint64_t    depthTest:4;
         uint64_t    depthWrite:1;
         uint64_t    cull:1;
         uint64_t    scissor:1;

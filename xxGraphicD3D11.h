@@ -81,7 +81,7 @@ xxAPI void          xxDestroyShaderD3D11(uint64_t device, uint64_t shader);
 //  Pipeline
 //==============================================================================
 xxAPI uint64_t      xxCreateBlendStateD3D11(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha);
-xxAPI uint64_t      xxCreateDepthStencilStateD3D11(uint64_t device, bool depthTest, bool depthWrite);
+xxAPI uint64_t      xxCreateDepthStencilStateD3D11(uint64_t device, const char* depthTest, bool depthWrite);
 xxAPI uint64_t      xxCreateRasterizerStateD3D11(uint64_t device, bool cull, bool scissor);
 xxAPI uint64_t      xxCreatePipelineD3D11(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
 xxAPI void          xxDestroyBlendStateD3D11(uint64_t blendState);

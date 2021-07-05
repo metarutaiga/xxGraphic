@@ -423,10 +423,10 @@ uint64_t xxCreateBlendStateGlide(uint64_t device, const char* sourceColor, const
     return static_cast<uint64_t>(grPipeline.value);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateDepthStencilStateGlide(uint64_t device, bool depthTest, bool depthWrite)
+uint64_t xxCreateDepthStencilStateGlide(uint64_t device, const char* depthTest, bool depthWrite)
 {
     GrPipeline grPipeline = {};
-    grPipeline.depthTest = depthTest;
+    grPipeline.depthTest = grCompareOp(depthTest);
     grPipeline.depthWrite = depthWrite;
     return static_cast<uint64_t>(grPipeline.value);
 }
@@ -494,7 +494,7 @@ void xxSetPipelineGlide(uint64_t commandEncoder, uint64_t pipeline)
     GrPipeline grPipeline = { pipeline };
 
     grAlphaBlendFunction(grPipeline.blendSourceColor, grPipeline.blendDestinationColor, grPipeline.blendSourceAlpha, grPipeline.blendDestinationAlpha);
-    grDepthBufferFunction(grPipeline.depthTest ? GR_CMP_LESS : GR_CMP_ALWAYS);
+    grDepthBufferFunction(grPipeline.depthTest);
     grDepthMask(grPipeline.depthWrite ? FXTRUE : FXFALSE);
     grCullMode(grPipeline.cull ? GR_CULL_NEGATIVE : GR_CULL_DISABLE);
 }

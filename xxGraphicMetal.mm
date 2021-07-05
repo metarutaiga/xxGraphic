@@ -199,6 +199,14 @@ uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view
     swapchain->height = height;
     swapchain->scale = contentsScale;
 
+    MTLTextureDescriptor* desc = [classMTLTextureDescriptor new];
+    desc.textureType = MTLTextureType2D;
+    desc.pixelFormat = MTLPixelFormatDepth32Float;
+    desc.width = width * contentsScale;
+    desc.height = height * contentsScale;
+    desc.usage = MTLTextureUsageRenderTarget;
+    swapchain->depthstencil = [mtlDevice newTextureWithDescriptor:desc];
+
     return reinterpret_cast<uint64_t>(swapchain);
 }
 //------------------------------------------------------------------------------
@@ -306,6 +314,7 @@ uint64_t xxBeginRenderPassMetal(uint64_t commandBuffer, uint64_t framebuffer, ui
     MTLRenderPassDescriptor* __unsafe_unretained mtlRenderPass = (__bridge MTLRenderPassDescriptor*)reinterpret_cast<void*>(renderPass);
 
     mtlRenderPass.colorAttachments[0].texture = mtlFramebuffer->texture;
+    mtlRenderPass.depthAttachment.texture = mtlFramebuffer->depthstencil;
 
     mtlRenderPass.colorAttachments[0].clearColor = MTLClearColorMake(color[0], color[1], color[2], color[3]);
     mtlRenderPass.depthAttachment.clearDepth = depth;
@@ -709,14 +718,14 @@ uint64_t xxCreateBlendStateMetal(uint64_t device, const char* sourceColor, const
     return reinterpret_cast<uint64_t>((__bridge_retained void*)desc);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateDepthStencilStateMetal(uint64_t device, bool depthTest, bool depthWrite)
+uint64_t xxCreateDepthStencilStateMetal(uint64_t device, const char* depthTest, bool depthWrite)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
     if (mtlDevice == nil)
         return 0;
 
     MTLDepthStencilDescriptor* desc = [classMTLDepthStencilDescriptor new];
-    desc.depthCompareFunction = depthTest ? MTLCompareFunctionLessEqual : MTLCompareFunctionAlways;
+    desc.depthCompareFunction = mtlCompareOp(depthTest);
     desc.depthWriteEnabled = depthWrite;
 
     id <MTLDepthStencilState> depthStencilState = [mtlDevice newDepthStencilStateWithDescriptor:desc];
@@ -752,6 +761,7 @@ uint64_t xxCreatePipelineMetal(uint64_t device, uint64_t renderPass, uint64_t bl
     desc.fragmentFunction = mtlFragmentShader;
     desc.vertexDescriptor = mtlVertexAttribute;
     desc.colorAttachments[0] = mtlBlendState;
+    desc.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
 
     id <MTLRenderPipelineState> pipeline = [mtlDevice newRenderPipelineStateWithDescriptor:desc
                                                                                      error:nil];

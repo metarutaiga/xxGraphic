@@ -64,7 +64,7 @@ void xxMaterial::Update(xxNode& node, uint64_t device)
     }
     if (m_depthStencilState == 0)
     {
-        m_depthStencilState = xxCreateDepthStencilState(m_device, false, false);
+        m_depthStencilState = xxCreateDepthStencilState(m_device, "Always", false);
     }
     if (m_rasterizerState == 0)
     {

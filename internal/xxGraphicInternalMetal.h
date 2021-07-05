@@ -126,11 +126,63 @@ inline MTLBlendOperation mtlBlendOp(const char* name)
     return MTLBlendOperationAdd;
 }
 //==============================================================================
+//  Depth Comparison
+//==============================================================================
+inline MTLCompareFunction mtlCompareOp(const char* name)
+{
+    bool e = false;
+    bool g = false;
+    bool l = false;
+    for (char x; (x = (*name)); name++)
+    {
+        switch (x)
+        {
+        case 'V':
+        case 'v':
+            return MTLCompareFunctionNever;
+        case 'W':
+        case 'w':
+            return MTLCompareFunctionAlways;
+        case 'N':
+        case 'n':
+        case '!':
+            return MTLCompareFunctionNotEqual;
+        case 'Q':
+        case 'q':
+        case '=':
+            e = true;
+            break;
+        case 'G':
+        case 'g':
+        case '>':
+            if (e) break;
+            g = true;
+            break;
+        case 'L':
+        case 'l':
+        case '<':
+            if (e) break;
+            l = true;
+            break;
+        }
+    }
+    if (e)
+    {
+        if (l) return MTLCompareFunctionLessEqual;
+        if (g) return MTLCompareFunctionGreaterEqual;
+        return MTLCompareFunctionEqual;
+    }
+    if (l) return MTLCompareFunctionLess;
+    if (g) return MTLCompareFunctionGreater;
+    return MTLCompareFunctionAlways;
+}
+//==============================================================================
 //  Framebuffer
 //==============================================================================
 struct MTLFRAMEBUFFER
 {
     id <MTLTexture>                 texture;
+    id <MTLTexture>                 depthstencil;
 };
 //==============================================================================
 //  Swapchain

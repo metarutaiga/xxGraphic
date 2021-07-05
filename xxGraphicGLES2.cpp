@@ -771,10 +771,10 @@ uint64_t xxCreateBlendStateGLES2(uint64_t device, const char* sourceColor, const
     return reinterpret_cast<uint64_t>(glBlend);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateDepthStencilStateGLES2(uint64_t device, bool depthTest, bool depthWrite)
+uint64_t xxCreateDepthStencilStateGLES2(uint64_t device, const char* depthTest, bool depthWrite)
 {
     STATEGL glState = {};
-    glState.depthTest = depthTest;
+    glState.depthTest = glCompareOp(depthTest);
     glState.depthWrite = depthWrite;
     return static_cast<uint64_t>(glState.value);
 }
@@ -895,7 +895,15 @@ void xxSetPipelineGLES2(uint64_t commandEncoder, uint64_t pipeline)
         glDisable(GL_BLEND);
     }
     glPipeline->state.cull ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
-    glPipeline->state.depthTest ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+    if (glPipeline->state.depthTest != GL_ALWAYS)
+    {
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(glPipeline->state.depthTest);
+    }
+    else
+    {
+        glDisable(GL_DEPTH_TEST);
+    }
     glDepthMask(glPipeline->state.depthWrite ? GL_TRUE : GL_FALSE);
     glPipeline->state.scissor ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST);
 

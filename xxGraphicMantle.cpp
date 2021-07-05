@@ -741,16 +741,16 @@ uint64_t xxCreateBlendStateMantle(uint64_t device, const char* sourceColor, cons
     return reinterpret_cast<uint64_t>(blendState);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateDepthStencilStateMantle(uint64_t device, bool depthTest, bool depthWrite)
+uint64_t xxCreateDepthStencilStateMantle(uint64_t device, const char* depthTest, bool depthWrite)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
         return 0;
 
     GR_DEPTH_STENCIL_STATE_CREATE_INFO info = {};
-    info.depthEnable = depthTest ? GR_TRUE : GR_FALSE;
     info.depthWriteEnable = depthWrite ? GR_TRUE : GR_FALSE;
-    info.depthFunc = GR_COMPARE_LESS_EQUAL;
+    info.depthFunc = grCompareOp(depthTest);
+    info.depthEnable = (info.depthFunc != GR_COMPARE_ALWAYS) ? GR_TRUE : GR_FALSE;
 
     GR_DEPTH_STENCIL_STATE_OBJECT depthStencilState = GR_NULL_HANDLE;
     grCreateDepthStencilState(grDevice, &info, &depthStencilState);

@@ -79,7 +79,7 @@ void        (*xxDestroyShader)(uint64_t device, uint64_t shader);
 //  Pipeline
 //==============================================================================
 uint64_t    (*xxCreateBlendState)(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha);
-uint64_t    (*xxCreateDepthStencilState)(uint64_t device, bool depthTest, bool depthWrite);
+uint64_t    (*xxCreateDepthStencilState)(uint64_t device, const char* depthTest, bool depthWrite);
 uint64_t    (*xxCreateRasterizerState)(uint64_t device, bool cull, bool scissor);
 uint64_t    (*xxCreatePipeline)(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
 void        (*xxDestroyBlendState)(uint64_t blendState);

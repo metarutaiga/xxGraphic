@@ -1414,7 +1414,7 @@ uint64_t xxCreateBlendStateD3D12(uint64_t device, const char* sourceColor, const
     return reinterpret_cast<uint64_t>(d3dDesc);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateDepthStencilStateD3D12(uint64_t device, bool depthTest, bool depthWrite)
+uint64_t xxCreateDepthStencilStateD3D12(uint64_t device, const char* depthTest, bool depthWrite)
 {
     D3D12_DEPTH_STENCIL_DESC* d3dDesc = xxAlloc(D3D12_DEPTH_STENCIL_DESC);
     if (d3dDesc == nullptr)
@@ -1422,9 +1422,9 @@ uint64_t xxCreateDepthStencilStateD3D12(uint64_t device, bool depthTest, bool de
     memset(d3dDesc, 0, sizeof(D3D12_DEPTH_STENCIL_DESC));
 
     D3D12_DEPTH_STENCIL_DESC& desc = (*d3dDesc);
-    desc.DepthEnable = depthTest;
+    desc.DepthFunc = d3d12CompareOp(depthTest);
+    desc.DepthEnable = (desc.DepthFunc != D3D12_COMPARISON_FUNC_ALWAYS) ? TRUE : FALSE;
     desc.DepthWriteMask = depthWrite ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
-    desc.DepthFunc = D3D12_COMPARISON_FUNC_ALWAYS;
     desc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
     desc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
     desc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;

@@ -72,6 +72,58 @@ inline GrAlphaBlendFnc_t grBlendFactor(const char* name)
     return o ? GR_BLEND_ONE : GR_BLEND_ZERO;
 }
 //==============================================================================
+//  Depth Comparison
+//==============================================================================
+inline GrCmpFnc_t grCompareOp(const char* name)
+{
+    bool e = false;
+    bool g = false;
+    bool l = false;
+    for (char x; (x = (*name)); name++)
+    {
+        switch (x)
+        {
+        case 'V':
+        case 'v':
+            return GR_CMP_NEVER;
+        case 'W':
+        case 'w':
+            return GR_CMP_ALWAYS;
+        case 'N':
+        case 'n':
+        case '!':
+            return GR_CMP_NOTEQUAL;
+        case 'Q':
+        case 'q':
+        case '=':
+            e = true;
+            break;
+        case 'G':
+        case 'g':
+        case '>':
+            if (e) break;
+            g = true;
+            break;
+        case 'L':
+        case 'l':
+        case '<':
+            if (e) break;
+            l = true;
+            break;
+        }
+    }
+    if (e)
+    {
+        if (l) return GR_CMP_LEQUAL;
+        if (g) return GR_CMP_GEQUAL;
+        return GR_CMP_EQUAL;
+    }
+    if (l) return GR_CMP_LESS;
+    if (g) return GR_CMP_GREATER;
+    return GR_CMP_ALWAYS;
+}
+//==============================================================================
+//==============================================================================
 //  Context
 //==============================================================================
 struct GrContext
@@ -144,7 +196,7 @@ union GrPipeline
         uint64_t    blendDestinationColor:4;
         uint64_t    blendSourceAlpha:4;
         uint64_t    blendDestinationAlpha:4;
-        uint64_t    depthTest:1;
+        uint64_t    depthTest:3;
         uint64_t    depthWrite:1;
         uint64_t    cull:1;
         uint64_t    scissor:1;

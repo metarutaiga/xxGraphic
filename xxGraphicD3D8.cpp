@@ -702,11 +702,12 @@ uint64_t xxCreateBlendStateD3D8(uint64_t device, const char* sourceColor, const 
     return static_cast<uint64_t>(d3dRenderState.value);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateDepthStencilStateD3D8(uint64_t device, bool depthTest, bool depthWrite)
+uint64_t xxCreateDepthStencilStateD3D8(uint64_t device, const char* depthTest, bool depthWrite)
 {
     D3DRENDERSTATE8 d3dRenderState = {};
-    d3dRenderState.depthTest = depthTest;
+    d3dRenderState.depthTest = d3dCompareOp(depthTest);
     d3dRenderState.depthWrite = depthWrite;
+    d3dRenderState.depthEnable = (d3dRenderState.depthTest != D3DCMP_ALWAYS) ? TRUE : FALSE;
     return static_cast<uint64_t>(d3dRenderState.value);
 }
 //------------------------------------------------------------------------------
@@ -736,6 +737,7 @@ uint64_t xxCreatePipelineD3D8(uint64_t device, uint64_t renderPass, uint64_t ble
     d3dPipeline->renderState.blendSourceColor       = d3dBlendState.blendSourceColor;
     d3dPipeline->renderState.blendDestinationColor  = d3dBlendState.blendDestinationColor;
     d3dPipeline->renderState.blendOperationColor    = d3dBlendState.blendOperationColor;
+    d3dPipeline->renderState.depthEnable            = d3dDepthStencilState.depthEnable;
     d3dPipeline->renderState.depthTest              = d3dDepthStencilState.depthTest;
     d3dPipeline->renderState.depthWrite             = d3dDepthStencilState.depthWrite;
     d3dPipeline->renderState.cull                   = d3dRasterizerState.cull;
@@ -825,7 +827,12 @@ void xxSetPipelineD3D8(uint64_t commandEncoder, uint64_t pipeline)
     d3dDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
     d3dDevice->SetRenderState(D3DRS_SPECULARENABLE, FALSE);
     d3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-    d3dDevice->SetRenderState(D3DRS_ZENABLE, d3dPipeline->renderState.depthWrite);
+    d3dDevice->SetRenderState(D3DRS_ZENABLE, d3dPipeline->renderState.depthEnable);
+    if (d3dPipeline->renderState.depthWrite)
+    {
+        d3dDevice->SetRenderState(D3DRS_ZFUNC, d3dPipeline->renderState.depthTest);
+    }
+    d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, d3dPipeline->renderState.depthWrite);
     d3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, d3dPipeline->renderState.blendEnable);
     if (d3dPipeline->renderState.blendEnable)
     {
