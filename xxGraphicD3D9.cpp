@@ -759,7 +759,8 @@ uint64_t xxCreateDepthStencilStateD3D9(uint64_t device, const char* depthTest, b
     D3DRENDERSTATE9 d3dRenderState = {};
     d3dRenderState.depthTest = d3dCompareOp(depthTest);
     d3dRenderState.depthWrite = depthWrite;
-    d3dRenderState.depthEnable = (d3dRenderState.depthTest != D3DCMP_ALWAYS) ? TRUE : FALSE;
+    d3dRenderState.depthEnable = (d3dRenderState.depthTest != D3DCMP_ALWAYS ||
+                                  d3dRenderState.depthWrite != FALSE) ? TRUE : FALSE;
     return static_cast<uint64_t>(d3dRenderState.value);
 }
 //------------------------------------------------------------------------------
@@ -883,11 +884,11 @@ void xxSetPipelineD3D9(uint64_t commandEncoder, uint64_t pipeline)
     d3dDevice->SetRenderState(D3DRS_SPECULARENABLE, FALSE);
     d3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
     d3dDevice->SetRenderState(D3DRS_ZENABLE, d3dPipeline->renderState.depthEnable);
-    if (d3dPipeline->renderState.depthWrite)
+    if (d3dPipeline->renderState.depthEnable)
     {
         d3dDevice->SetRenderState(D3DRS_ZFUNC, d3dPipeline->renderState.depthTest);
+        d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, d3dPipeline->renderState.depthWrite);
     }
-    d3dDevice->SetRenderState(D3DRS_ZWRITEENABLE, d3dPipeline->renderState.depthWrite);
     d3dDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, d3dPipeline->renderState.blendEnable);
     if (d3dPipeline->renderState.blendEnable)
     {
