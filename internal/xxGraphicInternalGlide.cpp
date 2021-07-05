@@ -181,6 +181,7 @@ static void (GL_APIENTRY* gto_glTexImage2D)(GLenum target, GLint level, GLint in
 static void (GL_APIENTRY* gto_glMatrixMode)(GLenum mode);
 static void (GL_APIENTRY* gto_glLoadIdentity)(void);
 static void (GL_APIENTRY* gto_glOrtho)(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar);
+static void (GL_APIENTRY* gto_glDepthFunc)(GLenum func);
 static void (GL_APIENTRY* gto_glDepthRange)(GLclampd zNear, GLclampd zFar);
 static void (GL_APIENTRY* gto_glViewport)(GLint x, GLint y, GLsizei width, GLsizei height);
 static void (GL_APIENTRY* gto_glScissor)(GLint x, GLint y, GLsizei width, GLsizei height);
@@ -254,9 +255,10 @@ static GrContext_t FX_CALL gto_grSstWinOpen(void *window, GrScreenResolution_t s
         break;
     }
 #if defined(xxMACOS)
-    static const NSOpenGLPixelFormatAttribute attributes[2] =
+    static const NSOpenGLPixelFormatAttribute attributes[] =
     {
-        NSOpenGLPFADoubleBuffer
+        NSOpenGLPFADoubleBuffer,
+        0
     };
     NSWindow* nsWindows = (__bridge NSWindow*)window;
     NSOpenGLContext* nsContext = [[NSOpenGLContext alloc] initWithFormat:[[NSOpenGLPixelFormat alloc] initWithAttributes:attributes]
@@ -390,6 +392,22 @@ static const char * FX_CALL gto_grGetString(FxU32 pname)
     return nullptr;
 }
 //------------------------------------------------------------------------------
+static void FX_CALL gto_grDepthBufferFunction(GrCmpFnc_t function)
+{
+    gto_glEnable(GL_DEPTH_TEST);
+    switch (function)
+    {
+    case GR_CMP_NEVER:      return gto_glDepthFunc(GL_NEVER);
+    case GR_CMP_LESS:       return gto_glDepthFunc(GL_LESS);
+    case GR_CMP_EQUAL:      return gto_glDepthFunc(GL_EQUAL);
+    case GR_CMP_LEQUAL:     return gto_glDepthFunc(GL_LEQUAL);
+    case GR_CMP_GREATER:    return gto_glDepthFunc(GL_GREATER);
+    case GR_CMP_NOTEQUAL:   return gto_glDepthFunc(GL_NOTEQUAL);
+    case GR_CMP_GEQUAL:     return gto_glDepthFunc(GL_GEQUAL);
+    case GR_CMP_ALWAYS:     return gto_glDepthFunc(GL_ALWAYS);
+    }
+}
+//------------------------------------------------------------------------------
 static void FX_CALL gto_grDepthRange(FxFloat n, FxFloat f)
 {
     gto_glDepthRange(n, f);
@@ -474,6 +492,7 @@ static void FX_CALL gto_grGlideInit(void)
     (void*&)gto_glMatrixMode = xxGetProcAddress(g_glLibrary, "glMatrixMode");
     (void*&)gto_glLoadIdentity = xxGetProcAddress(g_glLibrary, "glLoadIdentity");
     (void*&)gto_glOrtho = xxGetProcAddress(g_glLibrary, "glOrtho");
+    (void*&)gto_glDepthFunc = xxGetProcAddress(g_glLibrary, "glDepthFunc");
     (void*&)gto_glDepthRange = xxGetProcAddress(g_glLibrary, "glDepthRange");
     (void*&)gto_glViewport = xxGetProcAddress(g_glLibrary, "glViewport");
     (void*&)gto_glScissor = xxGetProcAddress(g_glLibrary, "glScissor");
@@ -535,6 +554,7 @@ static void FX_CALL gto_grGlideShutdown(void)
     gto_glMatrixMode = nullptr;
     gto_glLoadIdentity = nullptr;
     gto_glOrtho = nullptr;
+    gto_glDepthFunc = nullptr;
     gto_glDepthRange = nullptr;
     gto_glViewport = nullptr;
     gto_glScissor = nullptr;
@@ -557,6 +577,7 @@ GrProc FX_CALL gto_grGetProcAddress(char* name)
     case xxHash("grAlphaBlendFunction"):    return (GrProc)gto_grAlphaBlendFunction;
     case xxHash("grClipWindow"):            return (GrProc)gto_grClipWindow;
     case xxHash("grGetString"):             return (GrProc)gto_grGetString;
+    case xxHash("grDepthBufferFunction"):   return (GrProc)gto_grDepthBufferFunction;
     case xxHash("grDepthRange"):            return (GrProc)gto_grDepthRange;
     case xxHash("grViewport"):              return (GrProc)gto_grViewport;
     case xxHash("grTexCalcMemRequired"):    return (GrProc)gto_grTexCalcMemRequired;
