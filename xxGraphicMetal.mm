@@ -877,9 +877,8 @@ void xxSetVertexBuffersMetal(uint64_t commandEncoder, int count, const uint64_t*
     [mtlCommandEncoder setVertexBuffers:mtlBuffers
                                 offsets:offsets
                               withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_BUFFER, count)];
-#if TARGET_OS_SIMULATOR
+
     g_metalVertexAttribute = vertexAttribute;
-#endif
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesMetal(uint64_t commandEncoder, int count, const uint64_t* textures)

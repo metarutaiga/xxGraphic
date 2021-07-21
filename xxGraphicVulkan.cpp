@@ -2420,7 +2420,7 @@ void xxDrawIndexedVulkan(uint64_t commandEncoder, uint64_t indexBuffer, int inde
         }
     }
 
-    VkIndexType indexType = (INDEX_BUFFER_WIDTH == 2) ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
+    VkIndexType indexType = (INDEX_BUFFER_WIDTH == /* DISABLES CODE */ (2)) ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
     vkCmdBindIndexBuffer(vkCommandBuffer, vkIndexBuffer->buffer, 0, indexType);
     vkCmdDrawIndexed(vkCommandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
