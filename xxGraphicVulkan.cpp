@@ -1291,6 +1291,7 @@ struct BUFFERVK
     VkDeviceMemory  memory;
     VkDeviceSize    size;
     void*           ptr;
+    bool            persistent;
 };
 //------------------------------------------------------------------------------
 uint64_t xxCreateConstantBufferVulkan(uint64_t device, int size)
@@ -1322,7 +1323,6 @@ uint64_t xxCreateConstantBufferVulkan(uint64_t device, int size)
     vkGetPhysicalDeviceMemoryProperties(g_physicalDevice, &prop);
 
     uint32_t persistentMemoryTypeIndex = UINT32_MAX;
-#if PERSISTENT_BUFFER
     for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
     {
         if ((prop.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == VK_MEMORY_PROPERTY_HOST_COHERENT_BIT && req.memoryTypeBits & (1 << i))
@@ -1331,7 +1331,6 @@ uint64_t xxCreateConstantBufferVulkan(uint64_t device, int size)
             break;
         }
     }
-#endif
 
     uint32_t localMemoryTypeIndex = UINT32_MAX;
     for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
@@ -1361,12 +1360,7 @@ uint64_t xxCreateConstantBufferVulkan(uint64_t device, int size)
     vkBuffer->memory = memory;
     vkBuffer->size = size;
     vkBuffer->ptr = nullptr;
-#if PERSISTENT_BUFFER
-    if (persistentMemoryTypeIndex != UINT32_MAX)
-    {
-        vkMapMemory(vkDevice, memory, 0, size, 0, &vkBuffer->ptr);
-    }
-#endif
+    vkBuffer->persistent = (persistentMemoryTypeIndex != UINT32_MAX);
 
     return reinterpret_cast<uint64_t>(vkBuffer);
 }
@@ -1400,7 +1394,6 @@ uint64_t xxCreateIndexBufferVulkan(uint64_t device, int size)
     vkGetPhysicalDeviceMemoryProperties(g_physicalDevice, &prop);
 
     uint32_t persistentMemoryTypeIndex = UINT32_MAX;
-#if PERSISTENT_BUFFER
     for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
     {
         if ((prop.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == VK_MEMORY_PROPERTY_HOST_COHERENT_BIT && req.memoryTypeBits & (1 << i))
@@ -1409,7 +1402,6 @@ uint64_t xxCreateIndexBufferVulkan(uint64_t device, int size)
             break;
         }
     }
-#endif
 
     uint32_t localMemoryTypeIndex = UINT32_MAX;
     for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
@@ -1439,12 +1431,7 @@ uint64_t xxCreateIndexBufferVulkan(uint64_t device, int size)
     vkBuffer->memory = memory;
     vkBuffer->size = size;
     vkBuffer->ptr = nullptr;
-#if PERSISTENT_BUFFER
-    if (persistentMemoryTypeIndex != UINT32_MAX)
-    {
-        vkMapMemory(vkDevice, memory, 0, size, 0, &vkBuffer->ptr);
-    }
-#endif
+    vkBuffer->persistent = (persistentMemoryTypeIndex != UINT32_MAX);
 
     return reinterpret_cast<uint64_t>(vkBuffer);
 }
@@ -1478,7 +1465,6 @@ uint64_t xxCreateVertexBufferVulkan(uint64_t device, int size, uint64_t vertexAt
     vkGetPhysicalDeviceMemoryProperties(g_physicalDevice, &prop);
 
     uint32_t persistentMemoryTypeIndex = UINT32_MAX;
-#if PERSISTENT_BUFFER
     for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
     {
         if ((prop.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == VK_MEMORY_PROPERTY_HOST_COHERENT_BIT && req.memoryTypeBits & (1 << i))
@@ -1487,7 +1473,6 @@ uint64_t xxCreateVertexBufferVulkan(uint64_t device, int size, uint64_t vertexAt
             break;
         }
     }
-#endif
 
     uint32_t localMemoryTypeIndex = UINT32_MAX;
     for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
@@ -1517,12 +1502,7 @@ uint64_t xxCreateVertexBufferVulkan(uint64_t device, int size, uint64_t vertexAt
     vkBuffer->memory = memory;
     vkBuffer->size = size;
     vkBuffer->ptr = nullptr;
-#if PERSISTENT_BUFFER
-    if (persistentMemoryTypeIndex != UINT32_MAX)
-    {
-        vkMapMemory(vkDevice, memory, 0, size, 0, &vkBuffer->ptr);
-    }
-#endif
+    vkBuffer->persistent = (persistentMemoryTypeIndex != UINT32_MAX);
 
     return reinterpret_cast<uint64_t>(vkBuffer);
 }
@@ -1559,6 +1539,16 @@ void* xxMapBufferVulkan(uint64_t device, uint64_t buffer)
 
     void* ptr = nullptr;
     vkMapMemory(vkDevice, vkBuffer->memory, 0, vkBuffer->size, 0, &ptr);
+    if (ptr == nullptr)
+    {
+        return nullptr;
+    }
+#if PERSISTENT_BUFFER
+    if (vkBuffer->persistent && ptr != nullptr)
+    {
+        vkBuffer->ptr = ptr;
+    }
+#endif
 
     return ptr;
 }

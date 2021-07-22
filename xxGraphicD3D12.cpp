@@ -931,9 +931,6 @@ uint64_t xxCreateConstantBufferD3D12(uint64_t device, int size)
     d3dResource->resourceGPUHandle = {};
     d3dResource->size = size;
     d3dResource->cpuAddress = nullptr;
-#if PERSISTENT_BUFFER
-    d3dResource->cpuAddress = xxMapBuffer(device, reinterpret_cast<uint64_t>(d3dResource));
-#endif
     d3dResource->gpuAddress = resource->GetGPUVirtualAddress();
     createShaderHeap(d3dResource->resourceCPUHandle, d3dResource->resourceGPUHandle);
 
@@ -978,9 +975,6 @@ uint64_t xxCreateIndexBufferD3D12(uint64_t device, int size)
     d3dResource->resourceGPUHandle = {};
     d3dResource->size = size;
     d3dResource->cpuAddress = nullptr;
-#if PERSISTENT_BUFFER
-    d3dResource->cpuAddress = xxMapBuffer(device, reinterpret_cast<uint64_t>(d3dResource));
-#endif
     d3dResource->gpuAddress = resource->GetGPUVirtualAddress();
 
     return reinterpret_cast<uint64_t>(d3dResource);
@@ -1019,9 +1013,6 @@ uint64_t xxCreateVertexBufferD3D12(uint64_t device, int size, uint64_t vertexAtt
     d3dResource->resourceGPUHandle = {};
     d3dResource->size = size;
     d3dResource->cpuAddress = nullptr;
-#if PERSISTENT_BUFFER
-    d3dResource->cpuAddress = xxMapBuffer(device, reinterpret_cast<uint64_t>(d3dResource));
-#endif
     d3dResource->gpuAddress = resource->GetGPUVirtualAddress();
 
     return reinterpret_cast<uint64_t>(d3dResource);
@@ -1061,7 +1052,15 @@ void* xxMapBufferD3D12(uint64_t device, uint64_t buffer)
     void* ptr = nullptr;
     HRESULT hResult = d3dResource->resource->Map(0, &range, &ptr);
     if (hResult != S_OK)
+    {
         return nullptr;
+    }
+#if PERSISTENT_BUFFER
+    if (hResult == S_OK)
+    {
+        d3dResource->cpuAddress = ptr;
+    }
+#endif
 
     return ptr;
 }
