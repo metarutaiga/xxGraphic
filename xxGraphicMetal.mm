@@ -205,6 +205,9 @@ uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view
     desc.width = width * contentsScale;
     desc.height = height * contentsScale;
     desc.usage = MTLTextureUsageRenderTarget;
+#if defined(xxMACOS_LEGACY) || defined(xxIOS_LEGACY)
+    desc.resourceOptions = MTLResourceStorageModePrivate;
+#endif
     swapchain->depthstencil = [mtlDevice newTextureWithDescriptor:desc];
 
     return reinterpret_cast<uint64_t>(swapchain);
@@ -494,7 +497,7 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height
         return 0;
 
     MTLPixelFormat pixelFormat = MTLPixelFormatRGBA8Unorm;
-#if defined(xxMACOS)
+#if defined(xxMACOS_LEGACY)
     MTLResourceOptions options = MTLResourceStorageModeManaged;
 #else
     MTLResourceOptions options = MTLResourceStorageModeShared;
@@ -594,7 +597,7 @@ void xxUnmapTextureMetal(uint64_t device, uint64_t texture, int level, int array
                            mipmapLevel:0
                              withBytes:[mtlTexture->buffer contents]
                            bytesPerRow:[mtlTexture->buffer length] / mtlTexture->texture.height];
-#elif defined(xxMACOS_INTEL)
+#elif defined(xxMACOS_LEGACY)
     MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);
     [mtlTexture->buffer didModifyRange:NSMakeRange(0, [mtlTexture->buffer length])];
 #endif

@@ -45,14 +45,14 @@
 #   include <TargetConditionals.h>
 #   if TARGET_OS_IPHONE
 #       define xxIOS 1
+#       if TARGET_CPU_X86_64
+#           define xxIOS_LEGACY 1
+#       endif
 #   endif
 #   if TARGET_OS_OSX
 #       define xxMACOS 1
 #       if TARGET_CPU_X86_64
-#           define xxMACOS_INTEL 1
-#       endif
-#       if TARGET_CPU_ARM64
-#           define xxMACOS_ARM 1
+#           define xxMACOS_LEGACY 1
 #       endif
 #   endif
 #   if TARGET_OS_MACCATALYST
@@ -250,13 +250,19 @@ xxAPI xxInline xxConstexpr unsigned int xxHash(const char* key, const unsigned i
 //==============================================================================
 //  Bitwise
 //==============================================================================
-xxAPI xxInline int xxCountLeadingZeros(int value)
-{
 #if defined(__GNUC__) || defined(__llvm__)
-    return __builtin_clz(value);
+#define xxFindFirstSet          __builtin_ffs
+#define xxCountLeadingZeros     __builtin_clz
+#define xxCountTrailingZeros    __builtin_ctz
+#define xxPopulationCount       __builtin_popcount
 #elif defined(_M_IX86) || defined(_M_AMD64)
-    return __lzcnt(value);
+#define xxFindFirstSet          1 + __lzcnt
+#define xxCountLeadingZeros     __lzcnt
+#define xxCountTrailingZeros    __tzcnt
+#define xxPopulationCount       __popcnt
 #elif defined(_M_ARM) || defined(_M_ARM64)
-    return _CountLeadingZeros(value);
+#define xxFindFirstSet          1 + _CountLeadingZeros
+#define xxCountLeadingZeros     _CountLeadingZeros
+#define xxCountTrailingZeros    _CountTrailinZeros
+#define xxPopulationCount       _CountOneBits
 #endif
-}
