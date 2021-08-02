@@ -7,6 +7,7 @@
 #pragma once
 
 #include "xxGraphic.h"
+#include "xxGraphicInternal.h"
 
 #define COM_NO_WINDOWS_H
 #include <objbase.h>
@@ -376,122 +377,61 @@ inline struct ID3D10Blob* CreateD3D10Shader(const char* shader, const char* entr
 #if defined(DIRECT3D_VERSION)
 inline DWORD d3dBlendFactor(const char* name)
 {
-    bool a = false;
-    bool c = false;
-    bool d = false;
-    bool o = false;
-    bool s = false;
-    for (char x; (x = (*name)); name++)
-    {
-        switch (x)
-        {
-        case 'A':
-        case 'a':
-            a = true;
-            c = false;
-            break;
-        case 'C':
-        case 'c':
-            a = false;
-            c = true;
-            break;
-        case 'D':
-        case 'd':
-            if (s) break;
-            d = true;
-            break;
-        case 'O':
-        case 'o':
-        case '1':
-            o = true;
-            break;
-        case 'S':
-        case 's':
-            if (s) break;
-            s = true;
-            break;
-        case 'Z':
-        case 'z':
-        case '0':
-            return D3DBLEND_ZERO;
-        }
-    }
-    if (d)
-    {
-        if (c) return o ? D3DBLEND_INVDESTCOLOR : D3DBLEND_DESTCOLOR;
-        if (a) return o ? D3DBLEND_INVDESTALPHA : D3DBLEND_DESTALPHA;
-    }
-    if (s)
-    {
-        if (c) return o ? D3DBLEND_INVSRCCOLOR : D3DBLEND_SRCCOLOR;
-        if (a) return o ? D3DBLEND_INVSRCALPHA : D3DBLEND_SRCALPHA;
-    }
-    return o ? D3DBLEND_ONE : D3DBLEND_ZERO;
+    return xxTemplateBlendFactor<DWORD, D3DBLEND_ZERO,
+                                        D3DBLEND_ONE,
+                                        D3DBLEND_SRCCOLOR,
+                                        D3DBLEND_INVSRCCOLOR,
+                                        D3DBLEND_DESTCOLOR,
+                                        D3DBLEND_INVDESTCOLOR,
+                                        D3DBLEND_SRCALPHA,
+                                        D3DBLEND_INVSRCALPHA,
+                                        D3DBLEND_DESTALPHA,
+                                        D3DBLEND_INVDESTALPHA>(name);
 }
 #endif
-#if defined(__d3d10_h__) || defined(__d3d11_h__) || defined(__d3d12_h__)
 #if defined(__d3d10_h__)
-#define D3D1X_BLEND(value) D3D10_BLEND_ ## value
 inline D3D10_BLEND d3d10BlendFactor(const char* name)
-#elif defined(__d3d11_h__)
-#define D3D1X_BLEND(value) D3D11_BLEND_ ## value
-inline D3D11_BLEND d3d11BlendFactor(const char* name)
-#elif defined(__d3d12_h__)
-#define D3D1X_BLEND(value) D3D12_BLEND_ ## value
-inline D3D12_BLEND d3d12BlendFactor(const char* name)
-#endif
 {
-    bool a = false;
-    bool c = false;
-    bool d = false;
-    bool o = false;
-    bool s = false;
-    for (char x; (x = (*name)); name++)
-    {
-        switch (x)
-        {
-        case 'A':
-        case 'a':
-            a = true;
-            c = false;
-            break;
-        case 'C':
-        case 'c':
-            a = false;
-            c = true;
-            break;
-        case 'D':
-        case 'd':
-            if (s) break;
-            d = true;
-            break;
-        case 'O':
-        case 'o':
-        case '1':
-            o = true;
-            break;
-        case 'S':
-        case 's':
-            if (s) break;
-            s = true;
-            break;
-        case 'Z':
-        case 'z':
-        case '0':
-            return D3D1X_BLEND(ZERO);
-        }
-    }
-    if (d)
-    {
-        if (c) return o ? D3D1X_BLEND(INV_DEST_COLOR) : D3D1X_BLEND(DEST_COLOR);
-        if (a) return o ? D3D1X_BLEND(INV_DEST_ALPHA) : D3D1X_BLEND(DEST_ALPHA);
-    }
-    if (s)
-    {
-        if (c) return o ? D3D1X_BLEND(INV_SRC_COLOR) : D3D1X_BLEND(SRC_COLOR);
-        if (a) return o ? D3D1X_BLEND(INV_SRC_ALPHA) : D3D1X_BLEND(SRC_ALPHA);
-    }
-    return o ? D3D1X_BLEND(ONE) : D3D1X_BLEND(ZERO);
+    return xxTemplateBlendFactor<D3D10_BLEND, D3D10_BLEND_ZERO,
+                                              D3D10_BLEND_ONE,
+                                              D3D10_BLEND_SRC_COLOR,
+                                              D3D10_BLEND_INV_SRC_COLOR,
+                                              D3D10_BLEND_DEST_COLOR,
+                                              D3D10_BLEND_INV_DEST_COLOR,
+                                              D3D10_BLEND_SRC_ALPHA,
+                                              D3D10_BLEND_INV_SRC_ALPHA,
+                                              D3D10_BLEND_DEST_ALPHA,
+                                              D3D10_BLEND_INV_DEST_ALPHA>(name);
+}
+#endif
+#if defined(__d3d11_h__)
+inline D3D11_BLEND d3d11BlendFactor(const char* name)
+{
+    return xxTemplateBlendFactor<D3D11_BLEND, D3D11_BLEND_ZERO,
+                                              D3D11_BLEND_ONE,
+                                              D3D11_BLEND_SRC_COLOR,
+                                              D3D11_BLEND_INV_SRC_COLOR,
+                                              D3D11_BLEND_DEST_COLOR,
+                                              D3D11_BLEND_INV_DEST_COLOR,
+                                              D3D11_BLEND_SRC_ALPHA,
+                                              D3D11_BLEND_INV_SRC_ALPHA,
+                                              D3D11_BLEND_DEST_ALPHA,
+                                              D3D11_BLEND_INV_DEST_ALPHA>(name);
+}
+#endif
+#if defined(__d3d12_h__)
+inline D3D12_BLEND d3d12BlendFactor(const char* name)
+{
+    return xxTemplateBlendFactor<D3D12_BLEND, D3D12_BLEND_ZERO,
+                                              D3D12_BLEND_ONE,
+                                              D3D12_BLEND_SRC_COLOR,
+                                              D3D12_BLEND_INV_SRC_COLOR,
+                                              D3D12_BLEND_DEST_COLOR,
+                                              D3D12_BLEND_INV_DEST_COLOR,
+                                              D3D12_BLEND_SRC_ALPHA,
+                                              D3D12_BLEND_INV_SRC_ALPHA,
+                                              D3D12_BLEND_DEST_ALPHA,
+                                              D3D12_BLEND_INV_DEST_ALPHA>(name);
 }
 #endif
 //==============================================================================
@@ -500,70 +440,41 @@ inline D3D12_BLEND d3d12BlendFactor(const char* name)
 #if (DIRECT3D_VERSION >= 0x0800)
 inline DWORD d3dBlendOp(const char* name)
 {
-    for (char x; (x = (*name)); name++)
-    {
-        switch (x)
-        {
-        case 'A':
-        case 'a':
-        case '+':
-            return D3DBLENDOP_ADD;
-        case 'S':
-        case 's':
-        case '-':
-            return D3DBLENDOP_SUBTRACT;
-        case 'I':
-        case 'i':
-        case 'R':
-        case 'r':
-            return D3DBLENDOP_REVSUBTRACT;
-        case 'M':
-        case 'm':
-            name++;
-            x = (*name);
-            return (x == 'I' || x == 'i') ? D3DBLENDOP_MIN : D3DBLENDOP_MAX;
-        }
-    }
-    return D3DBLENDOP_ADD;
+    return xxTemplateBlendOp<DWORD, D3DBLENDOP_ADD,
+                                    D3DBLENDOP_SUBTRACT,
+                                    D3DBLENDOP_REVSUBTRACT,
+                                    D3DBLENDOP_MIN,
+                                    D3DBLENDOP_MAX>(name);
 }
 #endif
-#if defined(__d3d10_h__) || defined(__d3d11_h__) || defined(__d3d12_h__)
 #if defined(__d3d10_h__)
-#define D3D1X_BLEND_OP(value) D3D10_BLEND_OP_ ## value
 inline D3D10_BLEND_OP d3d10BlendOp(const char* name)
-#elif defined(__d3d11_h__)
-#define D3D1X_BLEND_OP(value) D3D11_BLEND_OP_ ## value
-inline D3D11_BLEND_OP d3d11BlendOp(const char* name)
-#elif defined(__d3d12_h__)
-#define D3D1X_BLEND_OP(value) D3D12_BLEND_OP_ ## value
-inline D3D12_BLEND_OP d3d12BlendOp(const char* name)
-#endif
 {
-    for (char x; (x = (*name)); name++)
-    {
-        switch (x)
-        {
-        case 'A':
-        case 'a':
-        case '+':
-            return D3D1X_BLEND_OP(ADD);
-        case 'S':
-        case 's':
-        case '-':
-            return D3D1X_BLEND_OP(SUBTRACT);
-        case 'I':
-        case 'i':
-        case 'R':
-        case 'r':
-            return D3D1X_BLEND_OP(REV_SUBTRACT);
-        case 'M':
-        case 'm':
-            name++;
-            x = (*name);
-            return (x == 'I' || x == 'i') ? D3D1X_BLEND_OP(MIN) : D3D1X_BLEND_OP(MAX);
-        }
-    }
-    return D3D1X_BLEND_OP(ADD);
+    return xxTemplateBlendOp<D3D10_BLEND_OP, D3D10_BLEND_OP_ADD,
+                                             D3D10_BLEND_OP_SUBTRACT,
+                                             D3D10_BLEND_OP_REV_SUBTRACT,
+                                             D3D10_BLEND_OP_MIN,
+                                             D3D10_BLEND_OP_MAX>(name);
+}
+#endif
+#if defined(__d3d11_h__)
+inline D3D11_BLEND_OP d3d11BlendOp(const char* name)
+{
+    return xxTemplateBlendOp<D3D11_BLEND_OP, D3D11_BLEND_OP_ADD,
+                                             D3D11_BLEND_OP_SUBTRACT,
+                                             D3D11_BLEND_OP_REV_SUBTRACT,
+                                             D3D11_BLEND_OP_MIN,
+                                             D3D11_BLEND_OP_MAX>(name);
+}
+#endif
+#if defined(__d3d12_h__)
+inline D3D12_BLEND_OP d3d12BlendOp(const char* name)
+{
+    return xxTemplateBlendOp<D3D12_BLEND_OP, D3D12_BLEND_OP_ADD,
+                                             D3D12_BLEND_OP_SUBTRACT,
+                                             D3D12_BLEND_OP_REV_SUBTRACT,
+                                             D3D12_BLEND_OP_MIN,
+                                             D3D12_BLEND_OP_MAX>(name);
 }
 #endif
 //==============================================================================
@@ -572,110 +483,53 @@ inline D3D12_BLEND_OP d3d12BlendOp(const char* name)
 #if defined(DIRECT3D_VERSION)
 inline D3DCMPFUNC d3dCompareOp(const char* name)
 {
-    bool e = false;
-    bool g = false;
-    bool l = false;
-    for (char x; (x = (*name)); name++)
-    {
-        switch (x)
-        {
-        case 'V':
-        case 'v':
-            return D3DCMP_NEVER;
-        case 'W':
-        case 'w':
-            return D3DCMP_ALWAYS;
-        case 'N':
-        case 'n':
-        case '!':
-            return D3DCMP_NOTEQUAL;
-        case 'Q':
-        case 'q':
-        case '=':
-            e = true;
-            break;
-        case 'G':
-        case 'g':
-        case '>':
-            if (e) break;
-            g = true;
-            break;
-        case 'L':
-        case 'l':
-        case '<':
-            if (e) break;
-            l = true;
-            break;
-        }
-    }
-    if (e)
-    {
-        if (l) return D3DCMP_LESSEQUAL;
-        if (g) return D3DCMP_GREATEREQUAL;
-        return D3DCMP_EQUAL;
-    }
-    if (l) return D3DCMP_LESS;
-    if (g) return D3DCMP_GREATER;
-    return D3DCMP_ALWAYS;
+    return xxTemplateCompareOp<D3DCMPFUNC, D3DCMP_NEVER,
+                                           D3DCMP_LESS,
+                                           D3DCMP_EQUAL,
+                                           D3DCMP_LESSEQUAL,
+                                           D3DCMP_GREATER,
+                                           D3DCMP_NOTEQUAL,
+                                           D3DCMP_GREATEREQUAL,
+                                           D3DCMP_ALWAYS>(name);
 }
 #endif
-#if defined(__d3d10_h__) || defined(__d3d11_h__) || defined(__d3d12_h__)
 #if defined(__d3d10_h__)
-#define D3D1X_COMPARISON(value) D3D10_COMPARISON_ ## value
 inline D3D10_COMPARISON_FUNC d3d10CompareOp(const char* name)
-#elif defined(__d3d11_h__)
-#define D3D1X_COMPARISON(value) D3D11_COMPARISON_ ## value
-inline D3D11_COMPARISON_FUNC d3d11CompareOp(const char* name)
-#elif defined(__d3d12_h__)
-#define D3D1X_COMPARISON(value) D3D12_COMPARISON_FUNC_ ## value
-inline D3D12_COMPARISON_FUNC d3d12CompareOp(const char* name)
-#endif
 {
-    bool e = false;
-    bool g = false;
-    bool l = false;
-    for (char x; (x = (*name)); name++)
-    {
-        switch (x)
-        {
-        case 'V':
-        case 'v':
-            return D3D1X_COMPARISON(NEVER);
-        case 'W':
-        case 'w':
-            return D3D1X_COMPARISON(ALWAYS);
-        case 'N':
-        case 'n':
-        case '!':
-            return D3D1X_COMPARISON(NOT_EQUAL);
-        case 'Q':
-        case 'q':
-        case '=':
-            e = true;
-            break;
-        case 'G':
-        case 'g':
-        case '>':
-            if (e) break;
-            g = true;
-            break;
-        case 'L':
-        case 'l':
-        case '<':
-            if (e) break;
-            l = true;
-            break;
-        }
-    }
-    if (e)
-    {
-        if (l) return D3D1X_COMPARISON(LESS_EQUAL);
-        if (g) return D3D1X_COMPARISON(GREATER_EQUAL);
-        return D3D1X_COMPARISON(EQUAL);
-    }
-    if (l) return D3D1X_COMPARISON(LESS);
-    if (g) return D3D1X_COMPARISON(GREATER);
-    return D3D1X_COMPARISON(ALWAYS);
+    return xxTemplateCompareOp<D3D10_COMPARISON_FUNC, D3D10_COMPARISON_NEVER,
+                                                      D3D10_COMPARISON_LESS,
+                                                      D3D10_COMPARISON_EQUAL,
+                                                      D3D10_COMPARISON_LESS_EQUAL,
+                                                      D3D10_COMPARISON_GREATER,
+                                                      D3D10_COMPARISON_NOT_EQUAL,
+                                                      D3D10_COMPARISON_GREATER_EQUAL,
+                                                      D3D10_COMPARISON_ALWAYS>(name);
+}
+#endif
+#if defined(__d3d11_h__)
+inline D3D11_COMPARISON_FUNC d3d11CompareOp(const char* name)
+{
+    return xxTemplateCompareOp<D3D11_COMPARISON_FUNC, D3D11_COMPARISON_NEVER,
+                                                      D3D11_COMPARISON_LESS,
+                                                      D3D11_COMPARISON_EQUAL,
+                                                      D3D11_COMPARISON_LESS_EQUAL,
+                                                      D3D11_COMPARISON_GREATER,
+                                                      D3D11_COMPARISON_NOT_EQUAL,
+                                                      D3D11_COMPARISON_GREATER_EQUAL,
+                                                      D3D11_COMPARISON_ALWAYS>(name);
+}
+#endif
+#if defined(__d3d12_h__)
+inline D3D12_COMPARISON_FUNC d3d12CompareOp(const char* name)
+{
+    return xxTemplateCompareOp<D3D12_COMPARISON_FUNC, D3D12_COMPARISON_FUNC_NEVER,
+                                                      D3D12_COMPARISON_FUNC_LESS,
+                                                      D3D12_COMPARISON_FUNC_EQUAL,
+                                                      D3D12_COMPARISON_FUNC_LESS_EQUAL,
+                                                      D3D12_COMPARISON_FUNC_GREATER,
+                                                      D3D12_COMPARISON_FUNC_NOT_EQUAL,
+                                                      D3D12_COMPARISON_FUNC_GREATER_EQUAL,
+                                                      D3D12_COMPARISON_FUNC_ALWAYS>(name);
 }
 #endif
 //==============================================================================

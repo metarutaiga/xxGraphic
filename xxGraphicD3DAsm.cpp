@@ -4,15 +4,11 @@
 // Copyright (c) 2019-2021 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
-#include "internal/xxGraphicInternal.h"
-#include "xxGraphicD3DAsm.h"
-
-#if defined(_MSC_VER)
-#   pragma const_seg(".rdata$shader")
-#endif
-
+#include "xxSystem.h"
 #include "dxsdk/d3d9.h"
 #include "dxsdk/d3d10TokenizedProgramFormat.hpp"
+#include "internal/xxGraphicInternal.h"
+#include "xxGraphicD3DAsm.h"
 
 //==============================================================================
 //  Direct3D 8.0 Assembly Shader

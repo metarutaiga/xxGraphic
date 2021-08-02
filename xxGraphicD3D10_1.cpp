@@ -6,7 +6,6 @@
 //==============================================================================
 #include "xxSystem.h"
 #include "dxsdk/d3d10_1.h"
-#include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalD3D.h"
 #include "xxGraphicD3D10.h"
 #include "xxGraphicD3D10_1.h"

@@ -9,7 +9,6 @@
 #endif
 #include "xxSystem.h"
 #include "dxsdk/d3d9.h"
-#include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalD3D.h"
 #include "xxGraphicD3D9.h"
 #include "xxGraphicD3D9PS.h"

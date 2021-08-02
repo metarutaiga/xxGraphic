@@ -8,7 +8,6 @@
 #undef  GL_ES_VERSION_3_0
 #define GL_ES_VERSION_3_1 0
 #define GL_ES_VERSION_3_2 0
-#include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalGL.h"
 #include "xxGraphicGLES2.h"
 #include "xxGraphicGLES3.h"

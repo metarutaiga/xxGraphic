@@ -4,14 +4,11 @@
 // Copyright (c) 2019-2021 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
+#include "xxSystem.h"
+#include "mantle/amdil.h"
 #include "internal/xxGraphicInternal.h"
 #include "xxGraphicMantleAsm.h"
 
-#if defined(_MSC_VER)
-#   pragma const_seg(".rdata$shader")
-#endif
-
-#include "mantle/amdil.h"
 #define IL_DCL_INPUT(usage, interp)     DWORD(IL_DCL_INPUT | (IL_IMPORTUSAGE_ ## usage << 16) | (IL_INTERPMODE_ ## interp << 21))
 #define IL_DCL_OUTPUT(usage)            DWORD(IL_DCL_OUTPUT | (IL_IMPORTUSAGE_ ## usage << 16))
 #define IL_DCL_RESOURCE(id, type)       DWORD(IL_DCL_RESOURCE | (id << 16) | (IL_USAGE_PIXTEX_ ## type << 24))

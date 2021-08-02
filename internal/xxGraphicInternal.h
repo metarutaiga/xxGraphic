@@ -166,3 +166,159 @@ enum xxGraphicDescriptor
     xxSetVertexConstantBuffer = nullptr; \
     xxSetFragmentConstantBuffer = nullptr; \
     xxDrawIndexed = nullptr;
+
+template <typename T, T ZERO,
+                      T ONE,
+                      T SRC_COLOR,
+                      T ONE_MINUS_SRC_COLOR,
+                      T DST_COLOR,
+                      T ONE_MINUS_DST_COLOR,
+                      T SRC_ALPHA,
+                      T ONE_MINUS_SRC_ALPHA,
+                      T DST_ALPHA,
+                      T ONE_MINUS_DST_ALPHA>
+inline T xxTemplateBlendFactor(const char* name)
+{
+    bool a = false;
+    bool c = false;
+    bool d = false;
+    bool o = false;
+    bool s = false;
+    for (char x; (x = (*name)); name++)
+    {
+        switch (x)
+        {
+        case 'A':
+        case 'a':
+            a = true;
+            c = false;
+            break;
+        case 'C':
+        case 'c':
+            a = false;
+            c = true;
+            break;
+        case 'D':
+        case 'd':
+            if (s) break;
+            d = true;
+            break;
+        case 'O':
+        case 'o':
+        case '1':
+            o = true;
+            break;
+        case 'S':
+        case 's':
+            if (s) break;
+            s = true;
+            break;
+        case 'Z':
+        case 'z':
+        case '0':
+            return ZERO;
+        }
+    }
+    if (d)
+    {
+        if (c) return o ? ONE_MINUS_DST_COLOR : DST_COLOR;
+        if (a) return o ? ONE_MINUS_DST_ALPHA : DST_ALPHA;
+    }
+    if (s)
+    {
+        if (c) return o ? ONE_MINUS_SRC_COLOR : SRC_COLOR;
+        if (a) return o ? ONE_MINUS_SRC_ALPHA : SRC_ALPHA;
+    }
+    return o ? ONE : ZERO;
+}
+
+template <typename T, T ADD,
+                      T SUBTRACT,
+                      T REVERSE_SUBTRACT,
+                      T MIN,
+                      T MAX>
+inline T xxTemplateBlendOp(const char* name)
+{
+    for (char x; (x = (*name)); name++)
+    {
+        switch (x)
+        {
+        case 'A':
+        case 'a':
+        case '+':
+            return ADD;
+        case 'S':
+        case 's':
+        case '-':
+            return SUBTRACT;
+        case 'I':
+        case 'i':
+        case 'R':
+        case 'r':
+            return REVERSE_SUBTRACT;
+        case 'M':
+        case 'm':
+            name++;
+            x = (*name);
+            return (x == 'I' || x == 'i') ? MIN : MAX;
+        }
+    }
+    return ADD;
+}
+
+template <typename T, T NEVER,
+                      T LESS,
+                      T EQUAL,
+                      T LESS_OR_EQUAL,
+                      T GREATER,
+                      T NOT_EQUAL,
+                      T GREATER_OR_EQUAL,
+                      T ALWAYS>
+inline T xxTemplateCompareOp(const char* name)
+{
+    bool e = false;
+    bool g = false;
+    bool l = false;
+    for (char x; (x = (*name)); name++)
+    {
+        switch (x)
+        {
+        case 'V':
+        case 'v':
+            return NEVER;
+        case 'W':
+        case 'w':
+            return ALWAYS;
+        case 'N':
+        case 'n':
+        case '!':
+            return NOT_EQUAL;
+        case 'Q':
+        case 'q':
+        case '=':
+            e = true;
+            break;
+        case 'G':
+        case 'g':
+        case '>':
+            if (e) break;
+            g = true;
+            break;
+        case 'L':
+        case 'l':
+        case '<':
+            if (e) break;
+            l = true;
+            break;
+        }
+    }
+    if (e)
+    {
+        if (l) return LESS_OR_EQUAL;
+        if (g) return GREATER_OR_EQUAL;
+        return EQUAL;
+    }
+    if (l) return LESS;
+    if (g) return GREATER;
+    return ALWAYS;
+}

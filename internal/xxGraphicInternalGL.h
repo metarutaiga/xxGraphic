@@ -7,6 +7,7 @@
 #pragma once
 
 #include "xxGraphic.h"
+#include "xxGraphicInternal.h"
 
 #define KHRONOS_STATIC
 #define GL_GLES_PROTOTYPES 1
@@ -39,141 +40,41 @@ extern const char* const    glDefaultShaderCode;
 //==============================================================================
 inline GLenum glBlendFactor(const char* name)
 {
-    bool a = false;
-    bool c = false;
-    bool d = false;
-    bool o = false;
-    bool s = false;
-    for (char x; (x = (*name)); name++)
-    {
-        switch (x)
-        {
-        case 'A':
-        case 'a':
-            a = true;
-            c = false;
-            break;
-        case 'C':
-        case 'c':
-            a = false;
-            c = true;
-            break;
-        case 'D':
-        case 'd':
-            if (s) break;
-            d = true;
-            break;
-        case 'O':
-        case 'o':
-        case '1':
-            o = true;
-            break;
-        case 'S':
-        case 's':
-            if (s) break;
-            s = true;
-            break;
-        case 'Z':
-        case 'z':
-        case '0':
-            return GL_ZERO;
-        }
-    }
-    if (d)
-    {
-        if (c) return o ? GL_ONE_MINUS_DST_COLOR : GL_DST_COLOR;
-        if (a) return o ? GL_ONE_MINUS_DST_ALPHA : GL_DST_ALPHA;
-    }
-    if (s)
-    {
-        if (c) return o ? GL_ONE_MINUS_SRC_COLOR : GL_SRC_COLOR;
-        if (a) return o ? GL_ONE_MINUS_SRC_ALPHA : GL_SRC_ALPHA;
-    }
-    return o ? GL_ONE : GL_ZERO;
+    return xxTemplateBlendFactor<GLenum, GL_ZERO,
+                                         GL_ONE,
+                                         GL_SRC_COLOR,
+                                         GL_ONE_MINUS_SRC_COLOR,
+                                         GL_DST_COLOR,
+                                         GL_ONE_MINUS_DST_COLOR,
+                                         GL_SRC_ALPHA,
+                                         GL_ONE_MINUS_SRC_ALPHA,
+                                         GL_DST_ALPHA,
+                                         GL_ONE_MINUS_DST_ALPHA>(name);
 }
 //==============================================================================
 //  Blend Operation
 //==============================================================================
 inline GLenum glBlendOp(const char* name)
 {
-    for (char x; (x = (*name)); name++)
-    {
-        switch (x)
-        {
-        case 'A':
-        case 'a':
-        case '+':
-            return GL_FUNC_ADD;
-        case 'S':
-        case 's':
-        case '-':
-            return GL_FUNC_SUBTRACT;
-        case 'I':
-        case 'i':
-        case 'R':
-        case 'r':
-            return GL_FUNC_REVERSE_SUBTRACT;
-#if 0
-        case 'M':
-        case 'm':
-            name++;
-            x = (*name);
-            return (x == 'I' || x == 'i') ? GL_MIN : GL_MAX;
-#endif
-        }
-    }
-    return GL_FUNC_ADD;
+    return xxTemplateBlendOp<GLenum, GL_FUNC_ADD,
+                                     GL_FUNC_SUBTRACT,
+                                     GL_FUNC_REVERSE_SUBTRACT,
+                                     GL_FUNC_ADD,
+                                     GL_FUNC_ADD>(name);
 }
 //==============================================================================
 //  Depth Comparison
 //==============================================================================
 inline GLenum glCompareOp(const char* name)
 {
-    bool e = false;
-    bool g = false;
-    bool l = false;
-    for (char x; (x = (*name)); name++)
-    {
-        switch (x)
-        {
-        case 'V':
-        case 'v':
-            return GL_NEVER;
-        case 'W':
-        case 'w':
-            return GL_ALWAYS;
-        case 'N':
-        case 'n':
-        case '!':
-            return GL_NOTEQUAL;
-        case 'Q':
-        case 'q':
-        case '=':
-            e = true;
-            break;
-        case 'G':
-        case 'g':
-        case '>':
-            if (e) break;
-            g = true;
-            break;
-        case 'L':
-        case 'l':
-        case '<':
-            if (e) break;
-            l = true;
-            break;
-        }
-    }
-    if (e)
-    {
-        if (l) return GL_LEQUAL;
-        if (g) return GL_GEQUAL;
-        return GL_EQUAL;
-    }
-    if (l) return GL_LESS;
-    if (g) return GL_GREATER;
-    return GL_ALWAYS;
+    return xxTemplateCompareOp<GLenum, GL_NEVER,
+                                       GL_LESS,
+                                       GL_EQUAL,
+                                       GL_LEQUAL,
+                                       GL_GREATER,
+                                       GL_NOTEQUAL,
+                                       GL_GEQUAL,
+                                       GL_ALWAYS>(name);
 }
 //==============================================================================
 //  Function

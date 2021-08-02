@@ -7,7 +7,6 @@
 #if !defined(_M_IX86) && !defined(_M_AMD64)
 #define xxAPI xxEXTERN
 #endif
-#include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalMantle.h"
 #include "xxGraphicMantleAsm.h"
 #include "xxGraphicMantle.h"

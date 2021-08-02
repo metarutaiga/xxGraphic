@@ -13,7 +13,6 @@
 #include "xxSystem.h"
 #include "dxsdk/ddraw.h"
 #include "dxsdk/d3d.h"
-#include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalD3D.h"
 #include "xxGraphicD3D7.h"
 

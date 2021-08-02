@@ -4,15 +4,11 @@
 // Copyright (c) 2019-2021 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
-#include "internal/xxGraphicInternal.h"
-#include "xxGraphicVulkanAsm.h"
-
-#if defined(_MSC_VER)
-#   pragma const_seg(".rdata$shader")
-#endif
-
+#include "xxSystem.h"
 #include "vulkan/spirv.h"
 #include "vulkan/GLSL.std.450.h"
+#include "internal/xxGraphicInternal.h"
+#include "xxGraphicVulkanAsm.h"
 
 //==============================================================================
 //  Vulkan SPIR-V Assembly Shader

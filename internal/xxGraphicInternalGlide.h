@@ -7,6 +7,7 @@
 #pragma once
 
 #include "xxGraphic.h"
+#include "xxGraphicInternal.h"
 
 #include "glide/glide.h"
 
@@ -19,108 +20,30 @@ GrProc FX_CALL gto_grGetProcAddress(char* name);
 //==============================================================================
 inline GrAlphaBlendFnc_t grBlendFactor(const char* name)
 {
-    bool a = false;
-    bool c = false;
-    bool d = false;
-    bool o = false;
-    bool s = false;
-    for (char x; (x = (*name)); name++)
-    {
-        switch (x)
-        {
-        case 'A':
-        case 'a':
-            a = true;
-            c = false;
-            break;
-        case 'C':
-        case 'c':
-            a = false;
-            c = true;
-            break;
-        case 'D':
-        case 'd':
-            if (s) break;
-            d = true;
-            break;
-        case 'O':
-        case 'o':
-        case '1':
-            o = true;
-            break;
-        case 'S':
-        case 's':
-            if (s) break;
-            s = true;
-            break;
-        case 'Z':
-        case 'z':
-        case '0':
-            return GR_BLEND_ZERO;
-        }
-    }
-    if (d)
-    {
-        if (c) return o ? GR_BLEND_ONE_MINUS_DST_COLOR : GR_BLEND_DST_COLOR;
-        if (a) return o ? GR_BLEND_ONE_MINUS_DST_ALPHA : GR_BLEND_DST_ALPHA;
-    }
-    if (s)
-    {
-        if (c) return o ? GR_BLEND_ONE_MINUS_SRC_COLOR : GR_BLEND_SRC_COLOR;
-        if (a) return o ? GR_BLEND_ONE_MINUS_SRC_ALPHA : GR_BLEND_SRC_ALPHA;
-    }
-    return o ? GR_BLEND_ONE : GR_BLEND_ZERO;
+    return xxTemplateBlendFactor<GrAlphaBlendFnc_t, GR_BLEND_ZERO,
+                                                    GR_BLEND_ONE,
+                                                    GR_BLEND_SRC_COLOR,
+                                                    GR_BLEND_ONE_MINUS_SRC_COLOR,
+                                                    GR_BLEND_DST_COLOR,
+                                                    GR_BLEND_ONE_MINUS_DST_COLOR,
+                                                    GR_BLEND_SRC_ALPHA,
+                                                    GR_BLEND_ONE_MINUS_SRC_ALPHA,
+                                                    GR_BLEND_DST_ALPHA,
+                                                    GR_BLEND_ONE_MINUS_DST_ALPHA>(name);
 }
 //==============================================================================
 //  Depth Comparison
 //==============================================================================
 inline GrCmpFnc_t grCompareOp(const char* name)
 {
-    bool e = false;
-    bool g = false;
-    bool l = false;
-    for (char x; (x = (*name)); name++)
-    {
-        switch (x)
-        {
-        case 'V':
-        case 'v':
-            return GR_CMP_NEVER;
-        case 'W':
-        case 'w':
-            return GR_CMP_ALWAYS;
-        case 'N':
-        case 'n':
-        case '!':
-            return GR_CMP_NOTEQUAL;
-        case 'Q':
-        case 'q':
-        case '=':
-            e = true;
-            break;
-        case 'G':
-        case 'g':
-        case '>':
-            if (e) break;
-            g = true;
-            break;
-        case 'L':
-        case 'l':
-        case '<':
-            if (e) break;
-            l = true;
-            break;
-        }
-    }
-    if (e)
-    {
-        if (l) return GR_CMP_LEQUAL;
-        if (g) return GR_CMP_GEQUAL;
-        return GR_CMP_EQUAL;
-    }
-    if (l) return GR_CMP_LESS;
-    if (g) return GR_CMP_GREATER;
-    return GR_CMP_ALWAYS;
+    return xxTemplateCompareOp<GrCmpFnc_t, GR_CMP_NEVER,
+                                           GR_CMP_LESS,
+                                           GR_CMP_EQUAL,
+                                           GR_CMP_LEQUAL,
+                                           GR_CMP_GREATER,
+                                           GR_CMP_NOTEQUAL,
+                                           GR_CMP_GEQUAL,
+                                           GR_CMP_ALWAYS>(name);
 }
 //==============================================================================
 //==============================================================================

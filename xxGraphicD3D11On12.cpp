@@ -8,7 +8,6 @@
 #include "dxsdk/d3d12.h"
 #include "dxsdk/d3d11on12.h"
 #include "dxsdk/dxgi1_4.h"
-#include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalD3D.h"
 #include "xxGraphicD3D11.h"
 #include "xxGraphicD3D11On12.h"

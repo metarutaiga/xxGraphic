@@ -7,6 +7,7 @@
 #pragma once
 
 #include "xxGraphic.h"
+#include "xxGraphicInternal.h"
 
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 
@@ -42,139 +43,41 @@ extern const char* const mtlArgumentShaderCode;
 //==============================================================================
 inline MTLBlendFactor mtlBlendFactor(const char* name)
 {
-    bool a = false;
-    bool c = false;
-    bool d = false;
-    bool o = false;
-    bool s = false;
-    for (char x; (x = (*name)); name++)
-    {
-        switch (x)
-        {
-        case 'A':
-        case 'a':
-            a = true;
-            c = false;
-            break;
-        case 'C':
-        case 'c':
-            a = false;
-            c = true;
-            break;
-        case 'D':
-        case 'd':
-            if (s) break;
-            d = true;
-            break;
-        case 'O':
-        case 'o':
-        case '1':
-            o = true;
-            break;
-        case 'S':
-        case 's':
-            if (s) break;
-            s = true;
-            break;
-        case 'Z':
-        case 'z':
-        case '0':
-            return MTLBlendFactorZero;
-        }
-    }
-    if (d)
-    {
-        if (c) return o ? MTLBlendFactorOneMinusDestinationColor : MTLBlendFactorDestinationColor;
-        if (a) return o ? MTLBlendFactorOneMinusDestinationAlpha : MTLBlendFactorDestinationAlpha;
-    }
-    if (s)
-    {
-        if (c) return o ? MTLBlendFactorOneMinusSourceColor : MTLBlendFactorSourceColor;
-        if (a) return o ? MTLBlendFactorOneMinusSourceAlpha : MTLBlendFactorSourceAlpha;
-    }
-    return o ? MTLBlendFactorOne : MTLBlendFactorZero;
+    return xxTemplateBlendFactor<MTLBlendFactor, MTLBlendFactorZero,
+                                                 MTLBlendFactorOne,
+                                                 MTLBlendFactorSourceColor,
+                                                 MTLBlendFactorOneMinusSourceColor,
+                                                 MTLBlendFactorDestinationColor,
+                                                 MTLBlendFactorOneMinusDestinationColor,
+                                                 MTLBlendFactorSourceAlpha,
+                                                 MTLBlendFactorOneMinusSourceAlpha,
+                                                 MTLBlendFactorDestinationAlpha,
+                                                 MTLBlendFactorOneMinusDestinationAlpha>(name);
 }
 //==============================================================================
 //  Blend Operation
 //==============================================================================
 inline MTLBlendOperation mtlBlendOp(const char* name)
 {
-    for (char x; (x = (*name)); name++)
-    {
-        switch (x)
-        {
-        case 'A':
-        case 'a':
-        case '+':
-            return MTLBlendOperationAdd;
-        case 'S':
-        case 's':
-        case '-':
-            return MTLBlendOperationSubtract;
-        case 'I':
-        case 'i':
-        case 'R':
-        case 'r':
-            return MTLBlendOperationReverseSubtract;
-        case 'M':
-        case 'm':
-            name++;
-            x = (*name);
-            return (x == 'I' || x == 'i') ? MTLBlendOperationMin : MTLBlendOperationMax;
-        }
-    }
-    return MTLBlendOperationAdd;
+    return xxTemplateBlendOp<MTLBlendOperation, MTLBlendOperationAdd,
+                                                MTLBlendOperationSubtract,
+                                                MTLBlendOperationReverseSubtract,
+                                                MTLBlendOperationMin,
+                                                MTLBlendOperationMax>(name);
 }
 //==============================================================================
 //  Depth Comparison
 //==============================================================================
 inline MTLCompareFunction mtlCompareOp(const char* name)
 {
-    bool e = false;
-    bool g = false;
-    bool l = false;
-    for (char x; (x = (*name)); name++)
-    {
-        switch (x)
-        {
-        case 'V':
-        case 'v':
-            return MTLCompareFunctionNever;
-        case 'W':
-        case 'w':
-            return MTLCompareFunctionAlways;
-        case 'N':
-        case 'n':
-        case '!':
-            return MTLCompareFunctionNotEqual;
-        case 'Q':
-        case 'q':
-        case '=':
-            e = true;
-            break;
-        case 'G':
-        case 'g':
-        case '>':
-            if (e) break;
-            g = true;
-            break;
-        case 'L':
-        case 'l':
-        case '<':
-            if (e) break;
-            l = true;
-            break;
-        }
-    }
-    if (e)
-    {
-        if (l) return MTLCompareFunctionLessEqual;
-        if (g) return MTLCompareFunctionGreaterEqual;
-        return MTLCompareFunctionEqual;
-    }
-    if (l) return MTLCompareFunctionLess;
-    if (g) return MTLCompareFunctionGreater;
-    return MTLCompareFunctionAlways;
+    return xxTemplateCompareOp<MTLCompareFunction, MTLCompareFunctionNever,
+                                                   MTLCompareFunctionLess,
+                                                   MTLCompareFunctionEqual,
+                                                   MTLCompareFunctionLessEqual,
+                                                   MTLCompareFunctionGreater,
+                                                   MTLCompareFunctionNotEqual,
+                                                   MTLCompareFunctionGreaterEqual,
+                                                   MTLCompareFunctionAlways>(name);
 }
 //==============================================================================
 //  Framebuffer

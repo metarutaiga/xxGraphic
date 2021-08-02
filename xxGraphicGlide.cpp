@@ -4,7 +4,6 @@
 // Copyright (c) 2019-2021 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
-#include "internal/xxGraphicInternal.h"
 #include "internal/xxGraphicInternalGlide.h"
 #include "xxVector.h"
 #include "xxGraphicGlide.h"
