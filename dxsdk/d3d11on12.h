@@ -8,7 +8,7 @@
 /* this ALWAYS GENERATED file contains the definitions for the interfaces */
 
 
- /* File created by MIDL compiler version 8.01.0622 */
+ /* File created by MIDL compiler version 8.01.0626 */
 
 
 
@@ -39,6 +39,14 @@
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 #pragma once
+#endif
+
+#ifndef DECLSPEC_XFGVIRT
+#if _CONTROL_FLOW_GUARD_XFG
+#define DECLSPEC_XFGVIRT(base, func) __declspec(xfg_virtual(base, func))
+#else
+#define DECLSPEC_XFGVIRT(base, func)
+#endif
 #endif
 
 /* Forward Declarations */ 
@@ -197,17 +205,21 @@ EXTERN_C const IID IID_ID3D11On12Device;
     {
         BEGIN_INTERFACE
         
+        DECLSPEC_XFGVIRT(IUnknown, QueryInterface)
         HRESULT ( STDMETHODCALLTYPE *QueryInterface )( 
             ID3D11On12Device * This,
             REFIID riid,
             _COM_Outptr_  void **ppvObject);
         
+        DECLSPEC_XFGVIRT(IUnknown, AddRef)
         ULONG ( STDMETHODCALLTYPE *AddRef )( 
             ID3D11On12Device * This);
         
+        DECLSPEC_XFGVIRT(IUnknown, Release)
         ULONG ( STDMETHODCALLTYPE *Release )( 
             ID3D11On12Device * This);
         
+        DECLSPEC_XFGVIRT(ID3D11On12Device, CreateWrappedResource)
         HRESULT ( STDMETHODCALLTYPE *CreateWrappedResource )( 
             ID3D11On12Device * This,
             _In_  IUnknown *pResource12,
@@ -217,11 +229,13 @@ EXTERN_C const IID IID_ID3D11On12Device;
             REFIID riid,
             _COM_Outptr_opt_  void **ppResource11);
         
+        DECLSPEC_XFGVIRT(ID3D11On12Device, ReleaseWrappedResources)
         void ( STDMETHODCALLTYPE *ReleaseWrappedResources )( 
             ID3D11On12Device * This,
             _In_reads_( NumResources )  ID3D11Resource *const *ppResources,
             UINT NumResources);
         
+        DECLSPEC_XFGVIRT(ID3D11On12Device, AcquireWrappedResources)
         void ( STDMETHODCALLTYPE *AcquireWrappedResources )( 
             ID3D11On12Device * This,
             _In_reads_( NumResources )  ID3D11Resource *const *ppResources,
@@ -298,17 +312,21 @@ EXTERN_C const IID IID_ID3D11On12Device1;
     {
         BEGIN_INTERFACE
         
+        DECLSPEC_XFGVIRT(IUnknown, QueryInterface)
         HRESULT ( STDMETHODCALLTYPE *QueryInterface )( 
             ID3D11On12Device1 * This,
             REFIID riid,
             _COM_Outptr_  void **ppvObject);
         
+        DECLSPEC_XFGVIRT(IUnknown, AddRef)
         ULONG ( STDMETHODCALLTYPE *AddRef )( 
             ID3D11On12Device1 * This);
         
+        DECLSPEC_XFGVIRT(IUnknown, Release)
         ULONG ( STDMETHODCALLTYPE *Release )( 
             ID3D11On12Device1 * This);
         
+        DECLSPEC_XFGVIRT(ID3D11On12Device, CreateWrappedResource)
         HRESULT ( STDMETHODCALLTYPE *CreateWrappedResource )( 
             ID3D11On12Device1 * This,
             _In_  IUnknown *pResource12,
@@ -318,16 +336,19 @@ EXTERN_C const IID IID_ID3D11On12Device1;
             REFIID riid,
             _COM_Outptr_opt_  void **ppResource11);
         
+        DECLSPEC_XFGVIRT(ID3D11On12Device, ReleaseWrappedResources)
         void ( STDMETHODCALLTYPE *ReleaseWrappedResources )( 
             ID3D11On12Device1 * This,
             _In_reads_( NumResources )  ID3D11Resource *const *ppResources,
             UINT NumResources);
         
+        DECLSPEC_XFGVIRT(ID3D11On12Device, AcquireWrappedResources)
         void ( STDMETHODCALLTYPE *AcquireWrappedResources )( 
             ID3D11On12Device1 * This,
             _In_reads_( NumResources )  ID3D11Resource *const *ppResources,
             UINT NumResources);
         
+        DECLSPEC_XFGVIRT(ID3D11On12Device1, GetD3D12Device)
         HRESULT ( STDMETHODCALLTYPE *GetD3D12Device )( 
             ID3D11On12Device1 * This,
             REFIID riid,
@@ -416,17 +437,21 @@ EXTERN_C const IID IID_ID3D11On12Device2;
     {
         BEGIN_INTERFACE
         
+        DECLSPEC_XFGVIRT(IUnknown, QueryInterface)
         HRESULT ( STDMETHODCALLTYPE *QueryInterface )( 
             ID3D11On12Device2 * This,
             REFIID riid,
             _COM_Outptr_  void **ppvObject);
         
+        DECLSPEC_XFGVIRT(IUnknown, AddRef)
         ULONG ( STDMETHODCALLTYPE *AddRef )( 
             ID3D11On12Device2 * This);
         
+        DECLSPEC_XFGVIRT(IUnknown, Release)
         ULONG ( STDMETHODCALLTYPE *Release )( 
             ID3D11On12Device2 * This);
         
+        DECLSPEC_XFGVIRT(ID3D11On12Device, CreateWrappedResource)
         HRESULT ( STDMETHODCALLTYPE *CreateWrappedResource )( 
             ID3D11On12Device2 * This,
             _In_  IUnknown *pResource12,
@@ -436,21 +461,25 @@ EXTERN_C const IID IID_ID3D11On12Device2;
             REFIID riid,
             _COM_Outptr_opt_  void **ppResource11);
         
+        DECLSPEC_XFGVIRT(ID3D11On12Device, ReleaseWrappedResources)
         void ( STDMETHODCALLTYPE *ReleaseWrappedResources )( 
             ID3D11On12Device2 * This,
             _In_reads_( NumResources )  ID3D11Resource *const *ppResources,
             UINT NumResources);
         
+        DECLSPEC_XFGVIRT(ID3D11On12Device, AcquireWrappedResources)
         void ( STDMETHODCALLTYPE *AcquireWrappedResources )( 
             ID3D11On12Device2 * This,
             _In_reads_( NumResources )  ID3D11Resource *const *ppResources,
             UINT NumResources);
         
+        DECLSPEC_XFGVIRT(ID3D11On12Device1, GetD3D12Device)
         HRESULT ( STDMETHODCALLTYPE *GetD3D12Device )( 
             ID3D11On12Device2 * This,
             REFIID riid,
             _COM_Outptr_  void **ppvDevice);
         
+        DECLSPEC_XFGVIRT(ID3D11On12Device2, UnwrapUnderlyingResource)
         HRESULT ( STDMETHODCALLTYPE *UnwrapUnderlyingResource )( 
             ID3D11On12Device2 * This,
             _In_  ID3D11Resource *pResource11,
@@ -458,6 +487,7 @@ EXTERN_C const IID IID_ID3D11On12Device2;
             REFIID riid,
             _COM_Outptr_  void **ppvResource12);
         
+        DECLSPEC_XFGVIRT(ID3D11On12Device2, ReturnUnderlyingResource)
         HRESULT ( STDMETHODCALLTYPE *ReturnUnderlyingResource )( 
             ID3D11On12Device2 * This,
             _In_  ID3D11Resource *pResource11,

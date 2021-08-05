@@ -10,6 +10,7 @@
 #ifndef __DDRAW_INCLUDED__
 #define __DDRAW_INCLUDED__
 
+
 // Always disable warning C4201: "nonstandard extension used :
 // nameless struct/union"
 #if _MSC_VER >= 1200
@@ -142,8 +143,8 @@ typedef struct _DDCOLORCONTROL          FAR *LPDDCOLORCONTROL;
 //#if defined( _WIN32 ) && !defined( _NO_ENUM )
     typedef BOOL (FAR PASCAL * LPDDENUMCALLBACKA)(GUID FAR *, LPSTR, LPSTR, LPVOID);
     typedef BOOL (FAR PASCAL * LPDDENUMCALLBACKW)(GUID FAR *, LPWSTR, LPWSTR, LPVOID);
-    extern HRESULT WINAPI DirectDrawEnumerateW( LPDDENUMCALLBACKW lpCallback, LPVOID lpContext );
-    extern HRESULT WINAPI DirectDrawEnumerateA( LPDDENUMCALLBACKA lpCallback, LPVOID lpContext );
+    extern _Check_return_ HRESULT WINAPI DirectDrawEnumerateW( LPDDENUMCALLBACKW lpCallback, LPVOID lpContext );
+    extern _Check_return_ HRESULT WINAPI DirectDrawEnumerateA( LPDDENUMCALLBACKA lpCallback, LPVOID lpContext );
     /*
      * Protect against old SDKs
      */
@@ -171,9 +172,9 @@ typedef struct _DDCOLORCONTROL          FAR *LPDDCOLORCONTROL;
         typedef LPDIRECTDRAWENUMERATEEXA        LPDIRECTDRAWENUMERATEEX;
         #define DirectDrawEnumerateEx       DirectDrawEnumerateExA
     #endif
-    extern HRESULT WINAPI DirectDrawCreate( GUID FAR *lpGUID, LPDIRECTDRAW FAR *lplpDD, IUnknown FAR *pUnkOuter );
+    extern _Check_return_ HRESULT WINAPI DirectDrawCreate( GUID FAR *lpGUID, LPDIRECTDRAW FAR *lplpDD, IUnknown FAR *pUnkOuter );
     extern HRESULT WINAPI DirectDrawCreateEx( GUID FAR * lpGuid, LPVOID  *lplpDD, REFIID  iid,IUnknown FAR *pUnkOuter );
-    extern HRESULT WINAPI DirectDrawCreateClipper( DWORD dwFlags, LPDIRECTDRAWCLIPPER FAR *lplpDDClipper, IUnknown FAR *pUnkOuter );
+    extern _Check_return_ HRESULT WINAPI DirectDrawCreateClipper( DWORD dwFlags, LPDIRECTDRAWCLIPPER FAR *lplpDDClipper, IUnknown FAR *pUnkOuter );
 #endif
 /*
  * Flags for DirectDrawEnumerateEx
@@ -5855,6 +5856,7 @@ typedef struct _DDCOLORCONTROL
 #pragma warning(default:4201)
 #endif
 
-#endif //__DDRAW_INCLUDED__
 
+
+#endif //__DDRAW_INCLUDED__
 

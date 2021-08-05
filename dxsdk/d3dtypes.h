@@ -7,6 +7,8 @@
  *
  ***************************************************************************/
 
+
+
 #ifndef _D3DTYPES_H_
 #define _D3DTYPES_H_
 
@@ -2122,4 +2124,5 @@ typedef enum _D3DTEXTURETRANSFORMFLAGS {
 #pragma warning(pop)
 
 #endif /* _D3DTYPES_H_ */
+
 

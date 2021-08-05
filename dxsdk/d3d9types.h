@@ -10,6 +10,7 @@
 #ifndef _d3d9TYPES_H_
 #define _d3d9TYPES_H_
 
+
 #ifndef DIRECT3D_VERSION
 #define DIRECT3D_VERSION         0x0900
 #endif  //DIRECT3D_VERSION
@@ -26,6 +27,7 @@
 #if defined(_X86_) || defined(_IA64_)
 #pragma pack(4)
 #endif
+
 
 // D3DCOLOR is equivalent to D3DFMT_A8R8G8B8
 #ifndef D3DCOLOR_DEFINED
@@ -76,6 +78,8 @@ typedef struct _D3DRECT {
 #define D3DRECT_DEFINED
 #endif
 
+
+
 #ifndef D3DMATRIX_DEFINED
 typedef struct _D3DMATRIX {
     union {
@@ -91,6 +95,8 @@ typedef struct _D3DMATRIX {
 } D3DMATRIX;
 #define D3DMATRIX_DEFINED
 #endif
+
+
 
 typedef struct _D3DVIEWPORT9 {
     DWORD       X;
@@ -1657,6 +1663,8 @@ typedef enum _D3DRESOURCETYPE {
 
 
 
+
+
 /* CubeMap Face identifiers */
 typedef enum _D3DCUBEMAP_FACES
 {
@@ -2418,7 +2426,6 @@ typedef struct _D3DAES_CTR_IV
 } D3DAES_CTR_IV;
 
 
-
 #endif // !D3D_DISABLE_9EX
 /* -- D3D9Ex only */
 
@@ -2428,6 +2435,7 @@ typedef struct _D3DAES_CTR_IV
 #else
 #pragma warning(default:4201)
 #endif
+
 
 #endif /* (DIRECT3D_VERSION >= 0x0900) */
 #endif /* _d3d9TYPES(P)_H_ */
