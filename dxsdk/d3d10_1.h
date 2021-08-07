@@ -1794,7 +1794,6 @@ EXTERN_C const IID IID_ID3D10Device1;
 
 #define	D3D10_1_SDK_VERSION	( ( 0 + 0x20 )  )
 
-#include "d3d10_1shader.h" 
 
 ///////////////////////////////////////////////////////////////////////////
 // D3D10CreateDevice1
