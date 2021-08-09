@@ -204,7 +204,7 @@ static uint64_t xxTSCFrequencyImpl()
         uint64_t tscEnd = xxTSC();
         QueryPerformanceCounter(&performanceEnd);
 
-        double delta = ((performanceEnd.QuadPart - performanceBegin.QuadPart) * MSEC_PER_SEC) / double(performanceFrequency.QuadPart);
+        double delta = (performanceEnd.QuadPart - performanceBegin.QuadPart) * (MSEC_PER_SEC / double(performanceFrequency.QuadPart));
 #else
         timeval tmBegin;
         timeval tmEnd;
@@ -219,12 +219,12 @@ static uint64_t xxTSCFrequencyImpl()
         uint64_t tscEnd = xxTSC();
         gettimeofday(&tmEnd, nullptr);
 
-        double delta = (((tmEnd.tv_sec - tmBegin.tv_sec) * USEC_PER_SEC + (tmEnd.tv_usec - tmBegin.tv_usec)) * NSEC_PER_USEC) / double(NSEC_PER_MSEC);
+        double delta = ((tmEnd.tv_sec - tmBegin.tv_sec) * USEC_PER_SEC + (tmEnd.tv_usec - tmBegin.tv_usec)) * (NSEC_PER_USEC / double(NSEC_PER_MSEC));
 #endif
         if (delta == 0.0)
             delta = 100.0;
 
-        int64_t counter = int64_t((tscEnd - tscBegin) * MSEC_PER_SEC / delta);
+        int64_t counter = int64_t((tscEnd - tscBegin) * (MSEC_PER_SEC / delta));
         double mhz = counter / double(NSEC_PER_MSEC);
         frequency = int64_t(int64_t(mhz + 0.5) * NSEC_PER_MSEC);
     }
