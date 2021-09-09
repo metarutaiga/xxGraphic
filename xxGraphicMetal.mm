@@ -513,6 +513,9 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height
         {
             ioSurface = (IOSurfaceRef)external;
             stride = 0;
+#if defined(xxMACOS)
+            options = MTLResourceStorageModeManaged;
+#endif
         }
         else if ([NSStringFromClass([(__bridge id)external class]) containsString:@"Texture"])
         {
