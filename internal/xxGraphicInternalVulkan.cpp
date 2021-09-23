@@ -18,20 +18,18 @@ extern "C" type VKAPI_CALL prototype parameter \
 { \
     return prototype ## Entry(__VA_ARGS__); \
 } \
+static void* VKAPI_CALL prototype ## Dummy parameter \
+{ \
+    return NULL; \
+} \
 static type VKAPI_CALL prototype ## Trunk parameter \
 { \
-    (void*&)prototype ## Entry = vkGetProcAddress(#prototype); \
-    if (prototype ## Entry == nullptr) \
-    { \
-        prototype ## Entry = [] parameter -> type \
-        { \
-            typedef type returnType; \
-            return returnType(); \
-        }; \
-    } \
+    prototype ## Entry = (type (VKAPI_CALL*) parameter)vkGetProcAddress(#prototype); \
+    if (prototype ## Entry == NULL) \
+        prototype ## Entry = (type (VKAPI_CALL*) parameter)prototype ## Dummy; \
     return prototype ## Entry(__VA_ARGS__); \
 } \
-type (VKAPI_CALL* prototype ## Entry) parameter = prototype ## Trunk;
+extern type (VKAPI_CALL* prototype ## Entry) parameter = prototype ## Trunk;
 //------------------------------------------------------------------------------
 VK_PROTOTYPE(VkResult, vkCreateInstance, (const VkInstanceCreateInfo* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkInstance* pInstance), pCreateInfo, pAllocator, pInstance);
 VK_PROTOTYPE(void, vkDestroyInstance, (VkInstance instance, const VkAllocationCallbacks* pAllocator), instance, pAllocator);

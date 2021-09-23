@@ -5,12 +5,13 @@
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "internal/xxGraphicInternalGL.h"
+#define _GDI32_
+#include "gl/wgl.h"
 #include "dxsdk/d3d11.h"
 #include "dxsdk/d3d10.h"
 #include "dxsdk/d3d9.h"
 #include "xxGraphicWGL.h"
 
-#include "gl/wgl.h"
 static void*                                g_gdiLibrary = nullptr;
 static void*                                g_glLibrary = nullptr;
 static HWND                                 g_dummyWindow = nullptr;

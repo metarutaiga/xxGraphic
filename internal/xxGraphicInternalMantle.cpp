@@ -15,20 +15,18 @@ extern "C" type GR_STDCALL prototype parameter \
 { \
     return prototype ## Entry(__VA_ARGS__); \
 } \
+static void* GR_STDCALL prototype ## Dummy parameter \
+{ \
+    return NULL; \
+} \
 static type GR_STDCALL prototype ## Trunk parameter \
 { \
-    (void*&)prototype ## Entry = grGetProcAddress(#prototype); \
-    if (prototype ## Entry == nullptr) \
-    { \
-        prototype ## Entry = [] parameter -> type \
-        { \
-            typedef type returnType; \
-            return returnType(); \
-        }; \
-    } \
+    prototype ## Entry = (type (GR_STDCALL*) parameter)grGetProcAddress(#prototype); \
+    if (prototype ## Entry == NULL) \
+        prototype ## Entry = (type (GR_STDCALL*) parameter)prototype ## Dummy; \
     return prototype ## Entry(__VA_ARGS__); \
 } \
-type (GR_STDCALL* prototype ## Entry) parameter = prototype ## Trunk;
+extern type (GR_STDCALL* prototype ## Entry) parameter = prototype ## Trunk;
 //------------------------------------------------------------------------------
 GR_PROTOTYPE(GR_RESULT, grInitAndEnumerateGpus, (const GR_APPLICATION_INFO* pAppInfo, const GR_ALLOC_CALLBACKS* pAllocCb, GR_UINT* pGpuCount, GR_PHYSICAL_GPU gpus[GR_MAX_PHYSICAL_GPUS]), pAppInfo, pAllocCb, pGpuCount, gpus);
 GR_PROTOTYPE(GR_RESULT, grGetGpuInfo, (GR_PHYSICAL_GPU gpu, GR_ENUM infoType, GR_SIZE* pDataSize, GR_VOID* pData), gpu, infoType, pDataSize, pData);

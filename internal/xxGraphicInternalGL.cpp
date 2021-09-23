@@ -67,7 +67,7 @@ static type GL_APIENTRY prototype ## Trunk parameter \
         prototype ## Entry = (type (GL_APIENTRYP) parameter)prototype ## Dummy; \
     return prototype ## Entry(__VA_ARGS__); \
 } \
-static type (GL_APIENTRYP prototype ## Entry) parameter = prototype ## Trunk;
+extern type (GL_APIENTRYP prototype ## Entry) parameter = prototype ## Trunk;
 //------------------------------------------------------------------------------
 GL_PROTOTYPE(void, glActiveTexture, (GLenum texture), texture);
 GL_PROTOTYPE(void, glAttachShader, (GLuint program, GLuint shader), program, shader);
@@ -456,7 +456,7 @@ static type GL_APIENTRY prototype ## Trunk parameter \
         prototype ## Entry = (type (GL_APIENTRYP) parameter)prototype ## Dummy; \
     return prototype ## Entry(__VA_ARGS__); \
 } \
-static type (GL_APIENTRYP prototype ## Entry) parameter = prototype ## Trunk;
+extern type (GL_APIENTRYP prototype ## Entry) parameter = prototype ## Trunk;
 //------------------------------------------------------------------------------
 WGL_PROTOTYPE(HGLRC, wglCreateContext, (HDC hDc), hDc);
 WGL_PROTOTYPE(BOOL, wglDeleteContext, (HGLRC oldContext), oldContext);

@@ -15,20 +15,18 @@ extern "C" type FX_CALL prototype parameter \
 { \
     return prototype ## Entry(__VA_ARGS__); \
 } \
+static void* FX_CALL prototype ## Dummy parameter \
+{ \
+    return NULL; \
+} \
 static type FX_CALL prototype ## Trunk parameter \
 { \
-    (void*&)prototype ## Entry = (void*)grGetProcAddress((char*)#prototype); \
-    if (prototype ## Entry == nullptr) \
-    { \
-        prototype ## Entry = [] parameter -> type \
-        { \
-            typedef type returnType; \
-            return returnType(); \
-        }; \
-    } \
+    prototype ## Entry = (type (FX_CALL*) parameter)grGetProcAddress((char*)#prototype); \
+    if (prototype ## Entry == NULL) \
+        prototype ## Entry = (type (FX_CALL*) parameter)prototype ## Dummy; \
     return prototype ## Entry(__VA_ARGS__); \
 } \
-type (FX_CALL* prototype ## Entry) parameter = prototype ## Trunk;
+extern type (FX_CALL* prototype ## Entry) parameter = prototype ## Trunk;
 //------------------------------------------------------------------------------
 FX_PROTOTYPE(void, grDrawPoint, (const void *pt), pt);
 FX_PROTOTYPE(void, grDrawLine, (const void *v1, const void *v2), v1, v2);
@@ -139,6 +137,7 @@ static void*                                        g_glLibrary = nullptr;
 static NSOpenGLContext*                             g_instance = nil;
 static NSOpenGLContext*                             g_openGLContext[256] = {};
 #elif defined(xxWINDOWS)
+#define _GDI32_
 #include "../gl/gl.h"
 #include "../gl/wgl.h"
 typedef double GLdouble;
