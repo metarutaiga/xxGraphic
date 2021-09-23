@@ -143,18 +143,8 @@ static NSOpenGLContext*                             g_openGLContext[256] = {};
 #include "../gl/wgl.h"
 typedef double GLdouble;
 typedef double GLclampd;
-static int                                          (WINAPI* ChoosePixelFormat)(HDC, CONST PIXELFORMATDESCRIPTOR*);
-static BOOL                                         (WINAPI* SetPixelFormat)(HDC, int, CONST PIXELFORMATDESCRIPTOR*);
-static BOOL                                         (WINAPI* SwapBuffers)(HDC);
-static PFNWGLCREATECONTEXTPROC                      wglCreateContext;
-static PFNWGLDELETECONTEXTPROC                      wglDeleteContext;
-static PFNWGLGETCURRENTDCPROC                       wglGetCurrentDC;
-static PFNWGLGETPROCADDRESSPROC                     wglGetProcAddress;
-static PFNWGLMAKECURRENTPROC                        wglMakeCurrent;
-static PFNWGLSHARELISTSPROC                         wglShareLists;
 static PFNWGLSWAPINTERVALEXTPROC                    wglSwapIntervalEXT;
 //------------------------------------------------------------------------------
-static void*                                        g_gdiLibrary = nullptr;
 static void*                                        g_glLibrary = nullptr;
 static HGLRC                                        g_instance = nullptr;
 static struct { HGLRC hGLRC; HDC hDC; HWND hWnd; }  g_openGLContext[256] = {};
@@ -499,21 +489,6 @@ static void FX_CALL gto_grGlideInit(void)
     (void*&)gto_glClearColor = xxGetProcAddress(g_glLibrary, "glClearColor");
     (void*&)gto_glClearDepth = xxGetProcAddress(g_glLibrary, "glClearDepth");
     (void*&)gto_glClear = xxGetProcAddress(g_glLibrary, "glClear");
-#if defined(xxWINDOWS)
-    (void*&)wglCreateContext = xxGetProcAddress(g_glLibrary, "wglCreateContext");
-    (void*&)wglDeleteContext = xxGetProcAddress(g_glLibrary, "wglDeleteContext");
-    (void*&)wglGetCurrentDC = xxGetProcAddress(g_glLibrary, "wglGetCurrentDC");
-    (void*&)wglGetProcAddress = xxGetProcAddress(g_glLibrary, "wglGetProcAddress");
-    (void*&)wglMakeCurrent = xxGetProcAddress(g_glLibrary, "wglMakeCurrent");
-    (void*&)wglShareLists = xxGetProcAddress(g_glLibrary, "wglShareLists");
-    if (g_gdiLibrary == nullptr)
-    {
-        g_gdiLibrary = xxLoadLibrary("gdi32.dll");
-    }
-    (void*&)ChoosePixelFormat = xxGetProcAddress(g_gdiLibrary, "ChoosePixelFormat");
-    (void*&)SetPixelFormat = xxGetProcAddress(g_gdiLibrary, "SetPixelFormat");
-    (void*&)SwapBuffers = xxGetProcAddress(g_gdiLibrary, "SwapBuffers");
-#endif
     g_baseTexture = 0;
     memset(g_vertexLayout, 0xFF, sizeof(g_vertexLayout));
 }
@@ -527,11 +502,6 @@ static void FX_CALL gto_grGlideShutdown(void)
     {
         wglDeleteContext(g_instance);
         g_instance = nullptr;
-    }
-    if (g_gdiLibrary)
-    {
-        xxFreeLibrary(g_gdiLibrary);
-        g_gdiLibrary = nullptr;
     }
 #endif
     if (g_glLibrary)

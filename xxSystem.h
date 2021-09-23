@@ -75,30 +75,6 @@
 #   include <intrin.h>
 #   define NOMINMAX
 #   define WIN32_LEAN_AND_MEAN
-#   define ChoosePixelFormat ChoosePixelFormat_unused
-#   define SetPixelFormat SetPixelFormat_unused
-#   define SwapBuffers SwapBuffers_unused
-#   define wglCreateContext wglCreateContext_unused
-#   define wglDeleteContext wglDeleteContext_unused
-#   define wglGetCurrentContext wglGetCurrentContext_unused
-#   define wglGetCurrentDC wglGetCurrentDC_unused
-#   define wglGetProcAddress wglGetProcAddress_unused
-#   define wglMakeCurrent wglMakeCurrent_unused
-#   define wglShareLists wglShareLists_unused
-#   include <windows.h>
-#   undef ChoosePixelFormat
-#   undef SetPixelFormat
-#   undef SwapBuffers
-#   undef wglCreateContext
-#   undef wglDeleteContext
-#   undef wglGetCurrentContext
-#   undef wglGetCurrentDC
-#   undef wglGetProcAddress
-#   undef wglMakeCurrent
-#   undef wglShareLists
-#   pragma warning(disable:4201)
-#   pragma warning(disable:4251)
-#   pragma warning(disable:4482)
 #   define xxWINDOWS 1
 #endif
 

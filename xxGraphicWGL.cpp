@@ -14,16 +14,6 @@
 static void*                                g_gdiLibrary = nullptr;
 static void*                                g_glLibrary = nullptr;
 static HWND                                 g_dummyWindow = nullptr;
-static int                                  (WINAPI *ChoosePixelFormat)(HDC, CONST PIXELFORMATDESCRIPTOR*);
-static BOOL                                 (WINAPI *SetPixelFormat)(HDC, int, CONST PIXELFORMATDESCRIPTOR*);
-static BOOL                                 (WINAPI *SwapBuffers)(HDC);
-static PFNWGLCREATECONTEXTPROC              wglCreateContext;
-static PFNWGLDELETECONTEXTPROC              wglDeleteContext;
-static PFNWGLGETCURRENTCONTEXTPROC          wglGetCurrentContext;
-static PFNWGLGETCURRENTDCPROC               wglGetCurrentDC;
-static PFNWGLGETPROCADDRESSPROC             wglGetProcAddress;
-static PFNWGLMAKECURRENTPROC                wglMakeCurrent;
-static PFNWGLSHARELISTSPROC                 wglShareLists;
 static PFNWGLSWAPINTERVALEXTPROC            wglSwapIntervalEXT;
 static PFNWGLCREATECONTEXTATTRIBSARBPROC    wglCreateContextAttribsARB;
 static PFNWGLDXOPENDEVICENVPROC             wglDXOpenDeviceNV;
@@ -100,7 +90,7 @@ static void* GL_APIENTRY wglSymbolImpl(const char* name, bool* failed = nullptr)
 {
     void* ptr = nullptr;
 
-    if (ptr == nullptr && wglGetProcAddress)
+    if (ptr == nullptr)
         ptr = wglGetProcAddress(name);
 
     if (ptr == nullptr && g_glLibrary)
@@ -271,20 +261,6 @@ uint64_t xxGraphicCreateWGL(int version)
     if (g_glLibrary == nullptr)
         g_glLibrary = xxLoadLibrary("opengl32.dll");
     if (g_glLibrary == nullptr)
-        return 0;
-
-    wglSymbolFailed = false;
-    wglSymbol(ChoosePixelFormat);
-    wglSymbol(SetPixelFormat);
-    wglSymbol(SwapBuffers);
-    wglSymbol(wglCreateContext);
-    wglSymbol(wglDeleteContext);
-    wglSymbol(wglGetCurrentContext);
-    wglSymbol(wglGetCurrentDC);
-    wglSymbol(wglGetProcAddress);
-    wglSymbol(wglMakeCurrent);
-    wglSymbol(wglShareLists);
-    if (wglSymbolFailed)
         return 0;
 
     WNDCLASSEXA wc = { sizeof(WNDCLASSEXA), CS_OWNDC, ::DefWindowProcA, 0, 0, ::GetModuleHandleA(nullptr), nullptr, nullptr, nullptr, nullptr, "xxGraphic", nullptr };

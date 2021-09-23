@@ -9,16 +9,16 @@
 #include "internal/xxGraphicInternal.h"
 #include "xxGraphicMantleAsm.h"
 
-#define IL_DCL_INPUT(usage, interp)     DWORD(IL_DCL_INPUT | (IL_IMPORTUSAGE_ ## usage << 16) | (IL_INTERPMODE_ ## interp << 21))
-#define IL_DCL_OUTPUT(usage)            DWORD(IL_DCL_OUTPUT | (IL_IMPORTUSAGE_ ## usage << 16))
-#define IL_DCL_RESOURCE(id, type)       DWORD(IL_DCL_RESOURCE | (id << 16) | (IL_USAGE_PIXTEX_ ## type << 24))
-#define IL_DCL_RESOURCE_FMT(x,y,z,w)    DWORD((IL_ELEMENTFORMAT_ ## x << 20) | (IL_ELEMENTFORMAT_ ## y << 23) | (IL_ELEMENTFORMAT_ ## z << 26) | (IL_ELEMENTFORMAT_ ## w << 29))
-#define IL_DST(type, id)                DWORD(id | (IL_REGTYPE_ ## type << 16))
-#define IL_DSTMOD(type, id)             DWORD(id | (IL_REGTYPE_ ## type << 16) | (1 << 22))
-#define IL_DSTIMM(type, id)             DWORD(id | (IL_REGTYPE_ ## type << 16) | (1 << 26))
-#define IL_SRC(type, id)                DWORD(id | (IL_REGTYPE_ ## type << 16))
-#define IL_SRCMOD(type, id)             DWORD(id | (IL_REGTYPE_ ## type << 16) | (1 << 22))
-#define IL_SRCIMM(type, id)             DWORD(id | (IL_REGTYPE_ ## type << 16) | (1 << 26))
+#define IL_DCL_INPUT(usage, interp)     uint32_t(IL_DCL_INPUT | (IL_IMPORTUSAGE_ ## usage << 16) | (IL_INTERPMODE_ ## interp << 21))
+#define IL_DCL_OUTPUT(usage)            uint32_t(IL_DCL_OUTPUT | (IL_IMPORTUSAGE_ ## usage << 16))
+#define IL_DCL_RESOURCE(id, type)       uint32_t(IL_DCL_RESOURCE | (id << 16) | (IL_USAGE_PIXTEX_ ## type << 24))
+#define IL_DCL_RESOURCE_FMT(x,y,z,w)    uint32_t((IL_ELEMENTFORMAT_ ## x << 20) | (IL_ELEMENTFORMAT_ ## y << 23) | (IL_ELEMENTFORMAT_ ## z << 26) | (IL_ELEMENTFORMAT_ ## w << 29))
+#define IL_DST(type, id)                uint32_t(id | (IL_REGTYPE_ ## type << 16))
+#define IL_DSTMOD(type, id)             uint32_t(id | (IL_REGTYPE_ ## type << 16) | (1 << 22))
+#define IL_DSTIMM(type, id)             uint32_t(id | (IL_REGTYPE_ ## type << 16) | (1 << 26))
+#define IL_SRC(type, id)                uint32_t(id | (IL_REGTYPE_ ## type << 16))
+#define IL_SRCMOD(type, id)             uint32_t(id | (IL_REGTYPE_ ## type << 16) | (1 << 22))
+#define IL_SRCIMM(type, id)             uint32_t(id | (IL_REGTYPE_ ## type << 16) | (1 << 26))
 
 //==============================================================================
 //  AMD IL Assembly Shader

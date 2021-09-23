@@ -56,20 +56,18 @@ extern "C" type GL_APIENTRY prototype parameter \
 { \
     return prototype ## Entry(__VA_ARGS__); \
 } \
+static void* GL_APIENTRY prototype ## Dummy parameter \
+{ \
+    return NULL; \
+} \
 static type GL_APIENTRY prototype ## Trunk parameter \
 { \
-    (void*&)prototype ## Entry = glGetProcAddress(#prototype); \
-    if (prototype ## Entry == nullptr) \
-    { \
-        prototype ## Entry = [] parameter -> type \
-        { \
-            typedef type returnType; \
-            return returnType(); \
-        }; \
-    } \
+    prototype ## Entry = (type (GL_APIENTRYP) parameter)glGetProcAddress(#prototype); \
+    if (prototype ## Entry == NULL) \
+        prototype ## Entry = (type (GL_APIENTRYP) parameter)prototype ## Dummy; \
     return prototype ## Entry(__VA_ARGS__); \
 } \
-type (GL_APIENTRYP prototype ## Entry) parameter = prototype ## Trunk;
+static type (GL_APIENTRYP prototype ## Entry) parameter = prototype ## Trunk;
 //------------------------------------------------------------------------------
 GL_PROTOTYPE(void, glActiveTexture, (GLenum texture), texture);
 GL_PROTOTYPE(void, glAttachShader, (GLuint program, GLuint shader), program, shader);
@@ -432,4 +430,41 @@ GL_PROTOTYPE(void, glGetSamplerParameterIuiv, (GLuint sampler, GLenum pname, GLu
 GL_PROTOTYPE(void, glTexBuffer, (GLenum target, GLenum internalformat, GLuint buffer), target, internalformat, buffer);
 GL_PROTOTYPE(void, glTexBufferRange, (GLenum target, GLenum internalformat, GLuint buffer, GLintptr offset, GLsizeiptr size), target, internalformat, buffer, offset, size);
 GL_PROTOTYPE(void, glTexStorage3DMultisample, (GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedsamplelocations), target, samples, internalformat, width, height, depth, fixedsamplelocations);
+//==============================================================================
+//  Windows GL Loader
+//==============================================================================
+#if defined(xxWINDOWS)
+#define _GDI32_
+#include <windows.h>
+static HMODULE opengl32 = nullptr;
+#define WGL_PROTOTYPE(type, prototype, parameter, ...) \
+extern type (GL_APIENTRYP prototype ## Entry) parameter; \
+extern "C" type GL_APIENTRY prototype parameter \
+{ \
+    return prototype ## Entry(__VA_ARGS__); \
+} \
+static void* GL_APIENTRY prototype ## Dummy parameter \
+{ \
+    return NULL; \
+} \
+static type GL_APIENTRY prototype ## Trunk parameter \
+{ \
+    if (opengl32 == NULL) \
+        opengl32 = LoadLibraryA("opengl32.dll"); \
+    prototype ## Entry = (type (GL_APIENTRYP) parameter)GetProcAddress(opengl32, #prototype); \
+    if (prototype ## Entry == NULL) \
+        prototype ## Entry = (type (GL_APIENTRYP) parameter)prototype ## Dummy; \
+    return prototype ## Entry(__VA_ARGS__); \
+} \
+static type (GL_APIENTRYP prototype ## Entry) parameter = prototype ## Trunk;
+//------------------------------------------------------------------------------
+WGL_PROTOTYPE(HGLRC, wglCreateContext, (HDC hDc), hDc);
+WGL_PROTOTYPE(BOOL, wglDeleteContext, (HGLRC oldContext), oldContext);
+WGL_PROTOTYPE(HGLRC, wglGetCurrentContext, (VOID));
+WGL_PROTOTYPE(HDC, wglGetCurrentDC, (VOID));
+WGL_PROTOTYPE(PROC, wglGetProcAddress, (LPCSTR lpszProc), lpszProc);
+WGL_PROTOTYPE(BOOL, wglMakeCurrent, (HDC hDc, HGLRC newContext), hDc, newContext);
+WGL_PROTOTYPE(BOOL, wglShareLists, (HGLRC hrcSrvShare, HGLRC hrcSrvSource), hrcSrvShare, hrcSrvSource);
+//------------------------------------------------------------------------------
+#endif
 //==============================================================================

@@ -39,6 +39,7 @@
 #   define ARM64_CNTPCT_EL0 ARM64_SYSREG(3,3,14,0,1)    // Counter-timer Physical Count register
 #   define ARM64_CNTVCT_EL0 ARM64_SYSREG(3,3,14,0,2)    // Counter-timer Virtual Count register
 #   if defined(_WIN32)
+#       include <windows.h>
 #       include <timeapi.h>
 #       pragma comment(lib, "winmm")
 #   endif
