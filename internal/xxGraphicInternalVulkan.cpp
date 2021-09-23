@@ -29,7 +29,7 @@ static type VKAPI_CALL prototype ## Trunk parameter \
         prototype ## Entry = (type (VKAPI_CALL*) parameter)prototype ## Dummy; \
     return prototype ## Entry(__VA_ARGS__); \
 } \
-extern type (VKAPI_CALL* prototype ## Entry) parameter = prototype ## Trunk;
+type (VKAPI_CALL* prototype ## Entry) parameter = prototype ## Trunk;
 //------------------------------------------------------------------------------
 VK_PROTOTYPE(VkResult, vkCreateInstance, (const VkInstanceCreateInfo* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkInstance* pInstance), pCreateInfo, pAllocator, pInstance);
 VK_PROTOTYPE(void, vkDestroyInstance, (VkInstance instance, const VkAllocationCallbacks* pAllocator), instance, pAllocator);

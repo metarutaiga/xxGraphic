@@ -26,7 +26,7 @@ static type FX_CALL prototype ## Trunk parameter \
         prototype ## Entry = (type (FX_CALL*) parameter)prototype ## Dummy; \
     return prototype ## Entry(__VA_ARGS__); \
 } \
-extern type (FX_CALL* prototype ## Entry) parameter = prototype ## Trunk;
+type (FX_CALL* prototype ## Entry) parameter = prototype ## Trunk;
 //------------------------------------------------------------------------------
 FX_PROTOTYPE(void, grDrawPoint, (const void *pt), pt);
 FX_PROTOTYPE(void, grDrawLine, (const void *v1, const void *v2), v1, v2);

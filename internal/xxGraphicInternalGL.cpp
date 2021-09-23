@@ -67,7 +67,7 @@ static type GL_APIENTRY prototype ## Trunk parameter \
         prototype ## Entry = (type (GL_APIENTRYP) parameter)prototype ## Dummy; \
     return prototype ## Entry(__VA_ARGS__); \
 } \
-extern type (GL_APIENTRYP prototype ## Entry) parameter = prototype ## Trunk;
+type (GL_APIENTRYP prototype ## Entry) parameter = prototype ## Trunk;
 //------------------------------------------------------------------------------
 GL_PROTOTYPE(void, glActiveTexture, (GLenum texture), texture);
 GL_PROTOTYPE(void, glAttachShader, (GLuint program, GLuint shader), program, shader);
@@ -436,7 +436,11 @@ GL_PROTOTYPE(void, glTexStorage3DMultisample, (GLenum target, GLsizei samples, G
 #if defined(xxWINDOWS)
 #define _GDI32_
 #include <windows.h>
-static HMODULE opengl32 = nullptr;
+static void* opengl32GetProcAddress(const char* name)
+{
+    static HMODULE opengl32 = LoadLibraryA("opengl32.dll");
+    return GetProcAddress(opengl32, name);
+}
 #define WGL_PROTOTYPE(type, prototype, parameter, ...) \
 extern type (GL_APIENTRYP prototype ## Entry) parameter; \
 extern "C" type GL_APIENTRY prototype parameter \
@@ -449,14 +453,12 @@ static void* GL_APIENTRY prototype ## Dummy parameter \
 } \
 static type GL_APIENTRY prototype ## Trunk parameter \
 { \
-    if (opengl32 == NULL) \
-        opengl32 = LoadLibraryA("opengl32.dll"); \
-    prototype ## Entry = (type (GL_APIENTRYP) parameter)GetProcAddress(opengl32, #prototype); \
+    prototype ## Entry = (type (GL_APIENTRYP) parameter)opengl32GetProcAddress(#prototype); \
     if (prototype ## Entry == NULL) \
         prototype ## Entry = (type (GL_APIENTRYP) parameter)prototype ## Dummy; \
     return prototype ## Entry(__VA_ARGS__); \
 } \
-extern type (GL_APIENTRYP prototype ## Entry) parameter = prototype ## Trunk;
+type (GL_APIENTRYP prototype ## Entry) parameter = prototype ## Trunk;
 //------------------------------------------------------------------------------
 WGL_PROTOTYPE(HGLRC, wglCreateContext, (HDC hDc), hDc);
 WGL_PROTOTYPE(BOOL, wglDeleteContext, (HGLRC oldContext), oldContext);
