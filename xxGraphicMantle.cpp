@@ -11,19 +11,6 @@
 #include "xxGraphicMantleAsm.h"
 #include "xxGraphicMantle.h"
 
-#define GR_PROTOTYPES 1
-#include "mantle/mantle.h"
-#include "mantle/mantleWsiWinExt.h"
-#define NUM_BACK_BUFFERS 3
-#define NUM_DESCRIPTOR_COUNT        (8)
-#define BASE_VERTEX_CONSTANT        (0)
-#define BASE_PIXEL_CONSTANT         (1)
-#define BASE_VERTEX_ATTRIBUTE       (2)
-#define BASE_VERTEX_TEXTURE         (2 + 16)
-#define BASE_PIXEL_TEXTURE          (2 + 16 + NUM_DESCRIPTOR_COUNT * 2)
-#define BASE_VERTEX_SAMPLER         (2 + 16 + NUM_DESCRIPTOR_COUNT * 3)
-#define BASE_PIXEL_SAMPLER          (2 + 16 + NUM_DESCRIPTOR_COUNT * 4)
-
 static void*                        g_mantleLibrary = nullptr;
 static GR_QUEUE                     g_queue = GR_NULL_HANDLE;
 static GR_FENCE                     g_fences[NUM_BACK_BUFFERS] = {};
@@ -165,29 +152,8 @@ const char* xxGetDeviceNameMantle()
     return "Mantle";
 }
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-struct FRAMEBUFFERGR
-{
-    GR_IMAGE                colorImage;
-    GR_GPU_MEMORY           colorMemory;
-    GR_COLOR_TARGET_VIEW    colorTargetView;
-    GR_IMAGE                depthStencilImage;
-    GR_GPU_MEMORY           depthStencilMemory;
-    GR_COLOR_TARGET_VIEW    depthStencilTargetView;
-};
-//==============================================================================
 //  Swapchain
 //==============================================================================
-struct SWAPCHAINGR : public FRAMEBUFFERGR
-{
-    GR_CMD_BUFFER   commandBuffers[NUM_BACK_BUFFERS];
-    int             commandBufferIndex;
-    void*           view;
-    int             width;
-    int             height;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateSwapchainMantle(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
@@ -371,16 +337,6 @@ void xxSubmitCommandBufferMantle(uint64_t commandBuffer, uint64_t swapchain)
 //==============================================================================
 //  Render Pass
 //==============================================================================
-union RENDERPASSGR
-{
-    uint64_t    value;
-    struct
-    {
-        bool    clearColor;
-        bool    clearDepthStencil;
-    };
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateRenderPassMantle(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil)
 {
     RENDERPASSGR grRenderPass = {};
@@ -427,13 +383,6 @@ void xxEndRenderPassMantle(uint64_t commandEncoder, uint64_t framebuffer, uint64
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-struct VERTEXATTRIBUTEGR
-{
-    GR_MEMORY_VIEW_ATTACH_INFO  infos[16];
-    int                         count;
-    int                         stride;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeMantle(uint64_t device, int count, int* attribute)
 {
     VERTEXATTRIBUTEGR* grVertexAttribute = xxAlloc(VERTEXATTRIBUTEGR, 1);

@@ -12,7 +12,6 @@
 #include "xxGraphicD3D12.h"
 
 typedef HRESULT (WINAPI *PFN_CREATE_DXGI_FACTORY1)(REFIID, void**);
-#define NUM_BACK_BUFFERS            3
 #define PERSISTENT_BUFFER           1
 
 static void*                        g_d3dLibrary = nullptr;
@@ -439,29 +438,8 @@ const char* xxGetDeviceNameD3D12()
     return "Direct3D 12.0";
 }
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-struct D3D12FRAMEBUFFER
-{
-    ID3D12Resource*             renderTargetResource;
-    D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandle;
-};
-//==============================================================================
 //  Swapchain
 //==============================================================================
-struct D3D12SWAPCHAIN : public D3D12FRAMEBUFFER
-{
-    IDXGISwapChain3*            dxgiSwapchain;
-    ID3D12DescriptorHeap*       renderTargetHeap;
-    ID3D12Resource*             renderTargetResources[NUM_BACK_BUFFERS];
-    D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandles[NUM_BACK_BUFFERS];
-    ID3D12CommandAllocator*     commandAllocators[NUM_BACK_BUFFERS];
-    ID3D12GraphicsCommandList*  commandList;
-    HWND                        hWnd;
-    int                         width;
-    int                         height;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateSwapchainD3D12(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
@@ -701,16 +679,6 @@ void xxSubmitCommandBufferD3D12(uint64_t commandBuffer, uint64_t swapchain)
 //==============================================================================
 //  Render Pass
 //==============================================================================
-union D3D12RENDERPASS
-{
-    uint64_t    value;
-    struct
-    {
-        bool    clearColor;
-        bool    clearDepthStencil;
-    };
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateRenderPassD3D12(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil)
 {
     D3D12RENDERPASS d3dRenderPass = {};
@@ -795,13 +763,6 @@ void xxEndRenderPassD3D12(uint64_t commandEncoder, uint64_t framebuffer, uint64_
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-struct D3D12VERTEXATTRIBUTE
-{
-    D3D12_INPUT_ELEMENT_DESC    inputElements[16];
-    UINT                        inputElementCount;
-    int                         stride;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeD3D12(uint64_t device, int count, int* attribute)
 {
     D3D12VERTEXATTRIBUTE* d3dVertexAttribute = xxAlloc(D3D12VERTEXATTRIBUTE);
@@ -892,16 +853,6 @@ void xxDestroyVertexAttributeD3D12(uint64_t vertexAttribute)
 //==============================================================================
 //  Buffer
 //==============================================================================
-struct D3D12RESOURCE
-{
-    ID3D12Resource*             resource;
-    D3D12_CPU_DESCRIPTOR_HANDLE resourceCPUHandle;
-    D3D12_GPU_DESCRIPTOR_HANDLE resourceGPUHandle;
-    UINT                        size;
-    void*                       cpuAddress;
-    D3D12_GPU_VIRTUAL_ADDRESS   gpuAddress;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateConstantBufferD3D12(uint64_t device, int size)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
@@ -1083,19 +1034,6 @@ void xxUnmapBufferD3D12(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-struct D3D12TEXTURE
-{
-    ID3D12Resource*             texture;
-    D3D12_CPU_DESCRIPTOR_HANDLE textureCPUHandle;
-    D3D12_GPU_DESCRIPTOR_HANDLE textureGPUHandle;
-    UINT                        width;
-    UINT                        height;
-    UINT                        depth;
-    ID3D12Resource*             upload;
-    UINT                        uploadPitch;
-    UINT                        uploadSize;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateTextureD3D12(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);

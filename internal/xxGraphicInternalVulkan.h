@@ -88,3 +88,81 @@ inline VkCompareOp vkCompareOp(const char* name)
                                             VK_COMPARE_OP_ALWAYS>(name);
 }
 //==============================================================================
+//  Framebuffer
+//==============================================================================
+struct FRAMEBUFFERVK
+{
+    VkFramebuffer       framebuffer;
+};
+//==============================================================================
+//  Swapchain
+//==============================================================================
+struct SWAPCHAINVK : public FRAMEBUFFERVK
+{
+    VkCommandBuffer     commandBuffers[8];
+
+    VkFence             fences[8];
+    VkSemaphore         imageSemaphores[8];
+    VkSemaphore         presentSemaphores[8];
+    uint32_t            semaphoreIndex;
+
+    VkFramebuffer       framebuffers[8];
+
+    VkImage             images[8];
+    VkImageView         imageViews[8];
+    VkImage             depthStencil;
+    VkImageView         depthStencilView;
+
+    VkSurfaceKHR        surface;
+    VkFormat            surfaceFormat;
+    VkPresentModeKHR    presentMode;
+    VkSwapchainKHR      swapchain;
+
+    void*               view;
+    uint32_t            width;
+    uint32_t            height;
+    float               scale;
+    uint32_t            imageCount;
+    uint32_t            imageIndex;
+};
+//==============================================================================
+//  Vertex Attribute
+//==============================================================================
+struct VERTEXATTRIBUTEVK
+{
+    VkVertexInputAttributeDescription   attributeDesc[16];
+    uint32_t                            attributeCount;
+    VkVertexInputBindingDescription     bindingDesc[4];
+    uint32_t                            bindingCount;
+};
+//==============================================================================
+//  Buffer
+//==============================================================================
+struct BUFFERVK
+{
+    VkBuffer        buffer;
+    VkDeviceMemory  memory;
+    VkDeviceSize    size;
+    void*           ptr;
+    bool            persistent;
+};
+//==============================================================================
+//  Texture
+//==============================================================================
+struct TEXTUREVK
+{
+    VkImageView     imageView;
+    VkImage         image;
+    VkDeviceMemory  memory;
+    VkDeviceSize    size;
+    uint32_t        width;
+    uint32_t        height;
+    uint32_t        depth;
+    uint32_t        mipmap;
+    uint32_t        array;
+    VkBuffer        uploadBuffer;
+    VkDeviceMemory  uploadMemory;
+    VkDeviceSize    uploadSize;
+    VkDeviceSize    uploadStride;
+};
+//==============================================================================

@@ -12,8 +12,6 @@
 #include "xxGraphicD3D11.h"
 #include "xxGraphicD3D11On12.h"
 
-#define NUM_BACK_BUFFERS            3
-
 static void*                        g_d3d11Library = nullptr;
 static void*                        g_d3d12Library = nullptr;
 static ID3D12Device*                g_d3d12Device = nullptr;

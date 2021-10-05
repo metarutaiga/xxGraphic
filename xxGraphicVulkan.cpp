@@ -529,44 +529,8 @@ const char* xxGetDeviceNameVulkan()
     return "Vulkan";
 }
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-struct FRAMEBUFFERVK
-{
-    VkFramebuffer       framebuffer;
-};
-//==============================================================================
 //  Swapchain
 //==============================================================================
-struct SWAPCHAINVK : public FRAMEBUFFERVK
-{
-    VkCommandBuffer     commandBuffers[8];
-
-    VkFence             fences[8];
-    VkSemaphore         imageSemaphores[8];
-    VkSemaphore         presentSemaphores[8];
-    uint32_t            semaphoreIndex;
-
-    VkFramebuffer       framebuffers[8];
-
-    VkImage             images[8];
-    VkImageView         imageViews[8];
-    VkImage             depthStencil;
-    VkImageView         depthStencilView;
-
-    VkSurfaceKHR        surface;
-    VkFormat            surfaceFormat;
-    VkPresentModeKHR    presentMode;
-    VkSwapchainKHR      swapchain;
-
-    void*               view;
-    uint32_t            width;
-    uint32_t            height;
-    float               scale;
-    uint32_t            imageCount;
-    uint32_t            imageIndex;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
@@ -1205,14 +1169,6 @@ void xxEndRenderPassVulkan(uint64_t commandEncoder, uint64_t framebuffer, uint64
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-struct VERTEXATTRIBUTEVK
-{
-    VkVertexInputAttributeDescription   attributeDesc[16];
-    uint32_t                            attributeCount;
-    VkVertexInputBindingDescription     bindingDesc[4];
-    uint32_t                            bindingCount;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateVertexAttributeVulkan(uint64_t device, int count, int* attribute)
 {
     VERTEXATTRIBUTEVK* vkVertexAttribute = xxAlloc(VERTEXATTRIBUTEVK);
@@ -1284,15 +1240,6 @@ void xxDestroyVertexAttributeVulkan(uint64_t vertexAttribute)
 //==============================================================================
 //  Buffer
 //==============================================================================
-struct BUFFERVK
-{
-    VkBuffer        buffer;
-    VkDeviceMemory  memory;
-    VkDeviceSize    size;
-    void*           ptr;
-    bool            persistent;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateConstantBufferVulkan(uint64_t device, int size)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
@@ -1574,23 +1521,6 @@ void xxUnmapBufferVulkan(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-struct TEXTUREVK
-{
-    VkImageView     imageView;
-    VkImage         image;
-    VkDeviceMemory  memory;
-    VkDeviceSize    size;
-    uint32_t        width;
-    uint32_t        height;
-    uint32_t        depth;
-    uint32_t        mipmap;
-    uint32_t        array;
-    VkBuffer        uploadBuffer;
-    VkDeviceMemory  uploadMemory;
-    VkDeviceSize    uploadSize;
-    VkDeviceSize    uploadStride;
-};
-//------------------------------------------------------------------------------
 uint64_t xxCreateTextureVulkan(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);

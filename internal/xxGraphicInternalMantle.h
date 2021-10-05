@@ -12,6 +12,14 @@
 #define GR_PROTOTYPES 1
 #include "mantle/mantle.h"
 #include "mantle/mantleWsiWinExt.h"
+#define NUM_DESCRIPTOR_COUNT        (8)
+#define BASE_VERTEX_CONSTANT        (0)
+#define BASE_PIXEL_CONSTANT         (1)
+#define BASE_VERTEX_ATTRIBUTE       (2)
+#define BASE_VERTEX_TEXTURE         (2 + 16)
+#define BASE_PIXEL_TEXTURE          (2 + 16 + NUM_DESCRIPTOR_COUNT * 2)
+#define BASE_VERTEX_SAMPLER         (2 + 16 + NUM_DESCRIPTOR_COUNT * 3)
+#define BASE_PIXEL_SAMPLER          (2 + 16 + NUM_DESCRIPTOR_COUNT * 4)
 
 extern void* grGetProcAddress(const char* name);
 //==============================================================================
@@ -55,4 +63,48 @@ inline GR_COMPARE_FUNC grCompareOp(const char* name)
                                                 GR_COMPARE_GREATER_EQUAL,
                                                 GR_COMPARE_ALWAYS>(name);
 }
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+struct FRAMEBUFFERGR
+{
+    GR_IMAGE                colorImage;
+    GR_GPU_MEMORY           colorMemory;
+    GR_COLOR_TARGET_VIEW    colorTargetView;
+    GR_IMAGE                depthStencilImage;
+    GR_GPU_MEMORY           depthStencilMemory;
+    GR_COLOR_TARGET_VIEW    depthStencilTargetView;
+};
+//==============================================================================
+//  Swapchain
+//==============================================================================
+struct SWAPCHAINGR : public FRAMEBUFFERGR
+{
+    GR_CMD_BUFFER   commandBuffers[NUM_BACK_BUFFERS];
+    int             commandBufferIndex;
+    void*           view;
+    int             width;
+    int             height;
+};
+//==============================================================================
+//  Render Pass
+//==============================================================================
+union RENDERPASSGR
+{
+    uint64_t    value;
+    struct
+    {
+        bool    clearColor;
+        bool    clearDepthStencil;
+    };
+};
+//==============================================================================
+//  Vertex Attribute
+//==============================================================================
+struct VERTEXATTRIBUTEGR
+{
+    GR_MEMORY_VIEW_ATTACH_INFO  infos[16];
+    int                         count;
+    int                         stride;
+};
 //==============================================================================

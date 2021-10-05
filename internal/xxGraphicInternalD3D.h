@@ -290,6 +290,21 @@ interface DECLSPEC_UUID("7071e1f0-e84b-4b33-974f-12fa49de65c5") ID3D12Tools;
 interface DECLSPEC_UUID("e9eb5314-33aa-42b2-a718-d77f58b1f1c7") ID3D12SDKConfiguration;
 interface DECLSPEC_UUID("55050859-4024-474c-87f5-6472eaee44ea") ID3D12GraphicsCommandList5;
 interface DECLSPEC_UUID("c3827890-e548-4cfa-96cf-5689a9370f80") ID3D12GraphicsCommandList6;
+#ifndef __d3d12_h__
+typedef struct D3D12_INPUT_ELEMENT_DESC
+{
+    LPCSTR SemanticName;
+    UINT SemanticIndex;
+    enum DXGI_FORMAT Format;
+    UINT InputSlot;
+    UINT AlignedByteOffset;
+    enum D3D12_INPUT_CLASSIFICATION InputSlotClass;
+    UINT InstanceDataStepRate;
+} D3D12_INPUT_ELEMENT_DESC;
+typedef struct D3D12_CPU_DESCRIPTOR_HANDLE { SIZE_T ptr; } D3D12_CPU_DESCRIPTOR_HANDLE;
+typedef struct D3D12_GPU_DESCRIPTOR_HANDLE { UINT64 ptr; } D3D12_GPU_DESCRIPTOR_HANDLE;
+typedef UINT64 D3D12_GPU_VIRTUAL_ADDRESS;
+#endif
 
 template <class T>
 inline ULONG SafeRelease(T*& ptr)
@@ -592,6 +607,12 @@ struct D3D11FRAMEBUFFER
     ID3D11RenderTargetView* renderTargetView;
     ID3D11DepthStencilView* depthStencilView;
 };
+//------------------------------------------------------------------------------
+struct D3D12FRAMEBUFFER
+{
+    ID3D12Resource*             renderTargetResource;
+    D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandle;
+};
 //==============================================================================
 //  Swapchain
 //==============================================================================
@@ -663,6 +684,19 @@ struct D3D11ON12SWAPCHAIN : public D3D11FRAMEBUFFER
     int                     width;
     int                     height;
 };
+//------------------------------------------------------------------------------
+struct D3D12SWAPCHAIN : public D3D12FRAMEBUFFER
+{
+    IDXGISwapChain3*            dxgiSwapchain;
+    ID3D12DescriptorHeap*       renderTargetHeap;
+    ID3D12Resource*             renderTargetResources[NUM_BACK_BUFFERS];
+    D3D12_CPU_DESCRIPTOR_HANDLE renderTargetHandles[NUM_BACK_BUFFERS];
+    ID3D12CommandAllocator*     commandAllocators[NUM_BACK_BUFFERS];
+    ID3D12GraphicsCommandList*  commandList;
+    HWND                        hWnd;
+    int                         width;
+    int                         height;
+};
 //==============================================================================
 //  Render Pass
 //==============================================================================
@@ -677,6 +711,7 @@ union D3D10RENDERPASS
 };
 //------------------------------------------------------------------------------
 typedef D3D10RENDERPASS D3D11RENDERPASS;
+typedef D3D10RENDERPASS D3D12RENDERPASS;
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
@@ -718,6 +753,13 @@ struct D3D11VERTEXATTRIBUTE
     ID3D11InputLayout*  inputLayout;
     int                 stride;
 };
+//------------------------------------------------------------------------------
+struct D3D12VERTEXATTRIBUTE
+{
+    D3D12_INPUT_ELEMENT_DESC    inputElements[16];
+    UINT                        inputElementCount;
+    int                         stride;
+};
 //==============================================================================
 //  Buffer
 //==============================================================================
@@ -745,6 +787,16 @@ struct D3D11BUFFER
     enum D3D11_MAP  map;
     void*           address;
 };
+//------------------------------------------------------------------------------
+struct D3D12RESOURCE
+{
+    ID3D12Resource*             resource;
+    D3D12_CPU_DESCRIPTOR_HANDLE resourceCPUHandle;
+    D3D12_GPU_DESCRIPTOR_HANDLE resourceGPUHandle;
+    UINT                        size;
+    void*                       cpuAddress;
+    D3D12_GPU_VIRTUAL_ADDRESS   gpuAddress;
+};
 //==============================================================================
 //  Texture
 //==============================================================================
@@ -764,6 +816,19 @@ struct D3D11TEXTURE
     ID3D11Texture2D*            texture2D;
     ID3D11Texture3D*            texture3D;
     unsigned int                mipmap;
+};
+//------------------------------------------------------------------------------
+struct D3D12TEXTURE
+{
+    ID3D12Resource*             texture;
+    D3D12_CPU_DESCRIPTOR_HANDLE textureCPUHandle;
+    D3D12_GPU_DESCRIPTOR_HANDLE textureGPUHandle;
+    UINT                        width;
+    UINT                        height;
+    UINT                        depth;
+    ID3D12Resource*             upload;
+    UINT                        uploadPitch;
+    UINT                        uploadSize;
 };
 //==============================================================================
 //  Sampler

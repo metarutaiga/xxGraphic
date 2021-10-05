@@ -6,6 +6,8 @@
 //==============================================================================
 #pragma once
 
+#define NUM_BACK_BUFFERS 3
+
 enum xxGraphicDescriptor
 {
     VERTEX_UNIFORM          = 0,
