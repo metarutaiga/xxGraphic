@@ -28,21 +28,12 @@
 #include <string.h>
 #include <time.h>
 
-#undef MSEC_PER_SEC
-#undef USEC_PER_SEC
-#undef NSEC_PER_SEC
-#undef USEC_PER_MSEC
-#undef NSEC_PER_MSEC
-#undef NSEC_PER_USEC
-#define MSEC_PER_SEC    1000ull
-#define USEC_PER_SEC    1000000ull
-#define NSEC_PER_SEC    1000000000ull
-#define USEC_PER_MSEC   1000ull
-#define NSEC_PER_MSEC   1000000ull
-#define NSEC_PER_USEC   1000ull
-
 #if defined(__APPLE__)
 #   include <TargetConditionals.h>
+#   define objc_msgSend objc_msgSend_unused
+#   include <objc/message.h>
+#   undef objc_msgSend
+    OBJC_EXPORT id objc_msgSend(id self, SEL op, ...);
 #   if TARGET_OS_IPHONE
 #       define xxIOS 1
 #       if TARGET_CPU_X86_64
@@ -58,15 +49,22 @@
 #   if TARGET_OS_MACCATALYST
 #       define xxMACCATALYST 1
 #   endif
-#   define objc_msgSend objc_msgSend_unused
-#   include <objc/message.h>
-#   undef objc_msgSend
-    OBJC_EXPORT id objc_msgSend(id self, SEL op, ...);
 #endif
 
 #if defined(__linux__)
 #   define xxLINUX 1
 #   if defined(__ANDROID__)
+#       if defined(__cplusplus)
+            extern "C"
+            {
+#       endif
+        extern struct _JavaVM* xxAndroidJavaVM;
+        extern struct _JNIEnv* xxAndroidJNIEnv;
+        extern class _jobject* xxAndroidContext;
+        extern int xxAndroidJNIVersion;
+#       if defined(__cplusplus)
+            };
+#       endif
 #       define xxANDROID 1
 #   endif
 #endif
@@ -78,36 +76,23 @@
 #   define xxWINDOWS 1
 #endif
 
-#ifndef nullptr
-#   if defined(__cplusplus)
-#   else
-#       define nullptr              NULL
-#   endif
-#endif
-
-#ifndef xxEXTERN
-#   if defined(_MSC_VER)
-#       if defined(__cplusplus)
-#           define xxEXTERN         extern "C"
-#       else
-#           define xxEXTERN         extern
-#       endif
-#   else
-#       if defined(__cplusplus)
-#           define xxEXTERN         __attribute__((visibility("default"))) extern "C"
-#       else
-#           define xxEXTERN         __attribute__((visibility("default"))) extern
-#       endif
-#   endif
-#endif
-
 #ifndef xxAPI
-#   if defined(_MSC_VER) && defined(XX_BUILD_LIBRARY)
-#       define xxAPI xxEXTERN       __declspec(dllexport)
-#   elif defined(_MSC_VER)
-#       define xxAPI xxEXTERN       __declspec(dllimport)
+#   if defined(__cplusplus)
+#       if defined(_MSC_VER) && defined(XX_BUILD_LIBRARY)
+#           define xxAPI            __declspec(dllexport) extern "C"
+#       elif defined(_MSC_VER)
+#           define xxAPI            __declspec(dllimport) extern "C"
+#       else
+#           define xxAPI            __attribute__((visibility("default"))) extern "C"
+#       endif
 #   else
-#       define xxAPI xxEXTERN
+#       if defined(_MSC_VER) && defined(XX_BUILD_LIBRARY)
+#           define xxAPI            __declspec(dllexport) extern
+#       elif defined(_MSC_VER)
+#           define xxAPI            __declspec(dllimport) extern
+#       else
+#           define xxAPI            __attribute__((visibility("default"))) extern
+#       endif
 #   endif
 #endif
 
@@ -121,27 +106,18 @@
 #   endif
 #endif
 
-#if defined(__GNUC__) || defined(__llvm__)
-#   define xxLikely(x)              __builtin_expect((x), 1)
-#   define xxUnlikely(x)            __builtin_expect((x), 0)
-#else
-#   define xxLikely(x)              (x)
-#   define xxUnlikely(x)            (x)
-#endif
-
-#if defined(__cplusplus)
-#   define xxInline                 inline
-#   define xxConstexpr              constexpr
-#   define xxDefaultArgument(value) = value
-#elif defined(__GNUC__) || defined(__llvm__)
-#   define xxInline                 __inline__
-#   define xxConstexpr              const
-#   define xxDefaultArgument(value)
-#elif defined(_MSC_VER)
-#   define xxInline                 __inline
-#   define xxConstexpr              const
-#   define xxDefaultArgument(value)
-#endif
+#undef MSEC_PER_SEC
+#undef USEC_PER_SEC
+#undef NSEC_PER_SEC
+#undef USEC_PER_MSEC
+#undef NSEC_PER_MSEC
+#undef NSEC_PER_USEC
+#define MSEC_PER_SEC                1000ull
+#define USEC_PER_SEC                1000000ull
+#define NSEC_PER_SEC                1000000000ull
+#define USEC_PER_MSEC               1000ull
+#define NSEC_PER_MSEC               1000000ull
+#define NSEC_PER_USEC               1000ull
 
 #define xxSizeOf(var)               (sizeof(var))
 #define xxCountOf(var)              (sizeof(var) / sizeof(*var))
@@ -158,15 +134,35 @@
 #define xxConcate_(x, y)            x ## y
 #define xxConcate(m, n)             xxConcate_(m, n)
 
-//==============================================================================
-//  OS Dependency
-//==============================================================================
-#if defined(xxANDROID)
-xxEXTERN struct _JavaVM* xxAndroidJavaVM;
-xxEXTERN struct _JNIEnv* xxAndroidJNIEnv;
-xxEXTERN class _jobject* xxAndroidContext;
-xxEXTERN int xxAndroidJNIVersion;
+#define xxLikely(x)                 (x)
+#define xxUnlikely(x)               (x)
+
+#define xxConstexpr                 const
+#define xxDefaultArgument(value)
+#define xxInline                    __inline__
+
+#if defined(__GNUC__) || defined(__llvm__)
+#   undef xxLikely
+#   undef xxUnlikely
+#   define xxLikely(x)              __builtin_expect((x), 1)
+#   define xxUnlikely(x)            __builtin_expect((x), 0)
 #endif
+
+#if (__cplusplus >= 201103L) || (_MSC_VER >= 1600)
+#   undef xxConstexpr
+#   define xxConstexpr              constexpr
+#endif
+
+#if defined(__cplusplus)
+#   undef xxDefaultArgument
+#   undef xxInline
+#   define xxDefaultArgument(value) = value
+#   define xxInline                 inline
+#elif defined(_MSC_VER)
+#   undef xxInline
+#   define xxInline                 __inline
+#endif
+
 //==============================================================================
 //  Allocator
 //==============================================================================

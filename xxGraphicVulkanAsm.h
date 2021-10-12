@@ -11,7 +11,7 @@
 //==============================================================================
 //  Vulkan SPIR-V Assembly Shader
 //==============================================================================
-xxEXTERN const uint32_t vertexShaderCodeSPIRV[];
-xxEXTERN const uint32_t vertexShaderCodeSPIRVSize;
-xxEXTERN const uint32_t fragmentShaderCodeSPIRV[];
-xxEXTERN const uint32_t fragmentShaderCodeSPIRVSize;
+extern const uint32_t vertexShaderCodeSPIRV[];
+extern const uint32_t vertexShaderCodeSPIRVSize;
+extern const uint32_t fragmentShaderCodeSPIRV[];
+extern const uint32_t fragmentShaderCodeSPIRVSize;

@@ -26,6 +26,10 @@
 #   include <unistd.h>
 #   if defined(__ANDROID__)
 #       include <android/log.h>
+        struct _JavaVM* xxAndroidJavaVM;
+        struct _JNIEnv* xxAndroidJNIEnv;
+        class _jobject* xxAndroidContext;
+        int xxAndroidJNIVersion;
 #   endif
 #endif
 
@@ -45,15 +49,6 @@
 #   endif
 #endif
 
-//==============================================================================
-//  OS Dependency
-//==============================================================================
-#if defined(xxANDROID)
-struct _JavaVM* xxAndroidJavaVM;
-struct _JNIEnv* xxAndroidJNIEnv;
-class _jobject* xxAndroidContext;
-int xxAndroidJNIVersion;
-#endif
 //==============================================================================
 //  Allocator
 //==============================================================================

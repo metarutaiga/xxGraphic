@@ -11,7 +11,7 @@
 //==============================================================================
 //  AMD IL Assembly Shader
 //==============================================================================
-xxEXTERN const uint32_t vertexShaderCodeIL[];
-xxEXTERN const uint32_t vertexShaderCodeILSize;
-xxEXTERN const uint32_t pixelShaderCodeIL[];
-xxEXTERN const uint32_t pixelShaderCodeILSize;
+extern const uint32_t vertexShaderCodeIL[];
+extern const uint32_t vertexShaderCodeILSize;
+extern const uint32_t pixelShaderCodeIL[];
+extern const uint32_t pixelShaderCodeILSize;

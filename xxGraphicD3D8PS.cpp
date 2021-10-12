@@ -5,7 +5,7 @@
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #ifndef _M_IX86
-#define xxAPI xxEXTERN
+#define xxAPI extern "C"
 #endif
 #include "xxSystem.h"
 #include "dxsdk/d3d8.h"

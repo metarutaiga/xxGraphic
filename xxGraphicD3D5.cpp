@@ -5,7 +5,7 @@
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #ifndef _M_IX86
-#define xxAPI xxEXTERN
+#define xxAPI extern "C"
 #endif
 #define DIRECTDRAW_VERSION          0x500
 #define DIRECT3D_VERSION            0x500

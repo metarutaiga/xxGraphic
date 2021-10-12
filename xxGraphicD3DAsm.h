@@ -11,11 +11,11 @@
 //==============================================================================
 //  Direct3D 8.0 Assembly Shader
 //==============================================================================
-xxEXTERN const DWORD vertexShaderCode10[];
-xxEXTERN const DWORD vertexShaderCode11[];
-xxEXTERN const DWORD pixelShaderCode10[];
+extern const DWORD vertexShaderCode10[];
+extern const DWORD vertexShaderCode11[];
+extern const DWORD pixelShaderCode10[];
 //==============================================================================
 //  Direct3D 10.0 Assembly Shader
 //==============================================================================
-xxEXTERN const DWORD vertexShaderCode40[];
-xxEXTERN const DWORD pixelShaderCode40[];
+extern const DWORD vertexShaderCode40[];
+extern const DWORD pixelShaderCode40[];
