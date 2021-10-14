@@ -79,19 +79,19 @@
 #ifndef xxAPI
 #   if defined(__cplusplus)
 #       if defined(_MSC_VER) && defined(XX_BUILD_LIBRARY)
-#           define xxAPI            __declspec(dllexport) extern "C"
+#           define xxAPI            extern "C" __declspec(dllexport) 
 #       elif defined(_MSC_VER)
-#           define xxAPI            __declspec(dllimport) extern "C"
+#           define xxAPI            extern "C" __declspec(dllimport) 
 #       else
-#           define xxAPI            __attribute__((visibility("default"))) extern "C"
+#           define xxAPI            extern "C" __attribute__((visibility("default")))
 #       endif
 #   else
 #       if defined(_MSC_VER) && defined(XX_BUILD_LIBRARY)
-#           define xxAPI            __declspec(dllexport) extern
+#           define xxAPI            extern __declspec(dllexport)
 #       elif defined(_MSC_VER)
-#           define xxAPI            __declspec(dllimport) extern
+#           define xxAPI            extern __declspec(dllimport)
 #       else
-#           define xxAPI            __attribute__((visibility("default"))) extern
+#           define xxAPI            extern __attribute__((visibility("default")))
 #       endif
 #   endif
 #endif
@@ -148,7 +148,7 @@
 #   define xxUnlikely(x)            __builtin_expect((x), 0)
 #endif
 
-#if (__cplusplus >= 201103L) || (_MSC_VER >= 1600)
+#if defined(__cplusplus) && ((__cplusplus >= 201103L) || (_MSC_VER >= 1600))
 #   undef xxConstexpr
 #   define xxConstexpr              constexpr
 #endif
