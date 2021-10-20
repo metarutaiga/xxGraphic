@@ -6,28 +6,6 @@
 //==============================================================================
 #pragma once
 
-#ifndef _HAS_EXCEPTIONS
-#   define _HAS_EXCEPTIONS 0
-#endif
-
-#ifndef _CRT_NONSTDC_NO_WARNINGS
-#   define _CRT_NONSTDC_NO_WARNINGS
-#endif
-
-#ifndef _CRT_SECURE_NO_WARNINGS
-#   define _CRT_SECURE_NO_WARNINGS
-#endif
-
-#include <float.h>
-#include <math.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-
 #if defined(__APPLE__)
 #   include <TargetConditionals.h>
 #   define objc_msgSend objc_msgSend_unused
@@ -70,11 +48,30 @@
 #endif
 
 #if defined(_MSC_VER)
+#   ifndef _HAS_EXCEPTIONS
+#       define _HAS_EXCEPTIONS 0
+#   endif
+#   ifndef _CRT_NONSTDC_NO_WARNINGS
+#       define _CRT_NONSTDC_NO_WARNINGS
+#   endif
+#   ifndef _CRT_SECURE_NO_WARNINGS
+#       define _CRT_SECURE_NO_WARNINGS
+#   endif
 #   include <intrin.h>
 #   define NOMINMAX
 #   define WIN32_LEAN_AND_MEAN
 #   define xxWINDOWS 1
 #endif
+
+#include <float.h>
+#include <math.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 #ifndef xxAPI
 #   if defined(__cplusplus)

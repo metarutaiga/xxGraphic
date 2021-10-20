@@ -36,7 +36,6 @@ extern Class classMTLVertexDescriptor;
 //  MSL Shader
 //==============================================================================
 extern const char* const mtlDefaultShaderCode;
-extern const char* const mtlArgumentShaderCode;
 
 //==============================================================================
 //  Blend Factor

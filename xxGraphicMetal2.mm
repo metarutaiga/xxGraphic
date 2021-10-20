@@ -128,11 +128,12 @@ uint64_t xxCreateVertexShaderMetal2(uint64_t device, const char* shader, uint64_
 
     if (strcmp(shader, "default") == 0)
     {
-        shader = mtlArgumentShaderCode;
+        shader = mtlDefaultShaderCode;
     }
 
     NSError* error;
     MTLCompileOptions* options = [classMTLCompileOptions new];
+    options.preprocessorMacros = @{ @"__METAL_USE_ARGUMENT__" : @(1) };
     options.fastMathEnabled = YES;
 
     id <MTLLibrary> library = [mtlDevice newLibraryWithSource:[NSString stringWithUTF8String:shader]
@@ -157,11 +158,12 @@ uint64_t xxCreateFragmentShaderMetal2(uint64_t device, const char* shader)
 
     if (strcmp(shader, "default") == 0)
     {
-        shader = mtlArgumentShaderCode;
+        shader = mtlDefaultShaderCode;
     }
 
     NSError* error;
     MTLCompileOptions* options = [classMTLCompileOptions new];
+    options.preprocessorMacros = @{ @"__METAL_USE_ARGUMENT__" : @(1) };
     options.fastMathEnabled = YES;
 
     id <MTLLibrary> library = [mtlDevice newLibraryWithSource:[NSString stringWithUTF8String:shader]
