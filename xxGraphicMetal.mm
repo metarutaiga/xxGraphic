@@ -513,7 +513,7 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height
         {
             ioSurface = (IOSurfaceRef)external;
             stride = 0;
-#if defined(xxMACOS)
+#if defined(xxMACOS) || defined(xxMACCATALYST)
             options = MTLResourceStorageModeManaged;
 #endif
         }
