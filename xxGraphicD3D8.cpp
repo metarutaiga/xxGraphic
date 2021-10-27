@@ -910,6 +910,13 @@ void xxSetFragmentConstantBufferD3D8(uint64_t commandEncoder, uint64_t buffer, i
 
 }
 //------------------------------------------------------------------------------
+void xxDrawD3D8(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
+{
+    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);
+
+    d3dDevice->DrawPrimitive(D3DPT_TRIANGLELIST, firstVertex, vertexCount);
+}
+//------------------------------------------------------------------------------
 void xxDrawIndexedD3D8(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandEncoder);

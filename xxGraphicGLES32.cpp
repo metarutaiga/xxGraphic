@@ -99,6 +99,11 @@ void xxSetVertexBuffersGLES32(uint64_t commandEncoder, int count, const uint64_t
     }
 }
 //------------------------------------------------------------------------------
+void xxDrawGLES32(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
+{
+    glDrawArraysInstanced(GL_TRIANGLES, firstVertex, vertexCount, instanceCount);
+}
+//------------------------------------------------------------------------------
 void xxDrawIndexedGLES32(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     GLenum indexType = (INDEX_BUFFER_WIDTH == 2) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;

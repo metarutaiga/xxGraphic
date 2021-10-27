@@ -920,6 +920,13 @@ void xxSetFragmentConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer,
     grAttachMemoryViewDescriptors(0, BASE_PIXEL_CONSTANT, 1, &info);
 }
 //------------------------------------------------------------------------------
+void xxDrawMantle(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
+{
+    GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandEncoder);
+
+    grCmdDraw(grCommandBuffer, firstVertex, vertexCount, firstInstance, instanceCount);
+}
+//------------------------------------------------------------------------------
 void xxDrawIndexedMantle(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandEncoder);

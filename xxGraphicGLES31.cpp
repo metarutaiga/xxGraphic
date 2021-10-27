@@ -31,7 +31,7 @@
 
 #define NUM_INDIRECT_BUFFER_SIZE    32768
 static GLuint                       g_indirectBuffer;
-static INDIRECTCOMMANDGL*           g_indirectCommand;
+static void*                        g_indirectCommand;
 static int                          g_indirectIndex;
 
 //==============================================================================
@@ -63,7 +63,7 @@ uint64_t xxCreateInstanceGLES31()
     GLuint indirectBuffer = 0;
     glGenBuffers(1, &indirectBuffer);
     glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectBuffer);
-    glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(INDIRECTCOMMANDGL) * NUM_INDIRECT_BUFFER_SIZE, nullptr, GL_STREAM_DRAW);
+    glBufferData(GL_DRAW_INDIRECT_BUFFER, sizeof(DrawElementsIndirectCommand) * NUM_INDIRECT_BUFFER_SIZE, nullptr, GL_STREAM_DRAW);
 
     g_indirectBuffer = indirectBuffer;
     g_indirectCommand = nullptr;
@@ -120,7 +120,7 @@ uint64_t xxGetCommandBufferGLES31(uint64_t device, uint64_t swapchain)
     uint64_t commandBuffer = xxGetCommandBufferGLES2(0, swapchain);
 
     glBindBuffer(GL_DRAW_INDIRECT_BUFFER, g_indirectBuffer);
-    (void*&)g_indirectCommand = glMapBufferRange(GL_DRAW_INDIRECT_BUFFER, 0, sizeof(INDIRECTCOMMANDGL) * NUM_INDIRECT_BUFFER_SIZE, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+    g_indirectCommand = glMapBufferRange(GL_DRAW_INDIRECT_BUFFER, 0, sizeof(DrawElementsIndirectCommand) * NUM_INDIRECT_BUFFER_SIZE, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
 
     return commandBuffer;
 }
@@ -147,13 +147,28 @@ void xxSetVertexBuffersGLES31(uint64_t commandEncoder, int count, const uint64_t
     }
 }
 //------------------------------------------------------------------------------
+void xxDrawGLES31(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
+{
+    int index = g_indirectIndex++;
+    if (g_indirectIndex >= NUM_INDIRECT_BUFFER_SIZE)
+        g_indirectIndex = 0;
+
+    DrawArraysIndirectCommand& indirectCommand = *(DrawArraysIndirectCommand*)((char*)g_indirectCommand + sizeof(DrawElementsIndirectCommand) * index);
+    indirectCommand.count = vertexCount;
+    indirectCommand.primCount = instanceCount;
+    indirectCommand.first = firstVertex;
+    indirectCommand.baseInstance = firstInstance;
+
+    glDrawArraysIndirect(GL_TRIANGLES, (DrawElementsIndirectCommand*)nullptr + index);
+}
+//------------------------------------------------------------------------------
 void xxDrawIndexedGLES31(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     int index = g_indirectIndex++;
     if (g_indirectIndex >= NUM_INDIRECT_BUFFER_SIZE)
         g_indirectIndex = 0;
 
-    INDIRECTCOMMANDGL& indirectCommand = g_indirectCommand[index];
+    DrawElementsIndirectCommand& indirectCommand = *(DrawElementsIndirectCommand*)((char*)g_indirectCommand + sizeof(DrawElementsIndirectCommand) * index);
     indirectCommand.count = indexCount;
     indirectCommand.instanceCount = instanceCount;
     indirectCommand.firstIndex = firstIndex;
@@ -161,6 +176,6 @@ void xxDrawIndexedGLES31(uint64_t commandEncoder, uint64_t indexBuffer, int inde
     indirectCommand.baseInstance = firstInstance;
 
     GLenum indexType = (INDEX_BUFFER_WIDTH == 2) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
-    glDrawElementsIndirect(GL_TRIANGLES, indexType, (INDIRECTCOMMANDGL*)nullptr + index);
+    glDrawElementsIndirect(GL_TRIANGLES, indexType, (DrawElementsIndirectCommand*)nullptr + index);
 }
 //==============================================================================

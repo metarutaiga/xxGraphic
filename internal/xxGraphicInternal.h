@@ -98,6 +98,7 @@ enum xxGraphicDescriptor
     xxSetFragmentSamplers = xxSetFragmentSamplers ## API; \
     xxSetVertexConstantBuffer = xxSetVertexConstantBuffer ## API; \
     xxSetFragmentConstantBuffer = xxSetFragmentConstantBuffer ## API; \
+    xxDraw = xxDraw ## API; \
     xxDrawIndexed = xxDrawIndexed ## API;
 
 #define xxUnregisterFunction() \
@@ -167,6 +168,7 @@ enum xxGraphicDescriptor
     xxSetFragmentSamplers = nullptr; \
     xxSetVertexConstantBuffer = nullptr; \
     xxSetFragmentConstantBuffer = nullptr; \
+    xxDraw = nullptr; \
     xxDrawIndexed = nullptr;
 
 template <typename T, T ZERO,

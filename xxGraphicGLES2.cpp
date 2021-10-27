@@ -986,6 +986,13 @@ void xxSetFragmentConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, 
 
 }
 //------------------------------------------------------------------------------
+void xxDrawGLES2(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
+{
+    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
+
+    glDrawArrays(GL_TRIANGLES, firstVertex, vertexCount);
+}
+//------------------------------------------------------------------------------
 void xxDrawIndexedGLES2(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);

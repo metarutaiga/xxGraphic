@@ -1580,6 +1580,13 @@ void xxSetFragmentConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, 
     d3dCommandList->SetGraphicsRootDescriptorTable(xxGraphicDescriptor::FRAGMENT_UNIFORM, d3dBuffer->resourceGPUHandle);
 }
 //------------------------------------------------------------------------------
+void xxDrawD3D12(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
+{
+    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
+
+    d3dCommandList->DrawInstanced(vertexCount, instanceCount, firstVertex, firstInstance);
+}
+//------------------------------------------------------------------------------
 void xxDrawIndexedD3D12(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);

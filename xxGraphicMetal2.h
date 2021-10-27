@@ -51,5 +51,6 @@ xxAPI void          xxSetVertexSamplersMetal2(uint64_t commandEncoder, int count
 xxAPI void          xxSetFragmentSamplersMetal2(uint64_t commandEncoder, int count, const uint64_t* samplers);
 xxAPI void          xxSetVertexConstantBufferMetal2(uint64_t commandEncoder, uint64_t buffer, int size);
 xxAPI void          xxSetFragmentConstantBufferMetal2(uint64_t commandEncoder, uint64_t buffer, int size);
+xxAPI void          xxDrawMetal2(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance);
 xxAPI void          xxDrawIndexedMetal2(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================

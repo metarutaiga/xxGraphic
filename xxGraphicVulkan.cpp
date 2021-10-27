@@ -2324,6 +2324,13 @@ void xxSetFragmentConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer,
     vkCmdPushDescriptorSetEXT(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, 1, &set);
 }
 //------------------------------------------------------------------------------
+void xxDrawVulkan(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
+{
+    VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
+
+    vkCmdDraw(vkCommandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
+}
+//------------------------------------------------------------------------------
 void xxDrawIndexedVulkan(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);

@@ -872,6 +872,13 @@ void xxSetFragmentConstantBufferD3D7(uint64_t commandEncoder, uint64_t buffer, i
 
 }
 //------------------------------------------------------------------------------
+void xxDrawD3D7(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
+{
+    LPDIRECT3DDEVICE7 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE7>(commandEncoder);
+
+    d3dDevice->DrawPrimitiveVB(D3DPT_TRIANGLELIST, g_vertexBuffer, firstVertex, vertexCount, 0);
+}
+//------------------------------------------------------------------------------
 void xxDrawIndexedD3D7(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     LPDIRECT3DDEVICE7 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE7>(commandEncoder);

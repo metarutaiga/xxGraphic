@@ -26,4 +26,5 @@ xxAPI uint64_t      xxGetCommandBufferGLES31(uint64_t device, uint64_t swapchain
 //  Command
 //==============================================================================
 xxAPI void          xxSetVertexBuffersGLES31(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
+xxAPI void          xxDrawGLES31(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance);
 xxAPI void          xxDrawIndexedGLES31(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);

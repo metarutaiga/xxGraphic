@@ -101,5 +101,6 @@ xxAPI void          xxSetVertexSamplersGlide(uint64_t commandEncoder, int count,
 xxAPI void          xxSetFragmentSamplersGlide(uint64_t commandEncoder, int count, const uint64_t* samplers);
 xxAPI void          xxSetVertexConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, int size);
 xxAPI void          xxSetFragmentConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, int size);
+xxAPI void          xxDrawGlide(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance);
 xxAPI void          xxDrawIndexedGlide(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================

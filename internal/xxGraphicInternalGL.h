@@ -217,7 +217,15 @@ struct PIPELINEGL
 //==============================================================================
 //  Indirect Command
 //==============================================================================
-struct INDIRECTCOMMANDGL
+struct DrawArraysIndirectCommand
+{
+    GLuint  count;
+    GLuint  primCount;
+    GLuint  first;
+    GLuint  baseInstance;
+};
+//------------------------------------------------------------------------------
+struct DrawElementsIndirectCommand
 {
     GLuint  count;
     GLuint  instanceCount;

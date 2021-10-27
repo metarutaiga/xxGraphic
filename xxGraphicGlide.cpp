@@ -584,6 +584,69 @@ void xxSetFragmentConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, 
 
 }
 //------------------------------------------------------------------------------
+void xxDrawGlide(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
+{
+    GrVertexAttribute grVertexAttribute = { g_vertexAttribute };
+    for (int i = 0; i < vertexCount; i += 3)
+    {
+        float* v0 = reinterpret_cast<float*>(g_vertexBuffer + (firstVertex + i + 0) * grVertexAttribute.stride);
+        float* v1 = reinterpret_cast<float*>(g_vertexBuffer + (firstVertex + i + 1) * grVertexAttribute.stride);
+        float* v2 = reinterpret_cast<float*>(g_vertexBuffer + (firstVertex + i + 2) * grVertexAttribute.stride);
+        GrVertex t0;
+        GrVertex t1;
+        GrVertex t2;
+
+        if (grVertexAttribute.flags & GR_PARAM_XY)
+        {
+            v4sf p0 = __builtin_multiplyvector(g_worldViewProjectionScreenMatrix, v4sf{ v0[0], v0[1], v0[2], 1.0f });
+            v4sf p1 = __builtin_multiplyvector(g_worldViewProjectionScreenMatrix, v4sf{ v1[0], v1[1], v1[2], 1.0f });
+            v4sf p2 = __builtin_multiplyvector(g_worldViewProjectionScreenMatrix, v4sf{ v2[0], v2[1], v2[2], 1.0f });
+
+            t0.x = p0[0];
+            t1.x = p1[0];
+            t2.x = p2[0];
+
+            t0.y = p0[1];
+            t1.y = p1[1];
+            t2.y = p2[1];
+
+            t0.ooz = 65535.0f / p0[2];
+            t1.ooz = 65535.0f / p1[2];
+            t2.ooz = 65535.0f / p2[2];
+
+            t0.oow = 1.0f / p0[3];
+            t1.oow = 1.0f / p1[3];
+            t2.oow = 1.0f / p2[3];
+
+            v0 += 3;
+            v1 += 3;
+            v2 += 3;
+        }
+        if (grVertexAttribute.flags & GR_PARAM_PARGB)
+        {
+            t0.rgba = (int&)v0[0];
+            t1.rgba = (int&)v1[0];
+            t2.rgba = (int&)v2[0];
+
+            v0++;
+            v1++;
+            v2++;
+        }
+        if (grVertexAttribute.flags & GR_PARAM_ST0)
+        {
+            t0.sow = v0[0]; t0.tow = v0[1];
+            t1.sow = v1[0]; t1.tow = v1[1];
+            t2.sow = v2[0]; t2.tow = v2[1];
+
+            v0 += 2;
+            v1 += 2;
+            v2 += 2;
+        }
+
+        grDrawTriangle(&t0, &t1, &t2);
+    }
+}
+//------------------------------------------------------------------------------
 void xxDrawIndexedGlide(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     GrVertexAttribute grVertexAttribute = { g_vertexAttribute };

@@ -99,5 +99,6 @@ void        (*xxSetVertexSamplers)(uint64_t commandEncoder, int count, const uin
 void        (*xxSetFragmentSamplers)(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void        (*xxSetVertexConstantBuffer)(uint64_t commandEncoder, uint64_t buffer, int size);
 void        (*xxSetFragmentConstantBuffer)(uint64_t commandEncoder, uint64_t buffer, int size);
+void        (*xxDraw)(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance);
 void        (*xxDrawIndexed)(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================

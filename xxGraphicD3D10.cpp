@@ -1251,6 +1251,13 @@ void xxSetFragmentConstantBufferD3D10(uint64_t commandEncoder, uint64_t buffer, 
     d3dDevice->PSSetConstantBuffers(0, 1, &d3dBuffer->buffer);
 }
 //------------------------------------------------------------------------------
+void xxDrawD3D10(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
+{
+    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
+
+    d3dDevice->DrawInstanced(vertexCount, instanceCount, firstVertex, firstInstance);
+}
+//------------------------------------------------------------------------------
 void xxDrawIndexedD3D10(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);

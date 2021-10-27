@@ -353,6 +353,13 @@ void xxSetFragmentConstantBufferMetal2(uint64_t commandEncoder, uint64_t buffer,
                                         usage:MTLResourceUsageRead];
 }
 //------------------------------------------------------------------------------
+void xxDrawMetal2(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
+{
+    MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(commandEncoder);
+
+    xxDrawMetal(reinterpret_cast<uint64_t>(mtlSwapchain->commandEncoder), vertexCount, instanceCount, firstVertex, firstInstance);
+}
+//------------------------------------------------------------------------------
 void xxDrawIndexedMetal2(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(commandEncoder);

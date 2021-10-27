@@ -964,6 +964,17 @@ void xxSetFragmentConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, 
                                  atIndex:0];
 }
 //------------------------------------------------------------------------------
+void xxDrawMetal(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
+{
+    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
+
+    [mtlCommandEncoder drawPrimitives:MTLPrimitiveTypeTriangle
+                          vertexStart:firstVertex
+                          vertexCount:vertexCount
+                        instanceCount:instanceCount
+                         baseInstance:firstInstance];
+}
+//------------------------------------------------------------------------------
 void xxDrawIndexedMetal(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);

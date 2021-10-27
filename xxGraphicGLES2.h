@@ -101,5 +101,6 @@ xxAPI void          xxSetVertexSamplersGLES2(uint64_t commandEncoder, int count,
 xxAPI void          xxSetFragmentSamplersGLES2(uint64_t commandEncoder, int count, const uint64_t* samplers);
 xxAPI void          xxSetVertexConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, int size);
 xxAPI void          xxSetFragmentConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, int size);
+xxAPI void          xxDrawGLES2(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance);
 xxAPI void          xxDrawIndexedGLES2(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
