@@ -28,6 +28,7 @@ static void*                        g_ddrawLibrary = nullptr;
 static LPDIRECTDRAW                 g_ddraw = nullptr;
 static LPDIRECTDRAWSURFACE          g_primarySurface = nullptr;
 static LPDIRECT3DMATERIAL2          g_clearColorMaterial = nullptr;
+static D3DVERTEXBUFFER2*            g_vertexBuffer = nullptr;
 
 //==============================================================================
 //  Instance
@@ -162,6 +163,7 @@ void xxDestroyDeviceD3D5(uint64_t device)
 
     SafeRelease(d3dDevice);
     SafeRelease(g_primarySurface);
+    g_vertexBuffer = nullptr;
 }
 //------------------------------------------------------------------------------
 bool xxResetDeviceD3D5(uint64_t device)
@@ -854,7 +856,7 @@ void xxSetVertexBuffersD3D5(uint64_t commandEncoder, int count, const uint64_t* 
         }
     }
 
-    d3dDevice->SetRenderState(D3DRENDERSTATE_LINEPATTERN, (DWORD)getResourceData(buffers[0]));
+    g_vertexBuffer = d3dVertexBuffer;
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesD3D5(uint64_t commandEncoder, int count, const uint64_t* textures)
@@ -948,8 +950,6 @@ void xxDrawIndexedD3D5(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
         indexArray = wordIndexBuffer;
     }
 
-    D3DVERTEXBUFFER2* vertexBuffer = nullptr;
-    d3dDevice->GetRenderState(D3DRENDERSTATE_LINEPATTERN, (DWORD*)&vertexBuffer);
-    d3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, D3DVT_LVERTEX, vertexBuffer->address, vertexBuffer->count, indexArray, indexCount, 0);
+    d3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, D3DVT_LVERTEX, g_vertexBuffer->address, g_vertexBuffer->count, indexArray, indexCount, 0);
 }
 //==============================================================================

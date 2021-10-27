@@ -14,7 +14,6 @@
 #include "xxGraphicD3D9PS.h"
 #include "xxGraphicD3D9On12.h"
 
-
 static void*                        g_d3dLibrary = nullptr;
 
 //==============================================================================

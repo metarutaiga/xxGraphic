@@ -24,6 +24,7 @@ typedef HRESULT (WINAPI *PFN_DIRECT_DRAW_CREATE)(GUID*, LPDIRECTDRAW*, IUnknown*
 static void*                        g_ddrawLibrary = nullptr;
 static LPDIRECTDRAW4                g_ddraw = nullptr;
 static LPDIRECTDRAWSURFACE4         g_primarySurface = nullptr;
+static LPDIRECT3DVERTEXBUFFER       g_vertexBuffer = nullptr;
 
 //==============================================================================
 //  Instance
@@ -175,6 +176,7 @@ void xxDestroyDeviceD3D6(uint64_t device)
 
     SafeRelease(d3dDevice);
     SafeRelease(g_primarySurface);
+    g_vertexBuffer = nullptr;
 }
 //------------------------------------------------------------------------------
 bool xxResetDeviceD3D6(uint64_t device)
@@ -869,9 +871,7 @@ void xxSetPipelineD3D6(uint64_t commandEncoder, uint64_t pipeline)
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersD3D6(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
-    LPDIRECT3DDEVICE3 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE3>(commandEncoder);
-
-    d3dDevice->SetRenderState(D3DRENDERSTATE_LINEPATTERN, (DWORD)(getResourceData(buffers[0])));
+    g_vertexBuffer = reinterpret_cast<LPDIRECT3DVERTEXBUFFER>(getResourceData(buffers[0]));
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesD3D6(uint64_t commandEncoder, int count, const uint64_t* textures)
@@ -965,8 +965,6 @@ void xxDrawIndexedD3D6(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
         indexArray = wordIndexBuffer;
     }
 
-    LPDIRECT3DVERTEXBUFFER vertexBuffer = nullptr;
-    d3dDevice->GetRenderState(D3DRENDERSTATE_LINEPATTERN, (DWORD*)&vertexBuffer);
-    d3dDevice->DrawIndexedPrimitiveVB(D3DPT_TRIANGLELIST, vertexBuffer, indexArray, indexCount, 0);
+    d3dDevice->DrawIndexedPrimitiveVB(D3DPT_TRIANGLELIST, g_vertexBuffer, indexArray, indexCount, 0);
 }
 //==============================================================================

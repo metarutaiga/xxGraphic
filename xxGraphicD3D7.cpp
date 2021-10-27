@@ -24,6 +24,7 @@ typedef HRESULT (WINAPI *PFN_DIRECT_DRAW_CREATE_EX)(GUID*, LPVOID*, REFIID, IUnk
 static void*                        g_ddrawLibrary = nullptr;
 static LPDIRECTDRAW7                g_ddraw = nullptr;
 static LPDIRECTDRAWSURFACE7         g_primarySurface = nullptr;
+static LPDIRECT3DVERTEXBUFFER7      g_vertexBuffer = nullptr;
 
 //==============================================================================
 //  Instance
@@ -160,6 +161,7 @@ void xxDestroyDeviceD3D7(uint64_t device)
 
     SafeRelease(d3dDevice);
     SafeRelease(g_primarySurface);
+    g_vertexBuffer = nullptr;
 }
 //------------------------------------------------------------------------------
 bool xxResetDeviceD3D7(uint64_t device)
@@ -812,9 +814,7 @@ void xxSetPipelineD3D7(uint64_t commandEncoder, uint64_t pipeline)
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersD3D7(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
-    LPDIRECT3DDEVICE7 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE7>(commandEncoder);
-
-    d3dDevice->SetRenderState(D3DRENDERSTATE_LINEPATTERN, (DWORD)(getResourceData(buffers[0])));
+    g_vertexBuffer = reinterpret_cast<LPDIRECT3DVERTEXBUFFER7>(getResourceData(buffers[0]));
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesD3D7(uint64_t commandEncoder, int count, const uint64_t* textures)
@@ -896,8 +896,6 @@ void xxDrawIndexedD3D7(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
         indexArray = wordIndexBuffer;
     }
 
-    LPDIRECT3DVERTEXBUFFER7 vertexBuffer = nullptr;
-    d3dDevice->GetRenderState(D3DRENDERSTATE_LINEPATTERN, (DWORD*)&vertexBuffer);
-    d3dDevice->DrawIndexedPrimitiveVB(D3DPT_TRIANGLELIST, vertexBuffer, vertexOffset, 0, indexArray, indexCount, 0);
+    d3dDevice->DrawIndexedPrimitiveVB(D3DPT_TRIANGLELIST, g_vertexBuffer, vertexOffset, 0, indexArray, indexCount, 0);
 }
 //==============================================================================
