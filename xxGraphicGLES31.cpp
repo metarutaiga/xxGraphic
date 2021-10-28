@@ -81,6 +81,7 @@ uint64_t xxCreateInstanceGLES31()
     xxPresentSwapchain = xxPresentSwapchainGLES31;
     xxGetCommandBuffer = xxGetCommandBufferGLES31;
     xxSetVertexBuffers = xxSetVertexBuffersGLES31;
+    xxDraw = xxDrawGLES31;
     xxDrawIndexed = xxDrawIndexedGLES31;
 
     return instance;

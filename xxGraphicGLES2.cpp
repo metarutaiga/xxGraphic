@@ -989,6 +989,23 @@ void xxSetFragmentConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, 
 void xxDrawGLES2(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
 {
     SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
+    PIPELINEGL* glPipeline = reinterpret_cast<PIPELINEGL*>(glSwapchain->pipeline);
+    VERTEXATTRIBUTEGL* vertexAttribute = glPipeline->vertexAttribute;
+    VERTEXATTRIBUTEGL::Attribute* attributes = vertexAttribute->attributes;
+
+    int currentStream = -1;
+    for (int i = 0; i < vertexAttribute->count; ++i)
+    {
+        VERTEXATTRIBUTEGL::Attribute& attribute = attributes[i];
+        if (currentStream != attribute.stream)
+        {
+            currentStream = attribute.stream;
+            BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(glSwapchain->vertexBuffers[attribute.stream]);
+
+            glBindBuffer(GL_ARRAY_BUFFER, glBuffer->buffer);
+        }
+        glVertexAttribPointer(attribute.index, attribute.size, attribute.type, attribute.normalized, attribute.stride, attribute.pointer);
+    }
 
     glDrawArrays(GL_TRIANGLES, firstVertex, vertexCount);
 }

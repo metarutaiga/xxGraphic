@@ -65,6 +65,7 @@ uint64_t xxCreateInstanceGLES32()
     xxMapBuffer = xxMapBufferGLES3;
     xxUnmapBuffer = xxUnmapBufferGLES3;
     xxSetVertexBuffers = xxSetVertexBuffersGLES32;
+    xxDraw = xxDrawGLES32;
     xxDrawIndexed = xxDrawIndexedGLES32;
 
     return instance;

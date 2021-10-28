@@ -2328,6 +2328,16 @@ void xxDrawVulkan(uint64_t commandEncoder, int vertexCount, int instanceCount, i
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
 
+    if (VK_KHR_push_descriptor == false)
+    {
+        VkDescriptorSet set = g_descriptorSetCurrent;
+        if (set != VK_NULL_HANDLE)
+        {
+            vkCmdBindDescriptorSets(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, 1, &set, 0, nullptr);
+            g_descriptorSetCurrent = VK_NULL_HANDLE;
+        }
+    }
+
     vkCmdDraw(vkCommandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
 }
 //------------------------------------------------------------------------------

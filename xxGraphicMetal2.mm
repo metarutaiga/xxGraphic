@@ -41,6 +41,7 @@ uint64_t xxCreateInstanceMetal2()
     xxSetFragmentSamplers = xxSetFragmentSamplersMetal2;
     xxSetVertexConstantBuffer = xxSetVertexConstantBufferMetal2;
     xxSetFragmentConstantBuffer = xxSetFragmentConstantBufferMetal2;
+    xxDraw = xxDrawMetal2;
     xxDrawIndexed = xxDrawIndexedMetal2;
 
     return instance;
