@@ -36,10 +36,10 @@
             extern "C"
             {
 #       endif
-        extern struct _JavaVM* xxAndroidJavaVM;
-        extern struct _JNIEnv* xxAndroidJNIEnv;
-        extern class _jobject* xxAndroidContext;
-        extern int xxAndroidJNIVersion;
+        extern __attribute__((visibility("default"))) struct _JavaVM* xxAndroidJavaVM;
+        extern __attribute__((visibility("default"))) struct _JNIEnv* xxAndroidJNIEnv;
+        extern __attribute__((visibility("default"))) class _jobject* xxAndroidContext;
+        extern __attribute__((visibility("default"))) int xxAndroidJNIVersion;
 #       if defined(__cplusplus)
             };
 #       endif
