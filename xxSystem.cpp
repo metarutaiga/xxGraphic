@@ -26,10 +26,10 @@
 #   include <unistd.h>
 #   if defined(__ANDROID__)
 #       include <android/log.h>
-        struct _JavaVM* xxAndroidJavaVM;
-        struct _JNIEnv* xxAndroidJNIEnv;
-        class _jobject* xxAndroidContext;
-        int xxAndroidJNIVersion;
+        extern "C" struct _JavaVM* xxAndroidJavaVM;
+        extern "C" struct _JNIEnv* xxAndroidJNIEnv;
+        extern "C" class _jobject* xxAndroidContext;
+        extern "C" int xxAndroidJNIVersion;
 #   endif
 #endif
 
