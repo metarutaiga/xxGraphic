@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : Metal Source
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "internal/xxGraphicInternalMetal.h"
@@ -158,6 +158,8 @@ uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view
         return 0;
     NSView* nsView = [[nsWindow contentViewController] view];
     if (nsView == nil)
+        nsView = [nsWindow contentView];
+    if (nsView == nil)
         return 0;
     float contentsScale = [nsWindow backingScaleFactor];
 #elif defined(xxIOS)
@@ -165,6 +167,8 @@ uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view
     if (nsWindow == nil)
         return 0;
     UIView* nsView = [[nsWindow rootViewController] view];
+    if (nsView == nil)
+        nsView = nsWindow;
     if (nsView == nil)
         return 0;
     float contentsScale = [[nsWindow screen] nativeScale];
@@ -529,7 +533,7 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height
             options = [buffer storageMode] << MTLResourceStorageModeShift;
         }
     }
-    else
+    else if (mipmap == 1)
     {
         int alignment = 256;
         if (@available(macOS 10.13, iOS 11.0, *))
@@ -541,11 +545,15 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height
         buffer = [mtlDevice newBufferWithLength:stride * height
                                         options:options];
     }
+    else
+    {
+        stride = width * sizeof(int);
+    }
 
     MTLTextureDescriptor* desc = [classMTLTextureDescriptor texture2DDescriptorWithPixelFormat:pixelFormat
                                                                                          width:width
                                                                                         height:height
-                                                                                     mipmapped:NO];
+                                                                                     mipmapped:mipmap > 1];
     desc.resourceOptions = options;
 
     if (ioSurface)
@@ -558,20 +566,25 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height
     {
         
     }
-    else
+    else if (buffer)
     {
-#if TARGET_OS_SIMULATOR
-        texture = [mtlDevice newTextureWithDescriptor:desc];
-#else
         texture = [buffer newTextureWithDescriptor:desc
                                             offset:0
                                        bytesPerRow:stride];
-#endif
+    }
+    else
+    {
+        texture = [mtlDevice newTextureWithDescriptor:desc];
     }
 
     mtlTexture->texture = texture;
     mtlTexture->buffer = buffer;
-    mtlTexture->stride = stride;
+    for (int i = 0; i < mipmap; ++i)
+    {
+        mtlTexture->strides[i] = (stride >> i);
+        if (mtlTexture->strides[i] < sizeof(int))
+            mtlTexture->strides[i] = sizeof(int);
+    }
 
     return reinterpret_cast<uint64_t>(mtlTexture);
 }
@@ -587,21 +600,38 @@ void* xxMapTextureMetal(uint64_t device, uint64_t texture, int* stride, int leve
 {
     MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);
 
-    (*stride) = mtlTexture->stride;
-    return [mtlTexture->buffer contents];
+    (*stride) = mtlTexture->strides[level];
+    if (mtlTexture->buffer)
+    {
+        return [mtlTexture->buffer contents];
+    }
+    NSUInteger count = [mtlTexture->texture width] * [mtlTexture->texture height] * sizeof(int);
+    mtlTexture->temporary = xxRealloc(mtlTexture->temporary, int, count);
+    return mtlTexture->temporary;
 }
 //------------------------------------------------------------------------------
 void xxUnmapTextureMetal(uint64_t device, uint64_t texture, int level, int array)
 {
-#if TARGET_OS_SIMULATOR
     MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);
+#if TARGET_OS_SIMULATOR
     [mtlTexture->texture replaceRegion:MTLRegionMake2D(0, 0, mtlTexture->texture.width, mtlTexture->texture.height)
                            mipmapLevel:0
                              withBytes:[mtlTexture->buffer contents]
                            bytesPerRow:[mtlTexture->buffer length] / mtlTexture->texture.height];
 #elif defined(xxMACOS_LEGACY)
-    MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);
     [mtlTexture->buffer didModifyRange:NSMakeRange(0, [mtlTexture->buffer length])];
+#else
+    if (mtlTexture->temporary)
+    {
+        NSUInteger width = [mtlTexture->texture width] >> level;
+        NSUInteger height = [mtlTexture->texture height] >> level;
+        [mtlTexture->texture replaceRegion:MTLRegionMake2D(0, 0, width, height)
+                               mipmapLevel:level
+                                 withBytes:mtlTexture->temporary
+                               bytesPerRow:mtlTexture->strides[level]];
+        xxFree(mtlTexture->temporary);
+        mtlTexture->temporary = nullptr;
+    }
 #endif
 }
 //==============================================================================

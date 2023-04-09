@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : Direct3D 10.0 Source
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "xxSystem.h"
@@ -680,13 +680,13 @@ uint64_t xxCreateTextureD3D10(uint64_t device, int format, int width, int height
         return 0;
 
     D3D10_SHADER_RESOURCE_VIEW_DESC viewDesc = {};
-    ID3D10Texture1D* d3dTexture1D = nullptr;
-    ID3D10Texture2D* d3dTexture2D = nullptr;
-    ID3D10Texture3D* d3dTexture3D = nullptr;
-    ID3D10Resource* d3dResource = nullptr;
+    ID3D10Resource* d3dTextureGPU = nullptr;
+    ID3D10Resource* d3dTextureCPU = nullptr;
 
     if (external)
     {
+        ID3D10Texture2D* d3dTexture2D = nullptr;
+
         IUnknown* unknown = (IUnknown*)external;
         HRESULT hResult = unknown->QueryInterface(__uuidof(ID3D10Texture2D), (void**)&d3dTexture2D);
         if (hResult != S_OK)
@@ -694,7 +694,7 @@ uint64_t xxCreateTextureD3D10(uint64_t device, int format, int width, int height
             xxFree(d3dTexture);
             return 0;
         }
-        d3dResource = d3dTexture2D;
+        d3dTextureGPU = d3dTexture2D;
 
         D3D10_TEXTURE2D_DESC texture2DDesc = {};
         d3dTexture2D->GetDesc(&texture2DDesc);
@@ -712,17 +712,34 @@ uint64_t xxCreateTextureD3D10(uint64_t device, int format, int width, int height
         texture2DDesc.ArraySize = array;
         texture2DDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
         texture2DDesc.SampleDesc.Count = 1;
-        texture2DDesc.Usage = D3D10_USAGE_DYNAMIC;
+        texture2DDesc.Usage = mipmap > 1 ? D3D10_USAGE_DEFAULT : D3D10_USAGE_DYNAMIC;
         texture2DDesc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
-        texture2DDesc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
+        texture2DDesc.CPUAccessFlags = mipmap > 1 ? 0 : D3D10_CPU_ACCESS_WRITE;
 
-        HRESULT hResult = d3dDevice->CreateTexture2D(&texture2DDesc, nullptr, &d3dTexture2D);
+        HRESULT hResult = d3dDevice->CreateTexture2D(&texture2DDesc, nullptr, (ID3D10Texture2D**)&d3dTextureGPU);
         if (hResult != S_OK)
         {
             xxFree(d3dTexture);
             return 0;
         }
-        d3dResource = d3dTexture2D;
+        if (mipmap > 1)
+        {
+            texture2DDesc.Usage = D3D10_USAGE_STAGING;
+            texture2DDesc.BindFlags = 0;
+            texture2DDesc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
+            hResult = d3dDevice->CreateTexture2D(&texture2DDesc, nullptr, (ID3D10Texture2D**)&d3dTextureCPU);
+            if (hResult != S_OK)
+            {
+                SafeRelease(d3dTextureGPU);
+                xxFree(d3dTexture);
+                return 0;
+            }
+        }
+        else
+        {
+            d3dTextureCPU = d3dTextureGPU;
+            d3dTextureCPU->AddRef();
+        }
 
         viewDesc.Format = texture2DDesc.Format;
         viewDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
@@ -737,18 +754,35 @@ uint64_t xxCreateTextureD3D10(uint64_t device, int format, int width, int height
         texture2DDesc.ArraySize = array;
         texture2DDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
         texture2DDesc.SampleDesc.Count = 1;
-        texture2DDesc.Usage = D3D10_USAGE_DYNAMIC;
+        texture2DDesc.Usage = mipmap > 1 ? D3D10_USAGE_DEFAULT : D3D10_USAGE_DYNAMIC;
         texture2DDesc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
-        texture2DDesc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
+        texture2DDesc.CPUAccessFlags = mipmap > 1 ? 0 : D3D10_CPU_ACCESS_WRITE;
         texture2DDesc.MiscFlags = D3D10_RESOURCE_MISC_TEXTURECUBE;
 
-        HRESULT hResult = d3dDevice->CreateTexture2D(&texture2DDesc, nullptr, &d3dTexture2D);
+        HRESULT hResult = d3dDevice->CreateTexture2D(&texture2DDesc, nullptr, (ID3D10Texture2D**)&d3dTextureGPU);
         if (hResult != S_OK)
         {
             xxFree(d3dTexture);
             return 0;
         }
-        d3dResource = d3dTexture2D;
+        if (mipmap > 1)
+        {
+            texture2DDesc.Usage = D3D10_USAGE_STAGING;
+            texture2DDesc.BindFlags = 0;
+            texture2DDesc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
+            hResult = d3dDevice->CreateTexture2D(&texture2DDesc, nullptr, (ID3D10Texture2D**)&d3dTextureCPU);
+            if (hResult != S_OK)
+            {
+                SafeRelease(d3dTextureGPU);
+                xxFree(d3dTexture);
+                return 0;
+            }
+        }
+        else
+        {
+            d3dTextureCPU = d3dTextureGPU;
+            d3dTextureCPU->AddRef();
+        }
 
         viewDesc.Format = texture2DDesc.Format;
         viewDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
@@ -762,42 +796,59 @@ uint64_t xxCreateTextureD3D10(uint64_t device, int format, int width, int height
         texture3DDesc.Depth = depth;
         texture3DDesc.MipLevels = mipmap;
         texture3DDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-        texture3DDesc.Usage = D3D10_USAGE_DYNAMIC;
+        texture3DDesc.Usage = mipmap > 1 ? D3D10_USAGE_DEFAULT : D3D10_USAGE_DYNAMIC;
         texture3DDesc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
-        texture3DDesc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
+        texture3DDesc.CPUAccessFlags = mipmap > 1 ? 0 : D3D10_CPU_ACCESS_WRITE;
 
-        HRESULT hResult = d3dDevice->CreateTexture3D(&texture3DDesc, nullptr, &d3dTexture3D);
+        HRESULT hResult = d3dDevice->CreateTexture3D(&texture3DDesc, nullptr, (ID3D10Texture3D**)&d3dTextureGPU);
         if (hResult != S_OK)
         {
             xxFree(d3dTexture);
             return 0;
         }
-        d3dResource = d3dTexture3D;
+        if (mipmap > 1)
+        {
+            texture3DDesc.Usage = D3D10_USAGE_STAGING;
+            texture3DDesc.BindFlags = 0;
+            texture3DDesc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
+            hResult = d3dDevice->CreateTexture3D(&texture3DDesc, nullptr, (ID3D10Texture3D**)&d3dTextureCPU);
+            if (hResult != S_OK)
+            {
+                SafeRelease(d3dTextureGPU);
+                xxFree(d3dTexture);
+                return 0;
+            }
+        }
+        else
+        {
+            d3dTextureCPU = d3dTextureGPU;
+            d3dTextureCPU->AddRef();
+        }
 
         viewDesc.Format = texture3DDesc.Format;
         viewDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE3D;
         viewDesc.Texture3D.MipLevels = mipmap;
     }
 
-    if (d3dResource == nullptr)
+    if (d3dTextureGPU == nullptr)
     {
         xxFree(d3dTexture);
         return 0;
     }
 
     ID3D10ShaderResourceView* d3dView = nullptr;
-    HRESULT hResult = d3dDevice->CreateShaderResourceView(d3dResource, &viewDesc, &d3dView);
+    HRESULT hResult = d3dDevice->CreateShaderResourceView(d3dTextureGPU, &viewDesc, &d3dView);
     if (hResult != S_OK)
     {
-        d3dResource->Release();
+        SafeRelease(d3dTextureGPU);
+        SafeRelease(d3dTextureCPU);
         xxFree(d3dTexture);
         return 0;
     }
 
-    d3dTexture->texture1D = d3dTexture1D;
-    d3dTexture->texture2D = d3dTexture2D;
-    d3dTexture->texture3D = d3dTexture3D;
     d3dTexture->resourceView = d3dView;
+    d3dTexture->textureGPU = d3dTextureGPU;
+    d3dTexture->textureCPU = d3dTextureCPU;
     d3dTexture->mipmap = mipmap;
 
     return reinterpret_cast<uint64_t>(d3dTexture);
@@ -809,10 +860,9 @@ void xxDestroyTextureD3D10(uint64_t texture)
     if (d3dTexture == nullptr)
         return;
 
-    SafeRelease(d3dTexture->texture1D);
-    SafeRelease(d3dTexture->texture2D);
-    SafeRelease(d3dTexture->texture3D);
     SafeRelease(d3dTexture->resourceView);
+    SafeRelease(d3dTexture->textureGPU);
+    SafeRelease(d3dTexture->textureCPU);
     xxFree(d3dTexture);
 }
 //------------------------------------------------------------------------------
@@ -822,31 +872,13 @@ void* xxMapTextureD3D10(uint64_t device, uint64_t texture, int* stride, int leve
     if (d3dTexture == nullptr)
         return nullptr;
 
-    if (d3dTexture->texture1D)
+    ID3D10Texture3D* texture3D = (ID3D10Texture3D*)d3dTexture->textureCPU;
+    if (texture3D)
     {
-        void* ptr = nullptr;
-        HRESULT hResult = d3dTexture->texture1D->Map(D3D10CalcSubresource(level, array, d3dTexture->mipmap), D3D10_MAP_WRITE_DISCARD, 0, &ptr);
-        if (hResult != S_OK)
-            return nullptr;
-
-        return ptr;
-    }
-
-    if (d3dTexture->texture2D)
-    {
-        D3D10_MAPPED_TEXTURE2D mappedTexture2D = {};
-        HRESULT hResult = d3dTexture->texture2D->Map(D3D10CalcSubresource(level, array, d3dTexture->mipmap), D3D10_MAP_WRITE_DISCARD, 0, &mappedTexture2D);
-        if (hResult != S_OK)
-            return nullptr;
-
-        (*stride) = mappedTexture2D.RowPitch;
-        return mappedTexture2D.pData;
-    }
-
-    if (d3dTexture->texture3D)
-    {
+        UINT subresource = D3D10CalcSubresource(level, array, d3dTexture->mipmap);
+        D3D10_MAP mapType = (d3dTexture->textureCPU == d3dTexture->textureGPU) ? D3D10_MAP_WRITE_DISCARD : D3D10_MAP_WRITE;
         D3D10_MAPPED_TEXTURE3D mappedTexture3D = {};
-        HRESULT hResult = d3dTexture->texture3D->Map(D3D10CalcSubresource(level, array, d3dTexture->mipmap), D3D10_MAP_WRITE_DISCARD, 0, &mappedTexture3D);
+        HRESULT hResult = texture3D->Map(subresource, mapType, 0, &mappedTexture3D);
         if (hResult != S_OK)
             return nullptr;
 
@@ -863,22 +895,18 @@ void xxUnmapTextureD3D10(uint64_t device, uint64_t texture, int level, int array
     if (d3dTexture == nullptr)
         return;
 
-    if (d3dTexture->texture1D)
+    ID3D10Texture3D* texture3D = (ID3D10Texture3D*)d3dTexture->textureCPU;
+    if (texture3D)
     {
-        d3dTexture->texture1D->Unmap(D3D10CalcSubresource(level, array, d3dTexture->mipmap));
-        return;
-    }
-
-    if (d3dTexture->texture2D)
-    {
-        d3dTexture->texture2D->Unmap(D3D10CalcSubresource(level, array, d3dTexture->mipmap));
-        return;
-    }
-
-    if (d3dTexture->texture3D)
-    {
-        d3dTexture->texture3D->Unmap(D3D10CalcSubresource(level, array, d3dTexture->mipmap));
-        return;
+        UINT subresource = D3D10CalcSubresource(level, array, d3dTexture->mipmap);
+        texture3D->Unmap(subresource);
+        if (d3dTexture->textureCPU != d3dTexture->textureGPU)
+        {
+            ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(device);
+            if (d3dDevice == nullptr)
+                return;
+            d3dDevice->CopySubresourceRegion(d3dTexture->textureGPU, subresource, 0, 0, 0, d3dTexture->textureCPU, subresource, nullptr);
+        }
     }
 }
 //==============================================================================
@@ -897,11 +925,12 @@ uint64_t xxCreateSamplerD3D10(uint64_t device, bool clampU, bool clampV, bool cl
     desc.AddressU = clampU ? D3D10_TEXTURE_ADDRESS_CLAMP : D3D10_TEXTURE_ADDRESS_WRAP;
     desc.AddressV = clampV ? D3D10_TEXTURE_ADDRESS_CLAMP : D3D10_TEXTURE_ADDRESS_WRAP;
     desc.AddressW = clampW ? D3D10_TEXTURE_ADDRESS_CLAMP : D3D10_TEXTURE_ADDRESS_WRAP;
-    desc.MaxAnisotropy = anisotropy;
-    desc.ComparisonFunc = D3D10_COMPARISON_ALWAYS;
+    desc.ComparisonFunc = D3D10_COMPARISON_NEVER;
+    desc.MaxLOD = D3D10_FLOAT32_MAX;
     if (anisotropy > 1)
     {
         desc.Filter = D3D10_ENCODE_ANISOTROPIC_FILTER(FALSE);
+        desc.MaxAnisotropy = anisotropy;
     }
 
     ID3D10SamplerState* d3dSamplerState = nullptr;
@@ -1055,7 +1084,7 @@ uint64_t xxCreateRasterizerStateD3D10(uint64_t device, bool cull, bool scissor)
 
     D3D10_RASTERIZER_DESC desc = {};
     desc.FillMode = D3D10_FILL_SOLID;
-    desc.CullMode = D3D10_CULL_NONE;
+    desc.CullMode = cull ? D3D10_CULL_BACK : D3D10_CULL_NONE;
     desc.ScissorEnable = scissor;
     desc.DepthClipEnable = true;
 

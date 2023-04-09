@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : Vulkan Source
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "internal/xxGraphicInternalVulkan.h"
@@ -1854,7 +1854,12 @@ uint64_t xxCreateSamplerVulkan(uint64_t device, bool clampU, bool clampV, bool c
     info.addressModeU = clampU ? VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE : VK_SAMPLER_ADDRESS_MODE_REPEAT;
     info.addressModeV = clampV ? VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE : VK_SAMPLER_ADDRESS_MODE_REPEAT;
     info.addressModeW = clampW ? VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE : VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    info.maxAnisotropy = (float)anisotropy;
+    info.maxLod = VK_LOD_CLAMP_NONE;
+    if (anisotropy > 0)
+    {
+        info.maxAnisotropy = (float)anisotropy;
+        info.anisotropyEnable = VK_TRUE;
+    }
 
     VkSampler sampler = VK_NULL_HANDLE;
     VkResult result = vkCreateSampler(vkDevice, &info, g_callbacks, &sampler);
@@ -1985,7 +1990,7 @@ uint64_t xxCreateRasterizerStateVulkan(uint64_t device, bool cull, bool scissor)
 
     rasterizerState->sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizerState->polygonMode = VK_POLYGON_MODE_FILL;
-    rasterizerState->cullMode = VK_CULL_MODE_NONE;
+    rasterizerState->cullMode = cull ? VK_CULL_MODE_BACK_BIT : VK_CULL_MODE_NONE;
     rasterizerState->frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizerState->lineWidth = 1.0f;
 

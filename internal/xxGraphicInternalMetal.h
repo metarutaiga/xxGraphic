@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : Metal Internal Header
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #pragma once
@@ -119,7 +119,8 @@ struct MTLTEXTURE
 {
     id <MTLTexture>                 texture;
     id <MTLBuffer>                  buffer;
-    int                             stride;
+    int                             strides[16];
+    void*                           temporary;
 };
 //==============================================================================
 //  Pipeline

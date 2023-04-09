@@ -1,24 +1,12 @@
 //==============================================================================
 // xxGraphic : Node Header
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #pragma once
 
-#include "../xxSystem.h"
-#include "xxMath.h"
-
-#include "xxImage.h"
-#include "xxMaterial.h"
-#include "xxMesh.h"
-
-#include <memory>
-#include <vector>
-
-class xxNode;
-typedef std::shared_ptr<xxNode> xxNodePtr;
-typedef std::weak_ptr<xxNode> xxNodeWeakPtr;
+#include "xxUtility.h"
 
 class xxPlusAPI xxNode
 {
@@ -49,15 +37,20 @@ public:
     void CreateRotateTranslateScale();
     void UpdateRotateTranslateScale();
 
-    xxImage* GetImage(size_t index) const;
-    xxMaterial* GetMaterial() const;
-    xxMesh* GetMesh() const;
+    xxImagePtr GetImage(size_t index) const;
+    xxMaterialPtr GetMaterial() const;
+    xxMeshPtr GetMesh() const;
+    void SetImage(size_t index, const xxImagePtr& image);
+    void SetMaterial(const xxMaterialPtr& material);
+    void SetMesh(const xxMeshPtr& mesh);
 
     void Update(float time, bool updateMatrix = true);
-    void Draw(uint64_t device, uint64_t commandEncoder);
+    void Draw(uint64_t device, uint64_t commandEncoder, const xxCameraPtr& camera);
 
 protected:
     xxNode();
+
+    typedef std::weak_ptr<class xxNode> xxNodeWeakPtr;
 
     // Parent / Children
     xxNodeWeakPtr               m_parent;

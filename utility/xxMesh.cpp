@@ -1,10 +1,10 @@
 //==============================================================================
 // xxGraphic : Mesh Source
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
-#include "../xxGraphic.h"
+#include "xxGraphic.h"
 #include "xxMesh.h"
 
 //==============================================================================
@@ -55,6 +55,7 @@ uint32_t xxMesh::GetVertexCount() const
 void xxMesh::SetVertexCount(uint32_t count)
 {
     m_vertex.resize(count * m_stride);
+    m_vertexSizeChanged = true;
 }
 //------------------------------------------------------------------------------
 uint32_t xxMesh::GetIndexCount() const
@@ -65,17 +66,18 @@ uint32_t xxMesh::GetIndexCount() const
 void xxMesh::SetIndexCount(uint32_t count)
 {
     m_index.resize(count);
+    m_indexSizeChanged = true;
 }
 //------------------------------------------------------------------------------
-xxStrideIterator<xxVector2> xxMesh::GetVertex() const
+xxStrideIterator<xxVector3> xxMesh::GetVertex() const
 {
-    char* vertex = (char*)&m_vertex.front();
-    return xxStrideIterator<xxVector2>(vertex, GetVertexCount(), m_stride);
+    char* vertex = (char*)m_vertex.data();
+    return xxStrideIterator<xxVector3>(vertex, GetVertexCount(), m_stride);
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<uint32_t> xxMesh::GetColor(int index) const
 {
-    char* vertex = (char*)&m_vertex.front();
+    char* vertex = (char*)m_vertex.data();
     vertex += xxSizeOf(xxVector3);
     vertex += xxSizeOf(uint32_t) * index;
     return xxStrideIterator<uint32_t>(vertex, GetVertexCount(), m_stride);
@@ -83,7 +85,7 @@ xxStrideIterator<uint32_t> xxMesh::GetColor(int index) const
 //------------------------------------------------------------------------------
 xxStrideIterator<xxVector3> xxMesh::GetNormal(int index) const
 {
-    char* vertex = (char*)&m_vertex.front();
+    char* vertex = (char*)m_vertex.data();
     vertex += xxSizeOf(xxVector3);
     vertex += xxSizeOf(uint32_t) * m_colorCount;
     vertex += xxSizeOf(xxVector3) * index;
@@ -92,12 +94,17 @@ xxStrideIterator<xxVector3> xxMesh::GetNormal(int index) const
 //------------------------------------------------------------------------------
 xxStrideIterator<xxVector2> xxMesh::GetTexture(int index) const
 {
-    char* vertex = (char*)&m_vertex.front();
+    char* vertex = (char*)m_vertex.data();
     vertex += xxSizeOf(xxVector3);
     vertex += xxSizeOf(uint32_t) * m_colorCount;
     vertex += xxSizeOf(xxVector3) * m_normalCount;
     vertex += xxSizeOf(xxVector2)* index;
     return xxStrideIterator<xxVector2>(vertex, GetVertexCount(), m_stride);
+}
+//------------------------------------------------------------------------------
+xxMesh::IndexType* xxMesh::GetIndex() const
+{
+    return (xxMesh::IndexType*)m_index.data();
 }
 //------------------------------------------------------------------------------
 uint64_t xxMesh::GetVertexAttribute() const
@@ -173,7 +180,6 @@ void xxMesh::Update(xxNode& node, uint64_t device)
         if (m_vertexSizeChanged)
         {
             m_vertexSizeChanged = false;
-            m_vertexDataModified = true;
 
             xxDestroyBuffer(m_device, m_vertexBuffers[index]);
             m_vertexBuffers[index] = 0;
@@ -181,6 +187,7 @@ void xxMesh::Update(xxNode& node, uint64_t device)
         if (m_vertexBuffers[index] == 0)
         {
             m_vertexBuffers[index] = xxCreateVertexBuffer(m_device, m_stride * GetVertexCount(), m_vertexAttribute);
+            m_vertexDataModified = true;
         }
 
         if (m_vertexDataModified)
@@ -190,7 +197,7 @@ void xxMesh::Update(xxNode& node, uint64_t device)
             {
                 m_vertexDataModified = false;
 
-                memcpy(ptr, &m_vertex.front(), m_stride * GetVertexCount());
+                memcpy(ptr, m_vertex.data(), m_stride * GetVertexCount());
                 xxUnmapBuffer(m_device, m_vertexBuffers[index]);
             }
         }
@@ -209,7 +216,6 @@ void xxMesh::Update(xxNode& node, uint64_t device)
         if (m_indexSizeChanged)
         {
             m_indexSizeChanged = false;
-            m_indexDataModified = true;
 
             xxDestroyBuffer(m_device, m_indexBuffers[index]);
             m_indexBuffers[index] = 0;
@@ -217,6 +223,7 @@ void xxMesh::Update(xxNode& node, uint64_t device)
         if (m_indexBuffers[index] == 0)
         {
             m_indexBuffers[index] = xxCreateIndexBuffer(m_device, xxSizeOf(IndexType) * GetIndexCount());
+            m_indexDataModified = true;
         }
 
         if (m_indexDataModified)
@@ -226,7 +233,7 @@ void xxMesh::Update(xxNode& node, uint64_t device)
             {
                 m_indexDataModified = false;
 
-                memcpy(ptr, &m_index.front(), xxSizeOf(IndexType) * GetIndexCount());
+                memcpy(ptr, m_index.data(), xxSizeOf(IndexType) * GetIndexCount());
                 xxUnmapBuffer(m_device, m_indexBuffers[index]);
             }
         }

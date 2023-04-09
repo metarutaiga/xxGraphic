@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : Direct3D 7.0 Source
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #ifndef _M_IX86
@@ -797,7 +797,7 @@ void xxSetPipelineD3D7(uint64_t commandEncoder, uint64_t pipeline)
     d3dDevice->SetTextureStageState(0, D3DTSS_ALPHAARG2, D3DTA_DIFFUSE);
     d3dDevice->SetRenderState(D3DRENDERSTATE_FOGENABLE, FALSE);
     d3dDevice->SetRenderState(D3DRENDERSTATE_SPECULARENABLE, FALSE);
-    d3dDevice->SetRenderState(D3DRENDERSTATE_CULLMODE, D3DCULL_NONE);
+    d3dDevice->SetRenderState(D3DRENDERSTATE_CULLMODE, d3dPipeline->renderState.cull ? D3DCULL_CCW : D3DCULL_NONE);
     d3dDevice->SetRenderState(D3DRENDERSTATE_ZENABLE, d3dPipeline->renderState.depthEnable);
     if (d3dPipeline->renderState.depthEnable)
     {

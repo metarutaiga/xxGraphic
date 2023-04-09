@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : Metal 2 Header
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #pragma once

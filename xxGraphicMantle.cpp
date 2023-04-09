@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : Mantle Source
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #if !defined(_M_IX86) && !defined(_M_AMD64)
@@ -590,8 +590,12 @@ uint64_t xxCreateSamplerMantle(uint64_t device, bool clampU, bool clampV, bool c
     info.addressU = clampU ? GR_TEX_ADDRESS_CLAMP : GR_TEX_ADDRESS_WRAP;
     info.addressV = clampV ? GR_TEX_ADDRESS_CLAMP : GR_TEX_ADDRESS_WRAP;
     info.addressW = clampW ? GR_TEX_ADDRESS_CLAMP : GR_TEX_ADDRESS_WRAP;
-    info.maxAnisotropy = anisotropy;
-    info.compareFunc = GR_COMPARE_ALWAYS;
+    info.compareFunc = GR_COMPARE_NEVER;
+    info.maxLod = 1000.0f;
+    if (anisotropy > 0)
+    {
+        info.maxAnisotropy = anisotropy;
+    }
 
     GR_SAMPLER sampler = GR_NULL_HANDLE;
     grCreateSampler(grDevice, &info, &sampler);
@@ -714,8 +718,8 @@ uint64_t xxCreateRasterizerStateMantle(uint64_t device, bool cull, bool scissor)
 
     GR_RASTER_STATE_CREATE_INFO info = {};
     info.fillMode = GR_FILL_SOLID;
-    info.cullMode = GR_CULL_NONE;
-    info.frontFace = GR_FRONT_FACE_CCW;
+    info.cullMode = cull ? GR_CULL_BACK : GR_CULL_NONE;
+    info.frontFace = GR_FRONT_FACE_CW;
 
     GR_RASTER_STATE_OBJECT rasterizerState = GR_NULL_HANDLE;
     grCreateRasterState(grDevice, &info, &rasterizerState);

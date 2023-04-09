@@ -1,20 +1,23 @@
 //==============================================================================
 // xxGraphic : Math Header
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #pragma once
 
-#include "../xxSystem.h"
-#include "../xxVector.h"
+#include "xxSystem.h"
+#include "xxVector.h"
 
-union xxPlusAPI xxVector2
+struct xxPlusAPI xxVector2
 {
     enum { N = 2 };
-    struct { float x, y; };
-    struct { float u, v; };
-    float f[N];
+    union
+    {
+        struct { float x, y; };
+        struct { float u, v; };
+        float f[N];
+    };
 
     typedef xxVector2 type;
 
@@ -26,6 +29,9 @@ union xxPlusAPI xxVector2
     xxVector2&      operator *=     (float s)                    { type t(*this); for (int i = 0; i < N; ++i) t.f[i] *= s;      (*this) = t; return (*this); }
     xxVector2&      operator /=     (float s)                    { (*this) *= (1.0f / s);                                                    return (*this); }
 
+    bool            operator ==     (const xxVector2& v) const   { for (int i = 0; i < N; ++i) if ((*this).f[i] != v.f[i]) return false; return true;  }
+    bool            operator !=     (const xxVector2& v) const   { for (int i = 0; i < N; ++i) if ((*this).f[i] != v.f[i]) return true;  return false; }
+
     xxVector2       operator +      (const xxVector2& v) const   { return xxVector2(*this) += v; }
     xxVector2       operator -      (const xxVector2& v) const   { return xxVector2(*this) -= v; }
     xxVector2       operator *      (const xxVector2& v) const   { return xxVector2(*this) *= v; }
@@ -33,6 +39,8 @@ union xxPlusAPI xxVector2
     xxVector2       operator *      (float s) const              { return xxVector2(*this) *= s; }
     xxVector2       operator /      (float s) const              { return xxVector2(*this) /= s; }
 
+    const float*    Array           () const                     { return f;                      }
+    float*          Array           ()                           { return f;                      }
     float           Dot             (const xxVector2& v) const   { return x * v.x + y * v.y;      }
     float           SquaredLength   () const                     { return Dot(*this);             }
     float           Length          () const                     { return sqrtf(SquaredLength()); }
@@ -46,12 +54,15 @@ union xxPlusAPI xxVector2
     static const xxVector2 Y;
 };
 
-union xxPlusAPI xxVector3
+struct xxPlusAPI xxVector3
 {
     enum { N = 3 };
-    struct { float x, y, z; };
-    struct { float r, g, b; };
-    float f[N];
+    union
+    {
+        struct { float x, y, z; };
+        struct { float r, g, b; };
+        float f[N];
+    };
 
     typedef xxVector3 type;
 
@@ -63,6 +74,9 @@ union xxPlusAPI xxVector3
     xxVector3&      operator *=     (float s)                    { type t(*this); for (int i = 0; i < N; ++i) t.f[i] *= s;      (*this) = t; return (*this); }
     xxVector3&      operator /=     (float s)                    { (*this) *= (1.0f / s);                                                    return (*this); }
 
+    bool            operator ==     (const xxVector3& v) const   { for (int i = 0; i < N; ++i) if ((*this).f[i] != v.f[i]) return false; return true;  }
+    bool            operator !=     (const xxVector3& v) const   { for (int i = 0; i < N; ++i) if ((*this).f[i] != v.f[i]) return true;  return false; }
+
     xxVector3       operator +      (const xxVector3& v) const   { return xxVector3(*this) += v; }
     xxVector3       operator -      (const xxVector3& v) const   { return xxVector3(*this) -= v; }
     xxVector3       operator *      (const xxVector3& v) const   { return xxVector3(*this) *= v; }
@@ -70,6 +84,8 @@ union xxPlusAPI xxVector3
     xxVector3       operator *      (float s) const              { return xxVector3(*this) *= s; }
     xxVector3       operator /      (float s) const              { return xxVector3(*this) /= s; }
 
+    const float*    Array           () const                     { return f;                           }
+    float*          Array           ()                           { return f;                           }
     float           Dot             (const xxVector3& v) const   { return x * v.x + y * v.y + z * v.z; }
     float           SquaredLength   () const                     { return Dot(*this);                  }
     float           Length          () const                     { return sqrtf(SquaredLength());      }
@@ -91,13 +107,16 @@ union xxPlusAPI xxVector3
     static const xxVector3 WHITE;
 };
 
-union xxPlusAPI xxVector4
+struct xxPlusAPI xxVector4
 {
     enum { N = 4 };
-    struct { float x, y, z, w; };
-    struct { float r, g, b, a; };
-    float f[N];
-    v4sf v;
+    union
+    {
+        struct { float x, y, z, w; };
+        struct { float r, g, b, a; };
+        float f[N];
+        v4sf v;
+    };
 
     typedef xxVector4 type;
 
@@ -109,6 +128,9 @@ union xxPlusAPI xxVector4
     xxVector4&      operator *=     (float s)                    { type t(*this); for (int i = 0; i < N; ++i) t.f[i] *= s;      (*this) = t; return (*this); }
     xxVector4&      operator /=     (float s)                    { (*this) *= (1.0f / s);                                                    return (*this); }
 
+    bool            operator ==     (const xxVector4& v) const   { for (int i = 0; i < N; ++i) if ((*this).f[i] != v.f[i]) return false; return true;  }
+    bool            operator !=     (const xxVector4& v) const   { for (int i = 0; i < N; ++i) if ((*this).f[i] != v.f[i]) return true;  return false; }
+
     xxVector4       operator +      (const xxVector4& v) const   { return xxVector4(*this) += v; }
     xxVector4       operator -      (const xxVector4& v) const   { return xxVector4(*this) -= v; }
     xxVector4       operator *      (const xxVector4& v) const   { return xxVector4(*this) *= v; }
@@ -116,6 +138,8 @@ union xxPlusAPI xxVector4
     xxVector4       operator *      (float s) const              { return xxVector4(*this) *= s; }
     xxVector4       operator /      (float s) const              { return xxVector4(*this) /= s; }
 
+    const float*    Array           () const                     { return f;                                     }
+    float*          Array           ()                           { return f;                                     }
     float           Dot             (const xxVector4& v) const   { return x * v.x + y * v.y + z * v.z + w * v.w; }
     float           SquaredLength   () const                     { return Dot(*this);                            }
     float           Length          () const                     { return sqrtf(SquaredLength());                }
@@ -135,19 +159,22 @@ union xxPlusAPI xxVector4
     static const xxVector4 WHITE;
 };
 
-typedef union xxMatrix2x2 xxMatrix2;
-typedef union xxMatrix3x3 xxMatrix3;
-typedef union xxMatrix4x4 xxMatrix4;
+typedef struct xxMatrix2x2 xxMatrix2;
+typedef struct xxMatrix3x3 xxMatrix3;
+typedef struct xxMatrix4x4 xxMatrix4;
 
-union xxPlusAPI xxMatrix2x2
+struct xxPlusAPI xxMatrix2x2
 {
     enum { M = 2, N = 2 };
-    xxVector2 _[N];
-    float f[M * N];
-    struct
+    union
     {
-        float m11, m12;
-        float m21, m22;
+        xxVector2 _[N];
+        float f[M * N];
+        struct
+        {
+            float m11, m12;
+            float m21, m22;
+        };
     };
 
     typedef xxMatrix2x2 type;
@@ -158,6 +185,9 @@ union xxPlusAPI xxMatrix2x2
     xxMatrix2x2&    operator *=     (const xxMatrix2x2& m)       { type t(*this); t = { t * m._[0], t * m._[1] };                   (*this) = t; return (*this); }
     xxMatrix2x2&    operator *=     (float s)                    { type t(*this); for (int i = 0; i < M * N; ++i) t.f[i] *= s;      (*this) = t; return (*this); }
     xxMatrix2x2&    operator /=     (float s)                    { (*this) *= (1.0f / s);                                                        return (*this); }
+
+    bool            operator ==     (const xxMatrix2x2& m) const { for (int i = 0; i < N; ++i) if ((*this)._[i] != m._[i]) return false; return true;  }
+    bool            operator !=     (const xxMatrix2x2& m) const { for (int i = 0; i < N; ++i) if ((*this)._[i] != m._[i]) return true;  return false; }
 
     xxMatrix2x2     operator +      (const xxMatrix2x2& m) const { return xxMatrix2x2(*this) += m; }
     xxMatrix2x2     operator -      (const xxMatrix2x2& m) const { return xxMatrix2x2(*this) -= m; }
@@ -174,16 +204,19 @@ union xxPlusAPI xxMatrix2x2
     static const xxMatrix2x2 IDENTITY;
 };
 
-union xxPlusAPI xxMatrix2x3
+struct xxPlusAPI xxMatrix2x3
 {
     enum { M = 2, N = 3 };
-    xxVector2 _[N];
-    float f[M * N];
-    struct
+    union
     {
-        float m11, m12;
-        float m21, m22;
-        float m31, m32;
+        xxVector2 _[N];
+        float f[M * N];
+        struct
+        {
+            float m11, m12;
+            float m21, m22;
+            float m31, m32;
+        };
     };
 
     typedef xxMatrix2x3 type;
@@ -194,6 +227,9 @@ union xxPlusAPI xxMatrix2x3
     xxMatrix2x3&    operator *=     (float s)                    { type t(*this); for (int i = 0; i < M * N; ++i) t.f[i] *= s;      (*this) = t; return (*this); }
     xxMatrix2x3&    operator /=     (float s)                    { (*this) *= (1.0f / s);                                                        return (*this); }
 
+    bool            operator ==     (const xxMatrix2x3& m) const { for (int i = 0; i < N; ++i) if ((*this)._[i] != m._[i]) return false; return true;  }
+    bool            operator !=     (const xxMatrix2x3& m) const { for (int i = 0; i < N; ++i) if ((*this)._[i] != m._[i]) return true;  return false; }
+
     xxMatrix2x3     operator +      (const xxMatrix2x3& m) const { return xxMatrix2x3(*this) += m; }
     xxMatrix2x3     operator -      (const xxMatrix2x3& m) const { return xxMatrix2x3(*this) -= m; }
     xxMatrix2x3     operator *      (float s) const              { return xxMatrix2x3(*this) *= s; }
@@ -202,17 +238,20 @@ union xxPlusAPI xxMatrix2x3
     static const xxMatrix2x3 IDENTITY;
 };
 
-union xxPlusAPI xxMatrix2x4
+struct xxPlusAPI xxMatrix2x4
 {
     enum { M = 2, N = 4 };
-    xxVector2 _[N];
-    float f[M * N];
-    struct
+    union
     {
-        float m11, m12;
-        float m21, m22;
-        float m31, m32;
-        float m41, m42;
+        xxVector2 _[N];
+        float f[M * N];
+        struct
+        {
+            float m11, m12;
+            float m21, m22;
+            float m31, m32;
+            float m41, m42;
+        };
     };
 
     typedef xxMatrix2x4 type;
@@ -223,6 +262,9 @@ union xxPlusAPI xxMatrix2x4
     xxMatrix2x4&    operator *=     (float s)                    { type t(*this); for (int i = 0; i < M * N; ++i) t.f[i] *= s;      (*this) = t; return (*this); }
     xxMatrix2x4&    operator /=     (float s)                    { (*this) *= (1.0f / s);                                                        return (*this); }
 
+    bool            operator ==     (const xxMatrix2x4& m) const { for (int i = 0; i < N; ++i) if ((*this)._[i] != m._[i]) return false; return true;  }
+    bool            operator !=     (const xxMatrix2x4& m) const { for (int i = 0; i < N; ++i) if ((*this)._[i] != m._[i]) return true;  return false; }
+
     xxMatrix2x4     operator +      (const xxMatrix2x4& m) const { return xxMatrix2x4(*this) += m; }
     xxMatrix2x4     operator -      (const xxMatrix2x4& m) const { return xxMatrix2x4(*this) -= m; }
     xxMatrix2x4     operator *      (float s) const              { return xxMatrix2x4(*this) *= s; }
@@ -231,15 +273,18 @@ union xxPlusAPI xxMatrix2x4
     static const xxMatrix2x4 IDENTITY;
 };
 
-union xxPlusAPI xxMatrix3x2
+struct xxPlusAPI xxMatrix3x2
 {
     enum { M = 3, N = 2 };
-    xxVector3 _[N];
-    float f[M * N];
-    struct
+    union
     {
-        float m11, m12, m13;
-        float m21, m22, m23;
+        xxVector3 _[N];
+        float f[M * N];
+        struct
+        {
+            float m11, m12, m13;
+            float m21, m22, m23;
+        };
     };
 
     typedef xxMatrix3x2 type;
@@ -250,6 +295,9 @@ union xxPlusAPI xxMatrix3x2
     xxMatrix3x2&    operator *=     (float s)                    { type t(*this); for (int i = 0; i < M * N; ++i) t.f[i] *= s;      (*this) = t; return (*this); }
     xxMatrix3x2&    operator /=     (float s)                    { (*this) *= (1.0f / s);                                                        return (*this); }
 
+    bool            operator ==     (const xxMatrix3x2& m) const { for (int i = 0; i < N; ++i) if ((*this)._[i] != m._[i]) return false; return true;  }
+    bool            operator !=     (const xxMatrix3x2& m) const { for (int i = 0; i < N; ++i) if ((*this)._[i] != m._[i]) return true;  return false; }
+
     xxMatrix3x2     operator +      (const xxMatrix3x2& m) const { return xxMatrix3x2(*this) += m; }
     xxMatrix3x2     operator -      (const xxMatrix3x2& m) const { return xxMatrix3x2(*this) -= m; }
     xxMatrix3x2     operator *      (float s) const              { return xxMatrix3x2(*this) *= s; }
@@ -258,16 +306,19 @@ union xxPlusAPI xxMatrix3x2
     static const xxMatrix3x2 IDENTITY;
 };
 
-union xxPlusAPI xxMatrix3x3
+struct xxPlusAPI xxMatrix3x3
 {
     enum { M = 3, N = 3 };
-    xxVector3 _[N];
-    float f[M * N];
-    struct
+    union
     {
-        float m11, m12, m13;
-        float m21, m22, m23;
-        float m31, m32, m33;
+        xxVector3 _[N];
+        float f[M * N];
+        struct
+        {
+            float m11, m12, m13;
+            float m21, m22, m23;
+            float m31, m32, m33;
+        };
     };
 
     typedef xxMatrix3x3 type;
@@ -278,6 +329,9 @@ union xxPlusAPI xxMatrix3x3
     xxMatrix3x3&    operator *=     (const xxMatrix3x3& m)       { type t(*this); t = { t * m._[0], t * m._[1], t * m._[2] };       (*this) = t; return (*this); }
     xxMatrix3x3&    operator *=     (float s)                    { type t(*this); for (int i = 0; i < M * N; ++i) t.f[i] *= s;      (*this) = t; return (*this); }
     xxMatrix3x3&    operator /=     (float s)                    { (*this) *= (1.0f / s);                                                        return (*this); }
+
+    bool            operator ==     (const xxMatrix3x3& m) const { for (int i = 0; i < N; ++i) if ((*this)._[i] != m._[i]) return false; return true;  }
+    bool            operator !=     (const xxMatrix3x3& m) const { for (int i = 0; i < N; ++i) if ((*this)._[i] != m._[i]) return true;  return false; }
 
     xxMatrix3x3     operator +      (const xxMatrix3x3& m) const { return xxMatrix3x3(*this) += m; }
     xxMatrix3x3     operator -      (const xxMatrix3x3& m) const { return xxMatrix3x3(*this) -= m; }
@@ -294,17 +348,20 @@ union xxPlusAPI xxMatrix3x3
     static const xxMatrix3x3 IDENTITY;
 };
 
-union xxPlusAPI xxMatrix3x4
+struct xxPlusAPI xxMatrix3x4
 {
     enum { M = 3, N = 4 };
-    xxVector3 _[N];
-    float f[M * N];
-    struct
+    union
     {
-        float m11, m12, m13;
-        float m21, m22, m23;
-        float m31, m32, m33;
-        float m41, m42, m43;
+        xxVector3 _[N];
+        float f[M * N];
+        struct
+        {
+            float m11, m12, m13;
+            float m21, m22, m23;
+            float m31, m32, m33;
+            float m41, m42, m43;
+        };
     };
 
     typedef xxMatrix3x4 type;
@@ -315,6 +372,9 @@ union xxPlusAPI xxMatrix3x4
     xxMatrix3x4&    operator *=     (float s)                    { type t(*this); for (int i = 0; i < M * N; ++i) t.f[i] *= s;      (*this) = t; return (*this); }
     xxMatrix3x4&    operator /=     (float s)                    { (*this) *= (1.0f / s);                                                        return (*this); }
 
+    bool            operator ==     (const xxMatrix3x4& m) const { for (int i = 0; i < N; ++i) if ((*this)._[i] != m._[i]) return false; return true;  }
+    bool            operator !=     (const xxMatrix3x4& m) const { for (int i = 0; i < N; ++i) if ((*this)._[i] != m._[i]) return true;  return false; }
+
     xxMatrix3x4     operator +      (const xxMatrix3x4& m) const { return xxMatrix3x4(*this) += m; }
     xxMatrix3x4     operator -      (const xxMatrix3x4& m) const { return xxMatrix3x4(*this) -= m; }
     xxMatrix3x4     operator *      (float s) const              { return xxMatrix3x4(*this) *= s; }
@@ -323,15 +383,18 @@ union xxPlusAPI xxMatrix3x4
     static const xxMatrix3x4 IDENTITY;
 };
 
-union xxPlusAPI xxMatrix4x2
+struct xxPlusAPI xxMatrix4x2
 {
     enum { M = 4, N = 2 };
-    xxVector4 _[N];
-    float f[M * N];
-    struct
+    union
     {
-        float m11, m12, m13, m14;
-        float m21, m22, m23, m24;
+        xxVector4 _[N];
+        float f[M * N];
+        struct
+        {
+            float m11, m12, m13, m14;
+            float m21, m22, m23, m24;
+        };
     };
 
     typedef xxMatrix4x2 type;
@@ -342,6 +405,9 @@ union xxPlusAPI xxMatrix4x2
     xxMatrix4x2&    operator *=     (float s)                    { type t(*this); for (int i = 0; i < M * N; ++i) t.f[i] *= s;      (*this) = t; return (*this); }
     xxMatrix4x2&    operator /=     (float s)                    { (*this) *= (1.0f / s);                                                        return (*this); }
 
+    bool            operator ==     (const xxMatrix4x2& m) const { for (int i = 0; i < N; ++i) if ((*this)._[i] != m._[i]) return false; return true;  }
+    bool            operator !=     (const xxMatrix4x2& m) const { for (int i = 0; i < N; ++i) if ((*this)._[i] != m._[i]) return true;  return false; }
+
     xxMatrix4x2     operator +      (const xxMatrix4x2& m) const { return xxMatrix4x2(*this) += m; }
     xxMatrix4x2     operator -      (const xxMatrix4x2& m) const { return xxMatrix4x2(*this) -= m; }
     xxMatrix4x2     operator *      (float s) const              { return xxMatrix4x2(*this) *= s; }
@@ -350,16 +416,19 @@ union xxPlusAPI xxMatrix4x2
     static const xxMatrix4x2 IDENTITY;
 };
 
-union xxPlusAPI xxMatrix4x3
+struct xxPlusAPI xxMatrix4x3
 {
     enum { M = 4, N = 3 };
-    xxVector4 _[N];
-    float f[M * N];
-    struct
+    union
     {
-        float m11, m12, m13, m14;
-        float m21, m22, m23, m24;
-        float m31, m32, m33, m34;
+        xxVector4 _[N];
+        float f[M * N];
+        struct
+        {
+            float m11, m12, m13, m14;
+            float m21, m22, m23, m24;
+            float m31, m32, m33, m34;
+        };
     };
 
     typedef xxMatrix4x3 type;
@@ -370,6 +439,9 @@ union xxPlusAPI xxMatrix4x3
     xxMatrix4x3&    operator *=     (float s)                    { type t(*this); for (int i = 0; i < M * N; ++i) t.f[i] *= s;      (*this) = t; return (*this); }
     xxMatrix4x3&    operator /=     (float s)                    { (*this) *= (1.0f / s);                                                        return (*this); }
 
+    bool            operator ==     (const xxMatrix4x3& m) const { for (int i = 0; i < N; ++i) if ((*this)._[i] != m._[i]) return false; return true;  }
+    bool            operator !=     (const xxMatrix4x3& m) const { for (int i = 0; i < N; ++i) if ((*this)._[i] != m._[i]) return true;  return false; }
+
     xxMatrix4x3     operator +      (const xxMatrix4x3& m) const { return xxMatrix4x3(*this) += m; }
     xxMatrix4x3     operator -      (const xxMatrix4x3& m) const { return xxMatrix4x3(*this) -= m; }
     xxMatrix4x3     operator *      (float s) const              { return xxMatrix4x3(*this) *= s; }
@@ -378,17 +450,20 @@ union xxPlusAPI xxMatrix4x3
     static const xxMatrix4x3 IDENTITY;
 };
 
-union xxPlusAPI xxMatrix4x4
+struct xxPlusAPI xxMatrix4x4
 {
     enum { M = 4, N = 4 };
-    xxVector4 _[N];
-    float f[M * N];
-    struct
+    union
     {
-        float m11, m12, m13, m14;
-        float m21, m22, m23, m24;
-        float m31, m32, m33, m34;
-        float m41, m42, m43, m44;
+        xxVector4 _[N];
+        float f[M * N];
+        struct
+        {
+            float m11, m12, m13, m14;
+            float m21, m22, m23, m24;
+            float m31, m32, m33, m34;
+            float m41, m42, m43, m44;
+        };
     };
 
     typedef xxMatrix4x4 type;
@@ -399,6 +474,9 @@ union xxPlusAPI xxMatrix4x4
     xxMatrix4x4&    operator *=     (const xxMatrix4x4& m)       { type t(*this); t = { t * m._[0], t * m._[1], t * m._[2], t * m._[3] }; (*this) = t; return (*this); }
     xxMatrix4x4&    operator *=     (float s)                    { type t(*this); for (int i = 0; i < M * N; ++i) t.f[i] *= s;            (*this) = t; return (*this); }
     xxMatrix4x4&    operator /=     (float s)                    { (*this) *= (1.0f / s);                                                              return (*this); }
+
+    bool            operator ==     (const xxMatrix4x4& m) const { for (int i = 0; i < N; ++i) if ((*this)._[i] != m._[i]) return false; return true;  }
+    bool            operator !=     (const xxMatrix4x4& m) const { for (int i = 0; i < N; ++i) if ((*this)._[i] != m._[i]) return true;  return false; }
 
     xxMatrix4x4     operator +      (const xxMatrix4x4& m) const { return xxMatrix4x4(*this) += m; }
     xxMatrix4x4     operator -      (const xxMatrix4x4& m) const { return xxMatrix4x4(*this) -= m; }

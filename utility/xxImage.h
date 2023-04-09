@@ -1,19 +1,12 @@
 //==============================================================================
 // xxGraphic : Image Header
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #pragma once
 
-#include "../xxSystem.h"
-#include "xxMath.h"
-
-#include <memory>
-#include <vector>
-
-class xxImage;
-typedef std::shared_ptr<xxImage> xxImagePtr;
+#include "xxUtility.h"
 
 class xxPlusAPI xxImage
 {
@@ -27,8 +20,15 @@ public:
 
     void* operator () (uint32_t x, uint32_t y, uint32_t z, uint32_t mipmap, uint32_t array);
 
-    uint64_t GetTexture() const;
-    uint64_t GetSampler() const;
+    bool        GetClampU() const;
+    bool        GetClampV() const;
+    bool        GetClampW() const;
+    void        SetClampU(bool clampU);
+    void        SetClampV(bool clampV);
+    void        SetClampW(bool clampW);
+
+    uint64_t    GetTexture() const;
+    uint64_t    GetSampler() const;
 
     void Update(uint64_t device);
 
@@ -45,6 +45,10 @@ protected:
     uint32_t            m_array;
 
     bool                m_imageModified;
+
+    bool                m_clampU;
+    bool                m_clampV;
+    bool                m_clampW;
 
     uint64_t            m_device;
     uint64_t            m_texture;

@@ -1,3 +1,9 @@
+/*-------------------------------------------------------------------------------------
+ *
+ * Copyright (c) Microsoft Corporation
+ * Licensed under the MIT license
+ *
+ *-------------------------------------------------------------------------------------*/
 
 
 /* this ALWAYS GENERATED file contains the definitions for the interfaces */
@@ -373,6 +379,13 @@ enum D3D_SRV_DIMENSION
 #define D3D_SHADER_FEATURE_SHADING_RATE                                                   0x80000
 #define D3D_SHADER_FEATURE_RAYTRACING_TIER_1_1                                            0x100000
 #define D3D_SHADER_FEATURE_SAMPLER_FEEDBACK                                               0x200000
+#define D3D_SHADER_FEATURE_ATOMIC_INT64_ON_TYPED_RESOURCE                                 0x400000
+#define D3D_SHADER_FEATURE_ATOMIC_INT64_ON_GROUP_SHARED                                   0x800000
+#define D3D_SHADER_FEATURE_DERIVATIVES_IN_MESH_AND_AMPLIFICATION_SHADERS                  0x1000000
+#define D3D_SHADER_FEATURE_RESOURCE_DESCRIPTOR_HEAP_INDEXING                              0x2000000
+#define D3D_SHADER_FEATURE_SAMPLER_DESCRIPTOR_HEAP_INDEXING                               0x4000000
+#define D3D_SHADER_FEATURE_WAVE_MMA                                                       0x8000000
+#define D3D_SHADER_FEATURE_ATOMIC_INT64_ON_DESCRIPTOR_HEAP_RESOURCE                       0x10000000
 typedef struct _D3D_SHADER_MACRO
     {
     LPCSTR Name;
@@ -720,6 +733,11 @@ enum _D3D_SHADER_VARIABLE_TYPE
         D3D_SVT_MIN12INT	= 55,
         D3D_SVT_MIN16INT	= 56,
         D3D_SVT_MIN16UINT	= 57,
+        D3D_SVT_INT16	= 58,
+        D3D_SVT_UINT16	= 59,
+        D3D_SVT_FLOAT16	= 60,
+        D3D_SVT_INT64	= 61,
+        D3D_SVT_UINT64	= 62,
         D3D10_SVT_VOID	= D3D_SVT_VOID,
         D3D10_SVT_BOOL	= D3D_SVT_BOOL,
         D3D10_SVT_INT	= D3D_SVT_INT,

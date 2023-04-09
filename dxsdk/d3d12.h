@@ -1,6 +1,7 @@
 /*-------------------------------------------------------------------------------------
  *
  * Copyright (c) Microsoft Corporation
+ * Licensed under the MIT license
  *
  *-------------------------------------------------------------------------------------*/
 
@@ -1103,7 +1104,7 @@ extern "C"{
 
 #define	D3D12_RS_SET_SHADING_RATE_COMBINER_COUNT	( 2 )
 
-#define	D3D12_SDK_VERSION	( 3 )
+#define	D3D12_SDK_VERSION	( 5 )
 
 #define	D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES	( 32 )
 
@@ -2068,6 +2069,7 @@ enum D3D12_FEATURE
         D3D12_FEATURE_SERIALIZATION	= 24,
         D3D12_FEATURE_CROSS_NODE	= 25,
         D3D12_FEATURE_D3D12_OPTIONS5	= 27,
+        D3D12_FEATURE_DISPLAYABLE	= 28,
         D3D12_FEATURE_D3D12_OPTIONS6	= 30,
         D3D12_FEATURE_QUERY_META_COMMAND	= 31,
         D3D12_FEATURE_D3D12_OPTIONS7	= 32,
@@ -2075,7 +2077,8 @@ enum D3D12_FEATURE
         D3D12_FEATURE_PROTECTED_RESOURCE_SESSION_TYPES	= 34,
         D3D12_FEATURE_D3D12_OPTIONS8	= 36,
         D3D12_FEATURE_D3D12_OPTIONS9	= 37,
-        D3D12_FEATURE_WAVE_MMA	= 38
+        D3D12_FEATURE_D3D12_OPTIONS10	= 39,
+        D3D12_FEATURE_D3D12_OPTIONS11	= 40
     } 	D3D12_FEATURE;
 
 typedef 
@@ -2337,7 +2340,9 @@ enum D3D12_SHADER_CACHE_SUPPORT_FLAGS
         D3D12_SHADER_CACHE_SUPPORT_LIBRARY	= 0x2,
         D3D12_SHADER_CACHE_SUPPORT_AUTOMATIC_INPROC_CACHE	= 0x4,
         D3D12_SHADER_CACHE_SUPPORT_AUTOMATIC_DISK_CACHE	= 0x8,
-        D3D12_SHADER_CACHE_SUPPORT_DRIVER_MANAGED_CACHE	= 0x10
+        D3D12_SHADER_CACHE_SUPPORT_DRIVER_MANAGED_CACHE	= 0x10,
+        D3D12_SHADER_CACHE_SUPPORT_SHADER_CONTROL_CLEAR	= 0x20,
+        D3D12_SHADER_CACHE_SUPPORT_SHADER_SESSION_DELETE	= 0x40
     } 	D3D12_SHADER_CACHE_SUPPORT_FLAGS;
 
 DEFINE_ENUM_FLAG_OPERATORS( D3D12_SHADER_CACHE_SUPPORT_FLAGS );
@@ -2388,6 +2393,12 @@ enum D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER
         D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_1	= ( D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_0 + 1 ) ,
         D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_2	= ( D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_1 + 1 ) 
     } 	D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER;
+
+typedef struct D3D12_FEATURE_DATA_DISPLAYABLE
+    {
+    _Out_  BOOL DisplayableTexture;
+    _Out_  D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER SharedResourceCompatibilityTier;
+    } 	D3D12_FEATURE_DATA_DISPLAYABLE;
 
 typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS4
     {
@@ -2508,44 +2519,16 @@ typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS9
     _Out_  D3D12_WAVE_MMA_TIER WaveMMATier;
     } 	D3D12_FEATURE_DATA_D3D12_OPTIONS9;
 
-typedef 
-enum D3D12_WAVE_MMA_INPUT_DATATYPE
+typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS10
     {
-        D3D12_WAVE_MMA_INPUT_DATATYPE_INVALID	= 0,
-        D3D12_WAVE_MMA_INPUT_DATATYPE_BYTE	= ( D3D12_WAVE_MMA_INPUT_DATATYPE_INVALID + 1 ) ,
-        D3D12_WAVE_MMA_INPUT_DATATYPE_FLOAT16	= ( D3D12_WAVE_MMA_INPUT_DATATYPE_BYTE + 1 ) ,
-        D3D12_WAVE_MMA_INPUT_DATATYPE_FLOAT	= ( D3D12_WAVE_MMA_INPUT_DATATYPE_FLOAT16 + 1 ) 
-    } 	D3D12_WAVE_MMA_INPUT_DATATYPE;
+    _Out_  BOOL VariableRateShadingSumCombinerSupported;
+    _Out_  BOOL MeshShaderPerPrimitiveShadingRateSupported;
+    } 	D3D12_FEATURE_DATA_D3D12_OPTIONS10;
 
-typedef 
-enum D3D12_WAVE_MMA_DIMENSION
+typedef struct D3D12_FEATURE_DATA_D3D12_OPTIONS11
     {
-        D3D12_WAVE_MMA_DIMENSION_INVALID	= 0,
-        D3D12_WAVE_MMA_DIMENSION_16	= ( D3D12_WAVE_MMA_DIMENSION_INVALID + 1 ) ,
-        D3D12_WAVE_MMA_DIMENSION_64	= ( D3D12_WAVE_MMA_DIMENSION_16 + 1 ) 
-    } 	D3D12_WAVE_MMA_DIMENSION;
-
-typedef 
-enum D3D12_WAVE_MMA_ACCUM_DATATYPE
-    {
-        D3D12_WAVE_MMA_ACCUM_DATATYPE_NONE	= 0,
-        D3D12_WAVE_MMA_ACCUM_DATATYPE_INT32	= 0x1,
-        D3D12_WAVE_MMA_ACCUM_DATATYPE_FLOAT16	= 0x2,
-        D3D12_WAVE_MMA_ACCUM_DATATYPE_FLOAT	= 0x4
-    } 	D3D12_WAVE_MMA_ACCUM_DATATYPE;
-
-DEFINE_ENUM_FLAG_OPERATORS( D3D12_WAVE_MMA_ACCUM_DATATYPE );
-typedef struct D3D12_FEATURE_DATA_WAVE_MMA
-    {
-    _In_  D3D12_WAVE_MMA_INPUT_DATATYPE InputDataType;
-    _In_  D3D12_WAVE_MMA_DIMENSION M;
-    _In_  D3D12_WAVE_MMA_DIMENSION N;
-    _Out_  BOOL Supported;
-    _Out_  UINT K;
-    _Out_  D3D12_WAVE_MMA_ACCUM_DATATYPE AccumDataTypes;
-    _Out_  UINT RequiredWaveLaneCountMin;
-    _Out_  UINT RequiredWaveLaneCountMax;
-    } 	D3D12_FEATURE_DATA_WAVE_MMA;
+    _Out_  BOOL AtomicInt64OnDescriptorHeapResourceSupported;
+    } 	D3D12_FEATURE_DATA_D3D12_OPTIONS11;
 
 typedef struct D3D12_RESOURCE_ALLOCATION_INFO
     {
@@ -21251,9 +21234,9 @@ HRESULT WINAPI D3D12GetDebugInterface( _In_ REFIID riid, _COM_Outptr_opt_ void**
 // --------------------------------------------------------------------------------------------------------------------------------
 HRESULT WINAPI D3D12EnableExperimentalFeatures(
     UINT                                    NumFeatures,
-    __in_ecount(NumFeatures) const IID*     pIIDs,
-    __in_ecount_opt(NumFeatures) void*      pConfigurationStructs,
-    __in_ecount_opt(NumFeatures) UINT*      pConfigurationStructSizes);
+    _In_count_(NumFeatures) const IID*     pIIDs,
+    _In_opt_count_(NumFeatures) void*      pConfigurationStructs,
+    _In_opt_count_(NumFeatures) UINT*      pConfigurationStructSizes);
 
 // --------------------------------------------------------------------------------------------------------------------------------
 // Experimental Feature: D3D12ExperimentalShaderModels

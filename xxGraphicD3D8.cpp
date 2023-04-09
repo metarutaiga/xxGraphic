@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : Direct3D 8.0 Source
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #ifndef _M_IX86
@@ -555,7 +555,7 @@ void* xxMapTextureD3D8(uint64_t device, uint64_t texture, int* stride, int level
             break;
 
         D3DLOCKED_RECT rect = {};
-        HRESULT hResult = d3dTexture->LockRect(level, &rect, nullptr, D3DLOCK_DISCARD);
+        HRESULT hResult = d3dTexture->LockRect(level, &rect, nullptr, level ? 0 : D3DLOCK_DISCARD);
         if (hResult != S_OK)
             break;
 
@@ -569,7 +569,7 @@ void* xxMapTextureD3D8(uint64_t device, uint64_t texture, int* stride, int level
             break;
 
         D3DLOCKED_RECT rect = {};
-        HRESULT hResult = d3dCubeTexture->LockRect((D3DCUBEMAP_FACES)array, level, &rect, nullptr, D3DLOCK_DISCARD);
+        HRESULT hResult = d3dCubeTexture->LockRect((D3DCUBEMAP_FACES)array, level, &rect, nullptr, level ? 0 : D3DLOCK_DISCARD);
         if (hResult != S_OK)
             break;
 
@@ -583,7 +583,7 @@ void* xxMapTextureD3D8(uint64_t device, uint64_t texture, int* stride, int level
             break;
 
         D3DLOCKED_BOX box = {};
-        HRESULT hResult = d3dVolumeTexture->LockBox(level, &box, nullptr, D3DLOCK_DISCARD);
+        HRESULT hResult = d3dVolumeTexture->LockBox(level, &box, nullptr, level ? 0 : D3DLOCK_DISCARD);
         if (hResult != S_OK)
             break;
 
@@ -826,7 +826,7 @@ void xxSetPipelineD3D8(uint64_t commandEncoder, uint64_t pipeline)
     d3dDevice->SetPixelShader(d3dPipeline->pixelShader);
     d3dDevice->SetRenderState(D3DRS_FOGENABLE, FALSE);
     d3dDevice->SetRenderState(D3DRS_SPECULARENABLE, FALSE);
-    d3dDevice->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+    d3dDevice->SetRenderState(D3DRS_CULLMODE, d3dPipeline->renderState.cull ? D3DCULL_CCW : D3DCULL_NONE);
     d3dDevice->SetRenderState(D3DRS_ZENABLE, d3dPipeline->renderState.depthEnable);
     if (d3dPipeline->renderState.depthEnable)
     {

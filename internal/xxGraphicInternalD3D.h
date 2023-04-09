@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : Direct3D Internal Header
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #pragma once
@@ -803,19 +803,17 @@ struct D3D12RESOURCE
 struct D3D10TEXTURE
 {
     ID3D10ShaderResourceView*   resourceView;
-    ID3D10Texture1D*            texture1D;
-    ID3D10Texture2D*            texture2D;
-    ID3D10Texture3D*            texture3D;
-    unsigned int                mipmap;
+    ID3D10Resource*             textureGPU;
+    ID3D10Resource*             textureCPU;
+    UINT                        mipmap;
 };
 //------------------------------------------------------------------------------
 struct D3D11TEXTURE
 {
     ID3D11ShaderResourceView*   resourceView;
-    ID3D11Texture1D*            texture1D;
-    ID3D11Texture2D*            texture2D;
-    ID3D11Texture3D*            texture3D;
-    unsigned int                mipmap;
+    ID3D11Resource*             textureGPU;
+    ID3D11Resource*             textureCPU;
+    UINT                        mipmap;
 };
 //------------------------------------------------------------------------------
 struct D3D12TEXTURE
@@ -826,9 +824,8 @@ struct D3D12TEXTURE
     UINT                        width;
     UINT                        height;
     UINT                        depth;
+    UINT                        mipmap;
     ID3D12Resource*             upload;
-    UINT                        uploadPitch;
-    UINT                        uploadSize;
 };
 //==============================================================================
 //  Sampler

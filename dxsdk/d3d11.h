@@ -1263,7 +1263,9 @@ enum D3D11_RESOURCE_MISC_FLAG
         D3D11_RESOURCE_MISC_GUARDED	= 0x8000L,
         D3D11_RESOURCE_MISC_TILE_POOL	= 0x20000L,
         D3D11_RESOURCE_MISC_TILED	= 0x40000L,
-        D3D11_RESOURCE_MISC_HW_PROTECTED	= 0x80000L
+        D3D11_RESOURCE_MISC_HW_PROTECTED	= 0x80000L,
+        D3D11_RESOURCE_MISC_SHARED_DISPLAYABLE	= 0x100000L,
+        D3D11_RESOURCE_MISC_SHARED_EXCLUSIVE_WRITER	= 0x200000L
     } 	D3D11_RESOURCE_MISC_FLAG;
 
 typedef 
@@ -3591,14 +3593,14 @@ struct CD3D11_SHADER_RESOURCE_VIEW_DESC : public D3D11_SHADER_RESOURCE_VIEW_DESC
         UINT arraySize = -1 )
     {
         ViewDimension = viewDimension;
-        if (DXGI_FORMAT_UNKNOWN == format || -1 == mipLevels ||
-            (-1 == arraySize && D3D11_SRV_DIMENSION_TEXTURE1DARRAY == viewDimension))
+        if (DXGI_FORMAT_UNKNOWN == format || (UINT)-1 == mipLevels ||
+            ((UINT)-1 == arraySize && D3D11_SRV_DIMENSION_TEXTURE1DARRAY == viewDimension))
         {
             D3D11_TEXTURE1D_DESC TexDesc;
             pTex1D->GetDesc( &TexDesc );
             if (DXGI_FORMAT_UNKNOWN == format) format = TexDesc.Format;
-            if (-1 == mipLevels) mipLevels = TexDesc.MipLevels - mostDetailedMip;
-            if (-1 == arraySize) arraySize = TexDesc.ArraySize - firstArraySlice;
+            if ((UINT)-1 == mipLevels) mipLevels = TexDesc.MipLevels - mostDetailedMip;
+            if ((UINT)-1 == arraySize) arraySize = TexDesc.ArraySize - firstArraySlice;
         }
         Format = format;
         switch (viewDimension)
@@ -3627,10 +3629,10 @@ struct CD3D11_SHADER_RESOURCE_VIEW_DESC : public D3D11_SHADER_RESOURCE_VIEW_DESC
     {
         ViewDimension = viewDimension;
         if (DXGI_FORMAT_UNKNOWN == format || 
-            (-1 == mipLevels &&
+            ((UINT)-1 == mipLevels &&
                 D3D11_SRV_DIMENSION_TEXTURE2DMS != viewDimension &&
                 D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY != viewDimension) ||
-            (-1 == arraySize &&
+            ((UINT)-1 == arraySize &&
                 (D3D11_SRV_DIMENSION_TEXTURE2DARRAY == viewDimension ||
                 D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY == viewDimension ||
                 D3D11_SRV_DIMENSION_TEXTURECUBEARRAY == viewDimension)))
@@ -3638,8 +3640,8 @@ struct CD3D11_SHADER_RESOURCE_VIEW_DESC : public D3D11_SHADER_RESOURCE_VIEW_DESC
             D3D11_TEXTURE2D_DESC TexDesc;
             pTex2D->GetDesc( &TexDesc );
             if (DXGI_FORMAT_UNKNOWN == format) format = TexDesc.Format;
-            if (-1 == mipLevels) mipLevels = TexDesc.MipLevels - mostDetailedMip;
-            if (-1 == arraySize)
+            if ((UINT)-1 == mipLevels) mipLevels = TexDesc.MipLevels - mostDetailedMip;
+            if ((UINT)-1 == arraySize)
             {
                 arraySize = TexDesc.ArraySize - firstArraySlice;
                 if (D3D11_SRV_DIMENSION_TEXTURECUBEARRAY == viewDimension) arraySize /= 6;
@@ -3684,12 +3686,12 @@ struct CD3D11_SHADER_RESOURCE_VIEW_DESC : public D3D11_SHADER_RESOURCE_VIEW_DESC
         UINT mipLevels = -1 )
     {
         ViewDimension = D3D11_SRV_DIMENSION_TEXTURE3D;
-        if (DXGI_FORMAT_UNKNOWN == format || -1 == mipLevels)
+        if (DXGI_FORMAT_UNKNOWN == format || (UINT)-1 == mipLevels)
         {
             D3D11_TEXTURE3D_DESC TexDesc;
             pTex3D->GetDesc( &TexDesc );
             if (DXGI_FORMAT_UNKNOWN == format) format = TexDesc.Format;
-            if (-1 == mipLevels) mipLevels = TexDesc.MipLevels - mostDetailedMip;
+            if ((UINT)-1 == mipLevels) mipLevels = TexDesc.MipLevels - mostDetailedMip;
         }
         Format = format;
         Texture3D.MostDetailedMip = mostDetailedMip;
@@ -3997,12 +3999,12 @@ struct CD3D11_RENDER_TARGET_VIEW_DESC : public D3D11_RENDER_TARGET_VIEW_DESC
     {
         ViewDimension = viewDimension;
         if (DXGI_FORMAT_UNKNOWN == format ||
-            (-1 == arraySize && D3D11_RTV_DIMENSION_TEXTURE1DARRAY == viewDimension))
+            ((UINT)-1 == arraySize && D3D11_RTV_DIMENSION_TEXTURE1DARRAY == viewDimension))
         {
             D3D11_TEXTURE1D_DESC TexDesc;
             pTex1D->GetDesc( &TexDesc );
             if (DXGI_FORMAT_UNKNOWN == format) format = TexDesc.Format;
-            if (-1 == arraySize) arraySize = TexDesc.ArraySize - firstArraySlice;
+            if ((UINT)-1 == arraySize) arraySize = TexDesc.ArraySize - firstArraySlice;
         }
         Format = format;
         switch (viewDimension)
@@ -4028,14 +4030,14 @@ struct CD3D11_RENDER_TARGET_VIEW_DESC : public D3D11_RENDER_TARGET_VIEW_DESC
     {
         ViewDimension = viewDimension;
         if (DXGI_FORMAT_UNKNOWN == format || 
-            (-1 == arraySize &&
+            ((UINT)-1 == arraySize &&
                 (D3D11_RTV_DIMENSION_TEXTURE2DARRAY == viewDimension ||
                 D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY == viewDimension)))
         {
             D3D11_TEXTURE2D_DESC TexDesc;
             pTex2D->GetDesc( &TexDesc );
             if (DXGI_FORMAT_UNKNOWN == format) format = TexDesc.Format;
-            if (-1 == arraySize) arraySize = TexDesc.ArraySize - firstArraySlice;
+            if ((UINT)-1 == arraySize) arraySize = TexDesc.ArraySize - firstArraySlice;
         }
         Format = format;
         switch (viewDimension)
@@ -4065,12 +4067,12 @@ struct CD3D11_RENDER_TARGET_VIEW_DESC : public D3D11_RENDER_TARGET_VIEW_DESC
         UINT wSize = -1 )
     {
         ViewDimension = D3D11_RTV_DIMENSION_TEXTURE3D;
-        if (DXGI_FORMAT_UNKNOWN == format || -1 == wSize)
+        if (DXGI_FORMAT_UNKNOWN == format || (UINT)-1 == wSize)
         {
             D3D11_TEXTURE3D_DESC TexDesc;
             pTex3D->GetDesc( &TexDesc );
             if (DXGI_FORMAT_UNKNOWN == format) format = TexDesc.Format;
-            if (-1 == wSize) wSize = TexDesc.Depth - firstWSlice;
+            if ((UINT)-1 == wSize) wSize = TexDesc.Depth - firstWSlice;
         }
         Format = format;
         Texture3D.MipSlice = mipSlice;
@@ -4493,12 +4495,12 @@ struct CD3D11_DEPTH_STENCIL_VIEW_DESC : public D3D11_DEPTH_STENCIL_VIEW_DESC
         ViewDimension = viewDimension;
         Flags = flags;
         if (DXGI_FORMAT_UNKNOWN == format ||
-            (-1 == arraySize && D3D11_DSV_DIMENSION_TEXTURE1DARRAY == viewDimension))
+            ((UINT)-1 == arraySize && D3D11_DSV_DIMENSION_TEXTURE1DARRAY == viewDimension))
         {
             D3D11_TEXTURE1D_DESC TexDesc;
             pTex1D->GetDesc( &TexDesc );
             if (DXGI_FORMAT_UNKNOWN == format) format = TexDesc.Format;
-            if (-1 == arraySize) arraySize = TexDesc.ArraySize - firstArraySlice;
+            if ((UINT)-1 == arraySize) arraySize = TexDesc.ArraySize - firstArraySlice;
         }
         Format = format;
         switch (viewDimension)
@@ -4526,14 +4528,14 @@ struct CD3D11_DEPTH_STENCIL_VIEW_DESC : public D3D11_DEPTH_STENCIL_VIEW_DESC
         ViewDimension = viewDimension;
         Flags = flags;
         if (DXGI_FORMAT_UNKNOWN == format || 
-            (-1 == arraySize &&
+            ((UINT)-1 == arraySize &&
                 (D3D11_DSV_DIMENSION_TEXTURE2DARRAY == viewDimension ||
                 D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY == viewDimension)))
         {
             D3D11_TEXTURE2D_DESC TexDesc;
             pTex2D->GetDesc( &TexDesc );
             if (DXGI_FORMAT_UNKNOWN == format) format = TexDesc.Format;
-            if (-1 == arraySize) arraySize = TexDesc.ArraySize - firstArraySlice;
+            if ((UINT)-1 == arraySize) arraySize = TexDesc.ArraySize - firstArraySlice;
         }
         Format = format;
         switch (viewDimension)
@@ -4843,12 +4845,12 @@ struct CD3D11_UNORDERED_ACCESS_VIEW_DESC : public D3D11_UNORDERED_ACCESS_VIEW_DE
     {
         ViewDimension = viewDimension;
         if (DXGI_FORMAT_UNKNOWN == format ||
-            (-1 == arraySize && D3D11_UAV_DIMENSION_TEXTURE1DARRAY == viewDimension))
+            ((UINT)-1 == arraySize && D3D11_UAV_DIMENSION_TEXTURE1DARRAY == viewDimension))
         {
             D3D11_TEXTURE1D_DESC TexDesc;
             pTex1D->GetDesc( &TexDesc );
             if (DXGI_FORMAT_UNKNOWN == format) format = TexDesc.Format;
-            if (-1 == arraySize) arraySize = TexDesc.ArraySize - firstArraySlice;
+            if ((UINT)-1 == arraySize) arraySize = TexDesc.ArraySize - firstArraySlice;
         }
         Format = format;
         switch (viewDimension)
@@ -4874,12 +4876,12 @@ struct CD3D11_UNORDERED_ACCESS_VIEW_DESC : public D3D11_UNORDERED_ACCESS_VIEW_DE
     {
         ViewDimension = viewDimension;
         if (DXGI_FORMAT_UNKNOWN == format || 
-            (-1 == arraySize && D3D11_UAV_DIMENSION_TEXTURE2DARRAY == viewDimension))
+            ((UINT)-1 == arraySize && D3D11_UAV_DIMENSION_TEXTURE2DARRAY == viewDimension))
         {
             D3D11_TEXTURE2D_DESC TexDesc;
             pTex2D->GetDesc( &TexDesc );
             if (DXGI_FORMAT_UNKNOWN == format) format = TexDesc.Format;
-            if (-1 == arraySize) arraySize = TexDesc.ArraySize - firstArraySlice;
+            if ((UINT)-1 == arraySize) arraySize = TexDesc.ArraySize - firstArraySlice;
         }
         Format = format;
         switch (viewDimension)
@@ -4903,12 +4905,12 @@ struct CD3D11_UNORDERED_ACCESS_VIEW_DESC : public D3D11_UNORDERED_ACCESS_VIEW_DE
         UINT wSize = -1 )
     {
         ViewDimension = D3D11_UAV_DIMENSION_TEXTURE3D;
-        if (DXGI_FORMAT_UNKNOWN == format || -1 == wSize)
+        if (DXGI_FORMAT_UNKNOWN == format || (UINT)-1 == wSize)
         {
             D3D11_TEXTURE3D_DESC TexDesc;
             pTex3D->GetDesc( &TexDesc );
             if (DXGI_FORMAT_UNKNOWN == format) format = TexDesc.Format;
-            if (-1 == wSize) wSize = TexDesc.Depth - firstWSlice;
+            if ((UINT)-1 == wSize) wSize = TexDesc.Depth - firstWSlice;
         }
         Format = format;
         Texture3D.MipSlice = mipSlice;
@@ -7536,7 +7538,8 @@ enum D3D11_FEATURE
         D3D11_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT	= ( D3D11_FEATURE_D3D11_OPTIONS3 + 1 ) ,
         D3D11_FEATURE_D3D11_OPTIONS4	= ( D3D11_FEATURE_GPU_VIRTUAL_ADDRESS_SUPPORT + 1 ) ,
         D3D11_FEATURE_SHADER_CACHE	= ( D3D11_FEATURE_D3D11_OPTIONS4 + 1 ) ,
-        D3D11_FEATURE_D3D11_OPTIONS5	= ( D3D11_FEATURE_SHADER_CACHE + 1 ) 
+        D3D11_FEATURE_D3D11_OPTIONS5	= ( D3D11_FEATURE_SHADER_CACHE + 1 ) ,
+        D3D11_FEATURE_DISPLAYABLE	= ( D3D11_FEATURE_D3D11_OPTIONS5 + 1 ) 
     } 	D3D11_FEATURE;
 
 typedef struct D3D11_FEATURE_DATA_THREADING
@@ -7714,6 +7717,12 @@ enum D3D11_SHARED_RESOURCE_TIER
         D3D11_SHARED_RESOURCE_TIER_2	= ( D3D11_SHARED_RESOURCE_TIER_1 + 1 ) ,
         D3D11_SHARED_RESOURCE_TIER_3	= ( D3D11_SHARED_RESOURCE_TIER_2 + 1 ) 
     } 	D3D11_SHARED_RESOURCE_TIER;
+
+typedef struct D3D11_FEATURE_DATA_DISPLAYABLE
+    {
+    BOOL DisplayableTexture;
+    D3D11_SHARED_RESOURCE_TIER SharedResourceTier;
+    } 	D3D11_FEATURE_DATA_DISPLAYABLE;
 
 typedef struct D3D11_FEATURE_DATA_D3D11_OPTIONS5
     {
@@ -14974,6 +14983,7 @@ enum D3D11_CREATE_DEVICE_FLAG
 #include "d3d11sdklayers.h" 
 #endif 
 #include "d3d10_1.h"
+#include "d3d10misc.h" 
 
 ///////////////////////////////////////////////////////////////////////////
 // D3D11CreateDevice

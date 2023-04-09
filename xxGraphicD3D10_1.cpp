@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : Direct3D 10.1 Source
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "xxSystem.h"

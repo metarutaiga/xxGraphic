@@ -1,10 +1,10 @@
 //==============================================================================
 // xxGraphic : Image Source
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
-#include "../xxGraphic.h"
+#include "xxGraphic.h"
 #include "xxImage.h"
 
 //==============================================================================
@@ -31,12 +31,16 @@ xxImage::xxImage(uint32_t format, uint32_t width, uint32_t height, uint32_t dept
         size_t size = xxSizeOf(uint32_t) * width * height * depth * array;
         m_images[i].resize(size);
 
-        width <<= 1;
-        height <<= 1;
-        depth <<= 1;
+        width >>= 1;
+        height >>= 1;
+        depth >>= 1;
     }
 
     m_imageModified = true;
+
+    m_clampU = true;
+    m_clampV = true;
+    m_clampW = true;
 
     m_device = 0;
     m_texture = 0;
@@ -102,9 +106,39 @@ void* xxImage::operator () (uint32_t x, uint32_t y, uint32_t z, uint32_t mipmap,
     std::vector<char>& image = m_images[mipmap];
     if (image.empty())
         return nullptr;
-    char* ptr = &image.front();
+    char* ptr = image.data();
 
     return ptr + offset * xxSizeOf(uint32_t);
+}
+//------------------------------------------------------------------------------
+bool xxImage::GetClampU() const
+{
+    return m_clampU;
+}
+//------------------------------------------------------------------------------
+bool xxImage::GetClampV() const
+{
+    return m_clampV;
+}
+//------------------------------------------------------------------------------
+bool xxImage::GetClampW() const
+{
+    return m_clampW;
+}
+//------------------------------------------------------------------------------
+void xxImage::SetClampU(bool clampU)
+{
+    m_clampU = clampU;
+}
+//------------------------------------------------------------------------------
+void xxImage::SetClampV(bool clampV)
+{
+    m_clampV = clampV;
+}
+//------------------------------------------------------------------------------
+void xxImage::SetClampW(bool clampW)
+{
+    m_clampW = clampW;
 }
 //------------------------------------------------------------------------------
 uint64_t xxImage::GetTexture() const
@@ -127,7 +161,7 @@ void xxImage::Update(uint64_t device)
     }
     if (m_sampler == 0)
     {
-        m_sampler = xxCreateSampler(m_device, true, true, true, true, true, true, 1);
+        m_sampler = xxCreateSampler(m_device, m_clampU, m_clampV, m_clampW, true, true, true, 1);
     }
 
     if (m_imageModified == false)
@@ -147,18 +181,25 @@ void xxImage::Update(uint64_t device)
             if (target == nullptr)
                 continue;
 
-            uint32_t levelWidth = (m_width << mipmap);
-            uint32_t levelHeight = (m_height << mipmap);
-            uint32_t levelDepth = (m_depth << mipmap);
+            uint32_t levelWidth = (m_width >> mipmap);
+            uint32_t levelHeight = (m_height >> mipmap);
+            uint32_t levelDepth = (m_depth >> mipmap);
             if (levelWidth == 0)
                 levelWidth = 1;
             if (levelHeight == 0)
                 levelHeight = 1;
             if (levelDepth == 0)
                 levelDepth = 1;
-            uint32_t size = levelWidth * levelHeight * levelDepth * sizeof(int);
 
-            memcpy(target, source, size);
+            for (uint32_t depth = 0; depth < levelDepth; ++depth)
+            {
+                for (uint32_t height = 0; height < levelHeight; ++height)
+                {
+                    memcpy(target, source, levelWidth * sizeof(int));
+                    source = (char*)source + levelWidth * sizeof(int);
+                    target = (char*)target + stride;
+                }
+            }
 
             xxUnmapTexture(m_device, m_texture, mipmap, array);
         }

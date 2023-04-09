@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : OpenGL ES 2.0 Source
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #undef  GL_ES_VERSION_2_0
@@ -578,6 +578,16 @@ void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, int level, int array
         return;
 #endif
 
+    unsigned int width = glTexture->width >> level;
+    unsigned int height = glTexture->height >> level;
+    unsigned int depth = glTexture->depth >> level;
+    if (width == 0)
+        width = 1;
+    if (height == 0)
+        height = 1;
+    if (depth == 0)
+        depth = 1;
+
     if (glTexture->depth == 1 && glTexture->array == 1)
     {
         glBindTexture(GL_TEXTURE_2D, glTexture->texture);
@@ -592,7 +602,7 @@ void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, int level, int array
 #else
         int format = GL_RGBA;
 #endif
-        glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, glTexture->width, glTexture->height, 0, format, GL_UNSIGNED_BYTE, glTexture->memory);
+        glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, width, height, 0, format, GL_UNSIGNED_BYTE, glTexture->memory);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
@@ -610,7 +620,7 @@ void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, int level, int array
 #else
         int format = GL_RGBA;
 #endif
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + array, level, GL_RGBA, glTexture->width, glTexture->height, 0, format, GL_UNSIGNED_BYTE, glTexture->memory);
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + array, level, GL_RGBA, width, height, 0, format, GL_UNSIGNED_BYTE, glTexture->memory);
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
 

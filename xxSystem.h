@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : System Header
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #pragma once
@@ -60,6 +60,7 @@
 #   include <intrin.h>
 #   define NOMINMAX
 #   define WIN32_LEAN_AND_MEAN
+#   define _USE_MATH_DEFINES
 #   define xxWINDOWS 1
 #endif
 

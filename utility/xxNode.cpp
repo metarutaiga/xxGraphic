@@ -1,10 +1,13 @@
 //==============================================================================
 // xxGraphic : Node Source
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
-#include "../xxGraphic.h"
+#include "xxGraphic.h"
+#include "xxImage.h"
+#include "xxMaterial.h"
+#include "xxMesh.h"
 #include "xxNode.h"
 
 //==============================================================================
@@ -21,17 +24,10 @@ xxNode::xxNode()
     m_legacyScale = -1.0f;
 
     m_linearMatrixCreate = false;
-
-#if 0
-    xxLog("xxNode", "Constructor : %p", this);
-#endif
 }
 //------------------------------------------------------------------------------
 xxNode::~xxNode()
 {
-#if 0
-    xxLog("xxNode", "Destructor : %p", this);
-#endif
 }
 //------------------------------------------------------------------------------
 xxNodePtr xxNode::Create()
@@ -216,7 +212,7 @@ void xxNode::CreateLinearMatrix()
     };
 
     // Root
-    xxMatrix4* linearMatrix = &newLinearMatrix.front();
+    xxMatrix4* linearMatrix = newLinearMatrix.data();
     linearMatrix[0] = (*m_localMatrix);
     linearMatrix[1] = (*m_worldMatrix);
     m_localMatrix = &linearMatrix[0];
@@ -242,7 +238,7 @@ bool xxNode::UpdateMatrix()
         CreateLinearMatrix();
     }
 
-    xxMatrix4* linearMatrix = m_linearMatrix.empty() ? nullptr : &m_linearMatrix.front();
+    xxMatrix4* linearMatrix = m_linearMatrix.empty() ? nullptr : m_linearMatrix.data();
     if (linearMatrix)
     {
         // Root
@@ -318,7 +314,12 @@ float xxNode::GetScale() const
 void xxNode::SetRotate(const xxMatrix3& rotate)
 {
     if (m_legacyScale < 0.0f)
-        CreateRotateTranslateScale();
+    {
+        (*m_localMatrix)._[0] = { rotate._[0].x, rotate._[0].y, rotate._[0].z };
+        (*m_localMatrix)._[1] = { rotate._[1].x, rotate._[1].y, rotate._[1].z };
+        (*m_localMatrix)._[2] = { rotate._[2].x, rotate._[2].y, rotate._[2].z };
+        return;
+    }
 
     m_legacyRotate = rotate;
 }
@@ -326,49 +327,74 @@ void xxNode::SetRotate(const xxMatrix3& rotate)
 void xxNode::SetTranslate(const xxVector3& translate)
 {
     if (m_legacyScale < 0.0f)
-        CreateRotateTranslateScale();
+    {
+        (*m_localMatrix)._[3] = { translate.x, translate.y, translate.z, 1.0f };
+        return;
+    }
 
     m_legacyTranslate = translate;
 }
 //------------------------------------------------------------------------------
 void xxNode::SetScale(float scale)
 {
-    if (m_legacyScale < 0.0f)
-        CreateRotateTranslateScale();
+    CreateRotateTranslateScale();
 
     m_legacyScale = scale;
 }
 //------------------------------------------------------------------------------
 void xxNode::CreateRotateTranslateScale()
 {
+    if (m_legacyScale >= 0.0f)
+        return;
+
     (*m_localMatrix).FastDecompose(m_legacyRotate, m_legacyTranslate, m_legacyScale);
 }
 //------------------------------------------------------------------------------
 void xxNode::UpdateRotateTranslateScale()
 {
-    for (int i = 0; i < 3; ++i)
-    {
-        (*m_localMatrix)._[i] = xxVector4{ m_legacyRotate._[i].x, m_legacyRotate._[i].y, m_legacyRotate._[i].z } * m_legacyScale;
-    }
-    (*m_localMatrix)._[3] = { m_legacyTranslate.x, m_legacyTranslate.y, m_legacyTranslate.z, 1.0f };
+    if (m_legacyScale < 0.0f)
+        return;
+
+    (*m_localMatrix)._[0] = xxVector4{ m_legacyRotate._[0].x, m_legacyRotate._[0].y, m_legacyRotate._[0].z } * m_legacyScale;
+    (*m_localMatrix)._[1] = xxVector4{ m_legacyRotate._[1].x, m_legacyRotate._[1].y, m_legacyRotate._[1].z } * m_legacyScale;
+    (*m_localMatrix)._[2] = xxVector4{ m_legacyRotate._[2].x, m_legacyRotate._[2].y, m_legacyRotate._[2].z } * m_legacyScale;
+    (*m_localMatrix)._[3] = xxVector4{ m_legacyTranslate.x, m_legacyTranslate.y, m_legacyTranslate.z, 1.0f };
 }
 //------------------------------------------------------------------------------
-xxImage* xxNode::GetImage(size_t index) const
+xxImagePtr xxNode::GetImage(size_t index) const
 {
     if (m_images.size() <= index)
         return nullptr;
 
-    return m_images[index].get();
+    return m_images[index];
 }
 //------------------------------------------------------------------------------
-xxMaterial* xxNode::GetMaterial() const
+xxMaterialPtr xxNode::GetMaterial() const
 {
-    return m_material.get();
+    return m_material;
 }
 //------------------------------------------------------------------------------
-xxMesh* xxNode::GetMesh() const
+xxMeshPtr xxNode::GetMesh() const
 {
-    return m_mesh.get();
+    return m_mesh;
+}
+//------------------------------------------------------------------------------
+void xxNode::SetImage(size_t index, const xxImagePtr& image)
+{
+    if (m_images.size() <= index) {
+        m_images.resize(index + 1);
+    }
+    m_images[index] = image;
+}
+//------------------------------------------------------------------------------
+void xxNode::SetMaterial(const xxMaterialPtr& material)
+{
+    m_material = material;
+}
+//------------------------------------------------------------------------------
+void xxNode::SetMesh(const xxMeshPtr& mesh)
+{
+    m_mesh = mesh;
 }
 //------------------------------------------------------------------------------
 void xxNode::Update(float time, bool updateMatrix)
@@ -388,7 +414,7 @@ void xxNode::Update(float time, bool updateMatrix)
     }
 }
 //------------------------------------------------------------------------------
-void xxNode::Draw(uint64_t device, uint64_t commandEncoder)
+void xxNode::Draw(uint64_t device, uint64_t commandEncoder, const xxCameraPtr& camera)
 {
     if (m_material == nullptr || m_mesh == nullptr)
         return;
@@ -404,13 +430,15 @@ void xxNode::Draw(uint64_t device, uint64_t commandEncoder)
         textures[i] = image->GetTexture();
         samplers[i] = image->GetSampler();
     }
+
+    m_mesh->Update(*this, device);
+    m_material->Update(*this, device, camera);
+
+    m_material->Draw(commandEncoder);
+
     xxSetFragmentTextures(commandEncoder, textureCount, textures);
     xxSetFragmentSamplers(commandEncoder, textureCount, samplers);
 
-    m_mesh->Update(*this, device);
-    m_material->Update(*this, device);
-
-    m_material->Draw(commandEncoder);
     m_mesh->Draw(commandEncoder);
 }
 //------------------------------------------------------------------------------

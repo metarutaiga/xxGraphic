@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : Direct3D 12.0 Source
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "xxSystem.h"
@@ -1062,7 +1062,7 @@ uint64_t xxCreateTextureD3D12(uint64_t device, int format, int width, int height
         desc.Width = width;
         desc.Height = height;
         desc.DepthOrArraySize = 1;
-        desc.MipLevels = 1;
+        desc.MipLevels = mipmap;
         desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
         desc.SampleDesc.Count = 1;
 
@@ -1093,9 +1093,8 @@ uint64_t xxCreateTextureD3D12(uint64_t device, int format, int width, int height
     d3dTexture->width = width;
     d3dTexture->height = height;
     d3dTexture->depth = depth;
+    d3dTexture->mipmap = mipmap;
     d3dTexture->upload = nullptr;
-    d3dTexture->uploadPitch = (width * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
-    d3dTexture->uploadSize = height * d3dTexture->uploadPitch;
 
     createShaderHeap(d3dTexture->textureCPUHandle, d3dTexture->textureGPUHandle);
     d3dDevice->CreateShaderResourceView(d3dResource, &viewDesc, d3dTexture->textureCPUHandle);
@@ -1129,6 +1128,17 @@ void* xxMapTextureD3D12(uint64_t device, uint64_t texture, int* stride, int leve
     if (d3dTexture == nullptr)
         return nullptr;
 
+    unsigned int width = d3dTexture->width >> level;
+    unsigned int height = d3dTexture->height >> level;
+    unsigned int depth = d3dTexture->depth >> level;
+    if (width == 0)
+        width = 1;
+    if (height == 0)
+        height = 1;
+    if (depth == 0)
+        depth = 1;
+    unsigned int pitch = (width * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
+
     if (d3dTexture->upload == nullptr)
     {
         D3D12_HEAP_PROPERTIES properties = {};
@@ -1138,7 +1148,7 @@ void* xxMapTextureD3D12(uint64_t device, uint64_t texture, int* stride, int leve
 
         D3D12_RESOURCE_DESC desc = {};
         desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-        desc.Width = d3dTexture->uploadSize;
+        desc.Width = pitch * height * depth;
         desc.Height = 1;
         desc.DepthOrArraySize = 1;
         desc.MipLevels = 1;
@@ -1156,7 +1166,7 @@ void* xxMapTextureD3D12(uint64_t device, uint64_t texture, int* stride, int leve
     if (hResult != S_OK)
         return nullptr;
 
-    (*stride) = d3dTexture->uploadPitch;
+    (*stride) = pitch;
     return ptr;
 }
 //------------------------------------------------------------------------------
@@ -1181,27 +1191,42 @@ void xxUnmapTextureD3D12(uint64_t device, uint64_t texture, int level, int array
         HRESULT hResult = d3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator, nullptr, IID_PPV_ARGS(&commandList));
         if (hResult == S_OK)
         {
+            unsigned int width = d3dTexture->width >> level;
+            unsigned int height = d3dTexture->height >> level;
+            unsigned int depth = d3dTexture->depth >> level;
+            if (width == 0)
+                width = 1;
+            if (height == 0)
+                height = 1;
+            if (depth == 0)
+                depth = 1;
+            unsigned int pitch = (width * 4 + D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u) & ~(D3D12_TEXTURE_DATA_PITCH_ALIGNMENT - 1u);
+
             D3D12_TEXTURE_COPY_LOCATION textureLocation = {};
             D3D12_TEXTURE_COPY_LOCATION uploadLocation = {};
             textureLocation.pResource = d3dTexture->texture;
             textureLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+            textureLocation.SubresourceIndex = level;
             uploadLocation.pResource = d3dTexture->upload;
             uploadLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
             uploadLocation.PlacedFootprint.Footprint.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-            uploadLocation.PlacedFootprint.Footprint.Width = d3dTexture->width;
-            uploadLocation.PlacedFootprint.Footprint.Height = d3dTexture->height;
-            uploadLocation.PlacedFootprint.Footprint.Depth = d3dTexture->depth;
-            uploadLocation.PlacedFootprint.Footprint.RowPitch = d3dTexture->uploadPitch;
+            uploadLocation.PlacedFootprint.Footprint.Width = width;
+            uploadLocation.PlacedFootprint.Footprint.Height = height;
+            uploadLocation.PlacedFootprint.Footprint.Depth = depth;
+            uploadLocation.PlacedFootprint.Footprint.RowPitch = pitch;
             commandList->CopyTextureRegion(&textureLocation, 0, 0, 0, &uploadLocation, nullptr);
 
-            D3D12_RESOURCE_BARRIER barrier = {};
-            barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-            barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-            barrier.Transition.pResource = d3dTexture->texture;
-            barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-            barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-            barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-            commandList->ResourceBarrier(1, &barrier);
+            if (d3dTexture->mipmap == level + 1)
+            {
+                D3D12_RESOURCE_BARRIER barrier = {};
+                barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+                barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+                barrier.Transition.pResource = d3dTexture->texture;
+                barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+                barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+                barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+                commandList->ResourceBarrier(1, &barrier);
+            }
 
             commandList->Close();
             g_commandQueue->ExecuteCommandLists(1, (ID3D12CommandList**)&commandList);
@@ -1230,11 +1255,12 @@ uint64_t xxCreateSamplerD3D12(uint64_t device, bool clampU, bool clampV, bool cl
     desc.AddressU = clampU ? D3D12_TEXTURE_ADDRESS_MODE_CLAMP : D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     desc.AddressV = clampV ? D3D12_TEXTURE_ADDRESS_MODE_CLAMP : D3D12_TEXTURE_ADDRESS_MODE_WRAP;
     desc.AddressW = clampW ? D3D12_TEXTURE_ADDRESS_MODE_CLAMP : D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-    desc.MaxAnisotropy = anisotropy;
-    desc.ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+    desc.MaxLOD = D3D12_FLOAT32_MAX;
+    desc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
     if (anisotropy > 1)
     {
         desc.Filter = D3D12_ENCODE_ANISOTROPIC_FILTER(D3D12_FILTER_REDUCTION_TYPE_STANDARD);
+        desc.MaxAnisotropy = anisotropy;
     }
 
     D3D12_CPU_DESCRIPTOR_HANDLE samplerCPUHandle;
@@ -1384,7 +1410,7 @@ uint64_t xxCreateRasterizerStateD3D12(uint64_t device, bool cull, bool scissor)
 
     D3D12_RASTERIZER_DESC& desc = (*d3dDesc);
     desc.FillMode = D3D12_FILL_MODE_SOLID;
-    desc.CullMode = D3D12_CULL_MODE_NONE;
+    desc.CullMode = cull ? D3D12_CULL_MODE_BACK : D3D12_CULL_MODE_NONE;
     desc.DepthClipEnable = true;
 
     return reinterpret_cast<uint64_t>(d3dDesc);

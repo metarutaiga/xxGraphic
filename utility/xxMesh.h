@@ -1,21 +1,12 @@
 //==============================================================================
 // xxGraphic : Mesh Header
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #pragma once
 
-#include "../xxSystem.h"
-#include "xxMath.h"
-
-#include <memory>
-#include <vector>
-
-class xxNode;
-
-class xxMesh;
-typedef std::shared_ptr<xxMesh> xxMeshPtr;
+#include "xxUtility.h"
 
 template<class T>
 struct xxStrideIterator;
@@ -27,24 +18,25 @@ public:
 
     static xxMeshPtr Create(int color, int normal, int texture);
 
+    typedef uint16_t IndexType;
+
     uint32_t                    GetVertexCount() const;
     void                        SetVertexCount(uint32_t count);
 
     uint32_t                    GetIndexCount() const;
     void                        SetIndexCount(uint32_t count);
 
-    xxStrideIterator<xxVector2> GetVertex() const;
+    xxStrideIterator<xxVector3> GetVertex() const;
     xxStrideIterator<uint32_t>  GetColor(int index) const;
     xxStrideIterator<xxVector3> GetNormal(int index) const;
     xxStrideIterator<xxVector2> GetTexture(int index) const;
+
+    IndexType*                  GetIndex() const;
 
     uint64_t                    GetVertexAttribute() const;
 
     void                        Update(xxNode& node, uint64_t device);
     void                        Draw(uint64_t commandEncoder, int instanceCount = 1, int firstIndex = 0, int vertexOffset = 0, int firstInstance = 0);
-
-public:
-    typedef uint16_t IndexType;
 
 protected:
     xxMesh(int color, int normal, int texture);
@@ -91,6 +83,13 @@ struct xxStrideIterator
     {
         m_now = reinterpret_cast<T*>(reinterpret_cast<char*>(m_now) + m_stride);
         return (*this);
+    }
+
+    xxStrideIterator operator ++ (int)
+    {
+        xxStrideIterator iterator = (*this);
+        m_now = reinterpret_cast<T*>(reinterpret_cast<char*>(m_now) + m_stride);
+        return iterator;
     }
 
     void toBegin()

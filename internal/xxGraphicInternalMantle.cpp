@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : Mantle Internal Source
 //
-// Copyright (c) 2019-2021 TAiGA
+// Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "xxGraphicInternalMantle.h"
