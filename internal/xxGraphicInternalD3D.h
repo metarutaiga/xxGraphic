@@ -286,10 +286,25 @@ interface DECLSPEC_UUID("DBB84C27-36CE-4FC9-B801-F048C46AC570") ID3D12MetaComman
 interface DECLSPEC_UUID("8754318e-d3a9-4541-98cf-645b50dc4874") ID3D12GraphicsCommandList4;
 interface DECLSPEC_UUID("28e2495d-0f64-4ae4-a6ec-129255dc49a8") ID3D12ShaderCacheSession;
 interface DECLSPEC_UUID("4c80e962-f032-4f60-bc9e-ebc2cfa1d83c") ID3D12Device9;
+interface DECLSPEC_UUID("517f8718-aa66-49f9-b02b-a7ab89c06031") ID3D12Device10;
+interface DECLSPEC_UUID("5405c344-d457-444e-b4dd-2366e45aee39") ID3D12Device11;
+interface DECLSPEC_UUID("5af5c532-4c91-4cd0-b541-15a405395fc5") ID3D12Device12;
+interface DECLSPEC_UUID("14eecffc-4df8-40f7-a118-5c816f45695e") ID3D12Device13;
+interface DECLSPEC_UUID("bc66d368-7373-4943-8757-fc87dc79e476") ID3D12VirtualizationGuestDevice;
+interface DECLSPEC_UUID("5f6e592d-d895-44c2-8e4a-88ad4926d323") ID3D12DeviceExperimental;
 interface DECLSPEC_UUID("7071e1f0-e84b-4b33-974f-12fa49de65c5") ID3D12Tools;
 interface DECLSPEC_UUID("e9eb5314-33aa-42b2-a718-d77f58b1f1c7") ID3D12SDKConfiguration;
+interface DECLSPEC_UUID("8aaf9303-ad25-48b9-9a57-d9c37e009d9f") ID3D12SDKConfiguration1;
+interface DECLSPEC_UUID("61f307d3-d34e-4e7c-8374-3ba4de23cccb") ID3D12DeviceFactory;
+interface DECLSPEC_UUID("78dbf87b-f766-422b-a61c-c8c446bdb9ad") ID3D12DeviceConfiguration;
+interface DECLSPEC_UUID("ed342442-6343-4e16-bb82-a3a577874e56") ID3D12DeviceConfiguration1;
 interface DECLSPEC_UUID("55050859-4024-474c-87f5-6472eaee44ea") ID3D12GraphicsCommandList5;
 interface DECLSPEC_UUID("c3827890-e548-4cfa-96cf-5689a9370f80") ID3D12GraphicsCommandList6;
+interface DECLSPEC_UUID("dd171223-8b61-4769-90e3-160ccde4e2c1") ID3D12GraphicsCommandList7;
+interface DECLSPEC_UUID("ee936ef9-599d-4d28-938e-23c4ad05ce51") ID3D12GraphicsCommandList8;
+interface DECLSPEC_UUID("34ed2808-ffe6-4c2b-b11a-cabd2b0c59e1") ID3D12GraphicsCommandList9;
+interface DECLSPEC_UUID("7013c015-d161-4b63-a08c-238552dd8acc") ID3D12GraphicsCommandListExperimental;
+
 #ifndef __d3d12_h__
 typedef struct D3D12_INPUT_ELEMENT_DESC
 {

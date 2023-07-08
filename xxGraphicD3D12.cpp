@@ -338,6 +338,26 @@ uint64_t xxCreateDeviceD3D12(uint64_t instance)
     IUnknown* unknown = nullptr;
     xxLocalBreak()
     {
+        if (d3dDevice->QueryInterface(__uuidof(ID3D12Device13*), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.13", xxGetDeviceName());
+            break;
+        }
+        if (d3dDevice->QueryInterface(__uuidof(ID3D12Device12*), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.12", xxGetDeviceName());
+            break;
+        }
+        if (d3dDevice->QueryInterface(__uuidof(ID3D12Device11*), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.11", xxGetDeviceName());
+            break;
+        }
+        if (d3dDevice->QueryInterface(__uuidof(ID3D12Device10*), (void**)&unknown) == S_OK)
+        {
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.10", xxGetDeviceName());
+            break;
+        }
         if (d3dDevice->QueryInterface(__uuidof(ID3D12Device9*), (void**)&unknown) == S_OK)
         {
             xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.9", xxGetDeviceName());
