@@ -4,9 +4,6 @@
 // Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
-#ifndef _M_IX86
-#define xxAPI extern "C"
-#endif
 #define DIRECTDRAW_VERSION          0x600
 #define DIRECT3D_VERSION            0x600
 #define D3D_OVERLOADS

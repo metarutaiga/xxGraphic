@@ -4,9 +4,6 @@
 // Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
-#ifndef _M_IX86
-#define xxAPI extern "C"
-#endif
 #define DIRECTDRAW_VERSION          0x500
 #define DIRECT3D_VERSION            0x500
 #define D3D_OVERLOADS
@@ -361,7 +358,7 @@ uint64_t xxBeginRenderPassD3D5(uint64_t commandBuffer, uint64_t framebuffer, uin
     LPDIRECT3DDEVICE2 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE2>(commandBuffer);
     if (d3dDevice == nullptr)
         return 0;
-    D3DFRAMEBUFFER3* d3dFramebuffer = reinterpret_cast<D3DFRAMEBUFFER3*>(framebuffer);
+    D3DFRAMEBUFFER2* d3dFramebuffer = reinterpret_cast<D3DFRAMEBUFFER2*>(framebuffer);
     if (d3dFramebuffer == nullptr)
         return 0;
     DWORD d3dFlags = static_cast<DWORD>(renderPass);
@@ -465,7 +462,7 @@ uint64_t xxCreateIndexBufferD3D5(uint64_t device, int size)
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexBufferD3D5(uint64_t device, int size, uint64_t vertexAttribute)
 {
-    D3DVERTEXATTRIBUTE3 d3dVertexAttribute = { vertexAttribute };
+    D3DVERTEXATTRIBUTE2 d3dVertexAttribute = { vertexAttribute };
     if (d3dVertexAttribute.stride == 0)
         return 0;
     D3DVERTEXBUFFER2* d3dVertexBuffer = xxAlloc(D3DVERTEXBUFFER2);
@@ -676,7 +673,7 @@ void xxDestroyShaderD3D5(uint64_t device, uint64_t shader)
 //==============================================================================
 uint64_t xxCreateBlendStateD3D5(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha)
 {
-    D3DRENDERSTATE3 d3dRenderState = {};
+    D3DRENDERSTATE2 d3dRenderState = {};
     d3dRenderState.blendSourceColor = d3dBlendFactor(sourceColor);
     d3dRenderState.blendDestinationColor = d3dBlendFactor(destinationColor);
     d3dRenderState.blendEnable = (d3dRenderState.blendSourceColor != D3DBLEND_ONE ||
@@ -686,7 +683,7 @@ uint64_t xxCreateBlendStateD3D5(uint64_t device, const char* sourceColor, const 
 //------------------------------------------------------------------------------
 uint64_t xxCreateDepthStencilStateD3D5(uint64_t device, const char* depthTest, bool depthWrite)
 {
-    D3DRENDERSTATE3 d3dRenderState = {};
+    D3DRENDERSTATE2 d3dRenderState = {};
     d3dRenderState.depthTest = d3dCompareOp(depthTest);
     d3dRenderState.depthWrite = depthWrite;
     d3dRenderState.depthEnable = (d3dRenderState.depthTest != D3DCMP_ALWAYS ||
@@ -696,7 +693,7 @@ uint64_t xxCreateDepthStencilStateD3D5(uint64_t device, const char* depthTest, b
 //------------------------------------------------------------------------------
 uint64_t xxCreateRasterizerStateD3D5(uint64_t device, bool cull, bool scissor)
 {
-    D3DRENDERSTATE3 d3dRenderState = {};
+    D3DRENDERSTATE2 d3dRenderState = {};
     d3dRenderState.cull = cull;
     d3dRenderState.scissor = scissor;
     return static_cast<uint64_t>(d3dRenderState.value);
@@ -704,15 +701,15 @@ uint64_t xxCreateRasterizerStateD3D5(uint64_t device, bool cull, bool scissor)
 //------------------------------------------------------------------------------
 uint64_t xxCreatePipelineD3D5(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
 {
-    D3DPIPELINE3* d3dPipeline = xxAlloc(D3DPIPELINE3);
+    D3DPIPELINE2* d3dPipeline = xxAlloc(D3DPIPELINE2);
     if (d3dPipeline == nullptr)
         return 0;
 
     DWORD d3dVertexShader                           = static_cast<DWORD>(vertexShader);
     DWORD d3dPixelShader                            = static_cast<DWORD>(fragmentShader);
-    D3DRENDERSTATE3 d3dBlendState                   = { blendState };
-    D3DRENDERSTATE3 d3dDepthStencilState            = { depthStencilState };
-    D3DRENDERSTATE3 d3dRasterizerState              = { rasterizerState };
+    D3DRENDERSTATE2 d3dBlendState                   = { blendState };
+    D3DRENDERSTATE2 d3dDepthStencilState            = { depthStencilState };
+    D3DRENDERSTATE2 d3dRasterizerState              = { rasterizerState };
     d3dPipeline->renderState.blendEnable            = d3dBlendState.blendEnable;
     d3dPipeline->renderState.blendSourceColor       = d3dBlendState.blendSourceColor;
     d3dPipeline->renderState.blendDestinationColor  = d3dBlendState.blendDestinationColor;
@@ -742,7 +739,7 @@ void xxDestroyRasterizerStateD3D5(uint64_t rasterizerState)
 //------------------------------------------------------------------------------
 void xxDestroyPipelineD3D5(uint64_t pipeline)
 {
-    D3DPIPELINE3* d3dPipeline = reinterpret_cast<D3DPIPELINE3*>(pipeline);
+    D3DPIPELINE2* d3dPipeline = reinterpret_cast<D3DPIPELINE2*>(pipeline);
 
     xxFree(d3dPipeline);
 }
@@ -799,7 +796,7 @@ void xxSetScissorD3D5(uint64_t commandEncoder, int x, int y, int width, int heig
 void xxSetPipelineD3D5(uint64_t commandEncoder, uint64_t pipeline)
 {
     LPDIRECT3DDEVICE2 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE2>(commandEncoder);
-    D3DPIPELINE3* d3dPipeline = reinterpret_cast<D3DPIPELINE3*>(pipeline);
+    D3DPIPELINE2* d3dPipeline = reinterpret_cast<D3DPIPELINE2*>(pipeline);
 
     d3dDevice->SetRenderState(D3DRENDERSTATE_SHADEMODE, D3DSHADE_GOURAUD);
     d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREMAPBLEND, D3DTBLEND_MODULATE);
@@ -824,7 +821,7 @@ void xxSetVertexBuffersD3D5(uint64_t commandEncoder, int count, const uint64_t* 
 {
     LPDIRECT3DDEVICE2 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE2>(commandEncoder);
     D3DVERTEXBUFFER2* d3dVertexBuffer = reinterpret_cast<D3DVERTEXBUFFER2*>(getResourceData(buffers[0]));
-    D3DVERTEXATTRIBUTE3 d3dVertexAttribute = { vertexAttribute };
+    D3DVERTEXATTRIBUTE2 d3dVertexAttribute = { vertexAttribute };
 
     if (d3dVertexBuffer && d3dVertexBuffer->dirty)
     {

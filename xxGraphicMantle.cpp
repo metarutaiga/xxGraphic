@@ -4,9 +4,6 @@
 // Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
-#if !defined(_M_IX86) && !defined(_M_AMD64)
-#define xxAPI extern
-#endif
 #include "internal/xxGraphicInternalMantle.h"
 #include "xxGraphicMantleAsm.h"
 #include "xxGraphicMantle.h"
