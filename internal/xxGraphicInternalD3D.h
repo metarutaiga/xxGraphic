@@ -12,6 +12,13 @@
 #define COM_NO_WINDOWS_H
 #include <objbase.h>
 
+#pragma const_seg(".rdata$uuid")
+#undef IID_PPV_ARGS
+#define IID_PPV_ARGS(ppType) __uuidof(decltype(**ppType)), IID_PPV_ARGS_Helper(ppType)
+template<class T> inline REFIID ___uuidof() { return __uuidof(T); }
+#define __uuidof(v) ___uuidof<v>()
+#pragma const_seg()
+
 // DirectDraw
 interface DECLSPEC_UUID("6C14DB80-A733-11CE-A521-0020AF0BE560") IDirectDraw;
 interface DECLSPEC_UUID("B3A6F3E0-2B43-11CF-A2DE-00AA00B93356") IDirectDraw2;
@@ -359,7 +366,7 @@ inline void PatchD3DIM(const char* name)
     char* codeBase = (char*)d3dim + ntHeader->OptionalHeader.BaseOfCode;
     DWORD codeSize = ntHeader->OptionalHeader.SizeOfCode;
 
-    const BYTE wantedBytes[] = { 0xB8, 0x00, 0x08, 0x00, 0x00, 0x39 };
+    static const BYTE wantedBytes[] = { 0xB8, 0x00, 0x08, 0x00, 0x00, 0x39 };
     for (DWORD i = 0, size = codeSize - sizeof(wantedBytes); i < size; ++i)
     {
         if (memcmp(codeBase + i, wantedBytes, sizeof(wantedBytes)) == 0)
@@ -747,8 +754,8 @@ typedef D3DVERTEXATTRIBUTE2 D3DVERTEXATTRIBUTE9;
 //------------------------------------------------------------------------------
 struct D3DVERTEXATTRIBUTE8PS
 {
-    DWORD   declaration[16];
-    int     stride;
+    DWORD               declaration[16];
+    int                 stride;
 };
 //------------------------------------------------------------------------------
 struct D3DVERTEXATTRIBUTE9PS
@@ -867,7 +874,7 @@ typedef D3DSAMPLER2 D3DSAMPLER9;
 //==============================================================================
 //  Pipeline
 //==============================================================================
-union D3DRENDERSTATE3
+union D3DRENDERSTATE2
 {
     uint64_t        value;
     struct
@@ -887,22 +894,31 @@ union D3DRENDERSTATE3
     };
 };
 //------------------------------------------------------------------------------
-typedef D3DRENDERSTATE3 D3DRENDERSTATE7;
-typedef D3DRENDERSTATE3 D3DRENDERSTATE8;
-typedef D3DRENDERSTATE3 D3DRENDERSTATE9;
+typedef D3DRENDERSTATE2 D3DRENDERSTATE3;
+typedef D3DRENDERSTATE2 D3DRENDERSTATE7;
+typedef D3DRENDERSTATE2 D3DRENDERSTATE8;
+typedef D3DRENDERSTATE2 D3DRENDERSTATE9;
+//------------------------------------------------------------------------------
+struct D3DPIPELINE2
+{
+    D3DRENDERSTATE2             renderState;
+};
 //------------------------------------------------------------------------------
 struct D3DPIPELINE3
 {
-    D3DRENDERSTATE3 renderState;
+    D3DRENDERSTATE3             renderState;
 };
 //------------------------------------------------------------------------------
-typedef D3DPIPELINE3 D3DPIPELINE7;
+struct D3DPIPELINE7
+{
+    D3DRENDERSTATE7             renderState;
+};
 //------------------------------------------------------------------------------
 struct D3DPIPELINE8
 {
-    DWORD           vertexShader;
-    DWORD           pixelShader;
-    D3DRENDERSTATE8 renderState;
+    DWORD                       vertexShader;
+    DWORD                       pixelShader;
+    D3DRENDERSTATE8             renderState;
 };
 //------------------------------------------------------------------------------
 struct D3DPIPELINE9
