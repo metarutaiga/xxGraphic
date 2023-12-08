@@ -20,11 +20,16 @@ public:
 
     typedef uint16_t IndexType;
 
-    uint32_t                    GetVertexCount() const;
-    void                        SetVertexCount(uint32_t count);
+    void                        Update(xxNode& node, uint64_t device);
+    void                        Draw(uint64_t commandEncoder, int instanceCount = 1, int firstIndex = 0, int vertexOffset = 0, int firstInstance = 0);
 
-    uint32_t                    GetIndexCount() const;
-    void                        SetIndexCount(uint32_t count);
+    uint64_t                    GetVertexAttribute() const;
+
+    int                         GetVertexCount() const;
+    void                        SetVertexCount(int count);
+
+    int                         GetIndexCount() const;
+    void                        SetIndexCount(int count);
 
     xxStrideIterator<xxVector3> GetVertex() const;
     xxStrideIterator<uint32_t>  GetColor(int index) const;
@@ -33,34 +38,32 @@ public:
 
     IndexType*                  GetIndex() const;
 
-    uint64_t                    GetVertexAttribute() const;
-
-    void                        Update(xxNode& node, uint64_t device);
-    void                        Draw(uint64_t commandEncoder, int instanceCount = 1, int firstIndex = 0, int vertexOffset = 0, int firstInstance = 0);
-
 protected:
     xxMesh(int color, int normal, int texture);
 
-    std::vector<char>           m_vertex;
-    std::vector<IndexType>      m_index;
+    uint64_t                    m_device = 0;
+    uint64_t                    m_vertexAttribute = 0;
+    uint64_t                    m_vertexBuffers[4] = {};
+    uint64_t                    m_indexBuffers[4] = {};
 
-    bool                        m_vertexDataModified;
-    bool                        m_vertexSizeChanged;
-    bool                        m_indexDataModified;
-    bool                        m_indexSizeChanged;
+    char*                       m_vertex = nullptr;
+    IndexType*                  m_index = nullptr;
 
-    char                        m_vertexBufferIndex;
-    char                        m_indexBufferIndex;
+    int                         m_vertexCount = 0;
+    int                         m_indexCount = 0;
 
-    uint64_t                    m_device;
-    uint64_t                    m_vertexAttribute;
-    uint64_t                    m_vertexBuffers[4];
-    uint64_t                    m_indexBuffers[4];
+    bool                        m_vertexDataModified = false;
+    bool                        m_vertexSizeChanged = false;
+    bool                        m_indexDataModified = false;
+    bool                        m_indexSizeChanged = false;
 
-    int                         m_stride;
-    int                         m_colorCount;
-    int                         m_normalCount;
-    int                         m_textureCount;
+    char                        m_vertexBufferIndex = 0;
+    char                        m_indexBufferIndex = 0;
+
+    int                         m_stride = 0;
+    int                         m_colorCount = 0;
+    int                         m_normalCount = 0;
+    int                         m_textureCount = 0;
 };
 
 template<class T>

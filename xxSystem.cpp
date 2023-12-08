@@ -78,8 +78,8 @@ void* xxAlignedRealloc(void* ptr, size_t size, size_t alignment)
         if (alignedPtr != nullptr)
         {
             memcpy(alignedPtr, newPtr, size);
+            free(newPtr);
         }
-        free(newPtr);
         newPtr = alignedPtr;
     }
     return newPtr;
