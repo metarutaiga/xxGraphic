@@ -15,42 +15,32 @@ public:
 
     static xxCameraPtr Create();
 
-    const xxMatrix4& GetViewMatrix() const;
-    const xxMatrix4& GetProjectionMatrix() const;
+    void        Update();
 
-    void SetViewportMatrix(float fromWidth, float fromHeight, float toX, float toY, float toWidth, float toHeight);
+    void        LookAt(const xxVector3& worldPoint, const xxVector3& worldUp);
 
-    const xxVector3& GetRight() const;
-    const xxVector3& GetUp() const;
-    const xxVector3& GetDirection() const;
-    const xxVector3& GetLocation() const;
-    void SetRight(const xxVector3& right);
-    void SetUp(const xxVector3& up);
-    void SetDirection(const xxVector3& direction);
-    void SetLocation(const xxVector3& location);
+    void        SetFOV(float aspect, float fov, float far);
+    void        SetViewportMatrix(float fromWidth, float fromHeight, float toX, float toY, float toWidth, float toHeight);
 
-    void Update();
-    void LookAt(const xxVector3& worldPoint, const xxVector3& worldUp);
-    void SetFOV(float aspect, float fov, float far);
-
-    xxVector3 GetScreenToWorldPos(float x, float y) const;
+    xxVector3   GetScreenToWorldPos(float x, float y) const;
 
 protected:
     xxCamera();
 
-    xxVector3   m_right;
-    xxVector3   m_up;
-    xxVector3   m_direction;
-    xxVector3   m_location;
+public:
+    xxMatrix4   m_viewMatrix = xxMatrix4::IDENTITY;
+    xxMatrix4   m_projectionMatrix = xxMatrix4::IDENTITY;
+    xxMatrix4   m_viewportMatrix = xxMatrix4::IDENTITY;
 
-    float       m_frustumLeft;
-    float       m_frustumRight;
-    float       m_frustumBottom;
-    float       m_frustumTop;
-    float       m_frustumNear;
-    float       m_frustumFar;
+    xxVector3   m_right = { 0, 0, 1 };
+    xxVector3   m_up = { 0, 1, 0 };
+    xxVector3   m_direction = { 1, 0, 0 };
+    xxVector3   m_location = { 0, 0, 0 };
 
-    xxMatrix4   m_viewMatrix;
-    xxMatrix4   m_projectionMatrix;
-    xxMatrix4   m_viewportMatrix;
+    float       m_frustumLeft = -0.5f;
+    float       m_frustumRight = 0.5f;
+    float       m_frustumBottom = -0.5f;
+    float       m_frustumTop = 0.5f;
+    float       m_frustumNear = 1.0f;
+    float       m_frustumFar = 1000.0f;
 };

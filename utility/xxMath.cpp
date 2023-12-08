@@ -290,4 +290,21 @@ void xxMatrix4::MultiplyArray(size_t count, const xxMatrix4* __restrict input, i
         output = reinterpret_cast<xxMatrix4*>((char*)output + outputStride);
     }
 }
+//------------------------------------------------------------------------------
+void xxMatrix4::MultiplyLink(size_t count, const xxMatrix4* __restrict input, int inputStride, xxMatrix4* __restrict output, int outputStride) const
+{
+    xxMatrix4 matrix(*this);
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        (*output)._[0].v = __builtin_multiplyvector(&matrix._->v, (*input)._[0].v);
+        (*output)._[1].v = __builtin_multiplyvector(&matrix._->v, (*input)._[1].v);
+        (*output)._[2].v = __builtin_multiplyvector(&matrix._->v, (*input)._[2].v);
+        (*output)._[3].v = __builtin_multiplyvector(&matrix._->v, (*input)._[3].v);
+        matrix = (*output);
+
+        input = reinterpret_cast<xxMatrix4*>((char*)input + inputStride);
+        output = reinterpret_cast<xxMatrix4*>((char*)output + outputStride);
+    }
+}
 //==============================================================================

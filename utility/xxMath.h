@@ -493,6 +493,7 @@ struct xxPlusAPI xxMatrix4x4
     void            FastDecompose   (xxMatrix3& rotate, xxVector3& translate, float& scale) const;
     void            MultiplyArray   (size_t count, const xxVector4* input, int inputStride, xxVector4* output, int outputStride) const;
     void            MultiplyArray   (size_t count, const xxMatrix4* input, int inputStride, xxMatrix4* output, int outputStride) const;
+    void            MultiplyLink    (size_t count, const xxMatrix4* input, int inputStride, xxMatrix4* output, int outputStride) const;
 
     static const xxMatrix4x4 IDENTITY;
 };

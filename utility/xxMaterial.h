@@ -15,40 +15,34 @@ public:
 
     static xxMaterialPtr Create();
 
-    bool            GetAlphaBlending() const;
-    void            SetAlphaBlending(bool alphaBlending);
-
-    const char*     GetDepthTest() const;
-    void            SetDepthTest(const char* depthTest);
-    bool            GetDepthWrite() const;
-    void            SetDepthWrite(bool depthWrite);
-
-    bool            GetCull() const;
-    void            SetCull(bool cull);
-    bool            GetScissor() const;
-    void            SetScissor(bool scissor);
-
-    void            Update(xxNode& node, uint64_t device, const xxCameraPtr& camera);
-    void            Draw(uint64_t commandEncoder);
+    void        Update(xxNode& node, uint64_t device, const xxCameraPtr& camera);
+    void        Draw(uint64_t commandEncoder);
 
 protected:
     xxMaterial();
 
-    bool            m_alphaBlending;
-    const char*     m_depthTest;
-    bool            m_depthWrite;
-    bool            m_cull;
-    bool            m_scissor;
+    uint64_t    m_device = 0;
+    uint64_t    m_blendState = 0;
+    uint64_t    m_depthStencilState = 0;
+    uint64_t    m_rasterizerState = 0;
+    uint64_t    m_vertexAttribute = 0;
+    uint64_t    m_vertexConstant = 0;
+    uint64_t    m_vertexShader = 0;
+    uint64_t    m_fragmentConstant = 0;
+    uint64_t    m_fragmentShader = 0;
+    uint64_t    m_renderPass = 0;
+    uint64_t    m_pipeline = 0;
 
-    uint64_t        m_device;
-    uint64_t        m_blendState;
-    uint64_t        m_depthStencilState;
-    uint64_t        m_rasterizerState;
-    uint64_t        m_vertexAttribute;
-    uint64_t        m_vertexConstant;
-    uint64_t        m_vertexShader;
-    uint64_t        m_fragmentConstant;
-    uint64_t        m_fragmentShader;
-    uint64_t        m_renderPass;
-    uint64_t        m_pipeline;
+public:
+    bool        m_blending = false;
+    const char* m_blendSourceColor = "SrcAlpha";
+    const char* m_blendOperationColor = "+";
+    const char* m_blendDestinationColor = "1-SrcAlpha";
+    const char* m_blendSourceAlpha = "1";
+    const char* m_blendOperationAlpha = "+";
+    const char* m_blendDestinationAlpha = "0";
+    const char* m_depthTest = "Always";
+    bool        m_depthWrite = false;
+    bool        m_cull = false;
+    bool        m_scissor = false;
 };

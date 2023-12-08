@@ -10,7 +10,7 @@
 //==============================================================================
 //  Texture
 //==============================================================================
-xxImage::xxImage(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap, uint32_t array)
+xxImage::xxImage(uint64_t format, int width, int height, int depth, int mipmap, int array)
 {
     m_format = format;
     m_width = width;
@@ -19,7 +19,7 @@ xxImage::xxImage(uint32_t format, uint32_t width, uint32_t height, uint32_t dept
     m_mipmap = mipmap;
     m_array = array;
 
-    for (uint32_t i = 0; i < mipmap; ++i)
+    for (int i = 0; i < mipmap; ++i)
     {
         if (width == 0)
             width = 1;
@@ -28,8 +28,9 @@ xxImage::xxImage(uint32_t format, uint32_t width, uint32_t height, uint32_t dept
         if (depth == 0)
             depth = 1;
 
+        xxFree(m_images[i]);
         size_t size = xxSizeOf(uint32_t) * width * height * depth * array;
-        m_images[i].resize(size);
+        m_images[i] = xxAlloc(char, size);
 
         width >>= 1;
         height >>= 1;
@@ -37,52 +38,54 @@ xxImage::xxImage(uint32_t format, uint32_t width, uint32_t height, uint32_t dept
     }
 
     m_imageModified = true;
-
-    m_clampU = true;
-    m_clampV = true;
-    m_clampW = true;
-
-    m_device = 0;
-    m_texture = 0;
-    m_sampler = 0;
 }
 //------------------------------------------------------------------------------
 xxImage::~xxImage()
 {
     xxDestroyTexture(m_texture);
     xxDestroySampler(m_sampler);
+    for (void* image : m_images)
+    {
+        xxFree(image);
+    }
 }
 //------------------------------------------------------------------------------
-xxImagePtr xxImage::Create(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap, uint32_t array)
+xxImagePtr xxImage::Create(uint64_t format, int width, int height, int depth, int mipmap, int array)
 {
-    return xxImagePtr(new xxImage(format, width, height, depth, mipmap, array));
+    xxImagePtr image = xxImagePtr(new xxImage(format, width, height, depth, mipmap, array));
+    if (image == nullptr)
+        return xxImagePtr();
+    if (image->m_images[0] == nullptr)
+        return xxImagePtr();
+
+    return image;
 }
 //------------------------------------------------------------------------------
-xxImagePtr xxImage::Create2D(uint32_t format, uint32_t width, uint32_t height, uint32_t mipmap)
+xxImagePtr xxImage::Create2D(uint64_t format, int width, int height, int mipmap)
 {
     return Create(format, width, height, 1, mipmap, 1);
 }
 //------------------------------------------------------------------------------
-xxImagePtr xxImage::Create3D(uint32_t format, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipmap)
+xxImagePtr xxImage::Create3D(uint64_t format, int width, int height, int depth, int mipmap)
 {
     return Create(format, width, height, depth, mipmap, 1);
 }
 //------------------------------------------------------------------------------
-xxImagePtr xxImage::CreateCube(uint32_t format, uint32_t width, uint32_t height, uint32_t mipmap)
+xxImagePtr xxImage::CreateCube(uint64_t format, int width, int height, int mipmap)
 {
     return Create(format, width, height, 1, mipmap, 6);
 }
 //------------------------------------------------------------------------------
-void* xxImage::operator () (uint32_t x, uint32_t y, uint32_t z, uint32_t mipmap, uint32_t array)
+void* xxImage::operator () (int x, int y, int z, int mipmap, int array)
 {
     if (array >= m_array)
         return nullptr;
     if (mipmap >= m_mipmap)
         return nullptr;
 
-    uint32_t levelWidth = (m_width << mipmap);
-    uint32_t levelHeight = (m_height << mipmap);
-    uint32_t levelDepth = (m_depth << mipmap);
+    int levelWidth = (m_width << mipmap);
+    int levelHeight = (m_height << mipmap);
+    int levelDepth = (m_depth << mipmap);
     if (levelWidth == 0)
         levelWidth = 1;
     if (levelHeight == 0)
@@ -96,59 +99,18 @@ void* xxImage::operator () (uint32_t x, uint32_t y, uint32_t z, uint32_t mipmap,
     if (z >= levelDepth)
         return nullptr;
 
-    uint32_t offset = 0;
+    int offset = 0;
     offset += z * (levelWidth * levelHeight);
     offset += y * (levelWidth);
     offset += x;
 
     if (mipmap >= xxCountOf(m_images))
         return nullptr;
-    std::vector<char>& image = m_images[mipmap];
-    if (image.empty())
+    void* image = m_images[mipmap];
+    if (image == nullptr)
         return nullptr;
-    char* ptr = image.data();
 
-    return ptr + offset * xxSizeOf(uint32_t);
-}
-//------------------------------------------------------------------------------
-bool xxImage::GetClampU() const
-{
-    return m_clampU;
-}
-//------------------------------------------------------------------------------
-bool xxImage::GetClampV() const
-{
-    return m_clampV;
-}
-//------------------------------------------------------------------------------
-bool xxImage::GetClampW() const
-{
-    return m_clampW;
-}
-//------------------------------------------------------------------------------
-void xxImage::SetClampU(bool clampU)
-{
-    m_clampU = clampU;
-}
-//------------------------------------------------------------------------------
-void xxImage::SetClampV(bool clampV)
-{
-    m_clampV = clampV;
-}
-//------------------------------------------------------------------------------
-void xxImage::SetClampW(bool clampW)
-{
-    m_clampW = clampW;
-}
-//------------------------------------------------------------------------------
-uint64_t xxImage::GetTexture() const
-{
-    return m_texture;
-}
-//------------------------------------------------------------------------------
-uint64_t xxImage::GetSampler() const
-{
-    return m_sampler;
+    return (char*)image + offset * xxSizeOf(uint32_t);
 }
 //------------------------------------------------------------------------------
 void xxImage::Update(uint64_t device)
@@ -161,16 +123,16 @@ void xxImage::Update(uint64_t device)
     }
     if (m_sampler == 0)
     {
-        m_sampler = xxCreateSampler(m_device, m_clampU, m_clampV, m_clampW, true, true, true, 1);
+        m_sampler = xxCreateSampler(m_device, m_clampU, m_clampV, m_clampW, m_filterMag, m_filterMin, m_filterMip, m_anisotropic);
     }
 
     if (m_imageModified == false)
         return;
     m_imageModified = false;
 
-    for (uint32_t array = 0; array < m_array; ++array)
+    for (int array = 0; array < m_array; ++array)
     {
-        for (uint32_t mipmap = 0; mipmap < m_mipmap; ++mipmap)
+        for (int mipmap = 0; mipmap < m_mipmap; ++mipmap)
         {
             void* source = (*this)(0, 0, 0, mipmap, array);
             if (source == nullptr)
@@ -181,9 +143,9 @@ void xxImage::Update(uint64_t device)
             if (target == nullptr)
                 continue;
 
-            uint32_t levelWidth = (m_width >> mipmap);
-            uint32_t levelHeight = (m_height >> mipmap);
-            uint32_t levelDepth = (m_depth >> mipmap);
+            int levelWidth = (m_width >> mipmap);
+            int levelHeight = (m_height >> mipmap);
+            int levelDepth = (m_depth >> mipmap);
             if (levelWidth == 0)
                 levelWidth = 1;
             if (levelHeight == 0)
@@ -191,9 +153,9 @@ void xxImage::Update(uint64_t device)
             if (levelDepth == 0)
                 levelDepth = 1;
 
-            for (uint32_t depth = 0; depth < levelDepth; ++depth)
+            for (int depth = 0; depth < levelDepth; ++depth)
             {
-                for (uint32_t height = 0; height < levelHeight; ++height)
+                for (int height = 0; height < levelHeight; ++height)
                 {
                     memcpy(target, source, levelWidth * sizeof(int));
                     source = (char*)source + levelWidth * sizeof(int);
@@ -204,5 +166,15 @@ void xxImage::Update(uint64_t device)
             xxUnmapTexture(m_device, m_texture, mipmap, array);
         }
     }
+}
+//------------------------------------------------------------------------------
+uint64_t xxImage::GetTexture() const
+{
+    return m_texture;
+}
+//------------------------------------------------------------------------------
+uint64_t xxImage::GetSampler() const
+{
+    return m_sampler;
 }
 //==============================================================================

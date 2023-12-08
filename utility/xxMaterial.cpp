@@ -15,23 +15,6 @@
 //==============================================================================
 xxMaterial::xxMaterial()
 {
-    m_alphaBlending = false;
-    m_depthTest = "Always";
-    m_depthWrite = false;
-    m_cull = false;
-    m_scissor = false;
-
-    m_device = 0;
-    m_blendState = 0;
-    m_depthStencilState = 0;
-    m_rasterizerState = 0;
-    m_vertexAttribute = 0;
-    m_vertexConstant = 0;
-    m_vertexShader = 0;
-    m_fragmentConstant = 0;
-    m_fragmentShader = 0;
-    m_renderPass = 0;
-    m_pipeline = 0;
 }
 //------------------------------------------------------------------------------
 xxMaterial::~xxMaterial()
@@ -56,56 +39,6 @@ xxMaterialPtr xxMaterial::Create()
     return material;
 }
 //------------------------------------------------------------------------------
-bool xxMaterial::GetAlphaBlending() const
-{
-    return m_alphaBlending;
-}
-//------------------------------------------------------------------------------
-void xxMaterial::SetAlphaBlending(bool alphaBlending)
-{
-    m_alphaBlending = alphaBlending;
-}
-//------------------------------------------------------------------------------
-const char* xxMaterial::GetDepthTest() const
-{
-    return m_depthTest;
-}
-//------------------------------------------------------------------------------
-void xxMaterial::SetDepthTest(const char* depthTest)
-{
-    m_depthTest = depthTest;
-}
-//------------------------------------------------------------------------------
-bool xxMaterial::GetDepthWrite() const
-{
-    return m_depthWrite;
-}
-//------------------------------------------------------------------------------
-void xxMaterial::SetDepthWrite(bool depthWrite)
-{
-    m_depthWrite = depthWrite;
-}
-//------------------------------------------------------------------------------
-bool xxMaterial::GetCull() const
-{
-    return m_cull;
-}
-//------------------------------------------------------------------------------
-void xxMaterial::SetCull(bool cull)
-{
-    m_cull = cull;
-}
-//------------------------------------------------------------------------------
-bool xxMaterial::GetScissor() const
-{
-    return m_scissor;
-}
-//------------------------------------------------------------------------------
-void xxMaterial::SetScissor(bool scissor)
-{
-    m_scissor = scissor;
-}
-//------------------------------------------------------------------------------
 void xxMaterial::Update(xxNode& node, uint64_t device, const xxCameraPtr& camera)
 {
     xxMeshPtr mesh = node.GetMesh();
@@ -121,9 +54,9 @@ void xxMaterial::Update(xxNode& node, uint64_t device, const xxCameraPtr& camera
 
     if (m_blendState == 0)
     {
-        if (m_alphaBlending)
+        if (m_blending)
         {
-            m_blendState = xxCreateBlendState(m_device, "SrcAlpha", "+", "1-SrcAlpha", "1", "+", "0");
+            m_blendState = xxCreateBlendState(m_device, m_blendSourceColor, m_blendOperationColor, m_blendDestinationColor, m_blendSourceAlpha, m_blendOperationAlpha, m_blendDestinationAlpha);
         }
         else
         {
@@ -169,8 +102,8 @@ void xxMaterial::Update(xxNode& node, uint64_t device, const xxCameraPtr& camera
         matrix[0] = node.GetWorldMatrix();
         if (camera)
         {
-            matrix[1] = camera->GetViewMatrix();
-            matrix[2] = camera->GetProjectionMatrix();
+            matrix[1] = camera->m_viewMatrix;
+            matrix[2] = camera->m_projectionMatrix;
         }
         else
         {
