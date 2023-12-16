@@ -97,7 +97,7 @@ void xxAlignedFree(void* ptr)
 //==============================================================================
 //  Library
 //==============================================================================
-void* xxLoadLibrary(const char* name)
+void* xxLoadLibrary(char const* name)
 {
 #if defined(_MSC_VER) && defined(_UNICODE)
     wchar_t temp[MAX_PATH];
@@ -113,7 +113,7 @@ void* xxLoadLibrary(const char* name)
 #endif
 }
 //------------------------------------------------------------------------------
-void* xxGetProcAddress(void* library, const char* name)
+void* xxGetProcAddress(void* library, char const* name)
 {
 #if defined(_MSC_VER)
     return GetProcAddress((HMODULE)library, name);
@@ -321,7 +321,7 @@ int xxGetIncrementThreadId()
 //==============================================================================
 //  Path
 //==============================================================================
-const char* xxGetExecutablePath()
+char const* xxGetExecutablePath()
 {
     static char path[4096];
     if (path[0] != '\0')
@@ -342,7 +342,7 @@ const char* xxGetExecutablePath()
     {
         while (fgets(path, sizeof(path), maps))
         {
-            const char* temp = nullptr;
+            char const* temp = nullptr;
             if (temp == nullptr)
                 temp = strstr(path, "/data/app/");
             if (temp == nullptr)
@@ -367,12 +367,12 @@ const char* xxGetExecutablePath()
     return path;
 }
 //------------------------------------------------------------------------------
-char* xxOpenDirectory(uint64_t* handle, const char* path, ...)
+char* xxOpenDirectory(uint64_t* handle, char const* path, ...)
 {
     if (handle == nullptr)
         return nullptr;
 
-    const char* filename;
+    char const* filename;
 #if defined(xxWINDOWS)
     WIN32_FIND_DATAA data;
 
@@ -413,10 +413,10 @@ char* xxOpenDirectory(uint64_t* handle, const char* path, ...)
     {
         va_list args;
         va_start(args, path);
-        while (const char* match = va_arg(args, const char*))
+        while (char const* match = va_arg(args, char const*))
         {
 #if defined(_MSC_VER)
-            auto strcasestr = [](const char* p1, const char* p2) -> const char*
+            auto strcasestr = [](char const* p1, char const* p2) -> char const*
             {
                 for (size_t p2Length = strlen(p2); (*p1); p1++)
                     if (strnicmp(p1, p2, p2Length) == 0)
@@ -482,7 +482,7 @@ void xxCloseDirectory(uint64_t* handle)
 //==============================================================================
 //  Logger
 //==============================================================================
-void xxLog(const char* tag, const char* format, ...)
+void xxLog(char const* tag, char const* format, ...)
 {
     va_list va;
     va_start(va, format);
@@ -617,10 +617,10 @@ void MD5_init(MD5_CTX* ctx)
     ctx->count = 0;
 }
 //------------------------------------------------------------------------------
-void MD5_update(MD5_CTX* ctx, const void* data, int len)
+void MD5_update(MD5_CTX* ctx, void const* data, int len)
 {
     int i = ctx->count & 63;
-    const uint8_t* p = (const uint8_t*)data;
+    uint8_t const* p = (uint8_t*)data;
 
     ctx->count += len;
 
@@ -664,7 +664,7 @@ const uint8_t* MD5_final(MD5_CTX* ctx)
     return ctx->buf;
 }
 //------------------------------------------------------------------------------
-const uint8_t* xxMD5(const void* data, int len, uint8_t* digest)
+const uint8_t* xxMD5(void const* data, int len, uint8_t* digest)
 {
     MD5_CTX ctx;
     MD5_init(&ctx);
@@ -675,7 +675,7 @@ const uint8_t* xxMD5(const void* data, int len, uint8_t* digest)
 //------------------------------------------------------------------------------
 // Copyright 2008-2016 (c), Advanced Micro Devices, Inc. All rights reserved.
 //------------------------------------------------------------------------------
-const uint8_t* xxDXBCChecksum(const void* data, int len, uint8_t* digest)
+const uint8_t* xxDXBCChecksum(void const* data, int len, uint8_t* digest)
 {
     MD5_CTX ctx;
     MD5_init(&ctx);

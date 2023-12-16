@@ -28,7 +28,7 @@ static void*            (*MTLCopyAllDevices)() = nullptr;
 //  Instance
 //==============================================================================
 static bool MTLSymbolFailed = false;
-static void* MTLSymbol(const char* name)
+static void* MTLSymbol(char const* name)
 {
     void* ptr = nullptr;
 
@@ -137,7 +137,7 @@ bool xxTestDeviceMetal(uint64_t device)
     return true;
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceNameMetal()
+char const* xxGetDeviceNameMetal()
 {
     return "Metal";
 }
@@ -489,7 +489,7 @@ void xxUnmapBufferMetal(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external)
+uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
     if (mtlDevice == nil)
@@ -666,7 +666,7 @@ void xxDestroySamplerMetal(uint64_t sampler)
 //==============================================================================
 //  Shader
 //==============================================================================
-uint64_t xxCreateVertexShaderMetal(uint64_t device, const char* shader, uint64_t vertexAttribute)
+uint64_t xxCreateVertexShaderMetal(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
     if (mtlDevice == nil)
@@ -695,7 +695,7 @@ uint64_t xxCreateVertexShaderMetal(uint64_t device, const char* shader, uint64_t
     return reinterpret_cast<uint64_t>((__bridge_retained void*)function);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateFragmentShaderMetal(uint64_t device, const char* shader)
+uint64_t xxCreateFragmentShaderMetal(uint64_t device, char const* shader)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
     if (mtlDevice == nil)
@@ -733,7 +733,7 @@ void xxDestroyShaderMetal(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateMetal(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha)
+uint64_t xxCreateBlendStateMetal(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha)
 {
     MTLRenderPipelineColorAttachmentDescriptor* desc = [classMTLRenderPipelineColorAttachmentDescriptor new];
     desc.pixelFormat = MTLPixelFormatBGRA8Unorm;
@@ -753,7 +753,7 @@ uint64_t xxCreateBlendStateMetal(uint64_t device, const char* sourceColor, const
     return reinterpret_cast<uint64_t>((__bridge_retained void*)desc);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateDepthStencilStateMetal(uint64_t device, const char* depthTest, bool depthWrite)
+uint64_t xxCreateDepthStencilStateMetal(uint64_t device, char const* depthTest, bool depthWrite)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
     if (mtlDevice == nil)

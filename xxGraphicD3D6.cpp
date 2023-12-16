@@ -192,7 +192,7 @@ bool xxTestDeviceD3D6(uint64_t device)
     return hResult == DD_OK;
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceNameD3D6()
+char const* xxGetDeviceNameD3D6()
 {
     return "Direct3D 6.0";
 }
@@ -589,7 +589,7 @@ void xxUnmapBufferD3D6(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureD3D6(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external)
+uint64_t xxCreateTextureD3D6(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external)
 {
     DDSURFACEDESC2 desc = {};
     desc.dwSize = sizeof(DDSURFACEDESC2);
@@ -698,12 +698,12 @@ void xxDestroySamplerD3D6(uint64_t sampler)
 //==============================================================================
 //  Shader
 //==============================================================================
-uint64_t xxCreateVertexShaderD3D6(uint64_t device, const char* shader, uint64_t vertexAttribute)
+uint64_t xxCreateVertexShaderD3D6(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateFragmentShaderD3D6(uint64_t device, const char* shader)
+uint64_t xxCreateFragmentShaderD3D6(uint64_t device, char const* shader)
 {
     return 0;
 }
@@ -715,7 +715,7 @@ void xxDestroyShaderD3D6(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateD3D6(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha)
+uint64_t xxCreateBlendStateD3D6(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha)
 {
     D3DRENDERSTATE3 d3dRenderState = {};
     d3dRenderState.blendSourceColor = d3dBlendFactor(sourceColor);
@@ -725,7 +725,7 @@ uint64_t xxCreateBlendStateD3D6(uint64_t device, const char* sourceColor, const 
     return static_cast<uint64_t>(d3dRenderState.value);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateDepthStencilStateD3D6(uint64_t device, const char* depthTest, bool depthWrite)
+uint64_t xxCreateDepthStencilStateD3D6(uint64_t device, char const* depthTest, bool depthWrite)
 {
     D3DRENDERSTATE3 d3dRenderState = {};
     d3dRenderState.depthTest = d3dCompareOp(depthTest);

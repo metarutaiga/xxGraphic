@@ -18,7 +18,7 @@ uint64_t    (*xxCreateDevice)(uint64_t instance);
 void        (*xxDestroyDevice)(uint64_t device);
 bool        (*xxResetDevice)(uint64_t device);
 bool        (*xxTestDevice)(uint64_t device);
-const char* (*xxGetDeviceName)();
+char const* (*xxGetDeviceName)();
 //==============================================================================
 //  Framebuffer
 //==============================================================================
@@ -60,7 +60,7 @@ void        (*xxUnmapBuffer)(uint64_t device, uint64_t buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t    (*xxCreateTexture)(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external);
+uint64_t    (*xxCreateTexture)(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external);
 void        (*xxDestroyTexture)(uint64_t texture);
 void*       (*xxMapTexture)(uint64_t device, uint64_t texture, int* stride, int level, int array);
 void        (*xxUnmapTexture)(uint64_t device, uint64_t texture, int level, int array);
@@ -72,14 +72,14 @@ void        (*xxDestroySampler)(uint64_t sampler);
 //==============================================================================
 //  Shader
 //==============================================================================
-uint64_t    (*xxCreateVertexShader)(uint64_t device, const char* shader, uint64_t vertexAttribute);
-uint64_t    (*xxCreateFragmentShader)(uint64_t device, const char* shader);
+uint64_t    (*xxCreateVertexShader)(uint64_t device, char const* shader, uint64_t vertexAttribute);
+uint64_t    (*xxCreateFragmentShader)(uint64_t device, char const* shader);
 void        (*xxDestroyShader)(uint64_t device, uint64_t shader);
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t    (*xxCreateBlendState)(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha);
-uint64_t    (*xxCreateDepthStencilState)(uint64_t device, const char* depthTest, bool depthWrite);
+uint64_t    (*xxCreateBlendState)(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha);
+uint64_t    (*xxCreateDepthStencilState)(uint64_t device, char const* depthTest, bool depthWrite);
 uint64_t    (*xxCreateRasterizerState)(uint64_t device, bool cull, bool scissor);
 uint64_t    (*xxCreatePipeline)(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
 void        (*xxDestroyBlendState)(uint64_t blendState);

@@ -15,7 +15,7 @@ xxAPI uint64_t      xxCreateInstanceMetal2();
 //==============================================================================
 //  Device
 //==============================================================================
-xxAPI const char*   xxGetDeviceNameMetal2();
+xxAPI char const*   xxGetDeviceNameMetal2();
 //==============================================================================
 //  Swapchain
 //==============================================================================
@@ -32,8 +32,8 @@ xxAPI uint64_t      xxCreateSamplerMetal2(uint64_t device, bool clampU, bool cla
 //==============================================================================
 //  Shader
 //==============================================================================
-xxAPI uint64_t      xxCreateVertexShaderMetal2(uint64_t device, const char* shader, uint64_t vertexAttribute);
-xxAPI uint64_t      xxCreateFragmentShaderMetal2(uint64_t device, const char* shader);
+xxAPI uint64_t      xxCreateVertexShaderMetal2(uint64_t device, char const* shader, uint64_t vertexAttribute);
+xxAPI uint64_t      xxCreateFragmentShaderMetal2(uint64_t device, char const* shader);
 //==============================================================================
 //  Pipeline
 //==============================================================================

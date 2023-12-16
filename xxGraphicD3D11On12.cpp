@@ -182,7 +182,7 @@ void xxDestroyDeviceD3D11On12(uint64_t device)
     SafeRelease(g_d3d12Device);
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceNameD3D11On12()
+char const* xxGetDeviceNameD3D11On12()
 {
     return "Direct3D 11On12";
 }

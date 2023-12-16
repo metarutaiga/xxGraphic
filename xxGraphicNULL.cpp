@@ -44,7 +44,7 @@ bool xxTestDeviceNULL(uint64_t device)
     return true;
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceNameNULL()
+char const* xxGetDeviceNameNULL()
 {
     return "NULL";
 }
@@ -163,7 +163,7 @@ void xxUnmapBufferNULL(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureNULL(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external)
+uint64_t xxCreateTextureNULL(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external)
 {
     return 0;
 }
@@ -197,12 +197,12 @@ void xxDestroySamplerNULL(uint64_t sampler)
 //==============================================================================
 //  Shader
 //==============================================================================
-uint64_t xxCreateVertexShaderNULL(uint64_t device, const char* shader, uint64_t vertexAttribute)
+uint64_t xxCreateVertexShaderNULL(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateFragmentShaderNULL(uint64_t device, const char* shader)
+uint64_t xxCreateFragmentShaderNULL(uint64_t device, char const* shader)
 {
     return 0;
 }
@@ -214,12 +214,12 @@ void xxDestroyShaderNULL(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateNULL(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha)
+uint64_t xxCreateBlendStateNULL(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha)
 {
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateDepthStencilStateNULL(uint64_t device, const char* depthTest, bool depthWrite)
+uint64_t xxCreateDepthStencilStateNULL(uint64_t device, char const* depthTest, bool depthWrite)
 {
     return 0;
 }

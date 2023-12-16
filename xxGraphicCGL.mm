@@ -42,7 +42,7 @@ static PFNGLSHADERSOURCEPROC glShaderSourceInternal;
 //------------------------------------------------------------------------------
 static void GL_APIENTRY cglShaderSourceLegacy(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
 {
-    const GLchar** replaceString = xxAlloc(const GLchar*, count);
+    GLchar const** replaceString = xxAlloc(GLchar const*, count);
 
     for (GLsizei i = 0; i < count; ++i)
     {
@@ -63,7 +63,7 @@ static void GL_APIENTRY cglShaderSourceLegacy(GLuint shader, GLsizei count, cons
 //------------------------------------------------------------------------------
 static void GL_APIENTRY cglShaderSource(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
 {
-    const GLchar** replaceString = xxAlloc(const GLchar*, count);
+    GLchar const** replaceString = xxAlloc(GLchar const*, count);
 
     bool fragmentShader = false;
     for (GLsizei i = 0; i < count; ++i)
@@ -132,7 +132,7 @@ static void GL_APIENTRY cglUniform4fv(GLint location, GLsizei count, const GLflo
 }
 //------------------------------------------------------------------------------
 static bool cglSymbolFailed = false;
-static void* GL_APIENTRY cglSymbolImpl(const char* name, bool* failed = nullptr)
+static void* GL_APIENTRY cglSymbolImpl(char const* name, bool* failed = nullptr)
 {
     void* ptr = nullptr;
 
@@ -226,7 +226,7 @@ void glDestroyContextCGL(uint64_t context, void* view, void* display)
     [NSOpenGLContext clearCurrentContext];
 }
 //------------------------------------------------------------------------------
-void* glGetProcAddressCGL(const char* name)
+void* glGetProcAddressCGL(char const* name)
 {
     return cglSymbolImpl(name);
 }
@@ -339,7 +339,7 @@ void xxGraphicDestroyCGL(uint64_t context)
 //==============================================================================
 //  Extension
 //==============================================================================
-void xxBindTextureWithSurface(const void* surface)
+void xxBindTextureWithSurface(void const* surface)
 {
     CGLContextObj contextObj = [[NSOpenGLContext currentContext] CGLContextObj];
     IOSurfaceRef ioSurface = (IOSurfaceRef)surface;

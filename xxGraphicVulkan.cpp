@@ -97,7 +97,7 @@ static VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetEXT(VkCommandBuffer comm
 //==============================================================================
 //  Instance
 //==============================================================================
-VKAPI_ATTR void* VKAPI_CALL vkGetProcAddress(const char* name)
+VKAPI_ATTR void* VKAPI_CALL vkGetProcAddress(char const* name)
 {
     void* ptr = nullptr;
 
@@ -119,7 +119,7 @@ VKAPI_ATTR void* VKAPI_CALL vkGetProcAddress(const char* name)
     return ptr;
 }
 //------------------------------------------------------------------------------
-static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugReportCallbackEXT(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, const char* pLayerPrefix, const char* pMessage, void* pUserData)
+static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugReportCallbackEXT(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, char const* pLayerPrefix, char const* pMessage, void* pUserData)
 {
     xxLog("Vulkan", "%s : %s", pLayerPrefix, pMessage);
     return VK_FALSE;
@@ -156,7 +156,7 @@ uint64_t xxCreateInstanceVulkan()
     VkExtensionProperties* instanceExtensionProperties = xxAlloc(VkExtensionProperties, instanceExtensionCount);
     vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, instanceExtensionProperties);
 
-    const char** instanceExtensionNames = xxAlloc(const char*, instanceExtensionCount);
+    char const** instanceExtensionNames = xxAlloc(char const*, instanceExtensionCount);
     if (instanceExtensionNames && instanceExtensionProperties)
     {
         for (uint32_t i = 0; i < instanceExtensionCount; ++i)
@@ -173,7 +173,7 @@ uint64_t xxCreateInstanceVulkan()
     VkLayerProperties* instanceLayerProperties = xxAlloc(VkLayerProperties, instanceLayerCount);
     vkEnumerateInstanceLayerProperties(&instanceLayerCount, instanceLayerProperties);
 
-    const char** instanceLayerNames = xxAlloc(const char*, instanceLayerCount);
+    char const** instanceLayerNames = xxAlloc(char const*, instanceLayerCount);
     if (instanceLayerNames && instanceLayerProperties)
     {
         for (uint32_t i = 0; i < instanceLayerCount; ++i)
@@ -189,7 +189,7 @@ uint64_t xxCreateInstanceVulkan()
 #else
     uint32_t instanceLayerCount = 0;
     VkLayerProperties* instanceLayerProperties = nullptr;
-    const char** instanceLayerNames = nullptr;
+    char const** instanceLayerNames = nullptr;
 #endif
 
     VkApplicationInfo appInfo = {};
@@ -350,7 +350,7 @@ uint64_t xxCreateDeviceVulkan(uint64_t instance)
     VkExtensionProperties* deviceExtensionProperties = xxAlloc(VkExtensionProperties, deviceExtensionCount);
     vkEnumerateDeviceExtensionProperties(vkPhysicalDevice, nullptr, &deviceExtensionCount, deviceExtensionProperties);
 
-    const char** deviceExtensionNames = xxAlloc(const char*, deviceExtensionCount);
+    char const** deviceExtensionNames = xxAlloc(char const*, deviceExtensionCount);
     if (deviceExtensionNames && deviceExtensionProperties)
     {
         for (uint32_t i = 0; i < deviceExtensionCount; ++i)
@@ -524,7 +524,7 @@ bool xxTestDeviceVulkan(uint64_t device)
     return true;
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceNameVulkan()
+char const* xxGetDeviceNameVulkan()
 {
     return "Vulkan";
 }
@@ -1521,7 +1521,7 @@ void xxUnmapBufferVulkan(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureVulkan(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external)
+uint64_t xxCreateTextureVulkan(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
@@ -1880,7 +1880,7 @@ void xxDestroySamplerVulkan(uint64_t sampler)
 //==============================================================================
 //  Shader
 //==============================================================================
-uint64_t xxCreateVertexShaderVulkan(uint64_t device, const char* shader, uint64_t vertexAttribute)
+uint64_t xxCreateVertexShaderVulkan(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
@@ -1904,7 +1904,7 @@ uint64_t xxCreateVertexShaderVulkan(uint64_t device, const char* shader, uint64_
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateFragmentShaderVulkan(uint64_t device, const char* shader)
+uint64_t xxCreateFragmentShaderVulkan(uint64_t device, char const* shader)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
@@ -1942,7 +1942,7 @@ void xxDestroyShaderVulkan(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateVulkan(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha)
+uint64_t xxCreateBlendStateVulkan(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha)
 {
     VkPipelineColorBlendAttachmentState* blendState = xxAlloc(VkPipelineColorBlendAttachmentState);
     if (blendState == nullptr)
@@ -1966,7 +1966,7 @@ uint64_t xxCreateBlendStateVulkan(uint64_t device, const char* sourceColor, cons
     return reinterpret_cast<uint64_t>(blendState);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateDepthStencilStateVulkan(uint64_t device, const char* depthTest, bool depthWrite)
+uint64_t xxCreateDepthStencilStateVulkan(uint64_t device, char const* depthTest, bool depthWrite)
 {
     VkPipelineDepthStencilStateCreateInfo* depthStencilState = xxAlloc(VkPipelineDepthStencilStateCreateInfo);
     if (depthStencilState == nullptr)

@@ -49,7 +49,7 @@ uint64_t xxCreateInstanceMetal2()
 //==============================================================================
 //  Device
 //==============================================================================
-const char* xxGetDeviceNameMetal2()
+char const* xxGetDeviceNameMetal2()
 {
     return "Metal 2";
 }
@@ -121,7 +121,7 @@ uint64_t xxCreateSamplerMetal2(uint64_t device, bool clampU, bool clampV, bool c
 //==============================================================================
 //  Shader
 //==============================================================================
-uint64_t xxCreateVertexShaderMetal2(uint64_t device, const char* shader, uint64_t vertexAttribute)
+uint64_t xxCreateVertexShaderMetal2(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
     if (mtlDevice == nil)
@@ -151,7 +151,7 @@ uint64_t xxCreateVertexShaderMetal2(uint64_t device, const char* shader, uint64_
     return reinterpret_cast<uint64_t>((__bridge_retained void*)function);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateFragmentShaderMetal2(uint64_t device, const char* shader)
+uint64_t xxCreateFragmentShaderMetal2(uint64_t device, char const* shader)
 {
     id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
     if (mtlDevice == nil)

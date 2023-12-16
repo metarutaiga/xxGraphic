@@ -32,7 +32,7 @@ static PFNGLSHADERSOURCEPROC glShaderSourceInternal;
 //------------------------------------------------------------------------------
 static void GL_APIENTRY wglShaderSourceLegacy(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
 {
-    const GLchar** replaceString = xxAlloc(const GLchar*, count);
+    GLchar const** replaceString = xxAlloc(GLchar const*, count);
 
     for (GLsizei i = 0; i < count; ++i)
     {
@@ -53,7 +53,7 @@ static void GL_APIENTRY wglShaderSourceLegacy(GLuint shader, GLsizei count, cons
 //------------------------------------------------------------------------------
 static void GL_APIENTRY wglShaderSource(GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length)
 {
-    const GLchar** replaceString = xxAlloc(const GLchar*, count);
+    GLchar const** replaceString = xxAlloc(GLchar const*, count);
 
     bool fragmentShader = false;
     for (GLsizei i = 0; i < count; ++i)
@@ -87,7 +87,7 @@ static void GL_APIENTRY wglShaderSource(GLuint shader, GLsizei count, const GLch
 }
 //------------------------------------------------------------------------------
 static bool wglSymbolFailed = false;
-static void* GL_APIENTRY wglSymbolImpl(const char* name, bool* failed = nullptr)
+static void* GL_APIENTRY wglSymbolImpl(char const* name, bool* failed = nullptr)
 {
     void* ptr = nullptr;
 
@@ -225,7 +225,7 @@ void glDestroyContextWGL(uint64_t context, void* view, void* display)
     ReleaseDC(hWnd, hDC);
 }
 //------------------------------------------------------------------------------
-void* glGetProcAddressWGL(const char* name)
+void* glGetProcAddressWGL(char const* name)
 {
     return wglSymbolImpl(name);
 }
@@ -333,7 +333,7 @@ void xxGraphicDestroyWGL(uint64_t context)
 //==============================================================================
 //  Extension
 //==============================================================================
-const void* xxGetDeviceFromDirect3DTexture(const void* texture)
+void const* xxGetDeviceFromDirect3DTexture(void const* texture)
 {
     if (wglDXOpenDeviceNV == nullptr)
         return nullptr;
@@ -377,7 +377,7 @@ const void* xxGetDeviceFromDirect3DTexture(const void* texture)
     return nullptr;
 }
 //------------------------------------------------------------------------------
-const void* xxCreateImageFromDirect3DTexture(const void* device, const void* texture, int id)
+void const* xxCreateImageFromDirect3DTexture(void const* device, void const* texture, int id)
 {
     if (wglDXRegisterObjectNV == nullptr)
         return nullptr;
@@ -385,7 +385,7 @@ const void* xxCreateImageFromDirect3DTexture(const void* device, const void* tex
     return wglDXRegisterObjectNV((HANDLE)device, (void*)texture, id, GL_TEXTURE_2D, WGL_ACCESS_READ_ONLY_NV);
 }
 //------------------------------------------------------------------------------
-void xxDestroyImage(const void* device, const void* image)
+void xxDestroyImage(void const* device, void const* image)
 {
     if (wglDXUnregisterObjectNV == nullptr || wglDXCloseDeviceNV == nullptr)
         return;

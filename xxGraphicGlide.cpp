@@ -99,7 +99,7 @@ bool xxTestDeviceGlide(uint64_t device)
     return true;
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceNameGlide()
+char const* xxGetDeviceNameGlide()
 {
     return "Glide";
 }
@@ -312,7 +312,7 @@ void xxUnmapBufferGlide(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureGlide(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external)
+uint64_t xxCreateTextureGlide(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external)
 {
     GrTexture* info = xxAlloc(GrTexture);
     if (info == nullptr)
@@ -395,12 +395,12 @@ void xxDestroySamplerGlide(uint64_t sampler)
 //==============================================================================
 //  Shader
 //==============================================================================
-uint64_t xxCreateVertexShaderGlide(uint64_t device, const char* shader, uint64_t vertexAttribute)
+uint64_t xxCreateVertexShaderGlide(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateFragmentShaderGlide(uint64_t device, const char* shader)
+uint64_t xxCreateFragmentShaderGlide(uint64_t device, char const* shader)
 {
     return 0;
 }
@@ -412,7 +412,7 @@ void xxDestroyShaderGlide(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateGlide(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha)
+uint64_t xxCreateBlendStateGlide(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha)
 {
     GrPipeline grPipeline = {};
     grPipeline.blendSourceColor = grBlendFactor(sourceColor);
@@ -422,7 +422,7 @@ uint64_t xxCreateBlendStateGlide(uint64_t device, const char* sourceColor, const
     return static_cast<uint64_t>(grPipeline.value);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateDepthStencilStateGlide(uint64_t device, const char* depthTest, bool depthWrite)
+uint64_t xxCreateDepthStencilStateGlide(uint64_t device, char const* depthTest, bool depthWrite)
 {
     GrPipeline grPipeline = {};
     grPipeline.depthTest = grCompareOp(depthTest);

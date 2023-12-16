@@ -9,7 +9,7 @@
 //==============================================================================
 //  GLSL Shader
 //==============================================================================
-const char* const glDefaultShaderCode =
+char const* const glDefaultShaderCode =
 R"(uniform vec4 buf[12];
 uniform sampler2D tex;
 
@@ -43,7 +43,7 @@ void main()
 //==============================================================================
 uint64_t    (*glCreateContext)(uint64_t instance, void* view, void** display);
 void        (*glDestroyContext)(uint64_t context, void* view, void* display);
-void*       (*glGetProcAddress)(const char* name);
+void*       (*glGetProcAddress)(char const* name);
 float       (*glGetScaleContext)(uint64_t context, void* view);
 void        (*glMakeCurrentContext)(uint64_t context, void* display);
 void        (*glPresentContext)(uint64_t context, void* display);
@@ -436,7 +436,7 @@ GL_PROTOTYPE(void, glTexStorage3DMultisample, (GLenum target, GLsizei samples, G
 #if defined(xxWINDOWS)
 #define _GDI32_
 #include <windows.h>
-static void* opengl32GetProcAddress(const char* name)
+static void* opengl32GetProcAddress(char const* name)
 {
     static HMODULE opengl32 = LoadLibraryA("opengl32.dll");
     return GetProcAddress(opengl32, name);

@@ -20,7 +20,7 @@ xxAPI uint64_t      xxCreateDeviceVulkan(uint64_t instance);
 xxAPI void          xxDestroyDeviceVulkan(uint64_t device);
 xxAPI bool          xxResetDeviceVulkan(uint64_t device);
 xxAPI bool          xxTestDeviceVulkan(uint64_t device);
-xxAPI const char*   xxGetDeviceNameVulkan();
+xxAPI char const*   xxGetDeviceNameVulkan();
 //==============================================================================
 //  Framebuffer
 //==============================================================================
@@ -62,7 +62,7 @@ xxAPI void          xxUnmapBufferVulkan(uint64_t device, uint64_t buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
-xxAPI uint64_t      xxCreateTextureVulkan(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external);
+xxAPI uint64_t      xxCreateTextureVulkan(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external);
 xxAPI void          xxDestroyTextureVulkan(uint64_t texture);
 xxAPI void*         xxMapTextureVulkan(uint64_t device, uint64_t texture, int* stride, int level, int array);
 xxAPI void          xxUnmapTextureVulkan(uint64_t device, uint64_t texture, int level, int array);
@@ -74,14 +74,14 @@ xxAPI void          xxDestroySamplerVulkan(uint64_t sampler);
 //==============================================================================
 //  Shader
 //==============================================================================
-xxAPI uint64_t      xxCreateVertexShaderVulkan(uint64_t device, const char* shader, uint64_t vertexAttribute);
-xxAPI uint64_t      xxCreateFragmentShaderVulkan(uint64_t device, const char* shader);
+xxAPI uint64_t      xxCreateVertexShaderVulkan(uint64_t device, char const* shader, uint64_t vertexAttribute);
+xxAPI uint64_t      xxCreateFragmentShaderVulkan(uint64_t device, char const* shader);
 xxAPI void          xxDestroyShaderVulkan(uint64_t device, uint64_t shader);
 //==============================================================================
 //  Pipeline
 //==============================================================================
-xxAPI uint64_t      xxCreateBlendStateVulkan(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha);
-xxAPI uint64_t      xxCreateDepthStencilStateVulkan(uint64_t device, const char* depthTest, bool depthWrite);
+xxAPI uint64_t      xxCreateBlendStateVulkan(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha);
+xxAPI uint64_t      xxCreateDepthStencilStateVulkan(uint64_t device, char const* depthTest, bool depthWrite);
 xxAPI uint64_t      xxCreateRasterizerStateVulkan(uint64_t device, bool cull, bool scissor);
 xxAPI uint64_t      xxCreatePipelineVulkan(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
 xxAPI void          xxDestroyBlendStateVulkan(uint64_t blendState);

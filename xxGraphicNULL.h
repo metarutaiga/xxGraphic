@@ -20,7 +20,7 @@ xxAPI uint64_t      xxCreateDeviceNULL(uint64_t instance);
 xxAPI void          xxDestroyDeviceNULL(uint64_t device);
 xxAPI bool          xxResetDeviceNULL(uint64_t device);
 xxAPI bool          xxTestDeviceNULL(uint64_t device);
-xxAPI const char*   xxGetDeviceNameNULL();
+xxAPI char const*   xxGetDeviceNameNULL();
 //==============================================================================
 //  Framebuffer
 //==============================================================================
@@ -62,7 +62,7 @@ xxAPI void          xxUnmapBufferNULL(uint64_t device, uint64_t buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
-xxAPI uint64_t      xxCreateTextureNULL(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external);
+xxAPI uint64_t      xxCreateTextureNULL(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external);
 xxAPI void          xxDestroyTextureNULL(uint64_t texture);
 xxAPI void*         xxMapTextureNULL(uint64_t device, uint64_t texture, int* stride, int level, int array);
 xxAPI void          xxUnmapTextureNULL(uint64_t device, uint64_t texture, int level, int array);
@@ -74,14 +74,14 @@ xxAPI void          xxDestroySamplerNULL(uint64_t sampler);
 //==============================================================================
 //  Shader
 //==============================================================================
-xxAPI uint64_t      xxCreateVertexShaderNULL(uint64_t device, const char* shader, uint64_t vertexAttribute);
-xxAPI uint64_t      xxCreateFragmentShaderNULL(uint64_t device, const char* shader);
+xxAPI uint64_t      xxCreateVertexShaderNULL(uint64_t device, char const* shader, uint64_t vertexAttribute);
+xxAPI uint64_t      xxCreateFragmentShaderNULL(uint64_t device, char const* shader);
 xxAPI void          xxDestroyShaderNULL(uint64_t device, uint64_t shader);
 //==============================================================================
 //  Pipeline
 //==============================================================================
-xxAPI uint64_t      xxCreateBlendStateNULL(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha);
-xxAPI uint64_t      xxCreateDepthStencilStateNULL(uint64_t device, const char* depthTest, bool depthWrite);
+xxAPI uint64_t      xxCreateBlendStateNULL(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha);
+xxAPI uint64_t      xxCreateDepthStencilStateNULL(uint64_t device, char const* depthTest, bool depthWrite);
 xxAPI uint64_t      xxCreateRasterizerStateNULL(uint64_t device, bool cull, bool scissor);
 xxAPI uint64_t      xxCreatePipelineNULL(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
 xxAPI void          xxDestroyBlendStateNULL(uint64_t blendState);

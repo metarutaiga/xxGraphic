@@ -18,7 +18,7 @@ GrProc FX_CALL gto_grGetProcAddress(char* name);
 //==============================================================================
 //  Blend Factor
 //==============================================================================
-inline GrAlphaBlendFnc_t grBlendFactor(const char* name)
+inline GrAlphaBlendFnc_t grBlendFactor(char const* name)
 {
     return xxTemplateBlendFactor<GrAlphaBlendFnc_t, GR_BLEND_ZERO,
                                                     GR_BLEND_ONE,
@@ -34,7 +34,7 @@ inline GrAlphaBlendFnc_t grBlendFactor(const char* name)
 //==============================================================================
 //  Depth Comparison
 //==============================================================================
-inline GrCmpFnc_t grCompareOp(const char* name)
+inline GrCmpFnc_t grCompareOp(char const* name)
 {
     return xxTemplateCompareOp<GrCmpFnc_t, GR_CMP_NEVER,
                                            GR_CMP_LESS,

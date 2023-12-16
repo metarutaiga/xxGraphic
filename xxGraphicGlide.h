@@ -20,7 +20,7 @@ xxAPI uint64_t      xxCreateDeviceGlide(uint64_t instance);
 xxAPI void          xxDestroyDeviceGlide(uint64_t device);
 xxAPI bool          xxResetDeviceGlide(uint64_t device);
 xxAPI bool          xxTestDeviceGlide(uint64_t device);
-xxAPI const char*   xxGetDeviceNameGlide();
+xxAPI char const*   xxGetDeviceNameGlide();
 //==============================================================================
 //  Framebuffer
 //==============================================================================
@@ -62,7 +62,7 @@ xxAPI void          xxUnmapBufferGlide(uint64_t device, uint64_t buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
-xxAPI uint64_t      xxCreateTextureGlide(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external);
+xxAPI uint64_t      xxCreateTextureGlide(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external);
 xxAPI void          xxDestroyTextureGlide(uint64_t texture);
 xxAPI void*         xxMapTextureGlide(uint64_t device, uint64_t texture, int* stride, int level, int array);
 xxAPI void          xxUnmapTextureGlide(uint64_t device, uint64_t texture, int level, int array);
@@ -74,14 +74,14 @@ xxAPI void          xxDestroySamplerGlide(uint64_t sampler);
 //==============================================================================
 //  Shader
 //==============================================================================
-xxAPI uint64_t      xxCreateVertexShaderGlide(uint64_t device, const char* shader, uint64_t vertexAttribute);
-xxAPI uint64_t      xxCreateFragmentShaderGlide(uint64_t device, const char* shader);
+xxAPI uint64_t      xxCreateVertexShaderGlide(uint64_t device, char const* shader, uint64_t vertexAttribute);
+xxAPI uint64_t      xxCreateFragmentShaderGlide(uint64_t device, char const* shader);
 xxAPI void          xxDestroyShaderGlide(uint64_t device, uint64_t shader);
 //==============================================================================
 //  Pipeline
 //==============================================================================
-xxAPI uint64_t      xxCreateBlendStateGlide(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha);
-xxAPI uint64_t      xxCreateDepthStencilStateGlide(uint64_t device, const char* depthTest, bool depthWrite);
+xxAPI uint64_t      xxCreateBlendStateGlide(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha);
+xxAPI uint64_t      xxCreateDepthStencilStateGlide(uint64_t device, char const* depthTest, bool depthWrite);
 xxAPI uint64_t      xxCreateRasterizerStateGlide(uint64_t device, bool cull, bool scissor);
 xxAPI uint64_t      xxCreatePipelineGlide(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
 xxAPI void          xxDestroyBlendStateGlide(uint64_t blendState);

@@ -18,5 +18,5 @@ xxAPI void          xxDestroyInstanceD3D9Ex(uint64_t instance);
 //  Device
 //==============================================================================
 xxAPI bool          xxTestDeviceD3D9Ex(uint64_t device);
-xxAPI const char*   xxGetDeviceNameD3D9Ex();
-xxAPI const char*   xxGetDeviceNameD3D9ExPS();
+xxAPI char const*   xxGetDeviceNameD3D9Ex();
+xxAPI char const*   xxGetDeviceNameD3D9ExPS();

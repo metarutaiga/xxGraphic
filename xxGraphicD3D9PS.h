@@ -15,7 +15,7 @@ xxAPI uint64_t      xxCreateInstanceD3D9PS();
 //==============================================================================
 //  Device
 //==============================================================================
-xxAPI const char*   xxGetDeviceNameD3D9PS();
+xxAPI char const*   xxGetDeviceNameD3D9PS();
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
@@ -24,8 +24,8 @@ xxAPI void          xxDestroyVertexAttributeD3D9PS(uint64_t vertexAttribute);
 //==============================================================================
 //  Shader
 //==============================================================================
-xxAPI uint64_t      xxCreateVertexShaderD3D9PS(uint64_t device, const char* shader, uint64_t vertexAttribute);
-xxAPI uint64_t      xxCreateFragmentShaderD3D9PS(uint64_t device, const char* shader);
+xxAPI uint64_t      xxCreateVertexShaderD3D9PS(uint64_t device, char const* shader, uint64_t vertexAttribute);
+xxAPI uint64_t      xxCreateFragmentShaderD3D9PS(uint64_t device, char const* shader);
 xxAPI void          xxDestroyShaderD3D9PS(uint64_t device, uint64_t shader);
 //==============================================================================
 //  Pipeline

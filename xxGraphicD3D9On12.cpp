@@ -146,22 +146,22 @@ bool xxTestDeviceD3D9On12Ex(uint64_t device)
     return true;
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceNameD3D9On12()
+char const* xxGetDeviceNameD3D9On12()
 {
     return "Direct3D 9On12 Fixed Function";
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceNameD3D9On12PS()
+char const* xxGetDeviceNameD3D9On12PS()
 {
     return "Direct3D 9On12 Programmable Shader";
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceNameD3D9On12Ex()
+char const* xxGetDeviceNameD3D9On12Ex()
 {
     return "Direct3D 9On12Ex Fixed Function";
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceNameD3D9On12ExPS()
+char const* xxGetDeviceNameD3D9On12ExPS()
 {
     return "Direct3D 9On12Ex Programmable Shader";
 }

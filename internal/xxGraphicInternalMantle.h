@@ -21,11 +21,11 @@
 #define BASE_VERTEX_SAMPLER         (2 + 16 + NUM_DESCRIPTOR_COUNT * 3)
 #define BASE_PIXEL_SAMPLER          (2 + 16 + NUM_DESCRIPTOR_COUNT * 4)
 
-extern void* grGetProcAddress(const char* name);
+extern void* grGetProcAddress(char const* name);
 //==============================================================================
 //  Blend Factor
 //==============================================================================
-inline GR_BLEND grBlendFactor(const char* name)
+inline GR_BLEND grBlendFactor(char const* name)
 {
     return xxTemplateBlendFactor<GR_BLEND, GR_BLEND_ZERO,
                                            GR_BLEND_ONE,
@@ -41,7 +41,7 @@ inline GR_BLEND grBlendFactor(const char* name)
 //==============================================================================
 //  Blend Operation
 //==============================================================================
-inline GR_BLEND_FUNC grBlendOp(const char* name)
+inline GR_BLEND_FUNC grBlendOp(char const* name)
 {
     return xxTemplateBlendOp<GR_BLEND_FUNC, GR_BLEND_FUNC_ADD,
                                             GR_BLEND_FUNC_SUBTRACT,
@@ -52,7 +52,7 @@ inline GR_BLEND_FUNC grBlendOp(const char* name)
 //==============================================================================
 //  Depth Comparison
 //==============================================================================
-inline GR_COMPARE_FUNC grCompareOp(const char* name)
+inline GR_COMPARE_FUNC grCompareOp(char const* name)
 {
     return xxTemplateCompareOp<GR_COMPARE_FUNC, GR_COMPARE_NEVER,
                                                 GR_COMPARE_LESS,

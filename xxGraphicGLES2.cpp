@@ -105,7 +105,7 @@ bool xxTestDeviceGLES2(uint64_t device)
     return true;
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceNameGLES2()
+char const* xxGetDeviceNameGLES2()
 {
     return "OpenGL ES 2.0";
 }
@@ -430,7 +430,7 @@ void xxUnmapBufferGLES2(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureGLES2(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external)
+uint64_t xxCreateTextureGLES2(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external)
 {
     if (width == 0 || height == 0 || depth == 0 || mipmap == 0 || array == 0)
         return 0;
@@ -655,7 +655,7 @@ void xxDestroySamplerGLES2(uint64_t sampler)
 //==============================================================================
 //  Shader
 //==============================================================================
-static void checkShader(GLuint glShader, const char* shader)
+static void checkShader(GLuint glShader, char const* shader)
 {
     GLint status = 0;
     glGetShaderiv(glShader, GL_COMPILE_STATUS, &status);
@@ -676,14 +676,14 @@ static void checkShader(GLuint glShader, const char* shader)
     }
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexShaderGLES2(uint64_t device, const char* shader, uint64_t vertexAttribute)
+uint64_t xxCreateVertexShaderGLES2(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
     if (strcmp(shader, "default") == 0)
     {
         shader = glDefaultShaderCode;
     }
 
-    const char* sources[] =
+    char const* sources[] =
     {
         "#version 100", "\n",
         "#define _VERTEX_ 1", "\n",
@@ -702,14 +702,14 @@ uint64_t xxCreateVertexShaderGLES2(uint64_t device, const char* shader, uint64_t
     return static_cast<uint64_t>(glShader);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateFragmentShaderGLES2(uint64_t device, const char* shader)
+uint64_t xxCreateFragmentShaderGLES2(uint64_t device, char const* shader)
 {
     if (strcmp(shader, "default") == 0)
     {
         shader = glDefaultShaderCode;
     }
 
-    const char* sources[] =
+    char const* sources[] =
     {
         "#version 100", "\n",
         "#define _FRAGMENT_ 1", "\n",
@@ -760,7 +760,7 @@ static void checkProgram(GLuint glProgram)
     }
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateBlendStateGLES2(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha)
+uint64_t xxCreateBlendStateGLES2(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha)
 {
     BLENDGL* glBlend = xxAlloc(BLENDGL);
     if (glBlend == nullptr)
@@ -780,7 +780,7 @@ uint64_t xxCreateBlendStateGLES2(uint64_t device, const char* sourceColor, const
     return reinterpret_cast<uint64_t>(glBlend);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateDepthStencilStateGLES2(uint64_t device, const char* depthTest, bool depthWrite)
+uint64_t xxCreateDepthStencilStateGLES2(uint64_t device, char const* depthTest, bool depthWrite)
 {
     STATEGL glState = {};
     glState.depthTest = glCompareOp(depthTest);

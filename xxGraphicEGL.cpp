@@ -42,7 +42,7 @@ static PFNEGLDESTROYIMAGEKHRPROC                eglDestroyImageKHR;
 //  Initialize - EGL
 //==============================================================================
 static bool eglSymbolFailed = false;
-static void* GL_APIENTRY eglSymbolImpl(const char* name, bool* failed = nullptr)
+static void* GL_APIENTRY eglSymbolImpl(char const* name, bool* failed = nullptr)
 {
     void* ptr = nullptr;
 
@@ -148,7 +148,7 @@ void glDestroyContextEGL(uint64_t context, void* view, void* surface)
     eglDestroySurface(eglDisplay, eglSurface);
 }
 //------------------------------------------------------------------------------
-void* glGetProcAddressEGL(const char* name)
+void* glGetProcAddressEGL(char const* name)
 {
     return eglSymbolImpl(name);
 }
@@ -283,7 +283,7 @@ void xxGraphicDestroyEGL(uint64_t context)
 //==============================================================================
 //  Extension
 //==============================================================================
-const void* xxCreateImageFromHardwareBuffer(const void* hardwareBuffer)
+void const* xxCreateImageFromHardwareBuffer(void const* hardwareBuffer)
 {
     if (hardwareBuffer == nullptr)
         return 0;
@@ -302,7 +302,7 @@ const void* xxCreateImageFromHardwareBuffer(const void* hardwareBuffer)
     return 0;
 }
 //------------------------------------------------------------------------------
-void xxBindTextureWithImage(const void* image)
+void xxBindTextureWithImage(void const* image)
 {
     if (image == nullptr)
         return;
@@ -312,7 +312,7 @@ void xxBindTextureWithImage(const void* image)
 #endif
 }
 //------------------------------------------------------------------------------
-void xxDestroyImage(const void* image)
+void xxDestroyImage(void const* image)
 {
     if (image == nullptr)
         return;
