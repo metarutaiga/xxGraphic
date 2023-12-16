@@ -35,12 +35,12 @@ extern Class classMTLVertexDescriptor;
 //==============================================================================
 //  MSL Shader
 //==============================================================================
-extern const char* const mtlDefaultShaderCode;
+extern char const* const mtlDefaultShaderCode;
 
 //==============================================================================
 //  Blend Factor
 //==============================================================================
-inline MTLBlendFactor mtlBlendFactor(const char* name)
+inline MTLBlendFactor mtlBlendFactor(char const* name)
 {
     return xxTemplateBlendFactor<MTLBlendFactor, MTLBlendFactorZero,
                                                  MTLBlendFactorOne,
@@ -56,7 +56,7 @@ inline MTLBlendFactor mtlBlendFactor(const char* name)
 //==============================================================================
 //  Blend Operation
 //==============================================================================
-inline MTLBlendOperation mtlBlendOp(const char* name)
+inline MTLBlendOperation mtlBlendOp(char const* name)
 {
     return xxTemplateBlendOp<MTLBlendOperation, MTLBlendOperationAdd,
                                                 MTLBlendOperationSubtract,
@@ -67,7 +67,7 @@ inline MTLBlendOperation mtlBlendOp(const char* name)
 //==============================================================================
 //  Depth Comparison
 //==============================================================================
-inline MTLCompareFunction mtlCompareOp(const char* name)
+inline MTLCompareFunction mtlCompareOp(char const* name)
 {
     return xxTemplateCompareOp<MTLCompareFunction, MTLCompareFunctionNever,
                                                    MTLCompareFunctionLess,

@@ -16,6 +16,6 @@ void xxGraphicDestroyWGL(uint64_t context);
 //==============================================================================
 //  Extension
 //==============================================================================
-const void* xxGetDeviceFromDirect3DTexture(const void* texture);
-const void* xxCreateImageFromDirect3DTexture(const void* device, const void* texture, int id);
-void xxDestroyImage(const void* device, const void* image);
+void const* xxGetDeviceFromDirect3DTexture(void const* texture);
+void const* xxCreateImageFromDirect3DTexture(void const* device, void const* texture, int id);
+void xxDestroyImage(void const* device, void const* image);

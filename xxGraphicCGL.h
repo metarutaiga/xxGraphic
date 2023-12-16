@@ -16,5 +16,5 @@ void xxGraphicDestroyCGL(uint64_t context);
 //==============================================================================
 //  Extension
 //==============================================================================
-void xxBindTextureWithSurface(const void* surface);
+void xxBindTextureWithSurface(void const* surface);
 void xxBindRectangleProgram();

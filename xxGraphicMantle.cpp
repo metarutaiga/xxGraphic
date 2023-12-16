@@ -18,7 +18,7 @@ static GR_UINT                      g_suitableHeap = 0;
 //==============================================================================
 //  Instance
 //==============================================================================
-void* grGetProcAddress(const char* name)
+void* grGetProcAddress(char const* name)
 {
     void* ptr = nullptr;
 
@@ -144,7 +144,7 @@ bool xxTestDeviceMantle(uint64_t device)
     return true;
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceNameMantle()
+char const* xxGetDeviceNameMantle()
 {
     return "Mantle";
 }
@@ -543,7 +543,7 @@ void xxUnmapBufferMantle(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureMantle(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external)
+uint64_t xxCreateTextureMantle(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external)
 {
     return 0;
 }
@@ -611,7 +611,7 @@ void xxDestroySamplerMantle(uint64_t sampler)
 //==============================================================================
 //  Shader
 //==============================================================================
-uint64_t xxCreateVertexShaderMantle(uint64_t device, const char* shader, uint64_t vertexAttribute)
+uint64_t xxCreateVertexShaderMantle(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
@@ -632,7 +632,7 @@ uint64_t xxCreateVertexShaderMantle(uint64_t device, const char* shader, uint64_
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateFragmentShaderMantle(uint64_t device, const char* shader)
+uint64_t xxCreateFragmentShaderMantle(uint64_t device, char const* shader)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
@@ -664,7 +664,7 @@ void xxDestroyShaderMantle(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateMantle(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha)
+uint64_t xxCreateBlendStateMantle(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
@@ -690,7 +690,7 @@ uint64_t xxCreateBlendStateMantle(uint64_t device, const char* sourceColor, cons
     return reinterpret_cast<uint64_t>(blendState);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateDepthStencilStateMantle(uint64_t device, const char* depthTest, bool depthWrite)
+uint64_t xxCreateDepthStencilStateMantle(uint64_t device, char const* depthTest, bool depthWrite)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)

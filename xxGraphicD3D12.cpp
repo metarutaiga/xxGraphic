@@ -453,7 +453,7 @@ bool xxTestDeviceD3D12(uint64_t device)
     return true;
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceNameD3D12()
+char const* xxGetDeviceNameD3D12()
 {
     return "Direct3D 12.0";
 }
@@ -1054,7 +1054,7 @@ void xxUnmapBufferD3D12(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureD3D12(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external)
+uint64_t xxCreateTextureD3D12(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
@@ -1304,7 +1304,7 @@ void xxDestroySamplerD3D12(uint64_t sampler)
 //==============================================================================
 //  Shader
 //==============================================================================
-uint64_t xxCreateVertexShaderD3D12(uint64_t device, const char* shader, uint64_t vertexAttribute)
+uint64_t xxCreateVertexShaderD3D12(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
@@ -1336,7 +1336,7 @@ uint64_t xxCreateVertexShaderD3D12(uint64_t device, const char* shader, uint64_t
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateFragmentShaderD3D12(uint64_t device, const char* shader)
+uint64_t xxCreateFragmentShaderD3D12(uint64_t device, char const* shader)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
@@ -1376,7 +1376,7 @@ void xxDestroyShaderD3D12(uint64_t device, uint64_t shader)
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateD3D12(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha)
+uint64_t xxCreateBlendStateD3D12(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha)
 {
     D3D12_BLEND_DESC* d3dDesc = xxAlloc(D3D12_BLEND_DESC);
     if (d3dDesc == nullptr)
@@ -1401,7 +1401,7 @@ uint64_t xxCreateBlendStateD3D12(uint64_t device, const char* sourceColor, const
     return reinterpret_cast<uint64_t>(d3dDesc);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateDepthStencilStateD3D12(uint64_t device, const char* depthTest, bool depthWrite)
+uint64_t xxCreateDepthStencilStateD3D12(uint64_t device, char const* depthTest, bool depthWrite)
 {
     D3D12_DEPTH_STENCIL_DESC* d3dDesc = xxAlloc(D3D12_DEPTH_STENCIL_DESC);
     if (d3dDesc == nullptr)

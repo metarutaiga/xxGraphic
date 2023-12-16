@@ -34,11 +34,11 @@
 //==============================================================================
 //  GLSL Shader
 //==============================================================================
-extern const char* const    glDefaultShaderCode;
+extern char const* const    glDefaultShaderCode;
 //==============================================================================
 //  Blend Factor
 //==============================================================================
-inline GLenum glBlendFactor(const char* name)
+inline GLenum glBlendFactor(char const* name)
 {
     return xxTemplateBlendFactor<GLenum, GL_ZERO,
                                          GL_ONE,
@@ -54,7 +54,7 @@ inline GLenum glBlendFactor(const char* name)
 //==============================================================================
 //  Blend Operation
 //==============================================================================
-inline GLenum glBlendOp(const char* name)
+inline GLenum glBlendOp(char const* name)
 {
     return xxTemplateBlendOp<GLenum, GL_FUNC_ADD,
                                      GL_FUNC_SUBTRACT,
@@ -65,7 +65,7 @@ inline GLenum glBlendOp(const char* name)
 //==============================================================================
 //  Depth Comparison
 //==============================================================================
-inline GLenum glCompareOp(const char* name)
+inline GLenum glCompareOp(char const* name)
 {
     return xxTemplateCompareOp<GLenum, GL_NEVER,
                                        GL_LESS,
@@ -81,14 +81,14 @@ inline GLenum glCompareOp(const char* name)
 //==============================================================================
 extern uint64_t             (*glCreateContext)(uint64_t device, void* view, void** display);
 extern void                 (*glDestroyContext)(uint64_t context, void* view, void* display);
-extern void*                (*glGetProcAddress)(const char* name);
+extern void*                (*glGetProcAddress)(char const* name);
 extern float                (*glGetScaleContext)(uint64_t context, void* view);
 extern void                 (*glMakeCurrentContext)(uint64_t context, void* display);
 extern void                 (*glPresentContext)(uint64_t context, void* display);
 //==============================================================================
-inline void* getSymbolExtension(void* (GL_APIENTRYP getSymbol)(const char* name, bool* failed), const char* name, bool* failed)
+inline void* getSymbolExtension(void* (GL_APIENTRYP getSymbol)(char const* name, bool* failed), char const* name, bool* failed)
 {
-    static const char* const tags[] = { "ARB", "OES", "EXT", "KHR", "AMD", "ARM", "IMG", "INTEL", "NV", "QCOM" };
+    static char const* const tags[] = { "ARB", "OES", "EXT", "KHR", "AMD", "ARM", "IMG", "INTEL", "NV", "QCOM" };
 
     char extensionName[64];
     for (int i = 0; i < xxCountOf(tags); ++i)
@@ -129,9 +129,9 @@ struct VERTEXATTRIBUTEGL
         GLenum      type;
         GLboolean   normalized;
         GLsizei     stride;
-        const char* pointer;
+        char const* pointer;
         int         stream;
-        const char* name;
+        char const* name;
     } attributes[16];
     int count;
 };
@@ -158,9 +158,9 @@ struct TEXTUREGL
     unsigned int    depth;
     unsigned int    mipmap;
     unsigned int    array;
-    const void*     external;
-    const void*     image;
-    const void*     device;
+    void const*     external;
+    void const*     image;
+    void const*     device;
 };
 //==============================================================================
 //  Sampler

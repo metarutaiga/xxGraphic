@@ -36,7 +36,7 @@ uint64_t xxCreateInstanceD3D9PS()
 //==============================================================================
 //  Device
 //==============================================================================
-const char* xxGetDeviceNameD3D9PS()
+char const* xxGetDeviceNameD3D9PS()
 {
     return "Direct3D 9.0 Programmable Shader";
 }
@@ -148,7 +148,7 @@ void xxDestroyVertexAttributeD3D9PS(uint64_t vertexAttribute)
 //==============================================================================
 //  Shader
 //==============================================================================
-uint64_t xxCreateVertexShaderD3D9PS(uint64_t device, const char* shader, uint64_t vertexAttribute)
+uint64_t xxCreateVertexShaderD3D9PS(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
     if (d3dDevice == nullptr)
@@ -167,7 +167,7 @@ uint64_t xxCreateVertexShaderD3D9PS(uint64_t device, const char* shader, uint64_
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateFragmentShaderD3D9PS(uint64_t device, const char* shader)
+uint64_t xxCreateFragmentShaderD3D9PS(uint64_t device, char const* shader)
 {
     LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
     if (d3dDevice == nullptr)

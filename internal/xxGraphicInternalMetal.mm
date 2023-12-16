@@ -8,7 +8,7 @@
 #include "xxGraphicInternalMetal.h"
 
 //==============================================================================
-const char* const mtlDefaultShaderCode =
+char const* const mtlDefaultShaderCode =
 R"(#include <metal_stdlib>
 using namespace metal;
 

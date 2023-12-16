@@ -45,11 +45,11 @@ extern "C" VkResult VKAPI_CALL vkSetMTLTextureMVK(VkImage image, id<MTLTexture> 
 extern "C" void VKAPI_CALL vkGetMTLTextureMVK(VkImage image, id<MTLTexture>* pMTLTexture);
 #endif
 
-extern VKAPI_ATTR void* VKAPI_CALL vkGetProcAddress(const char* name);
+extern VKAPI_ATTR void* VKAPI_CALL vkGetProcAddress(char const* name);
 //==============================================================================
 //  Blend Factor
 //==============================================================================
-inline VkBlendFactor vkBlendFactor(const char* name)
+inline VkBlendFactor vkBlendFactor(char const* name)
 {
     return xxTemplateBlendFactor<VkBlendFactor, VK_BLEND_FACTOR_ZERO,
                                                 VK_BLEND_FACTOR_ONE,
@@ -65,7 +65,7 @@ inline VkBlendFactor vkBlendFactor(const char* name)
 //==============================================================================
 //  Blend Operation
 //==============================================================================
-inline VkBlendOp vkBlendOp(const char* name)
+inline VkBlendOp vkBlendOp(char const* name)
 {
     return xxTemplateBlendOp<VkBlendOp, VK_BLEND_OP_ADD,
                                         VK_BLEND_OP_SUBTRACT,
@@ -76,7 +76,7 @@ inline VkBlendOp vkBlendOp(const char* name)
 //==============================================================================
 //  Depth Comparison
 //==============================================================================
-inline VkCompareOp vkCompareOp(const char* name)
+inline VkCompareOp vkCompareOp(char const* name)
 {
     return xxTemplateCompareOp<VkCompareOp, VK_COMPARE_OP_NEVER,
                                             VK_COMPARE_OP_LESS,

@@ -93,7 +93,7 @@ uint64_t xxCreateDeviceD3D10_1(uint64_t instance)
     return reinterpret_cast<uint64_t>(d3dDevice);
 }
 //------------------------------------------------------------------------------
-const char* xxGetDeviceNameD3D10_1()
+char const* xxGetDeviceNameD3D10_1()
 {
     return "Direct3D 10.1";
 }

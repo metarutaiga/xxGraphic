@@ -16,6 +16,6 @@ void xxGraphicDestroyEGL(uint64_t context);
 //==============================================================================
 //  Extension
 //==============================================================================
-const void* xxCreateImageFromHardwareBuffer(const void* hardwareBuffer);
-void xxBindTextureWithImage(const void* image);
-void xxDestroyImage(const void* image);
+void const* xxCreateImageFromHardwareBuffer(void const* hardwareBuffer);
+void xxBindTextureWithImage(void const* image);
+void xxDestroyImage(void const* image);

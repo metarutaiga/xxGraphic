@@ -19,7 +19,7 @@ static Class                            classEAGLContext = nil;
 //  Initialize - EAGL
 //==============================================================================
 static bool eaglSymbolFailed = false;
-static void* GL_APIENTRY eaglSymbolImpl(const char* name, bool* failed = nullptr)
+static void* GL_APIENTRY eaglSymbolImpl(char const* name, bool* failed = nullptr)
 {
     void* ptr = nullptr;
 
@@ -141,7 +141,7 @@ void glDestroyContextEAGL(uint64_t context, void* view, void* display)
     [classEAGLContext setCurrentContext:nil];
 }
 //------------------------------------------------------------------------------
-void* glGetProcAddressEAGL(const char* name)
+void* glGetProcAddressEAGL(char const* name)
 {
     return eaglSymbolImpl(name);
 }
@@ -232,7 +232,7 @@ void xxGraphicDestroyEAGL(uint64_t context)
                    invert:(BOOL)invert NS_AVAILABLE_IOS(4_0);
 @end
 //------------------------------------------------------------------------------
-void xxBindTextureWithSurface(const void* surface)
+void xxBindTextureWithSurface(void const* surface)
 {
     if (@available(iOS 11.0, *))
     {

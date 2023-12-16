@@ -20,7 +20,7 @@ xxAPI uint64_t      xxCreateDeviceMantle(uint64_t instance);
 xxAPI void          xxDestroyDeviceMantle(uint64_t device);
 xxAPI bool          xxResetDeviceMantle(uint64_t device);
 xxAPI bool          xxTestDeviceMantle(uint64_t device);
-xxAPI const char*   xxGetDeviceNameMantle();
+xxAPI char const*   xxGetDeviceNameMantle();
 //==============================================================================
 //  Framebuffer
 //==============================================================================
@@ -62,7 +62,7 @@ xxAPI void          xxUnmapBufferMantle(uint64_t device, uint64_t buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
-xxAPI uint64_t      xxCreateTextureMantle(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, const void* external);
+xxAPI uint64_t      xxCreateTextureMantle(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external);
 xxAPI void          xxDestroyTextureMantle(uint64_t texture);
 xxAPI void*         xxMapTextureMantle(uint64_t device, uint64_t texture, int* stride, int level, int array);
 xxAPI void          xxUnmapTextureMantle(uint64_t device, uint64_t texture, int level, int array);
@@ -74,14 +74,14 @@ xxAPI void          xxDestroySamplerMantle(uint64_t sampler);
 //==============================================================================
 //  Shader
 //==============================================================================
-xxAPI uint64_t      xxCreateVertexShaderMantle(uint64_t device, const char* shader, uint64_t vertexAttribute);
-xxAPI uint64_t      xxCreateFragmentShaderMantle(uint64_t device, const char* shader);
+xxAPI uint64_t      xxCreateVertexShaderMantle(uint64_t device, char const* shader, uint64_t vertexAttribute);
+xxAPI uint64_t      xxCreateFragmentShaderMantle(uint64_t device, char const* shader);
 xxAPI void          xxDestroyShaderMantle(uint64_t device, uint64_t shader);
 //==============================================================================
 //  Pipeline
 //==============================================================================
-xxAPI uint64_t      xxCreateBlendStateMantle(uint64_t device, const char* sourceColor, const char* operationColor, const char* destinationColor, const char* sourceAlpha, const char* operationAlpha, const char* destinationAlpha);
-xxAPI uint64_t      xxCreateDepthStencilStateMantle(uint64_t device, const char* depthTest, bool depthWrite);
+xxAPI uint64_t      xxCreateBlendStateMantle(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha);
+xxAPI uint64_t      xxCreateDepthStencilStateMantle(uint64_t device, char const* depthTest, bool depthWrite);
 xxAPI uint64_t      xxCreateRasterizerStateMantle(uint64_t device, bool cull, bool scissor);
 xxAPI uint64_t      xxCreatePipelineMantle(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
 xxAPI void          xxDestroyBlendStateMantle(uint64_t blendState);

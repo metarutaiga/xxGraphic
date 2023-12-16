@@ -73,7 +73,7 @@ uint64_t xxCreateInstanceGLES32()
 //==============================================================================
 //  Device
 //==============================================================================
-const char* xxGetDeviceNameGLES32()
+char const* xxGetDeviceNameGLES32()
 {
     return "OpenGL ES 3.2";
 }

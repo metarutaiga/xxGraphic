@@ -354,7 +354,7 @@ inline void ViewportFromScissor(float projectionMatrix[4][4], int fromX, int fro
     projectionMatrix[3][1] = projectionMatrix[3][1] * scaleHeight - offsetHeight;
 }
 
-inline void PatchD3DIM(const char* name)
+inline void PatchD3DIM(char const* name)
 {
     void* d3dim = xxLoadLibrary(name);
     if (d3dim == nullptr)
@@ -372,21 +372,23 @@ inline void PatchD3DIM(const char* name)
         if (memcmp(codeBase + i, wantedBytes, sizeof(wantedBytes)) == 0)
         {
             DWORD oldProtect;
-            VirtualProtect(&codeBase[i + 1], 4, PAGE_EXECUTE_READWRITE, &oldProtect);
-            codeBase[i + 1] = -1;
-            codeBase[i + 2] = -1;
-            codeBase[i + 3] = -1;
-            codeBase[i + 4] = -1;
-            VirtualProtect(&codeBase[i + 1], 4, oldProtect, &oldProtect);
+            if (VirtualProtect(&codeBase[i + 1], 4, PAGE_EXECUTE_READWRITE, &oldProtect))
+            {
+                codeBase[i + 1] = -1;
+                codeBase[i + 2] = -1;
+                codeBase[i + 3] = -1;
+                codeBase[i + 4] = -1;
+                VirtualProtect(&codeBase[i + 1], 4, oldProtect, &oldProtect);
+            }
         }
     }
 
     xxFreeLibrary(d3dim);
 }
 
-inline struct ID3D10Blob* CreateD3D10Shader(const char* shader, const char* entry, const char* target)
+inline struct ID3D10Blob* CreateD3D10Shader(char const* shader, char const* entry, char const* target)
 {
-    static HRESULT(WINAPI * D3D10CompileShader)(const char*, size_t, void*, void*, void*, const char*, const char*, int, ID3D10Blob**, ID3D10Blob**) = nullptr;
+    static HRESULT(WINAPI * D3D10CompileShader)(char const*, size_t, void*, void*, void*, char const*, char const*, int, ID3D10Blob**, ID3D10Blob**) = nullptr;
     if (D3D10CompileShader == nullptr)
     {
         (void*&)D3D10CompileShader = GetProcAddress(LoadLibraryA("d3d10.dll"), "D3D10CompileShader");
@@ -416,7 +418,7 @@ inline struct ID3D10Blob* CreateD3D10Shader(const char* shader, const char* entr
 //  Blend Factor
 //==============================================================================
 #if defined(DIRECT3D_VERSION)
-inline DWORD d3dBlendFactor(const char* name)
+inline DWORD d3dBlendFactor(char const* name)
 {
     return xxTemplateBlendFactor<DWORD, D3DBLEND_ZERO,
                                         D3DBLEND_ONE,
@@ -431,7 +433,7 @@ inline DWORD d3dBlendFactor(const char* name)
 }
 #endif
 #if defined(__d3d10_h__)
-inline D3D10_BLEND d3d10BlendFactor(const char* name)
+inline D3D10_BLEND d3d10BlendFactor(char const* name)
 {
     return xxTemplateBlendFactor<D3D10_BLEND, D3D10_BLEND_ZERO,
                                               D3D10_BLEND_ONE,
@@ -446,7 +448,7 @@ inline D3D10_BLEND d3d10BlendFactor(const char* name)
 }
 #endif
 #if defined(__d3d11_h__)
-inline D3D11_BLEND d3d11BlendFactor(const char* name)
+inline D3D11_BLEND d3d11BlendFactor(char const* name)
 {
     return xxTemplateBlendFactor<D3D11_BLEND, D3D11_BLEND_ZERO,
                                               D3D11_BLEND_ONE,
@@ -461,7 +463,7 @@ inline D3D11_BLEND d3d11BlendFactor(const char* name)
 }
 #endif
 #if defined(__d3d12_h__)
-inline D3D12_BLEND d3d12BlendFactor(const char* name)
+inline D3D12_BLEND d3d12BlendFactor(char const* name)
 {
     return xxTemplateBlendFactor<D3D12_BLEND, D3D12_BLEND_ZERO,
                                               D3D12_BLEND_ONE,
@@ -479,7 +481,7 @@ inline D3D12_BLEND d3d12BlendFactor(const char* name)
 //  Blend Operation
 //==============================================================================
 #if (DIRECT3D_VERSION >= 0x0800)
-inline DWORD d3dBlendOp(const char* name)
+inline DWORD d3dBlendOp(char const* name)
 {
     return xxTemplateBlendOp<DWORD, D3DBLENDOP_ADD,
                                     D3DBLENDOP_SUBTRACT,
@@ -489,7 +491,7 @@ inline DWORD d3dBlendOp(const char* name)
 }
 #endif
 #if defined(__d3d10_h__)
-inline D3D10_BLEND_OP d3d10BlendOp(const char* name)
+inline D3D10_BLEND_OP d3d10BlendOp(char const* name)
 {
     return xxTemplateBlendOp<D3D10_BLEND_OP, D3D10_BLEND_OP_ADD,
                                              D3D10_BLEND_OP_SUBTRACT,
@@ -499,7 +501,7 @@ inline D3D10_BLEND_OP d3d10BlendOp(const char* name)
 }
 #endif
 #if defined(__d3d11_h__)
-inline D3D11_BLEND_OP d3d11BlendOp(const char* name)
+inline D3D11_BLEND_OP d3d11BlendOp(char const* name)
 {
     return xxTemplateBlendOp<D3D11_BLEND_OP, D3D11_BLEND_OP_ADD,
                                              D3D11_BLEND_OP_SUBTRACT,
@@ -509,7 +511,7 @@ inline D3D11_BLEND_OP d3d11BlendOp(const char* name)
 }
 #endif
 #if defined(__d3d12_h__)
-inline D3D12_BLEND_OP d3d12BlendOp(const char* name)
+inline D3D12_BLEND_OP d3d12BlendOp(char const* name)
 {
     return xxTemplateBlendOp<D3D12_BLEND_OP, D3D12_BLEND_OP_ADD,
                                              D3D12_BLEND_OP_SUBTRACT,
@@ -522,7 +524,7 @@ inline D3D12_BLEND_OP d3d12BlendOp(const char* name)
 //  Depth Comparison
 //==============================================================================
 #if defined(DIRECT3D_VERSION)
-inline D3DCMPFUNC d3dCompareOp(const char* name)
+inline D3DCMPFUNC d3dCompareOp(char const* name)
 {
     return xxTemplateCompareOp<D3DCMPFUNC, D3DCMP_NEVER,
                                            D3DCMP_LESS,
@@ -535,7 +537,7 @@ inline D3DCMPFUNC d3dCompareOp(const char* name)
 }
 #endif
 #if defined(__d3d10_h__)
-inline D3D10_COMPARISON_FUNC d3d10CompareOp(const char* name)
+inline D3D10_COMPARISON_FUNC d3d10CompareOp(char const* name)
 {
     return xxTemplateCompareOp<D3D10_COMPARISON_FUNC, D3D10_COMPARISON_NEVER,
                                                       D3D10_COMPARISON_LESS,
@@ -548,7 +550,7 @@ inline D3D10_COMPARISON_FUNC d3d10CompareOp(const char* name)
 }
 #endif
 #if defined(__d3d11_h__)
-inline D3D11_COMPARISON_FUNC d3d11CompareOp(const char* name)
+inline D3D11_COMPARISON_FUNC d3d11CompareOp(char const* name)
 {
     return xxTemplateCompareOp<D3D11_COMPARISON_FUNC, D3D11_COMPARISON_NEVER,
                                                       D3D11_COMPARISON_LESS,
@@ -561,7 +563,7 @@ inline D3D11_COMPARISON_FUNC d3d11CompareOp(const char* name)
 }
 #endif
 #if defined(__d3d12_h__)
-inline D3D12_COMPARISON_FUNC d3d12CompareOp(const char* name)
+inline D3D12_COMPARISON_FUNC d3d12CompareOp(char const* name)
 {
     return xxTemplateCompareOp<D3D12_COMPARISON_FUNC, D3D12_COMPARISON_FUNC_NEVER,
                                                       D3D12_COMPARISON_FUNC_LESS,

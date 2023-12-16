@@ -100,7 +100,7 @@ void xxDestroyInstanceGLES31(uint64_t instance)
 //==============================================================================
 //  Device
 //==============================================================================
-const char* xxGetDeviceNameGLES31()
+char const* xxGetDeviceNameGLES31()
 {
     return "OpenGL ES 3.1";
 }

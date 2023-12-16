@@ -179,8 +179,8 @@ xxAPI void xxAlignedFree(void* ptr);
 //==============================================================================
 //  Library
 //==============================================================================
-xxAPI void* xxLoadLibrary(const char* name);
-xxAPI void* xxGetProcAddress(void* library, const char* name);
+xxAPI void* xxLoadLibrary(char const* name);
+xxAPI void* xxGetProcAddress(void* library, char const* name);
 xxAPI void xxFreeLibrary(void* library);
 //==============================================================================
 //  TSC
@@ -198,22 +198,22 @@ xxAPI int xxGetIncrementThreadId();
 //==============================================================================
 //  Path
 //==============================================================================
-xxAPI const char* xxGetExecutablePath();
-xxAPI char* xxOpenDirectory(uint64_t* handle, const char* path, ...);
+xxAPI char const* xxGetExecutablePath();
+xxAPI char* xxOpenDirectory(uint64_t* handle, char const* path, ...);
 xxAPI void xxCloseDirectory(uint64_t* handle);
 //==============================================================================
 //  Logger
 //==============================================================================
-xxAPI void xxLog(const char* tag, const char* format, ...);
+xxAPI void xxLog(char const* tag, char const* format, ...);
 //==============================================================================
 //  MD5
 //==============================================================================
-xxAPI const uint8_t* xxMD5(const void* data, int len, uint8_t* digest);
-xxAPI const uint8_t* xxDXBCChecksum(const void* data, int len, uint8_t* digest);
+xxAPI const uint8_t* xxMD5(void const* data, int len, uint8_t* digest);
+xxAPI const uint8_t* xxDXBCChecksum(void const* data, int len, uint8_t* digest);
 //==============================================================================
 //  Hash
 //==============================================================================
-xxAPI xxInline xxConstexpr unsigned int xxHash(const char* key, const unsigned int hash xxDefaultArgument(0))
+xxAPI xxInline xxConstexpr unsigned int xxHash(char const* key, const unsigned int hash xxDefaultArgument(0))
 {
     return (*key) ? xxHash(key + 1, (hash * 16777219) ^ (*key)) : hash;
 }

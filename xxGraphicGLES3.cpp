@@ -68,7 +68,7 @@ uint64_t xxCreateInstanceGLES3()
 //==============================================================================
 //  Device
 //==============================================================================
-const char* xxGetDeviceNameGLES3()
+char const* xxGetDeviceNameGLES3()
 {
     return "OpenGL ES 3.0";
 }

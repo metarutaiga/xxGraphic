@@ -181,7 +181,7 @@ template <typename T, T ZERO,
                       T ONE_MINUS_SRC_ALPHA,
                       T DST_ALPHA,
                       T ONE_MINUS_DST_ALPHA>
-inline T xxTemplateBlendFactor(const char* name)
+inline T xxTemplateBlendFactor(char const* name)
 {
     bool a = false;
     bool c = false;
@@ -241,7 +241,7 @@ template <typename T, T ADD,
                       T REVERSE_SUBTRACT,
                       T MIN,
                       T MAX>
-inline T xxTemplateBlendOp(const char* name)
+inline T xxTemplateBlendOp(char const* name)
 {
     for (char x; (x = (*name)); name++)
     {
@@ -278,7 +278,7 @@ template <typename T, T NEVER,
                       T NOT_EQUAL,
                       T GREATER_OR_EQUAL,
                       T ALWAYS>
-inline T xxTemplateCompareOp(const char* name)
+inline T xxTemplateCompareOp(char const* name)
 {
     bool e = false;
     bool g = false;
