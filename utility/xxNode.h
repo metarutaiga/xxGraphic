@@ -16,36 +16,36 @@ public:
     static xxNodePtr Create();
 
     xxNodePtr               GetParent() const;
-    const xxNodePtr&        GetChild(size_t index) const;
+    xxNodePtr const&        GetChild(size_t index) const;
     size_t                  GetChildCount() const;
-    bool                    AttachChild(const xxNodePtr& child);
-    bool                    DetachChild(const xxNodePtr& child);
+    bool                    AttachChild(xxNodePtr const& child);
+    bool                    DetachChild(xxNodePtr const& child);
 
-    const xxMatrix4&        GetLocalMatrix() const;
-    const xxMatrix4&        GetWorldMatrix() const;
-    void                    SetLocalMatrix(const xxMatrix4& matrix);
-    void                    SetWorldMatrix(const xxMatrix4& matrix);
+    xxMatrix4 const&        GetLocalMatrix() const;
+    xxMatrix4 const&        GetWorldMatrix() const;
+    void                    SetLocalMatrix(xxMatrix4 const& matrix);
+    void                    SetWorldMatrix(xxMatrix4 const& matrix);
     void                    CreateLinearMatrix();
     bool                    UpdateMatrix();
 
     xxMatrix3               GetRotate() const;
     xxVector3               GetTranslate() const;
     float                   GetScale() const;
-    void                    SetRotate(const xxMatrix3& rotate);
-    void                    SetTranslate(const xxVector3& translate);
+    void                    SetRotate(xxMatrix3 const& rotate);
+    void                    SetTranslate(xxVector3 const& translate);
     void                    SetScale(float scale);
     void                    CreateRotateTranslateScale();
     void                    UpdateRotateTranslateScale();
 
-    const xxImagePtr&       GetImage(size_t index) const;
-    const xxMaterialPtr&    GetMaterial() const;
-    const xxMeshPtr&        GetMesh() const;
-    void                    SetImage(size_t index, const xxImagePtr& image);
-    void                    SetMaterial(const xxMaterialPtr& material);
-    void                    SetMesh(const xxMeshPtr& mesh);
+    xxImagePtr const&       GetImage(size_t index) const;
+    xxMaterialPtr const&    GetMaterial() const;
+    xxMeshPtr const&        GetMesh() const;
+    void                    SetImage(size_t index, xxImagePtr const& image);
+    void                    SetMaterial(xxMaterialPtr const& material);
+    void                    SetMesh(xxMeshPtr const& mesh);
 
     void                    Update(float time, bool updateMatrix = true);
-    void                    Draw(uint64_t device, uint64_t commandEncoder, const xxCameraPtr& camera);
+    void                    Draw(uint64_t device, uint64_t commandEncoder, xxCameraPtr const& camera);
 
 protected:
     xxNode();

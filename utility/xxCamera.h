@@ -17,12 +17,12 @@ public:
 
     void        Update();
 
-    void        LookAt(const xxVector3& worldPoint, const xxVector3& worldUp);
+    void        LookAt(xxVector3 const& worldPoint, xxVector3 const& worldUp);
 
     void        SetFOV(float aspect, float fov, float far);
     void        SetViewportMatrix(float fromWidth, float fromHeight, float toX, float toY, float toWidth, float toHeight);
 
-    xxVector3   GetScreenToWorldPos(float x, float y) const;
+    xxVector3   GetDirectionFromScreenPos(float x, float y) const;
 
 protected:
     xxCamera();

@@ -568,11 +568,12 @@ void xxSetVertexConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, in
     float halfHeight = grContext->height * grContext->scale * 0.5f;
     v4sf screenMatrix[4] =
     {
-        { halfWidth,    0.0f,       0.0f, 0.0f },
-        { 0.0f,         halfHeight, 0.0f, 0.0f },
-        { 0.0f,         0.0f,       1.0f, 0.0f },
-        { halfWidth,    halfHeight, 0.0f, 1.0f },
+        { halfWidth,          0, 0, 0 },
+        {         0, halfHeight, 0, 0 },
+        {         0,          0, 1, 0 },
+        { halfWidth, halfHeight, 0, 1 },
     };
+
     g_worldViewProjectionScreenMatrix[0] = __builtin_multiplyvector(screenMatrix, __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[0])));
     g_worldViewProjectionScreenMatrix[1] = __builtin_multiplyvector(screenMatrix, __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[1])));
     g_worldViewProjectionScreenMatrix[2] = __builtin_multiplyvector(screenMatrix, __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[2])));

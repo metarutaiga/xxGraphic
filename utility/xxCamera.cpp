@@ -29,38 +29,30 @@ xxCameraPtr xxCamera::Create()
 //------------------------------------------------------------------------------
 void xxCamera::Update()
 {
-    m_viewMatrix._[0] = {  m_right.x,                m_up.x,                m_direction.x,               0 };
-    m_viewMatrix._[1] = {  m_right.y,                m_up.y,                m_direction.y,               0 };
-    m_viewMatrix._[2] = {  m_right.z,                m_up.z,                m_direction.z,               0 };
-    m_viewMatrix._[3] = { -m_right.Dot(m_location), -m_up.Dot(m_location), -m_direction.Dot(m_location), 1 };
+    float l = m_frustumLeft;
+    float r = m_frustumRight;
+    float b = m_frustumBottom;
+    float t = m_frustumTop;
+    float n = m_frustumNear;
+    float f = m_frustumFar;
 
-    m_projectionMatrix.m11 = 1.0f / (m_frustumRight - m_frustumLeft);
-    m_projectionMatrix.m21 = 0.0f;
-    m_projectionMatrix.m31 = m_projectionMatrix.m11 * -(m_frustumRight + m_frustumLeft);
-    m_projectionMatrix.m41 = 0.0f;
-    m_projectionMatrix.m12 = 0.0f;
-    m_projectionMatrix.m22 = 1.0f / (m_frustumTop - m_frustumBottom);
-    m_projectionMatrix.m32 = m_projectionMatrix.m22 * -(m_frustumTop + m_frustumBottom);
-    m_projectionMatrix.m42 = 0.0f;
-    m_projectionMatrix.m13 = 0.0f;
-    m_projectionMatrix.m23 = 0.0f;
-    m_projectionMatrix.m33 = 1.0f / (m_frustumFar - m_frustumNear);
-    m_projectionMatrix.m43 = m_projectionMatrix.m33 * -(m_frustumFar + m_frustumNear);
-    m_projectionMatrix.m14 = 0.0f;
-    m_projectionMatrix.m24 = 0.0f;
-    m_projectionMatrix.m34 = 1.0f;
-    m_projectionMatrix.m44 = 0.0f;
+    m_viewMatrix.v[0] = {  m_right.x,                m_up.x,                m_direction.x,               0 };
+    m_viewMatrix.v[1] = {  m_right.y,                m_up.y,                m_direction.y,               0 };
+    m_viewMatrix.v[2] = {  m_right.z,                m_up.z,                m_direction.z,               0 };
+    m_viewMatrix.v[3] = { -m_right.Dot(m_location), -m_up.Dot(m_location), -m_direction.Dot(m_location), 1 };
 
-    m_projectionMatrix.m11 *= 2.0f;
-    m_projectionMatrix.m22 *= 2.0f;
-    m_projectionMatrix.m33 *= m_frustumFar;
+    m_projectionMatrix.v[0] = {    (-2) / (l - r),                 0,                  0, 0 };
+    m_projectionMatrix.v[1] = {                 0,    (-2) / (b - t),                  0, 0 };
+//  m_projectionMatrix.v[2] = { (l + r) / (l - r), (b + t) / (b - t),      (f) / (f - n), 1 };
+    m_projectionMatrix.v[2] = {                 0,                 0,      (f) / (f - n), 1 };
+    m_projectionMatrix.v[3] = {                 0,                 0, (f * -n) / (f - n), 0 };
 
-    m_projectionMatrix = m_viewportMatrix * m_projectionMatrix;
+    m_projectionMatrix = m_projectionMatrix * m_viewportMatrix;
 }
 //------------------------------------------------------------------------------
-void xxCamera::LookAt(const xxVector3& worldPoint, const xxVector3& worldUp)
+void xxCamera::LookAt(xxVector3 const& worldPoint, xxVector3 const& worldUp)
 {
-    xxVector3 direction = m_location - worldPoint;
+    xxVector3 direction = worldPoint - m_location;
     direction /= direction.Length();
 
     xxVector3 right = worldUp.Cross(direction);
@@ -71,12 +63,12 @@ void xxCamera::LookAt(const xxVector3& worldPoint, const xxVector3& worldUp)
 
     m_right = right;
     m_up = up;
-    m_direction = -direction;
+    m_direction = direction;
 }
 //------------------------------------------------------------------------------
 void xxCamera::SetFOV(float aspect, float fov, float far)
 {
-    float halfHeight = tanf(fov * 0.5f * (float)M_PI / 180.0f);
+    float halfHeight = tanf(fov * (float)M_PI / 180.0f * 0.5f);
     float halfWidth = halfHeight * aspect;
 
     m_frustumLeft = -halfWidth;
@@ -98,19 +90,19 @@ void xxCamera::SetViewportMatrix(float fromWidth, float fromHeight, float toX, f
     float translateX = (newCenterX - oldCenterX) * 2.0f / fromWidth;
     float translateY = -(newCenterY - oldCenterY) * 2.0f / fromHeight;
 
-    m_viewportMatrix.m11 = scaleX;
-    m_viewportMatrix.m22 = scaleY;
-    m_viewportMatrix.m41 = translateX;
-    m_viewportMatrix.m42 = translateY;
+    m_viewportMatrix.v[0] = {     scaleX,          0, 0, 0 };
+    m_viewportMatrix.v[1] = {          0,     scaleY, 0, 0 };
+    m_viewportMatrix.v[2] = {          0,          0, 1, 0 };
+    m_viewportMatrix.v[3] = { translateX, translateY, 0, 0 };
 }
 //------------------------------------------------------------------------------
-xxVector3 xxCamera::GetScreenToWorldPos(float x, float y) const
+xxVector3 xxCamera::GetDirectionFromScreenPos(float x, float y) const
 {
     float right = m_frustumLeft + x * (m_frustumRight - m_frustumLeft);
     float up = m_frustumBottom + y * (m_frustumTop - m_frustumBottom);
 
-    xxVector3 kDir = m_direction + m_right * right + m_up * up;
-    kDir /= kDir.Length();
-    return kDir;
+    xxVector3 direction = m_direction + m_right * right + m_up * up;
+    direction /= direction.Length();
+    return direction;
 }
 //==============================================================================
