@@ -199,7 +199,7 @@ static void FX_CALL gto_grDrawTriangle(const void *a, const void *b, const void 
         if (g_vertexLayout[GR_PARAM_XY] != 0xFF)
         {
             GLfloat *v = (GLfloat*)((char*)p + g_vertexLayout[GR_PARAM_XY]);
-            gto_glVertex4f(v[0], v[1], 0.0f, 1.0f);
+            gto_glVertex4f(v[0], v[1], 1.0f / v[2], 1.0f / v[3]);
         }
     }
 
@@ -431,6 +431,12 @@ static void FX_CALL gto_grTexSource(GrChipID_t tmu, FxU32 startAddress, FxU32 ev
     gto_glBindTexture(GL_TEXTURE_2D, texture);
 }
 //------------------------------------------------------------------------------
+static void FX_CALL gto_grTexClampMode(GrChipID_t tmu, GrTextureClampMode_t s_clampmode, GrTextureClampMode_t t_clampmode)
+{
+    gto_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, s_clampmode == GR_TEXTURECLAMP_WRAP ? GL_REPEAT : GL_CLAMP_TO_EDGE);
+    gto_glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, t_clampmode == GR_TEXTURECLAMP_WRAP ? GL_REPEAT : GL_CLAMP_TO_EDGE);
+}
+//------------------------------------------------------------------------------
 static void FX_CALL gto_grTexDownloadMipMap(GrChipID_t tmu, FxU32 startAddress, FxU32 evenOdd, GrTexInfo *info)
 {
     GLuint texture = startAddress;
@@ -552,6 +558,7 @@ GrProc FX_CALL gto_grGetProcAddress(char* name)
     case xxHash("grTexCalcMemRequired"):    return (GrProc)gto_grTexCalcMemRequired;
     case xxHash("grTexMinAddress"):         return (GrProc)gto_grTexMinAddress;
     case xxHash("grTexSource"):             return (GrProc)gto_grTexSource;
+    case xxHash("grTexClampMode"):          return (GrProc)gto_grTexClampMode;
     case xxHash("grTexDownloadMipMap"):     return (GrProc)gto_grTexDownloadMipMap;
     case xxHash("grGlideInit"):             return (GrProc)gto_grGlideInit;
     case xxHash("grGlideShutdown"):         return (GrProc)gto_grGlideShutdown;

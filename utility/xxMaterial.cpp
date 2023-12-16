@@ -39,7 +39,7 @@ xxMaterialPtr xxMaterial::Create()
     return material;
 }
 //------------------------------------------------------------------------------
-void xxMaterial::Update(xxNode& node, uint64_t device, const xxCameraPtr& camera)
+void xxMaterial::Update(xxNode const& node, uint64_t device, xxCameraPtr const& camera)
 {
     xxMeshPtr mesh = node.GetMesh();
     if (mesh == nullptr)

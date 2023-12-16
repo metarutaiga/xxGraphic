@@ -47,7 +47,7 @@ xxNodePtr xxNode::GetParent() const
     return m_parent.lock();
 }
 //------------------------------------------------------------------------------
-const xxNodePtr& xxNode::GetChild(size_t index) const
+xxNodePtr const& xxNode::GetChild(size_t index) const
 {
     if (index >= m_children.size())
     {
@@ -63,7 +63,7 @@ size_t xxNode::GetChildCount() const
     return m_children.size();
 }
 //------------------------------------------------------------------------------
-bool xxNode::AttachChild(const xxNodePtr& node)
+bool xxNode::AttachChild(xxNodePtr const& node)
 {
     if (node == nullptr)
         return false;
@@ -87,20 +87,20 @@ bool xxNode::AttachChild(const xxNodePtr& node)
     return true;
 }
 //------------------------------------------------------------------------------
-bool xxNode::DetachChild(const xxNodePtr& node)
+bool xxNode::DetachChild(xxNodePtr const& node)
 {
     if (node == nullptr)
         return false;
     if (node->m_parent.lock() == nullptr)
         return false;
 
-    for (const xxNodePtr& child : m_children)
+    for (xxNodePtr const& child : m_children)
     {
         if (node != child)
             continue;
         node->m_parent.reset();
 
-        size_t i = std::distance<const xxNodePtr*>(m_children.data(), &child);
+        size_t i = std::distance<xxNodePtr const*>(m_children.data(), &child);
         for (size_t j = i + 1; j < m_children.size(); ++j)
             m_children[j - 1] = std::move(m_children[j]);
         m_children.pop_back();
@@ -114,7 +114,7 @@ bool xxNode::DetachChild(const xxNodePtr& node)
             node->m_worldMatrix = &node->m_classWorldMatrix;
 
             // Traversal
-            for (const xxNodePtr& child : node->m_children)
+            for (xxNodePtr const& child : node->m_children)
             {
                 if (child == nullptr)
                     continue;
@@ -130,24 +130,24 @@ bool xxNode::DetachChild(const xxNodePtr& node)
     return false;
 }
 //------------------------------------------------------------------------------
-const xxMatrix4& xxNode::GetLocalMatrix() const
+xxMatrix4 const& xxNode::GetLocalMatrix() const
 {
     return (*m_localMatrix);
 }
 //------------------------------------------------------------------------------
-const xxMatrix4& xxNode::GetWorldMatrix() const
+xxMatrix4 const& xxNode::GetWorldMatrix() const
 {
     return (*m_worldMatrix);
 }
 //------------------------------------------------------------------------------
-void xxNode::SetLocalMatrix(const xxMatrix4& matrix)
+void xxNode::SetLocalMatrix(xxMatrix4 const& matrix)
 {
     (*m_localMatrix) = matrix;
 
     m_legacyScale = -1.0f;
 }
 //------------------------------------------------------------------------------
-void xxNode::SetWorldMatrix(const xxMatrix4& matrix)
+void xxNode::SetWorldMatrix(xxMatrix4 const& matrix)
 {
     (*m_worldMatrix) = matrix;
 }
@@ -164,7 +164,7 @@ void xxNode::CreateLinearMatrix()
         size_t count = 1;
 
         // Traversal
-        for (const xxNodePtr& child : node->m_children)
+        for (xxNodePtr const& child : node->m_children)
         {
             if (child == nullptr)
                 continue;
@@ -189,7 +189,7 @@ void xxNode::CreateLinearMatrix()
         header->childrenCount = node->GetChildCount();
 
         // Children
-        for (const xxNodePtr& child : node->m_children)
+        for (xxNodePtr const& child : node->m_children)
         {
             if (child == nullptr)
                 continue;
@@ -201,7 +201,7 @@ void xxNode::CreateLinearMatrix()
         }
 
         // Traversal
-        for (const xxNodePtr& child : node->m_children)
+        for (xxNodePtr const& child : node->m_children)
         {
             if (child == nullptr)
                 continue;
@@ -251,7 +251,7 @@ bool xxNode::UpdateMatrix()
         LinearMatrixHeader* header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
         while (header->parentMatrix)
         {
-            const xxMatrix4& parentMatrix = (*header->parentMatrix);
+            xxMatrix4 const& parentMatrix = (*header->parentMatrix);
             size_t childrenCount = header->childrenCount;
 
             parentMatrix.MultiplyArray(childrenCount, &linearMatrix[0], sizeof(xxMatrix4) * 2, &linearMatrix[1], sizeof(xxMatrix4) * 2);
@@ -281,9 +281,9 @@ xxMatrix3 xxNode::GetRotate() const
     {
         xxMatrix3 rotate;
 
-        rotate._[0] = { (*m_localMatrix)._[0].x, (*m_localMatrix)._[0].y, (*m_localMatrix)._[0].z };
-        rotate._[1] = { (*m_localMatrix)._[1].x, (*m_localMatrix)._[1].y, (*m_localMatrix)._[1].z };
-        rotate._[2] = { (*m_localMatrix)._[2].x, (*m_localMatrix)._[2].y, (*m_localMatrix)._[2].z };
+        rotate.v[0] = { (*m_localMatrix).v[0].x, (*m_localMatrix).v[0].y, (*m_localMatrix).v[0].z };
+        rotate.v[1] = { (*m_localMatrix).v[1].x, (*m_localMatrix).v[1].y, (*m_localMatrix).v[1].z };
+        rotate.v[2] = { (*m_localMatrix).v[2].x, (*m_localMatrix).v[2].y, (*m_localMatrix).v[2].z };
 
         return rotate;
     }
@@ -297,7 +297,7 @@ xxVector3 xxNode::GetTranslate() const
     {
         xxVector3 translate;
 
-        translate = { (*m_localMatrix)._[3].x, (*m_localMatrix)._[3].y, (*m_localMatrix)._[3].z };
+        translate = { (*m_localMatrix).v[3].x, (*m_localMatrix).v[3].y, (*m_localMatrix).v[3].z };
 
         return translate;
     }
@@ -313,24 +313,24 @@ float xxNode::GetScale() const
     return m_legacyScale;
 }
 //------------------------------------------------------------------------------
-void xxNode::SetRotate(const xxMatrix3& rotate)
+void xxNode::SetRotate(xxMatrix3 const& rotate)
 {
     if (m_legacyScale < 0.0f)
     {
-        (*m_localMatrix)._[0] = { rotate._[0].x, rotate._[0].y, rotate._[0].z };
-        (*m_localMatrix)._[1] = { rotate._[1].x, rotate._[1].y, rotate._[1].z };
-        (*m_localMatrix)._[2] = { rotate._[2].x, rotate._[2].y, rotate._[2].z };
+        (*m_localMatrix).v[0] = { rotate.v[0].x, rotate.v[0].y, rotate.v[0].z };
+        (*m_localMatrix).v[1] = { rotate.v[1].x, rotate.v[1].y, rotate.v[1].z };
+        (*m_localMatrix).v[2] = { rotate.v[2].x, rotate.v[2].y, rotate.v[2].z };
         return;
     }
 
     m_legacyRotate = rotate;
 }
 //------------------------------------------------------------------------------
-void xxNode::SetTranslate(const xxVector3& translate)
+void xxNode::SetTranslate(xxVector3 const& translate)
 {
     if (m_legacyScale < 0.0f)
     {
-        (*m_localMatrix)._[3] = { translate.x, translate.y, translate.z, 1.0f };
+        (*m_localMatrix).v[3] = { translate.x, translate.y, translate.z, 1.0f };
         return;
     }
 
@@ -357,13 +357,13 @@ void xxNode::UpdateRotateTranslateScale()
     if (m_legacyScale < 0.0f)
         return;
 
-    (*m_localMatrix)._[0] = xxVector4{ m_legacyRotate._[0].x, m_legacyRotate._[0].y, m_legacyRotate._[0].z } * m_legacyScale;
-    (*m_localMatrix)._[1] = xxVector4{ m_legacyRotate._[1].x, m_legacyRotate._[1].y, m_legacyRotate._[1].z } * m_legacyScale;
-    (*m_localMatrix)._[2] = xxVector4{ m_legacyRotate._[2].x, m_legacyRotate._[2].y, m_legacyRotate._[2].z } * m_legacyScale;
-    (*m_localMatrix)._[3] = xxVector4{ m_legacyTranslate.x, m_legacyTranslate.y, m_legacyTranslate.z, 1.0f };
+    (*m_localMatrix).v[0] = xxVector4{ m_legacyRotate.v[0].x, m_legacyRotate.v[0].y, m_legacyRotate.v[0].z } * m_legacyScale;
+    (*m_localMatrix).v[1] = xxVector4{ m_legacyRotate.v[1].x, m_legacyRotate.v[1].y, m_legacyRotate.v[1].z } * m_legacyScale;
+    (*m_localMatrix).v[2] = xxVector4{ m_legacyRotate.v[2].x, m_legacyRotate.v[2].y, m_legacyRotate.v[2].z } * m_legacyScale;
+    (*m_localMatrix).v[3] = xxVector4{ m_legacyTranslate.x, m_legacyTranslate.y, m_legacyTranslate.z, 1.0f };
 }
 //------------------------------------------------------------------------------
-const xxImagePtr& xxNode::GetImage(size_t index) const
+xxImagePtr const& xxNode::GetImage(size_t index) const
 {
     if (m_images.size() <= index)
     {
@@ -374,17 +374,17 @@ const xxImagePtr& xxNode::GetImage(size_t index) const
     return m_images[index];
 }
 //------------------------------------------------------------------------------
-const xxMaterialPtr& xxNode::GetMaterial() const
+xxMaterialPtr const& xxNode::GetMaterial() const
 {
     return m_material;
 }
 //------------------------------------------------------------------------------
-const xxMeshPtr& xxNode::GetMesh() const
+xxMeshPtr const& xxNode::GetMesh() const
 {
     return m_mesh;
 }
 //------------------------------------------------------------------------------
-void xxNode::SetImage(size_t index, const xxImagePtr& image)
+void xxNode::SetImage(size_t index, xxImagePtr const& image)
 {
     if (m_images.size() <= index)
     {
@@ -394,12 +394,12 @@ void xxNode::SetImage(size_t index, const xxImagePtr& image)
     m_images[index] = image;
 }
 //------------------------------------------------------------------------------
-void xxNode::SetMaterial(const xxMaterialPtr& material)
+void xxNode::SetMaterial(xxMaterialPtr const& material)
 {
     m_material = material;
 }
 //------------------------------------------------------------------------------
-void xxNode::SetMesh(const xxMeshPtr& mesh)
+void xxNode::SetMesh(xxMeshPtr const& mesh)
 {
     m_mesh = mesh;
 }
@@ -411,7 +411,7 @@ void xxNode::Update(float time, bool updateMatrix)
         updateMatrix = UpdateMatrix();
     }
 
-    for (const xxNodePtr& child : m_children)
+    for (xxNodePtr const& child : m_children)
     {
         if (child == nullptr)
             continue;
@@ -419,15 +419,18 @@ void xxNode::Update(float time, bool updateMatrix)
     }
 }
 //------------------------------------------------------------------------------
-void xxNode::Draw(uint64_t device, uint64_t commandEncoder, const xxCameraPtr& camera)
+void xxNode::Draw(uint64_t device, uint64_t commandEncoder, xxCameraPtr const& camera)
 {
     if (m_material == nullptr || m_mesh == nullptr)
         return;
 
-    int textureCount = (int)m_images.size();
+    m_mesh->Update(*this, device);
+    m_material->Update(*this, device, camera);
+
     uint64_t textures[16];
     uint64_t samplers[16];
 
+    int textureCount = (int)m_images.size();
     for (int i = 0; i < textureCount; ++i)
     {
         xxImage* image = m_images[i].get();
@@ -436,14 +439,10 @@ void xxNode::Draw(uint64_t device, uint64_t commandEncoder, const xxCameraPtr& c
         samplers[i] = image->GetSampler();
     }
 
-    m_mesh->Update(*this, device);
-    m_material->Update(*this, device, camera);
-
-    m_material->Draw(commandEncoder);
-
     xxSetFragmentTextures(commandEncoder, textureCount, textures);
     xxSetFragmentSamplers(commandEncoder, textureCount, samplers);
 
+    m_material->Draw(commandEncoder);
     m_mesh->Draw(commandEncoder);
 }
 //------------------------------------------------------------------------------

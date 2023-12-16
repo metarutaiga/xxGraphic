@@ -15,7 +15,7 @@ public:
 
     static xxMaterialPtr Create();
 
-    void        Update(xxNode& node, uint64_t device, const xxCameraPtr& camera);
+    void        Update(xxNode const& node, uint64_t device, xxCameraPtr const& camera);
     void        Draw(uint64_t commandEncoder);
 
 protected:

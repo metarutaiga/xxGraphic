@@ -94,7 +94,7 @@ xxMatrix2 xxMatrix2::Transpose() const
 
     for (int y = 0; y < M; y++)
         for (int x = 0; x < N; x++)
-            m._[x].f[y] = _[y].f[x];
+            m.v[x].f[y] = v[y].f[x];
 
     return m;
 }
@@ -103,35 +103,35 @@ xxMatrix2 xxMatrix2::Transpose() const
 //==============================================================================
 float xxMatrix3::Determinant() const
 {
-    xxVector3 v;
+    xxVector3 t;
 
-    v.x = (m22 * m33 - m23 * m32);
-    v.y = (m23 * m31 - m21 * m33);
-    v.z = (m21 * m32 - m22 * m31);
+    t.x = (m22 * m33 - m23 * m32);
+    t.y = (m23 * m31 - m21 * m33);
+    t.z = (m21 * m32 - m22 * m31);
 
-    float det = _[0].Dot(v);
+    float det = v[0].Dot(t);
 
     return det;
 }
 //------------------------------------------------------------------------------
 xxMatrix3 xxMatrix3::Inverse() const
 {
-    xxVector3 v;
+    xxVector3 t;
 
-    v.x = (m22 * m33 - m23 * m32);
-    v.y = (m23 * m31 - m21 * m33);
-    v.z = (m21 * m32 - m22 * m31);
+    t.x = (m22 * m33 - m23 * m32);
+    t.y = (m23 * m31 - m21 * m33);
+    t.z = (m21 * m32 - m22 * m31);
 
-    float det = _[0].Dot(v);
+    float det = v[0].Dot(t);
     if (det == 0.0f)
         return {};
     float invDet = 1.0f / det;
 
     xxMatrix3 m;
 
-    m.m11 =                     v.x * invDet;
-    m.m21 =                     v.y * invDet;
-    m.m31 =                     v.z * invDet;
+    m.m11 =                     t.x * invDet;
+    m.m21 =                     t.y * invDet;
+    m.m31 =                     t.z * invDet;
     m.m12 = (m13 * m32 - m12 * m33) * invDet;
     m.m22 = (m11 * m33 - m13 * m31) * invDet;
     m.m32 = (m12 * m31 - m11 * m32) * invDet;
@@ -148,7 +148,7 @@ xxMatrix3 xxMatrix3::Transpose() const
 
     for (int y = 0; y < M; y++)
         for (int x = 0; x < N; x++)
-            m._[x].f[y] = _[y].f[x];
+            m.v[x].f[y] = v[y].f[x];
 
     return m;
 }
@@ -164,14 +164,14 @@ float xxMatrix4::Determinant() const
     float x24 = (m32 * m44 - m34 * m42);
     float x34 = (m33 * m44 - m34 * m43);
 
-    xxVector4 v;
+    xxVector4 t;
 
-    v.x =  (m22 * x34 - m23 * x24 + m24 * x23);
-    v.y = -(m21 * x34 - m23 * x14 + m24 * x13);
-    v.z =  (m21 * x24 - m22 * x14 + m24 * x12);
-    v.w = -(m21 * x23 - m22 * x13 + m23 * x12);
+    t.x =  (m22 * x34 - m23 * x24 + m24 * x23);
+    t.y = -(m21 * x34 - m23 * x14 + m24 * x13);
+    t.z =  (m21 * x24 - m22 * x14 + m24 * x12);
+    t.w = -(m21 * x23 - m22 * x13 + m23 * x12);
 
-    float det = _[0].Dot(v);
+    float det = v[0].Dot(t);
 
     return det;
 }
@@ -185,24 +185,24 @@ xxMatrix4 xxMatrix4::Inverse() const
     float x24 = (m32 * m44 - m34 * m42);
     float x34 = (m33 * m44 - m34 * m43);
 
-    xxVector4 v;
+    xxVector4 t;
 
-    v.x =  (m22 * x34 - m23 * x24 + m24 * x23);
-    v.y = -(m21 * x34 - m23 * x14 + m24 * x13);
-    v.z =  (m21 * x24 - m22 * x14 + m24 * x12);
-    v.w = -(m21 * x23 - m22 * x13 + m23 * x12);
+    t.x =  (m22 * x34 - m23 * x24 + m24 * x23);
+    t.y = -(m21 * x34 - m23 * x14 + m24 * x13);
+    t.z =  (m21 * x24 - m22 * x14 + m24 * x12);
+    t.w = -(m21 * x23 - m22 * x13 + m23 * x12);
 
-    float det = _[0].Dot(v);
+    float det = v[0].Dot(t);
     if (det == 0.0f)
         return {};
     float invDet = 1.0f / det;
 
     xxMatrix4 m;
 
-    m.m11 =                                  v.x * invDet;
-    m.m21 =                                  v.y * invDet;
-    m.m31 =                                  v.z * invDet;
-    m.m41 =                                  v.w * invDet;
+    m.m11 =                                  t.x * invDet;
+    m.m21 =                                  t.y * invDet;
+    m.m31 =                                  t.z * invDet;
+    m.m41 =                                  t.w * invDet;
     m.m12 = -(m12 * x34 - m13 * x24 + m14 * x23) * invDet;
     m.m22 =  (m11 * x34 - m13 * x14 + m14 * x13) * invDet;
     m.m32 = -(m11 * x24 - m12 * x14 + m14 * x12) * invDet;
@@ -233,7 +233,7 @@ xxMatrix4 xxMatrix4::Transpose() const
 
     for (int y = 0; y < M; y++)
         for (int x = 0; x < N; x++)
-            m._[x].f[y] = _[y].f[x];
+            m.v[x].f[y] = v[y].f[x];
 
     return m;
 }
@@ -250,57 +250,57 @@ float xxMatrix4::FastDeterminant() const
 //------------------------------------------------------------------------------
 void xxMatrix4::FastDecompose(xxMatrix3& __restrict rotate, xxVector3& __restrict translate, float& __restrict scale) const
 {
-    scale = xxVector3{ _[0].x, _[0].y, _[0].z }.Length();
-    translate = { _[3].x, _[3].y, _[3].z };
+    scale = xxVector3{ v[0].x, v[0].y, v[0].z }.Length();
+    translate = { v[3].x, v[3].y, v[3].z };
 
     float invScale = 1.0f / scale;
     for (int i = 0; i < 3; ++i)
     {
-        rotate._[i].x = _[i].x * invScale;
-        rotate._[i].y = _[i].y * invScale;
-        rotate._[i].z = _[i].z * invScale;
+        rotate.v[i].x = v[i].x * invScale;
+        rotate.v[i].y = v[i].y * invScale;
+        rotate.v[i].z = v[i].z * invScale;
     }
 }
 //------------------------------------------------------------------------------
-void xxMatrix4::MultiplyArray(size_t count, const xxVector4* __restrict input, int inputStride, xxVector4* __restrict output, int outputStride) const
+void xxMatrix4::MultiplyArray(size_t count, xxVector4 const* __restrict input, int inputStride, xxVector4* __restrict output, int outputStride) const
 {
-    const xxMatrix4 matrix(*this);
+    xxMatrix4 matrix(*this);
 
     for (size_t i = 0; i < count; ++i)
     {
-        (*output).v = __builtin_multiplyvector(&matrix._->v, (*input).v);
+        (*output).v = __builtin_multiplyvector(&matrix.v->v, (*input).v);
 
         input = reinterpret_cast<xxVector4*>((char*)input + inputStride);
         output = reinterpret_cast<xxVector4*>((char*)output + outputStride);
     }
 }
 //------------------------------------------------------------------------------
-void xxMatrix4::MultiplyArray(size_t count, const xxMatrix4* __restrict input, int inputStride, xxMatrix4* __restrict output, int outputStride) const
+void xxMatrix4::MultiplyArray(size_t count, xxMatrix4 const* __restrict input, int inputStride, xxMatrix4* __restrict output, int outputStride) const
 {
-    const xxMatrix4 matrix(*this);
+    xxMatrix4 matrix(*this);
 
     for (size_t i = 0; i < count; ++i)
     {
-        (*output)._[0].v = __builtin_multiplyvector(&matrix._->v, (*input)._[0].v);
-        (*output)._[1].v = __builtin_multiplyvector(&matrix._->v, (*input)._[1].v);
-        (*output)._[2].v = __builtin_multiplyvector(&matrix._->v, (*input)._[2].v);
-        (*output)._[3].v = __builtin_multiplyvector(&matrix._->v, (*input)._[3].v);
+        (*output).v[0].v = __builtin_multiplyvector(&(*input).v->v, matrix.v[0].v);
+        (*output).v[1].v = __builtin_multiplyvector(&(*input).v->v, matrix.v[1].v);
+        (*output).v[2].v = __builtin_multiplyvector(&(*input).v->v, matrix.v[2].v);
+        (*output).v[3].v = __builtin_multiplyvector(&(*input).v->v, matrix.v[3].v);
 
         input = reinterpret_cast<xxMatrix4*>((char*)input + inputStride);
         output = reinterpret_cast<xxMatrix4*>((char*)output + outputStride);
     }
 }
 //------------------------------------------------------------------------------
-void xxMatrix4::MultiplyLink(size_t count, const xxMatrix4* __restrict input, int inputStride, xxMatrix4* __restrict output, int outputStride) const
+void xxMatrix4::MultiplyLink(size_t count, xxMatrix4 const* __restrict input, int inputStride, xxMatrix4* __restrict output, int outputStride) const
 {
     xxMatrix4 matrix(*this);
 
     for (size_t i = 0; i < count; ++i)
     {
-        (*output)._[0].v = __builtin_multiplyvector(&matrix._->v, (*input)._[0].v);
-        (*output)._[1].v = __builtin_multiplyvector(&matrix._->v, (*input)._[1].v);
-        (*output)._[2].v = __builtin_multiplyvector(&matrix._->v, (*input)._[2].v);
-        (*output)._[3].v = __builtin_multiplyvector(&matrix._->v, (*input)._[3].v);
+        (*output).v[0].v = __builtin_multiplyvector(&(*input).v->v, matrix.v[0].v);
+        (*output).v[1].v = __builtin_multiplyvector(&(*input).v->v, matrix.v[1].v);
+        (*output).v[2].v = __builtin_multiplyvector(&(*input).v->v, matrix.v[2].v);
+        (*output).v[3].v = __builtin_multiplyvector(&(*input).v->v, matrix.v[3].v);
         matrix = (*output);
 
         input = reinterpret_cast<xxMatrix4*>((char*)input + inputStride);
