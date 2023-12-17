@@ -105,12 +105,23 @@ struct MTLSWAPCHAIN : public MTLFRAMEBUFFER
     float                           scale;
 
     // Metal 2
+    NSUInteger                      frameCount;
     id <MTLRenderCommandEncoder>    commandEncoder;
     int                             argumentBufferIndex;
     int                             argumentBufferStep;
     id <MTLBuffer>                  argumentBuffers[4];
     id <MTLArgumentEncoder>         vertexArgumentEncoder;
     id <MTLArgumentEncoder>         fragmentArgumentEncoder;
+};
+//==============================================================================
+//  Buffer
+//==============================================================================
+struct MTLBUFFER
+{
+    id <MTLBuffer>                  buffer;
+
+    // Metal 2
+    NSUInteger                      frameCount;
 };
 //==============================================================================
 //  Texture
@@ -121,6 +132,9 @@ struct MTLTEXTURE
     id <MTLBuffer>                  buffer;
     int                             strides[16];
     void*                           temporary;
+
+    // Metal 2
+    NSUInteger                      frameCount;
 };
 //==============================================================================
 //  Pipeline

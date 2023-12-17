@@ -438,10 +438,16 @@ uint64_t xxCreateConstantBufferMetal(uint64_t device, int size)
     if (mtlDevice == nil)
         return 0;
 
+    MTLBUFFER* mtlBuffer = new MTLBUFFER{};
+    if (mtlBuffer == nullptr)
+        return 0;
+
     id <MTLBuffer> buffer = [mtlDevice newBufferWithLength:size
                                                    options:MTLResourceStorageModeShared];
 
-    return reinterpret_cast<uint64_t>((__bridge_retained void*)buffer);
+    mtlBuffer->buffer = buffer;
+
+    return reinterpret_cast<uint64_t>(mtlBuffer);
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateIndexBufferMetal(uint64_t device, int size)
@@ -450,10 +456,16 @@ uint64_t xxCreateIndexBufferMetal(uint64_t device, int size)
     if (mtlDevice == nil)
         return 0;
 
+    MTLBUFFER* mtlBuffer = new MTLBUFFER{};
+    if (mtlBuffer == nullptr)
+        return 0;
+
     id <MTLBuffer> buffer = [mtlDevice newBufferWithLength:size
                                                    options:MTLResourceStorageModeShared];
 
-    return reinterpret_cast<uint64_t>((__bridge_retained void*)buffer);
+    mtlBuffer->buffer = buffer;
+
+    return reinterpret_cast<uint64_t>(mtlBuffer);
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexBufferMetal(uint64_t device, int size, uint64_t vertexAttribute)
@@ -462,24 +474,30 @@ uint64_t xxCreateVertexBufferMetal(uint64_t device, int size, uint64_t vertexAtt
     if (mtlDevice == nil)
         return 0;
 
+    MTLBUFFER* mtlBuffer = new MTLBUFFER{};
+    if (mtlBuffer == nullptr)
+        return 0;
+
     id <MTLBuffer> buffer = [mtlDevice newBufferWithLength:size
                                                    options:MTLResourceStorageModeShared];
 
-    return reinterpret_cast<uint64_t>((__bridge_retained void*)buffer);
+    mtlBuffer->buffer = buffer;
+
+    return reinterpret_cast<uint64_t>(mtlBuffer);
 }
 //------------------------------------------------------------------------------
 void xxDestroyBufferMetal(uint64_t device, uint64_t buffer)
 {
-    id <MTLBuffer> mtlBuffer = (__bridge_transfer id)reinterpret_cast<void*>(buffer);
+    MTLBUFFER* mtlBuffer = reinterpret_cast<MTLBUFFER*>(buffer);
 
-    mtlBuffer = nil;
+    delete mtlBuffer;
 }
 //------------------------------------------------------------------------------
 void* xxMapBufferMetal(uint64_t device, uint64_t buffer)
 {
-    id <MTLBuffer> mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);
+    MTLBUFFER* mtlBuffer = reinterpret_cast<MTLBUFFER*>(buffer);
 
-    return [mtlBuffer contents];
+    return [mtlBuffer->buffer contents];
 }
 //------------------------------------------------------------------------------
 void xxUnmapBufferMetal(uint64_t device, uint64_t buffer)
@@ -905,7 +923,8 @@ void xxSetVertexBuffersMetal(uint64_t commandEncoder, int count, const uint64_t*
 
     for (int i = 0; i < count; ++i)
     {
-        mtlBuffers[i] = (__bridge id)reinterpret_cast<void*>(buffers[i]);
+        MTLBUFFER* mtlBuffer = reinterpret_cast<MTLBUFFER*>(buffers[i]);
+        mtlBuffers[i] = mtlBuffer->buffer;
         offsets[i] = 0;
     }
 
@@ -977,9 +996,9 @@ void xxSetFragmentSamplersMetal(uint64_t commandEncoder, int count, const uint64
 void xxSetVertexConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    id <MTLBuffer> __unsafe_unretained mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);
+    MTLBUFFER* mtlBuffer = reinterpret_cast<MTLBUFFER*>(buffer);
 
-    [mtlCommandEncoder setVertexBuffer:mtlBuffer
+    [mtlCommandEncoder setVertexBuffer:mtlBuffer->buffer
                                 offset:0
                                atIndex:0];
 }
@@ -987,9 +1006,9 @@ void xxSetVertexConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, in
 void xxSetFragmentConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    id <MTLBuffer> __unsafe_unretained mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);
+    MTLBUFFER* mtlBuffer = reinterpret_cast<MTLBUFFER*>(buffer);
 
-    [mtlCommandEncoder setFragmentBuffer:mtlBuffer
+    [mtlCommandEncoder setFragmentBuffer:mtlBuffer->buffer
                                   offset:0
                                  atIndex:0];
 }
@@ -1008,7 +1027,7 @@ void xxDrawMetal(uint64_t commandEncoder, int vertexCount, int instanceCount, in
 void xxDrawIndexedMetal(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    id <MTLBuffer> __unsafe_unretained mtlIndexBuffer = (__bridge id)reinterpret_cast<void*>(indexBuffer);
+    MTLBUFFER* mtlIndexBuffer = reinterpret_cast<MTLBUFFER*>(indexBuffer);
 
     MTLIndexType indexType = (INDEX_BUFFER_WIDTH == /* DISABLES CODE */(2)) ? MTLIndexTypeUInt16 : MTLIndexTypeUInt32;
 #if TARGET_OS_SIMULATOR
@@ -1019,13 +1038,13 @@ void xxDrawIndexedMetal(uint64_t commandEncoder, uint64_t indexBuffer, int index
     [mtlCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
                                   indexCount:indexCount
                                    indexType:indexType
-                                 indexBuffer:mtlIndexBuffer
+                                 indexBuffer:mtlIndexBuffer->buffer
                            indexBufferOffset:firstIndex * INDEX_BUFFER_WIDTH];
 #else
     [mtlCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
                                   indexCount:indexCount
                                    indexType:indexType
-                                 indexBuffer:mtlIndexBuffer
+                                 indexBuffer:mtlIndexBuffer->buffer
                            indexBufferOffset:firstIndex * INDEX_BUFFER_WIDTH
                                instanceCount:instanceCount
                                   baseVertex:vertexOffset
