@@ -64,6 +64,7 @@ uint64_t xxGetCommandBufferMetal2(uint64_t device, uint64_t swapchain)
 
     MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(swapchain);
 
+    mtlSwapchain->frameCount++;
     mtlSwapchain->commandEncoder = nil;
     mtlSwapchain->argumentBufferIndex = (mtlSwapchain->argumentBufferIndex + 1) % xxCountOf(mtlSwapchain->argumentBuffers);
     mtlSwapchain->argumentBufferStep = 0;
@@ -273,15 +274,20 @@ void xxSetVertexTexturesMetal2(uint64_t commandEncoder, int count, const uint64_
 
     for (int i = 0; i < count; ++i)
     {
-        MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(textures[i]);
-        mtlTextures[i] = mtlTexture->texture;
+        MTLTEXTURE* texture = reinterpret_cast<MTLTEXTURE*>(textures[i]);
+        id <MTLTexture> __unsafe_unretained mtlTexture = texture->texture;
+        mtlTextures[i] = mtlTexture;
+
+        if (texture->frameCount != mtlSwapchain->frameCount)
+        {
+            texture->frameCount = mtlSwapchain->frameCount;
+            [mtlSwapchain->commandEncoder useResource:mtlTexture
+                                                usage:MTLResourceUsageSample];
+        }
     }
 
     [mtlSwapchain->vertexArgumentEncoder setTextures:mtlTextures
                                            withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_TEXTURE, count)];
-    [mtlSwapchain->commandEncoder useResources:mtlTextures
-                                         count:count
-                                         usage:MTLResourceUsageSample];
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentTexturesMetal2(uint64_t commandEncoder, int count, const uint64_t* textures)
@@ -291,15 +297,20 @@ void xxSetFragmentTexturesMetal2(uint64_t commandEncoder, int count, const uint6
 
     for (int i = 0; i < count; ++i)
     {
-        MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(textures[i]);
-        mtlTextures[i] = mtlTexture->texture;
+        MTLTEXTURE* texture = reinterpret_cast<MTLTEXTURE*>(textures[i]);
+        id <MTLTexture> __unsafe_unretained mtlTexture = texture->texture;
+        mtlTextures[i] = mtlTexture;
+
+        if (texture->frameCount != mtlSwapchain->frameCount)
+        {
+            texture->frameCount = mtlSwapchain->frameCount;
+            [mtlSwapchain->commandEncoder useResource:mtlTexture
+                                                usage:MTLResourceUsageSample];
+        }
     }
 
     [mtlSwapchain->fragmentArgumentEncoder setTextures:mtlTextures
                                              withRange:NSMakeRange(xxGraphicDescriptor::FRAGMENT_TEXTURE, count)];
-    [mtlSwapchain->commandEncoder useResources:mtlTextures
-                                         count:count
-                                         usage:MTLResourceUsageSample];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersMetal2(uint64_t commandEncoder, int count, const uint64_t* samplers)
@@ -333,25 +344,35 @@ void xxSetFragmentSamplersMetal2(uint64_t commandEncoder, int count, const uint6
 void xxSetVertexConstantBufferMetal2(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(commandEncoder);
-    id <MTLBuffer> __unsafe_unretained mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);
+    MTLBUFFER* mtlBuffer = reinterpret_cast<MTLBUFFER*>(buffer);
 
-    [mtlSwapchain->vertexArgumentEncoder setBuffer:mtlBuffer
+    if (mtlBuffer->frameCount != mtlSwapchain->frameCount)
+    {
+        mtlBuffer->frameCount = mtlSwapchain->frameCount;
+        [mtlSwapchain->commandEncoder useResource:mtlBuffer->buffer
+                                            usage:MTLResourceUsageRead];
+    }
+
+    [mtlSwapchain->vertexArgumentEncoder setBuffer:mtlBuffer->buffer
                                             offset:0
                                            atIndex:xxGraphicDescriptor::VERTEX_UNIFORM];
-    [mtlSwapchain->commandEncoder useResource:mtlBuffer
-                                        usage:MTLResourceUsageRead];
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferMetal2(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(commandEncoder);
-    id <MTLBuffer> __unsafe_unretained mtlBuffer = (__bridge id)reinterpret_cast<void*>(buffer);
+    MTLBUFFER* mtlBuffer = reinterpret_cast<MTLBUFFER*>(buffer);
 
-    [mtlSwapchain->fragmentArgumentEncoder setBuffer:mtlBuffer
+    if (mtlBuffer->frameCount != mtlSwapchain->frameCount)
+    {
+        mtlBuffer->frameCount = mtlSwapchain->frameCount;
+        [mtlSwapchain->commandEncoder useResource:mtlBuffer->buffer
+                                            usage:MTLResourceUsageRead];
+    }
+
+    [mtlSwapchain->fragmentArgumentEncoder setBuffer:mtlBuffer->buffer
                                               offset:0
                                              atIndex:xxGraphicDescriptor::FRAGMENT_UNIFORM];
-    [mtlSwapchain->commandEncoder useResource:mtlBuffer
-                                        usage:MTLResourceUsageRead];
 }
 //------------------------------------------------------------------------------
 void xxDrawMetal2(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
