@@ -36,17 +36,19 @@ struct VertexOut
     float2 uv;
 };
 
+#if __METAL_USE_ARGUMENT__ == 0
 struct TextureSampler
 {
     texture2d<float> tex [[texture(0)]];
     sampler sam          [[sampler(0)]];
 };
-
+#else
 struct TextureSamplerArgument
 {
     texture2d<float> tex [[id(6)]];
     sampler sam          [[id(18)]];
 };
+#endif
 
 #if __METAL_USE_ARGUMENT__ == 0
 vertex VertexOut VSMain(VertexIn in [[stage_in]], constant Uniform& uniforms [[buffer(0)]])

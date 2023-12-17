@@ -424,8 +424,9 @@ void xxNode::Draw(uint64_t device, uint64_t commandEncoder, xxCameraPtr const& c
     if (m_material == nullptr || m_mesh == nullptr)
         return;
 
-    m_mesh->Update(*this, device);
-    m_material->Update(*this, device, camera);
+    m_mesh->Update(device);
+    m_material->Update(device, *this, camera);
+    m_material->Draw(commandEncoder);
 
     uint64_t textures[16];
     uint64_t samplers[16];
@@ -442,7 +443,6 @@ void xxNode::Draw(uint64_t device, uint64_t commandEncoder, xxCameraPtr const& c
     xxSetFragmentTextures(commandEncoder, textureCount, textures);
     xxSetFragmentSamplers(commandEncoder, textureCount, samplers);
 
-    m_material->Draw(commandEncoder);
     m_mesh->Draw(commandEncoder);
 }
 //------------------------------------------------------------------------------

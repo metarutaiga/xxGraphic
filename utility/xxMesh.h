@@ -20,7 +20,7 @@ public:
 
     typedef uint16_t IndexType;
 
-    void                        Update(xxNode& node, uint64_t device);
+    void                        Update(uint64_t device);
     void                        Draw(uint64_t commandEncoder, int instanceCount = 1, int firstIndex = 0, int vertexOffset = 0, int firstInstance = 0);
 
     uint64_t                    GetVertexAttribute() const;
@@ -69,11 +69,11 @@ protected:
 template<class T>
 struct xxStrideIterator
 {
-    xxStrideIterator(void* base, size_t size, size_t stride)
+    xxStrideIterator(void* base, size_t stride, size_t size)
     {
         m_now = reinterpret_cast<T*>(base);
         m_begin = reinterpret_cast<T*>(base);
-        m_end = reinterpret_cast<T*>(reinterpret_cast<char*>(base) + size * stride);
+        m_end = reinterpret_cast<T*>(reinterpret_cast<char*>(base) + stride * size);
         m_stride = stride;
     }
 

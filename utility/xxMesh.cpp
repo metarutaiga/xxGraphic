@@ -43,7 +43,7 @@ xxMeshPtr xxMesh::Create(int color, int normal, int texture)
     return mesh;
 }
 //------------------------------------------------------------------------------
-void xxMesh::Update(xxNode& node, uint64_t device)
+void xxMesh::Update(uint64_t device)
 {
     m_device = device;
 
@@ -219,7 +219,7 @@ void xxMesh::SetIndexCount(int count)
 xxStrideIterator<xxVector3> xxMesh::GetVertex() const
 {
     char* vertex = m_vertex;
-    return xxStrideIterator<xxVector3>(vertex, GetVertexCount(), m_stride);
+    return xxStrideIterator<xxVector3>(vertex, m_stride, m_vertexCount);
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<uint32_t> xxMesh::GetColor(int index) const
@@ -227,7 +227,7 @@ xxStrideIterator<uint32_t> xxMesh::GetColor(int index) const
     char* vertex = m_vertex;
     vertex += xxSizeOf(xxVector3);
     vertex += xxSizeOf(uint32_t) * index;
-    return xxStrideIterator<uint32_t>(vertex, GetVertexCount(), m_stride);
+    return xxStrideIterator<uint32_t>(vertex, m_stride, m_vertexCount);
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<xxVector3> xxMesh::GetNormal(int index) const
@@ -236,7 +236,7 @@ xxStrideIterator<xxVector3> xxMesh::GetNormal(int index) const
     vertex += xxSizeOf(xxVector3);
     vertex += xxSizeOf(uint32_t) * m_colorCount;
     vertex += xxSizeOf(xxVector3) * index;
-    return xxStrideIterator<xxVector3>(vertex, GetVertexCount(), m_stride);
+    return xxStrideIterator<xxVector3>(vertex, m_stride, m_vertexCount);
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<xxVector2> xxMesh::GetTexture(int index) const
@@ -245,8 +245,8 @@ xxStrideIterator<xxVector2> xxMesh::GetTexture(int index) const
     vertex += xxSizeOf(xxVector3);
     vertex += xxSizeOf(uint32_t) * m_colorCount;
     vertex += xxSizeOf(xxVector3) * m_normalCount;
-    vertex += xxSizeOf(xxVector2)* index;
-    return xxStrideIterator<xxVector2>(vertex, GetVertexCount(), m_stride);
+    vertex += xxSizeOf(xxVector2) * index;
+    return xxStrideIterator<xxVector2>(vertex, m_stride, m_vertexCount);
 }
 //------------------------------------------------------------------------------
 xxMesh::IndexType* xxMesh::GetIndex() const

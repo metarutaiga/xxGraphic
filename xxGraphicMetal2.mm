@@ -278,10 +278,10 @@ void xxSetVertexTexturesMetal2(uint64_t commandEncoder, int count, const uint64_
     }
 
     [mtlSwapchain->vertexArgumentEncoder setTextures:mtlTextures
-                                           withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_SAMPLER, count)];
+                                           withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_TEXTURE, count)];
     [mtlSwapchain->commandEncoder useResources:mtlTextures
                                          count:count
-                                        usage:MTLResourceUsageSample];
+                                         usage:MTLResourceUsageSample];
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentTexturesMetal2(uint64_t commandEncoder, int count, const uint64_t* textures)
@@ -299,7 +299,7 @@ void xxSetFragmentTexturesMetal2(uint64_t commandEncoder, int count, const uint6
                                              withRange:NSMakeRange(xxGraphicDescriptor::FRAGMENT_TEXTURE, count)];
     [mtlSwapchain->commandEncoder useResources:mtlTextures
                                          count:count
-                                        usage:MTLResourceUsageSample];
+                                         usage:MTLResourceUsageSample];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersMetal2(uint64_t commandEncoder, int count, const uint64_t* samplers)
