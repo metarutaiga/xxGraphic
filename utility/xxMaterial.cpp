@@ -39,7 +39,7 @@ xxMaterialPtr xxMaterial::Create()
     return material;
 }
 //------------------------------------------------------------------------------
-void xxMaterial::Update(xxNode const& node, uint64_t device, xxCameraPtr const& camera)
+void xxMaterial::Update(uint64_t device, xxNode const& node, xxCameraPtr const& camera)
 {
     xxMeshPtr mesh = node.GetMesh();
     if (mesh == nullptr)
@@ -50,7 +50,6 @@ void xxMaterial::Update(xxNode const& node, uint64_t device, xxCameraPtr const& 
         return;
 
     m_device = device;
-    m_vertexAttribute = vertexAttribute;
 
     if (m_blendState == 0)
     {
@@ -77,7 +76,7 @@ void xxMaterial::Update(xxNode const& node, uint64_t device, xxCameraPtr const& 
     }
     if (m_vertexShader == 0)
     {
-        m_vertexShader = xxCreateVertexShader(m_device, "default", m_vertexAttribute);
+        m_vertexShader = xxCreateVertexShader(m_device, "default", vertexAttribute);
     }
     if (m_fragmentConstant == 0)
     {
@@ -93,7 +92,7 @@ void xxMaterial::Update(xxNode const& node, uint64_t device, xxCameraPtr const& 
     }
     if (m_pipeline == 0)
     {
-        m_pipeline = xxCreatePipeline(m_device, m_renderPass, m_blendState, m_depthStencilState, m_rasterizerState, m_vertexAttribute, m_vertexShader, m_fragmentShader);
+        m_pipeline = xxCreatePipeline(m_device, m_renderPass, m_blendState, m_depthStencilState, m_rasterizerState, vertexAttribute, m_vertexShader, m_fragmentShader);
     }
 
     xxMatrix4* matrix = (xxMatrix4*)xxMapBuffer(m_device, m_vertexConstant);

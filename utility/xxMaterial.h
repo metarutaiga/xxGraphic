@@ -15,7 +15,7 @@ public:
 
     static xxMaterialPtr Create();
 
-    void        Update(xxNode const& node, uint64_t device, xxCameraPtr const& camera);
+    void        Update(uint64_t device, xxNode const& node, xxCameraPtr const& camera);
     void        Draw(uint64_t commandEncoder);
 
 protected:
@@ -25,7 +25,6 @@ protected:
     uint64_t    m_blendState = 0;
     uint64_t    m_depthStencilState = 0;
     uint64_t    m_rasterizerState = 0;
-    uint64_t    m_vertexAttribute = 0;
     uint64_t    m_vertexConstant = 0;
     uint64_t    m_vertexShader = 0;
     uint64_t    m_fragmentConstant = 0;
