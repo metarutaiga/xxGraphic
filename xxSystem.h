@@ -8,6 +8,8 @@
 
 #if defined(__APPLE__)
 #   include <TargetConditionals.h>
+#   define objc_retain(self) (__bridge_retained void*)self
+#   define objc_release(self) (__bridge_transfer id)(__bridge void*)self
 #   define objc_msgSend objc_msgSend_unused
 #   include <objc/message.h>
 #   undef objc_msgSend

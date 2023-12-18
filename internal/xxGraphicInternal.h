@@ -31,75 +31,78 @@ enum xxGraphicDescriptor
     INDEX_BUFFER_WIDTH      = 2,
 };
 
+#define xxRegisterFunctionSingle(T, S) \
+    (void*&)T = (void*)S;
+
 #define xxRegisterFunction(API) \
-    xxCreateInstance = xxCreateInstance ## API; \
-    xxDestroyInstance = xxDestroyInstance ## API; \
+    xxRegisterFunctionSingle(xxCreateInstance, xxCreateInstance ## API); \
+    xxRegisterFunctionSingle(xxDestroyInstance, xxDestroyInstance ## API); \
 \
-    xxCreateDevice = xxCreateDevice ## API; \
-    xxDestroyDevice = xxDestroyDevice ## API; \
-    xxResetDevice = xxResetDevice ## API; \
-    xxTestDevice = xxTestDevice ## API; \
-    xxGetDeviceName = xxGetDeviceName ## API; \
+    xxRegisterFunctionSingle(xxCreateDevice, xxCreateDevice ## API); \
+    xxRegisterFunctionSingle(xxDestroyDevice, xxDestroyDevice ## API); \
+    xxRegisterFunctionSingle(xxResetDevice, xxResetDevice ## API); \
+    xxRegisterFunctionSingle(xxTestDevice, xxTestDevice ## API); \
+    xxRegisterFunctionSingle(xxGetDeviceName, xxGetDeviceName ## API); \
 \
-    xxGetFramebuffer = xxGetFramebuffer ## API; \
+    xxRegisterFunctionSingle(xxGetFramebuffer, xxGetFramebuffer ## API); \
 \
-    xxCreateSwapchain = xxCreateSwapchain ## API; \
-    xxDestroySwapchain = xxDestroySwapchain ## API; \
-    xxPresentSwapchain = xxPresentSwapchain ## API; \
+    xxRegisterFunctionSingle(xxCreateSwapchain, xxCreateSwapchain ## API); \
+    xxRegisterFunctionSingle(xxDestroySwapchain, xxDestroySwapchain ## API); \
+    xxRegisterFunctionSingle(xxPresentSwapchain, xxPresentSwapchain ## API); \
 \
-    xxCreateVertexAttribute = xxCreateVertexAttribute ## API; \
-    xxDestroyVertexAttribute = xxDestroyVertexAttribute ## API; \
+    xxRegisterFunctionSingle(xxCreateVertexAttribute, xxCreateVertexAttribute ## API); \
+    xxRegisterFunctionSingle(xxDestroyVertexAttribute, xxDestroyVertexAttribute ## API); \
 \
-    xxGetCommandBuffer = xxGetCommandBuffer ## API; \
-    xxBeginCommandBuffer = xxBeginCommandBuffer ## API; \
-    xxEndCommandBuffer = xxEndCommandBuffer ## API; \
-    xxSubmitCommandBuffer = xxSubmitCommandBuffer ## API; \
+    xxRegisterFunctionSingle(xxGetCommandBuffer, xxGetCommandBuffer ## API); \
+    xxRegisterFunctionSingle(xxBeginCommandBuffer, xxBeginCommandBuffer ## API); \
+    xxRegisterFunctionSingle(xxEndCommandBuffer, xxEndCommandBuffer ## API); \
+    xxRegisterFunctionSingle(xxSubmitCommandBuffer, xxSubmitCommandBuffer ## API); \
 \
-    xxCreateRenderPass = xxCreateRenderPass ## API; \
-    xxDestroyRenderPass = xxDestroyRenderPass ## API; \
-    xxBeginRenderPass = xxBeginRenderPass ## API; \
-    xxEndRenderPass = xxEndRenderPass ## API; \
+    xxRegisterFunctionSingle(xxCreateRenderPass, xxCreateRenderPass ## API); \
+    xxRegisterFunctionSingle(xxDestroyRenderPass, xxDestroyRenderPass ## API); \
+    xxRegisterFunctionSingle(xxBeginRenderPass, xxBeginRenderPass ## API); \
+    xxRegisterFunctionSingle(xxEndRenderPass, xxEndRenderPass ## API); \
 \
-    xxCreateConstantBuffer = xxCreateConstantBuffer ## API; \
-    xxCreateIndexBuffer = xxCreateIndexBuffer ## API; \
-    xxCreateVertexBuffer = xxCreateVertexBuffer ## API; \
-    xxDestroyBuffer = xxDestroyBuffer ## API; \
-    xxMapBuffer = xxMapBuffer ## API; \
-    xxUnmapBuffer = xxUnmapBuffer ## API; \
+    xxRegisterFunctionSingle(xxCreateConstantBuffer, xxCreateConstantBuffer ## API); \
+    xxRegisterFunctionSingle(xxCreateIndexBuffer, xxCreateIndexBuffer ## API); \
+    xxRegisterFunctionSingle(xxCreateVertexBuffer, xxCreateVertexBuffer ## API); \
+    xxRegisterFunctionSingle(xxDestroyBuffer, xxDestroyBuffer ## API); \
+    xxRegisterFunctionSingle(xxMapBuffer, xxMapBuffer ## API); \
+    xxRegisterFunctionSingle(xxUnmapBuffer, xxUnmapBuffer ## API); \
 \
-    xxCreateTexture = xxCreateTexture ## API; \
-    xxDestroyTexture = xxDestroyTexture ## API; \
-    xxMapTexture = xxMapTexture ## API; \
-    xxUnmapTexture = xxUnmapTexture ## API; \
+    xxRegisterFunctionSingle(xxCreateTexture, xxCreateTexture ## API); \
+    xxRegisterFunctionSingle(xxDestroyTexture, xxDestroyTexture ## API); \
+    xxRegisterFunctionSingle(xxMapTexture, xxMapTexture ## API); \
+    xxRegisterFunctionSingle(xxUnmapTexture, xxUnmapTexture ## API); \
 \
-    xxCreateSampler = xxCreateSampler ## API; \
-    xxDestroySampler = xxDestroySampler ## API; \
+    xxRegisterFunctionSingle(xxCreateSampler, xxCreateSampler ## API); \
+    xxRegisterFunctionSingle(xxDestroySampler, xxDestroySampler ## API); \
 \
-    xxCreateVertexShader = xxCreateVertexShader ## API; \
-    xxCreateFragmentShader = xxCreateFragmentShader ## API; \
-    xxDestroyShader = xxDestroyShader ## API; \
+    xxRegisterFunctionSingle(xxCreateVertexShader, xxCreateVertexShader ## API); \
+    xxRegisterFunctionSingle(xxCreateFragmentShader, xxCreateFragmentShader ## API); \
+    xxRegisterFunctionSingle(xxDestroyShader, xxDestroyShader ## API); \
 \
-    xxCreateBlendState = xxCreateBlendState ## API; \
-    xxCreateDepthStencilState = xxCreateDepthStencilState ## API; \
-    xxCreateRasterizerState = xxCreateRasterizerState ## API; \
-    xxCreatePipeline = xxCreatePipeline ## API; \
-    xxDestroyBlendState = xxDestroyBlendState ## API; \
-    xxDestroyDepthStencilState = xxDestroyDepthStencilState ## API; \
-    xxDestroyRasterizerState = xxDestroyRasterizerState ## API; \
-    xxDestroyPipeline = xxDestroyPipeline ## API; \
+    xxRegisterFunctionSingle(xxCreateBlendState, xxCreateBlendState ## API); \
+    xxRegisterFunctionSingle(xxCreateDepthStencilState, xxCreateDepthStencilState ## API); \
+    xxRegisterFunctionSingle(xxCreateRasterizerState, xxCreateRasterizerState ## API); \
+    xxRegisterFunctionSingle(xxCreatePipeline, xxCreatePipeline ## API); \
+    xxRegisterFunctionSingle(xxDestroyBlendState, xxDestroyBlendState ## API); \
+    xxRegisterFunctionSingle(xxDestroyDepthStencilState, xxDestroyDepthStencilState ## API); \
+    xxRegisterFunctionSingle(xxDestroyRasterizerState, xxDestroyRasterizerState ## API); \
+    xxRegisterFunctionSingle(xxDestroyPipeline, xxDestroyPipeline ## API); \
 \
-    xxSetViewport = xxSetViewport ## API; \
-    xxSetScissor = xxSetScissor ## API; \
-    xxSetPipeline = xxSetPipeline ## API; \
-    xxSetVertexBuffers = xxSetVertexBuffers ## API; \
-    xxSetVertexTextures = xxSetVertexTextures ## API; \
-    xxSetFragmentTextures = xxSetFragmentTextures ## API; \
-    xxSetVertexSamplers = xxSetVertexSamplers ## API; \
-    xxSetFragmentSamplers = xxSetFragmentSamplers ## API; \
-    xxSetVertexConstantBuffer = xxSetVertexConstantBuffer ## API; \
-    xxSetFragmentConstantBuffer = xxSetFragmentConstantBuffer ## API; \
-    xxDraw = xxDraw ## API; \
-    xxDrawIndexed = xxDrawIndexed ## API;
+    xxRegisterFunctionSingle(xxSetViewport, xxSetViewport ## API); \
+    xxRegisterFunctionSingle(xxSetScissor, xxSetScissor ## API); \
+    xxRegisterFunctionSingle(xxSetPipeline, xxSetPipeline ## API); \
+    xxRegisterFunctionSingle(xxSetVertexBuffers, xxSetVertexBuffers ## API); \
+    xxRegisterFunctionSingle(xxSetVertexTextures, xxSetVertexTextures ## API); \
+    xxRegisterFunctionSingle(xxSetFragmentTextures, xxSetFragmentTextures ## API); \
+    xxRegisterFunctionSingle(xxSetVertexSamplers, xxSetVertexSamplers ## API); \
+    xxRegisterFunctionSingle(xxSetFragmentSamplers, xxSetFragmentSamplers ## API); \
+    xxRegisterFunctionSingle(xxSetVertexConstantBuffer, xxSetVertexConstantBuffer ## API); \
+    xxRegisterFunctionSingle(xxSetFragmentConstantBuffer, xxSetFragmentConstantBuffer ## API); \
+    xxRegisterFunctionSingle(xxDraw, xxDraw ## API); \
+    xxRegisterFunctionSingle(xxDrawIndexed, xxDrawIndexed ## API);
 
 #define xxUnregisterFunction() \
     xxCreateInstance = nullptr; \

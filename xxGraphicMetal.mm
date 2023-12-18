@@ -4,25 +4,26 @@
 // Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
+#define xxCreateInstanceMetal xxConcate(xxCreateInstanceMetal, __LINE__)
 #include "internal/xxGraphicInternalMetal.h"
 #include "xxGraphicMetal.h"
 
-Class                   classMTLCompileOptions = nil;
-Class                   classMTLDepthStencilDescriptor = nil;
-Class                   classMTLRenderPassDescriptor = nil;
-Class                   classMTLRenderPipelineColorAttachmentDescriptor = nil;
-Class                   classMTLRenderPipelineDescriptor = nil;
-Class                   classMTLSamplerDescriptor = nil;
-Class                   classMTLTextureDescriptor = nil;
-Class                   classMTLVertexDescriptor = nil;
+Class                       classMTLCompileOptions = nil;
+Class                       classMTLDepthStencilDescriptor = nil;
+Class                       classMTLRenderPassDescriptor = nil;
+Class                       classMTLRenderPipelineColorAttachmentDescriptor = nil;
+Class                       classMTLRenderPipelineDescriptor = nil;
+Class                       classMTLSamplerDescriptor = nil;
+Class                       classMTLTextureDescriptor = nil;
+Class                       classMTLVertexDescriptor = nil;
 
-static void*            g_metalLibrary = nullptr;
-static MTLViewport      g_metalViewport;
-static MTLScissorRect   g_metalScissor;
-static bool             g_metalScissorEnable = false;
-static uint64_t         g_metalVertexAttribute = 0;
-static id <MTLDevice>   (*MTLCreateSystemDefaultDevice)() = nullptr;
-static void*            (*MTLCopyAllDevices)() = nullptr;
+static void*                metalLibrary = nullptr;
+static MTLViewport          metalViewport;
+static MTLScissorRect       metalScissor;
+static bool                 metalScissorEnable = false;
+static MTLVertexDescriptor* metalVertexAttribute = nil;
+static id <MTLDevice>       (*MTLCreateSystemDefaultDevice)() = nullptr;
+static NSArray*             (*MTLCopyAllDevices)() = nullptr;
 
 //==============================================================================
 //  Instance
@@ -32,8 +33,8 @@ static void* MTLSymbol(char const* name)
 {
     void* ptr = nullptr;
 
-    if (ptr == nullptr && g_metalLibrary)
-        ptr = xxGetProcAddress(g_metalLibrary, name);
+    if (ptr == nullptr && metalLibrary)
+        ptr = xxGetProcAddress(metalLibrary, name);
 
     if (ptr == nullptr)
         xxLog("Metal", "%s is not found", name);
@@ -44,11 +45,11 @@ static void* MTLSymbol(char const* name)
 }
 #define MTLSymbol(var) (void*&)var = MTLSymbol(#var);
 //------------------------------------------------------------------------------
-uint64_t xxCreateInstanceMetal()
+id xxCreateInstanceMetal()
 {
-    if (g_metalLibrary == nullptr)
-        g_metalLibrary = xxLoadLibrary("/System/Library/Frameworks/Metal.framework/Metal");
-    if (g_metalLibrary == nullptr)
+    if (metalLibrary == nullptr)
+        metalLibrary = xxLoadLibrary("/System/Library/Frameworks/Metal.framework/Metal");
+    if (metalLibrary == nullptr)
         return 0;
 
     MTLSymbolFailed = false;
@@ -61,21 +62,21 @@ uint64_t xxCreateInstanceMetal()
     if (MTLSymbolFailed)
         return 0;
 
-    classMTLCompileOptions = (__bridge Class)xxGetProcAddress(g_metalLibrary, "OBJC_CLASS_$_MTLCompileOptions");
-    classMTLDepthStencilDescriptor = (__bridge Class)xxGetProcAddress(g_metalLibrary, "OBJC_CLASS_$_MTLDepthStencilDescriptor");
-    classMTLRenderPassDescriptor = (__bridge Class)xxGetProcAddress(g_metalLibrary, "OBJC_CLASS_$_MTLRenderPassDescriptor");
-    classMTLRenderPipelineColorAttachmentDescriptor = (__bridge Class)xxGetProcAddress(g_metalLibrary, "OBJC_CLASS_$_MTLRenderPipelineColorAttachmentDescriptor");
-    classMTLRenderPipelineDescriptor = (__bridge Class)xxGetProcAddress(g_metalLibrary, "OBJC_CLASS_$_MTLRenderPipelineDescriptor");
-    classMTLSamplerDescriptor = (__bridge Class)xxGetProcAddress(g_metalLibrary, "OBJC_CLASS_$_MTLSamplerDescriptor");
-    classMTLTextureDescriptor = (__bridge Class)xxGetProcAddress(g_metalLibrary, "OBJC_CLASS_$_MTLTextureDescriptor");
-    classMTLVertexDescriptor = (__bridge Class)xxGetProcAddress(g_metalLibrary, "OBJC_CLASS_$_MTLVertexDescriptor");
+    classMTLCompileOptions = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLCompileOptions");
+    classMTLDepthStencilDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLDepthStencilDescriptor");
+    classMTLRenderPassDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLRenderPassDescriptor");
+    classMTLRenderPipelineColorAttachmentDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLRenderPipelineColorAttachmentDescriptor");
+    classMTLRenderPipelineDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLRenderPipelineDescriptor");
+    classMTLSamplerDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLSamplerDescriptor");
+    classMTLTextureDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLTextureDescriptor");
+    classMTLVertexDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLVertexDescriptor");
 
 #if defined(xxMACOS)
-    NSArray* allDevices = (__bridge_transfer NSArray*)MTLCopyAllDevices();
+    NSArray* allDevices = MTLCopyAllDevices();
     if (allDevices == nil)
         return 0;
 #elif defined(xxIOS)
-    id <MTLDevice> device = MTLCreateSystemDefaultDevice();
+    id <MTLDevice> __unsafe_unretained device = MTLCreateSystemDefaultDevice();
     if (device == nil)
         return 0;
     NSArray* allDevices = [[NSArray alloc] initWithObjects:&device
@@ -84,19 +85,19 @@ uint64_t xxCreateInstanceMetal()
 
     xxRegisterFunction(Metal);
 
-    return reinterpret_cast<uint64_t>((__bridge_retained void*)allDevices);
+    objc_retain(allDevices);
+    return allDevices;
 }
 //------------------------------------------------------------------------------
-void xxDestroyInstanceMetal(uint64_t instance)
+void xxDestroyInstanceMetal(id __unsafe_unretained instance)
 {
-    NSArray* allDevices = (__bridge_transfer NSArray*)reinterpret_cast<void*>(instance);
+    objc_release(instance);
+    instance = nil;
 
-    allDevices = nil;
-
-    if (g_metalLibrary)
+    if (metalLibrary)
     {
-        xxFreeLibrary(g_metalLibrary);
-        g_metalLibrary = nullptr;
+        xxFreeLibrary(metalLibrary);
+        metalLibrary = nullptr;
     }
 
     xxUnregisterFunction();
@@ -104,35 +105,35 @@ void xxDestroyInstanceMetal(uint64_t instance)
 //==============================================================================
 //  Device
 //==============================================================================
-uint64_t xxCreateDeviceMetal(uint64_t instance)
+id xxCreateDeviceMetal(id __unsafe_unretained instance)
 {
-    NSArray* allDevices = (__bridge NSArray*)reinterpret_cast<void*>(instance);
+    NSArray* allDevices = instance;
     if (allDevices.count == 0)
         return 0;
 
-    id <MTLDevice> device = allDevices.firstObject;
+    id <MTLDevice> __unsafe_unretained device = allDevices.firstObject;
     for (NSUInteger i = 0; i < allDevices.count; ++i)
     {
-        id <MTLDevice> device = allDevices[i];
+        id <MTLDevice> __unsafe_unretained device = allDevices[i];
         xxLog("xxGraphic", "%s", [[device name] UTF8String]);
     }
 
-    return reinterpret_cast<uint64_t>((__bridge_retained void*)device);
+    objc_retain(device);
+    return device;
 }
 //------------------------------------------------------------------------------
-void xxDestroyDeviceMetal(uint64_t device)
+void xxDestroyDeviceMetal(id <MTLDevice> __unsafe_unretained device)
 {
-    id <MTLDevice> mtlDevice = (__bridge_transfer id)reinterpret_cast<void*>(device);
-
-    mtlDevice = nil;
+    objc_release(device);
+    device = nil;
 }
 //------------------------------------------------------------------------------
-bool xxResetDeviceMetal(uint64_t device)
+bool xxResetDeviceMetal(id <MTLDevice> __unsafe_unretained device)
 {
     return true;
 }
 //------------------------------------------------------------------------------
-bool xxTestDeviceMetal(uint64_t device)
+bool xxTestDeviceMetal(id <MTLDevice> __unsafe_unretained device)
 {
     return true;
 }
@@ -144,13 +145,11 @@ char const* xxGetDeviceNameMetal()
 //==============================================================================
 //  Swapchain
 //==============================================================================
-uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain)
+MTLSWAPCHAIN* xxCreateSwapchainMetal(id <MTLDevice> __unsafe_unretained device, MTLRenderPassDescriptor* __unsafe_unretained renderPass, void* view, int width, int height, MTLSWAPCHAIN* oldSwapchain)
 {
-    id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
-    if (mtlDevice == nil)
+    if (device == nil)
         return 0;
-    MTLSWAPCHAIN* mtlOldSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(oldSwapchain);
-    if (mtlOldSwapchain && mtlOldSwapchain->view == view && mtlOldSwapchain->width == width && mtlOldSwapchain->height == height)
+    if (oldSwapchain && oldSwapchain->view == view && oldSwapchain->width == width && oldSwapchain->height == height)
         return oldSwapchain;
 #if defined(xxMACOS)
     NSWindow* nsWindow = (__bridge NSWindow*)view;
@@ -190,13 +189,13 @@ uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view
     layer.drawableSize = CGSizeMake(width * contentsScale, height * contentsScale);
 #endif
     layer.contentsScale = contentsScale;
-    layer.device = mtlDevice;
+    layer.device = device;
     layer.framebufferOnly = NO;
     layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
 
     swapchain->metalLayer = layer;
     swapchain->drawable = [layer nextDrawable];
-    swapchain->commandQueue = [mtlDevice newCommandQueue];
+    swapchain->commandQueue = [device newCommandQueue];
     swapchain->view = nsView;
     swapchain->width = width;
     swapchain->height = height;
@@ -211,66 +210,57 @@ uint64_t xxCreateSwapchainMetal(uint64_t device, uint64_t renderPass, void* view
 #if defined(xxMACOS_LEGACY) || defined(xxIOS_LEGACY)
     desc.resourceOptions = MTLResourceStorageModePrivate;
 #endif
-    swapchain->depthstencil = [mtlDevice newTextureWithDescriptor:desc];
+    swapchain->depthstencil = [device newTextureWithDescriptor:desc];
 
-    return reinterpret_cast<uint64_t>(swapchain);
+    return swapchain;
 }
 //------------------------------------------------------------------------------
-void xxDestroySwapchainMetal(uint64_t swapchain)
+void xxDestroySwapchainMetal(MTLSWAPCHAIN* swapchain)
 {
-    MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(swapchain);
-
-    delete mtlSwapchain;
+    delete swapchain;
 }
 //------------------------------------------------------------------------------
-void xxPresentSwapchainMetal(uint64_t swapchain)
+void xxPresentSwapchainMetal(MTLSWAPCHAIN* swapchain)
 {
-    MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(swapchain);
+    id <MTLCommandBuffer> __unsafe_unretained commandBuffer = swapchain->commandBuffer;
+    [commandBuffer presentDrawable:swapchain->drawable];
+    [commandBuffer commit];
 
-    id <MTLCommandBuffer> __unsafe_unretained mtlCommandBuffer = mtlSwapchain->commandBuffer;
-    [mtlCommandBuffer presentDrawable:mtlSwapchain->drawable];
-    [mtlCommandBuffer commit];
-
-    mtlSwapchain->texture = nil;
-    mtlSwapchain->drawable = nil;
-    mtlSwapchain->commandBuffer = nil;
+    swapchain->texture = nil;
+    swapchain->drawable = nil;
+    swapchain->commandBuffer = nil;
 }
 //------------------------------------------------------------------------------
-uint64_t xxGetCommandBufferMetal(uint64_t device, uint64_t swapchain)
+id xxGetCommandBufferMetal(id <MTLDevice> __unsafe_unretained device, MTLSWAPCHAIN* swapchain)
 {
-    MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(swapchain);
+    swapchain->commandBuffer = [swapchain->commandQueue commandBuffer];
 
-    id <MTLCommandBuffer> commandBuffer = [mtlSwapchain->commandQueue commandBuffer];
-    mtlSwapchain->commandBuffer = commandBuffer;
-
-    return reinterpret_cast<uint64_t>((__bridge void*)commandBuffer);
+    return swapchain->commandBuffer;
 }
 //------------------------------------------------------------------------------
-uint64_t xxGetFramebufferMetal(uint64_t device, uint64_t swapchain, float* scale)
+MTLFRAMEBUFFER* xxGetFramebufferMetal(id <MTLDevice> __unsafe_unretained device, MTLSWAPCHAIN* swapchain, float* scale)
 {
-    MTLSWAPCHAIN* mtlSwapchain = reinterpret_cast<MTLSWAPCHAIN*>(swapchain);
-
     if (scale)
     {
 #if defined(xxMACOS)
-        float scaleFactor = [[mtlSwapchain->view window] backingScaleFactor];
+        float scaleFactor = [[swapchain->view window] backingScaleFactor];
 #else
-        float scaleFactor = [mtlSwapchain->view contentScaleFactor];
+        float scaleFactor = [swapchain->view contentScaleFactor];
 #endif
-        if (mtlSwapchain->scale != scaleFactor)
+        if (swapchain->scale != scaleFactor)
         {
-            mtlSwapchain->scale = scaleFactor;
-            mtlSwapchain->metalLayer.contentsScale = scaleFactor;
-            mtlSwapchain->metalLayer.drawableSize = CGSizeMake(mtlSwapchain->width * scaleFactor, mtlSwapchain->height * scaleFactor);
+            swapchain->scale = scaleFactor;
+            swapchain->metalLayer.contentsScale = scaleFactor;
+            swapchain->metalLayer.drawableSize = CGSizeMake(swapchain->width * scaleFactor, swapchain->height * scaleFactor);
         }
 
         (*scale) = scaleFactor;
     }
 
-    mtlSwapchain->drawable = [mtlSwapchain->metalLayer nextDrawable];
-    mtlSwapchain->texture = [mtlSwapchain->drawable texture];
+    swapchain->drawable = [swapchain->metalLayer nextDrawable];
+    swapchain->texture = [swapchain->drawable texture];
 
-    return reinterpret_cast<uint64_t>(mtlSwapchain);
+    return swapchain;
 }
 //==============================================================================
 //  Command Buffer
@@ -291,7 +281,7 @@ void xxSubmitCommandBufferMetal(uint64_t commandBuffer, uint64_t swapchain)
 //==============================================================================
 //  Render Pass
 //==============================================================================
-uint64_t xxCreateRenderPassMetal(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil)
+id xxCreateRenderPassMetal(id <MTLDevice> __unsafe_unretained device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil)
 {
     MTLRenderPassDescriptor* renderPass = [classMTLRenderPassDescriptor new];
 
@@ -303,30 +293,26 @@ uint64_t xxCreateRenderPassMetal(uint64_t device, bool clearColor, bool clearDep
     renderPass.depthAttachment.storeAction = storeDepth ? MTLStoreActionStore : MTLStoreActionDontCare;
     renderPass.stencilAttachment.storeAction = storeStencil ? MTLStoreActionStore : MTLStoreActionDontCare;
 
-    return reinterpret_cast<uint64_t>((__bridge_retained void*)renderPass);
+    objc_retain(renderPass);
+    return renderPass;
 }
 //------------------------------------------------------------------------------
-void xxDestroyRenderPassMetal(uint64_t renderPass)
+void xxDestroyRenderPassMetal(MTLRenderPassDescriptor* __unsafe_unretained renderPass)
 {
-    MTLRenderPassDescriptor* mtlRenderPass = (__bridge_transfer id)reinterpret_cast<void*>(renderPass);
-
-    mtlRenderPass = nil;
+    objc_release(renderPass);
+    renderPass = nil;
 }
 //------------------------------------------------------------------------------
-uint64_t xxBeginRenderPassMetal(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float color[4], float depth, unsigned char stencil)
+id xxBeginRenderPassMetal(id <MTLCommandBuffer> __unsafe_unretained commandBuffer, MTLFRAMEBUFFER* framebuffer, MTLRenderPassDescriptor* __unsafe_unretained renderPass, int width, int height, float color[4], float depth, unsigned char stencil)
 {
-    id <MTLCommandBuffer> __unsafe_unretained mtlCommandBuffer = (__bridge id)reinterpret_cast<void*>(commandBuffer);
-    MTLFRAMEBUFFER* mtlFramebuffer = reinterpret_cast<MTLFRAMEBUFFER*>(framebuffer);
-    MTLRenderPassDescriptor* __unsafe_unretained mtlRenderPass = (__bridge MTLRenderPassDescriptor*)reinterpret_cast<void*>(renderPass);
+    renderPass.colorAttachments[0].texture = framebuffer->texture;
+    renderPass.depthAttachment.texture = framebuffer->depthstencil;
 
-    mtlRenderPass.colorAttachments[0].texture = mtlFramebuffer->texture;
-    mtlRenderPass.depthAttachment.texture = mtlFramebuffer->depthstencil;
+    renderPass.colorAttachments[0].clearColor = MTLClearColorMake(color[0], color[1], color[2], color[3]);
+    renderPass.depthAttachment.clearDepth = depth;
+    renderPass.stencilAttachment.clearStencil = stencil;
 
-    mtlRenderPass.colorAttachments[0].clearColor = MTLClearColorMake(color[0], color[1], color[2], color[3]);
-    mtlRenderPass.depthAttachment.clearDepth = depth;
-    mtlRenderPass.stencilAttachment.clearStencil = stencil;
-
-    id <MTLRenderCommandEncoder> commandEncoder = [mtlCommandBuffer renderCommandEncoderWithDescriptor:mtlRenderPass];
+    id <MTLRenderCommandEncoder> commandEncoder = [commandBuffer renderCommandEncoderWithDescriptor:renderPass];
 
     MTLViewport vp;
     vp.originX = 0;
@@ -336,7 +322,7 @@ uint64_t xxBeginRenderPassMetal(uint64_t commandBuffer, uint64_t framebuffer, ui
     vp.znear = 0.0f;
     vp.zfar = 1.0f;
     [commandEncoder setViewport:vp];
-    g_metalViewport = vp;
+    metalViewport = vp;
 
     MTLScissorRect rect;
     rect.x = 0;
@@ -344,23 +330,21 @@ uint64_t xxBeginRenderPassMetal(uint64_t commandBuffer, uint64_t framebuffer, ui
     rect.width = width;
     rect.height = height;
     [commandEncoder setScissorRect:rect];
-    g_metalScissor = rect;
+    metalScissor = rect;
 
-    return reinterpret_cast<uint64_t>((__bridge_retained void*)commandEncoder);
+    return commandEncoder;
 }
 //------------------------------------------------------------------------------
-void xxEndRenderPassMetal(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass)
+void xxEndRenderPassMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, MTLFRAMEBUFFER* framebuffer, MTLRenderPassDescriptor* __unsafe_unretained renderPass)
 {
-    id <MTLRenderCommandEncoder> mtlCommandEncoder = (__bridge_transfer id)reinterpret_cast<void*>(commandEncoder);
-
-    [mtlCommandEncoder endEncoding];
+    [commandEncoder endEncoding];
 }
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-uint64_t xxCreateVertexAttributeMetal(uint64_t device, int count, int* attribute)
+id xxCreateVertexAttributeMetal(id <MTLDevice> __unsafe_unretained device, int count, int* attribute)
 {
-    MTLVertexDescriptor* desc = [classMTLVertexDescriptor new];
+    MTLVertexDescriptor* vertexDescriptor = [classMTLVertexDescriptor new];
     int stride = 0;
 
     for (int i = 0; i < count; ++i)
@@ -372,7 +356,7 @@ uint64_t xxCreateVertexAttributeMetal(uint64_t device, int count, int* attribute
 
         stride += size;
 
-        MTLVertexAttributeDescriptor* attribute = desc.attributes[i];
+        MTLVertexAttributeDescriptor* attribute = vertexDescriptor.attributes[i];
         attribute.offset = offset;
         attribute.bufferIndex = xxGraphicDescriptor::VERTEX_BUFFER + stream;
 
@@ -416,105 +400,91 @@ uint64_t xxCreateVertexAttributeMetal(uint64_t device, int count, int* attribute
         }
     }
 
-    MTLVertexBufferLayoutDescriptor* layout = desc.layouts[xxGraphicDescriptor::VERTEX_BUFFER];
+    MTLVertexBufferLayoutDescriptor* layout = vertexDescriptor.layouts[xxGraphicDescriptor::VERTEX_BUFFER];
     layout.stride = stride;
     layout.stepRate = MTLVertexStepFunctionPerVertex;
 
-    return reinterpret_cast<uint64_t>((__bridge_retained void*)desc);
+    objc_retain(vertexDescriptor);
+    return vertexDescriptor;
 }
 //------------------------------------------------------------------------------
-void xxDestroyVertexAttributeMetal(uint64_t vertexAttribute)
+void xxDestroyVertexAttributeMetal(MTLVertexDescriptor* __unsafe_unretained vertexAttribute)
 {
-    MTLVertexDescriptor* desc = (__bridge_transfer MTLVertexDescriptor*)reinterpret_cast<void*>(vertexAttribute);
-
-    desc = nil;
+    objc_release(vertexAttribute);
+    vertexAttribute = nil;
 }
 //==============================================================================
 //  Buffer
 //==============================================================================
-uint64_t xxCreateConstantBufferMetal(uint64_t device, int size)
+MTLBUFFER* xxCreateConstantBufferMetal(id <MTLDevice> __unsafe_unretained device, int size)
 {
-    id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
-    if (mtlDevice == nil)
+    if (device == nil)
         return 0;
 
-    MTLBUFFER* mtlBuffer = new MTLBUFFER{};
-    if (mtlBuffer == nullptr)
+    MTLBUFFER* buffer = new MTLBUFFER{};
+    if (buffer == nullptr)
         return 0;
 
-    id <MTLBuffer> buffer = [mtlDevice newBufferWithLength:size
-                                                   options:MTLResourceStorageModeShared];
+    buffer->buffer = [device newBufferWithLength:size
+                                         options:MTLResourceStorageModeShared];
 
-    mtlBuffer->buffer = buffer;
-
-    return reinterpret_cast<uint64_t>(mtlBuffer);
+    return buffer;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateIndexBufferMetal(uint64_t device, int size)
+MTLBUFFER* xxCreateIndexBufferMetal(id <MTLDevice> __unsafe_unretained device, int size)
 {
-    id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
-    if (mtlDevice == nil)
+    if (device == nil)
         return 0;
 
-    MTLBUFFER* mtlBuffer = new MTLBUFFER{};
-    if (mtlBuffer == nullptr)
+    MTLBUFFER* buffer = new MTLBUFFER{};
+    if (buffer == nullptr)
         return 0;
 
-    id <MTLBuffer> buffer = [mtlDevice newBufferWithLength:size
-                                                   options:MTLResourceStorageModeShared];
+    buffer->buffer = [device newBufferWithLength:size
+                                         options:MTLResourceStorageModeShared];
 
-    mtlBuffer->buffer = buffer;
-
-    return reinterpret_cast<uint64_t>(mtlBuffer);
+    return buffer;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateVertexBufferMetal(uint64_t device, int size, uint64_t vertexAttribute)
+MTLBUFFER* xxCreateVertexBufferMetal(id <MTLDevice> __unsafe_unretained device, int size, MTLVertexDescriptor* __unsafe_unretained vertexAttribute)
 {
-    id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
-    if (mtlDevice == nil)
+    if (device == nil)
         return 0;
 
-    MTLBUFFER* mtlBuffer = new MTLBUFFER{};
-    if (mtlBuffer == nullptr)
+    MTLBUFFER* buffer = new MTLBUFFER{};
+    if (buffer == nullptr)
         return 0;
 
-    id <MTLBuffer> buffer = [mtlDevice newBufferWithLength:size
-                                                   options:MTLResourceStorageModeShared];
+    buffer->buffer = [device newBufferWithLength:size
+                                         options:MTLResourceStorageModeShared];
 
-    mtlBuffer->buffer = buffer;
-
-    return reinterpret_cast<uint64_t>(mtlBuffer);
+    return buffer;
 }
 //------------------------------------------------------------------------------
-void xxDestroyBufferMetal(uint64_t device, uint64_t buffer)
+void xxDestroyBufferMetal(id <MTLDevice> __unsafe_unretained device, MTLBUFFER* buffer)
 {
-    MTLBUFFER* mtlBuffer = reinterpret_cast<MTLBUFFER*>(buffer);
-
-    delete mtlBuffer;
+    delete buffer;
 }
 //------------------------------------------------------------------------------
-void* xxMapBufferMetal(uint64_t device, uint64_t buffer)
+void* xxMapBufferMetal(id <MTLDevice> __unsafe_unretained device, MTLBUFFER* buffer)
 {
-    MTLBUFFER* mtlBuffer = reinterpret_cast<MTLBUFFER*>(buffer);
-
-    return [mtlBuffer->buffer contents];
+    return [buffer->buffer contents];
 }
 //------------------------------------------------------------------------------
-void xxUnmapBufferMetal(uint64_t device, uint64_t buffer)
+void xxUnmapBufferMetal(id <MTLDevice> __unsafe_unretained device, MTLBUFFER* buffer)
 {
 
 }
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external)
+MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, int format, int width, int height, int depth, int mipmap, int array, void const* external)
 {
-    id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
-    if (mtlDevice == nil)
+    if (device == nil)
         return 0;
 
-    MTLTEXTURE* mtlTexture = new MTLTEXTURE{};
-    if (mtlTexture == nullptr)
+    MTLTEXTURE* output = new MTLTEXTURE{};
+    if (output == nullptr)
         return 0;
 
     MTLPixelFormat pixelFormat = MTLPixelFormatRGBA8Unorm;
@@ -556,12 +526,12 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height
         int alignment = 256;
         if (@available(macOS 10.13, iOS 11.0, *))
         {
-            alignment = (int)[mtlDevice minimumLinearTextureAlignmentForPixelFormat:pixelFormat];
+            alignment = (int)[device minimumLinearTextureAlignmentForPixelFormat:pixelFormat];
         }
         stride = width * sizeof(int);
         stride = (stride + (alignment - 1)) & ~(alignment - 1);
-        buffer = [mtlDevice newBufferWithLength:stride * height
-                                        options:options];
+        buffer = [device newBufferWithLength:stride * height
+                                     options:options];
     }
     else
     {
@@ -576,9 +546,9 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height
 
     if (ioSurface)
     {
-        texture = [mtlDevice newTextureWithDescriptor:desc
-                                            iosurface:ioSurface
-                                                plane:0];
+        texture = [device newTextureWithDescriptor:desc
+                                         iosurface:ioSurface
+                                             plane:0];
     }
     else if (texture)
     {
@@ -592,73 +562,67 @@ uint64_t xxCreateTextureMetal(uint64_t device, int format, int width, int height
     }
     else
     {
-        texture = [mtlDevice newTextureWithDescriptor:desc];
+        texture = [device newTextureWithDescriptor:desc];
     }
 
-    mtlTexture->texture = texture;
-    mtlTexture->buffer = buffer;
+    output->texture = texture;
+    output->buffer = buffer;
     for (int i = 0; i < mipmap; ++i)
     {
-        mtlTexture->strides[i] = (stride >> i);
-        if (mtlTexture->strides[i] < sizeof(int))
-            mtlTexture->strides[i] = sizeof(int);
+        output->strides[i] = (stride >> i);
+        if (output->strides[i] < sizeof(int))
+            output->strides[i] = sizeof(int);
     }
 
-    return reinterpret_cast<uint64_t>(mtlTexture);
+    return output;
 }
 //------------------------------------------------------------------------------
-void xxDestroyTextureMetal(uint64_t texture)
+void xxDestroyTextureMetal(MTLTEXTURE* texture)
 {
-    MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);
-
-    delete mtlTexture;
+    delete texture;
 }
 //------------------------------------------------------------------------------
-void* xxMapTextureMetal(uint64_t device, uint64_t texture, int* stride, int level, int array)
+void* xxMapTextureMetal(id <MTLDevice> __unsafe_unretained device, MTLTEXTURE* texture, int* stride, int level, int array)
 {
-    MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);
-
-    (*stride) = mtlTexture->strides[level];
-    if (mtlTexture->buffer)
+    (*stride) = texture->strides[level];
+    if (texture->buffer)
     {
-        return [mtlTexture->buffer contents];
+        return [texture->buffer contents];
     }
-    NSUInteger count = [mtlTexture->texture width] * [mtlTexture->texture height] * sizeof(int);
-    mtlTexture->temporary = xxRealloc(mtlTexture->temporary, int, count);
-    return mtlTexture->temporary;
+    NSUInteger count = [texture->texture width] * [texture->texture height] * sizeof(int);
+    texture->temporary = xxRealloc(texture->temporary, int, count);
+    return texture->temporary;
 }
 //------------------------------------------------------------------------------
-void xxUnmapTextureMetal(uint64_t device, uint64_t texture, int level, int array)
+void xxUnmapTextureMetal(id <MTLDevice> __unsafe_unretained device, MTLTEXTURE* texture, int level, int array)
 {
-    MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(texture);
 #if TARGET_OS_SIMULATOR
-    [mtlTexture->texture replaceRegion:MTLRegionMake2D(0, 0, mtlTexture->texture.width, mtlTexture->texture.height)
-                           mipmapLevel:0
-                             withBytes:[mtlTexture->buffer contents]
-                           bytesPerRow:[mtlTexture->buffer length] / mtlTexture->texture.height];
+    [texture->texture replaceRegion:MTLRegionMake2D(0, 0, texture->texture.width, texture->texture.height)
+                        mipmapLevel:0
+                          withBytes:[texture->buffer contents]
+                        bytesPerRow:[texture->buffer length] / texture->texture.height];
 #elif defined(xxMACOS_LEGACY)
-    [mtlTexture->buffer didModifyRange:NSMakeRange(0, [mtlTexture->buffer length])];
+    [texture->buffer didModifyRange:NSMakeRange(0, [texture->buffer length])];
 #else
-    if (mtlTexture->temporary)
+    if (texture->temporary)
     {
-        NSUInteger width = [mtlTexture->texture width] >> level;
-        NSUInteger height = [mtlTexture->texture height] >> level;
-        [mtlTexture->texture replaceRegion:MTLRegionMake2D(0, 0, width, height)
-                               mipmapLevel:level
-                                 withBytes:mtlTexture->temporary
-                               bytesPerRow:mtlTexture->strides[level]];
-        xxFree(mtlTexture->temporary);
-        mtlTexture->temporary = nullptr;
+        NSUInteger width = [texture->texture width] >> level;
+        NSUInteger height = [texture->texture height] >> level;
+        [texture->texture replaceRegion:MTLRegionMake2D(0, 0, width, height)
+                            mipmapLevel:level
+                              withBytes:texture->temporary
+                            bytesPerRow:texture->strides[level]];
+        xxFree(texture->temporary);
+        texture->temporary = nullptr;
     }
 #endif
 }
 //==============================================================================
 //  Sampler
 //==============================================================================
-uint64_t xxCreateSamplerMetal(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy)
+id xxCreateSamplerMetal(id <MTLDevice> __unsafe_unretained device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy)
 {
-    id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
-    if (mtlDevice == nil)
+    if (device == nil)
         return 0;
 
     MTLSamplerDescriptor* desc = [classMTLSamplerDescriptor new];
@@ -670,24 +634,23 @@ uint64_t xxCreateSamplerMetal(uint64_t device, bool clampU, bool clampV, bool cl
     desc.mipFilter = linearMip ? MTLSamplerMipFilterLinear : MTLSamplerMipFilterNearest;
     desc.maxAnisotropy = anisotropy;
 
-    id <MTLSamplerState> sampler = [mtlDevice newSamplerStateWithDescriptor:desc];
+    id <MTLSamplerState> sampler = [device newSamplerStateWithDescriptor:desc];
 
-    return reinterpret_cast<uint64_t>((__bridge_retained void*)sampler);
+    objc_retain(sampler);
+    return sampler;
 }
 //------------------------------------------------------------------------------
-void xxDestroySamplerMetal(uint64_t sampler)
+void xxDestroySamplerMetal(id <MTLSamplerState> sampler)
 {
-    id <MTLSamplerState> mtlSampler = (__bridge_transfer id)reinterpret_cast<void*>(sampler);
-
-    mtlSampler = nil;
+    objc_release(sampler);
+    sampler = nil;
 }
 //==============================================================================
 //  Shader
 //==============================================================================
-uint64_t xxCreateVertexShaderMetal(uint64_t device, char const* shader, uint64_t vertexAttribute)
+id xxCreateVertexShaderMetal(id <MTLDevice> __unsafe_unretained device, char const* shader, MTLVertexDescriptor* __unsafe_unretained vertexAttribute)
 {
-    id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
-    if (mtlDevice == nil)
+    if (device == nil)
         return 0;
 
     if (strcmp(shader, "default") == 0)
@@ -699,9 +662,9 @@ uint64_t xxCreateVertexShaderMetal(uint64_t device, char const* shader, uint64_t
     MTLCompileOptions* options = [classMTLCompileOptions new];
     options.fastMathEnabled = YES;
 
-    id <MTLLibrary> library = [mtlDevice newLibraryWithSource:[NSString stringWithUTF8String:shader]
-                                                      options:options
-                                                        error:&error];
+    id <MTLLibrary> library = [device newLibraryWithSource:[NSString stringWithUTF8String:shader]
+                                                   options:options
+                                                     error:&error];
     if (library == nil)
     {
         xxLog("xxGraphic", "%s", [[error localizedDescription] UTF8String]);
@@ -710,13 +673,13 @@ uint64_t xxCreateVertexShaderMetal(uint64_t device, char const* shader, uint64_t
 
     id <MTLFunction> function = [library newFunctionWithName:@"VSMain"];
 
-    return reinterpret_cast<uint64_t>((__bridge_retained void*)function);
+    objc_retain(function);
+    return function;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateFragmentShaderMetal(uint64_t device, char const* shader)
+id xxCreateFragmentShaderMetal(id <MTLDevice> __unsafe_unretained device, char const* shader)
 {
-    id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
-    if (mtlDevice == nil)
+    if (device == nil)
         return 0;
 
     if (strcmp(shader, "default") == 0)
@@ -728,9 +691,9 @@ uint64_t xxCreateFragmentShaderMetal(uint64_t device, char const* shader)
     MTLCompileOptions* options = [classMTLCompileOptions new];
     options.fastMathEnabled = YES;
 
-    id <MTLLibrary> library = [mtlDevice newLibraryWithSource:[NSString stringWithUTF8String:shader]
-                                                      options:options
-                                                        error:&error];
+    id <MTLLibrary> library = [device newLibraryWithSource:[NSString stringWithUTF8String:shader]
+                                                   options:options
+                                                     error:&error];
     if (library == nil)
     {
         xxLog("xxGraphic", "%s", [[error localizedDescription] UTF8String]);
@@ -739,19 +702,19 @@ uint64_t xxCreateFragmentShaderMetal(uint64_t device, char const* shader)
 
     id <MTLFunction> function = [library newFunctionWithName:@"FSMain"];
 
-    return reinterpret_cast<uint64_t>((__bridge_retained void*)function);
+    objc_retain(function);
+    return function;
 }
 //------------------------------------------------------------------------------
-void xxDestroyShaderMetal(uint64_t device, uint64_t shader)
+void xxDestroyShaderMetal(id <MTLDevice> __unsafe_unretained device, id <MTLFunction> __unsafe_unretained shader)
 {
-    id <MTLFunction> function = (__bridge_transfer id)reinterpret_cast<void*>(shader);
-
-    function = nil;
+    objc_release(shader);
+    shader = nil;
 }
 //==============================================================================
 //  Pipeline
 //==============================================================================
-uint64_t xxCreateBlendStateMetal(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha)
+id xxCreateBlendStateMetal(id <MTLDevice> __unsafe_unretained device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha)
 {
     MTLRenderPipelineColorAttachmentDescriptor* desc = [classMTLRenderPipelineColorAttachmentDescriptor new];
     desc.pixelFormat = MTLPixelFormatBGRA8Unorm;
@@ -768,25 +731,23 @@ uint64_t xxCreateBlendStateMetal(uint64_t device, char const* sourceColor, char 
                             desc.destinationAlphaBlendFactor != MTLBlendFactorZero ||
                             desc.alphaBlendOperation != MTLBlendOperationAdd) ? YES : NO;
 
-    return reinterpret_cast<uint64_t>((__bridge_retained void*)desc);
+    objc_retain(desc);
+    return desc;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateDepthStencilStateMetal(uint64_t device, char const* depthTest, bool depthWrite)
+id xxCreateDepthStencilStateMetal(id <MTLDevice> __unsafe_unretained device, char const* depthTest, bool depthWrite)
 {
-    id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
-    if (mtlDevice == nil)
-        return 0;
-
     MTLDepthStencilDescriptor* desc = [classMTLDepthStencilDescriptor new];
     desc.depthCompareFunction = mtlCompareOp(depthTest);
     desc.depthWriteEnabled = depthWrite;
 
-    id <MTLDepthStencilState> depthStencilState = [mtlDevice newDepthStencilStateWithDescriptor:desc];
+    id <MTLDepthStencilState> depthStencilState = [device newDepthStencilStateWithDescriptor:desc];
 
-    return reinterpret_cast<uint64_t>((__bridge_retained void*)depthStencilState);
+    objc_retain(depthStencilState);
+    return depthStencilState;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateRasterizerStateMetal(uint64_t device, bool cull, bool scissor)
+uint64_t xxCreateRasterizerStateMetal(id <MTLDevice> __unsafe_unretained device, bool cull, bool scissor)
 {
     uint64_t state = 0;
     state |= (cull << 0);
@@ -794,51 +755,48 @@ uint64_t xxCreateRasterizerStateMetal(uint64_t device, bool cull, bool scissor)
     return state;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreatePipelineMetal(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+MTLPIPELINE* xxCreatePipelineMetal(id <MTLDevice> __unsafe_unretained device, MTLRenderPassDescriptor* __unsafe_unretained renderPass, MTLRenderPipelineColorAttachmentDescriptor* __unsafe_unretained blendState, id <MTLDepthStencilState> __unsafe_unretained depthStencilState, uint64_t rasterizerState, MTLVertexDescriptor* __unsafe_unretained vertexAttribute, id <MTLFunction> __unsafe_unretained vertexShader, id <MTLFunction> __unsafe_unretained fragmentShader)
 {
-    id <MTLDevice> mtlDevice = (__bridge id)reinterpret_cast<void*>(device);
-    if (mtlDevice == nil)
+    if (device == nil)
         return 0;
-    MTLRenderPipelineColorAttachmentDescriptor* mtlBlendState = (__bridge MTLRenderPipelineColorAttachmentDescriptor*)reinterpret_cast<void*>(blendState);
-    id <MTLDepthStencilState> mtlDepthStencilState = (__bridge id)reinterpret_cast<void*>(depthStencilState);
-    MTLVertexDescriptor* mtlVertexAttribute = (__bridge MTLVertexDescriptor*)reinterpret_cast<void*>(vertexAttribute);
-    id <MTLFunction> mtlVertexShader = (__bridge id)reinterpret_cast<void*>(vertexShader);
-    id <MTLFunction> mtlFragmentShader = (__bridge id)reinterpret_cast<void*>(fragmentShader);
 
-    MTLPIPELINE* mtlPipeline = new MTLPIPELINE{};
-    if (mtlPipeline == nullptr)
+    MTLPIPELINE* pipeline = new MTLPIPELINE{};
+    if (pipeline == nullptr)
         return 0;
 
     MTLRenderPipelineDescriptor* desc = [classMTLRenderPipelineDescriptor new];
-    desc.vertexFunction = mtlVertexShader;
-    desc.fragmentFunction = mtlFragmentShader;
-    desc.vertexDescriptor = mtlVertexAttribute;
-    desc.colorAttachments[0] = mtlBlendState;
+    desc.vertexFunction = vertexShader;
+    desc.fragmentFunction = fragmentShader;
+    desc.vertexDescriptor = vertexAttribute;
+    desc.colorAttachments[0] = blendState;
     desc.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
 
-    id <MTLRenderPipelineState> pipeline = [mtlDevice newRenderPipelineStateWithDescriptor:desc
-                                                                                     error:nil];
+    NSError* error;
+    pipeline->pipeline = [device newRenderPipelineStateWithDescriptor:desc
+                                                                error:&error];
+    if (pipeline->pipeline == nil)
+    {
+        xxLog("xxGraphic", "%s", [[error localizedDescription] UTF8String]);
+        return 0;
+    }
 
-    mtlPipeline->pipeline = pipeline;
-    mtlPipeline->depthStencil = mtlDepthStencilState;
-    mtlPipeline->cullMode = (rasterizerState & 1) ? MTLCullModeBack : MTLCullModeNone;
-    mtlPipeline->scissorEnable = (rasterizerState & 2) != 0;
+    pipeline->depthStencil = depthStencilState;
+    pipeline->cullMode = (rasterizerState & 1) ? MTLCullModeBack : MTLCullModeNone;
+    pipeline->scissorEnable = (rasterizerState & 2) != 0;
 
-    return reinterpret_cast<uint64_t>(mtlPipeline);
+    return pipeline;
 }
 //------------------------------------------------------------------------------
-void xxDestroyBlendStateMetal(uint64_t blendState)
+void xxDestroyBlendStateMetal(MTLRenderPipelineColorAttachmentDescriptor* __unsafe_unretained blendState)
 {
-    MTLRenderPipelineColorAttachmentDescriptor* mtlBlendState = (__bridge_transfer MTLRenderPipelineColorAttachmentDescriptor*)reinterpret_cast<void*>(blendState);
-
-    mtlBlendState = nil;
+    objc_release(blendState);
+    blendState = nil;
 }
 //------------------------------------------------------------------------------
-void xxDestroyDepthStencilStateMetal(uint64_t depthStencilState)
+void xxDestroyDepthStencilStateMetal(id <MTLDepthStencilState> __unsafe_unretained depthStencilState)
 {
-    id <MTLDepthStencilState> mtlDepthStencilState = (__bridge_transfer id)reinterpret_cast<void*>(depthStencilState);
-
-    mtlDepthStencilState = nil;
+    objc_release(depthStencilState);
+    depthStencilState = nil;
 }
 //------------------------------------------------------------------------------
 void xxDestroyRasterizerStateMetal(uint64_t rasterizerState)
@@ -846,19 +804,15 @@ void xxDestroyRasterizerStateMetal(uint64_t rasterizerState)
 
 }
 //------------------------------------------------------------------------------
-void xxDestroyPipelineMetal(uint64_t pipeline)
+void xxDestroyPipelineMetal(MTLPIPELINE* pipeline)
 {
-    MTLPIPELINE* mtlPipeline = reinterpret_cast<MTLPIPELINE*>(pipeline);
-
-    delete mtlPipeline;
+    delete pipeline;
 }
 //==============================================================================
 //  Command
 //==============================================================================
-void xxSetViewportMetal(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ)
+void xxSetViewportMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int x, int y, int width, int height, float minZ, float maxZ)
 {
-    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-
     MTLViewport vp;
     vp.originX = x;
     vp.originY = y;
@@ -866,189 +820,151 @@ void xxSetViewportMetal(uint64_t commandEncoder, int x, int y, int width, int he
     vp.height = height;
     vp.znear = minZ;
     vp.zfar = maxZ;
-    [mtlCommandEncoder setViewport:vp];
+    [commandEncoder setViewport:vp];
 
-    g_metalViewport = vp;
+    metalViewport = vp;
 }
 //------------------------------------------------------------------------------
-void xxSetScissorMetal(uint64_t commandEncoder, int x, int y, int width, int height)
+void xxSetScissorMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int x, int y, int width, int height)
 {
-    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-
     MTLScissorRect rect;
     rect.x = x;
     rect.y = y;
     rect.width = width;
     rect.height = height;
-    [mtlCommandEncoder setScissorRect:rect];
+    [commandEncoder setScissorRect:rect];
 
-    g_metalScissor = rect;
-    g_metalScissorEnable = (width != g_metalViewport.width || height != g_metalViewport.height);
+    metalScissor = rect;
+    metalScissorEnable = (width != metalViewport.width || height != metalViewport.height);
 }
 //------------------------------------------------------------------------------
-void xxSetPipelineMetal(uint64_t commandEncoder, uint64_t pipeline)
+void xxSetPipelineMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, MTLPIPELINE* pipeline)
 {
-    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    MTLPIPELINE* mtlPipeline = reinterpret_cast<MTLPIPELINE*>(pipeline);
+    [commandEncoder setRenderPipelineState:pipeline->pipeline];
+    [commandEncoder setDepthStencilState:pipeline->depthStencil];
+    [commandEncoder setCullMode:pipeline->cullMode];
 
-    [mtlCommandEncoder setRenderPipelineState:mtlPipeline->pipeline];
-    [mtlCommandEncoder setDepthStencilState:mtlPipeline->depthStencil];
-    [mtlCommandEncoder setCullMode:mtlPipeline->cullMode];
-
-    if (g_metalScissorEnable != mtlPipeline->scissorEnable)
+    if (metalScissorEnable != pipeline->scissorEnable)
     {
-        if (mtlPipeline->scissorEnable)
+        if (pipeline->scissorEnable)
         {
-            [mtlCommandEncoder setScissorRect:g_metalScissor];
-            g_metalScissorEnable = true;
+            [commandEncoder setScissorRect:metalScissor];
+            metalScissorEnable = true;
         }
         else
         {
             MTLScissorRect rect;
             rect.x = 0;
             rect.y = 0;
-            rect.width = g_metalViewport.width;
-            rect.height = g_metalViewport.height;
-            [mtlCommandEncoder setScissorRect:rect];
-            g_metalScissorEnable = false;
+            rect.width = metalViewport.width;
+            rect.height = metalViewport.height;
+            [commandEncoder setScissorRect:rect];
+            metalScissorEnable = false;
         }
     }
 }
 //------------------------------------------------------------------------------
-void xxSetVertexBuffersMetal(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
+void xxSetVertexBuffersMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, MTLBUFFER** buffers, MTLVertexDescriptor* __unsafe_unretained vertexAttribute)
 {
-    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    id <MTLBuffer> __unsafe_unretained mtlBuffers[8];
+    id <MTLBuffer> __unsafe_unretained vertexBuffers[8];
     NSUInteger offsets[8];
 
     for (int i = 0; i < count; ++i)
     {
-        MTLBUFFER* mtlBuffer = reinterpret_cast<MTLBUFFER*>(buffers[i]);
-        mtlBuffers[i] = mtlBuffer->buffer;
+        vertexBuffers[i] = buffers[i]->buffer;
         offsets[i] = 0;
     }
 
-    [mtlCommandEncoder setVertexBuffers:mtlBuffers
-                                offsets:offsets
-                              withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_BUFFER, count)];
+    [commandEncoder setVertexBuffers:vertexBuffers
+                             offsets:offsets
+                           withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_BUFFER, count)];
 
-    g_metalVertexAttribute = vertexAttribute;
+    metalVertexAttribute = vertexAttribute;
 }
 //------------------------------------------------------------------------------
-void xxSetVertexTexturesMetal(uint64_t commandEncoder, int count, const uint64_t* textures)
+void xxSetVertexTexturesMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, MTLTEXTURE** textures)
 {
-    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    id <MTLTexture> __unsafe_unretained mtlTextures[8];
+    id <MTLTexture> __unsafe_unretained vertexTextures[8];
 
     for (int i = 0; i < count; ++i)
     {
-        MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(textures[i]);
-        mtlTextures[i] = mtlTexture->texture;
+        vertexTextures[i] = textures[i]->texture;
     }
 
-    [mtlCommandEncoder setVertexTextures:mtlTextures
-                               withRange:NSMakeRange(0, count)];
+    [commandEncoder setVertexTextures:vertexTextures
+                            withRange:NSMakeRange(0, count)];
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentTexturesMetal(uint64_t commandEncoder, int count, const uint64_t* textures)
+void xxSetFragmentTexturesMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, MTLTEXTURE** textures)
 {
-    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    id <MTLTexture> __unsafe_unretained mtlTextures[8];
+    id <MTLTexture> __unsafe_unretained fragmentTextures[8];
 
     for (int i = 0; i < count; ++i)
     {
-        MTLTEXTURE* mtlTexture = reinterpret_cast<MTLTEXTURE*>(textures[i]);
-        mtlTextures[i] = mtlTexture->texture;
+        fragmentTextures[i] = textures[i]->texture;
     }
 
-    [mtlCommandEncoder setFragmentTextures:mtlTextures
+    [commandEncoder setFragmentTextures:fragmentTextures
+                              withRange:NSMakeRange(0, count)];
+}
+//------------------------------------------------------------------------------
+void xxSetVertexSamplersMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, id <MTLSamplerState> __unsafe_unretained* samplers)
+{
+    [commandEncoder setVertexSamplerStates:samplers
                                  withRange:NSMakeRange(0, count)];
 }
 //------------------------------------------------------------------------------
-void xxSetVertexSamplersMetal(uint64_t commandEncoder, int count, const uint64_t* samplers)
+void xxSetFragmentSamplersMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, id <MTLSamplerState> __unsafe_unretained* samplers)
 {
-    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    id <MTLSamplerState> __unsafe_unretained mtlSamplers[8];
-
-    for (int i = 0; i < count; ++i)
-    {
-        mtlSamplers[i] = (__bridge id)reinterpret_cast<void*>(samplers[i]);
-    }
-
-    [mtlCommandEncoder setVertexSamplerStates:mtlSamplers
-                                    withRange:NSMakeRange(0, count)];
+    [commandEncoder setFragmentSamplerStates:samplers
+                                   withRange:NSMakeRange(0, count)];
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentSamplersMetal(uint64_t commandEncoder, int count, const uint64_t* samplers)
+void xxSetVertexConstantBufferMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, MTLBUFFER* buffer, int size)
 {
-    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    id <MTLSamplerState> __unsafe_unretained mtlSamplers[8];
-
-    for (int i = 0; i < count; ++i)
-    {
-        mtlSamplers[i] = (__bridge id)reinterpret_cast<void*>(samplers[i]);
-    }
-
-    [mtlCommandEncoder setFragmentSamplerStates:mtlSamplers
-                                      withRange:NSMakeRange(0, count)];
+    [commandEncoder setVertexBuffer:buffer->buffer
+                             offset:0
+                            atIndex:0];
 }
 //------------------------------------------------------------------------------
-void xxSetVertexConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, int size)
+void xxSetFragmentConstantBufferMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, MTLBUFFER* buffer, int size)
 {
-    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    MTLBUFFER* mtlBuffer = reinterpret_cast<MTLBUFFER*>(buffer);
-
-    [mtlCommandEncoder setVertexBuffer:mtlBuffer->buffer
-                                offset:0
-                               atIndex:0];
+    [commandEncoder setFragmentBuffer:buffer->buffer
+                               offset:0
+                              atIndex:0];
 }
 //------------------------------------------------------------------------------
-void xxSetFragmentConstantBufferMetal(uint64_t commandEncoder, uint64_t buffer, int size)
+void xxDrawMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
 {
-    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    MTLBUFFER* mtlBuffer = reinterpret_cast<MTLBUFFER*>(buffer);
-
-    [mtlCommandEncoder setFragmentBuffer:mtlBuffer->buffer
-                                  offset:0
-                                 atIndex:0];
+    [commandEncoder drawPrimitives:MTLPrimitiveTypeTriangle
+                       vertexStart:firstVertex
+                       vertexCount:vertexCount
+                     instanceCount:instanceCount
+                      baseInstance:firstInstance];
 }
 //------------------------------------------------------------------------------
-void xxDrawMetal(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
+void xxDrawIndexedMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, MTLBUFFER* indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
-    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-
-    [mtlCommandEncoder drawPrimitives:MTLPrimitiveTypeTriangle
-                          vertexStart:firstVertex
-                          vertexCount:vertexCount
-                        instanceCount:instanceCount
-                         baseInstance:firstInstance];
-}
-//------------------------------------------------------------------------------
-void xxDrawIndexedMetal(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
-{
-    id <MTLRenderCommandEncoder> __unsafe_unretained mtlCommandEncoder = (__bridge id)reinterpret_cast<void*>(commandEncoder);
-    MTLBUFFER* mtlIndexBuffer = reinterpret_cast<MTLBUFFER*>(indexBuffer);
-
     MTLIndexType indexType = (INDEX_BUFFER_WIDTH == /* DISABLES CODE */(2)) ? MTLIndexTypeUInt16 : MTLIndexTypeUInt32;
 #if TARGET_OS_SIMULATOR
-    MTLVertexDescriptor* __unsafe_unretained desc = (__bridge id)reinterpret_cast<void*>(g_metalVertexAttribute);
+    MTLVertexDescriptor* __unsafe_unretained desc = (__bridge id)reinterpret_cast<void*>(metalVertexAttribute);
     MTLVertexBufferLayoutDescriptor* __unsafe_unretained layout = desc.layouts[xxGraphicDescriptor::VERTEX_BUFFER];
-    [mtlCommandEncoder setVertexBufferOffset:vertexOffset * layout.stride
-                                     atIndex:xxGraphicDescriptor::VERTEX_BUFFER];
-    [mtlCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
-                                  indexCount:indexCount
-                                   indexType:indexType
-                                 indexBuffer:mtlIndexBuffer->buffer
-                           indexBufferOffset:firstIndex * INDEX_BUFFER_WIDTH];
+    [commandEncoder setVertexBufferOffset:vertexOffset * layout.stride
+                                  atIndex:xxGraphicDescriptor::VERTEX_BUFFER];
+    [commandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
+                               indexCount:indexCount
+                                indexType:indexType
+                              indexBuffer:indexBuffer->buffer
+                        indexBufferOffset:firstIndex * INDEX_BUFFER_WIDTH];
 #else
-    [mtlCommandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
-                                  indexCount:indexCount
-                                   indexType:indexType
-                                 indexBuffer:mtlIndexBuffer->buffer
-                           indexBufferOffset:firstIndex * INDEX_BUFFER_WIDTH
-                               instanceCount:instanceCount
-                                  baseVertex:vertexOffset
-                                baseInstance:firstInstance];
+    [commandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
+                               indexCount:indexCount
+                                indexType:indexType
+                              indexBuffer:indexBuffer->buffer
+                        indexBufferOffset:firstIndex * INDEX_BUFFER_WIDTH
+                            instanceCount:instanceCount
+                               baseVertex:vertexOffset
+                             baseInstance:firstInstance];
 #endif
 }
 //==============================================================================
