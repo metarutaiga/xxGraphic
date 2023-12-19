@@ -26,6 +26,13 @@ id xxCreateInstanceMetal2()
     xxRegisterFunctionSingle(xxBeginRenderPass, xxBeginRenderPassMetal2);
     xxRegisterFunctionSingle(xxEndRenderPass, xxEndRenderPassMetal2);
 
+    xxRegisterFunctionSingle(xxCreateConstantBuffer, xxCreateConstantBufferMetal2);
+    xxRegisterFunctionSingle(xxCreateIndexBuffer, xxCreateIndexBufferMetal2);
+    xxRegisterFunctionSingle(xxCreateVertexBuffer, xxCreateVertexBufferMetal2);
+    xxRegisterFunctionSingle(xxDestroyBuffer, xxDestroyBufferMetal2);
+    xxRegisterFunctionSingle(xxMapBuffer, xxMapBufferMetal2);
+    xxRegisterFunctionSingle(xxUnmapBuffer, xxUnmapBufferMetal2);
+
     xxRegisterFunctionSingle(xxCreateSampler, xxCreateSamplerMetal2);
 
     xxRegisterFunctionSingle(xxCreateVertexShader, xxCreateVertexShaderMetal2);
@@ -91,6 +98,68 @@ void xxEndRenderPassMetal2(MTLSWAPCHAIN* swapchain, MTLFRAMEBUFFER* framebuffer,
 {
     [swapchain->commandEncoder endEncoding];
     swapchain->commandEncoder = nil;
+}
+//==============================================================================
+//  Buffer
+//==============================================================================
+MTLBUFFER* xxCreateConstantBufferMetal2(id <MTLDevice> __unsafe_unretained device, int size)
+{
+    if (device == nil)
+        return 0;
+
+    MTLBUFFER* buffer = new MTLBUFFER{};
+    if (buffer == nullptr)
+        return 0;
+
+    buffer->buffer = [device newBufferWithLength:size
+                                         options:MTLResourceStorageModeShared];
+
+    return buffer;
+}
+//------------------------------------------------------------------------------
+MTLBUFFER* xxCreateIndexBufferMetal2(id <MTLDevice> __unsafe_unretained device, int size)
+{
+    if (device == nil)
+        return 0;
+
+    MTLBUFFER* buffer = new MTLBUFFER{};
+    if (buffer == nullptr)
+        return 0;
+
+    buffer->buffer = [device newBufferWithLength:size
+                                         options:MTLResourceStorageModeShared];
+
+    return buffer;
+}
+//------------------------------------------------------------------------------
+MTLBUFFER* xxCreateVertexBufferMetal2(id <MTLDevice> __unsafe_unretained device, int size, MTLVertexDescriptor* __unsafe_unretained vertexAttribute)
+{
+    if (device == nil)
+        return 0;
+
+    MTLBUFFER* buffer = new MTLBUFFER{};
+    if (buffer == nullptr)
+        return 0;
+
+    buffer->buffer = [device newBufferWithLength:size
+                                         options:MTLResourceStorageModeShared];
+
+    return buffer;
+}
+//------------------------------------------------------------------------------
+void xxDestroyBufferMetal2(id <MTLDevice> __unsafe_unretained device, MTLBUFFER* buffer)
+{
+    delete buffer;
+}
+//------------------------------------------------------------------------------
+void* xxMapBufferMetal2(id <MTLDevice> __unsafe_unretained device, MTLBUFFER* buffer)
+{
+    return [buffer->buffer contents];
+}
+//------------------------------------------------------------------------------
+void xxUnmapBufferMetal2(id <MTLDevice> __unsafe_unretained device, MTLBUFFER* buffer)
+{
+
 }
 //==============================================================================
 //  Sampler
@@ -247,7 +316,14 @@ void xxSetPipelineMetal2(MTLSWAPCHAIN* swapchain, MTLPIPELINE* pipeline)
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersMetal2(MTLSWAPCHAIN* swapchain, int count, MTLBUFFER** buffers, MTLVertexDescriptor* __unsafe_unretained vertexAttribute)
 {
-    xxSetVertexBuffersMetal(swapchain->commandEncoder, count, buffers, vertexAttribute);
+    id <MTLBuffer> __unsafe_unretained vertexBuffers[8];
+
+    for (int i = 0; i < count; ++i)
+    {
+        vertexBuffers[i] = buffers[i]->buffer;
+    }
+
+    xxSetVertexBuffersMetal(swapchain->commandEncoder, count, vertexBuffers, vertexAttribute);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE** textures)
@@ -339,6 +415,6 @@ void xxDrawMetal2(MTLSWAPCHAIN* swapchain, int vertexCount, int instanceCount, i
 //------------------------------------------------------------------------------
 void xxDrawIndexedMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
-    xxDrawIndexedMetal(swapchain->commandEncoder, indexBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+    xxDrawIndexedMetal(swapchain->commandEncoder, indexBuffer->buffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 //------------------------------------------------------------------------------

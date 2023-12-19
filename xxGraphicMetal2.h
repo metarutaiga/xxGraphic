@@ -32,6 +32,15 @@ xxAPI MTLSWAPCHAIN*     xxGetCommandBufferMetal2(id <MTLDevice> device, MTLSWAPC
 xxAPI MTLSWAPCHAIN*     xxBeginRenderPassMetal2(MTLSWAPCHAIN* swapchain, MTLFRAMEBUFFER* framebuffer, MTLRenderPassDescriptor* renderPass, int width, int height, float color[4], float depth, unsigned char stencil);
 xxAPI void              xxEndRenderPassMetal2(MTLSWAPCHAIN* swapchain, MTLFRAMEBUFFER* framebuffer, MTLRenderPassDescriptor* renderPass);
 //==============================================================================
+//  Buffer
+//==============================================================================
+xxAPI MTLBUFFER*        xxCreateConstantBufferMetal2(id <MTLDevice> device, int size);
+xxAPI MTLBUFFER*        xxCreateIndexBufferMetal2(id <MTLDevice> device, int size);
+xxAPI MTLBUFFER*        xxCreateVertexBufferMetal2(id <MTLDevice> device, int size, MTLVertexDescriptor* vertexAttribute);
+xxAPI void              xxDestroyBufferMetal2(id <MTLDevice> device, MTLBUFFER* buffer);
+xxAPI void*             xxMapBufferMetal2(id <MTLDevice> device, MTLBUFFER* buffer);
+xxAPI void              xxUnmapBufferMetal2(id <MTLDevice> device, MTLBUFFER* buffer);
+//==============================================================================
 //  Sampler
 //==============================================================================
 xxAPI id                xxCreateSamplerMetal2(id <MTLDevice> device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy);
