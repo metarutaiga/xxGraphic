@@ -59,12 +59,12 @@ xxAPI void              xxDestroyVertexAttributeMetal(MTLVertexDescriptor* verte
 //==============================================================================
 //  Buffer
 //==============================================================================
-xxAPI MTLBUFFER*        xxCreateConstantBufferMetal(id <MTLDevice> device, int size);
-xxAPI MTLBUFFER*        xxCreateIndexBufferMetal(id <MTLDevice> device, int size);
-xxAPI MTLBUFFER*        xxCreateVertexBufferMetal(id <MTLDevice> device, int size, MTLVertexDescriptor* vertexAttribute);
-xxAPI void              xxDestroyBufferMetal(id <MTLDevice> device, MTLBUFFER* buffer);
-xxAPI void*             xxMapBufferMetal(id <MTLDevice> device, MTLBUFFER* buffer);
-xxAPI void              xxUnmapBufferMetal(id <MTLDevice> device, MTLBUFFER* buffer);
+xxAPI id                xxCreateConstantBufferMetal(id <MTLDevice> device, int size);
+xxAPI id                xxCreateIndexBufferMetal(id <MTLDevice> device, int size);
+xxAPI id                xxCreateVertexBufferMetal(id <MTLDevice> device, int size, MTLVertexDescriptor* vertexAttribute);
+xxAPI void              xxDestroyBufferMetal(id <MTLDevice> device, id <MTLBuffer> buffer);
+xxAPI void*             xxMapBufferMetal(id <MTLDevice> device, id <MTLBuffer> buffer);
+xxAPI void              xxUnmapBufferMetal(id <MTLDevice> device, id <MTLBuffer> buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
@@ -100,15 +100,15 @@ xxAPI void              xxDestroyPipelineMetal(MTLPIPELINE* pipeline);
 xxAPI void              xxSetViewportMetal(id <MTLRenderCommandEncoder> commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
 xxAPI void              xxSetScissorMetal(id <MTLRenderCommandEncoder> commandEncoder, int x, int y, int width, int height);
 xxAPI void              xxSetPipelineMetal(id <MTLRenderCommandEncoder> commandEncoder, MTLPIPELINE* pipeline);
-xxAPI void              xxSetVertexBuffersMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, MTLBUFFER** buffers, MTLVertexDescriptor* vertexAttribute);
+xxAPI void              xxSetVertexBuffersMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, id <MTLBuffer> __unsafe_unretained* buffers, MTLVertexDescriptor* vertexAttribute);
 xxAPI void              xxSetVertexTexturesMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, MTLTEXTURE** textures);
 xxAPI void              xxSetFragmentTexturesMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, MTLTEXTURE** textures);
 xxAPI void              xxSetVertexSamplersMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, id <MTLSamplerState> __unsafe_unretained* samplers);
 xxAPI void              xxSetFragmentSamplersMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, id <MTLSamplerState> __unsafe_unretained* samplers);
-xxAPI void              xxSetVertexConstantBufferMetal(id <MTLRenderCommandEncoder> commandEncoder, MTLBUFFER* buffer, int size);
-xxAPI void              xxSetFragmentConstantBufferMetal(id <MTLRenderCommandEncoder> commandEncoder, MTLBUFFER* buffer, int size);
+xxAPI void              xxSetVertexConstantBufferMetal(id <MTLRenderCommandEncoder> commandEncoder, id <MTLBuffer> buffer, int size);
+xxAPI void              xxSetFragmentConstantBufferMetal(id <MTLRenderCommandEncoder> commandEncoder, id <MTLBuffer> buffer, int size);
 xxAPI void              xxDrawMetal(id <MTLRenderCommandEncoder> commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance);
-xxAPI void              xxDrawIndexedMetal(id <MTLRenderCommandEncoder> commandEncoder, MTLBUFFER* indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+xxAPI void              xxDrawIndexedMetal(id <MTLRenderCommandEncoder> commandEncoder, id <MTLBuffer> indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 
 #endif
