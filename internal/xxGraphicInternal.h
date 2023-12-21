@@ -13,10 +13,10 @@ enum xxGraphicDescriptor
     VERTEX_UNIFORM          = 0,
     FRAGMENT_UNIFORM        = 1,
     VERTEX_TEXTURE          = 2,
-    FRAGMENT_TEXTURE        = 6,
-    VERTEX_SAMPLER          = 14,
+    FRAGMENT_TEXTURE        = 4,
+    VERTEX_SAMPLER          = 16,
     FRAGMENT_SAMPLER        = 18,
-    TOTAL                   = 26,
+    TOTAL                   = 30,
 
     VERTEX_UNIFORM_COUNT    = FRAGMENT_UNIFORM  - VERTEX_UNIFORM,
     FRAGMENT_UNIFORM_COUNT  = VERTEX_TEXTURE    - FRAGMENT_UNIFORM,

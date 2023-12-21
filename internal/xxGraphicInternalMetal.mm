@@ -12,15 +12,17 @@ char const* const mtlDefaultShaderCode =
 R"(#include <metal_stdlib>
 using namespace metal;
 
+#if __METAL_USE_ARGUMENT__ == 0
 struct Uniform
 {
     float4x4 matrix[3];
 };
-
+#else
 struct UniformArgument
 {
     device float4x4* matrix [[id(0)]];
 };
+#endif
 
 struct VertexIn
 {
@@ -45,7 +47,7 @@ struct TextureSampler
 #else
 struct TextureSamplerArgument
 {
-    texture2d<float> tex [[id(6)]];
+    texture2d<float> tex [[id(4)]];
     sampler sam          [[id(18)]];
 };
 #endif
