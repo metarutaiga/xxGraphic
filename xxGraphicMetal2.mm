@@ -202,12 +202,12 @@ id xxCreateVertexShaderMetal2(id <MTLDevice> __unsafe_unretained device, char co
     options.preprocessorMacros = @{ @"__METAL_USE_ARGUMENT__" : @(1) };
     options.fastMathEnabled = YES;
 
-    id <MTLLibrary> library = [device newLibraryWithSource:[NSString stringWithUTF8String:shader]
+    id <MTLLibrary> library = [device newLibraryWithSource:@(shader)
                                                    options:options
                                                      error:&error];
     if (library == nil)
     {
-        xxLog("xxGraphic", "%s", [[error localizedDescription] UTF8String]);
+        xxLog("xxGraphic", "%s", error.localizedDescription.UTF8String);
         return 0;
     }
 
@@ -232,12 +232,12 @@ id xxCreateFragmentShaderMetal2(id <MTLDevice> __unsafe_unretained device, char 
     options.preprocessorMacros = @{ @"__METAL_USE_ARGUMENT__" : @(1) };
     options.fastMathEnabled = YES;
 
-    id <MTLLibrary> library = [device newLibraryWithSource:[NSString stringWithUTF8String:shader]
+    id <MTLLibrary> library = [device newLibraryWithSource:@(shader)
                                                    options:options
                                                      error:&error];
     if (library == nil)
     {
-        xxLog("xxGraphic", "%s", [[error localizedDescription] UTF8String]);
+        xxLog("xxGraphic", "%s", error.localizedDescription.UTF8String);
         return 0;
     }
 
@@ -259,8 +259,8 @@ MTLPIPELINE* xxCreatePipelineMetal2(id <MTLDevice> __unsafe_unretained device, M
     pipeline->fragmentShader = fragmentShader;
     pipeline->vertexArgumentEncoder = [pipeline->vertexShader newArgumentEncoderWithBufferIndex:0];
     pipeline->fragmentArgumentEncoder = [pipeline->fragmentShader newArgumentEncoderWithBufferIndex:0];
-    pipeline->vertexArgumentEncodedLength = [pipeline->vertexArgumentEncoder encodedLength];
-    pipeline->fragmentArgumentEncodedLength = [pipeline->fragmentArgumentEncoder encodedLength];
+    pipeline->vertexArgumentEncodedLength = pipeline->vertexArgumentEncoder.encodedLength;
+    pipeline->fragmentArgumentEncodedLength = pipeline->fragmentArgumentEncoder.encodedLength;
     pipeline->vertexArgumentEncodedLength = (pipeline->vertexArgumentEncodedLength + 255) & ~255;
     pipeline->fragmentArgumentEncodedLength = (pipeline->fragmentArgumentEncodedLength + 255) & ~255;
 
@@ -292,10 +292,10 @@ void xxSetPipelineMetal2(MTLSWAPCHAIN* swapchain, MTLPIPELINE* pipeline)
 
     int argumentBufferIndex = swapchain->argumentBufferIndex;
     id <MTLBuffer> __unsafe_unretained argumentBuffer = swapchain->argumentBuffers[argumentBufferIndex];
-    if (argumentBuffer == nil || [argumentBuffer length] < capacityLength)
+    if (argumentBuffer == nil || argumentBuffer.length < capacityLength)
     {
-        argumentBuffer = swapchain->argumentBuffers[argumentBufferIndex] = [[swapchain->commandQueue device] newBufferWithLength:capacityLength * 2
-                                                                                                                         options:MTLResourceStorageModeShared];
+        argumentBuffer = swapchain->argumentBuffers[argumentBufferIndex] = [swapchain->commandQueue.device newBufferWithLength:capacityLength * 2
+                                                                                                                       options:MTLResourceStorageModeShared];
     }
     swapchain->argumentBufferStep++;
 

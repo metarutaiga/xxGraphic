@@ -21,7 +21,7 @@ static void*                metalLibrary = nullptr;
 static MTLViewport          metalViewport;
 static MTLScissorRect       metalScissor;
 static bool                 metalScissorEnable = false;
-static MTLVertexDescriptor* metalVertexAttribute = nil;
+static MTLVertexDescriptor* metalVertexAttribute __unused = nil;
 static id <MTLDevice>       (*MTLCreateSystemDefaultDevice)() NS_RETURNS_RETAINED = nullptr;
 static NSArray*             (*MTLCopyAllDevices)() NS_RETURNS_RETAINED = nullptr;
 
@@ -115,7 +115,7 @@ id xxCreateDeviceMetal(id __unsafe_unretained instance)
     for (NSUInteger i = 0; i < allDevices.count; ++i)
     {
         id <MTLDevice> __unsafe_unretained device = allDevices[i];
-        xxLog("xxGraphic", "%s", [[device name] UTF8String]);
+        xxLog("xxGraphic", "%s", device.name.UTF8String);
     }
 
     objc_retain(device);
@@ -155,22 +155,22 @@ MTLSWAPCHAIN* xxCreateSwapchainMetal(id <MTLDevice> __unsafe_unretained device, 
     NSWindow* __unsafe_unretained nsWindow = (__bridge NSWindow*)view;
     if (nsWindow == nil)
         return 0;
-    NSView* __unsafe_unretained nsView = [[nsWindow contentViewController] view];
+    NSView* __unsafe_unretained nsView = nsWindow.contentViewController.view;
     if (nsView == nil)
-        nsView = [nsWindow contentView];
+        nsView = nsWindow.contentView;
     if (nsView == nil)
         return 0;
-    float contentsScale = [nsWindow backingScaleFactor];
+    float contentsScale = nsWindow.backingScaleFactor;
 #elif defined(xxIOS)
     UIWindow* __unsafe_unretained nsWindow = (__bridge UIWindow*)view;
     if (nsWindow == nil)
         return 0;
-    UIView* __unsafe_unretained nsView = [[nsWindow rootViewController] view];
+    UIView* __unsafe_unretained nsView = nsWindow.rootViewController.view;
     if (nsView == nil)
         nsView = nsWindow;
     if (nsView == nil)
         return 0;
-    float contentsScale = [[nsWindow screen] nativeScale];
+    float contentsScale = nsWindow.screen.nativeScale;
 #endif
 
     MTLSWAPCHAIN* swapchain = new MTLSWAPCHAIN{};
@@ -182,10 +182,10 @@ MTLSWAPCHAIN* xxCreateSwapchainMetal(id <MTLDevice> __unsafe_unretained device, 
 #if defined(xxMACOS)
     CAMetalLayer* layer = [CAMetalLayer layer];
     layer.displaySyncEnabled = NO;
-    [nsView setLayer:layer];
-    [nsView setWantsLayer:YES];
+    nsView.layer = layer;
+    nsView.wantsLayer = YES;
 #elif defined(xxIOS)
-    CAMetalLayer* layer = (CAMetalLayer*)[nsView layer];
+    CAMetalLayer* layer = (CAMetalLayer*)nsView.layer;
     layer.drawableSize = CGSizeMake(width * contentsScale, height * contentsScale);
 #endif
     layer.contentsScale = contentsScale;
@@ -243,9 +243,9 @@ MTLFRAMEBUFFER* xxGetFramebufferMetal(id <MTLDevice> __unsafe_unretained device,
     if (scale)
     {
 #if defined(xxMACOS)
-        float scaleFactor = [[swapchain->view window] backingScaleFactor];
+        float scaleFactor = swapchain->view.window.backingScaleFactor;
 #else
-        float scaleFactor = [swapchain->view contentScaleFactor];
+        float scaleFactor = swapchain->view.contentScaleFactor;
 #endif
         if (swapchain->scale != scaleFactor)
         {
@@ -258,7 +258,7 @@ MTLFRAMEBUFFER* xxGetFramebufferMetal(id <MTLDevice> __unsafe_unretained device,
     }
 
     swapchain->drawable = [swapchain->metalLayer nextDrawable];
-    swapchain->texture = [swapchain->drawable texture];
+    swapchain->texture = swapchain->drawable.texture;
 
     return swapchain;
 }
@@ -511,8 +511,8 @@ MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, int 
         else
         {
             buffer = (__bridge id)external;
-            stride = (int)[buffer length] / height;
-            options = [buffer storageMode] << MTLResourceStorageModeShift;
+            stride = (int)buffer.length / height;
+            options = buffer.storageMode << MTLResourceStorageModeShift;
         }
     }
     else if (mipmap == 1)
@@ -581,34 +581,34 @@ void* xxMapTextureMetal(id <MTLDevice> __unsafe_unretained device, MTLTEXTURE* t
     (*stride) = texture->strides[level];
     if (texture->buffer)
     {
-        return [texture->buffer contents];
+        return texture->buffer.contents;
     }
-    NSUInteger count = [texture->texture width] * [texture->texture height] * sizeof(int);
-    texture->temporary = xxRealloc(texture->temporary, int, count);
+    NSUInteger count = texture->texture.width * texture->texture.height * sizeof(int);
+    texture->temporary = xxRealloc(texture->temporary, char, count);
     return texture->temporary;
 }
 //------------------------------------------------------------------------------
 void xxUnmapTextureMetal(id <MTLDevice> __unsafe_unretained device, MTLTEXTURE* texture, int level, int array)
 {
-#if TARGET_OS_SIMULATOR
-    [texture->texture replaceRegion:MTLRegionMake2D(0, 0, texture->texture.width, texture->texture.height)
-                        mipmapLevel:0
-                          withBytes:[texture->buffer contents]
-                        bytesPerRow:[texture->buffer length] / texture->texture.height];
-#elif defined(xxMACOS_LEGACY)
-    [texture->buffer didModifyRange:NSMakeRange(0, [texture->buffer length])];
-#else
     if (texture->temporary)
     {
-        NSUInteger width = [texture->texture width] >> level;
-        NSUInteger height = [texture->texture height] >> level;
+        NSUInteger width = texture->texture.width >> level;
+        NSUInteger height = texture->texture.height >> level;
         [texture->texture replaceRegion:MTLRegionMake2D(0, 0, width, height)
                             mipmapLevel:level
                               withBytes:texture->temporary
                             bytesPerRow:texture->strides[level]];
         xxFree(texture->temporary);
         texture->temporary = nullptr;
+        return;
     }
+#if TARGET_OS_SIMULATOR
+    [texture->texture replaceRegion:MTLRegionMake2D(0, 0, texture->texture.width, texture->texture.height)
+                        mipmapLevel:0
+                          withBytes:texture->buffer.contents
+                        bytesPerRow:texture->buffer.length / texture->texture.height];
+#elif defined(xxMACOS_LEGACY)
+    [texture->buffer didModifyRange:NSMakeRange(0, texture->buffer.length)];
 #endif
 }
 //==============================================================================
@@ -656,12 +656,12 @@ id xxCreateVertexShaderMetal(id <MTLDevice> __unsafe_unretained device, char con
     MTLCompileOptions* options = [classMTLCompileOptions new];
     options.fastMathEnabled = YES;
 
-    id <MTLLibrary> library = [device newLibraryWithSource:[NSString stringWithUTF8String:shader]
+    id <MTLLibrary> library = [device newLibraryWithSource:@(shader)
                                                    options:options
                                                      error:&error];
     if (library == nil)
     {
-        xxLog("xxGraphic", "%s", [[error localizedDescription] UTF8String]);
+        xxLog("xxGraphic", "%s", error.localizedDescription.UTF8String);
         return 0;
     }
 
@@ -685,12 +685,12 @@ id xxCreateFragmentShaderMetal(id <MTLDevice> __unsafe_unretained device, char c
     MTLCompileOptions* options = [classMTLCompileOptions new];
     options.fastMathEnabled = YES;
 
-    id <MTLLibrary> library = [device newLibraryWithSource:[NSString stringWithUTF8String:shader]
+    id <MTLLibrary> library = [device newLibraryWithSource:@(shader)
                                                    options:options
                                                      error:&error];
     if (library == nil)
     {
-        xxLog("xxGraphic", "%s", [[error localizedDescription] UTF8String]);
+        xxLog("xxGraphic", "%s", error.localizedDescription.UTF8String);
         return 0;
     }
 
@@ -770,7 +770,7 @@ MTLPIPELINE* xxCreatePipelineMetal(id <MTLDevice> __unsafe_unretained device, MT
                                                                 error:&error];
     if (pipeline->pipeline == nil)
     {
-        xxLog("xxGraphic", "%s", [[error localizedDescription] UTF8String]);
+        xxLog("xxGraphic", "%s", error.localizedDescription.UTF8String);
         return 0;
     }
 
@@ -865,8 +865,9 @@ void xxSetVertexBuffersMetal(id <MTLRenderCommandEncoder> __unsafe_unretained co
     [commandEncoder setVertexBuffers:buffers
                              offsets:offsets
                            withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_BUFFER, count)];
-
+#if TARGET_OS_SIMULATOR
     metalVertexAttribute = vertexAttribute;
+#endif
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, MTLTEXTURE** textures)
