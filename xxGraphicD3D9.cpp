@@ -88,17 +88,17 @@ uint64_t xxCreateDeviceD3D9(uint64_t instance)
     {
         if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice9On12), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "9On12", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "9On12", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice9Ex), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "9Ex", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "9Ex", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice9), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "9.0", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "9.0", xxGetInstanceName());
             break;
         }
     }
@@ -139,11 +139,6 @@ bool xxTestDeviceD3D9(uint64_t device)
 
     HRESULT hResult = d3dDevice->TestCooperativeLevel();
     return hResult == S_OK;
-}
-//------------------------------------------------------------------------------
-char const* xxGetDeviceNameD3D9()
-{
-    return "Direct3D 9.0 Fixed Function";
 }
 //==============================================================================
 //  Swapchain

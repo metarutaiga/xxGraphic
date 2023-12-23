@@ -8,15 +8,23 @@
 
 #include "xxGraphic.h"
 
+xxAPI    uint64_t       xxCreateInstanceD3D9Ex();
+xxAPI    uint64_t       xxCreateInstanceD3D9ExPS();
+xxInline char const*    xxGetInstanceNameD3D9Ex() { return "Direct3D 9Ex Fixed Function"; }
+xxInline char const*    xxGetInstanceNameD3D9ExPS() { return "Direct3D 9Ex Programmable Shader"; }
+
+#ifdef _D3D9_H_
+
 //==============================================================================
 //  Instance
 //==============================================================================
-xxAPI uint64_t      xxCreateInstanceD3D9Ex();
-xxAPI uint64_t      xxCreateInstanceD3D9ExPS();
-xxAPI void          xxDestroyInstanceD3D9Ex(uint64_t instance);
+uint64_t        xxCreateInstanceD3D9Ex();
+uint64_t        xxCreateInstanceD3D9ExPS();
+void            xxDestroyInstanceD3D9Ex(uint64_t instance);
 //==============================================================================
 //  Device
 //==============================================================================
-xxAPI bool          xxTestDeviceD3D9Ex(uint64_t device);
-xxAPI char const*   xxGetDeviceNameD3D9Ex();
-xxAPI char const*   xxGetDeviceNameD3D9ExPS();
+bool            xxTestDeviceD3D9Ex(uint64_t device);
+//==============================================================================
+
+#endif

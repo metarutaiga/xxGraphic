@@ -8,13 +8,20 @@
 
 #include "xxGraphic.h"
 
+xxAPI    uint64_t       xxCreateInstanceD3D10_1();
+xxInline char const*    xxGetInstanceNameD3D10_1() { return "Direct3D 10.1"; }
+
+#ifdef __d3d10_1_h__
+
 //==============================================================================
 //  Instance
 //==============================================================================
-xxAPI uint64_t      xxCreateInstanceD3D10_1();
-xxAPI void          xxDestroyInstanceD3D10_1(uint64_t instance);
+uint64_t        xxCreateInstanceD3D10_1();
+void            xxDestroyInstanceD3D10_1(uint64_t instance);
 //==============================================================================
 //  Device
 //==============================================================================
-xxAPI uint64_t      xxCreateDeviceD3D10_1(uint64_t instance);
-xxAPI char const*   xxGetDeviceNameD3D10_1();
+uint64_t        xxCreateDeviceD3D10_1(uint64_t instance);
+//==============================================================================
+
+#endif

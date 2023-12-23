@@ -19,27 +19,24 @@ uint64_t xxCreateInstanceD3D8PS()
     if (instance == 0)
         return 0;
 
-    xxCreateInstance = xxCreateInstanceD3D8PS;
-    xxGetDeviceName = xxGetDeviceNameD3D8PS;
-    xxCreateVertexAttribute = xxCreateVertexAttributeD3D8PS;
-    xxDestroyVertexAttribute = xxDestroyVertexAttributeD3D8PS;
-    xxCreateVertexShader = xxCreateVertexShaderD3D8PS;
-    xxCreateFragmentShader = xxCreateFragmentShaderD3D8PS;
-    xxDestroyShader = xxDestroyShaderD3D8PS;
-    xxCreatePipeline = xxCreatePipelineD3D8PS;
-    xxSetScissor = xxSetScissorD3D8PS;
-    xxSetVertexBuffers = xxSetVertexBuffersD3D8PS;
-    xxSetVertexConstantBuffer = xxSetVertexConstantBufferD3D8PS;
-    xxSetFragmentConstantBuffer = xxSetFragmentConstantBufferD3D8PS;
+    xxRegisterFunctionSingle(xxCreateInstance, xxCreateInstanceD3D8PS);
+    xxRegisterFunctionSingle(xxGetInstanceName, xxGetInstanceNameD3D8PS);
+
+    xxRegisterFunctionSingle(xxCreateVertexAttribute, xxCreateVertexAttributeD3D8PS);
+    xxRegisterFunctionSingle(xxDestroyVertexAttribute, xxDestroyVertexAttributeD3D8PS);
+
+    xxRegisterFunctionSingle(xxCreateVertexShader, xxCreateVertexShaderD3D8PS);
+    xxRegisterFunctionSingle(xxCreateFragmentShader, xxCreateFragmentShaderD3D8PS);
+    xxRegisterFunctionSingle(xxDestroyShader, xxDestroyShaderD3D8PS);
+
+    xxRegisterFunctionSingle(xxCreatePipeline, xxCreatePipelineD3D8PS);
+
+    xxRegisterFunctionSingle(xxSetScissor, xxSetScissorD3D8PS);
+    xxRegisterFunctionSingle(xxSetVertexBuffers, xxSetVertexBuffersD3D8PS);
+    xxRegisterFunctionSingle(xxSetVertexConstantBuffer, xxSetVertexConstantBufferD3D8PS);
+    xxRegisterFunctionSingle(xxSetFragmentConstantBuffer, xxSetFragmentConstantBufferD3D8PS);
 
     return instance;
-}
-//==============================================================================
-//  Device
-//==============================================================================
-char const* xxGetDeviceNameD3D8PS()
-{
-    return "Direct3D 8.0 Programmable Shader";
 }
 //==============================================================================
 //  Vertex Attribute

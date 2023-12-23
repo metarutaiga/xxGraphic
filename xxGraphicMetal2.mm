@@ -19,7 +19,8 @@ id xxCreateInstanceMetal2()
     if (instance == 0)
         return 0;
 
-    xxRegisterFunctionSingle(xxGetDeviceName, xxGetDeviceNameMetal2);
+    xxRegisterFunctionSingle(xxCreateInstance, xxCreateInstanceMetal2);
+    xxRegisterFunctionSingle(xxGetInstanceName, xxGetInstanceNameMetal2);
 
     xxRegisterFunctionSingle(xxGetCommandBuffer, xxGetCommandBufferMetal2);
 
@@ -54,13 +55,6 @@ id xxCreateInstanceMetal2()
     xxRegisterFunctionSingle(xxDrawIndexed, xxDrawIndexedMetal2);
 
     return instance;
-}
-//==============================================================================
-//  Device
-//==============================================================================
-char const* xxGetDeviceNameMetal2()
-{
-    return "Metal 2";
 }
 //==============================================================================
 //  Swapchain

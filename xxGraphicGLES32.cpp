@@ -59,7 +59,7 @@ uint64_t xxCreateInstanceGLES32()
     xxRegisterFunction(GLES2);
 
     xxCreateInstance = xxCreateInstanceGLES32;
-    xxGetDeviceName = xxGetDeviceNameGLES32;
+    xxGetInstanceName = xxGetInstanceNameGLES32;
     xxCreateIndexBuffer = xxCreateIndexBufferGLES3;
     xxCreateVertexBuffer = xxCreateVertexBufferGLES3;
     xxMapBuffer = xxMapBufferGLES3;
@@ -69,13 +69,6 @@ uint64_t xxCreateInstanceGLES32()
     xxDrawIndexed = xxDrawIndexedGLES32;
 
     return instance;
-}
-//==============================================================================
-//  Device
-//==============================================================================
-char const* xxGetDeviceNameGLES32()
-{
-    return "OpenGL ES 3.2";
 }
 //==============================================================================
 //  Command

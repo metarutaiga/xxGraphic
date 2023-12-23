@@ -4,6 +4,7 @@
 // Copyright (c) 2019-2023 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
+#define _NULL_H_
 #include "internal/xxGraphicInternal.h"
 #include "xxGraphicNULL.h"
 
@@ -42,11 +43,6 @@ bool xxResetDeviceNULL(uint64_t device)
 bool xxTestDeviceNULL(uint64_t device)
 {
     return true;
-}
-//------------------------------------------------------------------------------
-char const* xxGetDeviceNameNULL()
-{
-    return "NULL";
 }
 //==============================================================================
 //  Framebuffer
