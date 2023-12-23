@@ -66,7 +66,7 @@ void xxCamera::LookAt(xxVector3 const& worldPoint, xxVector3 const& worldUp)
     m_direction = direction;
 }
 //------------------------------------------------------------------------------
-void xxCamera::SetFOV(float aspect, float fov, float far)
+void xxCamera::SetFOV(float aspect, float fov, float depth)
 {
     float halfHeight = tanf(fov * (float)M_PI / 180.0f * 0.5f);
     float halfWidth = halfHeight * aspect;
@@ -76,7 +76,7 @@ void xxCamera::SetFOV(float aspect, float fov, float far)
     m_frustumBottom = -halfHeight;
     m_frustumTop = halfHeight;
     m_frustumNear = 1.0f;
-    m_frustumFar = far;
+    m_frustumFar = depth;
 }
 //------------------------------------------------------------------------------
 void xxCamera::SetViewportMatrix(float fromWidth, float fromHeight, float toX, float toY, float toWidth, float toHeight)

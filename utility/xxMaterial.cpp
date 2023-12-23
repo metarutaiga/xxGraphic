@@ -113,7 +113,7 @@ void xxMaterial::Update(uint64_t device, xxNode const& node, xxCameraPtr const& 
     }
 }
 //------------------------------------------------------------------------------
-void xxMaterial::Draw(uint64_t commandEncoder)
+void xxMaterial::Set(uint64_t commandEncoder)
 {
     xxSetPipeline(commandEncoder, m_pipeline);
     xxSetVertexConstantBuffer(commandEncoder, m_vertexConstant, 3 * sizeof(xxMatrix4));
