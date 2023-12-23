@@ -8,99 +8,106 @@
 
 #include "xxGraphic.h"
 
+xxAPI    uint64_t       xxCreateInstanceGLES2();
+xxInline char const*    xxGetInstanceNameGLES2() { return "OpenGL ES 2.0"; }
+
+#ifdef GL_ES_VERSION_2_0
+
 //==============================================================================
 //  Instance
 //==============================================================================
-xxAPI uint64_t      xxCreateInstanceGLES2();
-xxAPI void          xxDestroyInstanceGLES2(uint64_t instance);
+uint64_t        xxCreateInstanceGLES2();
+void            xxDestroyInstanceGLES2(uint64_t instance);
 //==============================================================================
 //  Device
 //==============================================================================
-xxAPI uint64_t      xxCreateDeviceGLES2(uint64_t instance);
-xxAPI void          xxDestroyDeviceGLES2(uint64_t device);
-xxAPI bool          xxResetDeviceGLES2(uint64_t device);
-xxAPI bool          xxTestDeviceGLES2(uint64_t device);
-xxAPI char const*   xxGetDeviceNameGLES2();
+uint64_t        xxCreateDeviceGLES2(uint64_t instance);
+void            xxDestroyDeviceGLES2(uint64_t device);
+bool            xxResetDeviceGLES2(uint64_t device);
+bool            xxTestDeviceGLES2(uint64_t device);
+char const*     xxGetInstanceNameGLES2();
 //==============================================================================
 //  Framebuffer
 //==============================================================================
 //==============================================================================
 //  Swapchain
 //==============================================================================
-xxAPI uint64_t      xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain);
-xxAPI void          xxDestroySwapchainGLES2(uint64_t swapchain);
-xxAPI void          xxPresentSwapchainGLES2(uint64_t swapchain);
-xxAPI uint64_t      xxGetCommandBufferGLES2(uint64_t device, uint64_t swapchain);
-xxAPI uint64_t      xxGetFramebufferGLES2(uint64_t device, uint64_t swapchain, float* scale);
+uint64_t        xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain);
+void            xxDestroySwapchainGLES2(uint64_t swapchain);
+void            xxPresentSwapchainGLES2(uint64_t swapchain);
+uint64_t        xxGetCommandBufferGLES2(uint64_t device, uint64_t swapchain);
+uint64_t        xxGetFramebufferGLES2(uint64_t device, uint64_t swapchain, float* scale);
 //==============================================================================
 //  Command Buffer
 //==============================================================================
-xxAPI bool          xxBeginCommandBufferGLES2(uint64_t commandBuffer);
-xxAPI void          xxEndCommandBufferGLES2(uint64_t commandBuffer);
-xxAPI void          xxSubmitCommandBufferGLES2(uint64_t commandBuffer, uint64_t swapchain);
+bool            xxBeginCommandBufferGLES2(uint64_t commandBuffer);
+void            xxEndCommandBufferGLES2(uint64_t commandBuffer);
+void            xxSubmitCommandBufferGLES2(uint64_t commandBuffer, uint64_t swapchain);
 //==============================================================================
 //  Render Pass
 //==============================================================================
-xxAPI uint64_t      xxCreateRenderPassGLES2(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil);
-xxAPI void          xxDestroyRenderPassGLES2(uint64_t renderPass);
-xxAPI uint64_t      xxBeginRenderPassGLES2(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float color[4], float depth, unsigned char stencil);
-xxAPI void          xxEndRenderPassGLES2(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass);
+uint64_t        xxCreateRenderPassGLES2(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil);
+void            xxDestroyRenderPassGLES2(uint64_t renderPass);
+uint64_t        xxBeginRenderPassGLES2(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float color[4], float depth, unsigned char stencil);
+void            xxEndRenderPassGLES2(uint64_t commandEncoder, uint64_t framebuffer, uint64_t renderPass);
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-xxAPI uint64_t      xxCreateVertexAttributeGLES2(uint64_t device, int count, int* attribute);
-xxAPI void          xxDestroyVertexAttributeGLES2(uint64_t vertexAttribute);
+uint64_t        xxCreateVertexAttributeGLES2(uint64_t device, int count, int* attribute);
+void            xxDestroyVertexAttributeGLES2(uint64_t vertexAttribute);
 //==============================================================================
 //  Buffer
 //==============================================================================
-xxAPI uint64_t      xxCreateConstantBufferGLES2(uint64_t device, int size);
-xxAPI uint64_t      xxCreateIndexBufferGLES2(uint64_t device, int size);
-xxAPI uint64_t      xxCreateVertexBufferGLES2(uint64_t device, int size, uint64_t vertexAttribute);
-xxAPI void          xxDestroyBufferGLES2(uint64_t device, uint64_t buffer);
-xxAPI void*         xxMapBufferGLES2(uint64_t device, uint64_t buffer);
-xxAPI void          xxUnmapBufferGLES2(uint64_t device, uint64_t buffer);
+uint64_t        xxCreateConstantBufferGLES2(uint64_t device, int size);
+uint64_t        xxCreateIndexBufferGLES2(uint64_t device, int size);
+uint64_t        xxCreateVertexBufferGLES2(uint64_t device, int size, uint64_t vertexAttribute);
+void            xxDestroyBufferGLES2(uint64_t device, uint64_t buffer);
+void*           xxMapBufferGLES2(uint64_t device, uint64_t buffer);
+void            xxUnmapBufferGLES2(uint64_t device, uint64_t buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
-xxAPI uint64_t      xxCreateTextureGLES2(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external);
-xxAPI void          xxDestroyTextureGLES2(uint64_t texture);
-xxAPI void*         xxMapTextureGLES2(uint64_t device, uint64_t texture, int* stride, int level, int array);
-xxAPI void          xxUnmapTextureGLES2(uint64_t device, uint64_t texture, int level, int array);
+uint64_t        xxCreateTextureGLES2(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external);
+void            xxDestroyTextureGLES2(uint64_t texture);
+void*           xxMapTextureGLES2(uint64_t device, uint64_t texture, int* stride, int level, int array);
+void            xxUnmapTextureGLES2(uint64_t device, uint64_t texture, int level, int array);
 //==============================================================================
 //  Sampler
 //==============================================================================
-xxAPI uint64_t      xxCreateSamplerGLES2(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy);
-xxAPI void          xxDestroySamplerGLES2(uint64_t sampler);
+uint64_t        xxCreateSamplerGLES2(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy);
+void            xxDestroySamplerGLES2(uint64_t sampler);
 //==============================================================================
 //  Shader
 //==============================================================================
-xxAPI uint64_t      xxCreateVertexShaderGLES2(uint64_t device, char const* shader, uint64_t vertexAttribute);
-xxAPI uint64_t      xxCreateFragmentShaderGLES2(uint64_t device, char const* shader);
-xxAPI void          xxDestroyShaderGLES2(uint64_t device, uint64_t shader);
+uint64_t        xxCreateVertexShaderGLES2(uint64_t device, char const* shader, uint64_t vertexAttribute);
+uint64_t        xxCreateFragmentShaderGLES2(uint64_t device, char const* shader);
+void            xxDestroyShaderGLES2(uint64_t device, uint64_t shader);
 //==============================================================================
 //  Pipeline
 //==============================================================================
-xxAPI uint64_t      xxCreateBlendStateGLES2(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha);
-xxAPI uint64_t      xxCreateDepthStencilStateGLES2(uint64_t device, char const* depthTest, bool depthWrite);
-xxAPI uint64_t      xxCreateRasterizerStateGLES2(uint64_t device, bool cull, bool scissor);
-xxAPI uint64_t      xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
-xxAPI void          xxDestroyBlendStateGLES2(uint64_t blendState);
-xxAPI void          xxDestroyDepthStencilStateGLES2(uint64_t depthStencilState);
-xxAPI void          xxDestroyRasterizerStateGLES2(uint64_t rasterizerState);
-xxAPI void          xxDestroyPipelineGLES2(uint64_t pipeline);
+uint64_t        xxCreateBlendStateGLES2(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha);
+uint64_t        xxCreateDepthStencilStateGLES2(uint64_t device, char const* depthTest, bool depthWrite);
+uint64_t        xxCreateRasterizerStateGLES2(uint64_t device, bool cull, bool scissor);
+uint64_t        xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
+void            xxDestroyBlendStateGLES2(uint64_t blendState);
+void            xxDestroyDepthStencilStateGLES2(uint64_t depthStencilState);
+void            xxDestroyRasterizerStateGLES2(uint64_t rasterizerState);
+void            xxDestroyPipelineGLES2(uint64_t pipeline);
 //==============================================================================
 //  Command
 //==============================================================================
-xxAPI void          xxSetViewportGLES2(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
-xxAPI void          xxSetScissorGLES2(uint64_t commandEncoder, int x, int y, int width, int height);
-xxAPI void          xxSetPipelineGLES2(uint64_t commandEncoder, uint64_t pipeline);
-xxAPI void          xxSetVertexBuffersGLES2(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
-xxAPI void          xxSetVertexTexturesGLES2(uint64_t commandEncoder, int count, const uint64_t* textures);
-xxAPI void          xxSetFragmentTexturesGLES2(uint64_t commandEncoder, int count, const uint64_t* textures);
-xxAPI void          xxSetVertexSamplersGLES2(uint64_t commandEncoder, int count, const uint64_t* samplers);
-xxAPI void          xxSetFragmentSamplersGLES2(uint64_t commandEncoder, int count, const uint64_t* samplers);
-xxAPI void          xxSetVertexConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, int size);
-xxAPI void          xxSetFragmentConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, int size);
-xxAPI void          xxDrawGLES2(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance);
-xxAPI void          xxDrawIndexedGLES2(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+void            xxSetViewportGLES2(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
+void            xxSetScissorGLES2(uint64_t commandEncoder, int x, int y, int width, int height);
+void            xxSetPipelineGLES2(uint64_t commandEncoder, uint64_t pipeline);
+void            xxSetVertexBuffersGLES2(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
+void            xxSetVertexTexturesGLES2(uint64_t commandEncoder, int count, const uint64_t* textures);
+void            xxSetFragmentTexturesGLES2(uint64_t commandEncoder, int count, const uint64_t* textures);
+void            xxSetVertexSamplersGLES2(uint64_t commandEncoder, int count, const uint64_t* samplers);
+void            xxSetFragmentSamplersGLES2(uint64_t commandEncoder, int count, const uint64_t* samplers);
+void            xxSetVertexConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, int size);
+void            xxSetFragmentConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, int size);
+void            xxDrawGLES2(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance);
+void            xxDrawIndexedGLES2(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
+
+#endif

@@ -153,12 +153,12 @@ uint64_t xxCreateDeviceD3D6(uint64_t instance)
     {
         if ((*iid) == __uuidof(IDirect3DTnLHalDevice))
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "6.0 Hardware Transform and Lighting", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "6.0 Hardware Transform and Lighting", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice3), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "6.0", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "6.0", xxGetInstanceName());
             break;
         }
     }
@@ -190,11 +190,6 @@ bool xxTestDeviceD3D6(uint64_t device)
         hResult = g_ddraw->TestCooperativeLevel();
     }
     return hResult == DD_OK;
-}
-//------------------------------------------------------------------------------
-char const* xxGetDeviceNameD3D6()
-{
-    return "Direct3D 6.0";
 }
 //==============================================================================
 //  Swapchain

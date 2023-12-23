@@ -73,7 +73,7 @@ uint64_t xxCreateInstanceGLES31()
 
     xxCreateInstance = xxCreateInstanceGLES31;
     xxDestroyInstance = xxDestroyInstanceGLES31;
-    xxGetDeviceName = xxGetDeviceNameGLES31;
+    xxGetInstanceName = xxGetInstanceNameGLES31;
     xxCreateIndexBuffer = xxCreateIndexBufferGLES3;
     xxCreateVertexBuffer = xxCreateVertexBufferGLES3;
     xxMapBuffer = xxMapBufferGLES3;
@@ -96,13 +96,6 @@ void xxDestroyInstanceGLES31(uint64_t instance)
     }
 
     xxDestroyInstanceGLES2(instance);
-}
-//==============================================================================
-//  Device
-//==============================================================================
-char const* xxGetDeviceNameGLES31()
-{
-    return "OpenGL ES 3.1";
 }
 //==============================================================================
 //  Swapchain

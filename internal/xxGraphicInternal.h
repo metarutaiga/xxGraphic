@@ -37,12 +37,12 @@ enum xxGraphicDescriptor
 #define xxRegisterFunction(API) \
     xxRegisterFunctionSingle(xxCreateInstance, xxCreateInstance ## API); \
     xxRegisterFunctionSingle(xxDestroyInstance, xxDestroyInstance ## API); \
+    xxRegisterFunctionSingle(xxGetInstanceName, xxGetInstanceName ## API); \
 \
     xxRegisterFunctionSingle(xxCreateDevice, xxCreateDevice ## API); \
     xxRegisterFunctionSingle(xxDestroyDevice, xxDestroyDevice ## API); \
     xxRegisterFunctionSingle(xxResetDevice, xxResetDevice ## API); \
     xxRegisterFunctionSingle(xxTestDevice, xxTestDevice ## API); \
-    xxRegisterFunctionSingle(xxGetDeviceName, xxGetDeviceName ## API); \
 \
     xxRegisterFunctionSingle(xxGetFramebuffer, xxGetFramebuffer ## API); \
 \
@@ -107,12 +107,12 @@ enum xxGraphicDescriptor
 #define xxUnregisterFunction() \
     xxCreateInstance = nullptr; \
     xxDestroyInstance = nullptr; \
+    xxGetInstanceName = nullptr; \
 \
     xxCreateDevice = nullptr; \
     xxDestroyDevice = nullptr; \
     xxResetDevice = nullptr; \
     xxTestDevice = nullptr; \
-    xxGetDeviceName = nullptr; \
 \
     xxGetFramebuffer = nullptr; \
 \

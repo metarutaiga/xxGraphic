@@ -8,33 +8,36 @@
 
 #include "xxGraphicD3D9.h"
 
+xxAPI    uint64_t       xxCreateInstanceD3D9PS();
+xxInline char const*    xxGetInstanceNameD3D9PS() { return "Direct3D 9.0 Programmable Shader"; }
+
+#ifdef _D3D9_H_
+
 //==============================================================================
 //  Instance
 //==============================================================================
-xxAPI uint64_t      xxCreateInstanceD3D9PS();
-//==============================================================================
-//  Device
-//==============================================================================
-xxAPI char const*   xxGetDeviceNameD3D9PS();
+uint64_t        xxCreateInstanceD3D9PS();
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-xxAPI uint64_t      xxCreateVertexAttributeD3D9PS(uint64_t device, int count, int* attribute);
-xxAPI void          xxDestroyVertexAttributeD3D9PS(uint64_t vertexAttribute);
+uint64_t        xxCreateVertexAttributeD3D9PS(uint64_t device, int count, int* attribute);
+void            xxDestroyVertexAttributeD3D9PS(uint64_t vertexAttribute);
 //==============================================================================
 //  Shader
 //==============================================================================
-xxAPI uint64_t      xxCreateVertexShaderD3D9PS(uint64_t device, char const* shader, uint64_t vertexAttribute);
-xxAPI uint64_t      xxCreateFragmentShaderD3D9PS(uint64_t device, char const* shader);
-xxAPI void          xxDestroyShaderD3D9PS(uint64_t device, uint64_t shader);
+uint64_t        xxCreateVertexShaderD3D9PS(uint64_t device, char const* shader, uint64_t vertexAttribute);
+uint64_t        xxCreateFragmentShaderD3D9PS(uint64_t device, char const* shader);
+void            xxDestroyShaderD3D9PS(uint64_t device, uint64_t shader);
 //==============================================================================
 //  Pipeline
 //==============================================================================
-xxAPI uint64_t      xxCreatePipelineD3D9PS(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
+uint64_t        xxCreatePipelineD3D9PS(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
 //==============================================================================
 //  Command
 //==============================================================================
-xxAPI void          xxSetVertexBuffersD3D9PS(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
-xxAPI void          xxSetVertexConstantBufferD3D9PS(uint64_t commandEncoder, uint64_t buffer, int size);
-xxAPI void          xxSetFragmentConstantBufferD3D9PS(uint64_t commandEncoder, uint64_t buffer, int size);
+void            xxSetVertexBuffersD3D9PS(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
+void            xxSetVertexConstantBufferD3D9PS(uint64_t commandEncoder, uint64_t buffer, int size);
+void            xxSetFragmentConstantBufferD3D9PS(uint64_t commandEncoder, uint64_t buffer, int size);
 //==============================================================================
+
+#endif

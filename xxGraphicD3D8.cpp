@@ -82,7 +82,7 @@ uint64_t xxCreateDeviceD3D8(uint64_t instance)
     {
         if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice8), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "8.0", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "8.0", xxGetInstanceName());
             break;
         }
     }
@@ -122,11 +122,6 @@ bool xxTestDeviceD3D8(uint64_t device)
 
     HRESULT hResult = d3dDevice->TestCooperativeLevel();
     return hResult == S_OK;
-}
-//------------------------------------------------------------------------------
-char const* xxGetDeviceNameD3D8()
-{
-    return "Direct3D 8.0 Fixed Function";
 }
 //==============================================================================
 //  Swapchain

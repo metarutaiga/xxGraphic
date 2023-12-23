@@ -40,9 +40,11 @@ uint64_t xxCreateInstanceD3D9Ex()
 
     xxRegisterFunction(D3D9);
 
-    xxDestroyInstance = xxDestroyInstanceD3D9Ex;
-    xxTestDevice = xxTestDeviceD3D9Ex;
-    xxGetDeviceName = xxGetDeviceNameD3D9Ex;
+    xxRegisterFunctionSingle(xxCreateInstance, xxCreateInstanceD3D9Ex);
+    xxRegisterFunctionSingle(xxDestroyInstance, xxDestroyInstanceD3D9Ex);
+    xxRegisterFunctionSingle(xxGetInstanceName, xxGetInstanceNameD3D9Ex);
+
+    xxRegisterFunctionSingle(xxTestDevice, xxTestDeviceD3D9Ex);
 
     return reinterpret_cast<uint64_t>(d3d);
 }
@@ -53,21 +55,24 @@ uint64_t xxCreateInstanceD3D9ExPS()
     if (instance == 0)
         return 0;
 
-    xxCreateInstance = xxCreateInstanceD3D9PS;
-    xxGetDeviceName = xxGetDeviceNameD3D9PS;
-    xxCreateVertexAttribute = xxCreateVertexAttributeD3D9PS;
-    xxDestroyVertexAttribute = xxDestroyVertexAttributeD3D9PS;
-    xxCreateVertexShader = xxCreateVertexShaderD3D9PS;
-    xxCreateFragmentShader = xxCreateFragmentShaderD3D9PS;
-    xxDestroyShader = xxDestroyShaderD3D9PS;
-    xxCreatePipeline = xxCreatePipelineD3D9PS;
-    xxSetVertexBuffers = xxSetVertexBuffersD3D9PS;
-    xxSetVertexConstantBuffer = xxSetVertexConstantBufferD3D9PS;
-    xxSetFragmentConstantBuffer = xxSetFragmentConstantBufferD3D9PS;
+    xxRegisterFunctionSingle(xxCreateInstance, xxCreateInstanceD3D9ExPS);
+    xxRegisterFunctionSingle(xxDestroyInstance, xxDestroyInstanceD3D9Ex);
+    xxRegisterFunctionSingle(xxGetInstanceName, xxGetInstanceNameD3D9ExPS);
 
-    xxDestroyInstance = xxDestroyInstanceD3D9Ex;
-    xxTestDevice = xxTestDeviceD3D9Ex;
-    xxGetDeviceName = xxGetDeviceNameD3D9ExPS;
+    xxRegisterFunctionSingle(xxTestDevice, xxTestDeviceD3D9Ex);
+
+    xxRegisterFunctionSingle(xxCreateVertexAttribute, xxCreateVertexAttributeD3D9PS);
+    xxRegisterFunctionSingle(xxDestroyVertexAttribute, xxDestroyVertexAttributeD3D9PS);
+
+    xxRegisterFunctionSingle(xxCreateVertexShader, xxCreateVertexShaderD3D9PS);
+    xxRegisterFunctionSingle(xxCreateFragmentShader, xxCreateFragmentShaderD3D9PS);
+    xxRegisterFunctionSingle(xxDestroyShader, xxDestroyShaderD3D9PS);
+
+    xxRegisterFunctionSingle(xxCreatePipeline, xxCreatePipelineD3D9PS);
+
+    xxRegisterFunctionSingle(xxSetVertexBuffers, xxSetVertexBuffersD3D9PS);
+    xxRegisterFunctionSingle(xxSetVertexConstantBuffer, xxSetVertexConstantBufferD3D9PS);
+    xxRegisterFunctionSingle(xxSetFragmentConstantBuffer, xxSetFragmentConstantBufferD3D9PS);
 
     return instance;
 }
@@ -92,15 +97,5 @@ void xxDestroyInstanceD3D9Ex(uint64_t instance)
 bool xxTestDeviceD3D9Ex(uint64_t device)
 {
     return true;
-}
-//------------------------------------------------------------------------------
-char const* xxGetDeviceNameD3D9Ex()
-{
-    return "Direct3D 9Ex Fixed Function";
-}
-//------------------------------------------------------------------------------
-char const* xxGetDeviceNameD3D9ExPS()
-{
-    return "Direct3D 9Ex Programmable Shader";
 }
 //------------------------------------------------------------------------------

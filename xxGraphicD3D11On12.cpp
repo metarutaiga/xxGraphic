@@ -51,12 +51,15 @@ uint64_t xxCreateInstanceD3D11On12()
 
     xxRegisterFunction(D3D11);
 
-    xxDestroyInstance = xxDestroyInstanceD3D11On12;
-    xxCreateDevice = xxCreateDeviceD3D11On12;
-    xxDestroyDevice = xxDestroyDeviceD3D11On12;
-    xxGetDeviceName = xxGetDeviceNameD3D11On12;
-    xxPresentSwapchain = xxPresentSwapchainD3D11On12;
-    xxGetCommandBuffer = xxGetCommandBufferD3D11On12;
+    xxRegisterFunctionSingle(xxCreateInstance, xxCreateInstanceD3D11On12);
+    xxRegisterFunctionSingle(xxDestroyInstance, xxDestroyInstanceD3D11On12);
+    xxRegisterFunctionSingle(xxGetInstanceName, xxGetInstanceNameD3D11On12);
+
+    xxRegisterFunctionSingle(xxCreateDevice, xxCreateDeviceD3D11On12);
+    xxRegisterFunctionSingle(xxDestroyDevice, xxDestroyDeviceD3D11On12);
+
+    xxRegisterFunctionSingle(xxPresentSwapchain, xxPresentSwapchainD3D11On12);
+    xxRegisterFunctionSingle(xxGetCommandBuffer, xxGetCommandBufferD3D11On12);
 
     return reinterpret_cast<uint64_t>(g_d3d11Library);
 }
@@ -140,17 +143,17 @@ uint64_t xxCreateDeviceD3D11On12(uint64_t instance)
     {
         if (d3dDevice->QueryInterface(__uuidof(ID3D11On12Device2*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11On12.2", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11On12.2", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D11On12Device1*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11On12.1", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11On12.1", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D11On12Device*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11On12", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11On12", xxGetInstanceName());
             break;
         }
     }
@@ -180,11 +183,6 @@ void xxDestroyDeviceD3D11On12(uint64_t device)
 
     SafeRelease(g_d3d12CommandQueue);
     SafeRelease(g_d3d12Device);
-}
-//------------------------------------------------------------------------------
-char const* xxGetDeviceNameD3D11On12()
-{
-    return "Direct3D 11On12";
 }
 //==============================================================================
 //  Swapchain

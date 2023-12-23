@@ -145,7 +145,7 @@ uint64_t xxCreateDeviceD3D5(uint64_t instance)
     {
         if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice2), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "5.0", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "5.0", xxGetInstanceName());
             break;
         }
     }
@@ -171,11 +171,6 @@ bool xxResetDeviceD3D5(uint64_t device)
 bool xxTestDeviceD3D5(uint64_t device)
 {
     return true;
-}
-//------------------------------------------------------------------------------
-char const* xxGetDeviceNameD3D5()
-{
-    return "Direct3D 5.0";
 }
 //==============================================================================
 //  Swapchain

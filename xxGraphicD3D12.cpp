@@ -340,72 +340,72 @@ uint64_t xxCreateDeviceD3D12(uint64_t instance)
     {
         if (d3dDevice->QueryInterface(__uuidof(ID3D12Device13*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.13", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.13", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D12Device12*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.12", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.12", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D12Device11*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.11", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.11", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D12Device10*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.10", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.10", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D12Device9*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.9", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.9", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D12Device8*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.8", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.8", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D12Device7*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.7", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.7", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D12Device6*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.6", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.6", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D12Device5*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.5", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.5", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D12Device4*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.4", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.4", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D12Device3*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.3", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.3", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D12Device2*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.2", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.2", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D12Device1*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.1", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.1", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D12Device*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.0", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "12.0", xxGetInstanceName());
             break;
         }
     }
@@ -451,11 +451,6 @@ bool xxResetDeviceD3D12(uint64_t device)
 bool xxTestDeviceD3D12(uint64_t device)
 {
     return true;
-}
-//------------------------------------------------------------------------------
-char const* xxGetDeviceNameD3D12()
-{
-    return "Direct3D 12.0";
 }
 //==============================================================================
 //  Swapchain

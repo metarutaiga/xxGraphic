@@ -72,32 +72,32 @@ uint64_t xxCreateDeviceD3D11(uint64_t instance)
     {
         if (d3dDevice->QueryInterface(__uuidof(ID3D11Device5*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.5", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.5", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D11Device4*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.4", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.4", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D11Device3*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.3", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.3", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D11Device2*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.2", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.2", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D11Device1*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.1", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.1", xxGetInstanceName());
             break;
         }
         if (d3dDevice->QueryInterface(__uuidof(ID3D11Device*), (void**)&unknown) == S_OK)
         {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.0", xxGetDeviceName());
+            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "11.0", xxGetInstanceName());
             break;
         }
     }
@@ -136,11 +136,6 @@ bool xxResetDeviceD3D11(uint64_t device)
 bool xxTestDeviceD3D11(uint64_t device)
 {
     return true;
-}
-//------------------------------------------------------------------------------
-char const* xxGetDeviceNameD3D11()
-{
-    return "Direct3D 11.0";
 }
 //==============================================================================
 //  Swapchain
