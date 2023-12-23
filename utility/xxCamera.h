@@ -19,7 +19,7 @@ public:
 
     void        LookAt(xxVector3 const& worldPoint, xxVector3 const& worldUp);
 
-    void        SetFOV(float aspect, float fov, float far);
+    void        SetFOV(float aspect, float fov, float depth);
     void        SetViewportMatrix(float fromWidth, float fromHeight, float toX, float toY, float toWidth, float toHeight);
 
     xxVector3   GetDirectionFromScreenPos(float x, float y) const;

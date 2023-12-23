@@ -426,7 +426,7 @@ void xxNode::Draw(uint64_t device, uint64_t commandEncoder, xxCameraPtr const& c
 
     m_mesh->Update(device);
     m_material->Update(device, *this, camera);
-    m_material->Draw(commandEncoder);
+    m_material->Set(commandEncoder);
 
     uint64_t textures[16];
     uint64_t samplers[16];

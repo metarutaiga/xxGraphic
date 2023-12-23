@@ -46,7 +46,6 @@
 #   define ARM64_CNTPCT_EL0 ARM64_SYSREG(3,3,14,0,1)    // Counter-timer Physical Count register
 #   define ARM64_CNTVCT_EL0 ARM64_SYSREG(3,3,14,0,2)    // Counter-timer Virtual Count register
 #   if defined(_WIN32)
-#       include <windows.h>
 #       include <timeapi.h>
 #       pragma comment(lib, "winmm")
 #   endif
@@ -57,7 +56,7 @@
 //==============================================================================
 void* xxAlignedAlloc(size_t size, size_t alignment)
 {
-#if defined(_MSC_VER)
+#if defined(_WIN32)
     return _aligned_malloc(size, alignment);
 #else
     void* ptr = nullptr;
@@ -68,7 +67,7 @@ void* xxAlignedAlloc(size_t size, size_t alignment)
 //------------------------------------------------------------------------------
 void* xxAlignedRealloc(void* ptr, size_t size, size_t alignment)
 {
-#if defined(_MSC_VER)
+#if defined(_WIN32)
     return _aligned_realloc(ptr, size, alignment);
 #else
     void* newPtr = realloc(ptr, size);
@@ -88,7 +87,7 @@ void* xxAlignedRealloc(void* ptr, size_t size, size_t alignment)
 //------------------------------------------------------------------------------
 void xxAlignedFree(void* ptr)
 {
-#if defined(_MSC_VER)
+#if defined(_WIN32)
     return _aligned_free(ptr);
 #else
     return free(ptr);
@@ -99,14 +98,14 @@ void xxAlignedFree(void* ptr)
 //==============================================================================
 void* xxLoadLibrary(char const* name)
 {
-#if defined(_MSC_VER) && defined(_UNICODE)
+#if defined(_WIN32) && defined(_UNICODE)
     wchar_t temp[MAX_PATH];
     ::MultiByteToWideChar(CP_UTF8, 0, name, -1, temp, MAX_PATH);
     void* library = LoadLibraryW(temp);
     if (library == nullptr)
         library = LoadLibraryExW(temp, nullptr, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
     return library;
-#elif defined(_MSC_VER)
+#elif defined(_WIN32)
     return LoadLibraryA(name);
 #else
     return dlopen(name, RTLD_LAZY);
@@ -115,7 +114,7 @@ void* xxLoadLibrary(char const* name)
 //------------------------------------------------------------------------------
 void* xxGetProcAddress(void* library, char const* name)
 {
-#if defined(_MSC_VER)
+#if defined(_WIN32)
     return GetProcAddress((HMODULE)library, name);
 #else
     return dlsym(library, name);
@@ -124,10 +123,55 @@ void* xxGetProcAddress(void* library, char const* name)
 //------------------------------------------------------------------------------
 void xxFreeLibrary(void* library)
 {
-#if defined(_MSC_VER)
+#if defined(_WIN32)
     FreeLibrary((HMODULE)library);
 #else
     dlclose(library);
+#endif
+}
+//==============================================================================
+//  Mutex
+//==============================================================================
+void xxMutexInit(xxMutex* mutex)
+{
+#if defined(_WIN32)
+    InitializeCriticalSection(mutex);
+#else
+    (*mutex) = PTHREAD_RECURSIVE_MUTEX_INITIALIZER;
+#endif
+}
+//------------------------------------------------------------------------------
+void xxMutexDestroy(xxMutex* mutex)
+{
+#if defined(_WIN32)
+    DeleteCriticalSection(mutex);
+#endif
+}
+//------------------------------------------------------------------------------
+void xxMutexLock(xxMutex* mutex)
+{
+#if defined(_WIN32)
+    EnterCriticalSection(mutex);
+#else
+    while (pthread_mutex_lock(mutex) != 0);
+#endif
+}
+//------------------------------------------------------------------------------
+bool xxMutexTryLock(xxMutex* mutex)
+{
+#if defined(_WIN32)
+    return TryEnterCriticalSection(mutex);
+#else
+    return pthread_mutex_trylock(mutex) == 0;
+#endif
+}
+//------------------------------------------------------------------------------
+void xxMutexUnlock(xxMutex* mutex)
+{
+#if defined(_WIN32)
+    LeaveCriticalSection(mutex);
+#else
+    pthread_mutex_lock(mutex);
 #endif
 }
 //==============================================================================
@@ -482,8 +526,19 @@ void xxCloseDirectory(uint64_t* handle)
 //==============================================================================
 //  Logger
 //==============================================================================
+static void(*logCallback)(char const* tag, char const* format, va_list list) = nullptr;
+//------------------------------------------------------------------------------
 void xxLog(char const* tag, char const* format, ...)
 {
+    if (logCallback)
+    {
+        va_list va;
+        va_start(va, format);
+        logCallback(tag, format, va);
+        va_end(va);
+        return;
+    }
+
     va_list va;
     va_start(va, format);
 #if defined(xxANDROID)
@@ -507,6 +562,11 @@ void xxLog(char const* tag, char const* format, ...)
 #endif
 #endif
     va_end(va);
+}
+//------------------------------------------------------------------------------
+void xxLogCallback(void(*callback)(char const* tag, char const* format, va_list list))
+{
+    logCallback = callback;
 }
 //==============================================================================
 //  MD5 - omaha
