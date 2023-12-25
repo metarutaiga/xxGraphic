@@ -254,7 +254,7 @@ static GrContext_t FX_CALL gto_grSstWinOpen(void *window, GrScreenResolution_t s
                                                             shareContext:g_instance];
     if (g_instance == nullptr)
         g_instance = nsContext;
-    [nsContext setView:[[nsWindows contentViewController] view]];
+    [nsContext setView:nsWindows.contentViewController.view];
     [nsContext makeCurrentContext];
     int swapInterval = 0;
     [nsContext setValues:&swapInterval
@@ -329,8 +329,8 @@ static FxBool FX_CALL gto_grSelectContext(GrContext_t context)
     auto glContext = g_openGLContext[context % 256];
 #if defined(xxMACOS)
     [glContext makeCurrentContext];
-    NSView* nsView = [glContext view];
-    NSRect frame = [nsView convertRectToBacking:[nsView frame]];
+    NSView* nsView = glContext.view;
+    NSRect frame = [nsView convertRectToBacking:nsView.frame];
     g_width = frame.size.width;
     g_height = frame.size.height;
 #elif defined(xxWINDOWS)
