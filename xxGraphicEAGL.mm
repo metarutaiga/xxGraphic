@@ -62,16 +62,16 @@ uint64_t glCreateContextEAGL(uint64_t instance, void* view, void** display)
     UIWindow* nsWindow = (__bridge UIWindow*)view;
     if (nsWindow == nil)
         return 0;
-    UIView* nsView = [[nsWindow rootViewController] view];
+    UIView* nsView = nsWindow.rootViewController.view;
     if (nsView == nil)
         return 0;
-    float contentsScale = [[nsWindow screen] nativeScale];
+    float contentsScale = nsWindow.screen.nativeScale;
 
-    CAEAGLLayer* layer = (CAEAGLLayer*)[nsView layer];
+    CAEAGLLayer* layer = (CAEAGLLayer*)nsView.layer;
     layer.contentsScale = contentsScale;
 
-    EAGLContext* eaglContext = [[classEAGLContext alloc] initWithAPI:[rootContext API]
-                                                          sharegroup:[rootContext sharegroup]];
+    EAGLContext* eaglContext = [[classEAGLContext alloc] initWithAPI:rootContext.API
+                                                          sharegroup:rootContext.sharegroup];
     if (eaglContext == nil)
         return 0;
     [classEAGLContext setCurrentContext:eaglContext];
@@ -152,7 +152,7 @@ float glGetScaleContextEAGL(uint64_t context, void* view)
     if (nsWindow == nil)
         return 1.0f;
 
-    return [nsWindow contentScaleFactor];
+    return nsWindow.contentScaleFactor;
 }
 //------------------------------------------------------------------------------
 void glMakeCurrentContextEAGL(uint64_t context, void* display)

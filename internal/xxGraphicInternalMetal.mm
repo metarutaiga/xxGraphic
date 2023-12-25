@@ -12,17 +12,14 @@ char const* const mtlDefaultShaderCode =
 R"(#include <metal_stdlib>
 using namespace metal;
 
-#if __METAL_USE_ARGUMENT__ == 0
 struct Uniform
 {
+#if __METAL_USE_ARGUMENT__ == 0
     float4x4 matrix[3];
-};
 #else
-struct UniformArgument
-{
     device float4x4* matrix [[id(0)]];
-};
 #endif
+};
 
 struct VertexIn
 {
@@ -38,25 +35,18 @@ struct VertexOut
     float2 uv;
 };
 
-#if __METAL_USE_ARGUMENT__ == 0
 struct TextureSampler
 {
+#if __METAL_USE_ARGUMENT__ == 0
     texture2d<float> tex [[texture(0)]];
     sampler sam          [[sampler(0)]];
-};
 #else
-struct TextureSamplerArgument
-{
     texture2d<float> tex [[id(4)]];
     sampler sam          [[id(18)]];
+#endif
 };
-#endif
 
-#if __METAL_USE_ARGUMENT__ == 0
 vertex VertexOut VSMain(VertexIn in [[stage_in]], constant Uniform& uniforms [[buffer(0)]])
-#else
-vertex VertexOut VSMain(VertexIn in [[stage_in]], constant UniformArgument& uniforms [[buffer(0)]])
-#endif
 {
     VertexOut out;
     float4x4 world = uniforms.matrix[0];
@@ -71,7 +61,7 @@ vertex VertexOut VSMain(VertexIn in [[stage_in]], constant UniformArgument& unif
 #if __METAL_USE_ARGUMENT__ == 0
 fragment float4 FSMain(VertexOut in [[stage_in]], TextureSampler textureSampler)
 #else
-fragment float4 FSMain(VertexOut in [[stage_in]], constant TextureSamplerArgument& textureSampler [[buffer(0)]])
+fragment float4 FSMain(VertexOut in [[stage_in]], constant TextureSampler& textureSampler [[buffer(0)]])
 #endif
 {
     return in.color * textureSampler.tex.sample(textureSampler.sam, in.uv);

@@ -25,7 +25,6 @@ uint64_t        xxCreateDeviceD3D10(uint64_t instance);
 void            xxDestroyDeviceD3D10(uint64_t device);
 bool            xxResetDeviceD3D10(uint64_t device);
 bool            xxTestDeviceD3D10(uint64_t device);
-char const*     xxGetInstanceNameD3D10();
 //==============================================================================
 //  Framebuffer
 //==============================================================================

@@ -25,7 +25,6 @@ uint64_t        xxCreateDeviceGLES2(uint64_t instance);
 void            xxDestroyDeviceGLES2(uint64_t device);
 bool            xxResetDeviceGLES2(uint64_t device);
 bool            xxTestDeviceGLES2(uint64_t device);
-char const*     xxGetInstanceNameGLES2();
 //==============================================================================
 //  Framebuffer
 //==============================================================================

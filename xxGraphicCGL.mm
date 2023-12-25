@@ -171,15 +171,15 @@ uint64_t glCreateContextCGL(uint64_t instance, void* view, void** display)
     NSWindow* nsWindow = (__bridge NSWindow*)view;
     if (nsWindow == nil)
         return 0;
-    NSView* nsView = [[nsWindow contentViewController] view];
+    NSView* nsView = nsWindow.contentViewController.view;
     if (nsView == nil)
         return 0;
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
     if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6)
         [nsView setWantsBestResolutionOpenGLSurface:YES];
 #endif // MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
-    NSOpenGLContext* nsContext = [[NSOpenGLContext alloc] initWithFormat:[g_rootView pixelFormat]
-                                                            shareContext:[g_rootView openGLContext]];
+    NSOpenGLContext* nsContext = [[NSOpenGLContext alloc] initWithFormat:g_rootView.pixelFormat
+                                                            shareContext:g_rootView.openGLContext];
     if (nsContext == nil)
         return 0;
     [nsContext setView:nsView];
@@ -237,7 +237,7 @@ float glGetScaleContextCGL(uint64_t context, void* view)
     if (nsWindow == nil)
         return 1.0f;
 
-    return [nsWindow backingScaleFactor];
+    return nsWindow.backingScaleFactor;
 }
 //------------------------------------------------------------------------------
 void glMakeCurrentContextCGL(uint64_t context, void* display)
@@ -289,8 +289,8 @@ uint64_t xxGraphicCreateCGL(int version)
                                          pixelFormat:pixelFormat];
     if (g_rootView == nil)
         return 0;
-    [[g_rootView openGLContext] makeCurrentContext];
-    NSOpenGLContext* rootContext = [g_rootView openGLContext];
+    [g_rootView.openGLContext makeCurrentContext];
+    NSOpenGLContext* rootContext = g_rootView.openGLContext;
 
     glCreateContext = glCreateContextCGL;
     glDestroyContext = glDestroyContextCGL;

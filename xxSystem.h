@@ -64,6 +64,7 @@
 #   define WIN32_LEAN_AND_MEAN
 #   define _USE_MATH_DEFINES
 #   include <windows.h>
+#   define strtok_r strtok_s
 #   define xxWINDOWS 1
 #endif
 
