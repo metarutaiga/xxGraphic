@@ -18,7 +18,7 @@ public:
     static xxImagePtr Create3D(uint64_t format, int width, int height, int depth, int mipmap);
     static xxImagePtr CreateCube(uint64_t format, int width, int height, int mipmap);
 
-    void* operator () (int x, int y, int z, int mipmap, int array);
+    void* operator () (int x = 0, int y = 0, int z = 0, int mipmap = 0, int array = 0);
 
     void        Update(uint64_t device);
 
@@ -43,11 +43,11 @@ protected:
     bool        m_imageModified = true;
 
 public:
-    bool        m_clampU = true;
-    bool        m_clampV = true;
-    bool        m_clampW = true;
-    bool        m_filterMag = true;
-    bool        m_filterMin = true;
-    bool        m_filterMip = true;
-    uint8_t     m_anisotropic = 1;
+    bool        ClampU = true;
+    bool        ClampV = true;
+    bool        ClampW = true;
+    bool        FilterMag = true;
+    bool        FilterMin = true;
+    bool        FilterMip = true;
+    uint8_t     Anisotropic = 1;
 };

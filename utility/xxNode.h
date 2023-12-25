@@ -38,11 +38,7 @@ public:
     void                    UpdateRotateTranslateScale();
 
     xxImagePtr const&       GetImage(size_t index) const;
-    xxMaterialPtr const&    GetMaterial() const;
-    xxMeshPtr const&        GetMesh() const;
     void                    SetImage(size_t index, xxImagePtr const& image);
-    void                    SetMaterial(xxMaterialPtr const& material);
-    void                    SetMesh(xxMeshPtr const& mesh);
 
     void                    Update(float time, bool updateMatrix = true);
     void                    Draw(uint64_t device, uint64_t commandEncoder, xxCameraPtr const& camera);
@@ -75,8 +71,9 @@ protected:
     std::vector<xxMatrix4>  m_linearMatrix;
     bool                    m_linearMatrixCreate;
 
-    // Component
-    std::vector<xxImagePtr> m_images;
-    xxMaterialPtr           m_material;
-    xxMeshPtr               m_mesh;
+public:
+    std::string             Name = "";
+    std::vector<xxImagePtr> Images;
+    xxMaterialPtr           Material;
+    xxMeshPtr               Mesh;
 };

@@ -147,6 +147,9 @@ struct xxPlusAPI xxVector4
     float           SquaredLength   () const                     { return Dot(*this);                            }
     float           Length          () const                     { return sqrtf(SquaredLength());                }
 
+    static xxVector4    FromInteger (uint32_t v)                 { xxVector4 t;    for (size_t i = 0; i < N; ++i) t.f[i] = (v >> (i * 8) & 0xFF) / 255.0f; return t; }
+           uint32_t     ToInteger   () const                     { uint32_t t = 0; for (size_t i = 0; i < N; ++i) t |= uint32_t(f[i] * 255.0f) << (i * 8); return t; }
+
     static const xxVector4 ZERO;
     static const xxVector4 ONE;
 
