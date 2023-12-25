@@ -10,16 +10,16 @@
 //==============================================================================
 //  Mesh
 //==============================================================================
-xxMesh::xxMesh(int color, int normal, int texture)
+xxMesh::xxMesh(int normal, int color, int texture)
 {
     int stride = 0;
     stride += xxSizeOf(xxVector3) * 1;
-    stride += xxSizeOf(uint32_t) * color;
     stride += xxSizeOf(xxVector3) * normal;
+    stride += xxSizeOf(uint32_t) * color;
     stride += xxSizeOf(xxVector2) * texture;
     m_stride = stride;
-    m_colorCount = color;
     m_normalCount = normal;
+    m_colorCount = color;
     m_textureCount = texture;
 }
 //------------------------------------------------------------------------------
@@ -34,9 +34,9 @@ xxMesh::~xxMesh()
     xxFree(m_index);
 }
 //------------------------------------------------------------------------------
-xxMeshPtr xxMesh::Create(int color, int normal, int texture)
+xxMeshPtr xxMesh::Create(int normal, int color, int texture)
 {
-    xxMeshPtr mesh = xxMeshPtr(new xxMesh(color, normal, texture));
+    xxMeshPtr mesh = xxMeshPtr(new xxMesh(normal, color, texture));
     if (mesh == nullptr)
         return xxMeshPtr();
 
@@ -62,17 +62,6 @@ void xxMesh::Update(uint64_t device)
         (*dataPtr++) = xxSizeOf(xxVector3);
         offset += xxSizeOf(xxVector3);
 
-        // color
-        for (int i = 0; i < m_colorCount; ++i)
-        {
-            dataCount++;
-            (*dataPtr++) = 0;
-            (*dataPtr++) = offset;
-            (*dataPtr++) = 4;
-            (*dataPtr++) = xxSizeOf(uint32_t);
-            offset += xxSizeOf(uint32_t);
-        }
-
         // normal
         for (int i = 0; i < m_normalCount; ++i)
         {
@@ -82,6 +71,17 @@ void xxMesh::Update(uint64_t device)
             (*dataPtr++) = 3;
             (*dataPtr++) = xxSizeOf(xxVector3);
             offset += xxSizeOf(xxVector3);
+        }
+
+        // color
+        for (int i = 0; i < m_colorCount; ++i)
+        {
+            dataCount++;
+            (*dataPtr++) = 0;
+            (*dataPtr++) = offset;
+            (*dataPtr++) = 4;
+            (*dataPtr++) = xxSizeOf(uint32_t);
+            offset += xxSizeOf(uint32_t);
         }
 
         // texture
@@ -174,7 +174,14 @@ void xxMesh::Update(uint64_t device)
 void xxMesh::Draw(uint64_t commandEncoder, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     xxSetVertexBuffers(commandEncoder, 1, &m_vertexBuffers[m_vertexBufferIndex], m_vertexAttribute);
-    xxDrawIndexed(commandEncoder, m_indexBuffers[m_indexBufferIndex], m_indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+    if (m_indexCount == 0)
+    {
+        xxDraw(commandEncoder, m_vertexCount - firstIndex * 3, instanceCount, vertexOffset + firstIndex * 3, firstInstance);
+    }
+    else
+    {
+        xxDrawIndexed(commandEncoder, m_indexBuffers[m_indexBufferIndex], m_indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+    }
 }
 //------------------------------------------------------------------------------
 uint64_t xxMesh::GetVertexAttribute() const
@@ -222,31 +229,31 @@ xxStrideIterator<xxVector3> xxMesh::GetVertex() const
     return xxStrideIterator<xxVector3>(vertex, m_stride, m_vertexCount);
 }
 //------------------------------------------------------------------------------
-xxStrideIterator<uint32_t> xxMesh::GetColor(int index) const
-{
-    char* vertex = m_vertex;
-    vertex += xxSizeOf(xxVector3);
-    vertex += xxSizeOf(uint32_t) * index;
-    return xxStrideIterator<uint32_t>(vertex, m_stride, m_vertexCount);
-}
-//------------------------------------------------------------------------------
 xxStrideIterator<xxVector3> xxMesh::GetNormal(int index) const
 {
     char* vertex = m_vertex;
     vertex += xxSizeOf(xxVector3);
-    vertex += xxSizeOf(uint32_t) * m_colorCount;
     vertex += xxSizeOf(xxVector3) * index;
-    return xxStrideIterator<xxVector3>(vertex, m_stride, m_vertexCount);
+    return xxStrideIterator<xxVector3>(vertex, m_stride, m_normalCount ? m_vertexCount : 0);
+}
+//------------------------------------------------------------------------------
+xxStrideIterator<uint32_t> xxMesh::GetColor(int index) const
+{
+    char* vertex = m_vertex;
+    vertex += xxSizeOf(xxVector3);
+    vertex += xxSizeOf(xxVector3) * m_normalCount;
+    vertex += xxSizeOf(uint32_t) * index;
+    return xxStrideIterator<uint32_t>(vertex, m_stride, m_colorCount ? m_vertexCount : 0);
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<xxVector2> xxMesh::GetTexture(int index) const
 {
     char* vertex = m_vertex;
     vertex += xxSizeOf(xxVector3);
-    vertex += xxSizeOf(uint32_t) * m_colorCount;
     vertex += xxSizeOf(xxVector3) * m_normalCount;
+    vertex += xxSizeOf(uint32_t) * m_colorCount;
     vertex += xxSizeOf(xxVector2) * index;
-    return xxStrideIterator<xxVector2>(vertex, m_stride, m_vertexCount);
+    return xxStrideIterator<xxVector2>(vertex, m_stride, m_textureCount ? m_vertexCount : 0);
 }
 //------------------------------------------------------------------------------
 xxMesh::IndexType* xxMesh::GetIndex() const

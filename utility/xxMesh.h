@@ -16,7 +16,7 @@ class xxPlusAPI xxMesh
 public:
     virtual ~xxMesh();
 
-    static xxMeshPtr Create(int color, int normal, int texture);
+    static xxMeshPtr Create(int normal, int color, int texture);
 
     typedef uint16_t IndexType;
 
@@ -32,14 +32,14 @@ public:
     void                        SetIndexCount(int count);
 
     xxStrideIterator<xxVector3> GetVertex() const;
-    xxStrideIterator<uint32_t>  GetColor(int index) const;
     xxStrideIterator<xxVector3> GetNormal(int index) const;
+    xxStrideIterator<uint32_t>  GetColor(int index) const;
     xxStrideIterator<xxVector2> GetTexture(int index) const;
 
     IndexType*                  GetIndex() const;
 
 protected:
-    xxMesh(int color, int normal, int texture);
+    xxMesh(int normal, int color, int texture);
 
     uint64_t                    m_device = 0;
     uint64_t                    m_vertexAttribute = 0;
@@ -61,8 +61,8 @@ protected:
     char                        m_indexBufferIndex = 0;
 
     int                         m_stride = 0;
-    int                         m_colorCount = 0;
     int                         m_normalCount = 0;
+    int                         m_colorCount = 0;
     int                         m_textureCount = 0;
 };
 
@@ -102,7 +102,7 @@ struct xxStrideIterator
 
     bool isEnd() const
     {
-        return m_now == m_end();
+        return m_now == m_end;
     }
 
     T*      m_now;

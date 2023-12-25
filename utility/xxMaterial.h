@@ -33,15 +33,28 @@ protected:
     uint64_t    m_pipeline = 0;
 
 public:
-    bool        m_blending = false;
-    const char* m_blendSourceColor = "SrcAlpha";
-    const char* m_blendOperationColor = "+";
-    const char* m_blendDestinationColor = "1-SrcAlpha";
-    const char* m_blendSourceAlpha = "1";
-    const char* m_blendOperationAlpha = "+";
-    const char* m_blendDestinationAlpha = "0";
-    const char* m_depthTest = "Always";
-    bool        m_depthWrite = false;
-    bool        m_cull = false;
-    bool        m_scissor = false;
+    std::string Name = "";
+
+    char const* VertexShader = "default";
+    char const* FragmentShader = "default";
+
+    xxVector3   AmbientColor = xxVector3::WHITE;
+    xxVector3   DiffuseColor = xxVector3::BLACK;
+    xxVector3   SpecularColor = xxVector3::BLACK;
+    xxVector3   EmissiveColor = xxVector3::BLACK;
+    float       SpecularHighlight = 0.0f;
+
+    bool        Blending = false;
+    char const* BlendSourceColor = "SrcAlpha";
+    char const* BlendOperationColor = "+";
+    char const* BlendDestinationColor = "1-SrcAlpha";
+    char const* BlendSourceAlpha = "1";
+    char const* BlendOperationAlpha = "+";
+    char const* BlendDestinationAlpha = "0";
+
+    char const* DepthTest = "Always";
+    bool        DepthWrite = false;
+
+    bool        Cull = false;
+    bool        Scissor = false;
 };

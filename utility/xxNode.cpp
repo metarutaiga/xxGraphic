@@ -100,11 +100,6 @@ bool xxNode::DetachChild(xxNodePtr const& node)
             continue;
         node->m_parent.reset();
 
-        size_t i = std::distance<xxNodePtr const*>(m_children.data(), &child);
-        for (size_t j = i + 1; j < m_children.size(); ++j)
-            m_children[j - 1] = std::move(m_children[j]);
-        m_children.pop_back();
-
 #if HAVE_LINEAR_MATRIX
         std::function<void(xxNode*)> resetMatrix = [&resetMatrix](xxNode* node)
         {
@@ -123,6 +118,11 @@ bool xxNode::DetachChild(xxNodePtr const& node)
         };
         resetMatrix(child.get());
 #endif
+
+        size_t i = std::distance<xxNodePtr const*>(m_children.data(), &child);
+        for (size_t j = i + 1; j < m_children.size(); ++j)
+            m_children[j - 1] = std::move(m_children[j]);
+        m_children.pop_back();
 
         return true;
     }
@@ -365,43 +365,23 @@ void xxNode::UpdateRotateTranslateScale()
 //------------------------------------------------------------------------------
 xxImagePtr const& xxNode::GetImage(size_t index) const
 {
-    if (m_images.size() <= index)
+    if (Images.size() <= index)
     {
         static xxImagePtr empty;
         return empty;
     }
 
-    return m_images[index];
-}
-//------------------------------------------------------------------------------
-xxMaterialPtr const& xxNode::GetMaterial() const
-{
-    return m_material;
-}
-//------------------------------------------------------------------------------
-xxMeshPtr const& xxNode::GetMesh() const
-{
-    return m_mesh;
+    return Images[index];
 }
 //------------------------------------------------------------------------------
 void xxNode::SetImage(size_t index, xxImagePtr const& image)
 {
-    if (m_images.size() <= index)
+    if (Images.size() <= index)
     {
-        m_images.resize(index + 1);
+        Images.resize(index + 1);
     }
 
-    m_images[index] = image;
-}
-//------------------------------------------------------------------------------
-void xxNode::SetMaterial(xxMaterialPtr const& material)
-{
-    m_material = material;
-}
-//------------------------------------------------------------------------------
-void xxNode::SetMesh(xxMeshPtr const& mesh)
-{
-    m_mesh = mesh;
+    Images[index] = image;
 }
 //------------------------------------------------------------------------------
 void xxNode::Update(float time, bool updateMatrix)
@@ -421,20 +401,20 @@ void xxNode::Update(float time, bool updateMatrix)
 //------------------------------------------------------------------------------
 void xxNode::Draw(uint64_t device, uint64_t commandEncoder, xxCameraPtr const& camera)
 {
-    if (m_material == nullptr || m_mesh == nullptr)
+    if (Material == nullptr || Mesh == nullptr)
         return;
 
-    m_mesh->Update(device);
-    m_material->Update(device, *this, camera);
-    m_material->Set(commandEncoder);
+    Mesh->Update(device);
+    Material->Update(device, *this, camera);
+    Material->Set(commandEncoder);
 
     uint64_t textures[16];
     uint64_t samplers[16];
 
-    int textureCount = (int)m_images.size();
+    int textureCount = (int)Images.size();
     for (int i = 0; i < textureCount; ++i)
     {
-        xxImage* image = m_images[i].get();
+        xxImage* image = Images[i].get();
         image->Update(device);
         textures[i] = image->GetTexture();
         samplers[i] = image->GetSampler();
@@ -443,6 +423,6 @@ void xxNode::Draw(uint64_t device, uint64_t commandEncoder, xxCameraPtr const& c
     xxSetFragmentTextures(commandEncoder, textureCount, textures);
     xxSetFragmentSamplers(commandEncoder, textureCount, samplers);
 
-    m_mesh->Draw(commandEncoder);
+    Mesh->Draw(commandEncoder);
 }
 //------------------------------------------------------------------------------

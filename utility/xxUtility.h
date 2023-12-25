@@ -10,6 +10,7 @@
 #include "xxMath.h"
 
 #include <memory>
+#include <string>
 #include <vector>
 
 typedef std::shared_ptr<class xxCamera> xxCameraPtr;

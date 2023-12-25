@@ -104,8 +104,6 @@ void* xxImage::operator () (int x, int y, int z, int mipmap, int array)
     offset += y * (levelWidth);
     offset += x;
 
-    if (mipmap >= xxCountOf(m_images))
-        return nullptr;
     void* image = m_images[mipmap];
     if (image == nullptr)
         return nullptr;
@@ -123,7 +121,7 @@ void xxImage::Update(uint64_t device)
     }
     if (m_sampler == 0)
     {
-        m_sampler = xxCreateSampler(m_device, m_clampU, m_clampV, m_clampW, m_filterMag, m_filterMin, m_filterMip, m_anisotropic);
+        m_sampler = xxCreateSampler(m_device, ClampU, ClampV, ClampW, FilterMag, FilterMin, FilterMip, Anisotropic);
     }
 
     if (m_imageModified == false)

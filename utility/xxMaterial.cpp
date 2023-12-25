@@ -41,7 +41,7 @@ xxMaterialPtr xxMaterial::Create()
 //------------------------------------------------------------------------------
 void xxMaterial::Update(uint64_t device, xxNode const& node, xxCameraPtr const& camera)
 {
-    xxMeshPtr mesh = node.GetMesh();
+    xxMeshPtr mesh = node.Mesh;
     if (mesh == nullptr)
         return;
 
@@ -53,9 +53,9 @@ void xxMaterial::Update(uint64_t device, xxNode const& node, xxCameraPtr const& 
 
     if (m_blendState == 0)
     {
-        if (m_blending)
+        if (Blending)
         {
-            m_blendState = xxCreateBlendState(m_device, m_blendSourceColor, m_blendOperationColor, m_blendDestinationColor, m_blendSourceAlpha, m_blendOperationAlpha, m_blendDestinationAlpha);
+            m_blendState = xxCreateBlendState(m_device, BlendSourceColor, BlendOperationColor, BlendDestinationColor, BlendSourceAlpha, BlendOperationAlpha, BlendDestinationAlpha);
         }
         else
         {
@@ -64,11 +64,11 @@ void xxMaterial::Update(uint64_t device, xxNode const& node, xxCameraPtr const& 
     }
     if (m_depthStencilState == 0)
     {
-        m_depthStencilState = xxCreateDepthStencilState(m_device, m_depthTest, m_depthWrite);
+        m_depthStencilState = xxCreateDepthStencilState(m_device, DepthTest, DepthWrite);
     }
     if (m_rasterizerState == 0)
     {
-        m_rasterizerState = xxCreateRasterizerState(m_device, m_cull, m_scissor);
+        m_rasterizerState = xxCreateRasterizerState(m_device, Cull, Scissor);
     }
     if (m_vertexConstant == 0)
     {
@@ -76,7 +76,7 @@ void xxMaterial::Update(uint64_t device, xxNode const& node, xxCameraPtr const& 
     }
     if (m_vertexShader == 0)
     {
-        m_vertexShader = xxCreateVertexShader(m_device, "default", vertexAttribute);
+        m_vertexShader = xxCreateVertexShader(m_device, VertexShader, vertexAttribute);
     }
     if (m_fragmentConstant == 0)
     {
@@ -84,7 +84,7 @@ void xxMaterial::Update(uint64_t device, xxNode const& node, xxCameraPtr const& 
     }
     if (m_fragmentShader == 0)
     {
-        m_fragmentShader = xxCreateFragmentShader(m_device, "default");
+        m_fragmentShader = xxCreateFragmentShader(m_device, FragmentShader);
     }
     if (m_renderPass == 0)
     {
