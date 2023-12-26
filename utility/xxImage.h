@@ -20,6 +20,7 @@ public:
 
     void* operator () (int x = 0, int y = 0, int z = 0, int mipmap = 0, int array = 0);
 
+    void        Invalidate();
     void        Update(uint64_t device);
 
     uint64_t    GetTexture() const;
