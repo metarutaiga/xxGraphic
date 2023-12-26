@@ -73,9 +73,9 @@ static void GL_APIENTRY cglShaderSource(GLuint shader, GLsizei count, const GLch
             var = "#version 140";
         if (strncmp(var, "precision", sizeof("precision") - 1) == 0)
             var = "";
-        if (strcmp(var, "#define _FRAGMENT_ 1") == 0)
+        if (strcmp(var, "#define SHADER_FRAGMENT 1") == 0)
         {
-            var =   "#define _FRAGMENT_ 1\n"
+            var =   "#define SHADER_FRAGMENT 1\n"
                     "#ifndef texture2D\n"
                     "#define texture2D texture\n"
                     "#endif\n"
@@ -377,7 +377,10 @@ void xxBindRectangleProgram()
     const GLchar* fragmentShaderCodes[] =
     {
         "#version 100", "\n",
-        "#define _FRAGMENT_ 1", "\n",
+        "#define SHADER_GLSL 1", "\n",
+        "#define SHADER_METAL 0", "\n",
+        "#define SHADER_VERTEX 0", "\n",
+        "#define SHADER_FRAGMENT 1", "\n",
         "#define sampler2D sampler2DRect", "\n",
         "#undef texture2D", "\n",
         "#define texture2D(t,c) texture2DRect(t, (c) * vec2(textureSize2DRect(t, 0)))", "\n",
