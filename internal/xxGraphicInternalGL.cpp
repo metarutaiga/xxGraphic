@@ -11,7 +11,6 @@
 //==============================================================================
 char const* const glDefaultShaderCode =
 R"(uniform vec4 buf[12];
-uniform sampler2D tex;
 
 attribute vec3 position;
 attribute vec4 color;
@@ -20,7 +19,9 @@ attribute vec2 uv;
 varying vec4 varyColor;
 varying vec2 varyUV;
 
-#ifdef _VERTEX_
+uniform sampler2D tex;
+
+#if SHADER_VERTEX
 void main()
 {
     mat4 world = mat4(buf[0], buf[1], buf[2], buf[3]);
@@ -32,7 +33,7 @@ void main()
 }
 #endif
 
-#ifdef _FRAGMENT_
+#if SHADER_FRAGMENT
 void main()
 {
     gl_FragColor = varyColor * texture2D(tex, varyUV);

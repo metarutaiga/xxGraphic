@@ -63,9 +63,9 @@ static void GL_APIENTRY wglShaderSource(GLuint shader, GLsizei count, const GLch
             var = "#version 140";
         if (strncmp(var, "precision", sizeof("precision") - 1) == 0)
             var = "";
-        if (strcmp(var, "#define _FRAGMENT_ 1") == 0)
+        if (strcmp(var, "#define SHADER_FRAGMENT 1") == 0)
         {
-            var =   "#define _FRAGMENT_ 1\n"
+            var =   "#define SHADER_FRAGMENT 1\n"
                     "#ifndef gl_FragColor\n"
                     "#define gl_FragColor fragColor\n"
                     "out vec4 fragColor;\n"

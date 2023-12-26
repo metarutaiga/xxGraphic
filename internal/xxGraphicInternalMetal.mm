@@ -21,14 +21,14 @@ struct Uniform
 #endif
 };
 
-struct VertexIn
+struct Attribute
 {
     float3 position [[attribute(0)]];
     float4 color    [[attribute(1)]];
     float2 uv       [[attribute(2)]];
 };
 
-struct VertexOut
+struct Varying
 {
     float4 position [[position]];
     float4 color;
@@ -46,9 +46,11 @@ struct TextureSampler
 #endif
 };
 
-vertex VertexOut VSMain(VertexIn in [[stage_in]], constant Uniform& uniforms [[buffer(0)]])
+#if SHADER_VERTEX
+vertex Varying Main(Attribute in [[stage_in]],
+                      constant Uniform& uniforms [[buffer(0)]])
 {
-    VertexOut out;
+    Varying out;
     float4x4 world = uniforms.matrix[0];
     float4x4 view = uniforms.matrix[1];
     float4x4 projection = uniforms.matrix[2];
@@ -57,13 +59,17 @@ vertex VertexOut VSMain(VertexIn in [[stage_in]], constant Uniform& uniforms [[b
     out.uv = in.uv;
     return out;
 }
+#endif
 
+#if SHADER_FRAGMENT
+fragment float4 Main(Varying in [[stage_in]],
 #if __METAL_USE_ARGUMENT__ == 0
-fragment float4 FSMain(VertexOut in [[stage_in]], TextureSampler textureSampler)
+                     TextureSampler textureSampler)
 #else
-fragment float4 FSMain(VertexOut in [[stage_in]], constant TextureSampler& textureSampler [[buffer(0)]])
+                     constant TextureSampler& textureSampler [[buffer(0)]])
 #endif
 {
     return in.color * textureSampler.tex.sample(textureSampler.sam, in.uv);
-})";
+}
+#endif)";
 //==============================================================================

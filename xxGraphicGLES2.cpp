@@ -171,6 +171,7 @@ uint64_t xxGetCommandBufferGLES2(uint64_t device, uint64_t swapchain)
     glMakeCurrentContext(glSwapchain->context, glSwapchain->display);
     glViewport(0, 0, glSwapchain->width, glSwapchain->height);
     glScissor(0, 0, glSwapchain->width, glSwapchain->height);
+    glFrontFace(GL_CW);
 
     glSwapchain->pipeline = 0;
     memset(glSwapchain->vertexBuffers, 0, sizeof(glSwapchain->vertexBuffers));
@@ -248,6 +249,10 @@ uint64_t xxBeginRenderPassGLES2(uint64_t commandBuffer, uint64_t framebuffer, ui
     if (mask & GL_COLOR_BUFFER_BIT)
     {
         glClearColor(color[0], color[1], color[2], color[3]);
+    }
+    if (mask & (GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT))
+    {
+        glDepthMask(true);
     }
     if (mask & GL_DEPTH_BUFFER_BIT)
     {
@@ -681,7 +686,10 @@ uint64_t xxCreateVertexShaderGLES2(uint64_t device, char const* shader, uint64_t
     char const* sources[] =
     {
         "#version 100", "\n",
-        "#define _VERTEX_ 1", "\n",
+        "#define SHADER_GLSL 1", "\n",
+        "#define SHADER_METAL 0", "\n",
+        "#define SHADER_VERTEX 1", "\n",
+        "#define SHADER_FRAGMENT 0", "\n",
         "#define uniform uniform highp", "\n",
         "#define attribute attribute", "\n",
         "#define varying varying", "\n",
@@ -707,7 +715,10 @@ uint64_t xxCreateFragmentShaderGLES2(uint64_t device, char const* shader)
     char const* sources[] =
     {
         "#version 100", "\n",
-        "#define _FRAGMENT_ 1", "\n",
+        "#define SHADER_GLSL 1", "\n",
+        "#define SHADER_METAL 0", "\n",
+        "#define SHADER_VERTEX 0", "\n",
+        "#define SHADER_FRAGMENT 1", "\n",
         "#define uniform uniform highp", "\n",
         "#define attribute", "\n",
         "#define varying varying", "\n",

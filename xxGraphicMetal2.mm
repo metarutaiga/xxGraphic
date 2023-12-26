@@ -193,7 +193,7 @@ id xxCreateVertexShaderMetal2(id <MTLDevice> __unsafe_unretained device, char co
 
     NSError* error;
     MTLCompileOptions* options = [classMTLCompileOptions new];
-    options.preprocessorMacros = @{ @"__METAL_USE_ARGUMENT__" : @(1) };
+    options.preprocessorMacros = @{ @"SHADER_METAL" : @(1), @"SHADER_VERTEX" : @(1), @"__METAL_USE_ARGUMENT__" : @(1) };
     options.fastMathEnabled = YES;
 
     id <MTLLibrary> library = [device newLibraryWithSource:@(shader)
@@ -205,7 +205,7 @@ id xxCreateVertexShaderMetal2(id <MTLDevice> __unsafe_unretained device, char co
         return 0;
     }
 
-    id <MTLFunction> function = [library newFunctionWithName:@"VSMain"];
+    id <MTLFunction> function = [library newFunctionWithName:@"Main"];
 
     objc_retain(function);
     return function;
@@ -223,7 +223,7 @@ id xxCreateFragmentShaderMetal2(id <MTLDevice> __unsafe_unretained device, char 
 
     NSError* error;
     MTLCompileOptions* options = [classMTLCompileOptions new];
-    options.preprocessorMacros = @{ @"__METAL_USE_ARGUMENT__" : @(1) };
+    options.preprocessorMacros = @{ @"SHADER_METAL" : @(1), @"SHADER_FRAGMENT" : @(1), @"__METAL_USE_ARGUMENT__" : @(1) };
     options.fastMathEnabled = YES;
 
     id <MTLLibrary> library = [device newLibraryWithSource:@(shader)
@@ -235,7 +235,7 @@ id xxCreateFragmentShaderMetal2(id <MTLDevice> __unsafe_unretained device, char 
         return 0;
     }
 
-    id <MTLFunction> function = [library newFunctionWithName:@"FSMain"];
+    id <MTLFunction> function = [library newFunctionWithName:@"Main"];
 
     objc_retain(function);
     return function;
