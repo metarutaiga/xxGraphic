@@ -25,11 +25,7 @@ xxMesh::xxMesh(int normal, int color, int texture)
 //------------------------------------------------------------------------------
 xxMesh::~xxMesh()
 {
-    xxDestroyVertexAttribute(m_vertexAttribute);
-    for (uint64_t buffer : m_vertexBuffers)
-        xxDestroyBuffer(m_device, buffer);
-    for (uint64_t buffer : m_indexBuffers)
-        xxDestroyBuffer(m_device, buffer);
+    Invalidate();
     xxFree(m_vertex);
     xxFree(m_index);
 }
@@ -41,6 +37,25 @@ xxMeshPtr xxMesh::Create(int normal, int color, int texture)
         return xxMeshPtr();
 
     return mesh;
+}
+//------------------------------------------------------------------------------
+void xxMesh::Invalidate()
+{
+    xxDestroyVertexAttribute(m_vertexAttribute);
+    for (uint64_t buffer : m_vertexBuffers)
+        xxDestroyBuffer(m_device, buffer);
+    for (uint64_t buffer : m_indexBuffers)
+        xxDestroyBuffer(m_device, buffer);
+
+    m_device = 0;
+    m_vertexAttribute = 0;
+    for (uint64_t& buffer : m_vertexBuffers)
+        buffer = 0;
+    for (uint64_t& buffer : m_indexBuffers)
+        buffer = 0;
+
+    m_vertexDataModified = (m_vertexCount != 0);
+    m_indexDataModified = (m_indexCount != 0);
 }
 //------------------------------------------------------------------------------
 void xxMesh::Update(uint64_t device)

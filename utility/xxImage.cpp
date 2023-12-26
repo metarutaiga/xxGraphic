@@ -42,12 +42,9 @@ xxImage::xxImage(uint64_t format, int width, int height, int depth, int mipmap, 
 //------------------------------------------------------------------------------
 xxImage::~xxImage()
 {
-    xxDestroyTexture(m_texture);
-    xxDestroySampler(m_sampler);
+    Invalidate();
     for (void* image : m_images)
-    {
         xxFree(image);
-    }
 }
 //------------------------------------------------------------------------------
 xxImagePtr xxImage::Create(uint64_t format, int width, int height, int depth, int mipmap, int array)
@@ -109,6 +106,17 @@ void* xxImage::operator () (int x, int y, int z, int mipmap, int array)
         return nullptr;
 
     return (char*)image + offset * xxSizeOf(uint32_t);
+}
+//------------------------------------------------------------------------------
+void xxImage::Invalidate()
+{
+    xxDestroyTexture(m_texture);
+    xxDestroySampler(m_sampler);
+
+    m_texture = 0;
+    m_sampler = 0;
+
+    m_imageModified = true;
 }
 //------------------------------------------------------------------------------
 void xxImage::Update(uint64_t device)

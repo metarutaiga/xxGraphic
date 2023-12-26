@@ -19,15 +19,7 @@ xxMaterial::xxMaterial()
 //------------------------------------------------------------------------------
 xxMaterial::~xxMaterial()
 {
-    xxDestroyBlendState(m_blendState);
-    xxDestroyDepthStencilState(m_depthStencilState);
-    xxDestroyRasterizerState(m_rasterizerState);
-    xxDestroyBuffer(m_device, m_vertexConstant);
-    xxDestroyShader(m_device, m_vertexShader);
-    xxDestroyBuffer(m_device, m_fragmentConstant);
-    xxDestroyShader(m_device, m_fragmentShader);
-    xxDestroyRenderPass(m_renderPass);
-    xxDestroyPipeline(m_pipeline);
+    Invalidate();
 }
 //------------------------------------------------------------------------------
 xxMaterialPtr xxMaterial::Create()
@@ -37,6 +29,30 @@ xxMaterialPtr xxMaterial::Create()
         return xxMaterialPtr();
 
     return material;
+}
+//------------------------------------------------------------------------------
+void xxMaterial::Invalidate()
+{
+    xxDestroyBlendState(m_blendState);
+    xxDestroyDepthStencilState(m_depthStencilState);
+    xxDestroyRasterizerState(m_rasterizerState);
+    xxDestroyBuffer(m_device, m_vertexConstant);
+    xxDestroyShader(m_device, m_vertexShader);
+    xxDestroyBuffer(m_device, m_fragmentConstant);
+    xxDestroyShader(m_device, m_fragmentShader);
+    xxDestroyRenderPass(m_renderPass);
+    xxDestroyPipeline(m_pipeline);
+
+    m_device = 0;
+    m_blendState = 0;
+    m_depthStencilState = 0;
+    m_rasterizerState = 0;
+    m_vertexConstant = 0;
+    m_vertexShader = 0;
+    m_fragmentConstant = 0;
+    m_fragmentShader = 0;
+    m_renderPass = 0;
+    m_pipeline = 0;
 }
 //------------------------------------------------------------------------------
 void xxMaterial::Update(uint64_t device, xxNode const& node, xxCameraPtr const& camera)

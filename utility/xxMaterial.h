@@ -15,6 +15,7 @@ public:
 
     static xxMaterialPtr Create();
 
+    void        Invalidate();
     void        Update(uint64_t device, xxNode const& node, xxCameraPtr const& camera);
     void        Set(uint64_t commandEncoder);
 
