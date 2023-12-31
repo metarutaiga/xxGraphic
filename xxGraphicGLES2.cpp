@@ -305,11 +305,11 @@ uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, int* attribute
 
         if (offset == 0 && element == 3 && size == sizeof(float) * 3)
         {
-            attributes[i].name = "position";
+            attributes[i].name = "attrPosition";
         }
         if (offset != 0 && element == 3 && size == sizeof(float) * 3)
         {
-            attributes[i].name = "normal";
+            attributes[i].name = "attrNormal";
         }
         if (offset != 0 && element == 4 && size == sizeof(char) * 4)
         {
@@ -320,11 +320,11 @@ uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, int* attribute
 #endif
             attributes[i].type = GL_UNSIGNED_BYTE;
             attributes[i].normalized = GL_TRUE;
-            attributes[i].name = "color";
+            attributes[i].name = "attrColor";
         }
         if (offset != 0 && element == 2 && size == sizeof(float) * 2)
         {
-            attributes[i].name = "uv";
+            attributes[i].name = "attrUV0";
         }
     }
 
@@ -661,7 +661,19 @@ static void checkShader(GLuint glShader, char const* shader)
     glGetShaderiv(glShader, GL_COMPILE_STATUS, &status);
     if (status == GL_FALSE)
     {
-        xxLog("xxGraphicGLES2", "failed to compile %s", shader);
+        xxLog("xxGraphicGLES2", "failed to compile %d", glShader);
+        char* dup = strdup(shader);
+        if (dup)
+        {
+            char* lasts;
+            char* line = strtok_r(dup, "\r\n", &lasts);
+            while (line)
+            {
+                xxLog("xxGraphicGLES2", "%s", line);
+                line = strtok_r(nullptr, "\r\n", &lasts);
+            }
+            free(dup);
+        }
 
         GLint length = 0;
         glGetShaderiv(glShader, GL_INFO_LOG_LENGTH, &length);
@@ -670,7 +682,14 @@ static void checkShader(GLuint glShader, char const* shader)
         {
             glGetShaderInfoLog(glShader, length, nullptr, log);
             log[length] = '\0';
-            xxLog("xxGraphicGLES2", "%s", log);
+
+            char* lasts;
+            char* line = strtok_r(log, "\r\n", &lasts);
+            while (line)
+            {
+                xxLog("xxGraphicGLES2", "%s", line);
+                line = strtok_r(nullptr, "\r\n", &lasts);
+            }
             xxFree(log);
         }
     }
@@ -687,7 +706,8 @@ uint64_t xxCreateVertexShaderGLES2(uint64_t device, char const* shader, uint64_t
     {
         "#version 100", "\n",
         "#define SHADER_GLSL 1", "\n",
-        "#define SHADER_METAL 0", "\n",
+        "#define SHADER_HLSL 0", "\n",
+        "#define SHADER_MSL 0", "\n",
         "#define SHADER_VERTEX 1", "\n",
         "#define SHADER_FRAGMENT 0", "\n",
         "#define uniform uniform highp", "\n",
@@ -716,7 +736,8 @@ uint64_t xxCreateFragmentShaderGLES2(uint64_t device, char const* shader)
     {
         "#version 100", "\n",
         "#define SHADER_GLSL 1", "\n",
-        "#define SHADER_METAL 0", "\n",
+        "#define SHADER_HLSL 0", "\n",
+        "#define SHADER_MSL 0", "\n",
         "#define SHADER_VERTEX 0", "\n",
         "#define SHADER_FRAGMENT 1", "\n",
         "#define uniform uniform highp", "\n",
@@ -760,7 +781,14 @@ static void checkProgram(GLuint glProgram)
         {
             glGetProgramInfoLog(glProgram, length, nullptr, log);
             log[length] = '\0';
-            xxLog("xxGraphicGLES2", "%s", log);
+
+            char* lasts;
+            char* line = strtok_r(log, "\r\n", &lasts);
+            while (line)
+            {
+                xxLog("xxGraphicGLES2", "%s", line);
+                line = strtok_r(nullptr, "\r\n", &lasts);
+            }
             xxFree(log);
         }
     }
@@ -833,8 +861,8 @@ uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t bl
 
     glPipeline->program = glProgram;
     glPipeline->vertexAttribute = glVertexAttribute;
-    glPipeline->texture = glGetUniformLocation(glProgram, "tex");
-    glPipeline->uniform = glGetUniformLocation(glProgram, "buf");
+    glPipeline->texture = glGetUniformLocation(glProgram, "samDiffuse");
+    glPipeline->uniform = glGetUniformLocation(glProgram, "uniBuffer");
     glPipeline->blend = glBlendState ? (*glBlendState) : BLENDGL{ .blendEnable = GL_FALSE };
     glPipeline->state.depthTest = glDepthStencilState.depthTest;
     glPipeline->state.depthWrite = glDepthStencilState.depthWrite;

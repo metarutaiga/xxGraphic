@@ -9,67 +9,65 @@
 
 //==============================================================================
 char const* const mtlDefaultShaderCode =
-R"(#include <metal_stdlib>
-using namespace metal;
-
-struct Uniform
+R"(struct Uniform
 {
-#if __METAL_USE_ARGUMENT__ == 0
-    float4x4 matrix[3];
+#if SHADER_MSL_ARGUMENT
+    device float4* Buffer [[id(0)]];
 #else
-    device float4x4* matrix [[id(0)]];
+    float4 Buffer[12];
 #endif
 };
 
 struct Attribute
 {
-    float3 position [[attribute(0)]];
-    float4 color    [[attribute(1)]];
-    float2 uv       [[attribute(2)]];
+    float3 Position [[attribute(0)]];
+    float4 Color    [[attribute(1)]];
+    float2 UV0      [[attribute(2)]];
 };
 
 struct Varying
 {
-    float4 position [[position]];
-    float4 color;
-    float2 uv;
+    float4 Position [[position]];
+    float4 Color;
+    float2 UV0;
 };
 
-struct TextureSampler
+struct Sampler
 {
-#if __METAL_USE_ARGUMENT__ == 0
-    texture2d<float> tex [[texture(0)]];
-    sampler sam          [[sampler(0)]];
+#if SHADER_MSL_ARGUMENT
+    texture2d<float> Diffuse    [[id(4)]];
+    sampler DiffuseSampler      [[id(18)]];
 #else
-    texture2d<float> tex [[id(4)]];
-    sampler sam          [[id(18)]];
+    texture2d<float> Diffuse    [[texture(0)]];
+    sampler DiffuseSampler      [[sampler(0)]];
 #endif
 };
 
 #if SHADER_VERTEX
-vertex Varying Main(Attribute in [[stage_in]],
-                      constant Uniform& uniforms [[buffer(0)]])
+vertex Varying Main(Attribute attr [[stage_in]],
+                    constant Uniform& uni [[buffer(0)]])
 {
-    Varying out;
-    float4x4 world = uniforms.matrix[0];
-    float4x4 view = uniforms.matrix[1];
-    float4x4 projection = uniforms.matrix[2];
-    out.position = projection * (view * (world * float4(in.position, 1.0)));
-    out.color = in.color;
-    out.uv = in.uv;
-    return out;
+    auto uniBuffer = uni.Buffer;
+    float4x4 world = float4x4(uniBuffer[0], uniBuffer[1], uniBuffer[2], uniBuffer[3]);
+    float4x4 view = float4x4(uniBuffer[4], uniBuffer[5], uniBuffer[6], uniBuffer[7]);
+    float4x4 projection = float4x4(uniBuffer[8], uniBuffer[9], uniBuffer[10], uniBuffer[11]);
+    Varying vary;
+    vary.Position = projection * (view * (world * float4(attr.Position, 1.0)));
+    vary.Color = attr.Color;
+    vary.UV0 = attr.UV0;
+    return vary;
 }
 #endif
 
 #if SHADER_FRAGMENT
-fragment float4 Main(Varying in [[stage_in]],
-#if __METAL_USE_ARGUMENT__ == 0
-                     TextureSampler textureSampler)
+fragment float4 Main(Varying vary [[stage_in]],
+#if SHADER_MSL_ARGUMENT
+                     constant Sampler& sam [[buffer(0)]])
 #else
-                     constant TextureSampler& textureSampler [[buffer(0)]])
+                     Sampler sam)
 #endif
 {
-    return in.color * textureSampler.tex.sample(textureSampler.sam, in.uv);
+    return vary.Color * sam.Diffuse.sample(sam.DiffuseSampler, vary.UV0);
 }
 #endif)";
 //==============================================================================

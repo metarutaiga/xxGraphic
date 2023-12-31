@@ -193,10 +193,11 @@ id xxCreateVertexShaderMetal2(id <MTLDevice> __unsafe_unretained device, char co
 
     NSError* error;
     MTLCompileOptions* options = [classMTLCompileOptions new];
-    options.preprocessorMacros = @{ @"SHADER_METAL" : @(1), @"SHADER_VERTEX" : @(1), @"__METAL_USE_ARGUMENT__" : @(1) };
+    options.preprocessorMacros = @{ @"SHADER_MSL" : @(1), @"SHADER_VERTEX" : @(1), @"SHADER_MSL_ARGUMENT" : @(1) };
     options.fastMathEnabled = YES;
 
-    id <MTLLibrary> library = [device newLibraryWithSource:@(shader)
+    NSString* code = [NSString stringWithFormat:@"%s%s", "#include <metal_stdlib>\nusing namespace metal;\n", shader];
+    id <MTLLibrary> library = [device newLibraryWithSource:code
                                                    options:options
                                                      error:&error];
     if (library == nil)
@@ -223,10 +224,11 @@ id xxCreateFragmentShaderMetal2(id <MTLDevice> __unsafe_unretained device, char 
 
     NSError* error;
     MTLCompileOptions* options = [classMTLCompileOptions new];
-    options.preprocessorMacros = @{ @"SHADER_METAL" : @(1), @"SHADER_FRAGMENT" : @(1), @"__METAL_USE_ARGUMENT__" : @(1) };
+    options.preprocessorMacros = @{ @"SHADER_MSL" : @(1), @"SHADER_FRAGMENT" : @(1), @"SHADER_MSL_ARGUMENT" : @(1) };
     options.fastMathEnabled = YES;
 
-    id <MTLLibrary> library = [device newLibraryWithSource:@(shader)
+    NSString* code = [NSString stringWithFormat:@"%s%s", "#include <metal_stdlib>\nusing namespace metal;\n", shader];
+    id <MTLLibrary> library = [device newLibraryWithSource:code
                                                    options:options
                                                      error:&error];
     if (library == nil)

@@ -1316,7 +1316,8 @@ uint64_t xxCreateVertexShaderD3D12(uint64_t device, char const* shader, uint64_t
     }
     else
     {
-        ID3D10Blob* blob = CreateD3D10Shader(shader, "VSMain", "vs_4_0");
+        static char const* const macro[] = { "SHADER_HLSL", "1", "SHADER_VERTEX", "1", nullptr, nullptr };
+        ID3D10Blob* blob = D3DCompileShader(shader, macro, "Main", "vs_4_0");
         if (blob == nullptr)
             return 0;
 
@@ -1348,7 +1349,8 @@ uint64_t xxCreateFragmentShaderD3D12(uint64_t device, char const* shader)
     }
     else
     {
-        ID3D10Blob* blob = CreateD3D10Shader(shader, "FSMain", "ps_4_0");
+        static char const* const macro[] = { "SHADER_HLSL", "1", "SHADER_FRAGMENT", "1", nullptr, nullptr };
+        ID3D10Blob* blob = D3DCompileShader(shader, macro, "Main", "ps_4_0");
         if (blob == nullptr)
             return 0;
 

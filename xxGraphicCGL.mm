@@ -378,7 +378,7 @@ void xxBindRectangleProgram()
     {
         "#version 100", "\n",
         "#define SHADER_GLSL 1", "\n",
-        "#define SHADER_METAL 0", "\n",
+        "#define SHADER_MSL 0", "\n",
         "#define SHADER_VERTEX 0", "\n",
         "#define SHADER_FRAGMENT 1", "\n",
         "#define sampler2D sampler2DRect", "\n",
@@ -395,9 +395,9 @@ void xxBindRectangleProgram()
     xxFree(source);
 
     GLuint glProgram = glCreateProgram();
-    glBindAttribLocation(glProgram, 0, "position");
-    glBindAttribLocation(glProgram, 1, "color");
-    glBindAttribLocation(glProgram, 2, "uv");
+    glBindAttribLocation(glProgram, 0, "attrPosition");
+    glBindAttribLocation(glProgram, 1, "attrColor");
+    glBindAttribLocation(glProgram, 2, "attrUV0");
     glAttachShader(glProgram, shaders[0]);
     glAttachShader(glProgram, glFragmentShader);
     glLinkProgram(glProgram);

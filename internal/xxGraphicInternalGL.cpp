@@ -10,33 +10,33 @@
 //  GLSL Shader
 //==============================================================================
 char const* const glDefaultShaderCode =
-R"(uniform vec4 buf[12];
+R"(uniform vec4 uniBuffer[12];
 
-attribute vec3 position;
-attribute vec4 color;
-attribute vec2 uv;
+attribute vec3 attrPosition;
+attribute vec4 attrColor;
+attribute vec2 attrUV0;
 
 varying vec4 varyColor;
-varying vec2 varyUV;
+varying vec2 varyUV0;
 
-uniform sampler2D tex;
+uniform sampler2D samDiffuse;
 
 #if SHADER_VERTEX
 void main()
 {
-    mat4 world = mat4(buf[0], buf[1], buf[2], buf[3]);
-    mat4 view = mat4(buf[4], buf[5], buf[6], buf[7]);
-    mat4 projection = mat4(buf[8], buf[9], buf[10], buf[11]);
-    gl_Position = projection * (view * (world * vec4(position, 1)));
-    varyColor = color;
-    varyUV = uv;
+    mat4 world = mat4(uniBuffer[0], uniBuffer[1], uniBuffer[2], uniBuffer[3]);
+    mat4 view = mat4(uniBuffer[4], uniBuffer[5], uniBuffer[6], uniBuffer[7]);
+    mat4 projection = mat4(uniBuffer[8], uniBuffer[9], uniBuffer[10], uniBuffer[11]);
+    gl_Position = projection * (view * (world * vec4(attrPosition, 1)));
+    varyColor = attrColor;
+    varyUV0 = attrUV0;
 }
 #endif
 
 #if SHADER_FRAGMENT
 void main()
 {
-    gl_FragColor = varyColor * texture2D(tex, varyUV);
+    gl_FragColor = varyColor * texture2D(samDiffuse, varyUV0);
 }
 #endif)";
 //==============================================================================
@@ -435,7 +435,6 @@ GL_PROTOTYPE(void, glTexStorage3DMultisample, (GLenum target, GLsizei samples, G
 //  Windows GL Loader
 //==============================================================================
 #if defined(xxWINDOWS)
-#define _GDI32_
 static void* opengl32GetProcAddress(char const* name)
 {
     static HMODULE opengl32 = LoadLibraryA("opengl32.dll");

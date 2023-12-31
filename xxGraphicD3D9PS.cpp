@@ -6,6 +6,7 @@
 //==============================================================================
 #include "xxSystem.h"
 #include "dxsdk/d3d9.h"
+#include "dxsdk/d3dcommon.h"
 #include "internal/xxGraphicInternalD3D.h"
 #include "xxGraphicD3DAsm.h"
 #include "xxGraphicD3D9PS.h"
@@ -151,10 +152,24 @@ uint64_t xxCreateVertexShaderD3D9PS(uint64_t device, char const* shader, uint64_
     if (d3dDevice == nullptr)
         return 0;
 
+    LPDIRECT3DVERTEXSHADER9 d3dShader = nullptr;
     if (strcmp(shader, "default") == 0)
     {
-        LPDIRECT3DVERTEXSHADER9 d3dShader = nullptr;
         HRESULT hResult = d3dDevice->CreateVertexShader(vertexShaderCode11, &d3dShader);
+        if (hResult != S_OK)
+            return 0;
+
+        return reinterpret_cast<uint64_t>(d3dShader);
+    }
+    else
+    {
+        static char const* const macro[] = { "SHADER_HLSL", "1", "SHADER_VERTEX", "1", nullptr, nullptr };
+        ID3D10Blob* blob = D3DCompileShader(shader, macro, "Main", "vs_3_0");
+        if (blob == nullptr)
+            return 0;
+
+        HRESULT hResult = d3dDevice->CreateVertexShader((DWORD*)blob->GetBufferPointer(), &d3dShader);
+        blob->Release();
         if (hResult != S_OK)
             return 0;
 
@@ -170,10 +185,24 @@ uint64_t xxCreateFragmentShaderD3D9PS(uint64_t device, char const* shader)
     if (d3dDevice == nullptr)
         return 0;
 
+    LPDIRECT3DPIXELSHADER9 d3dShader = nullptr;
     if (strcmp(shader, "default") == 0)
     {
-        LPDIRECT3DPIXELSHADER9 d3dShader = nullptr;
         HRESULT hResult = d3dDevice->CreatePixelShader(pixelShaderCode10, &d3dShader);
+        if (hResult != S_OK)
+            return 0;
+
+        return reinterpret_cast<uint64_t>(d3dShader);
+    }
+    else
+    {
+        static char const* const macro[] = { "SHADER_HLSL", "1", "SHADER_FRAGMENT", "1", nullptr, nullptr };
+        ID3D10Blob* blob = D3DCompileShader(shader, macro, "Main", "ps_3_0");
+        if (blob == nullptr)
+            return 0;
+
+        HRESULT hResult = d3dDevice->CreatePixelShader((DWORD*)blob->GetBufferPointer(), &d3dShader);
+        blob->Release();
         if (hResult != S_OK)
             return 0;
 
