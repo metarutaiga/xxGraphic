@@ -386,26 +386,57 @@ inline void PatchD3DIM(char const* name)
     xxFreeLibrary(d3dim);
 }
 
-inline struct ID3D10Blob* CreateD3D10Shader(char const* shader, char const* entry, char const* target)
+inline struct ID3D10Blob* D3DCompileShader(char const* shader, char const*const* macro, char const* entry, char const* target)
 {
-    static HRESULT(WINAPI * D3D10CompileShader)(char const*, size_t, void*, void*, void*, char const*, char const*, int, ID3D10Blob**, ID3D10Blob**) = nullptr;
-    if (D3D10CompileShader == nullptr)
+    static HRESULT(WINAPI * D3DCompile)(char const*, size_t, char const*, char const*const*, void*, char const*, char const*, int, int, ID3D10Blob**, ID3D10Blob**) = nullptr;
+    static HRESULT(WINAPI * D3D10CompileShader)(char const*, size_t, char const*, char const*const*, void*, char const*, char const*, int, ID3D10Blob**, ID3D10Blob**) = nullptr;
+    if (D3DCompile == nullptr)
+    {
+        (void*&)D3DCompile = GetProcAddress(LoadLibraryA("d3dcompiler_47.dll"), "D3DCompile");
+    }
+    if (D3DCompile == nullptr && D3D10CompileShader == nullptr)
     {
         (void*&)D3D10CompileShader = GetProcAddress(LoadLibraryA("d3d10.dll"), "D3D10CompileShader");
     }
-    if (D3D10CompileShader)
+    if (D3DCompile || D3D10CompileShader)
     {
         ID3D10Blob* blob = nullptr;
         ID3D10Blob* error = nullptr;
-        D3D10CompileShader(shader, strlen(shader), nullptr, nullptr, nullptr, entry, target, 0, &blob, &error);
+        if (D3DCompile)
+        {
+            D3DCompile(shader, strlen(shader), nullptr, macro, nullptr, entry, target, (1 << 12), 0, &blob, &error);
+        }
+        else if (D3D10CompileShader)
+        {
+            D3D10CompileShader(shader, strlen(shader), nullptr, macro, nullptr, entry, target, 0, &blob, &error);
+        }
         if (error)
         {
             struct Blob : public IUnknown
             {
                 virtual LPCSTR STDMETHODCALLTYPE GetBufferPointer() = 0;
+                virtual SIZE_T STDMETHODCALLTYPE GetBufferSize() = 0;
             };
             Blob* blob = (Blob*)error;
-            OutputDebugStringA(blob->GetBufferPointer());
+
+            size_t size = blob->GetBufferSize();
+            char* temp = xxAlloc(char, size + 1);
+            if (temp)
+            {
+                memcpy(temp, blob->GetBufferPointer(), size);
+                temp[size] = 0;
+
+                char* lasts;
+                char* line = strtok_r(temp, "\r\n", &lasts);
+                while (line)
+                {
+                    xxLog("D3DCompileShader", "%s", line);
+                    line = strtok_r(nullptr, "\r\n", &lasts);
+                }
+
+                xxFree(temp);
+            }
+
             blob->Release();
         }
         return blob;
