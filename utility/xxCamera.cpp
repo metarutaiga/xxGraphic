@@ -36,23 +36,23 @@ void xxCamera::Update()
     float n = m_frustumNear;
     float f = m_frustumFar;
 
-    m_viewMatrix.v[0] = {  m_right.x,                m_up.x,                m_direction.x,               0 };
-    m_viewMatrix.v[1] = {  m_right.y,                m_up.y,                m_direction.y,               0 };
-    m_viewMatrix.v[2] = {  m_right.z,                m_up.z,                m_direction.z,               0 };
-    m_viewMatrix.v[3] = { -m_right.Dot(m_location), -m_up.Dot(m_location), -m_direction.Dot(m_location), 1 };
+    ViewMatrix.v[0] = {  Right.x,              Up.x,              Direction.x,             0 };
+    ViewMatrix.v[1] = {  Right.y,              Up.y,              Direction.y,             0 };
+    ViewMatrix.v[2] = {  Right.z,              Up.z,              Direction.z,             0 };
+    ViewMatrix.v[3] = { -Right.Dot(Location), -Up.Dot(Location), -Direction.Dot(Location), 1 };
 
-    m_projectionMatrix.v[0] = {    (-2) / (l - r),                 0,                  0, 0 };
-    m_projectionMatrix.v[1] = {                 0,    (-2) / (b - t),                  0, 0 };
-//  m_projectionMatrix.v[2] = { (l + r) / (l - r), (b + t) / (b - t),      (f) / (f - n), 1 };
-    m_projectionMatrix.v[2] = {                 0,                 0,      (f) / (f - n), 1 };
-    m_projectionMatrix.v[3] = {                 0,                 0, (f * -n) / (f - n), 0 };
+    ProjectionMatrix.v[0] = {    (-2) / (l - r),                 0,                  0, 0 };
+    ProjectionMatrix.v[1] = {                 0,    (-2) / (b - t),                  0, 0 };
+//  ProjectionMatrix.v[2] = { (l + r) / (l - r), (b + t) / (b - t),      (f) / (f - n), 1 };
+    ProjectionMatrix.v[2] = {                 0,                 0,      (f) / (f - n), 1 };
+    ProjectionMatrix.v[3] = {                 0,                 0, (f * -n) / (f - n), 0 };
 
-    m_projectionMatrix = m_projectionMatrix * m_viewportMatrix;
+    ProjectionMatrix = ProjectionMatrix * m_viewportMatrix;
 }
 //------------------------------------------------------------------------------
 void xxCamera::LookAt(xxVector3 const& worldPoint, xxVector3 const& worldUp)
 {
-    xxVector3 direction = worldPoint - m_location;
+    xxVector3 direction = worldPoint - Location;
     direction /= direction.Length();
 
     xxVector3 right = worldUp.Cross(direction);
@@ -61,9 +61,9 @@ void xxCamera::LookAt(xxVector3 const& worldPoint, xxVector3 const& worldUp)
     xxVector3 up = direction.Cross(right);
     up /= up.Length();
 
-    m_right = right;
-    m_up = up;
-    m_direction = direction;
+    Right = right;
+    Up = up;
+    Direction = direction;
 }
 //------------------------------------------------------------------------------
 void xxCamera::SetFOV(float aspect, float fov, float depth)
@@ -101,7 +101,7 @@ xxVector3 xxCamera::GetDirectionFromScreenPos(float x, float y) const
     float right = m_frustumLeft + x * (m_frustumRight - m_frustumLeft);
     float up = m_frustumBottom + y * (m_frustumTop - m_frustumBottom);
 
-    xxVector3 direction = m_direction + m_right * right + m_up * up;
+    xxVector3 direction = Direction + Right * right + Up * up;
     direction /= direction.Length();
     return direction;
 }

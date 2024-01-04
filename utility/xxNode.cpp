@@ -16,9 +16,9 @@
 //  Node
 //==============================================================================
 xxNode::xxNode()
+    :LocalMatrix(m_classLocalMatrix)
+    ,WorldMatrix(m_classWorldMatrix)
 {
-    m_localMatrix = &m_classLocalMatrix;
-    m_worldMatrix = &m_classWorldMatrix;
     m_classLocalMatrix = xxMatrix4::IDENTITY;
     m_classWorldMatrix = xxMatrix4::IDENTITY;
     m_legacyRotate = xxMatrix3::IDENTITY;
@@ -30,6 +30,7 @@ xxNode::xxNode()
 //------------------------------------------------------------------------------
 xxNode::~xxNode()
 {
+    Invalidate();
 }
 //------------------------------------------------------------------------------
 xxNodePtr xxNode::Create()
@@ -103,10 +104,11 @@ bool xxNode::DetachChild(xxNodePtr const& node)
 #if HAVE_LINEAR_MATRIX
         std::function<void(xxNode*)> resetMatrix = [&resetMatrix](xxNode* node)
         {
-            node->m_classLocalMatrix = (*node->m_localMatrix);
-            node->m_classWorldMatrix = (*node->m_worldMatrix);
-            node->m_localMatrix = &node->m_classLocalMatrix;
-            node->m_worldMatrix = &node->m_classWorldMatrix;
+            xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&node->Name + sizeof(node->Name));
+            node->m_classLocalMatrix = node->LocalMatrix;
+            node->m_classWorldMatrix = node->WorldMatrix;
+            pointer[0] = &node->m_classLocalMatrix;
+            pointer[1] = &node->m_classWorldMatrix;
 
             // Traversal
             for (xxNodePtr const& child : node->m_children)
@@ -128,28 +130,6 @@ bool xxNode::DetachChild(xxNodePtr const& node)
     }
 
     return false;
-}
-//------------------------------------------------------------------------------
-xxMatrix4 const& xxNode::GetLocalMatrix() const
-{
-    return (*m_localMatrix);
-}
-//------------------------------------------------------------------------------
-xxMatrix4 const& xxNode::GetWorldMatrix() const
-{
-    return (*m_worldMatrix);
-}
-//------------------------------------------------------------------------------
-void xxNode::SetLocalMatrix(xxMatrix4 const& matrix)
-{
-    (*m_localMatrix) = matrix;
-
-    m_legacyScale = -1.0f;
-}
-//------------------------------------------------------------------------------
-void xxNode::SetWorldMatrix(xxMatrix4 const& matrix)
-{
-    (*m_worldMatrix) = matrix;
 }
 //------------------------------------------------------------------------------
 void xxNode::CreateLinearMatrix()
@@ -185,7 +165,7 @@ void xxNode::CreateLinearMatrix()
     {
         // Header
         LinearMatrixHeader* header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
-        header->parentMatrix = node->m_worldMatrix;
+        header->parentMatrix = &node->WorldMatrix;
         header->childrenCount = node->GetChildCount();
 
         // Children
@@ -193,10 +173,11 @@ void xxNode::CreateLinearMatrix()
         {
             if (child == nullptr)
                 continue;
-            linearMatrix[0] = (*child->m_localMatrix);
-            linearMatrix[1] = (*child->m_worldMatrix);
-            child->m_localMatrix = &linearMatrix[0];
-            child->m_worldMatrix = &linearMatrix[1];
+            xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&child->Name + sizeof(child->Name));
+            linearMatrix[0] = child->LocalMatrix;
+            linearMatrix[1] = child->WorldMatrix;
+            pointer[0] = &linearMatrix[0];
+            pointer[1] = &linearMatrix[1];
             linearMatrix += 2;
         }
 
@@ -213,10 +194,11 @@ void xxNode::CreateLinearMatrix()
 
     // Root
     xxMatrix4* linearMatrix = newLinearMatrix.data();
-    linearMatrix[0] = (*m_localMatrix);
-    linearMatrix[1] = (*m_worldMatrix);
-    m_localMatrix = &linearMatrix[0];
-    m_worldMatrix = &linearMatrix[1];
+    xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&Name + sizeof(Name));
+    linearMatrix[0] = LocalMatrix;
+    linearMatrix[1] = WorldMatrix;
+    pointer[0] = &linearMatrix[0];
+    pointer[1] = &linearMatrix[1];
     linearMatrix += 2;
 
     // Traversal
@@ -265,11 +247,11 @@ bool xxNode::UpdateMatrix()
 #endif
     if (m_parent.lock() == nullptr)
     {
-        (*m_worldMatrix) = (*m_localMatrix);
+        WorldMatrix = LocalMatrix;
     }
     else
     {
-        (*m_worldMatrix) = (*m_parent.lock()->m_worldMatrix) * (*m_localMatrix);
+        WorldMatrix = m_parent.lock()->WorldMatrix * LocalMatrix;
     }
 
     return true;
@@ -279,13 +261,7 @@ xxMatrix3 xxNode::GetRotate() const
 {
     if (m_legacyScale < 0.0f)
     {
-        xxMatrix3 rotate;
-
-        rotate.v[0] = { (*m_localMatrix).v[0].x, (*m_localMatrix).v[0].y, (*m_localMatrix).v[0].z };
-        rotate.v[1] = { (*m_localMatrix).v[1].x, (*m_localMatrix).v[1].y, (*m_localMatrix).v[1].z };
-        rotate.v[2] = { (*m_localMatrix).v[2].x, (*m_localMatrix).v[2].y, (*m_localMatrix).v[2].z };
-
-        return rotate;
+        return { LocalMatrix[0].xyz, LocalMatrix[1].xyz, LocalMatrix[2].xyz };
     }
 
     return m_legacyRotate;
@@ -295,11 +271,7 @@ xxVector3 xxNode::GetTranslate() const
 {
     if (m_legacyScale < 0.0f)
     {
-        xxVector3 translate;
-
-        translate = { (*m_localMatrix).v[3].x, (*m_localMatrix).v[3].y, (*m_localMatrix).v[3].z };
-
-        return translate;
+        return LocalMatrix.v[3].xyz;
     }
 
     return m_legacyTranslate;
@@ -308,7 +280,9 @@ xxVector3 xxNode::GetTranslate() const
 float xxNode::GetScale() const
 {
     if (m_legacyScale < 0.0f)
+    {
         return 1.0f;
+    }
 
     return m_legacyScale;
 }
@@ -317,9 +291,9 @@ void xxNode::SetRotate(xxMatrix3 const& rotate)
 {
     if (m_legacyScale < 0.0f)
     {
-        (*m_localMatrix).v[0] = { rotate.v[0].x, rotate.v[0].y, rotate.v[0].z };
-        (*m_localMatrix).v[1] = { rotate.v[1].x, rotate.v[1].y, rotate.v[1].z };
-        (*m_localMatrix).v[2] = { rotate.v[2].x, rotate.v[2].y, rotate.v[2].z };
+        LocalMatrix.v[0].xyz = rotate.v[0];
+        LocalMatrix.v[1].xyz = rotate.v[1];
+        LocalMatrix.v[2].xyz = rotate.v[2];
         return;
     }
 
@@ -330,7 +304,7 @@ void xxNode::SetTranslate(xxVector3 const& translate)
 {
     if (m_legacyScale < 0.0f)
     {
-        (*m_localMatrix).v[3] = { translate.x, translate.y, translate.z, 1.0f };
+        LocalMatrix.v[3].xyz = translate;
         return;
     }
 
@@ -349,7 +323,7 @@ void xxNode::CreateRotateTranslateScale()
     if (m_legacyScale >= 0.0f)
         return;
 
-    (*m_localMatrix).FastDecompose(m_legacyRotate, m_legacyTranslate, m_legacyScale);
+    LocalMatrix.FastDecompose(m_legacyRotate, m_legacyTranslate, m_legacyScale);
 }
 //------------------------------------------------------------------------------
 void xxNode::UpdateRotateTranslateScale()
@@ -357,10 +331,10 @@ void xxNode::UpdateRotateTranslateScale()
     if (m_legacyScale < 0.0f)
         return;
 
-    (*m_localMatrix).v[0] = xxVector4{ m_legacyRotate.v[0].x, m_legacyRotate.v[0].y, m_legacyRotate.v[0].z } * m_legacyScale;
-    (*m_localMatrix).v[1] = xxVector4{ m_legacyRotate.v[1].x, m_legacyRotate.v[1].y, m_legacyRotate.v[1].z } * m_legacyScale;
-    (*m_localMatrix).v[2] = xxVector4{ m_legacyRotate.v[2].x, m_legacyRotate.v[2].y, m_legacyRotate.v[2].z } * m_legacyScale;
-    (*m_localMatrix).v[3] = xxVector4{ m_legacyTranslate.x, m_legacyTranslate.y, m_legacyTranslate.z, 1.0f };
+    LocalMatrix.v[0].xyz = m_legacyRotate.v[0] * m_legacyScale;
+    LocalMatrix.v[1].xyz = m_legacyRotate.v[1] * m_legacyScale;
+    LocalMatrix.v[2].xyz = m_legacyRotate.v[2] * m_legacyScale;
+    LocalMatrix.v[3].xyz = m_legacyTranslate;
 }
 //------------------------------------------------------------------------------
 xxImagePtr const& xxNode::GetImage(size_t index) const
@@ -382,6 +356,20 @@ void xxNode::SetImage(size_t index, xxImagePtr const& image)
     }
 
     Images[index] = image;
+}
+//------------------------------------------------------------------------------
+void xxNode::Invalidate()
+{
+    for (auto& constantData : ConstantDatas)
+    {
+        xxDestroyBuffer(constantData.device, constantData.vertexConstant);
+        xxDestroyBuffer(constantData.device, constantData.fragmentConstant);
+        constantData.device = 0;
+        constantData.vertexConstant = 0;
+        constantData.fragmentConstant = 0;
+        constantData.vertexConstantSize = 0;
+        constantData.fragmentConstantSize = 0;
+    }
 }
 //------------------------------------------------------------------------------
 void xxNode::Update(float time, bool updateMatrix)
@@ -406,7 +394,7 @@ void xxNode::Draw(uint64_t device, uint64_t commandEncoder, xxCameraPtr const& c
 
     Mesh->Update(device);
     Material->Update(device, *this, camera);
-    Material->Set(commandEncoder);
+    Material->Set(commandEncoder, *this);
 
     uint64_t textures[16];
     uint64_t samplers[16];

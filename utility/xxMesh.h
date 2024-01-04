@@ -61,21 +61,24 @@ protected:
     char                        m_vertexBufferIndex = 0;
     char                        m_indexBufferIndex = 0;
 
-    int                         m_stride = 0;
-    int                         m_normalCount = 0;
-    int                         m_colorCount = 0;
-    int                         m_textureCount = 0;
+public:
+    std::string                 Name = "";
+
+    int const                   Stride = 0;
+    int const                   NormalCount = 0;
+    int const                   ColorCount = 0;
+    int const                   TextureCount = 0;
 };
 
 template<class T>
 struct xxStrideIterator
 {
     xxStrideIterator(void* base, size_t stride, size_t size)
+        :m_stride(stride)
+        ,m_now(reinterpret_cast<T*>(base))
+        ,m_begin(reinterpret_cast<T*>(base))
+        ,m_end(reinterpret_cast<T*>(reinterpret_cast<char*>(base) + stride * size))
     {
-        m_now = reinterpret_cast<T*>(base);
-        m_begin = reinterpret_cast<T*>(base);
-        m_end = reinterpret_cast<T*>(reinterpret_cast<char*>(base) + stride * size);
-        m_stride = stride;
     }
 
     T& operator * () const
@@ -106,8 +109,8 @@ struct xxStrideIterator
         return m_now == m_end;
     }
 
-    T*      m_now;
-    T*      m_begin;
-    T*      m_end;
-    size_t  m_stride;
+    T*              m_now;
+    T* const        m_begin;
+    T* const        m_end;
+    size_t const    m_stride;
 };

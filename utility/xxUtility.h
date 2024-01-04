@@ -13,6 +13,8 @@
 #include <string>
 #include <vector>
 
+struct xxConstantData;
+
 typedef std::shared_ptr<class xxCamera> xxCameraPtr;
 typedef std::shared_ptr<class xxImage> xxImagePtr;
 typedef std::shared_ptr<class xxMaterial> xxMaterialPtr;

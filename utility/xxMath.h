@@ -63,6 +63,8 @@ struct xxPlusAPI xxVector3
         float f[N];
         struct { float x, y, z; };
         struct { float r, g, b; };
+        xxVector2 xy;
+        xxVector2 rg;
     };
 
     xxVector3       operator -      () const                     { xxVector3 t;     for (size_t i = 0; i < N; ++i) t.f[i] =   -f[i]; return t;       }
@@ -118,6 +120,10 @@ struct xxPlusAPI xxVector4
         float f[N];
         struct { float x, y, z, w; };
         struct { float r, g, b, a; };
+        xxVector2 xy;
+        xxVector2 rg;
+        xxVector3 xyz;
+        xxVector3 rgb;
     };
 
     xxVector4       operator -      () const                     { xxVector4 t;     for (size_t i = 0; i < N; ++i) t.f[i] =   -f[i]; return t;       }

@@ -11,16 +11,14 @@
 //  Mesh
 //==============================================================================
 xxMesh::xxMesh(int normal, int color, int texture)
+    :Stride(xxSizeOf(xxVector3) * 1 + 
+            xxSizeOf(xxVector3) * normal +
+            xxSizeOf(uint32_t) * color +
+            xxSizeOf(xxVector2) * texture)
+    ,NormalCount(normal)
+    ,ColorCount(color)
+    ,TextureCount(texture)
 {
-    int stride = 0;
-    stride += xxSizeOf(xxVector3) * 1;
-    stride += xxSizeOf(xxVector3) * normal;
-    stride += xxSizeOf(uint32_t) * color;
-    stride += xxSizeOf(xxVector2) * texture;
-    m_stride = stride;
-    m_normalCount = normal;
-    m_colorCount = color;
-    m_textureCount = texture;
 }
 //------------------------------------------------------------------------------
 xxMesh::~xxMesh()
@@ -78,7 +76,7 @@ void xxMesh::Update(uint64_t device)
         offset += xxSizeOf(xxVector3);
 
         // normal
-        for (int i = 0; i < m_normalCount; ++i)
+        for (int i = 0; i < NormalCount; ++i)
         {
             dataCount++;
             (*dataPtr++) = 0;
@@ -89,7 +87,7 @@ void xxMesh::Update(uint64_t device)
         }
 
         // color
-        for (int i = 0; i < m_colorCount; ++i)
+        for (int i = 0; i < ColorCount; ++i)
         {
             dataCount++;
             (*dataPtr++) = 0;
@@ -100,7 +98,7 @@ void xxMesh::Update(uint64_t device)
         }
 
         // texture
-        for (int i = 0; i < m_textureCount; ++i)
+        for (int i = 0; i < TextureCount; ++i)
         {
             dataCount++;
             (*dataPtr++) = 0;
@@ -132,7 +130,7 @@ void xxMesh::Update(uint64_t device)
         }
         if (m_vertexBuffers[index] == 0)
         {
-            m_vertexBuffers[index] = xxCreateVertexBuffer(m_device, m_stride * m_vertexCount, m_vertexAttribute);
+            m_vertexBuffers[index] = xxCreateVertexBuffer(m_device, Stride * m_vertexCount, m_vertexAttribute);
             m_vertexDataModified = true;
         }
 
@@ -143,7 +141,7 @@ void xxMesh::Update(uint64_t device)
             {
                 m_vertexDataModified = false;
 
-                memcpy(ptr, m_vertex, m_stride * m_vertexCount);
+                memcpy(ptr, m_vertex, Stride * m_vertexCount);
                 xxUnmapBuffer(m_device, m_vertexBuffers[index]);
             }
         }
@@ -213,7 +211,7 @@ void xxMesh::SetVertexCount(int count)
 {
     xxFree(m_vertex);
     m_vertexCount = 0;
-    m_vertex = xxAlloc(char, count * m_stride);
+    m_vertex = xxAlloc(char, count * Stride);
     if (m_vertex)
     {
         m_vertexCount = count;
@@ -241,7 +239,7 @@ void xxMesh::SetIndexCount(int count)
 xxStrideIterator<xxVector3> xxMesh::GetVertex() const
 {
     char* vertex = m_vertex;
-    return xxStrideIterator<xxVector3>(vertex, m_stride, m_vertexCount);
+    return xxStrideIterator<xxVector3>(vertex, Stride, m_vertexCount);
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<xxVector3> xxMesh::GetNormal(int index) const
@@ -249,26 +247,26 @@ xxStrideIterator<xxVector3> xxMesh::GetNormal(int index) const
     char* vertex = m_vertex;
     vertex += xxSizeOf(xxVector3);
     vertex += xxSizeOf(xxVector3) * index;
-    return xxStrideIterator<xxVector3>(vertex, m_stride, m_normalCount ? m_vertexCount : 0);
+    return xxStrideIterator<xxVector3>(vertex, Stride, NormalCount ? m_vertexCount : 0);
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<uint32_t> xxMesh::GetColor(int index) const
 {
     char* vertex = m_vertex;
     vertex += xxSizeOf(xxVector3);
-    vertex += xxSizeOf(xxVector3) * m_normalCount;
+    vertex += xxSizeOf(xxVector3) * NormalCount;
     vertex += xxSizeOf(uint32_t) * index;
-    return xxStrideIterator<uint32_t>(vertex, m_stride, m_colorCount ? m_vertexCount : 0);
+    return xxStrideIterator<uint32_t>(vertex, Stride, ColorCount ? m_vertexCount : 0);
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<xxVector2> xxMesh::GetTexture(int index) const
 {
     char* vertex = m_vertex;
     vertex += xxSizeOf(xxVector3);
-    vertex += xxSizeOf(xxVector3) * m_normalCount;
-    vertex += xxSizeOf(uint32_t) * m_colorCount;
+    vertex += xxSizeOf(xxVector3) * NormalCount;
+    vertex += xxSizeOf(uint32_t) * ColorCount;
     vertex += xxSizeOf(xxVector2) * index;
-    return xxStrideIterator<xxVector2>(vertex, m_stride, m_textureCount ? m_vertexCount : 0);
+    return xxStrideIterator<xxVector2>(vertex, Stride, TextureCount ? m_vertexCount : 0);
 }
 //------------------------------------------------------------------------------
 xxMesh::IndexType* xxMesh::GetIndex() const
