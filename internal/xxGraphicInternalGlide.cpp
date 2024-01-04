@@ -124,6 +124,7 @@ FX_PROTOTYPE(void, grGlideSetVertexLayout, (const void *layout), layout);
 //  Glide to OpenGL prototype
 //==============================================================================
 #if defined(xxMACOS)
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #define GL_SILENCE_DEPRECATION
 #import <AppKit/NSOpenGL.h>
 #import <AppKit/NSOpenGLView.h>

@@ -11,14 +11,13 @@
 //  Texture
 //==============================================================================
 xxImage::xxImage(uint64_t format, int width, int height, int depth, int mipmap, int array)
+    :Format(format)
+    ,Width(width)
+    ,Height(height)
+    ,Depth(depth)
+    ,Mipmap(mipmap)
+    ,Array(array)
 {
-    m_format = format;
-    m_width = width;
-    m_height = height;
-    m_depth = depth;
-    m_mipmap = mipmap;
-    m_array = array;
-
     for (int i = 0; i < mipmap; ++i)
     {
         if (width == 0)
@@ -75,14 +74,14 @@ xxImagePtr xxImage::CreateCube(uint64_t format, int width, int height, int mipma
 //------------------------------------------------------------------------------
 void* xxImage::operator () (int x, int y, int z, int mipmap, int array)
 {
-    if (array >= m_array)
+    if (array >= Array)
         return nullptr;
-    if (mipmap >= m_mipmap)
+    if (mipmap >= Mipmap)
         return nullptr;
 
-    int levelWidth = (m_width << mipmap);
-    int levelHeight = (m_height << mipmap);
-    int levelDepth = (m_depth << mipmap);
+    int levelWidth = (Width << mipmap);
+    int levelHeight = (Height << mipmap);
+    int levelDepth = (Depth << mipmap);
     if (levelWidth == 0)
         levelWidth = 1;
     if (levelHeight == 0)
@@ -105,7 +104,7 @@ void* xxImage::operator () (int x, int y, int z, int mipmap, int array)
     if (image == nullptr)
         return nullptr;
 
-    return (char*)image + offset * xxSizeOf(uint32_t);
+    return reinterpret_cast<char*>(image) + offset * xxSizeOf(uint32_t);
 }
 //------------------------------------------------------------------------------
 void xxImage::Invalidate()
@@ -125,7 +124,7 @@ void xxImage::Update(uint64_t device)
 
     if (m_texture == 0)
     {
-        m_texture = xxCreateTexture(m_device, 0, m_width, m_height, m_depth, m_mipmap, m_array, nullptr);
+        m_texture = xxCreateTexture(m_device, 0, Width, Height, Depth, Mipmap, Array, nullptr);
     }
     if (m_sampler == 0)
     {
@@ -136,9 +135,9 @@ void xxImage::Update(uint64_t device)
         return;
     m_imageModified = false;
 
-    for (int array = 0; array < m_array; ++array)
+    for (int array = 0; array < Array; ++array)
     {
-        for (int mipmap = 0; mipmap < m_mipmap; ++mipmap)
+        for (int mipmap = 0; mipmap < Mipmap; ++mipmap)
         {
             void* source = (*this)(0, 0, 0, mipmap, array);
             if (source == nullptr)
@@ -149,9 +148,9 @@ void xxImage::Update(uint64_t device)
             if (target == nullptr)
                 continue;
 
-            int levelWidth = (m_width >> mipmap);
-            int levelHeight = (m_height >> mipmap);
-            int levelDepth = (m_depth >> mipmap);
+            int levelWidth = (Width >> mipmap);
+            int levelHeight = (Height >> mipmap);
+            int levelDepth = (Depth >> mipmap);
             if (levelWidth == 0)
                 levelWidth = 1;
             if (levelHeight == 0)
@@ -164,8 +163,8 @@ void xxImage::Update(uint64_t device)
                 for (int height = 0; height < levelHeight; ++height)
                 {
                     memcpy(target, source, levelWidth * sizeof(int));
-                    source = (char*)source + levelWidth * sizeof(int);
-                    target = (char*)target + stride;
+                    source = reinterpret_cast<char*>(source) + levelWidth * sizeof(int);
+                    target = reinterpret_cast<char*>(target) + stride;
                 }
             }
 
