@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : Metal Source
 //
-// Copyright (c) 2019-2023 TAiGA
+// Copyright (c) 2019-2024 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #define xxCreateInstanceMetal xxConcate(xxCreateInstanceMetal, __LINE__)
