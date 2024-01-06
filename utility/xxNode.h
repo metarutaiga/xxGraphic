@@ -44,7 +44,7 @@ public:
 
     void                        Invalidate();
     void                        Update(float time, bool updateMatrix = true);
-    void                        Draw(uint64_t device, uint64_t commandEncoder, xxCameraPtr const& camera);
+    void                        Draw(xxDrawData const& data);
 
 protected:
     xxNode();
@@ -83,8 +83,21 @@ public:
 struct xxConstantData
 {
     uint64_t    device = 0;
+    uint64_t    pipeline = 0;
     uint64_t    vertexConstant = 0;
     uint64_t    fragmentConstant = 0;
     int         vertexConstantSize = 0;
     int         fragmentConstantSize = 0;
+    int         ready = 0;
+};
+
+struct xxDrawData
+{
+    uint64_t                device = 0;
+    uint64_t                commandEncoder = 0;
+    xxCamera*               camera = nullptr;
+    mutable xxConstantData* constantData = nullptr;
+    mutable xxMesh*         mesh = nullptr;
+    mutable xxNode*         node = nullptr;
+    int                     materialIndex = 0;
 };

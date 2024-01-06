@@ -16,16 +16,19 @@ public:
     static xxMaterialPtr Create();
 
     void                Invalidate();
-    void                Update(uint64_t device, xxNode& node, xxCameraPtr const& camera);
-    void                Set(uint64_t commandEncoder, xxNode const& node);
+    void                Update(xxDrawData const& data);
+    void                Set(xxDrawData const& data) const;
+
+    virtual void        CreatePipeline(xxDrawData const& data);
+    virtual void        CreateConstant(xxDrawData const& data) const;
+    virtual void        UpdateConstant(xxDrawData const& data) const;
 
 protected:
     xxMaterial();
 
-    virtual std::string GetShader(xxMeshPtr const& mesh) const;
+    virtual std::string GetShader(xxMesh const* mesh, int type) const;
     virtual int         GetVertexConstantSize() const;
     virtual int         GetFragmentConstantSize() const;
-    virtual void        UpdateConstant(xxConstantData const& constant, xxNode const& node, xxCameraPtr const& camera) const;
 
     uint64_t            m_device = 0;
     uint64_t            m_blendState = 0;
@@ -66,6 +69,4 @@ public:
 
     bool                Cull = false;
     bool                Scissor = false;
-
-    static int          ActiveMaterialIndex;
 };

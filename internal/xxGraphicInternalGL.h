@@ -210,7 +210,8 @@ struct PIPELINEGL
     GLuint              program;
     VERTEXATTRIBUTEGL*  vertexAttribute;
     GLint               texture;
-    GLint               uniform;
+    GLint               uniformVS;
+    GLint               uniformFS;
     BLENDGL             blend;
     STATEGL             state;
 };

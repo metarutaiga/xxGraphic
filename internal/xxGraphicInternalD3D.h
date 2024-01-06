@@ -426,12 +426,12 @@ inline struct ID3D10Blob* D3DCompileShader(char const* shader, char const*const*
                 memcpy(temp, blob->GetBufferPointer(), size);
                 temp[size] = 0;
 
-                char* lasts;
-                char* line = strtok_r(temp, "\r\n", &lasts);
+                char* lasts = temp;
+                char* line = strsep(&lasts, "\r\n");
                 while (line)
                 {
                     xxLog("D3DCompileShader", "%s", line);
-                    line = strtok_r(nullptr, "\r\n", &lasts);
+                    line = strsep(&lasts, "\r\n");
                 }
 
                 xxFree(temp);
