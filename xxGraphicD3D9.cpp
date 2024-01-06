@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : Direct3D 9.0 Source
 //
-// Copyright (c) 2019-2023 TAiGA
+// Copyright (c) 2019-2024 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #if defined(_DEBUG)

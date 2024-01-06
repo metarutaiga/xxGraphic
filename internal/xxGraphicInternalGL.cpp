@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : OpenGL Internal Source
 //
-// Copyright (c) 2019-2023 TAiGA
+// Copyright (c) 2019-2024 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "xxGraphicInternalGL.h"
