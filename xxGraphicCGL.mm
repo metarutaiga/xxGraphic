@@ -173,6 +173,8 @@ uint64_t glCreateContextCGL(uint64_t instance, void* view, void** display)
         return 0;
     NSView* nsView = nsWindow.contentViewController.view;
     if (nsView == nil)
+        nsView = nsWindow.contentView;
+    if (nsView == nil)
         return 0;
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
     if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_6)

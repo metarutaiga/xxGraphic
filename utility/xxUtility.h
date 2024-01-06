@@ -14,6 +14,7 @@
 #include <vector>
 
 struct xxConstantData;
+struct xxDrawData;
 
 typedef std::shared_ptr<class xxCamera> xxCameraPtr;
 typedef std::shared_ptr<class xxImage> xxImagePtr;

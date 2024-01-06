@@ -365,10 +365,12 @@ void xxNode::Invalidate()
         xxDestroyBuffer(constantData.device, constantData.vertexConstant);
         xxDestroyBuffer(constantData.device, constantData.fragmentConstant);
         constantData.device = 0;
+        constantData.pipeline = 0;
         constantData.vertexConstant = 0;
         constantData.fragmentConstant = 0;
         constantData.vertexConstantSize = 0;
         constantData.fragmentConstantSize = 0;
+        constantData.ready = 0;
     }
 }
 //------------------------------------------------------------------------------
@@ -387,14 +389,21 @@ void xxNode::Update(float time, bool updateMatrix)
     }
 }
 //------------------------------------------------------------------------------
-void xxNode::Draw(uint64_t device, uint64_t commandEncoder, xxCameraPtr const& camera)
+void xxNode::Draw(xxDrawData const& data)
 {
     if (Material == nullptr || Mesh == nullptr)
         return;
 
-    Mesh->Update(device);
-    Material->Update(device, *this, camera);
-    Material->Set(commandEncoder, *this);
+    data.mesh = Mesh.get();
+    data.node = this;
+
+    Mesh->Update(data.device);
+    Material->Update(data);
+
+    if (data.constantData->ready <= 0)
+        return;
+
+    Material->Set(data);
 
     uint64_t textures[16];
     uint64_t samplers[16];
@@ -403,14 +412,14 @@ void xxNode::Draw(uint64_t device, uint64_t commandEncoder, xxCameraPtr const& c
     for (int i = 0; i < textureCount; ++i)
     {
         xxImage* image = Images[i].get();
-        image->Update(device);
+        image->Update(data.device);
         textures[i] = image->GetTexture();
         samplers[i] = image->GetSampler();
     }
 
-    xxSetFragmentTextures(commandEncoder, textureCount, textures);
-    xxSetFragmentSamplers(commandEncoder, textureCount, samplers);
+    xxSetFragmentTextures(data.commandEncoder, textureCount, textures);
+    xxSetFragmentSamplers(data.commandEncoder, textureCount, samplers);
 
-    Mesh->Draw(commandEncoder);
+    Mesh->Draw(data.commandEncoder);
 }
 //------------------------------------------------------------------------------

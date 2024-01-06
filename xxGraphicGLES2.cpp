@@ -665,12 +665,13 @@ static void checkShader(GLuint glShader, char const* shader)
         char* dup = strdup(shader);
         if (dup)
         {
-            char* lasts;
-            char* line = strtok_r(dup, "\r\n", &lasts);
+            int index = 0;
+            char* lasts = dup;
+            char* line = strsep(&lasts, "\r\n");
             while (line)
             {
-                xxLog("xxGraphicGLES2", "%s", line);
-                line = strtok_r(nullptr, "\r\n", &lasts);
+                xxLog("xxGraphicGLES2", "%d : %s", index++, line);
+                line = strsep(&lasts, "\r\n");
             }
             free(dup);
         }
@@ -683,12 +684,12 @@ static void checkShader(GLuint glShader, char const* shader)
             glGetShaderInfoLog(glShader, length, nullptr, log);
             log[length] = '\0';
 
-            char* lasts;
-            char* line = strtok_r(log, "\r\n", &lasts);
+            char* lasts = log;
+            char* line = strsep(&lasts, "\r\n");
             while (line)
             {
                 xxLog("xxGraphicGLES2", "%s", line);
-                line = strtok_r(nullptr, "\r\n", &lasts);
+                line = strsep(&lasts, "\r\n");
             }
             xxFree(log);
         }
@@ -710,6 +711,7 @@ uint64_t xxCreateVertexShaderGLES2(uint64_t device, char const* shader, uint64_t
         "#define SHADER_MSL 0", "\n",
         "#define SHADER_VERTEX 1", "\n",
         "#define SHADER_FRAGMENT 0", "\n",
+        "#define uniBuffer uniBufferVS", "\n",
         "#define uniform uniform highp", "\n",
         "#define attribute attribute", "\n",
         "#define varying varying", "\n",
@@ -740,6 +742,7 @@ uint64_t xxCreateFragmentShaderGLES2(uint64_t device, char const* shader)
         "#define SHADER_MSL 0", "\n",
         "#define SHADER_VERTEX 0", "\n",
         "#define SHADER_FRAGMENT 1", "\n",
+        "#define uniBuffer uniBufferFS", "\n",
         "#define uniform uniform highp", "\n",
         "#define attribute", "\n",
         "#define varying varying", "\n",
@@ -782,12 +785,12 @@ static void checkProgram(GLuint glProgram)
             glGetProgramInfoLog(glProgram, length, nullptr, log);
             log[length] = '\0';
 
-            char* lasts;
-            char* line = strtok_r(log, "\r\n", &lasts);
+            char* lasts = log;
+            char* line = strsep(&lasts, "\r\n");
             while (line)
             {
                 xxLog("xxGraphicGLES2", "%s", line);
-                line = strtok_r(nullptr, "\r\n", &lasts);
+                line = strsep(&lasts, "\r\n");
             }
             xxFree(log);
         }
@@ -862,7 +865,8 @@ uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t bl
     glPipeline->program = glProgram;
     glPipeline->vertexAttribute = glVertexAttribute;
     glPipeline->texture = glGetUniformLocation(glProgram, "samDiffuse");
-    glPipeline->uniform = glGetUniformLocation(glProgram, "uniBuffer");
+    glPipeline->uniformVS = glGetUniformLocation(glProgram, "uniBufferVS");
+    glPipeline->uniformFS = glGetUniformLocation(glProgram, "uniBufferFS");
     glPipeline->blend = glBlendState ? (*glBlendState) : BLENDGL{ .blendEnable = GL_FALSE };
     glPipeline->state.depthTest = glDepthStencilState.depthTest;
     glPipeline->state.depthWrite = glDepthStencilState.depthWrite;
@@ -1022,12 +1026,16 @@ void xxSetVertexConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, in
     PIPELINEGL* glPipeline = reinterpret_cast<PIPELINEGL*>(glSwapchain->pipeline);
     BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(buffer);
 
-    glUniform4fv(glPipeline->uniform, size / sizeof(float) / 4, (GLfloat*)glBuffer->memory);
+    glUniform4fv(glPipeline->uniformVS, size / sizeof(float) / 4, (GLfloat*)glBuffer->memory);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, int size)
 {
+    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
+    PIPELINEGL* glPipeline = reinterpret_cast<PIPELINEGL*>(glSwapchain->pipeline);
+    BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(buffer);
 
+    glUniform4fv(glPipeline->uniformFS, size / sizeof(float) / 4, (GLfloat*)glBuffer->memory);
 }
 //------------------------------------------------------------------------------
 void xxDrawGLES2(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)

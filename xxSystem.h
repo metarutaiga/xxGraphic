@@ -65,7 +65,6 @@
 #   define _USE_MATH_DEFINES
 #   define _GDI32_
 #   include <windows.h>
-#   define strtok_r strtok_s
 #   define xxWINDOWS 1
 #endif
 
@@ -254,4 +253,18 @@ xxAPI xxInline xxConstexpr unsigned int xxHash(char const* key, const unsigned i
 #define xxCountLeadingZeros     _CountLeadingZeros
 #define xxCountTrailingZeros    _CountTrailinZeros
 #define xxPopulationCount       _CountOneBits
+#endif
+//==============================================================================
+//  String
+//==============================================================================
+#if defined(_WIN32)
+xxAPI xxInline char* strsep(char** sp, char const* sep)
+{
+    if (**sp == '\0') return nullptr;
+    char* s = *sp;
+    char* p = s + strcspn(s, sep);
+    if (*p != '\0') *p++ = '\0';
+    *sp = p;
+    return s;
+}
 #endif
