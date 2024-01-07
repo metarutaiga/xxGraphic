@@ -5,6 +5,7 @@
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "xxGraphic.h"
+#include "xxBinary.h"
 #include "xxMesh.h"
 
 //==============================================================================
@@ -35,6 +36,45 @@ xxMeshPtr xxMesh::Create(int normal, int color, int texture)
         return xxMeshPtr();
 
     return mesh;
+}
+//------------------------------------------------------------------------------
+bool xxMesh::BinaryRead(xxBinary& binary)
+{
+    binary.ReadString(Name);
+
+    binary.Read(const_cast<int&>(Stride));
+    binary.Read(const_cast<int&>(NormalCount));
+    binary.Read(const_cast<int&>(ColorCount));
+    binary.Read(const_cast<int&>(TextureCount));
+
+    binary.Read(m_vertexCount);
+    binary.Read(m_indexCount);
+
+    SetVertexCount(m_vertexCount);
+    SetIndexCount(m_indexCount);
+
+    binary.ReadArray(m_vertex, Stride * m_vertexCount);
+    binary.ReadArray(m_index, m_indexCount);
+
+    return true;
+}
+//------------------------------------------------------------------------------
+bool xxMesh::BinaryWrite(xxBinary& binary)
+{
+    binary.WriteString(Name);
+
+    binary.Write(Stride);
+    binary.Write(NormalCount);
+    binary.Write(ColorCount);
+    binary.Write(TextureCount);
+
+    binary.Write(m_vertexCount);
+    binary.Write(m_indexCount);
+
+    binary.WriteArray(m_vertex, Stride * m_vertexCount);
+    binary.WriteArray(m_index, m_indexCount);
+
+    return true;
 }
 //------------------------------------------------------------------------------
 void xxMesh::Invalidate()
@@ -128,7 +168,7 @@ void xxMesh::Update(uint64_t device)
             xxDestroyBuffer(m_device, m_vertexBuffers[index]);
             m_vertexBuffers[index] = 0;
         }
-        if (m_vertexBuffers[index] == 0)
+        if (m_vertexBuffers[index] == 0 && m_vertexCount != 0)
         {
             m_vertexBuffers[index] = xxCreateVertexBuffer(m_device, Stride * m_vertexCount, m_vertexAttribute);
             m_vertexDataModified = true;
@@ -164,7 +204,7 @@ void xxMesh::Update(uint64_t device)
             xxDestroyBuffer(m_device, m_indexBuffers[index]);
             m_indexBuffers[index] = 0;
         }
-        if (m_indexBuffers[index] == 0)
+        if (m_indexBuffers[index] == 0 && m_indexCount != 0)
         {
             m_indexBuffers[index] = xxCreateIndexBuffer(m_device, xxSizeOf(IndexType) * m_indexCount);
             m_indexDataModified = true;
@@ -209,12 +249,16 @@ int xxMesh::GetVertexCount() const
 //------------------------------------------------------------------------------
 void xxMesh::SetVertexCount(int count)
 {
-    xxFree(m_vertex);
     m_vertexCount = 0;
-    m_vertex = xxAlloc(char, count * Stride);
-    if (m_vertex)
+    xxFree(m_vertex);
+    m_vertex = nullptr;
+    if (count)
     {
-        m_vertexCount = count;
+        m_vertex = xxAlloc(char, count * Stride);
+        if (m_vertex)
+        {
+            m_vertexCount = count;
+        }
     }
     m_vertexSizeChanged = true;
 }
@@ -226,12 +270,16 @@ int xxMesh::GetIndexCount() const
 //------------------------------------------------------------------------------
 void xxMesh::SetIndexCount(int count)
 {
-    xxFree(m_index);
     m_indexCount = 0;
-    m_index = xxAlloc(IndexType, count);
-    if (m_index)
+    xxFree(m_index);
+    m_index = nullptr;
+    if (count)
     {
-        m_indexCount = count;
+        m_index = xxAlloc(IndexType, count);
+        if (m_index)
+        {
+            m_indexCount = count;
+        }
     }
     m_indexSizeChanged = true;
 }

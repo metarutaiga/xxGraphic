@@ -5,6 +5,7 @@
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "xxGraphic.h"
+#include "xxBinary.h"
 #include "xxCamera.h"
 #include "xxMesh.h"
 #include "xxNode.h"
@@ -29,6 +30,80 @@ xxMaterialPtr xxMaterial::Create()
         return xxMaterialPtr();
 
     return material;
+}
+//------------------------------------------------------------------------------
+bool xxMaterial::BinaryRead(xxBinary& binary)
+{
+    binary.ReadString(Name);
+
+    binary.ReadString(Shader);
+    binary.ReadString(ShaderOption);
+
+    binary.Read(AmbientColor);
+    binary.Read(DiffuseColor);
+    binary.Read(EmissiveColor);
+    binary.Read(SpecularColor);
+    binary.Read(SpecularHighlight);
+    binary.Read(Opacity);
+
+    binary.Read(Lighting);
+    binary.Read(Specular);
+
+    binary.Read(Blending);
+    if (Blending)
+    {
+        binary.ReadString(BlendSourceColor);
+        binary.ReadString(BlendOperationColor);
+        binary.ReadString(BlendDestinationColor);
+        binary.ReadString(BlendSourceAlpha);
+        binary.ReadString(BlendOperationAlpha);
+        binary.ReadString(BlendDestinationAlpha);
+    }
+
+    binary.ReadString(DepthTest);
+    binary.Read(DepthWrite);
+
+    binary.Read(Cull);
+    binary.Read(Scissor);
+
+    return true;
+}
+//------------------------------------------------------------------------------
+bool xxMaterial::BinaryWrite(xxBinary& binary)
+{
+    binary.WriteString(Name);
+
+    binary.WriteString(Shader);
+    binary.WriteString(ShaderOption);
+
+    binary.Write(AmbientColor);
+    binary.Write(DiffuseColor);
+    binary.Write(EmissiveColor);
+    binary.Write(SpecularColor);
+    binary.Write(SpecularHighlight);
+    binary.Write(Opacity);
+
+    binary.Write(Lighting);
+    binary.Write(Specular);
+
+    binary.Write(Blending);
+    if (Blending)
+    {
+        binary.WriteString(BlendSourceColor);
+        binary.WriteString(BlendOperationColor);
+        binary.WriteString(BlendDestinationColor);
+        binary.WriteString(BlendSourceAlpha);
+        binary.WriteString(BlendOperationAlpha);
+        binary.WriteString(BlendDestinationAlpha);
+    }
+
+    binary.WriteString(DepthTest);
+    binary.Write(DepthWrite);
+
+    binary.Write(Cull);
+    binary.Write(Scissor);
+
+    return true;
 }
 //------------------------------------------------------------------------------
 void xxMaterial::Invalidate()
@@ -94,7 +169,12 @@ void xxMaterial::CreatePipeline(xxDrawData const& data)
         {
             if (Blending)
             {
-                m_blendState = xxCreateBlendState(m_device, BlendSourceColor, BlendOperationColor, BlendDestinationColor, BlendSourceAlpha, BlendOperationAlpha, BlendDestinationAlpha);
+                m_blendState = xxCreateBlendState(m_device, BlendSourceColor.c_str(),
+                                                            BlendOperationColor.c_str(),
+                                                            BlendDestinationColor.c_str(),
+                                                            BlendSourceAlpha.c_str(),
+                                                            BlendOperationAlpha.c_str(),
+                                                            BlendDestinationAlpha.c_str());
             }
             else
             {
@@ -103,7 +183,7 @@ void xxMaterial::CreatePipeline(xxDrawData const& data)
         }
         if (m_depthStencilState == 0)
         {
-            m_depthStencilState = xxCreateDepthStencilState(m_device, DepthTest, DepthWrite);
+            m_depthStencilState = xxCreateDepthStencilState(m_device, DepthTest.c_str(), DepthWrite);
         }
         if (m_rasterizerState == 0)
         {
@@ -158,6 +238,7 @@ void xxMaterial::CreateConstant(xxDrawData const& data) const
 void xxMaterial::UpdateConstant(xxDrawData const& data) const
 {
     size_t size;
+    xxCamera* camera = data.camera;
     auto* constantData = data.constantData;
 
     size = constantData->vertexConstantSize;
@@ -171,7 +252,6 @@ void xxMaterial::UpdateConstant(xxDrawData const& data) const
                 xxMatrix4* wvp = reinterpret_cast<xxMatrix4*>(vector);
                 wvp[0] = data.node->WorldMatrix;
 
-                xxCamera* camera = data.camera;
                 if (camera)
                 {
                     wvp[1] = camera->ViewMatrix;
@@ -184,25 +264,32 @@ void xxMaterial::UpdateConstant(xxDrawData const& data) const
                 }
                 vector += 3 * 4;
                 size -= 3 * sizeof(xxMatrix4);
+            }
 
-                if (Lighting && size >= 5 * sizeof(xxVector4))
+            if (Blending && size >= 1 * sizeof(xxVector4))
+            {
+                vector[0].x = Opacity;
+                vector += 1;
+                size -= 1 * sizeof(xxVector4);
+            }
+
+            if (Lighting && size >= 5 * sizeof(xxVector4))
+            {
+                if (camera)
                 {
-                    if (camera)
-                    {
-                        vector[0].xyz = camera->LightDirection;
-                        vector[1].xyz = camera->LightColor;
-                    }
-                    else
-                    {
-                        vector[0].xyz = xxVector3::Y;
-                        vector[1].xyz = xxVector3::WHITE;
-                    }
-                    vector[2].xyz = AmbientColor;
-                    vector[3].xyz = DiffuseColor;
-                    vector[4].xyz = EmissiveColor;
-                    vector += 5;
-                    size -= 5 * sizeof(xxVector4);
+                    vector[0].xyz = camera->LightDirection;
+                    vector[1].xyz = camera->LightColor;
                 }
+                else
+                {
+                    vector[0].xyz = xxVector3::Y;
+                    vector[1].xyz = xxVector3::WHITE;
+                }
+                vector[2].xyz = AmbientColor;
+                vector[3].xyz = DiffuseColor;
+                vector[4].xyz = EmissiveColor;
+                vector += 5;
+                size -= 5 * sizeof(xxVector4);
             }
             xxUnmapBuffer(m_device, constantData->vertexConstant);
         }
@@ -216,7 +303,6 @@ void xxMaterial::UpdateConstant(xxDrawData const& data) const
         {
             if (Specular && size >= 3 * sizeof(xxVector4))
             {
-                xxCamera* camera = data.camera;
                 if (camera)
                 {
                     vector[0].xyz = camera->Location;
@@ -266,10 +352,11 @@ std::string xxMaterial::GetShader(xxMesh const* mesh, int type) const
     shader += define("SHADER_COLOR", mesh->ColorCount);
     shader += define("SHADER_TEXTURE", mesh->TextureCount);
     shader += define("SHADER_UNIFORM", constantSize);
+    shader += define("SHADER_OPACITY", Blending ? 1 : 0);
     shader += define("SHADER_LIGHTING", mesh->NormalCount && Lighting ? 1 : 0);
     shader += define("SHADER_SPECULAR", mesh->NormalCount && Lighting && Specular ? 1 : 0);
     shader += ShaderOption;
-    shader += Shader;
+    shader += Shader.empty() ? ms_defaultShader : Shader;
 
     return shader;
 }
@@ -277,6 +364,10 @@ std::string xxMaterial::GetShader(xxMesh const* mesh, int type) const
 int xxMaterial::GetVertexConstantSize() const
 {
     int size = 3 * sizeof(xxMatrix4);
+    if (Blending)
+    {
+        size += 1 * sizeof(xxVector4);
+    }
     if (Lighting)
     {
         size += 5 * sizeof(xxVector4);
@@ -484,13 +575,17 @@ vertex Varying Main(Attribute attr [[stage_in]],
     color = attrColor;
 #endif
 
+    int uniIndex = 12;
+#if SHADER_OPACITY
+    color.a = uniBuffer[uniIndex++].x;
+#endif
 #if SHADER_LIGHTING
     float3 worldNormal = normalize(mul(float4(attrNormal, 1.0), world).xyz);
-    float3 lightDirection = uniBuffer[12].xyz;
-    float3 lightColor = uniBuffer[13].xyz;
-    float3 ambientColor = uniBuffer[14].xyz;
-    float3 diffuseColor = uniBuffer[15].xyz;
-    float3 emissiveColor = uniBuffer[16].xyz;
+    float3 lightDirection = uniBuffer[uniIndex++].xyz;
+    float3 lightColor = uniBuffer[uniIndex++].xyz;
+    float3 ambientColor = uniBuffer[uniIndex++].xyz;
+    float3 diffuseColor = uniBuffer[uniIndex++].xyz;
+    float3 emissiveColor = uniBuffer[uniIndex++].xyz;
     float3 N = worldNormal;
     float3 L = lightDirection;
     float lambert = dot(N, L);
@@ -572,11 +667,12 @@ fragment float4 Main(Varying vary [[stage_in]],
     color = color * sam.Diffuse.sample(sam.DiffuseSampler, vary.UV0);
 #endif
 
+    int uniIndex = 0;
 #if SHADER_SPECULAR
-    float3 cameraPosition = uniBuffer[0].xyz;
-    float3 lightDirection = uniBuffer[1].xyz;
-    float3 specularColor = uniBuffer[2].xyz;
-    float specularHighlight = uniBuffer[2].w;
+    float3 cameraPosition = uniBuffer[uniIndex++].xyz;
+    float3 lightDirection = uniBuffer[uniIndex++].xyz;
+    float3 specularColor = uniBuffer[uniIndex].xyz;
+    float specularHighlight = uniBuffer[uniIndex++].w;
     float3 L = lightDirection;
     float3 V = normalize(cameraPosition - varyWorldPosition);
     float3 N = normalize(varyWorldNormal);

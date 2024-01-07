@@ -21,6 +21,9 @@ public:
 
     static xxNodePtr Create();
 
+    bool                        BinaryRead(xxBinary& binary);
+    bool                        BinaryWrite(xxBinary& binary);
+
     xxNodePtr                   GetParent() const;
     xxNodePtr const&            GetChild(size_t index) const;
     size_t                      GetChildCount() const;
