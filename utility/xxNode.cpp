@@ -73,10 +73,10 @@ bool xxNode::BinaryRead(xxBinary& binary)
         if (child == nullptr || child->BinaryRead(binary) == false)
             return false;
 
-        m_children.push_back(child);
+        AttachChild(child);
     }
 
-    return true;
+    return binary.Safe;
 }
 //------------------------------------------------------------------------------
 bool xxNode::BinaryWrite(xxBinary& binary)
@@ -106,7 +106,7 @@ bool xxNode::BinaryWrite(xxBinary& binary)
             return false;
     }
 
-    return true;
+    return binary.Safe;
 }
 //------------------------------------------------------------------------------
 xxNodePtr xxNode::GetParent() const

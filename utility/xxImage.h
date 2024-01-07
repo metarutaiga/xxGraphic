@@ -22,7 +22,6 @@ public:
     bool            BinaryRead(xxBinary& binary);
     bool            BinaryWrite(xxBinary& binary);
 
-    void            Initialize();
     void*           operator () (int x = 0, int y = 0, int z = 0, int mipmap = 0, int array = 0);
 
     void            Invalidate();
@@ -35,6 +34,8 @@ public:
 
 protected:
     xxImage(uint64_t format, int width, int height, int depth, int mipmap, int array);
+
+    void            Initialize(uint64_t format, int width, int height, int depth, int mipmap, int array);
 
     uint64_t        m_device = 0;
     uint64_t        m_texture = 0;

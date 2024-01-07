@@ -13,14 +13,8 @@ void (*xxImage::ImageLoader)(xxImagePtr const& image, std::string const& path) =
 //  Texture
 //==============================================================================
 xxImage::xxImage(uint64_t format, int width, int height, int depth, int mipmap, int array)
-    :Format(format)
-    ,Width(width)
-    ,Height(height)
-    ,Depth(depth)
-    ,Mipmap(mipmap)
-    ,Array(array)
 {
-    Initialize();
+    Initialize(format, width, height, depth, mipmap, array);
 }
 //------------------------------------------------------------------------------
 xxImage::~xxImage()
@@ -77,7 +71,7 @@ bool xxImage::BinaryRead(xxBinary& binary)
     binary.Read(FilterMip);
     binary.Read(Anisotropic);
 
-    return true;
+    return binary.Safe;
 }
 //------------------------------------------------------------------------------
 bool xxImage::BinaryWrite(xxBinary& binary)
@@ -92,16 +86,17 @@ bool xxImage::BinaryWrite(xxBinary& binary)
     binary.Write(FilterMip);
     binary.Write(Anisotropic);
 
-    return true;
+    return binary.Safe;
 }
 //------------------------------------------------------------------------------
-void xxImage::Initialize()
+void xxImage::Initialize(uint64_t format, int width, int height, int depth, int mipmap, int array)
 {
-    int width = Width;
-    int height = Height;
-    int depth = Depth;
-    int mipmap = Mipmap;
-    int array = Array;
+    const_cast<uint64_t&>(Format) = format;
+    const_cast<int&>(Width) = width;
+    const_cast<int&>(Height) = height;
+    const_cast<int&>(Depth) = depth;
+    const_cast<int&>(Mipmap) = mipmap;
+    const_cast<int&>(Array) = array;
 
     if (width == 0 || height == 0 || depth == 0 || mipmap == 0 || array == 0)
         return;

@@ -66,7 +66,7 @@ bool xxMaterial::BinaryRead(xxBinary& binary)
     binary.Read(Cull);
     binary.Read(Scissor);
 
-    return true;
+    return binary.Safe;
 }
 //------------------------------------------------------------------------------
 bool xxMaterial::BinaryWrite(xxBinary& binary)
@@ -103,7 +103,7 @@ bool xxMaterial::BinaryWrite(xxBinary& binary)
     binary.Write(Cull);
     binary.Write(Scissor);
 
-    return true;
+    return binary.Safe;
 }
 //------------------------------------------------------------------------------
 void xxMaterial::Invalidate()
