@@ -23,7 +23,6 @@ protected:
 
     void*                               handle = nullptr;
     std::vector<std::shared_ptr<void>>  reference;
-    int                                 version = 0x20240107;
     int                                 called = 0;
     int                                 failed = 0;
 
@@ -32,20 +31,23 @@ public:
     template<typename T> bool           Write(T const& data)                    { return WriteBinary(&data, sizeof(T)); }
     template<typename T> bool           ReadArray(T* data, size_t size)         { return ReadBinary(data, sizeof(T) * size); }
     template<typename T> bool           WriteArray(T const* data, size_t size)  { return WriteBinary(data, sizeof(T) * size); }
+    bool                                ReadSize(size_t& size);
+    bool                                WriteSize(size_t size);
     bool                                ReadString(std::string& string);
     bool                                WriteString(std::string const& string);
 
     std::string                         Path;
+    int                                 Version = 0x20240108;
+    bool                                Safe = true;
 
     template<class T>
     std::shared_ptr<T> ReadReference()
     {
-        int16_t id = 0;
-        if (Read(id) == false)
+        size_t index = 0;
+        if (ReadSize(index) == false)
             return nullptr;
 
-        size_t index = id;
-        if (reference.size() < index || index == SIZE_T_MAX)
+        if (reference.size() < index)
             return nullptr;
 
         if (reference.size() == index)
@@ -62,7 +64,7 @@ public:
     template<class T>
     bool WriteReference(std::shared_ptr<T>& input)
     {
-        size_t index = input ? reference.size() : SIZE_T_MAX;
+        size_t index = reference.size();
         for (size_t i = 0; i < reference.size(); ++i)
         {
             if (reference[i].get() == input.get())
@@ -72,8 +74,7 @@ public:
             }
         }
 
-        int16_t id = (int16_t)index;
-        if (Write(id) == false)
+        if (WriteSize(index) == false)
             return false;
 
         if (reference.size() == index)

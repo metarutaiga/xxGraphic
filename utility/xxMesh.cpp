@@ -56,7 +56,7 @@ bool xxMesh::BinaryRead(xxBinary& binary)
     binary.ReadArray(m_vertex, Stride * m_vertexCount);
     binary.ReadArray(m_index, m_indexCount);
 
-    return true;
+    return binary.Safe;
 }
 //------------------------------------------------------------------------------
 bool xxMesh::BinaryWrite(xxBinary& binary)
@@ -74,7 +74,7 @@ bool xxMesh::BinaryWrite(xxBinary& binary)
     binary.WriteArray(m_vertex, Stride * m_vertexCount);
     binary.WriteArray(m_index, m_indexCount);
 
-    return true;
+    return binary.Safe;
 }
 //------------------------------------------------------------------------------
 void xxMesh::Invalidate()

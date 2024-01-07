@@ -51,7 +51,7 @@ bool xxCamera::BinaryRead(xxBinary& binary)
     binary.Read(LightDirection);
     binary.Read(LightColor);
 
-    return true;
+    return binary.Safe;
 }
 //------------------------------------------------------------------------------
 bool xxCamera::BinaryWrite(xxBinary& binary)
@@ -77,7 +77,7 @@ bool xxCamera::BinaryWrite(xxBinary& binary)
     binary.Write(LightDirection);
     binary.Write(LightColor);
 
-    return true;
+    return binary.Safe;
 }
 //------------------------------------------------------------------------------
 void xxCamera::Update()
