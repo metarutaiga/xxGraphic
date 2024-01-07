@@ -15,6 +15,9 @@ public:
 
     static xxMaterialPtr Create();
 
+    bool                BinaryRead(xxBinary& binary);
+    bool                BinaryWrite(xxBinary& binary);
+
     void                Invalidate();
     void                Update(xxDrawData const& data);
     void                Set(xxDrawData const& data) const;
@@ -44,7 +47,7 @@ protected:
 public:
     std::string         Name = "";
 
-    char const*         Shader = ms_defaultShader;
+    std::string         Shader = "";
     std::string         ShaderOption = "";
 
     xxVector3           AmbientColor = xxVector3::ZERO;
@@ -52,19 +55,20 @@ public:
     xxVector3           EmissiveColor = xxVector3::ZERO;
     xxVector3           SpecularColor = xxVector3::ZERO;
     float               SpecularHighlight = 0.0f;
+    float               Opacity = 1.0f;
 
     bool                Lighting = false;
     bool                Specular = false;
 
     bool                Blending = false;
-    char const*         BlendSourceColor = "SrcAlpha";
-    char const*         BlendOperationColor = "+";
-    char const*         BlendDestinationColor = "1-SrcAlpha";
-    char const*         BlendSourceAlpha = "1";
-    char const*         BlendOperationAlpha = "+";
-    char const*         BlendDestinationAlpha = "0";
+    std::string         BlendSourceColor = "SrcAlpha";
+    std::string         BlendOperationColor = "+";
+    std::string         BlendDestinationColor = "1-SrcAlpha";
+    std::string         BlendSourceAlpha = "1";
+    std::string         BlendOperationAlpha = "+";
+    std::string         BlendDestinationAlpha = "0";
 
-    char const*         DepthTest = "Always";
+    std::string         DepthTest = "Always";
     bool                DepthWrite = false;
 
     bool                Cull = false;

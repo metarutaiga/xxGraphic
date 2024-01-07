@@ -4,6 +4,7 @@
 // Copyright (c) 2019-2024 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
+#include "xxBinary.h"
 #include "xxCamera.h"
 
 //==============================================================================
@@ -27,6 +28,58 @@ xxCameraPtr xxCamera::Create()
     return camera;
 }
 //------------------------------------------------------------------------------
+bool xxCamera::BinaryRead(xxBinary& binary)
+{
+    binary.ReadString(Name);
+
+    binary.Read(m_frustumLeft);
+    binary.Read(m_frustumRight);
+    binary.Read(m_frustumBottom);
+    binary.Read(m_frustumTop);
+    binary.Read(m_frustumNear);
+    binary.Read(m_frustumFar);
+
+    binary.Read(ViewMatrix);
+    binary.Read(ProjectionMatrix);
+//  binary.Read(ViewportMatrix);
+
+    binary.Read(Right);
+    binary.Read(Up);
+    binary.Read(Direction);
+    binary.Read(Location);
+
+    binary.Read(LightDirection);
+    binary.Read(LightColor);
+
+    return true;
+}
+//------------------------------------------------------------------------------
+bool xxCamera::BinaryWrite(xxBinary& binary)
+{
+    binary.WriteString(Name);
+
+    binary.Write(m_frustumLeft);
+    binary.Write(m_frustumRight);
+    binary.Write(m_frustumBottom);
+    binary.Write(m_frustumTop);
+    binary.Write(m_frustumNear);
+    binary.Write(m_frustumFar);
+
+    binary.Write(ViewMatrix);
+    binary.Write(ProjectionMatrix);
+//  binary.Write(ViewportMatrix);
+
+    binary.Write(Right);
+    binary.Write(Up);
+    binary.Write(Direction);
+    binary.Write(Location);
+
+    binary.Write(LightDirection);
+    binary.Write(LightColor);
+
+    return true;
+}
+//------------------------------------------------------------------------------
 void xxCamera::Update()
 {
     float l = m_frustumLeft;
@@ -47,7 +100,7 @@ void xxCamera::Update()
     ProjectionMatrix.v[2] = {                 0,                 0,      (f) / (f - n), 1 };
     ProjectionMatrix.v[3] = {                 0,                 0, (f * -n) / (f - n), 0 };
 
-    ProjectionMatrix = ProjectionMatrix * m_viewportMatrix;
+    ProjectionMatrix = ProjectionMatrix * ViewportMatrix;
 }
 //------------------------------------------------------------------------------
 void xxCamera::LookAt(xxVector3 const& worldPoint, xxVector3 const& worldUp)
@@ -90,10 +143,10 @@ void xxCamera::SetViewportMatrix(float fromWidth, float fromHeight, float toX, f
     float translateX = (newCenterX - oldCenterX) * 2.0f / fromWidth;
     float translateY = -(newCenterY - oldCenterY) * 2.0f / fromHeight;
 
-    m_viewportMatrix.v[0] = {     scaleX,          0, 0, 0 };
-    m_viewportMatrix.v[1] = {          0,     scaleY, 0, 0 };
-    m_viewportMatrix.v[2] = {          0,          0, 1, 0 };
-    m_viewportMatrix.v[3] = { translateX, translateY, 0, 0 };
+    ViewportMatrix.v[0] = {     scaleX,          0, 0, 0 };
+    ViewportMatrix.v[1] = {          0,     scaleY, 0, 0 };
+    ViewportMatrix.v[2] = {          0,          0, 1, 0 };
+    ViewportMatrix.v[3] = { translateX, translateY, 0, 0 };
 }
 //------------------------------------------------------------------------------
 xxVector3 xxCamera::GetDirectionFromScreenPos(float x, float y) const

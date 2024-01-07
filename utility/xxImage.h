@@ -13,18 +13,25 @@ class xxPlusAPI xxImage
 public:
     virtual ~xxImage();
 
+    static xxImagePtr Create();
     static xxImagePtr Create(uint64_t format, int width, int height, int depth, int mipmap, int array);
     static xxImagePtr Create2D(uint64_t format, int width, int height, int mipmap);
     static xxImagePtr Create3D(uint64_t format, int width, int height, int depth, int mipmap);
     static xxImagePtr CreateCube(uint64_t format, int width, int height, int mipmap);
 
-    void* operator () (int x = 0, int y = 0, int z = 0, int mipmap = 0, int array = 0);
+    bool            BinaryRead(xxBinary& binary);
+    bool            BinaryWrite(xxBinary& binary);
+
+    void            Initialize();
+    void*           operator () (int x = 0, int y = 0, int z = 0, int mipmap = 0, int array = 0);
 
     void            Invalidate();
     void            Update(uint64_t device);
 
     uint64_t        GetTexture() const;
     uint64_t        GetSampler() const;
+
+    static void   (*ImageLoader)(xxImagePtr const& image, std::string const& path);
 
 protected:
     xxImage(uint64_t format, int width, int height, int depth, int mipmap, int array);

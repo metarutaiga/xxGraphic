@@ -213,11 +213,13 @@ inline T xxTemplateBlendFactor(char const* name)
         case 'O':
         case 'o':
         case '1':
+        case 'I':
+        case 'i':
             o = true;
             break;
         case 'S':
         case 's':
-            if (s) break;
+            if (d) break;
             s = true;
             break;
         case 'Z':

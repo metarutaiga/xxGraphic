@@ -15,6 +15,9 @@ public:
 
     static xxCameraPtr Create();
 
+    bool        BinaryRead(xxBinary& binary);
+    bool        BinaryWrite(xxBinary& binary);
+
     void        Update();
 
     void        LookAt(xxVector3 const& worldPoint, xxVector3 const& worldUp);
@@ -26,8 +29,6 @@ public:
 
 protected:
     xxCamera();
-
-    xxMatrix4   m_viewportMatrix = xxMatrix4::IDENTITY;
 
     float       m_frustumLeft = -0.5f;
     float       m_frustumRight = 0.5f;
@@ -41,6 +42,7 @@ public:
 
     xxMatrix4   ViewMatrix = xxMatrix4::IDENTITY;
     xxMatrix4   ProjectionMatrix = xxMatrix4::IDENTITY;
+    xxMatrix4   ViewportMatrix = xxMatrix4::IDENTITY;
 
     xxVector3   Right = xxVector3::Z;
     xxVector3   Up = xxVector3::Y;

@@ -13,6 +13,8 @@
 #include <string>
 #include <vector>
 
+class xxBinary;
+
 struct xxConstantData;
 struct xxDrawData;
 

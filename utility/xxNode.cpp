@@ -5,6 +5,8 @@
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "xxGraphic.h"
+#include "xxBinary.h"
+#include "xxCamera.h"
 #include "xxImage.h"
 #include "xxMaterial.h"
 #include "xxMesh.h"
@@ -41,6 +43,70 @@ xxNodePtr xxNode::Create()
 
     node->m_this = node;
     return node;
+}
+//------------------------------------------------------------------------------
+bool xxNode::BinaryRead(xxBinary& binary)
+{
+    binary.ReadString(Name);
+
+    binary.Read(LocalMatrix);
+
+    Camera = binary.ReadReference<xxCamera>();
+
+    uint16_t imageCount = 0;
+    binary.Read(imageCount);
+    for (size_t i = 0; i < imageCount; ++i)
+    {
+        xxImagePtr image = binary.ReadReference<xxImage>();
+        xxImage::ImageLoader(image, binary.Path);
+        Images.push_back(image);
+    }
+
+    Material = binary.ReadReference<xxMaterial>();
+    Mesh = binary.ReadReference<xxMesh>();
+
+    uint16_t childCount = 0;
+    binary.Read(childCount);
+    for (size_t i = 0; i < childCount; ++i)
+    {
+        xxNodePtr child = xxNode::Create();
+        if (child == nullptr || child->BinaryRead(binary) == false)
+            return false;
+
+        m_children.push_back(child);
+    }
+
+    return true;
+}
+//------------------------------------------------------------------------------
+bool xxNode::BinaryWrite(xxBinary& binary)
+{
+    binary.WriteString(Name);
+
+    binary.Write(LocalMatrix);
+
+    binary.WriteReference(Camera);
+
+    uint16_t imageCount = (uint16_t)Images.size();
+    binary.Write(imageCount);
+    for (size_t i = 0; i < imageCount; ++i)
+    {
+        binary.WriteReference(Images[i]);
+    }
+
+    binary.WriteReference(Material);
+    binary.WriteReference(Mesh);
+
+    uint16_t childCount = (uint16_t)m_children.size();
+    binary.Write(childCount);
+    for (size_t i = 0; i < childCount; ++i)
+    {
+        xxNodePtr const& child = m_children[i];
+        if (child == nullptr || child->BinaryWrite(binary) == false)
+            return false;
+    }
+
+    return true;
 }
 //------------------------------------------------------------------------------
 xxNodePtr xxNode::GetParent() const

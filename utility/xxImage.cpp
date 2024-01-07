@@ -5,8 +5,10 @@
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "xxGraphic.h"
+#include "xxBinary.h"
 #include "xxImage.h"
 
+void (*xxImage::ImageLoader)(xxImagePtr const& image, std::string const& path) = [](xxImagePtr const&, std::string const&){};
 //==============================================================================
 //  Texture
 //==============================================================================
@@ -18,25 +20,7 @@ xxImage::xxImage(uint64_t format, int width, int height, int depth, int mipmap, 
     ,Mipmap(mipmap)
     ,Array(array)
 {
-    for (int i = 0; i < mipmap; ++i)
-    {
-        if (width == 0)
-            width = 1;
-        if (height == 0)
-            height = 1;
-        if (depth == 0)
-            depth = 1;
-
-        xxFree(m_images[i]);
-        size_t size = xxSizeOf(uint32_t) * width * height * depth * array;
-        m_images[i] = xxAlloc(char, size);
-
-        width >>= 1;
-        height >>= 1;
-        depth >>= 1;
-    }
-
-    m_imageModified = true;
+    Initialize();
 }
 //------------------------------------------------------------------------------
 xxImage::~xxImage()
@@ -44,6 +28,15 @@ xxImage::~xxImage()
     Invalidate();
     for (void* image : m_images)
         xxFree(image);
+}
+//------------------------------------------------------------------------------
+xxImagePtr xxImage::Create()
+{
+    xxImagePtr image = xxImagePtr(new xxImage(0, 0, 0, 0, 0, 0));
+    if (image == nullptr)
+        return xxImagePtr();
+
+    return image;
 }
 //------------------------------------------------------------------------------
 xxImagePtr xxImage::Create(uint64_t format, int width, int height, int depth, int mipmap, int array)
@@ -70,6 +63,66 @@ xxImagePtr xxImage::Create3D(uint64_t format, int width, int height, int depth, 
 xxImagePtr xxImage::CreateCube(uint64_t format, int width, int height, int mipmap)
 {
     return Create(format, width, height, 1, mipmap, 6);
+}
+//------------------------------------------------------------------------------
+bool xxImage::BinaryRead(xxBinary& binary)
+{
+    binary.ReadString(Name);
+
+    binary.Read(ClampU);
+    binary.Read(ClampV);
+    binary.Read(ClampW);
+    binary.Read(FilterMag);
+    binary.Read(FilterMin);
+    binary.Read(FilterMip);
+    binary.Read(Anisotropic);
+
+    return true;
+}
+//------------------------------------------------------------------------------
+bool xxImage::BinaryWrite(xxBinary& binary)
+{
+    binary.WriteString(Name);
+
+    binary.Write(ClampU);
+    binary.Write(ClampV);
+    binary.Write(ClampW);
+    binary.Write(FilterMag);
+    binary.Write(FilterMin);
+    binary.Write(FilterMip);
+    binary.Write(Anisotropic);
+
+    return true;
+}
+//------------------------------------------------------------------------------
+void xxImage::Initialize()
+{
+    int width = Width;
+    int height = Height;
+    int depth = Depth;
+    int mipmap = Mipmap;
+    int array = Array;
+
+    if (width == 0 || height == 0 || depth == 0 || mipmap == 0 || array == 0)
+        return;
+
+    for (int i = 0; i < mipmap; ++i)
+    {
+        if (width == 0)
+            width = 1;
+        if (height == 0)
+            height = 1;
+        if (depth == 0)
+            depth = 1;
+
+        xxFree(m_images[i]);
+        size_t size = xxSizeOf(uint32_t) * width * height * depth * array;
+        m_images[i] = xxAlloc(char, size);
+
+        width >>= 1;
+        height >>= 1;
+        depth >>= 1;
+    }
 }
 //------------------------------------------------------------------------------
 void* xxImage::operator () (int x, int y, int z, int mipmap, int array)

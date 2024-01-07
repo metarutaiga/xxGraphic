@@ -16,9 +16,12 @@ class xxPlusAPI xxMesh
 public:
     virtual ~xxMesh();
 
-    static xxMeshPtr Create(int normal, int color, int texture);
+    static xxMeshPtr Create(int normal = 0, int color = 0, int texture = 0);
 
     typedef uint16_t IndexType;
+
+    bool                        BinaryRead(xxBinary& binary);
+    bool                        BinaryWrite(xxBinary& binary);
 
     void                        Invalidate();
     void                        Update(uint64_t device);
@@ -47,11 +50,11 @@ protected:
     uint64_t                    m_vertexBuffers[4] = {};
     uint64_t                    m_indexBuffers[4] = {};
 
-    char*                       m_vertex = nullptr;
-    IndexType*                  m_index = nullptr;
-
     int                         m_vertexCount = 0;
     int                         m_indexCount = 0;
+
+    char*                       m_vertex = nullptr;
+    IndexType*                  m_index = nullptr;
 
     bool                        m_vertexDataModified = false;
     bool                        m_vertexSizeChanged = false;
