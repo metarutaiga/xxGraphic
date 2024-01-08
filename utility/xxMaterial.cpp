@@ -32,6 +32,8 @@ xxMaterialPtr xxMaterial::Create()
     return material;
 }
 //------------------------------------------------------------------------------
+xxMaterialPtr (*xxMaterial::BinaryCreate)() = xxMaterial::Create;
+//------------------------------------------------------------------------------
 bool xxMaterial::BinaryRead(xxBinary& binary)
 {
     binary.ReadString(Name);

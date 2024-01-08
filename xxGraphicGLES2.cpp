@@ -87,6 +87,7 @@ void xxDestroyInstanceGLES2(uint64_t instance)
 //==============================================================================
 uint64_t xxCreateDeviceGLES2(uint64_t instance)
 {
+    xxLog("xxGraphic", "%s %s %s %s", glGetString(GL_VENDOR), glGetString(GL_RENDERER), glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
     return instance;
 }
 //------------------------------------------------------------------------------
@@ -661,7 +662,7 @@ static void checkShader(GLuint glShader, char const* shader)
     glGetShaderiv(glShader, GL_COMPILE_STATUS, &status);
     if (status == GL_FALSE)
     {
-        xxLog("xxGraphicGLES2", "failed to compile %d", glShader);
+        xxLog("xxGraphic", "failed to compile %d", glShader);
         char* dup = strdup(shader);
         if (dup)
         {
@@ -670,7 +671,7 @@ static void checkShader(GLuint glShader, char const* shader)
             char* line = strsep(&lasts, "\r\n");
             while (line)
             {
-                xxLog("xxGraphicGLES2", "%d : %s", index++, line);
+                xxLog("xxGraphic", "%d : %s", index++, line);
                 line = strsep(&lasts, "\r\n");
             }
             free(dup);
@@ -688,7 +689,7 @@ static void checkShader(GLuint glShader, char const* shader)
             char* line = strsep(&lasts, "\r\n");
             while (line)
             {
-                xxLog("xxGraphicGLES2", "%s", line);
+                xxLog("xxGraphic", "%s", line);
                 line = strsep(&lasts, "\r\n");
             }
             xxFree(log);
@@ -775,7 +776,7 @@ static void checkProgram(GLuint glProgram)
     glGetProgramiv(glProgram, GL_LINK_STATUS, &status);
     if (status == GL_FALSE)
     {
-        xxLog("xxGraphicGLES2", "failed to link %u", glProgram);
+        xxLog("xxGraphic", "failed to link %u", glProgram);
 
         GLint length = 0;
         glGetProgramiv(glProgram, GL_INFO_LOG_LENGTH, &length);
@@ -789,7 +790,7 @@ static void checkProgram(GLuint glProgram)
             char* line = strsep(&lasts, "\r\n");
             while (line)
             {
-                xxLog("xxGraphicGLES2", "%s", line);
+                xxLog("xxGraphic", "%s", line);
                 line = strsep(&lasts, "\r\n");
             }
             xxFree(log);

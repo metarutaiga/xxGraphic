@@ -16,12 +16,13 @@ class xxPlusAPI xxMesh
 public:
     virtual ~xxMesh();
 
-    static xxMeshPtr Create(int normal = 0, int color = 0, int texture = 0);
-
     typedef uint16_t IndexType;
 
-    bool                        BinaryRead(xxBinary& binary);
-    bool                        BinaryWrite(xxBinary& binary);
+    static xxMeshPtr            Create(int normal = 0, int color = 0, int texture = 0);
+
+    static xxMeshPtr          (*BinaryCreate)();
+    virtual bool                BinaryRead(xxBinary& binary);
+    virtual bool                BinaryWrite(xxBinary& binary);
 
     void                        Invalidate();
     void                        Update(uint64_t device);

@@ -27,6 +27,8 @@ xxCameraPtr xxCamera::Create()
     return camera;
 }
 //------------------------------------------------------------------------------
+xxCameraPtr (*xxCamera::BinaryCreate)() = xxCamera::Create;
+//------------------------------------------------------------------------------
 bool xxCamera::BinaryRead(xxBinary& binary)
 {
     binary.ReadString(Name);

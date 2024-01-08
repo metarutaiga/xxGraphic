@@ -42,7 +42,7 @@ public:
     template<class T>
     std::shared_ptr<T> ReadReference()
     {
-        auto create = reinterpret_cast<std::shared_ptr<xxBinary>(*)()>(&T::Create);
+        auto create = []() { auto ptr = T::BinaryCreate(); return reinterpret_cast<std::shared_ptr<xxBinary>&>(ptr); };
         auto read = reinterpret_cast<bool(xxBinary::*)(xxBinary&)>(&T::BinaryRead);
         std::shared_ptr<xxBinary> pointer = ReadReferenceInternal(create, read);
         return reinterpret_cast<std::shared_ptr<T>&>(pointer);

@@ -24,10 +24,12 @@ xxImage::~xxImage()
         xxFree(image);
 }
 //------------------------------------------------------------------------------
-xxImagePtr xxImage::Create()
+xxImagePtr xxImage::Create(uint64_t format, int width, int height, int depth, int mipmap, int array)
 {
-    xxImagePtr image = xxImagePtr(new xxImage(0, 0, 0, 0, 0, 0));
+    xxImagePtr image = xxImagePtr(new xxImage(format, width, height, depth, mipmap, array));
     if (image == nullptr)
+        return xxImagePtr();
+    if (width && height && depth && mipmap && array && image->m_images[0] == nullptr)
         return xxImagePtr();
 
     return image;
@@ -35,29 +37,20 @@ xxImagePtr xxImage::Create()
 //------------------------------------------------------------------------------
 xxImagePtr xxImage::Create2D(uint64_t format, int width, int height, int mipmap)
 {
-    return CreateArray(format, width, height, 1, mipmap, 1);
+    return Create(format, width, height, 1, mipmap, 1);
 }
 //------------------------------------------------------------------------------
 xxImagePtr xxImage::Create3D(uint64_t format, int width, int height, int depth, int mipmap)
 {
-    return CreateArray(format, width, height, depth, mipmap, 1);
+    return Create(format, width, height, depth, mipmap, 1);
 }
 //------------------------------------------------------------------------------
 xxImagePtr xxImage::CreateCube(uint64_t format, int width, int height, int mipmap)
 {
-    return CreateArray(format, width, height, 1, mipmap, 6);
+    return Create(format, width, height, 1, mipmap, 6);
 }
 //------------------------------------------------------------------------------
-xxImagePtr xxImage::CreateArray(uint64_t format, int width, int height, int depth, int mipmap, int array)
-{
-    xxImagePtr image = xxImagePtr(new xxImage(format, width, height, depth, mipmap, array));
-    if (image == nullptr)
-        return xxImagePtr();
-    if (image->m_images[0] == nullptr)
-        return xxImagePtr();
-
-    return image;
-}
+xxImagePtr (*xxImage::BinaryCreate)() = []() { return xxImage::Create(0, 0, 0, 0, 0, 0); };
 //------------------------------------------------------------------------------
 bool xxImage::BinaryRead(xxBinary& binary)
 {
