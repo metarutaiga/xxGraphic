@@ -5,9 +5,8 @@
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "xxNode.h"
+#include "xxFile.h"
 #include "xxBinary.h"
-
-#define SIGNATURE "DoubleCross"
 
 //==============================================================================
 //  Binary
@@ -18,64 +17,62 @@ xxBinary::xxBinary()
 //------------------------------------------------------------------------------
 xxBinary::~xxBinary()
 {
-
 }
 //------------------------------------------------------------------------------
-xxNodePtr xxBinary::Load(char const* path)
+xxNodePtr xxBinary::Load(char const* name)
 {
     xxNodePtr node;
 
-    FILE* file = fopen(path, "rb");
+    xxFile* file = xxFile::Load(name);
     if (file)
     {
-        handle = file;
-        reference.resize(1);
+        xxBinary binary;
 
-        size_t pos;
-        Path = path;
-        if ((pos = Path.rfind('/')) != std::string::npos)
-            Path.resize(pos + 1);
-        else if ((pos = Path.rfind('\\')) != std::string::npos)
-            Path.resize(pos + 1);
+        binary.file = file;
+        binary.reference.resize(1);
+        const_cast<std::string&>(binary.Path) = xxFile::GetPath(name);
 
         char signature[12];
-        if (fread(signature, 12, 1, file) == 1 &&
-            fread(&Version, 4, 1, file) == 1 &&
-            strcmp(signature, SIGNATURE) == 0)
+        if (file->Read(signature, 12) &&
+            file->Read(const_cast<int*>(&binary.Version), 4) &&
+            strcmp(signature, xxBINARY_SIGNATURE) == 0)
         {
             node = xxNode::Create();
-            if (node == nullptr || node->BinaryRead(*this) == false)
+            if (node == nullptr || node->BinaryRead(binary) == false)
             {
                 node = nullptr;
             }
         }
 
-        fclose(file);
-        handle = nullptr;
+        delete file;
+        file = nullptr;
     }
 
     return node;
 }
 //------------------------------------------------------------------------------
-bool xxBinary::Save(char const* path, xxNodePtr const& node)
+bool xxBinary::Save(char const* name, xxNodePtr const& node)
 {
     bool succeed = false;
 
-    FILE* file = fopen(path, "wb");
+    xxFile* file = xxFile::Load(name);
     if (file)
     {
-        handle = file;
-        reference.resize(1);
+        xxBinary binary;
 
-        char signature[12] = SIGNATURE;
-        if (fwrite(signature, 12, 1, file) == 1 &&
-            fwrite(&Version, 4, 1, file) == 1)
+        binary.file = file;
+        binary.reference.resize(1);
+        const_cast<std::string&>(binary.Path) = xxFile::GetPath(name);
+
+        char signature[12] = xxBINARY_SIGNATURE;
+        if (file->Write(signature, 12) &&
+            file->Write(&binary.Version, 4))
         {
-            succeed = node->BinaryWrite(*this);
+            succeed = node->BinaryWrite(binary);
         }
 
-        fclose(file);
-        handle = nullptr;
+        delete file;
+        file = nullptr;
     }
 
     return succeed;
@@ -83,15 +80,14 @@ bool xxBinary::Save(char const* path, xxNodePtr const& node)
 //------------------------------------------------------------------------------
 bool xxBinary::ReadBinary(void* data, size_t size)
 {
-    FILE* file = reinterpret_cast<FILE*>(handle);
     if (file == nullptr || Safe == false)
         return false;
     called++;
 
-    if (size != 0 && fread(data, size, 1, file) != 1)
+    if (file->Read(data, size) == false)
     {
         failed = called;
-        Safe = false;
+        const_cast<bool&>(Safe) = false;
         return false;
     }
 
@@ -100,16 +96,60 @@ bool xxBinary::ReadBinary(void* data, size_t size)
 //------------------------------------------------------------------------------
 bool xxBinary::WriteBinary(void const* data, size_t size)
 {
-    FILE* file = reinterpret_cast<FILE*>(handle);
     if (file == nullptr || Safe == false)
         return false;
     called++;
 
-    if (size != 0 && fwrite(data, size, 1, file) != 1)
+    if (file->Write(data, size) == false)
     {
         failed = called;
-        Safe = false;
+        const_cast<bool&>(Safe) = false;
         return false;
+    }
+
+    return true;
+}
+//------------------------------------------------------------------------------
+std::shared_ptr<xxBinary> xxBinary::ReadReferenceInternal(std::shared_ptr<xxBinary>(*create)(), bool(xxBinary::*read)(xxBinary&))
+{
+    size_t index = 0;
+    if (ReadSize(index) == false)
+        return nullptr;
+
+    if (reference.size() < index)
+        return nullptr;
+
+    if (reference.size() == index)
+    {
+        std::shared_ptr<xxBinary> output = create();
+        if (output == nullptr || (output.get()->*read)(*this) == false)
+            return nullptr;
+        reference.push_back(output);
+    }
+
+    return reinterpret_cast<std::shared_ptr<xxBinary>&>(reference[index]);
+}
+//------------------------------------------------------------------------------
+bool xxBinary::WriteReferenceInternal(std::shared_ptr<xxBinary>& input, bool(xxBinary::*write)(xxBinary&))
+{
+    size_t index = reference.size();
+    for (size_t i = 0; i < reference.size(); ++i)
+    {
+        if (reference[i].get() == input.get())
+        {
+            index = i;
+            break;
+        }
+    }
+
+    if (WriteSize(index) == false)
+        return false;
+
+    if (reference.size() == index)
+    {
+        if ((input.get()->*write)(*this) == false)
+            return false;
+        reference.push_back(reinterpret_cast<std::shared_ptr<void>&>(input));
     }
 
     return true;

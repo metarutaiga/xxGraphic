@@ -14,10 +14,10 @@ public:
     virtual ~xxImage();
 
     static xxImagePtr Create();
-    static xxImagePtr Create(uint64_t format, int width, int height, int depth, int mipmap, int array);
     static xxImagePtr Create2D(uint64_t format, int width, int height, int mipmap);
     static xxImagePtr Create3D(uint64_t format, int width, int height, int depth, int mipmap);
     static xxImagePtr CreateCube(uint64_t format, int width, int height, int mipmap);
+    static xxImagePtr CreateArray(uint64_t format, int width, int height, int depth, int mipmap, int array);
 
     bool            BinaryRead(xxBinary& binary);
     bool            BinaryWrite(xxBinary& binary);

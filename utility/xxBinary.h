@@ -11,17 +11,20 @@
 class xxPlusAPI xxBinary
 {
 public:
+    static xxNodePtr                    Load(char const* name);
+    static bool                         Save(char const* name, xxNodePtr const& node);
+
+protected:
     xxBinary();
     virtual ~xxBinary();
 
-    virtual xxNodePtr                   Load(char const* path);
-    virtual bool                        Save(char const* path, xxNodePtr const& node);
+    bool                                ReadBinary(void* data, size_t size);
+    bool                                WriteBinary(void const* data, size_t size);
 
-protected:
-    virtual bool                        ReadBinary(void* data, size_t size);
-    virtual bool                        WriteBinary(void const* data, size_t size);
+    std::shared_ptr<xxBinary>           ReadReferenceInternal(std::shared_ptr<xxBinary>(*create)(), bool(xxBinary::*read)(xxBinary&));
+    bool                                WriteReferenceInternal(std::shared_ptr<xxBinary>& input, bool(xxBinary::*write)(xxBinary&));
 
-    void*                               handle = nullptr;
+    xxFile*                             file = nullptr;
     std::vector<std::shared_ptr<void>>  reference;
     int                                 called = 0;
     int                                 failed = 0;
@@ -36,54 +39,24 @@ public:
     bool                                ReadString(std::string& string);
     bool                                WriteString(std::string const& string);
 
-    std::string                         Path;
-    int                                 Version = 0x20240108;
-    bool                                Safe = true;
-
     template<class T>
     std::shared_ptr<T> ReadReference()
     {
-        size_t index = 0;
-        if (ReadSize(index) == false)
-            return nullptr;
-
-        if (reference.size() < index)
-            return nullptr;
-
-        if (reference.size() == index)
-        {
-            std::shared_ptr<T> output = T::Create();
-            if (output == nullptr || output->BinaryRead(*this) == false)
-                return nullptr;
-            reference.push_back(output);
-        }
-
-        return reinterpret_cast<std::shared_ptr<T>&>(reference[index]);
+        auto create = reinterpret_cast<std::shared_ptr<xxBinary>(*)()>(&T::Create);
+        auto read = reinterpret_cast<bool(xxBinary::*)(xxBinary&)>(&T::BinaryRead);
+        std::shared_ptr<xxBinary> pointer = ReadReferenceInternal(create, read);
+        return reinterpret_cast<std::shared_ptr<T>&>(pointer);
     }
 
     template<class T>
     bool WriteReference(std::shared_ptr<T>& input)
     {
-        size_t index = reference.size();
-        for (size_t i = 0; i < reference.size(); ++i)
-        {
-            if (reference[i].get() == input.get())
-            {
-                index = i;
-                break;
-            }
-        }
-
-        if (WriteSize(index) == false)
-            return false;
-
-        if (reference.size() == index)
-        {
-            if (input->BinaryWrite(*this) == false)
-                return false;
-            reference.push_back(reinterpret_cast<std::shared_ptr<void>&>(input));
-        }
-
-        return true;
+        auto pointer = reinterpret_cast<std::shared_ptr<xxBinary>&>(input);
+        auto write = reinterpret_cast<bool(xxBinary::*)(xxBinary&)>(&T::BinaryWrite);
+        return WriteReferenceInternal(pointer, write);
     }
+
+    std::string const                   Path;
+    int const                           Version = 0x20240108;
+    bool const                          Safe = true;
 };
