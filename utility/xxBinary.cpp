@@ -55,7 +55,7 @@ bool xxBinary::Save(char const* name, xxNodePtr const& node)
 {
     bool succeed = false;
 
-    xxFile* file = xxFile::Load(name);
+    xxFile* file = xxFile::Save(name);
     if (file)
     {
         xxBinary binary;

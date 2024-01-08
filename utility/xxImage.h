@@ -13,52 +13,52 @@ class xxPlusAPI xxImage
 public:
     virtual ~xxImage();
 
-    static xxImagePtr Create();
-    static xxImagePtr Create2D(uint64_t format, int width, int height, int mipmap);
-    static xxImagePtr Create3D(uint64_t format, int width, int height, int depth, int mipmap);
-    static xxImagePtr CreateCube(uint64_t format, int width, int height, int mipmap);
-    static xxImagePtr CreateArray(uint64_t format, int width, int height, int depth, int mipmap, int array);
+    static xxImagePtr   Create(uint64_t format, int width, int height, int depth, int mipmap, int array);
+    static xxImagePtr   Create2D(uint64_t format, int width, int height, int mipmap);
+    static xxImagePtr   Create3D(uint64_t format, int width, int height, int depth, int mipmap);
+    static xxImagePtr   CreateCube(uint64_t format, int width, int height, int mipmap);
 
-    bool            BinaryRead(xxBinary& binary);
-    bool            BinaryWrite(xxBinary& binary);
+    static xxImagePtr (*BinaryCreate)();
+    virtual bool        BinaryRead(xxBinary& binary);
+    virtual bool        BinaryWrite(xxBinary& binary);
 
-    void*           operator () (int x = 0, int y = 0, int z = 0, int mipmap = 0, int array = 0);
+    void*               operator () (int x = 0, int y = 0, int z = 0, int mipmap = 0, int array = 0);
 
-    void            Invalidate();
-    void            Update(uint64_t device);
+    void                Invalidate();
+    void                Update(uint64_t device);
 
-    uint64_t        GetTexture() const;
-    uint64_t        GetSampler() const;
+    uint64_t            GetTexture() const;
+    uint64_t            GetSampler() const;
 
-    static void   (*ImageLoader)(xxImagePtr const& image, std::string const& path);
+    static void       (*ImageLoader)(xxImagePtr const& image, std::string const& path);
 
 protected:
     xxImage(uint64_t format, int width, int height, int depth, int mipmap, int array);
 
-    void            Initialize(uint64_t format, int width, int height, int depth, int mipmap, int array);
+    void                Initialize(uint64_t format, int width, int height, int depth, int mipmap, int array);
 
-    uint64_t        m_device = 0;
-    uint64_t        m_texture = 0;
-    uint64_t        m_sampler = 0;
+    uint64_t            m_device = 0;
+    uint64_t            m_texture = 0;
+    uint64_t            m_sampler = 0;
 
-    void*           m_images[16] = {};
-    bool            m_imageModified = true;
+    void*               m_images[16] = {};
+    bool                m_imageModified = true;
 
 public:
-    std::string     Name = "";
+    std::string         Name = "";
 
-    uint64_t const  Format = 0;
-    int const       Width = 0;
-    int const       Height = 0;
-    int const       Depth = 0;
-    int const       Mipmap = 0;
-    int const       Array = 0;
+    uint64_t const      Format = 0;
+    int const           Width = 0;
+    int const           Height = 0;
+    int const           Depth = 0;
+    int const           Mipmap = 0;
+    int const           Array = 0;
 
-    bool            ClampU = true;
-    bool            ClampV = true;
-    bool            ClampW = true;
-    bool            FilterMag = true;
-    bool            FilterMin = true;
-    bool            FilterMip = true;
-    uint8_t         Anisotropic = 1;
+    bool                ClampU = true;
+    bool                ClampV = true;
+    bool                ClampW = true;
+    bool                FilterMag = true;
+    bool                FilterMin = true;
+    bool                FilterMip = true;
+    uint8_t             Anisotropic = 1;
 };

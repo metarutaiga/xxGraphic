@@ -38,6 +38,8 @@ xxMeshPtr xxMesh::Create(int normal, int color, int texture)
     return mesh;
 }
 //------------------------------------------------------------------------------
+xxMeshPtr (*xxMesh::BinaryCreate)() = []() { return Create(); };
+//------------------------------------------------------------------------------
 bool xxMesh::BinaryRead(xxBinary& binary)
 {
     binary.ReadString(Name);
