@@ -7,6 +7,7 @@
 #include "internal/xxGraphicInternalGL.h"
 #include "xxGraphicCGL.h"
 
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #define IOSurfaceGetWidth IOSurfaceGetWidth_unused
 #define IOSurfaceGetHeight IOSurfaceGetHeight_unused
 #define IOSurfaceLock IOSurfaceLock_unused

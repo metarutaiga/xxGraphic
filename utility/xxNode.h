@@ -49,6 +49,8 @@ public:
     void                        Update(float time, bool updateMatrix = true);
     void                        Draw(xxDrawData const& data);
 
+    static bool                 Traversal(std::function<bool(xxNodePtr const&)> callback, xxNodePtr const& node);
+
 protected:
     xxNode();
 

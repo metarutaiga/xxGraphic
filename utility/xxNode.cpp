@@ -168,23 +168,15 @@ bool xxNode::DetachChild(xxNodePtr const& node)
         node->m_parent.reset();
 
 #if HAVE_LINEAR_MATRIX
-        std::function<void(xxNode*)> resetMatrix = [&resetMatrix](xxNode* node)
+        Traversal([](xxNodePtr const& node)
         {
             xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&node->Name + sizeof(node->Name));
             node->m_classLocalMatrix = node->LocalMatrix;
             node->m_classWorldMatrix = node->WorldMatrix;
             pointer[0] = &node->m_classLocalMatrix;
             pointer[1] = &node->m_classWorldMatrix;
-
-            // Traversal
-            for (xxNodePtr const& child : node->m_children)
-            {
-                if (child == nullptr)
-                    continue;
-                resetMatrix(child.get());
-            }
-        };
-        resetMatrix(child.get());
+            return true;
+        }, child);
 #endif
 
         size_t i = std::distance<xxNodePtr const*>(m_children.data(), &child);
@@ -487,5 +479,17 @@ void xxNode::Draw(xxDrawData const& data)
     xxSetFragmentSamplers(data.commandEncoder, textureCount, samplers);
 
     Mesh->Draw(data.commandEncoder);
+}
+//------------------------------------------------------------------------------
+bool xxNode::Traversal(std::function<bool(xxNodePtr const&)> callback, xxNodePtr const& node)
+{
+    if (node == nullptr)
+        return false;
+    if (callback(node) == false)
+        return false;
+    for (xxNodePtr const& child : node->m_children)
+        if (Traversal(callback, child) == false)
+            return false;
+    return true;
 }
 //------------------------------------------------------------------------------

@@ -33,7 +33,22 @@ xxImagePtr xxImage::Create()
     return image;
 }
 //------------------------------------------------------------------------------
-xxImagePtr xxImage::Create(uint64_t format, int width, int height, int depth, int mipmap, int array)
+xxImagePtr xxImage::Create2D(uint64_t format, int width, int height, int mipmap)
+{
+    return CreateArray(format, width, height, 1, mipmap, 1);
+}
+//------------------------------------------------------------------------------
+xxImagePtr xxImage::Create3D(uint64_t format, int width, int height, int depth, int mipmap)
+{
+    return CreateArray(format, width, height, depth, mipmap, 1);
+}
+//------------------------------------------------------------------------------
+xxImagePtr xxImage::CreateCube(uint64_t format, int width, int height, int mipmap)
+{
+    return CreateArray(format, width, height, 1, mipmap, 6);
+}
+//------------------------------------------------------------------------------
+xxImagePtr xxImage::CreateArray(uint64_t format, int width, int height, int depth, int mipmap, int array)
 {
     xxImagePtr image = xxImagePtr(new xxImage(format, width, height, depth, mipmap, array));
     if (image == nullptr)
@@ -42,21 +57,6 @@ xxImagePtr xxImage::Create(uint64_t format, int width, int height, int depth, in
         return xxImagePtr();
 
     return image;
-}
-//------------------------------------------------------------------------------
-xxImagePtr xxImage::Create2D(uint64_t format, int width, int height, int mipmap)
-{
-    return Create(format, width, height, 1, mipmap, 1);
-}
-//------------------------------------------------------------------------------
-xxImagePtr xxImage::Create3D(uint64_t format, int width, int height, int depth, int mipmap)
-{
-    return Create(format, width, height, depth, mipmap, 1);
-}
-//------------------------------------------------------------------------------
-xxImagePtr xxImage::CreateCube(uint64_t format, int width, int height, int mipmap)
-{
-    return Create(format, width, height, 1, mipmap, 6);
 }
 //------------------------------------------------------------------------------
 bool xxImage::BinaryRead(xxBinary& binary)

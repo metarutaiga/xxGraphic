@@ -13,7 +13,10 @@
 #include <string>
 #include <vector>
 
+#define xxBINARY_SIGNATURE "DoubleCross"
+
 class xxBinary;
+class xxFile;
 
 struct xxConstantData;
 struct xxDrawData;
