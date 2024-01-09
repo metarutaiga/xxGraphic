@@ -46,7 +46,9 @@
 #   define ARM64_CNTPCT_EL0 ARM64_SYSREG(3,3,14,0,1)    // Counter-timer Physical Count register
 #   define ARM64_CNTVCT_EL0 ARM64_SYSREG(3,3,14,0,2)    // Counter-timer Virtual Count register
 #   if defined(_WIN32)
+#       include <shlobj.h>
 #       include <timeapi.h>
+#       pragma comment(lib, "shell32")
 #       pragma comment(lib, "winmm")
 #   endif
 #endif
@@ -365,6 +367,22 @@ int xxGetIncrementThreadId()
 //==============================================================================
 //  Path
 //==============================================================================
+char const* xxGetDocumentPath()
+{
+    static char path[4096];
+    if (path[0] != '\0')
+        return path;
+
+#if defined(xxWINDOWS)
+    SHGetFolderPathA(nullptr, CSIDL_MYDOCUMENTS, nullptr, SHGFP_TYPE_CURRENT, path);
+#else
+    strcpy(path, getenv("HOME"));
+    strcat(path, "/Documents");
+#endif
+
+    return path;
+}
+//------------------------------------------------------------------------------
 char const* xxGetExecutablePath()
 {
     static char path[4096];
@@ -459,16 +477,6 @@ char* xxOpenDirectory(uint64_t* handle, char const* path, ...)
         va_start(args, path);
         while (char const* match = va_arg(args, char const*))
         {
-#if defined(_MSC_VER)
-            auto strcasestr = [](char const* p1, char const* p2) -> char const*
-            {
-                for (size_t p2Length = strlen(p2); (*p1); p1++)
-                    if (strnicmp(p1, p2, p2Length) == 0)
-                        return p1;
-                return nullptr;
-            };
-#endif
-
             if (match[0] && strcasestr(filename, match) == nullptr)
             {
                 filename = nullptr;
@@ -526,19 +534,8 @@ void xxCloseDirectory(uint64_t* handle)
 //==============================================================================
 //  Logger
 //==============================================================================
-static void(*logCallback)(char const* tag, char const* format, va_list list) = nullptr;
-//------------------------------------------------------------------------------
-void xxLog(char const* tag, char const* format, ...)
+static void xxLogDefault(char const* tag, char const* format, ...)
 {
-    if (logCallback)
-    {
-        va_list va;
-        va_start(va, format);
-        logCallback(tag, format, va);
-        va_end(va);
-        return;
-    }
-
     va_list va;
     va_start(va, format);
 #if defined(xxANDROID)
@@ -564,10 +561,7 @@ void xxLog(char const* tag, char const* format, ...)
     va_end(va);
 }
 //------------------------------------------------------------------------------
-void xxLogCallback(void(*callback)(char const* tag, char const* format, va_list list))
-{
-    logCallback = callback;
-}
+void (*xxLog)(char const* tag, char const* format, ...) = xxLogDefault;
 //==============================================================================
 //  MD5 - omaha
 //  Copyright 2007-2009 Google Inc.
