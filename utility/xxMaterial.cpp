@@ -25,87 +25,11 @@ xxMaterial::~xxMaterial()
 //------------------------------------------------------------------------------
 xxMaterialPtr xxMaterial::Create()
 {
-    xxMaterialPtr material = xxMaterialPtr(new xxMaterial());
+    xxMaterialPtr material = xxMaterialPtr(new xxMaterial(), [](xxMaterial* material) { delete material; });
     if (material == nullptr)
-        return xxMaterialPtr();
+        return nullptr;
 
     return material;
-}
-//------------------------------------------------------------------------------
-xxMaterialPtr (*xxMaterial::BinaryCreate)() = xxMaterial::Create;
-//------------------------------------------------------------------------------
-bool xxMaterial::BinaryRead(xxBinary& binary)
-{
-    binary.ReadString(Name);
-
-    binary.ReadString(Shader);
-    binary.ReadString(ShaderOption);
-
-    binary.Read(AmbientColor);
-    binary.Read(DiffuseColor);
-    binary.Read(EmissiveColor);
-    binary.Read(SpecularColor);
-    binary.Read(SpecularHighlight);
-    binary.Read(Opacity);
-
-    binary.Read(Lighting);
-    binary.Read(Specular);
-
-    binary.Read(Blending);
-    if (Blending)
-    {
-        binary.ReadString(BlendSourceColor);
-        binary.ReadString(BlendOperationColor);
-        binary.ReadString(BlendDestinationColor);
-        binary.ReadString(BlendSourceAlpha);
-        binary.ReadString(BlendOperationAlpha);
-        binary.ReadString(BlendDestinationAlpha);
-    }
-
-    binary.ReadString(DepthTest);
-    binary.Read(DepthWrite);
-
-    binary.Read(Cull);
-    binary.Read(Scissor);
-
-    return binary.Safe;
-}
-//------------------------------------------------------------------------------
-bool xxMaterial::BinaryWrite(xxBinary& binary)
-{
-    binary.WriteString(Name);
-
-    binary.WriteString(Shader);
-    binary.WriteString(ShaderOption);
-
-    binary.Write(AmbientColor);
-    binary.Write(DiffuseColor);
-    binary.Write(EmissiveColor);
-    binary.Write(SpecularColor);
-    binary.Write(SpecularHighlight);
-    binary.Write(Opacity);
-
-    binary.Write(Lighting);
-    binary.Write(Specular);
-
-    binary.Write(Blending);
-    if (Blending)
-    {
-        binary.WriteString(BlendSourceColor);
-        binary.WriteString(BlendOperationColor);
-        binary.WriteString(BlendDestinationColor);
-        binary.WriteString(BlendSourceAlpha);
-        binary.WriteString(BlendOperationAlpha);
-        binary.WriteString(BlendDestinationAlpha);
-    }
-
-    binary.WriteString(DepthTest);
-    binary.Write(DepthWrite);
-
-    binary.Write(Cull);
-    binary.Write(Scissor);
-
-    return binary.Safe;
 }
 //------------------------------------------------------------------------------
 void xxMaterial::Invalidate()
@@ -385,6 +309,84 @@ int xxMaterial::GetFragmentConstantSize() const
         size += 3 * sizeof(xxVector4);
     }
     return size;
+}
+//==============================================================================
+//  Binary
+//==============================================================================
+xxMaterialPtr (*xxMaterial::BinaryCreate)() = xxMaterial::Create;
+//------------------------------------------------------------------------------
+bool xxMaterial::BinaryRead(xxBinary& binary)
+{
+    binary.ReadString(Name);
+
+    binary.ReadString(Shader);
+    binary.ReadString(ShaderOption);
+
+    binary.Read(AmbientColor);
+    binary.Read(DiffuseColor);
+    binary.Read(EmissiveColor);
+    binary.Read(SpecularColor);
+    binary.Read(SpecularHighlight);
+    binary.Read(Opacity);
+
+    binary.Read(Lighting);
+    binary.Read(Specular);
+
+    binary.Read(Blending);
+    if (Blending)
+    {
+        binary.ReadString(BlendSourceColor);
+        binary.ReadString(BlendOperationColor);
+        binary.ReadString(BlendDestinationColor);
+        binary.ReadString(BlendSourceAlpha);
+        binary.ReadString(BlendOperationAlpha);
+        binary.ReadString(BlendDestinationAlpha);
+    }
+
+    binary.ReadString(DepthTest);
+    binary.Read(DepthWrite);
+
+    binary.Read(Cull);
+    binary.Read(Scissor);
+
+    return binary.Safe;
+}
+//------------------------------------------------------------------------------
+bool xxMaterial::BinaryWrite(xxBinary& binary) const
+{
+    binary.WriteString(Name);
+
+    binary.WriteString(Shader);
+    binary.WriteString(ShaderOption);
+
+    binary.Write(AmbientColor);
+    binary.Write(DiffuseColor);
+    binary.Write(EmissiveColor);
+    binary.Write(SpecularColor);
+    binary.Write(SpecularHighlight);
+    binary.Write(Opacity);
+
+    binary.Write(Lighting);
+    binary.Write(Specular);
+
+    binary.Write(Blending);
+    if (Blending)
+    {
+        binary.WriteString(BlendSourceColor);
+        binary.WriteString(BlendOperationColor);
+        binary.WriteString(BlendDestinationColor);
+        binary.WriteString(BlendSourceAlpha);
+        binary.WriteString(BlendOperationAlpha);
+        binary.WriteString(BlendDestinationAlpha);
+    }
+
+    binary.WriteString(DepthTest);
+    binary.Write(DepthWrite);
+
+    binary.Write(Cull);
+    binary.Write(Scissor);
+
+    return binary.Safe;
 }
 //==============================================================================
 //  Default Shader

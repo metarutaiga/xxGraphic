@@ -17,12 +17,7 @@ class xxPlusAPI xxNode
     };
 
 public:
-    virtual ~xxNode();
-
     static xxNodePtr Create();
-
-    bool                        BinaryRead(xxBinary& binary);
-    bool                        BinaryWrite(xxBinary& binary);
 
     xxNodePtr                   GetParent() const;
     xxNodePtr const&            GetChild(size_t index) const;
@@ -51,8 +46,13 @@ public:
 
     static bool                 Traversal(std::function<bool(xxNodePtr const&)> callback, xxNodePtr const& node);
 
+    static xxNodePtr          (*BinaryCreate)();
+    bool                        BinaryRead(xxBinary& binary);
+    bool                        BinaryWrite(xxBinary& binary) const;
+
 protected:
     xxNode();
+    virtual ~xxNode();
 
     typedef std::weak_ptr<class xxNode> xxNodeWeakPtr;
 

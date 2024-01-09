@@ -14,15 +14,7 @@ struct xxStrideIterator;
 class xxPlusAPI xxMesh
 {
 public:
-    virtual ~xxMesh();
-
-    typedef uint16_t IndexType;
-
     static xxMeshPtr            Create(int normal = 0, int color = 0, int texture = 0);
-
-    static xxMeshPtr          (*BinaryCreate)();
-    virtual bool                BinaryRead(xxBinary& binary);
-    virtual bool                BinaryWrite(xxBinary& binary);
 
     void                        Invalidate();
     void                        Update(uint64_t device);
@@ -30,10 +22,7 @@ public:
 
     uint64_t                    GetVertexAttribute() const;
 
-    int                         GetVertexCount() const;
     void                        SetVertexCount(int count);
-
-    int                         GetIndexCount() const;
     void                        SetIndexCount(int count);
 
     xxStrideIterator<xxVector3> GetVertex() const;
@@ -41,21 +30,18 @@ public:
     xxStrideIterator<uint32_t>  GetColor(int index) const;
     xxStrideIterator<xxVector2> GetTexture(int index) const;
 
-    IndexType*                  GetIndex() const;
+    static xxMeshPtr          (*BinaryCreate)();
+    virtual bool                BinaryRead(xxBinary& binary);
+    virtual bool                BinaryWrite(xxBinary& binary) const;
 
 protected:
     xxMesh(int normal, int color, int texture);
+    virtual ~xxMesh();
 
     uint64_t                    m_device = 0;
     uint64_t                    m_vertexAttribute = 0;
     uint64_t                    m_vertexBuffers[4] = {};
     uint64_t                    m_indexBuffers[4] = {};
-
-    int                         m_vertexCount = 0;
-    int                         m_indexCount = 0;
-
-    char*                       m_vertex = nullptr;
-    IndexType*                  m_index = nullptr;
 
     bool                        m_vertexDataModified = false;
     bool                        m_vertexSizeChanged = false;
@@ -72,6 +58,13 @@ public:
     int const                   NormalCount = 0;
     int const                   ColorCount = 0;
     int const                   TextureCount = 0;
+
+    int const                   VertexCount = 0;
+    int const                   IndexCount = 0;
+
+    char* const                 Vertex = nullptr;
+    uint16_t* const             Index = nullptr;
+
 };
 
 template<class T>

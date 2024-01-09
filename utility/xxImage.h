@@ -11,16 +11,10 @@
 class xxPlusAPI xxImage
 {
 public:
-    virtual ~xxImage();
-
     static xxImagePtr   Create(uint64_t format, int width, int height, int depth, int mipmap, int array);
     static xxImagePtr   Create2D(uint64_t format, int width, int height, int mipmap);
     static xxImagePtr   Create3D(uint64_t format, int width, int height, int depth, int mipmap);
     static xxImagePtr   CreateCube(uint64_t format, int width, int height, int mipmap);
-
-    static xxImagePtr (*BinaryCreate)();
-    virtual bool        BinaryRead(xxBinary& binary);
-    virtual bool        BinaryWrite(xxBinary& binary);
 
     void*               operator () (int x = 0, int y = 0, int z = 0, int mipmap = 0, int array = 0);
 
@@ -32,8 +26,13 @@ public:
 
     static void       (*ImageLoader)(xxImagePtr const& image, std::string const& path);
 
+    static xxImagePtr (*BinaryCreate)();
+    virtual bool        BinaryRead(xxBinary& binary);
+    virtual bool        BinaryWrite(xxBinary& binary) const;
+
 protected:
     xxImage(uint64_t format, int width, int height, int depth, int mipmap, int array);
+    virtual ~xxImage();
 
     void                Initialize(uint64_t format, int width, int height, int depth, int mipmap, int array);
 

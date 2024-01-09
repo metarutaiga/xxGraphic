@@ -37,7 +37,7 @@ xxNodePtr xxBinary::Load(char const* name)
             file->Read(const_cast<int*>(&binary.Version), 4) &&
             strcmp(signature, xxBINARY_SIGNATURE) == 0)
         {
-            node = xxNode::Create();
+            node = xxNode::BinaryCreate();
             if (node == nullptr || node->BinaryRead(binary) == false)
             {
                 node = nullptr;
@@ -78,7 +78,7 @@ bool xxBinary::Save(char const* name, xxNodePtr const& node)
     return succeed;
 }
 //------------------------------------------------------------------------------
-bool xxBinary::ReadBinary(void* data, size_t size)
+bool xxBinary::Read(void* data, size_t size)
 {
     if (file == nullptr || Safe == false)
         return false;
@@ -94,7 +94,7 @@ bool xxBinary::ReadBinary(void* data, size_t size)
     return true;
 }
 //------------------------------------------------------------------------------
-bool xxBinary::WriteBinary(void const* data, size_t size)
+bool xxBinary::Write(void const* data, size_t size)
 {
     if (file == nullptr || Safe == false)
         return false;
@@ -110,7 +110,7 @@ bool xxBinary::WriteBinary(void const* data, size_t size)
     return true;
 }
 //------------------------------------------------------------------------------
-std::shared_ptr<xxBinary> xxBinary::ReadReferenceInternal(std::shared_ptr<xxBinary>(*create)(), bool(xxBinary::*read)(xxBinary&))
+xxUnknownPtr xxBinary::ReadReferenceInternal(xxUnknownPtr (*create)(), bool(xxBinary::*read)(xxBinary&))
 {
     size_t index = 0;
     if (ReadSize(index) == false)
@@ -121,21 +121,22 @@ std::shared_ptr<xxBinary> xxBinary::ReadReferenceInternal(std::shared_ptr<xxBina
 
     if (reference.size() == index)
     {
-        std::shared_ptr<xxBinary> output = create();
+        xxUnknownPtr unknown = create();
+        auto output = reinterpret_cast<std::shared_ptr<xxBinary>&>(unknown);
         if (output == nullptr || (output.get()->*read)(*this) == false)
             return nullptr;
-        reference.push_back(output);
+        reference.push_back(unknown);
     }
 
-    return reinterpret_cast<std::shared_ptr<xxBinary>&>(reference[index]);
+    return reinterpret_cast<xxUnknownPtr&>(reference[index]);
 }
 //------------------------------------------------------------------------------
-bool xxBinary::WriteReferenceInternal(std::shared_ptr<xxBinary>& input, bool(xxBinary::*write)(xxBinary&))
+bool xxBinary::WriteReferenceInternal(xxUnknownPtr const& unknown, bool(xxBinary::*write)(xxBinary&))
 {
     size_t index = reference.size();
     for (size_t i = 0; i < reference.size(); ++i)
     {
-        if (reference[i].get() == input.get())
+        if (reference[i] == unknown)
         {
             index = i;
             break;
@@ -147,9 +148,10 @@ bool xxBinary::WriteReferenceInternal(std::shared_ptr<xxBinary>& input, bool(xxB
 
     if (reference.size() == index)
     {
+        auto input = reinterpret_cast<std::shared_ptr<xxBinary> const&>(unknown);
         if ((input.get()->*write)(*this) == false)
             return false;
-        reference.push_back(reinterpret_cast<std::shared_ptr<void>&>(input));
+        reference.push_back(unknown);
     }
 
     return true;

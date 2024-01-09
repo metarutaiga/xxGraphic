@@ -11,13 +11,7 @@
 class xxPlusAPI xxMaterial
 {
 public:
-    virtual ~xxMaterial();
-
     static xxMaterialPtr    Create();
-
-    static xxMaterialPtr  (*BinaryCreate)();
-    virtual bool            BinaryRead(xxBinary& binary);
-    virtual bool            BinaryWrite(xxBinary& binary);
 
     void                    Invalidate();
     void                    Update(xxDrawData const& data);
@@ -27,8 +21,13 @@ public:
     virtual void            CreateConstant(xxDrawData const& data) const;
     virtual void            UpdateConstant(xxDrawData const& data) const;
 
+    static xxMaterialPtr  (*BinaryCreate)();
+    virtual bool            BinaryRead(xxBinary& binary);
+    virtual bool            BinaryWrite(xxBinary& binary) const;
+
 protected:
     xxMaterial();
+    virtual ~xxMaterial();
 
     virtual std::string     GetShader(xxMesh const* mesh, int type) const;
     virtual int             GetVertexConstantSize() const;

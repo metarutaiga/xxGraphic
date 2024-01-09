@@ -25,58 +25,17 @@ xxMesh::xxMesh(int normal, int color, int texture)
 xxMesh::~xxMesh()
 {
     Invalidate();
-    xxFree(m_vertex);
-    xxFree(m_index);
+    xxFree(Vertex);
+    xxFree(Index);
 }
 //------------------------------------------------------------------------------
 xxMeshPtr xxMesh::Create(int normal, int color, int texture)
 {
-    xxMeshPtr mesh = xxMeshPtr(new xxMesh(normal, color, texture));
+    xxMeshPtr mesh = xxMeshPtr(new xxMesh(normal, color, texture), [](xxMesh* mesh) { delete mesh; });
     if (mesh == nullptr)
-        return xxMeshPtr();
+        return nullptr;
 
     return mesh;
-}
-//------------------------------------------------------------------------------
-xxMeshPtr (*xxMesh::BinaryCreate)() = []() { return Create(); };
-//------------------------------------------------------------------------------
-bool xxMesh::BinaryRead(xxBinary& binary)
-{
-    binary.ReadString(Name);
-
-    binary.Read(const_cast<int&>(Stride));
-    binary.Read(const_cast<int&>(NormalCount));
-    binary.Read(const_cast<int&>(ColorCount));
-    binary.Read(const_cast<int&>(TextureCount));
-
-    binary.Read(m_vertexCount);
-    binary.Read(m_indexCount);
-
-    SetVertexCount(m_vertexCount);
-    SetIndexCount(m_indexCount);
-
-    binary.ReadArray(m_vertex, Stride * m_vertexCount);
-    binary.ReadArray(m_index, m_indexCount);
-
-    return binary.Safe;
-}
-//------------------------------------------------------------------------------
-bool xxMesh::BinaryWrite(xxBinary& binary)
-{
-    binary.WriteString(Name);
-
-    binary.Write(Stride);
-    binary.Write(NormalCount);
-    binary.Write(ColorCount);
-    binary.Write(TextureCount);
-
-    binary.Write(m_vertexCount);
-    binary.Write(m_indexCount);
-
-    binary.WriteArray(m_vertex, Stride * m_vertexCount);
-    binary.WriteArray(m_index, m_indexCount);
-
-    return binary.Safe;
 }
 //------------------------------------------------------------------------------
 void xxMesh::Invalidate()
@@ -94,8 +53,8 @@ void xxMesh::Invalidate()
     for (uint64_t& buffer : m_indexBuffers)
         buffer = 0;
 
-    m_vertexDataModified = (m_vertexCount != 0);
-    m_indexDataModified = (m_indexCount != 0);
+    m_vertexDataModified = (VertexCount != 0);
+    m_indexDataModified = (IndexCount != 0);
 }
 //------------------------------------------------------------------------------
 void xxMesh::Update(uint64_t device)
@@ -170,9 +129,9 @@ void xxMesh::Update(uint64_t device)
             xxDestroyBuffer(m_device, m_vertexBuffers[index]);
             m_vertexBuffers[index] = 0;
         }
-        if (m_vertexBuffers[index] == 0 && m_vertexCount != 0)
+        if (m_vertexBuffers[index] == 0 && VertexCount != 0)
         {
-            m_vertexBuffers[index] = xxCreateVertexBuffer(m_device, Stride * m_vertexCount, m_vertexAttribute);
+            m_vertexBuffers[index] = xxCreateVertexBuffer(m_device, Stride * VertexCount, m_vertexAttribute);
             m_vertexDataModified = true;
         }
 
@@ -183,7 +142,7 @@ void xxMesh::Update(uint64_t device)
             {
                 m_vertexDataModified = false;
 
-                memcpy(ptr, m_vertex, Stride * m_vertexCount);
+                memcpy(ptr, Vertex, Stride * VertexCount);
                 xxUnmapBuffer(m_device, m_vertexBuffers[index]);
             }
         }
@@ -206,9 +165,9 @@ void xxMesh::Update(uint64_t device)
             xxDestroyBuffer(m_device, m_indexBuffers[index]);
             m_indexBuffers[index] = 0;
         }
-        if (m_indexBuffers[index] == 0 && m_indexCount != 0)
+        if (m_indexBuffers[index] == 0 && IndexCount != 0)
         {
-            m_indexBuffers[index] = xxCreateIndexBuffer(m_device, xxSizeOf(IndexType) * m_indexCount);
+            m_indexBuffers[index] = xxCreateIndexBuffer(m_device, xxSizeOf(uint16_t) * IndexCount);
             m_indexDataModified = true;
         }
 
@@ -219,7 +178,7 @@ void xxMesh::Update(uint64_t device)
             {
                 m_indexDataModified = false;
 
-                memcpy(ptr, m_index, xxSizeOf(IndexType) * m_indexCount);
+                memcpy(ptr, Index, xxSizeOf(uint16_t) * IndexCount);
                 xxUnmapBuffer(m_device, m_indexBuffers[index]);
             }
         }
@@ -229,13 +188,13 @@ void xxMesh::Update(uint64_t device)
 void xxMesh::Draw(uint64_t commandEncoder, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     xxSetVertexBuffers(commandEncoder, 1, &m_vertexBuffers[m_vertexBufferIndex], m_vertexAttribute);
-    if (m_indexCount == 0)
+    if (IndexCount == 0)
     {
-        xxDraw(commandEncoder, m_vertexCount - firstIndex * 3, instanceCount, vertexOffset + firstIndex * 3, firstInstance);
+        xxDraw(commandEncoder, VertexCount - firstIndex * 3, instanceCount, vertexOffset + firstIndex * 3, firstInstance);
     }
     else
     {
-        xxDrawIndexed(commandEncoder, m_indexBuffers[m_indexBufferIndex], m_indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+        xxDrawIndexed(commandEncoder, m_indexBuffers[m_indexBufferIndex], IndexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
     }
 }
 //------------------------------------------------------------------------------
@@ -244,83 +203,114 @@ uint64_t xxMesh::GetVertexAttribute() const
     return m_vertexAttribute;
 }
 //------------------------------------------------------------------------------
-int xxMesh::GetVertexCount() const
-{
-    return m_vertexCount;
-}
-//------------------------------------------------------------------------------
 void xxMesh::SetVertexCount(int count)
 {
-    m_vertexCount = 0;
-    xxFree(m_vertex);
-    m_vertex = nullptr;
+    char* vertex = nullptr;
     if (count)
     {
-        m_vertex = xxAlloc(char, count * Stride);
-        if (m_vertex)
+        vertex = xxAlloc(char, count * Stride);
+        if (vertex == nullptr)
         {
-            m_vertexCount = count;
+            count = 0;
         }
     }
+    xxFree(Vertex);
+    const_cast<int&>(VertexCount) = count;
+    const_cast<char*&>(Vertex) = vertex;
     m_vertexSizeChanged = true;
-}
-//------------------------------------------------------------------------------
-int xxMesh::GetIndexCount() const
-{
-    return m_indexCount;
 }
 //------------------------------------------------------------------------------
 void xxMesh::SetIndexCount(int count)
 {
-    m_indexCount = 0;
-    xxFree(m_index);
-    m_index = nullptr;
+    uint16_t* index = nullptr;
     if (count)
     {
-        m_index = xxAlloc(IndexType, count);
-        if (m_index)
+        index = xxAlloc(uint16_t, count);
+        if (index == nullptr)
         {
-            m_indexCount = count;
+            count = 0;
         }
     }
+    xxFree(Index);
+    const_cast<int&>(IndexCount) = count;
+    const_cast<uint16_t*&>(Index) = index;
     m_indexSizeChanged = true;
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<xxVector3> xxMesh::GetVertex() const
 {
-    char* vertex = m_vertex;
-    return xxStrideIterator<xxVector3>(vertex, Stride, m_vertexCount);
+    char* vertex = Vertex;
+    return xxStrideIterator<xxVector3>(vertex, Stride, VertexCount);
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<xxVector3> xxMesh::GetNormal(int index) const
 {
-    char* vertex = m_vertex;
+    char* vertex = Vertex;
     vertex += xxSizeOf(xxVector3);
     vertex += xxSizeOf(xxVector3) * index;
-    return xxStrideIterator<xxVector3>(vertex, Stride, NormalCount ? m_vertexCount : 0);
+    return xxStrideIterator<xxVector3>(vertex, Stride, NormalCount ? VertexCount : 0);
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<uint32_t> xxMesh::GetColor(int index) const
 {
-    char* vertex = m_vertex;
+    char* vertex = Vertex;
     vertex += xxSizeOf(xxVector3);
     vertex += xxSizeOf(xxVector3) * NormalCount;
     vertex += xxSizeOf(uint32_t) * index;
-    return xxStrideIterator<uint32_t>(vertex, Stride, ColorCount ? m_vertexCount : 0);
+    return xxStrideIterator<uint32_t>(vertex, Stride, ColorCount ? VertexCount : 0);
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<xxVector2> xxMesh::GetTexture(int index) const
 {
-    char* vertex = m_vertex;
+    char* vertex = Vertex;
     vertex += xxSizeOf(xxVector3);
     vertex += xxSizeOf(xxVector3) * NormalCount;
     vertex += xxSizeOf(uint32_t) * ColorCount;
     vertex += xxSizeOf(xxVector2) * index;
-    return xxStrideIterator<xxVector2>(vertex, Stride, TextureCount ? m_vertexCount : 0);
+    return xxStrideIterator<xxVector2>(vertex, Stride, TextureCount ? VertexCount : 0);
+}
+//==============================================================================
+//  Binary
+//==============================================================================
+xxMeshPtr (*xxMesh::BinaryCreate)() = []() { return Create(); };
+//------------------------------------------------------------------------------
+bool xxMesh::BinaryRead(xxBinary& binary)
+{
+    binary.ReadString(Name);
+
+    binary.Read(const_cast<int&>(Stride));
+    binary.Read(const_cast<int&>(NormalCount));
+    binary.Read(const_cast<int&>(ColorCount));
+    binary.Read(const_cast<int&>(TextureCount));
+
+    int vertexCount = 0;
+    int indexCount = 0;
+    binary.Read(vertexCount);
+    binary.Read(indexCount);
+    SetVertexCount(vertexCount);
+    SetIndexCount(indexCount);
+
+    binary.ReadArray(Vertex, Stride * VertexCount);
+    binary.ReadArray(Index, IndexCount);
+
+    return binary.Safe;
 }
 //------------------------------------------------------------------------------
-xxMesh::IndexType* xxMesh::GetIndex() const
+bool xxMesh::BinaryWrite(xxBinary& binary) const
 {
-    return m_index;
+    binary.WriteString(Name);
+
+    binary.Write(Stride);
+    binary.Write(NormalCount);
+    binary.Write(ColorCount);
+    binary.Write(TextureCount);
+
+    binary.Write(VertexCount);
+    binary.Write(IndexCount);
+
+    binary.WriteArray(Vertex, Stride * VertexCount);
+    binary.WriteArray(Index, IndexCount);
+
+    return binary.Safe;
 }
 //==============================================================================
