@@ -11,6 +11,7 @@
 //==============================================================================
 uint64_t    (*xxCreateInstance)();
 void        (*xxDestroyInstance)(uint64_t instance);
+char const* (*xxGetInstanceName)();
 //==============================================================================
 //  Device
 //==============================================================================
@@ -18,7 +19,6 @@ uint64_t    (*xxCreateDevice)(uint64_t instance);
 void        (*xxDestroyDevice)(uint64_t device);
 bool        (*xxResetDevice)(uint64_t device);
 bool        (*xxTestDevice)(uint64_t device);
-char const* (*xxGetInstanceName)();
 //==============================================================================
 //  Framebuffer
 //==============================================================================

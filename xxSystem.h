@@ -215,14 +215,14 @@ xxAPI int xxGetIncrementThreadId();
 //==============================================================================
 //  Path
 //==============================================================================
+xxAPI char const* xxGetDocumentPath();
 xxAPI char const* xxGetExecutablePath();
 xxAPI char* xxOpenDirectory(uint64_t* handle, char const* path, ...);
 xxAPI void xxCloseDirectory(uint64_t* handle);
 //==============================================================================
 //  Logger
 //==============================================================================
-xxAPI void xxLog(char const* tag, char const* format, ...);
-xxAPI void xxLogCallback(void(*callback)(char const* tag, char const* format, va_list list));
+xxAPI void (*xxLog)(char const* tag, char const* format, ...);
 //==============================================================================
 //  MD5
 //==============================================================================
@@ -233,7 +233,7 @@ xxAPI const uint8_t* xxDXBCChecksum(void const* data, int len, uint8_t* digest);
 //==============================================================================
 xxAPI xxInline xxConstexpr unsigned int xxHash(char const* key, const unsigned int hash xxDefaultArgument(0))
 {
-    return (*key) ? xxHash(key + 1, (hash * 16777219) ^ (*key)) : hash;
+    return (*key) ? xxHash(key + 1, (hash * 16777619) ^ (*key)) : hash;
 }
 //==============================================================================
 //  Bitwise
@@ -258,13 +258,20 @@ xxAPI xxInline xxConstexpr unsigned int xxHash(char const* key, const unsigned i
 //  String
 //==============================================================================
 #if defined(_WIN32)
-xxAPI xxInline char* strsep(char** sp, char const* sep)
+xxAPI xxInline char* strcasestr(char const* haystack, char const* needle)
 {
-    if (**sp == '\0') return nullptr;
-    char* s = *sp;
-    char* p = s + strcspn(s, sep);
+    for (size_t length = strlen(needle); (*haystack); haystack++)
+        if (_strnicmp(haystack, needle, length) == 0)
+            return (char*)haystack;
+    return nullptr;
+}
+xxAPI xxInline char* strsep(char** stringp, char const* delim)
+{
+    if (**stringp == '\0') return nullptr;
+    char* s = *stringp;
+    char* p = s + strcspn(s, delim);
     if (*p != '\0') *p++ = '\0';
-    *sp = p;
+    *stringp = p;
     return s;
 }
 #endif

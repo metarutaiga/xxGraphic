@@ -283,12 +283,12 @@ bool xxMesh::BinaryRead(xxBinary& binary)
     binary.Read(const_cast<int&>(ColorCount));
     binary.Read(const_cast<int&>(TextureCount));
 
-    int vertexCount = 0;
-    int indexCount = 0;
-    binary.Read(vertexCount);
-    binary.Read(indexCount);
-    SetVertexCount(vertexCount);
-    SetIndexCount(indexCount);
+    size_t vertexCount = 0;
+    size_t indexCount = 0;
+    binary.ReadSize(vertexCount);
+    binary.ReadSize(indexCount);
+    SetVertexCount(static_cast<int>(vertexCount));
+    SetIndexCount(static_cast<int>(indexCount));
 
     binary.ReadArray(Vertex, Stride * VertexCount);
     binary.ReadArray(Index, IndexCount);
@@ -305,8 +305,8 @@ bool xxMesh::BinaryWrite(xxBinary& binary) const
     binary.Write(ColorCount);
     binary.Write(TextureCount);
 
-    binary.Write(VertexCount);
-    binary.Write(IndexCount);
+    binary.WriteSize(VertexCount);
+    binary.WriteSize(IndexCount);
 
     binary.WriteArray(Vertex, Stride * VertexCount);
     binary.WriteArray(Index, IndexCount);
