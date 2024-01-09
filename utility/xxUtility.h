@@ -26,3 +26,4 @@ typedef std::shared_ptr<class xxImage> xxImagePtr;
 typedef std::shared_ptr<class xxMaterial> xxMaterialPtr;
 typedef std::shared_ptr<class xxMesh> xxMeshPtr;
 typedef std::shared_ptr<class xxNode> xxNodePtr;
+typedef std::shared_ptr<void> xxUnknownPtr;

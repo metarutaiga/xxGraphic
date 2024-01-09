@@ -20,65 +20,11 @@ xxCamera::~xxCamera()
 //------------------------------------------------------------------------------
 xxCameraPtr xxCamera::Create()
 {
-    xxCameraPtr camera = xxCameraPtr(new xxCamera());
+    xxCameraPtr camera = xxCameraPtr(new xxCamera(), [](xxCamera* camera) { delete camera; });
     if (camera == nullptr)
-        return xxCameraPtr();
+        return nullptr;
 
     return camera;
-}
-//------------------------------------------------------------------------------
-xxCameraPtr (*xxCamera::BinaryCreate)() = xxCamera::Create;
-//------------------------------------------------------------------------------
-bool xxCamera::BinaryRead(xxBinary& binary)
-{
-    binary.ReadString(Name);
-
-    binary.Read(m_frustumLeft);
-    binary.Read(m_frustumRight);
-    binary.Read(m_frustumBottom);
-    binary.Read(m_frustumTop);
-    binary.Read(m_frustumNear);
-    binary.Read(m_frustumFar);
-
-    binary.Read(ViewMatrix);
-    binary.Read(ProjectionMatrix);
-//  binary.Read(ViewportMatrix);
-
-    binary.Read(Right);
-    binary.Read(Up);
-    binary.Read(Direction);
-    binary.Read(Location);
-
-    binary.Read(LightDirection);
-    binary.Read(LightColor);
-
-    return binary.Safe;
-}
-//------------------------------------------------------------------------------
-bool xxCamera::BinaryWrite(xxBinary& binary)
-{
-    binary.WriteString(Name);
-
-    binary.Write(m_frustumLeft);
-    binary.Write(m_frustumRight);
-    binary.Write(m_frustumBottom);
-    binary.Write(m_frustumTop);
-    binary.Write(m_frustumNear);
-    binary.Write(m_frustumFar);
-
-    binary.Write(ViewMatrix);
-    binary.Write(ProjectionMatrix);
-//  binary.Write(ViewportMatrix);
-
-    binary.Write(Right);
-    binary.Write(Up);
-    binary.Write(Direction);
-    binary.Write(Location);
-
-    binary.Write(LightDirection);
-    binary.Write(LightColor);
-
-    return binary.Safe;
 }
 //------------------------------------------------------------------------------
 void xxCamera::Update()
@@ -158,5 +104,61 @@ xxVector3 xxCamera::GetDirectionFromScreenPos(float x, float y) const
     xxVector3 direction = Direction + Right * right + Up * up;
     direction /= direction.Length();
     return direction;
+}
+//==============================================================================
+//  Binary
+//==============================================================================
+xxCameraPtr (*xxCamera::BinaryCreate)() = xxCamera::Create;
+//------------------------------------------------------------------------------
+bool xxCamera::BinaryRead(xxBinary& binary)
+{
+    binary.ReadString(Name);
+
+    binary.Read(m_frustumLeft);
+    binary.Read(m_frustumRight);
+    binary.Read(m_frustumBottom);
+    binary.Read(m_frustumTop);
+    binary.Read(m_frustumNear);
+    binary.Read(m_frustumFar);
+
+    binary.Read(ViewMatrix);
+    binary.Read(ProjectionMatrix);
+//  binary.Read(ViewportMatrix);
+
+    binary.Read(Right);
+    binary.Read(Up);
+    binary.Read(Direction);
+    binary.Read(Location);
+
+    binary.Read(LightDirection);
+    binary.Read(LightColor);
+
+    return binary.Safe;
+}
+//------------------------------------------------------------------------------
+bool xxCamera::BinaryWrite(xxBinary& binary) const
+{
+    binary.WriteString(Name);
+
+    binary.Write(m_frustumLeft);
+    binary.Write(m_frustumRight);
+    binary.Write(m_frustumBottom);
+    binary.Write(m_frustumTop);
+    binary.Write(m_frustumNear);
+    binary.Write(m_frustumFar);
+
+    binary.Write(ViewMatrix);
+    binary.Write(ProjectionMatrix);
+//  binary.Write(ViewportMatrix);
+
+    binary.Write(Right);
+    binary.Write(Up);
+    binary.Write(Direction);
+    binary.Write(Location);
+
+    binary.Write(LightDirection);
+    binary.Write(LightColor);
+
+    return binary.Safe;
 }
 //==============================================================================

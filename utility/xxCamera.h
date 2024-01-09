@@ -11,13 +11,7 @@
 class xxPlusAPI xxCamera
 {
 public:
-    virtual ~xxCamera();
-
     static xxCameraPtr      Create();
-
-    static xxCameraPtr    (*BinaryCreate)();
-    virtual bool            BinaryRead(xxBinary& binary);
-    virtual bool            BinaryWrite(xxBinary& binary);
 
     void                    Update();
 
@@ -28,8 +22,13 @@ public:
 
     xxVector3               GetDirectionFromScreenPos(float x, float y) const;
 
+    static xxCameraPtr    (*BinaryCreate)();
+    virtual bool            BinaryRead(xxBinary& binary);
+    virtual bool            BinaryWrite(xxBinary& binary) const;
+
 protected:
     xxCamera();
+    virtual ~xxCamera();
 
     float                   m_frustumLeft = -0.5f;
     float                   m_frustumRight = 0.5f;

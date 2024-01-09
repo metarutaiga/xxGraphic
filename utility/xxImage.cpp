@@ -26,11 +26,11 @@ xxImage::~xxImage()
 //------------------------------------------------------------------------------
 xxImagePtr xxImage::Create(uint64_t format, int width, int height, int depth, int mipmap, int array)
 {
-    xxImagePtr image = xxImagePtr(new xxImage(format, width, height, depth, mipmap, array));
+    xxImagePtr image = xxImagePtr(new xxImage(format, width, height, depth, mipmap, array), [](xxImage* image) { delete image; });
     if (image == nullptr)
-        return xxImagePtr();
+        return nullptr;
     if (width && height && depth && mipmap && array && image->m_images[0] == nullptr)
-        return xxImagePtr();
+        return nullptr;
 
     return image;
 }
@@ -48,38 +48,6 @@ xxImagePtr xxImage::Create3D(uint64_t format, int width, int height, int depth, 
 xxImagePtr xxImage::CreateCube(uint64_t format, int width, int height, int mipmap)
 {
     return Create(format, width, height, 1, mipmap, 6);
-}
-//------------------------------------------------------------------------------
-xxImagePtr (*xxImage::BinaryCreate)() = []() { return xxImage::Create(0, 0, 0, 0, 0, 0); };
-//------------------------------------------------------------------------------
-bool xxImage::BinaryRead(xxBinary& binary)
-{
-    binary.ReadString(Name);
-
-    binary.Read(ClampU);
-    binary.Read(ClampV);
-    binary.Read(ClampW);
-    binary.Read(FilterMag);
-    binary.Read(FilterMin);
-    binary.Read(FilterMip);
-    binary.Read(Anisotropic);
-
-    return binary.Safe;
-}
-//------------------------------------------------------------------------------
-bool xxImage::BinaryWrite(xxBinary& binary)
-{
-    binary.WriteString(Name);
-
-    binary.Write(ClampU);
-    binary.Write(ClampV);
-    binary.Write(ClampW);
-    binary.Write(FilterMag);
-    binary.Write(FilterMin);
-    binary.Write(FilterMip);
-    binary.Write(Anisotropic);
-
-    return binary.Safe;
 }
 //------------------------------------------------------------------------------
 void xxImage::Initialize(uint64_t format, int width, int height, int depth, int mipmap, int array)
@@ -222,5 +190,39 @@ uint64_t xxImage::GetTexture() const
 uint64_t xxImage::GetSampler() const
 {
     return m_sampler;
+}
+//==============================================================================
+//  Binary
+//==============================================================================
+xxImagePtr (*xxImage::BinaryCreate)() = []() { return xxImage::Create(0, 0, 0, 0, 0, 0); };
+//------------------------------------------------------------------------------
+bool xxImage::BinaryRead(xxBinary& binary)
+{
+    binary.ReadString(Name);
+
+    binary.Read(ClampU);
+    binary.Read(ClampV);
+    binary.Read(ClampW);
+    binary.Read(FilterMag);
+    binary.Read(FilterMin);
+    binary.Read(FilterMip);
+    binary.Read(Anisotropic);
+
+    return binary.Safe;
+}
+//------------------------------------------------------------------------------
+bool xxImage::BinaryWrite(xxBinary& binary) const
+{
+    binary.WriteString(Name);
+
+    binary.Write(ClampU);
+    binary.Write(ClampV);
+    binary.Write(ClampW);
+    binary.Write(FilterMag);
+    binary.Write(FilterMin);
+    binary.Write(FilterMip);
+    binary.Write(Anisotropic);
+
+    return binary.Safe;
 }
 //==============================================================================
