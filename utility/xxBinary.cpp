@@ -112,6 +112,9 @@ bool xxBinary::Write(void const* data, size_t size)
 //------------------------------------------------------------------------------
 xxUnknownPtr xxBinary::ReadReferenceInternal(xxUnknownPtr (*create)(), bool(xxBinary::*read)(xxBinary&))
 {
+    if (Safe == false)
+        return nullptr;
+
     size_t index = 0;
     if (ReadSize(index) == false)
         return nullptr;
@@ -124,7 +127,10 @@ xxUnknownPtr xxBinary::ReadReferenceInternal(xxUnknownPtr (*create)(), bool(xxBi
         xxUnknownPtr unknown = create();
         auto output = reinterpret_cast<std::shared_ptr<xxBinary>&>(unknown);
         if (output == nullptr || (output.get()->*read)(*this) == false)
+        {
+            const_cast<bool&>(Safe) = false;
             return nullptr;
+        }
         reference.push_back(unknown);
     }
 
@@ -133,6 +139,9 @@ xxUnknownPtr xxBinary::ReadReferenceInternal(xxUnknownPtr (*create)(), bool(xxBi
 //------------------------------------------------------------------------------
 bool xxBinary::WriteReferenceInternal(xxUnknownPtr const& unknown, bool(xxBinary::*write)(xxBinary&))
 {
+    if (Safe == false)
+        return false;
+
     size_t index = reference.size();
     for (size_t i = 0; i < reference.size(); ++i)
     {
@@ -150,7 +159,10 @@ bool xxBinary::WriteReferenceInternal(xxUnknownPtr const& unknown, bool(xxBinary
     {
         auto input = reinterpret_cast<std::shared_ptr<xxBinary> const&>(unknown);
         if ((input.get()->*write)(*this) == false)
+        {
+            const_cast<bool&>(Safe) = false;
             return false;
+        }
         reference.push_back(unknown);
     }
 
@@ -193,7 +205,7 @@ bool xxBinary::WriteSize(size_t size)
 bool xxBinary::ReadString(std::string& string)
 {
     size_t length = 0;
-    return ReadSize(length) && ReadArray(string.assign(length, 0).data(), length);
+    return ReadSize(length) && ReadArray(string.insert(string.end(), length, 0).base(), length);
 }
 //------------------------------------------------------------------------------
 bool xxBinary::WriteString(std::string const& string)

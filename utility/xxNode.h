@@ -82,6 +82,8 @@ public:
     xxMaterialPtr               Material;
     xxMeshPtr                   Mesh;
 
+    std::vector<xxModifierPtr>  Modifiers;
+
     std::vector<xxConstantData> ConstantDatas;
 };
 
