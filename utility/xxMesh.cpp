@@ -57,7 +57,7 @@ void xxMesh::Invalidate()
     m_indexDataModified = (IndexCount != 0);
 }
 //------------------------------------------------------------------------------
-void xxMesh::Update(uint64_t device)
+void xxMesh::Setup(uint64_t device)
 {
     m_device = device;
 

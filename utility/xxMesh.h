@@ -17,7 +17,7 @@ public:
     static xxMeshPtr            Create(int normal = 0, int color = 0, int texture = 0);
 
     void                        Invalidate();
-    void                        Update(uint64_t device);
+    void                        Setup(uint64_t device);
     void                        Draw(uint64_t commandEncoder, int instanceCount = 1, int firstIndex = 0, int vertexOffset = 0, int firstInstance = 0);
 
     uint64_t                    GetVertexAttribute() const;

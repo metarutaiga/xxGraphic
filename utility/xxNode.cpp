@@ -10,6 +10,7 @@
 #include "xxImage.h"
 #include "xxMaterial.h"
 #include "xxMesh.h"
+#include "xxModifier.h"
 #include "xxNode.h"
 
 #define HAVE_LINEAR_MATRIX 1
@@ -370,6 +371,11 @@ void xxNode::Invalidate()
 //------------------------------------------------------------------------------
 void xxNode::Update(float time, bool updateMatrix)
 {
+    for (xxModifierPtr const& modifier : Modifiers)
+    {
+        modifier->Update(time, this);
+    }
+
     if (updateMatrix)
     {
         updateMatrix = UpdateMatrix();
@@ -391,13 +397,13 @@ void xxNode::Draw(xxDrawData const& data)
     data.mesh = Mesh.get();
     data.node = this;
 
-    Mesh->Update(data.device);
-    Material->Update(data);
+    Mesh->Setup(data.device);
+    Material->Setup(data);
 
     if (data.constantData->ready <= 0)
         return;
 
-    Material->Set(data);
+    Material->Draw(data);
 
     uint64_t textures[16];
     uint64_t samplers[16];
@@ -441,11 +447,14 @@ bool xxNode::BinaryRead(xxBinary& binary)
 
     Camera = binary.ReadReference<xxCamera>();
 
-    uint16_t imageCount = 0;
-    binary.Read(imageCount);
+    size_t imageCount = 0;
+    binary.ReadSize(imageCount);
     for (size_t i = 0; i < imageCount; ++i)
     {
         xxImagePtr image = binary.ReadReference<xxImage>();
+        if (image == nullptr)
+            return false;
+
         xxImage::ImageLoader(image, binary.Path);
         Images.push_back(image);
     }
@@ -453,8 +462,19 @@ bool xxNode::BinaryRead(xxBinary& binary)
     Material = binary.ReadReference<xxMaterial>();
     Mesh = binary.ReadReference<xxMesh>();
 
-    uint16_t childCount = 0;
-    binary.Read(childCount);
+    size_t modifierCount = 0;
+    binary.ReadSize(modifierCount);
+    for (size_t i = 0; i < modifierCount; ++i)
+    {
+        xxModifierPtr modifier = binary.ReadReference<xxModifier>();
+        if (modifier == nullptr)
+            return false;
+
+        Modifiers.push_back(modifier);
+    }
+
+    size_t childCount = 0;
+    binary.ReadSize(childCount);
     for (size_t i = 0; i < childCount; ++i)
     {
         xxNodePtr child = xxNode::Create();
@@ -475,8 +495,8 @@ bool xxNode::BinaryWrite(xxBinary& binary) const
 
     binary.WriteReference(Camera);
 
-    uint16_t imageCount = (uint16_t)Images.size();
-    binary.Write(imageCount);
+    size_t imageCount = Images.size();
+    binary.WriteSize(imageCount);
     for (size_t i = 0; i < imageCount; ++i)
     {
         binary.WriteReference(Images[i]);
@@ -485,8 +505,15 @@ bool xxNode::BinaryWrite(xxBinary& binary) const
     binary.WriteReference(Material);
     binary.WriteReference(Mesh);
 
-    uint16_t childCount = (uint16_t)m_children.size();
-    binary.Write(childCount);
+    size_t modifierCount = Modifiers.size();
+    binary.WriteSize(modifierCount);
+    for (size_t i = 0; i < modifierCount; ++i)
+    {
+        binary.WriteReference(Modifiers[i]);
+    }
+
+    size_t childCount = m_children.size();
+    binary.WriteSize(childCount);
     for (size_t i = 0; i < childCount; ++i)
     {
         xxNodePtr const& child = m_children[i];

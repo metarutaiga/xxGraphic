@@ -8,6 +8,7 @@
 #include "xxBinary.h"
 #include "xxCamera.h"
 #include "xxMesh.h"
+#include "xxModifier.h"
 #include "xxNode.h"
 #include "xxMaterial.h"
 
@@ -52,7 +53,15 @@ void xxMaterial::Invalidate()
     m_pipeline = 0;
 }
 //------------------------------------------------------------------------------
-void xxMaterial::Update(xxDrawData const& data)
+void xxMaterial::Update(float time)
+{
+    for (xxModifierPtr const& modifier : Modifiers)
+    {
+        modifier->Update(time, this);
+    }
+}
+//------------------------------------------------------------------------------
+void xxMaterial::Setup(xxDrawData const& data)
 {
     xxNode* node = data.node;
     if (node->ConstantDatas.size() <= data.materialIndex)
@@ -71,7 +80,7 @@ void xxMaterial::Update(xxDrawData const& data)
     UpdateConstant(data);
 }
 //------------------------------------------------------------------------------
-void xxMaterial::Set(xxDrawData const& data) const
+void xxMaterial::Draw(xxDrawData const& data) const
 {
     auto* constantData = data.constantData;
 
@@ -349,6 +358,17 @@ bool xxMaterial::BinaryRead(xxBinary& binary)
     binary.Read(Cull);
     binary.Read(Scissor);
 
+    size_t modifierCount = 0;
+    binary.ReadSize(modifierCount);
+    for (size_t i = 0; i < modifierCount; ++i)
+    {
+        xxModifierPtr modifier = binary.ReadReference<xxModifier>();
+        if (modifier == nullptr)
+            return false;
+
+        Modifiers.push_back(modifier);
+    }
+
     return binary.Safe;
 }
 //------------------------------------------------------------------------------
@@ -385,6 +405,13 @@ bool xxMaterial::BinaryWrite(xxBinary& binary) const
 
     binary.Write(Cull);
     binary.Write(Scissor);
+
+    size_t modifierCount = Modifiers.size();
+    binary.WriteSize(modifierCount);
+    for (size_t i = 0; i < modifierCount; ++i)
+    {
+        binary.WriteReference(Modifiers[i]);
+    }
 
     return binary.Safe;
 }
