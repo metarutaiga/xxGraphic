@@ -24,10 +24,10 @@ protected:
     xxUnknownPtr                ReadReferenceInternal(xxUnknownPtr (*create)(), bool(xxBinary::*read)(xxBinary&));
     bool                        WriteReferenceInternal(xxUnknownPtr const& unknown, bool(xxBinary::*write)(xxBinary&));
 
-    xxFile*                     file = nullptr;
-    std::vector<xxUnknownPtr>   reference;
-    int                         called = 0;
-    int                         failed = 0;
+    xxFile*                     m_file = nullptr;
+    std::vector<xxUnknownPtr>   m_reference;
+    int                         m_called = 0;
+    int                         m_failed = 0;
 
 public:
     template<typename T> bool   Read(T& data)                           { return Read(&data, sizeof(T)); }

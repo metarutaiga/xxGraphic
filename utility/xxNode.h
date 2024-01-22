@@ -17,8 +17,6 @@ class xxPlusAPI xxNode
     };
 
 public:
-    static xxNodePtr Create();
-
     xxNodePtr                   GetParent() const;
     xxNodePtr const&            GetChild(size_t index) const;
     size_t                      GetChildCount() const;
@@ -45,6 +43,8 @@ public:
     void                        Draw(xxDrawData const& data);
 
     static bool                 Traversal(std::function<bool(xxNodePtr const&)> callback, xxNodePtr const& node);
+
+    static xxNodePtr            Create();
 
     static xxNodePtr          (*BinaryCreate)();
     bool                        BinaryRead(xxBinary& binary);

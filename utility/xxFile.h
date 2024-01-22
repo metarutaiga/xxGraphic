@@ -24,5 +24,5 @@ public:
     static std::string  GetPath(char const* name);
 
 protected:
-    void*               handle = nullptr;
+    void*               m_handle = nullptr;
 };

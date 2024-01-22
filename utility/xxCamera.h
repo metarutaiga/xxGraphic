@@ -11,8 +11,6 @@
 class xxPlusAPI xxCamera
 {
 public:
-    static xxCameraPtr      Create();
-
     void                    Update();
 
     void                    LookAt(xxVector3 const& worldPoint, xxVector3 const& worldUp);
@@ -21,6 +19,8 @@ public:
     void                    SetViewportMatrix(float fromWidth, float fromHeight, float toX, float toY, float toWidth, float toHeight);
 
     xxVector3               GetDirectionFromScreenPos(float x, float y) const;
+
+    static xxCameraPtr      Create();
 
     static xxCameraPtr    (*BinaryCreate)();
     virtual bool            BinaryRead(xxBinary& binary);

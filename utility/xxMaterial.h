@@ -11,8 +11,6 @@
 class xxPlusAPI xxMaterial
 {
 public:
-    static xxMaterialPtr        Create();
-
     void                        Invalidate();
     void                        Update(float time);
     void                        Setup(xxDrawData const& data);
@@ -21,6 +19,8 @@ public:
     virtual void                CreatePipeline(xxDrawData const& data);
     virtual void                CreateConstant(xxDrawData const& data) const;
     virtual void                UpdateConstant(xxDrawData const& data) const;
+
+    static xxMaterialPtr        Create();
 
     static xxMaterialPtr      (*BinaryCreate)();
     virtual bool                BinaryRead(xxBinary& binary);

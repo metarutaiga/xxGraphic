@@ -11,12 +11,12 @@
 //==============================================================================
 xxFile::xxFile(void* file)
 {
-    handle = file;
+    m_handle = file;
 }
 //------------------------------------------------------------------------------
 xxFile::~xxFile()
 {
-    FILE* file = reinterpret_cast<FILE*>(handle);
+    FILE* file = reinterpret_cast<FILE*>(m_handle);
     if (file)
     {
         fclose(file);
@@ -25,7 +25,7 @@ xxFile::~xxFile()
 //------------------------------------------------------------------------------
 bool xxFile::Read(void* data, size_t size)
 {
-    FILE* file = reinterpret_cast<FILE*>(handle);
+    FILE* file = reinterpret_cast<FILE*>(m_handle);
     if (file == nullptr)
         return false;
 
@@ -34,7 +34,7 @@ bool xxFile::Read(void* data, size_t size)
 //------------------------------------------------------------------------------
 bool xxFile::Write(void const* data, size_t size)
 {
-    FILE* file = reinterpret_cast<FILE*>(handle);
+    FILE* file = reinterpret_cast<FILE*>(m_handle);
     if (file == nullptr)
         return false;
 

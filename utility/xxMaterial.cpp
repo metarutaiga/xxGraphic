@@ -24,15 +24,6 @@ xxMaterial::~xxMaterial()
     Invalidate();
 }
 //------------------------------------------------------------------------------
-xxMaterialPtr xxMaterial::Create()
-{
-    xxMaterialPtr material = xxMaterialPtr(new xxMaterial(), [](xxMaterial* material) { delete material; });
-    if (material == nullptr)
-        return nullptr;
-
-    return material;
-}
-//------------------------------------------------------------------------------
 void xxMaterial::Invalidate()
 {
     xxDestroyBlendState(m_blendState);
@@ -318,6 +309,15 @@ int xxMaterial::GetFragmentConstantSize() const
         size += 3 * sizeof(xxVector4);
     }
     return size;
+}
+//------------------------------------------------------------------------------
+xxMaterialPtr xxMaterial::Create()
+{
+    xxMaterialPtr material = xxMaterialPtr(new xxMaterial(), [](xxMaterial* material) { delete material; });
+    if (material == nullptr)
+        return nullptr;
+
+    return material;
 }
 //==============================================================================
 //  Binary

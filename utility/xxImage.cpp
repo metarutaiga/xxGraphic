@@ -24,32 +24,6 @@ xxImage::~xxImage()
         xxFree(image);
 }
 //------------------------------------------------------------------------------
-xxImagePtr xxImage::Create(uint64_t format, int width, int height, int depth, int mipmap, int array)
-{
-    xxImagePtr image = xxImagePtr(new xxImage(format, width, height, depth, mipmap, array), [](xxImage* image) { delete image; });
-    if (image == nullptr)
-        return nullptr;
-    if (width && height && depth && mipmap && array && image->m_images[0] == nullptr)
-        return nullptr;
-
-    return image;
-}
-//------------------------------------------------------------------------------
-xxImagePtr xxImage::Create2D(uint64_t format, int width, int height, int mipmap)
-{
-    return Create(format, width, height, 1, mipmap, 1);
-}
-//------------------------------------------------------------------------------
-xxImagePtr xxImage::Create3D(uint64_t format, int width, int height, int depth, int mipmap)
-{
-    return Create(format, width, height, depth, mipmap, 1);
-}
-//------------------------------------------------------------------------------
-xxImagePtr xxImage::CreateCube(uint64_t format, int width, int height, int mipmap)
-{
-    return Create(format, width, height, 1, mipmap, 6);
-}
-//------------------------------------------------------------------------------
 void xxImage::Initialize(uint64_t format, int width, int height, int depth, int mipmap, int array)
 {
     const_cast<uint64_t&>(Format) = format;
@@ -190,6 +164,32 @@ uint64_t xxImage::GetTexture() const
 uint64_t xxImage::GetSampler() const
 {
     return m_sampler;
+}
+//------------------------------------------------------------------------------
+xxImagePtr xxImage::Create(uint64_t format, int width, int height, int depth, int mipmap, int array)
+{
+    xxImagePtr image = xxImagePtr(new xxImage(format, width, height, depth, mipmap, array), [](xxImage* image) { delete image; });
+    if (image == nullptr)
+        return nullptr;
+    if (width && height && depth && mipmap && array && image->m_images[0] == nullptr)
+        return nullptr;
+
+    return image;
+}
+//------------------------------------------------------------------------------
+xxImagePtr xxImage::Create2D(uint64_t format, int width, int height, int mipmap)
+{
+    return Create(format, width, height, 1, mipmap, 1);
+}
+//------------------------------------------------------------------------------
+xxImagePtr xxImage::Create3D(uint64_t format, int width, int height, int depth, int mipmap)
+{
+    return Create(format, width, height, depth, mipmap, 1);
+}
+//------------------------------------------------------------------------------
+xxImagePtr xxImage::CreateCube(uint64_t format, int width, int height, int mipmap)
+{
+    return Create(format, width, height, 1, mipmap, 6);
 }
 //==============================================================================
 //  Binary

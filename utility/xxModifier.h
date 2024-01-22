@@ -11,9 +11,9 @@
 class xxPlusAPI xxModifier
 {
 public:
-    static xxModifierPtr    Create();
-
     void                  (*Update)(float time, void* target) = [](float, void*){};
+
+    static xxModifierPtr    Create();
 
     static xxModifierPtr  (*BinaryCreate)();
     virtual bool            BinaryRead(xxBinary& binary);

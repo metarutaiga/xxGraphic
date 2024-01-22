@@ -14,8 +14,6 @@ struct xxStrideIterator;
 class xxPlusAPI xxMesh
 {
 public:
-    static xxMeshPtr            Create(int normal = 0, int color = 0, int texture = 0);
-
     void                        Invalidate();
     void                        Setup(uint64_t device);
     void                        Draw(uint64_t commandEncoder, int instanceCount = 1, int firstIndex = 0, int vertexOffset = 0, int firstInstance = 0);
@@ -29,6 +27,8 @@ public:
     xxStrideIterator<xxVector3> GetNormal(int index) const;
     xxStrideIterator<uint32_t>  GetColor(int index) const;
     xxStrideIterator<xxVector2> GetTexture(int index) const;
+
+    static xxMeshPtr            Create(int normal = 0, int color = 0, int texture = 0);
 
     static xxMeshPtr          (*BinaryCreate)();
     virtual bool                BinaryRead(xxBinary& binary);
