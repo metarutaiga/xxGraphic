@@ -29,15 +29,6 @@ xxMesh::~xxMesh()
     xxFree(Index);
 }
 //------------------------------------------------------------------------------
-xxMeshPtr xxMesh::Create(int normal, int color, int texture)
-{
-    xxMeshPtr mesh = xxMeshPtr(new xxMesh(normal, color, texture), [](xxMesh* mesh) { delete mesh; });
-    if (mesh == nullptr)
-        return nullptr;
-
-    return mesh;
-}
-//------------------------------------------------------------------------------
 void xxMesh::Invalidate()
 {
     xxDestroyVertexAttribute(m_vertexAttribute);
@@ -268,6 +259,15 @@ xxStrideIterator<xxVector2> xxMesh::GetTexture(int index) const
     vertex += xxSizeOf(uint32_t) * ColorCount;
     vertex += xxSizeOf(xxVector2) * index;
     return xxStrideIterator<xxVector2>(vertex, Stride, TextureCount ? VertexCount : 0);
+}
+//------------------------------------------------------------------------------
+xxMeshPtr xxMesh::Create(int normal, int color, int texture)
+{
+    xxMeshPtr mesh = xxMeshPtr(new xxMesh(normal, color, texture), [](xxMesh* mesh) { delete mesh; });
+    if (mesh == nullptr)
+        return nullptr;
+
+    return mesh;
 }
 //==============================================================================
 //  Binary

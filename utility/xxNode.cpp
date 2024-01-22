@@ -36,16 +36,6 @@ xxNode::~xxNode()
     Invalidate();
 }
 //------------------------------------------------------------------------------
-xxNodePtr xxNode::Create()
-{
-    xxNodePtr node = xxNodePtr(new xxNode, [](xxNode* node) { delete node; });
-    if (node == nullptr)
-        return nullptr;
-
-    node->m_this = node;
-    return node;
-}
-//------------------------------------------------------------------------------
 xxNodePtr xxNode::GetParent() const
 {
     return m_parent.lock();
@@ -433,6 +423,16 @@ bool xxNode::Traversal(std::function<bool(xxNodePtr const&)> callback, xxNodePtr
         if (Traversal(callback, child) == false)
             return false;
     return true;
+}
+//------------------------------------------------------------------------------
+xxNodePtr xxNode::Create()
+{
+    xxNodePtr node = xxNodePtr(new xxNode, [](xxNode* node) { delete node; });
+    if (node == nullptr)
+        return nullptr;
+
+    node->m_this = node;
+    return node;
 }
 //==============================================================================
 //  Binary

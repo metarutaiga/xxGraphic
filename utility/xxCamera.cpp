@@ -18,15 +18,6 @@ xxCamera::~xxCamera()
 {
 }
 //------------------------------------------------------------------------------
-xxCameraPtr xxCamera::Create()
-{
-    xxCameraPtr camera = xxCameraPtr(new xxCamera(), [](xxCamera* camera) { delete camera; });
-    if (camera == nullptr)
-        return nullptr;
-
-    return camera;
-}
-//------------------------------------------------------------------------------
 void xxCamera::Update()
 {
     float l = m_frustumLeft;
@@ -104,6 +95,15 @@ xxVector3 xxCamera::GetDirectionFromScreenPos(float x, float y) const
     xxVector3 direction = Direction + Right * right + Up * up;
     direction /= direction.Length();
     return direction;
+}
+//------------------------------------------------------------------------------
+xxCameraPtr xxCamera::Create()
+{
+    xxCameraPtr camera = xxCameraPtr(new xxCamera(), [](xxCamera* camera) { delete camera; });
+    if (camera == nullptr)
+        return nullptr;
+
+    return camera;
 }
 //==============================================================================
 //  Binary
