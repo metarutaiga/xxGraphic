@@ -63,8 +63,6 @@
 #   define NOMINMAX
 #   define WIN32_LEAN_AND_MEAN
 #   define _USE_MATH_DEFINES
-#   define _GDI32_
-#   include <windows.h>
 #   define xxWINDOWS 1
 #endif
 
@@ -186,19 +184,6 @@ xxAPI void xxAlignedFree(void* ptr);
 xxAPI void* xxLoadLibrary(char const* name);
 xxAPI void* xxGetProcAddress(void* library, char const* name);
 xxAPI void xxFreeLibrary(void* library);
-//==============================================================================
-//  Mutex
-//==============================================================================
-#if defined(_WIN32)
-typedef CRITICAL_SECTION xxMutex;
-#else
-typedef pthread_mutex_t xxMutex;
-#endif
-xxAPI void xxMutexInit(xxMutex* mutex);
-xxAPI void xxMutexDestroy(xxMutex* mutex);
-xxAPI void xxMutexLock(xxMutex* mutex);
-xxAPI bool xxMutexTryLock(xxMutex* mutex);
-xxAPI void xxMutexUnlock(xxMutex* mutex);
 //==============================================================================
 //  TSC
 //==============================================================================

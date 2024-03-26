@@ -132,51 +132,6 @@ void xxFreeLibrary(void* library)
 #endif
 }
 //==============================================================================
-//  Mutex
-//==============================================================================
-void xxMutexInit(xxMutex* mutex)
-{
-#if defined(_WIN32)
-    InitializeCriticalSection(mutex);
-#else
-    (*mutex) = PTHREAD_RECURSIVE_MUTEX_INITIALIZER;
-#endif
-}
-//------------------------------------------------------------------------------
-void xxMutexDestroy(xxMutex* mutex)
-{
-#if defined(_WIN32)
-    DeleteCriticalSection(mutex);
-#endif
-}
-//------------------------------------------------------------------------------
-void xxMutexLock(xxMutex* mutex)
-{
-#if defined(_WIN32)
-    EnterCriticalSection(mutex);
-#else
-    while (pthread_mutex_lock(mutex) != 0);
-#endif
-}
-//------------------------------------------------------------------------------
-bool xxMutexTryLock(xxMutex* mutex)
-{
-#if defined(_WIN32)
-    return TryEnterCriticalSection(mutex);
-#else
-    return pthread_mutex_trylock(mutex) == 0;
-#endif
-}
-//------------------------------------------------------------------------------
-void xxMutexUnlock(xxMutex* mutex)
-{
-#if defined(_WIN32)
-    LeaveCriticalSection(mutex);
-#else
-    pthread_mutex_lock(mutex);
-#endif
-}
-//==============================================================================
 //  TSC
 //==============================================================================
 uint64_t xxTSC()
