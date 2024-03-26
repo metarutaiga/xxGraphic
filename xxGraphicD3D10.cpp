@@ -19,7 +19,6 @@ typedef HRESULT (WINAPI *PFN_D3D10_CREATE_DEVICE)(IDXGIAdapter*, D3D10_DRIVER_TY
 static void*                        g_d3dLibrary = nullptr;
 static IDXGIFactory*                g_dxgiFactory = nullptr;
 static bool                         g_unsupportedBGRA = false;
-static bool                         g_unsupportedPersistentBuffer = false;
 
 //==============================================================================
 //  Instance
@@ -86,7 +85,6 @@ uint64_t xxCreateDeviceD3D10(uint64_t instance)
     SafeRelease(unknown);
 
     g_unsupportedBGRA = true;
-    g_unsupportedPersistentBuffer = GetFileAttributesA("C:\\.windows-serial") != INVALID_FILE_ATTRIBUTES;
 
     return reinterpret_cast<uint64_t>(d3dDevice);
 }
@@ -639,7 +637,7 @@ void* xxMapBufferD3D10(uint64_t device, uint64_t buffer)
         return nullptr;
     }
 #if PERSISTENT_BUFFER
-    if (d3dBuffer->map == D3D10_MAP_WRITE_NO_OVERWRITE && g_unsupportedPersistentBuffer == false)
+    if (d3dBuffer->map == D3D10_MAP_WRITE_NO_OVERWRITE)
     {
         d3dBuffer->address = ptr;
     }
