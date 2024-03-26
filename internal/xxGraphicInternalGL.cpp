@@ -435,6 +435,8 @@ GL_PROTOTYPE(void, glTexStorage3DMultisample, (GLenum target, GLsizei samples, G
 //  Windows GL Loader
 //==============================================================================
 #if defined(xxWINDOWS)
+#define _GDI32_
+#include <windows.h>
 static void* opengl32GetProcAddress(char const* name)
 {
     static HMODULE opengl32 = LoadLibraryA("opengl32.dll");
