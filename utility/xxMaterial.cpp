@@ -324,7 +324,7 @@ xxMaterialPtr xxMaterial::Create()
 //==============================================================================
 xxMaterialPtr (*xxMaterial::BinaryCreate)() = xxMaterial::Create;
 //------------------------------------------------------------------------------
-bool xxMaterial::BinaryRead(xxBinary& binary)
+void xxMaterial::BinaryRead(xxBinary& binary)
 {
     binary.ReadString(Name);
 
@@ -364,15 +364,13 @@ bool xxMaterial::BinaryRead(xxBinary& binary)
     {
         xxModifierPtr modifier = binary.ReadReference<xxModifier>();
         if (modifier == nullptr)
-            return false;
+            return;
 
         Modifiers.push_back(modifier);
     }
-
-    return binary.Safe;
 }
 //------------------------------------------------------------------------------
-bool xxMaterial::BinaryWrite(xxBinary& binary) const
+void xxMaterial::BinaryWrite(xxBinary& binary) const
 {
     binary.WriteString(Name);
 
@@ -412,8 +410,6 @@ bool xxMaterial::BinaryWrite(xxBinary& binary) const
     {
         binary.WriteReference(Modifiers[i]);
     }
-
-    return binary.Safe;
 }
 //==============================================================================
 //  Default Shader

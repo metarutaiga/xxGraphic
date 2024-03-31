@@ -274,7 +274,7 @@ xxMeshPtr xxMesh::Create(int normal, int color, int texture)
 //==============================================================================
 xxMeshPtr (*xxMesh::BinaryCreate)() = []() { return Create(); };
 //------------------------------------------------------------------------------
-bool xxMesh::BinaryRead(xxBinary& binary)
+void xxMesh::BinaryRead(xxBinary& binary)
 {
     binary.ReadString(Name);
 
@@ -292,11 +292,9 @@ bool xxMesh::BinaryRead(xxBinary& binary)
 
     binary.ReadArray(Vertex, Stride * VertexCount);
     binary.ReadArray(Index, IndexCount);
-
-    return binary.Safe;
 }
 //------------------------------------------------------------------------------
-bool xxMesh::BinaryWrite(xxBinary& binary) const
+void xxMesh::BinaryWrite(xxBinary& binary) const
 {
     binary.WriteString(Name);
 
@@ -310,7 +308,5 @@ bool xxMesh::BinaryWrite(xxBinary& binary) const
 
     binary.WriteArray(Vertex, Stride * VertexCount);
     binary.WriteArray(Index, IndexCount);
-
-    return binary.Safe;
 }
 //==============================================================================

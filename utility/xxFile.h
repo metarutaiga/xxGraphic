@@ -17,6 +17,9 @@ public:
     virtual bool        Read(void* data, size_t size);
     virtual bool        Write(void const* data, size_t size);
 
+    virtual size_t      Position() const;
+    virtual size_t      Size() const;
+
     static xxFile*    (*Load)(char const* name);
     static xxFile*    (*Save)(char const* name);
 

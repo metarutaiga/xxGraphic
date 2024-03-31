@@ -41,6 +41,29 @@ bool xxFile::Write(void const* data, size_t size)
     return (size == 0) || (fwrite(data, size, 1, file) == 1);
 }
 //------------------------------------------------------------------------------
+size_t xxFile::Position() const
+{
+    FILE* file = reinterpret_cast<FILE*>(m_handle);
+    if (file == nullptr)
+        return 0;
+
+    size_t position = ftell(file);
+    return position;
+}
+//------------------------------------------------------------------------------
+size_t xxFile::Size() const
+{
+    FILE* file = reinterpret_cast<FILE*>(m_handle);
+    if (file == nullptr)
+        return 0;
+
+    long position = ftell(file);
+    fseek(file, 0, SEEK_END);
+    size_t size = ftell(file);
+    fseek(file, position, SEEK_SET);
+    return size;
+}
+//------------------------------------------------------------------------------
 xxFile* (*xxFile::Load)(char const* name) = [](char const* name) -> xxFile*
 {
     FILE* file = fopen(name, "rb");

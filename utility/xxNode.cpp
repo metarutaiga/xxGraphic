@@ -439,7 +439,7 @@ xxNodePtr xxNode::Create()
 //==============================================================================
 xxNodePtr (*xxNode::BinaryCreate)() = []() { return xxNode::Create(); };
 //------------------------------------------------------------------------------
-bool xxNode::BinaryRead(xxBinary& binary)
+void xxNode::BinaryRead(xxBinary& binary)
 {
     binary.ReadString(Name);
 
@@ -453,7 +453,7 @@ bool xxNode::BinaryRead(xxBinary& binary)
     {
         xxImagePtr image = binary.ReadReference<xxImage>();
         if (image == nullptr)
-            return false;
+            return;
 
         xxImage::ImageLoader(image, binary.Path);
         Images.push_back(image);
@@ -468,7 +468,7 @@ bool xxNode::BinaryRead(xxBinary& binary)
     {
         xxModifierPtr modifier = binary.ReadReference<xxModifier>();
         if (modifier == nullptr)
-            return false;
+            return;
 
         Modifiers.push_back(modifier);
     }
@@ -478,16 +478,18 @@ bool xxNode::BinaryRead(xxBinary& binary)
     for (size_t i = 0; i < childCount; ++i)
     {
         xxNodePtr child = xxNode::Create();
-        if (child == nullptr || child->BinaryRead(binary) == false)
-            return false;
+        if (child)
+        {
+            child->BinaryRead(binary);
+        }
+        if (child == nullptr || binary.Safe == false)
+            return;
 
         AttachChild(child);
     }
-
-    return binary.Safe;
 }
 //------------------------------------------------------------------------------
-bool xxNode::BinaryWrite(xxBinary& binary) const
+void xxNode::BinaryWrite(xxBinary& binary) const
 {
     binary.WriteString(Name);
 
@@ -517,10 +519,12 @@ bool xxNode::BinaryWrite(xxBinary& binary) const
     for (size_t i = 0; i < childCount; ++i)
     {
         xxNodePtr const& child = m_children[i];
-        if (child == nullptr || child->BinaryWrite(binary) == false)
-            return false;
+        if (child)
+        {
+            child->BinaryWrite(binary);
+        }
+        if (child == nullptr || binary.Safe == false)
+            return;
     }
-
-    return binary.Safe;
 }
 //==============================================================================

@@ -18,11 +18,11 @@ protected:
     xxBinary();
     virtual ~xxBinary();
 
-    bool                        Read(void* data, size_t size);
-    bool                        Write(void const* data, size_t size);
+    virtual bool                Read(void* data, size_t size);
+    virtual bool                Write(void const* data, size_t size);
 
-    xxUnknownPtr                ReadReferenceInternal(xxUnknownPtr (*create)(), bool(xxBinary::*read)(xxBinary&));
-    bool                        WriteReferenceInternal(xxUnknownPtr const& unknown, bool(xxBinary::*write)(xxBinary&));
+    xxUnknownPtr                ReadReferenceInternal(xxUnknownPtr (*create)(), void(xxBinary::*read)(xxBinary&));
+    bool                        WriteReferenceInternal(xxUnknownPtr const& unknown, void(xxBinary::*write)(xxBinary&));
 
     xxFile*                     m_file = nullptr;
     std::vector<xxUnknownPtr>   m_reference;
@@ -36,14 +36,14 @@ public:
     template<typename T> bool   WriteArray(T const* data, size_t size)  { return Write(data, sizeof(T) * size); }
     bool                        ReadSize(size_t& size);
     bool                        WriteSize(size_t size);
-    bool                        ReadString(std::string& string);
-    bool                        WriteString(std::string const& string);
+    virtual bool                ReadString(std::string& string);
+    virtual bool                WriteString(std::string const& string);
 
     template<class T>
     std::shared_ptr<T> ReadReference()
     {
         auto create = []() { auto ptr = T::BinaryCreate(); return reinterpret_cast<xxUnknownPtr&>(ptr); };
-        auto read = reinterpret_cast<bool(xxBinary::*)(xxBinary&)>(&T::BinaryRead);
+        auto read = reinterpret_cast<void(xxBinary::*)(xxBinary&)>(&T::BinaryRead);
         auto unknown = ReadReferenceInternal(create, read);
         return reinterpret_cast<std::shared_ptr<T>&>(unknown);
     }
@@ -52,7 +52,7 @@ public:
     bool WriteReference(std::shared_ptr<T> const& input)
     {
         auto unknown = reinterpret_cast<xxUnknownPtr const&>(input);
-        auto write = reinterpret_cast<bool(xxBinary::*)(xxBinary&)>(&T::BinaryWrite);
+        auto write = reinterpret_cast<void(xxBinary::*)(xxBinary&)>(&T::BinaryWrite);
         return WriteReferenceInternal(unknown, write);
     }
 
