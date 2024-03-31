@@ -31,7 +31,7 @@ xxModifierPtr xxModifier::Create()
 //==============================================================================
 xxModifierPtr (*xxModifier::BinaryCreate)() = xxModifier::Create;
 //------------------------------------------------------------------------------
-bool xxModifier::BinaryRead(xxBinary& binary)
+void xxModifier::BinaryRead(xxBinary& binary)
 {
     binary.ReadString(Name);
 
@@ -40,11 +40,9 @@ bool xxModifier::BinaryRead(xxBinary& binary)
     size_t length = 0;
     binary.ReadSize(length);
     binary.ReadArray(Data.insert(Data.end(), length, 0).base(), length);
-
-    return binary.Safe;
 }
 //------------------------------------------------------------------------------
-bool xxModifier::BinaryWrite(xxBinary& binary) const
+void xxModifier::BinaryWrite(xxBinary& binary) const
 {
     binary.WriteString(Name);
 
@@ -53,7 +51,5 @@ bool xxModifier::BinaryWrite(xxBinary& binary) const
     size_t length = Data.size();
     binary.WriteSize(length);
     binary.WriteArray(Data.data(), length);
-
-    return binary.Safe;
 }
 //==============================================================================

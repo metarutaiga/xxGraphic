@@ -25,8 +25,8 @@ public:
     static xxImagePtr   CreateCube(uint64_t format, int width, int height, int mipmap);
 
     static xxImagePtr (*BinaryCreate)();
-    virtual bool        BinaryRead(xxBinary& binary);
-    virtual bool        BinaryWrite(xxBinary& binary) const;
+    virtual void        BinaryRead(xxBinary& binary);
+    virtual void        BinaryWrite(xxBinary& binary) const;
 
     static void       (*ImageLoader)(xxImagePtr const& image, std::string const& path);
 
@@ -59,5 +59,5 @@ public:
     bool                FilterMag = true;
     bool                FilterMin = true;
     bool                FilterMip = true;
-    uint8_t             Anisotropic = 1;
+    int                 Anisotropic = 1;
 };

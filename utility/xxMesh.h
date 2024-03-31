@@ -31,8 +31,8 @@ public:
     static xxMeshPtr            Create(int normal = 0, int color = 0, int texture = 0);
 
     static xxMeshPtr          (*BinaryCreate)();
-    virtual bool                BinaryRead(xxBinary& binary);
-    virtual bool                BinaryWrite(xxBinary& binary) const;
+    virtual void                BinaryRead(xxBinary& binary);
+    virtual void                BinaryWrite(xxBinary& binary) const;
 
 protected:
     xxMesh(int normal, int color, int texture);

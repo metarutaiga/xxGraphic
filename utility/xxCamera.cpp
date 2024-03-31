@@ -110,7 +110,7 @@ xxCameraPtr xxCamera::Create()
 //==============================================================================
 xxCameraPtr (*xxCamera::BinaryCreate)() = xxCamera::Create;
 //------------------------------------------------------------------------------
-bool xxCamera::BinaryRead(xxBinary& binary)
+void xxCamera::BinaryRead(xxBinary& binary)
 {
     binary.ReadString(Name);
 
@@ -132,11 +132,9 @@ bool xxCamera::BinaryRead(xxBinary& binary)
 
     binary.Read(LightDirection);
     binary.Read(LightColor);
-
-    return binary.Safe;
 }
 //------------------------------------------------------------------------------
-bool xxCamera::BinaryWrite(xxBinary& binary) const
+void xxCamera::BinaryWrite(xxBinary& binary) const
 {
     binary.WriteString(Name);
 
@@ -158,7 +156,5 @@ bool xxCamera::BinaryWrite(xxBinary& binary) const
 
     binary.Write(LightDirection);
     binary.Write(LightColor);
-
-    return binary.Safe;
 }
 //==============================================================================

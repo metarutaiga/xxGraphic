@@ -47,8 +47,8 @@ public:
     static xxNodePtr            Create();
 
     static xxNodePtr          (*BinaryCreate)();
-    bool                        BinaryRead(xxBinary& binary);
-    bool                        BinaryWrite(xxBinary& binary) const;
+    void                        BinaryRead(xxBinary& binary);
+    void                        BinaryWrite(xxBinary& binary) const;
 
 protected:
     xxNode();

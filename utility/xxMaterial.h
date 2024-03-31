@@ -23,8 +23,8 @@ public:
     static xxMaterialPtr        Create();
 
     static xxMaterialPtr      (*BinaryCreate)();
-    virtual bool                BinaryRead(xxBinary& binary);
-    virtual bool                BinaryWrite(xxBinary& binary) const;
+    virtual void                BinaryRead(xxBinary& binary);
+    virtual void                BinaryWrite(xxBinary& binary) const;
 
 protected:
     xxMaterial();

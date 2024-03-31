@@ -16,8 +16,8 @@ public:
     static xxModifierPtr    Create();
 
     static xxModifierPtr  (*BinaryCreate)();
-    virtual bool            BinaryRead(xxBinary& binary);
-    virtual bool            BinaryWrite(xxBinary& binary) const;
+    virtual void            BinaryRead(xxBinary& binary);
+    virtual void            BinaryWrite(xxBinary& binary) const;
 
 protected:
     xxModifier();

@@ -196,7 +196,7 @@ xxImagePtr xxImage::CreateCube(uint64_t format, int width, int height, int mipma
 //==============================================================================
 xxImagePtr (*xxImage::BinaryCreate)() = []() { return xxImage::Create(0, 0, 0, 0, 0, 0); };
 //------------------------------------------------------------------------------
-bool xxImage::BinaryRead(xxBinary& binary)
+void xxImage::BinaryRead(xxBinary& binary)
 {
     binary.ReadString(Name);
 
@@ -207,11 +207,9 @@ bool xxImage::BinaryRead(xxBinary& binary)
     binary.Read(FilterMin);
     binary.Read(FilterMip);
     binary.Read(Anisotropic);
-
-    return binary.Safe;
 }
 //------------------------------------------------------------------------------
-bool xxImage::BinaryWrite(xxBinary& binary) const
+void xxImage::BinaryWrite(xxBinary& binary) const
 {
     binary.WriteString(Name);
 
@@ -222,7 +220,5 @@ bool xxImage::BinaryWrite(xxBinary& binary) const
     binary.Write(FilterMin);
     binary.Write(FilterMip);
     binary.Write(Anisotropic);
-
-    return binary.Safe;
 }
 //==============================================================================
