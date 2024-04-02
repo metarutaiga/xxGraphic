@@ -7,6 +7,7 @@
 #include "xxGraphic.h"
 #include "xxBinary.h"
 #include "xxCamera.h"
+#include "xxImage.h"
 #include "xxMesh.h"
 #include "xxModifier.h"
 #include "xxNode.h"
@@ -80,6 +81,42 @@ void xxMaterial::Draw(xxDrawData const& data) const
         xxSetVertexConstantBuffer(data.commandEncoder, constantData->vertexConstant, constantData->vertexConstantSize);
     if (constantData->fragmentConstant)
         xxSetFragmentConstantBuffer(data.commandEncoder, constantData->fragmentConstant, constantData->fragmentConstantSize);
+
+    uint64_t textures[16];
+    uint64_t samplers[16];
+
+    int textureCount = (int)Images.size();
+    for (int i = 0; i < textureCount; ++i)
+    {
+        xxImage* image = Images[i].get();
+        image->Update(data.device);
+        textures[i] = image->GetTexture();
+        samplers[i] = image->GetSampler();
+    }
+
+    xxSetFragmentTextures(data.commandEncoder, textureCount, textures);
+    xxSetFragmentSamplers(data.commandEncoder, textureCount, samplers);
+}
+//------------------------------------------------------------------------------
+xxImagePtr const& xxMaterial::GetImage(size_t index) const
+{
+    if (Images.size() <= index)
+    {
+        static xxImagePtr empty;
+        return empty;
+    }
+
+    return Images[index];
+}
+//------------------------------------------------------------------------------
+void xxMaterial::SetImage(size_t index, xxImagePtr const& image)
+{
+    if (Images.size() <= index)
+    {
+        Images.resize(index + 1);
+    }
+
+    Images[index] = image;
 }
 //------------------------------------------------------------------------------
 void xxMaterial::CreatePipeline(xxDrawData const& data)
@@ -358,15 +395,12 @@ void xxMaterial::BinaryRead(xxBinary& binary)
     binary.Read(Cull);
     binary.Read(Scissor);
 
-    size_t modifierCount = 0;
-    binary.ReadSize(modifierCount);
-    for (size_t i = 0; i < modifierCount; ++i)
-    {
-        xxModifierPtr modifier = binary.ReadReference<xxModifier>();
-        if (modifier == nullptr)
-            return;
+    binary.ReadReferences(Images);
+    binary.ReadReferences(Modifiers);
 
-        Modifiers.push_back(modifier);
+    for (size_t i = 0; i < Images.size(); ++i)
+    {
+        xxImage::ImageLoader(Images[i], binary.Path);
     }
 }
 //------------------------------------------------------------------------------
@@ -404,12 +438,8 @@ void xxMaterial::BinaryWrite(xxBinary& binary) const
     binary.Write(Cull);
     binary.Write(Scissor);
 
-    size_t modifierCount = Modifiers.size();
-    binary.WriteSize(modifierCount);
-    for (size_t i = 0; i < modifierCount; ++i)
-    {
-        binary.WriteReference(Modifiers[i]);
-    }
+    binary.WriteReferences(Images);
+    binary.WriteReferences(Modifiers);
 }
 //==============================================================================
 //  Default Shader

@@ -35,9 +35,6 @@ public:
     void                        CreateRotateTranslateScale();
     void                        UpdateRotateTranslateScale();
 
-    xxImagePtr const&           GetImage(size_t index) const;
-    void                        SetImage(size_t index, xxImagePtr const& image);
-
     void                        Invalidate();
     void                        Update(float time, bool updateMatrix = true);
     void                        Draw(xxDrawData const& data);
@@ -78,7 +75,6 @@ public:
     xxMatrix4&                  WorldMatrix;
 
     xxCameraPtr                 Camera;
-    std::vector<xxImagePtr>     Images;
     xxMaterialPtr               Material;
     xxMeshPtr                   Mesh;
 
