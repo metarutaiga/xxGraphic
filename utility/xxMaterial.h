@@ -16,6 +16,9 @@ public:
     void                        Setup(xxDrawData const& data);
     void                        Draw(xxDrawData const& data) const;
 
+    xxImagePtr const&           GetImage(size_t index) const;
+    void                        SetImage(size_t index, xxImagePtr const& image);
+
     virtual void                CreatePipeline(xxDrawData const& data);
     virtual void                CreateConstant(xxDrawData const& data) const;
     virtual void                UpdateConstant(xxDrawData const& data) const;
@@ -74,6 +77,8 @@ public:
 
     bool                        Cull = false;
     bool                        Scissor = false;
+
+    std::vector<xxImagePtr>     Images;
 
     std::vector<xxModifierPtr>  Modifiers;
 };

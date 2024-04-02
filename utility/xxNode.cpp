@@ -7,7 +7,6 @@
 #include "xxGraphic.h"
 #include "xxBinary.h"
 #include "xxCamera.h"
-#include "xxImage.h"
 #include "xxMaterial.h"
 #include "xxMesh.h"
 #include "xxModifier.h"
@@ -322,27 +321,6 @@ void xxNode::UpdateRotateTranslateScale()
     LocalMatrix.v[3].xyz = m_legacyTranslate;
 }
 //------------------------------------------------------------------------------
-xxImagePtr const& xxNode::GetImage(size_t index) const
-{
-    if (Images.size() <= index)
-    {
-        static xxImagePtr empty;
-        return empty;
-    }
-
-    return Images[index];
-}
-//------------------------------------------------------------------------------
-void xxNode::SetImage(size_t index, xxImagePtr const& image)
-{
-    if (Images.size() <= index)
-    {
-        Images.resize(index + 1);
-    }
-
-    Images[index] = image;
-}
-//------------------------------------------------------------------------------
 void xxNode::Invalidate()
 {
     for (auto& constantData : ConstantDatas)
@@ -394,22 +372,6 @@ void xxNode::Draw(xxDrawData const& data)
         return;
 
     Material->Draw(data);
-
-    uint64_t textures[16];
-    uint64_t samplers[16];
-
-    int textureCount = (int)Images.size();
-    for (int i = 0; i < textureCount; ++i)
-    {
-        xxImage* image = Images[i].get();
-        image->Update(data.device);
-        textures[i] = image->GetTexture();
-        samplers[i] = image->GetSampler();
-    }
-
-    xxSetFragmentTextures(data.commandEncoder, textureCount, textures);
-    xxSetFragmentSamplers(data.commandEncoder, textureCount, samplers);
-
     Mesh->Draw(data.commandEncoder);
 }
 //------------------------------------------------------------------------------
@@ -445,33 +407,11 @@ void xxNode::BinaryRead(xxBinary& binary)
 
     binary.Read(LocalMatrix);
 
-    Camera = binary.ReadReference<xxCamera>();
+    binary.ReadReference(Camera);
+    binary.ReadReference(Material);
+    binary.ReadReference(Mesh);
 
-    size_t imageCount = 0;
-    binary.ReadSize(imageCount);
-    for (size_t i = 0; i < imageCount; ++i)
-    {
-        xxImagePtr image = binary.ReadReference<xxImage>();
-        if (image == nullptr)
-            return;
-
-        xxImage::ImageLoader(image, binary.Path);
-        Images.push_back(image);
-    }
-
-    Material = binary.ReadReference<xxMaterial>();
-    Mesh = binary.ReadReference<xxMesh>();
-
-    size_t modifierCount = 0;
-    binary.ReadSize(modifierCount);
-    for (size_t i = 0; i < modifierCount; ++i)
-    {
-        xxModifierPtr modifier = binary.ReadReference<xxModifier>();
-        if (modifier == nullptr)
-            return;
-
-        Modifiers.push_back(modifier);
-    }
+    binary.ReadReferences(Modifiers);
 
     size_t childCount = 0;
     binary.ReadSize(childCount);
@@ -479,9 +419,7 @@ void xxNode::BinaryRead(xxBinary& binary)
     {
         xxNodePtr child = xxNode::Create();
         if (child)
-        {
             child->BinaryRead(binary);
-        }
         if (child == nullptr || binary.Safe == false)
             return;
 
@@ -496,23 +434,10 @@ void xxNode::BinaryWrite(xxBinary& binary) const
     binary.Write(LocalMatrix);
 
     binary.WriteReference(Camera);
-
-    size_t imageCount = Images.size();
-    binary.WriteSize(imageCount);
-    for (size_t i = 0; i < imageCount; ++i)
-    {
-        binary.WriteReference(Images[i]);
-    }
-
     binary.WriteReference(Material);
     binary.WriteReference(Mesh);
 
-    size_t modifierCount = Modifiers.size();
-    binary.WriteSize(modifierCount);
-    for (size_t i = 0; i < modifierCount; ++i)
-    {
-        binary.WriteReference(Modifiers[i]);
-    }
+    binary.WriteReferences(Modifiers);
 
     size_t childCount = m_children.size();
     binary.WriteSize(childCount);
@@ -520,9 +445,7 @@ void xxNode::BinaryWrite(xxBinary& binary) const
     {
         xxNodePtr const& child = m_children[i];
         if (child)
-        {
             child->BinaryWrite(binary);
-        }
         if (child == nullptr || binary.Safe == false)
             return;
     }

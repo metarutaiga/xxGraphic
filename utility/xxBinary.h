@@ -21,7 +21,7 @@ protected:
     virtual bool                Read(void* data, size_t size);
     virtual bool                Write(void const* data, size_t size);
 
-    xxUnknownPtr                ReadReferenceInternal(xxUnknownPtr (*create)(), void(xxBinary::*read)(xxBinary&));
+    bool                        ReadReferenceInternal(xxUnknownPtr& unknown, xxUnknownPtr (*create)(), void(xxBinary::*read)(xxBinary&));
     bool                        WriteReferenceInternal(xxUnknownPtr const& unknown, void(xxBinary::*write)(xxBinary&));
 
     xxFile*                     m_file = nullptr;
@@ -40,12 +40,12 @@ public:
     virtual bool                WriteString(std::string const& string);
 
     template<class T>
-    std::shared_ptr<T> ReadReference()
+    bool ReadReference(std::shared_ptr<T>& input)
     {
+        auto unknown = reinterpret_cast<xxUnknownPtr&>(input);
         auto create = []() { auto ptr = T::BinaryCreate(); return reinterpret_cast<xxUnknownPtr&>(ptr); };
         auto read = reinterpret_cast<void(xxBinary::*)(xxBinary&)>(&T::BinaryRead);
-        auto unknown = ReadReferenceInternal(create, read);
-        return reinterpret_cast<std::shared_ptr<T>&>(unknown);
+        return ReadReferenceInternal(unknown, create, read);
     }
 
     template<class T>
@@ -56,7 +56,32 @@ public:
         return WriteReferenceInternal(unknown, write);
     }
 
+    template<class T>
+    bool ReadReferences(std::vector<T>& container)
+    {
+        size_t count = 0;
+        ReadSize(count);
+        container.resize(count);
+        for (size_t i = 0; i < count; ++i)
+        {
+            ReadReference(container[i]);
+        }
+        return true;
+    }
+
+    template<class T>
+    bool WriteReferences(std::vector<T> const& container)
+    {
+        size_t count = container.size();
+        WriteSize(count);
+        for (size_t i = 0; i < count; ++i)
+        {
+            WriteReference(container[i]);
+        }
+        return true;
+    }
+
     std::string const           Path;
-    int const                   Version = 0x20240121;
+    int const                   Version = 0x20240401;
     bool const                  Safe = true;
 };
