@@ -325,13 +325,17 @@ uint64_t xxCreateVertexAttributeD3D8(uint64_t device, int count, int* attribute)
 
         stride += size;
 
-        if (offset == 0 && element == 3 && size == sizeof(float) * 3)
+        if (element == 'POS3' && size == sizeof(float) * 3)
             d3dVertexAttribute.fvf |= D3DFVF_XYZ;
-        if (offset != 0 && element == 3 && size == sizeof(float) * 3)
+        if (element == 'BON3' && size == sizeof(float) * 3)
+            d3dVertexAttribute.fvf |= D3DFVF_XYZB4;
+        if (element == 'BON4' && size == sizeof(char) * 4)
+            d3dVertexAttribute.fvf |= D3DFVF_LASTBETA_UBYTE4;
+        if (element == 'NOR3' && size == sizeof(float) * 3)
             d3dVertexAttribute.fvf |= D3DFVF_NORMAL;
-        if (offset != 0 && element == 4 && size == sizeof(char) * 4)
+        if (element == 'COL4' && size == sizeof(char) * 4)
             d3dVertexAttribute.fvf |= D3DFVF_DIFFUSE;
-        if (offset != 0 && element == 2 && size == sizeof(float) * 2)
+        if (element == 'TEX2' && size == sizeof(float) * 2)
             d3dVertexAttribute.fvf += D3DFVF_TEX1;
     }
 

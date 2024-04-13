@@ -11,11 +11,14 @@
 //==============================================================================
 //  Mesh
 //==============================================================================
-xxMesh::xxMesh(int normal, int color, int texture)
-    :Stride(xxSizeOf(xxVector3) * 1 + 
+xxMesh::xxMesh(bool skinning, int normal, int color, int texture)
+    :Stride(xxSizeOf(xxVector3) * 1 +
+            xxSizeOf(xxVector3) * (skinning ? 1 : 0) +
+            xxSizeOf(uint32_t) * (skinning ? 1 : 0) +
             xxSizeOf(xxVector3) * normal +
             xxSizeOf(uint32_t) * color +
             xxSizeOf(xxVector2) * texture)
+    ,Skinning(skinning)
     ,NormalCount(normal)
     ,ColorCount(color)
     ,TextureCount(texture)
@@ -63,9 +66,29 @@ void xxMesh::Setup(uint64_t device)
         dataCount++;
         (*dataPtr++) = 0;
         (*dataPtr++) = offset;
-        (*dataPtr++) = 3;
+        (*dataPtr++) = 'POS3';
         (*dataPtr++) = xxSizeOf(xxVector3);
         offset += xxSizeOf(xxVector3);
+
+        // skinning
+        if (Skinning)
+        {
+            // bone weight
+            dataCount++;
+            (*dataPtr++) = 0;
+            (*dataPtr++) = offset;
+            (*dataPtr++) = 'BON3';
+            (*dataPtr++) = xxSizeOf(xxVector3);
+            offset += xxSizeOf(xxVector3);
+
+            // bone index
+            dataCount++;
+            (*dataPtr++) = 0;
+            (*dataPtr++) = offset;
+            (*dataPtr++) = 'BON4';
+            (*dataPtr++) = xxSizeOf(uint32_t);
+            offset += xxSizeOf(uint32_t);
+        }
 
         // normal
         for (int i = 0; i < NormalCount; ++i)
@@ -73,7 +96,7 @@ void xxMesh::Setup(uint64_t device)
             dataCount++;
             (*dataPtr++) = 0;
             (*dataPtr++) = offset;
-            (*dataPtr++) = 3;
+            (*dataPtr++) = 'NOR3';
             (*dataPtr++) = xxSizeOf(xxVector3);
             offset += xxSizeOf(xxVector3);
         }
@@ -84,7 +107,7 @@ void xxMesh::Setup(uint64_t device)
             dataCount++;
             (*dataPtr++) = 0;
             (*dataPtr++) = offset;
-            (*dataPtr++) = 4;
+            (*dataPtr++) = 'COL4';
             (*dataPtr++) = xxSizeOf(uint32_t);
             offset += xxSizeOf(uint32_t);
         }
@@ -95,7 +118,7 @@ void xxMesh::Setup(uint64_t device)
             dataCount++;
             (*dataPtr++) = 0;
             (*dataPtr++) = offset;
-            (*dataPtr++) = 2;
+            (*dataPtr++) = 'TEX2';
             (*dataPtr++) = xxSizeOf(xxVector2);
             offset += xxSizeOf(xxVector2);
         }
@@ -234,10 +257,29 @@ xxStrideIterator<xxVector3> xxMesh::GetVertex() const
     return xxStrideIterator<xxVector3>(vertex, Stride, VertexCount);
 }
 //------------------------------------------------------------------------------
+xxStrideIterator<xxVector3> xxMesh::GetBoneWeight() const
+{
+    char* vertex = Vertex;
+    vertex += xxSizeOf(xxVector3);
+    vertex += xxSizeOf(xxVector3);
+    return xxStrideIterator<xxVector3>(vertex, Stride, Skinning ? VertexCount : 0);
+}
+//------------------------------------------------------------------------------
+xxStrideIterator<uint32_t> xxMesh::GetBoneIndex() const
+{
+    char* vertex = Vertex;
+    vertex += xxSizeOf(xxVector3);
+    vertex += xxSizeOf(xxVector3) * (Skinning ? 1 : 0);
+    vertex += xxSizeOf(uint32_t);
+    return xxStrideIterator<uint32_t>(vertex, Stride, Skinning ? VertexCount : 0);
+}
+//------------------------------------------------------------------------------
 xxStrideIterator<xxVector3> xxMesh::GetNormal(int index) const
 {
     char* vertex = Vertex;
     vertex += xxSizeOf(xxVector3);
+    vertex += xxSizeOf(xxVector3) * (Skinning ? 1 : 0);
+    vertex += xxSizeOf(uint32_t) * (Skinning ? 1 : 0);
     vertex += xxSizeOf(xxVector3) * index;
     return xxStrideIterator<xxVector3>(vertex, Stride, NormalCount ? VertexCount : 0);
 }
@@ -246,6 +288,8 @@ xxStrideIterator<uint32_t> xxMesh::GetColor(int index) const
 {
     char* vertex = Vertex;
     vertex += xxSizeOf(xxVector3);
+    vertex += xxSizeOf(xxVector3) * (Skinning ? 1 : 0);
+    vertex += xxSizeOf(uint32_t) * (Skinning ? 1 : 0);
     vertex += xxSizeOf(xxVector3) * NormalCount;
     vertex += xxSizeOf(uint32_t) * index;
     return xxStrideIterator<uint32_t>(vertex, Stride, ColorCount ? VertexCount : 0);
@@ -255,15 +299,17 @@ xxStrideIterator<xxVector2> xxMesh::GetTexture(int index) const
 {
     char* vertex = Vertex;
     vertex += xxSizeOf(xxVector3);
+    vertex += xxSizeOf(xxVector3) * (Skinning ? 1 : 0);
+    vertex += xxSizeOf(uint32_t) * (Skinning ? 1 : 0);
     vertex += xxSizeOf(xxVector3) * NormalCount;
     vertex += xxSizeOf(uint32_t) * ColorCount;
     vertex += xxSizeOf(xxVector2) * index;
     return xxStrideIterator<xxVector2>(vertex, Stride, TextureCount ? VertexCount : 0);
 }
 //------------------------------------------------------------------------------
-xxMeshPtr xxMesh::Create(int normal, int color, int texture)
+xxMeshPtr xxMesh::Create(bool skinning, int normal, int color, int texture)
 {
-    xxMeshPtr mesh = xxMeshPtr(new xxMesh(normal, color, texture), [](xxMesh* mesh) { delete mesh; });
+    xxMeshPtr mesh = xxMeshPtr(new xxMesh(skinning, normal, color, texture), [](xxMesh* mesh) { delete mesh; });
     if (mesh == nullptr)
         return nullptr;
 

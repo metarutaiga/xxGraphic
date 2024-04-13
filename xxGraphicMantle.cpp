@@ -403,20 +403,33 @@ uint64_t xxCreateVertexAttributeMantle(uint64_t device, int count, int* attribut
         info.format.numericFormat = GR_NUM_FMT_FLOAT;
         info.state = GR_MEMORY_STATE_GRAPHICS_SHADER_READ_ONLY;
 
-        if (element == 3 && size == sizeof(float) * 3)
+        if (element == 'POS3' && size == sizeof(float) * 3)
         {
             info.format.channelFormat = GR_CH_FMT_R32G32B32;
             continue;
         }
 
-        if (element == 4 && size == sizeof(char) * 4)
+        if (element == 'BON3' && size == sizeof(float) * 3)
+        {
+            info.format.channelFormat = GR_CH_FMT_R32G32B32;
+            continue;
+        }
+
+        if (element == 'BON4' && size == sizeof(char) * 4)
+        {
+            info.format.channelFormat = GR_CH_FMT_R8G8B8A8;
+            info.format.numericFormat = GR_NUM_FMT_UINT;
+            continue;
+        }
+
+        if (element == 'COL4' && size == sizeof(char) * 4)
         {
             info.format.channelFormat = GR_CH_FMT_B8G8R8A8;
             info.format.numericFormat = GR_NUM_FMT_UNORM;
             continue;
         }
 
-        if (element == 2 && size == sizeof(float) * 2)
+        if (element == 'TEX2' && size == sizeof(float) * 2)
         {
             info.format.channelFormat = GR_CH_FMT_R32G32;
             continue;

@@ -245,11 +245,11 @@ uint64_t xxCreateVertexAttributeGlide(uint64_t device, int count, int* attribute
         (void)stream;
         stride += size;
 
-        if (offset == 0 && element == 3 && size == sizeof(float) * 3)
+        if (element == 'POS3' && size == sizeof(float) * 3)
             grVertexAttribute.flags |= GR_PARAM_XY | GR_PARAM_Z;
-        if (offset != 0 && element == 4 && size == sizeof(char) * 4)
+        if (element == 'COL4' && size == sizeof(char) * 4)
             grVertexAttribute.flags |= GR_PARAM_PARGB;
-        if (offset != 0 && element == 2 && size == sizeof(float) * 2)
+        if (element == 'TEX2' && size == sizeof(float) * 2)
             grVertexAttribute.flags += GR_PARAM_ST0;
     }
 

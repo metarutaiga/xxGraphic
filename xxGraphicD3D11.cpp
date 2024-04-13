@@ -410,8 +410,8 @@ uint64_t xxCreateVertexAttributeD3D11(uint64_t device, int count, int* attribute
         return 0;
 
     D3D11_INPUT_ELEMENT_DESC inputElements[16];
-    BYTE xyzIndex = 0;
-    BYTE textureIndex = 0;
+    int normalIndex = 0;
+    int textureIndex = 0;
     int stride = 0;
 
     for (int i = 0; i < count; ++i)
@@ -425,50 +425,55 @@ uint64_t xxCreateVertexAttributeD3D11(uint64_t device, int count, int* attribute
 
         D3D11_INPUT_ELEMENT_DESC& inputElement = inputElements[i];
         inputElement.SemanticName;
-        inputElement.SemanticIndex;
+        inputElement.SemanticIndex = 0;
         inputElement.Format;
         inputElement.InputSlot = stream;
         inputElement.AlignedByteOffset = offset;
         inputElement.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
         inputElement.InstanceDataStepRate = 0;
 
-        if (element == 3 && size == sizeof(float) * 3)
+        if (element == 'POS3' && size == sizeof(float) * 3)
         {
             inputElement.Format = DXGI_FORMAT_R32G32B32_FLOAT;
-            switch (xyzIndex)
-            {
-            case 0:
-                inputElement.SemanticName = "POSITION";
-                inputElement.SemanticIndex = 0;
-                break;
-            case 1:
-                inputElement.SemanticName = "NORMAL";
-                inputElement.SemanticIndex = 0;
-                break;
-            case 2:
-                inputElement.SemanticName = "BINORMAL";
-                inputElement.SemanticIndex = 0;
-                break;
-            case 3:
-                inputElement.SemanticName = "TANGENT";
-                inputElement.SemanticIndex = 0;
-                break;
-            default:
-                break;
-            }
-            xyzIndex++;
+            inputElement.SemanticName = "POSITION";
             continue;
         }
 
-        if (element == 4 && size == sizeof(char) * 4)
+        if (element == 'BON3' && size == sizeof(float) * 3)
+        {
+            inputElement.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+            inputElement.SemanticName = "BLENDWEIGHT";
+            continue;
+        }
+
+        if (element == 'BON4' && size == sizeof(char) * 4)
+        {
+            inputElement.Format = DXGI_FORMAT_R8G8B8A8_UINT;
+            inputElement.SemanticName = "BLENDINDICES";
+            continue;
+        }
+
+        if (element == 'NOR3' && size == sizeof(float) * 3)
+        {
+            inputElement.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+            switch (normalIndex)
+            {
+            case 0: inputElement.SemanticName = "NORMAL"; break;
+            case 1: inputElement.SemanticName = "TANGENT"; break;
+            case 2: inputElement.SemanticName = "BINORMAL"; break;
+            }
+            normalIndex++;
+            continue;
+        }
+
+        if (element == 'COL4' && size == sizeof(char) * 4)
         {
             inputElement.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
             inputElement.SemanticName = "COLOR";
-            inputElement.SemanticIndex = 0;
             continue;
         }
 
-        if (element == 2 && size == sizeof(float) * 2)
+        if (element == 'TEX2' && size == sizeof(float) * 2)
         {
             inputElement.Format = DXGI_FORMAT_R32G32_FLOAT;
             inputElement.SemanticName = "TEXCOORD";
@@ -1033,7 +1038,7 @@ uint64_t xxCreateVertexShaderD3D11(uint64_t device, char const* shader, uint64_t
     }
     else
     {
-        static char const* const macro[] = { "SHADER_HLSL", "1", "SHADER_VERTEX", "1", nullptr, nullptr };
+        static char const* const macro[] = { "SHADER_HLSL", "11", "SHADER_VERTEX", "1", nullptr, nullptr };
         ID3D10Blob* blob = D3DCompileShader(shader, macro, "Main", "vs_4_0");
         if (blob == nullptr)
             return 0;
@@ -1066,7 +1071,7 @@ uint64_t xxCreateFragmentShaderD3D11(uint64_t device, char const* shader)
     }
     else
     {
-        static char const* const macro[] = { "SHADER_HLSL", "1", "SHADER_FRAGMENT", "1", nullptr, nullptr };
+        static char const* const macro[] = { "SHADER_HLSL", "11", "SHADER_FRAGMENT", "1", nullptr, nullptr };
         ID3D10Blob* blob = D3DCompileShader(shader, macro, "Main", "ps_4_0");
         if (blob == nullptr)
             return 0;
