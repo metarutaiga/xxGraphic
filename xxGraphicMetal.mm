@@ -357,39 +357,42 @@ id xxCreateVertexAttributeMetal(id <MTLDevice> __unsafe_unretained device, int c
         attribute.offset = offset;
         attribute.bufferIndex = xxGraphicDescriptor::VERTEX_BUFFER + stream;
 
-        switch (size / element)
+        switch (size / ((element & 0xFF) - '0'))
         {
         case sizeof(char):
-            switch (element)
+            switch (element & 0xFF)
             {
-            case 1:
+            case '1':
                 attribute.format = MTLVertexFormat(47)/*MTLVertexFormatUCharNormalized*/;
                 break;
-            case 2:
+            case '2':
                 attribute.format = MTLVertexFormatUChar2Normalized;
                 break;
-            case 3:
+            case '3':
                 attribute.format = MTLVertexFormatUChar3Normalized;
                 break;
-            case 4:
-                attribute.format = MTLVertexFormatUChar4Normalized;
+            case '4':
+                if (element == 'BON4')
+                    attribute.format = MTLVertexFormatUChar4;
+                else
+                    attribute.format = MTLVertexFormatUChar4Normalized;
                 break;
             }
             break;
 
         case sizeof(float):
-            switch (element)
+            switch (element & 0xFF)
             {
-            case 1:
+            case '1':
                 attribute.format = MTLVertexFormatFloat;
                 break;
-            case 2:
+            case '2':
                 attribute.format = MTLVertexFormatFloat2;
                 break;
-            case 3:
+            case '3':
                 attribute.format = MTLVertexFormatFloat3;
                 break;
-            case 4:
+            case '4':
                 attribute.format = MTLVertexFormatFloat4;
                 break;
             }

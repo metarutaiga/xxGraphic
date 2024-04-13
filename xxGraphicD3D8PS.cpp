@@ -51,7 +51,6 @@ uint64_t xxCreateVertexAttributeD3D8PS(uint64_t device, int count, int* attribut
         return 0;
 
     d3dVertexAttribute->declaration[0] = D3DVSD_STREAM(0);
-    BYTE xyzIndex = 0;
     BYTE textureIndex = 0;
     int stride = 0;
 
@@ -66,22 +65,39 @@ uint64_t xxCreateVertexAttributeD3D8PS(uint64_t device, int count, int* attribut
 
         DWORD& declaration = d3dVertexAttribute->declaration[i + 1];
 
-        if (element == 3 && size == sizeof(float) * 3)
+        if (element == 'POS3' && size == sizeof(float) * 3)
         {
-            declaration = D3DVSD_REG(i, D3DVSDT_FLOAT3);
-            xyzIndex++;
+            declaration = D3DVSD_REG(D3DVSDE_POSITION, D3DVSDT_FLOAT3);
             continue;
         }
 
-        if (element == 4 && size == sizeof(char) * 4)
+        if (element == 'BON3' && size == sizeof(float) * 3)
         {
-            declaration = D3DVSD_REG(i, D3DVSDT_D3DCOLOR);
+            declaration = D3DVSD_REG(D3DVSDE_BLENDWEIGHT, D3DVSDT_FLOAT3);
             continue;
         }
 
-        if (element == 2 && size == sizeof(float) * 2)
+        if (element == 'BON4' && size == sizeof(char) * 4)
         {
-            declaration = D3DVSD_REG(i, D3DVSDT_FLOAT2);
+            declaration = D3DVSD_REG(D3DVSDE_BLENDINDICES, D3DVSDT_UBYTE4);
+            continue;
+        }
+
+        if (element == 'NOR3' && size == sizeof(float) * 3)
+        {
+            declaration = D3DVSD_REG(D3DVSDE_NORMAL, D3DVSDT_FLOAT3);
+            continue;
+        }
+
+        if (element == 'COL4' && size == sizeof(char) * 4)
+        {
+            declaration = D3DVSD_REG(D3DVSDE_DIFFUSE, D3DVSDT_D3DCOLOR);
+            continue;
+        }
+
+        if (element == 'TEX2' && size == sizeof(float) * 2)
+        {
+            declaration = D3DVSD_REG(D3DVSDE_TEXCOORD0 + textureIndex, D3DVSDT_FLOAT2);
             textureIndex++;
             continue;
         }

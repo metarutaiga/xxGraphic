@@ -1189,13 +1189,19 @@ uint64_t xxCreateVertexAttributeVulkan(uint64_t device, int count, int* attribut
         attributeDesc.format = VK_FORMAT_R32G32B32A32_SFLOAT;
         attributeDesc.offset = offset;
 
-        if (element == 3 && size == sizeof(float) * 3)
+        if (element == 'POS3' && size == sizeof(float) * 3)
         {
             attributeDesc.format = VK_FORMAT_R32G32B32_SFLOAT;
             continue;
         }
 
-        if (element == 4 && size == sizeof(char) * 4)
+        if (element == 'NOR3' && size == sizeof(float) * 3)
+        {
+            attributeDesc.format = VK_FORMAT_R32G32B32_SFLOAT;
+            continue;
+        }
+
+        if (element == 'COL4' && size == sizeof(char) * 4)
         {
 #if defined(xxWINDOWS)
             attributeDesc.format = VK_FORMAT_B8G8R8A8_UNORM;
@@ -1205,7 +1211,7 @@ uint64_t xxCreateVertexAttributeVulkan(uint64_t device, int count, int* attribut
             continue;
         }
 
-        if (element == 2 && size == sizeof(float) * 2)
+        if (element == 'TEX2' && size == sizeof(float) * 2)
         {
             attributeDesc.format = VK_FORMAT_R32G32_SFLOAT;
             continue;

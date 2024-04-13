@@ -24,18 +24,21 @@ public:
     void                        SetIndexCount(int count);
 
     xxStrideIterator<xxVector3> GetVertex() const;
+    xxStrideIterator<xxVector3> GetBoneWeight() const;
+    xxStrideIterator<uint32_t>  GetBoneIndex() const;
+
     xxStrideIterator<xxVector3> GetNormal(int index) const;
     xxStrideIterator<uint32_t>  GetColor(int index) const;
     xxStrideIterator<xxVector2> GetTexture(int index) const;
 
-    static xxMeshPtr            Create(int normal = 0, int color = 0, int texture = 0);
+    static xxMeshPtr            Create(bool skinning = false, int normal = 0, int color = 0, int texture = 0);
 
     static xxMeshPtr          (*BinaryCreate)();
     virtual void                BinaryRead(xxBinary& binary);
     virtual void                BinaryWrite(xxBinary& binary) const;
 
 protected:
-    xxMesh(int normal, int color, int texture);
+    xxMesh(bool skinning, int normal, int color, int texture);
     virtual ~xxMesh();
 
     uint64_t                    m_device = 0;
@@ -55,6 +58,7 @@ public:
     std::string                 Name = "";
 
     int const                   Stride = 0;
+    bool const                  Skinning = false;
     int const                   NormalCount = 0;
     int const                   ColorCount = 0;
     int const                   TextureCount = 0;

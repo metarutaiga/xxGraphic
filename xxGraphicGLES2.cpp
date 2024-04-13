@@ -285,6 +285,8 @@ uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, int* attribute
         return 0;
 
     VERTEXATTRIBUTEGL::Attribute* attributes = glVertexAttribute->attributes;
+    int normalIndex = 0;
+    int textureIndex = 0;
     int stride = 0;
 
     for (int i = 0; i < count; ++i)
@@ -304,15 +306,25 @@ uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, int* attribute
         attributes[i].pointer = (char*)nullptr + offset;
         attributes[i].stream = stream;
 
-        if (offset == 0 && element == 3 && size == sizeof(float) * 3)
+        if (element == 'POS3' && size == sizeof(float) * 3)
         {
             attributes[i].name = "attrPosition";
+            continue;
         }
-        if (offset != 0 && element == 3 && size == sizeof(float) * 3)
+
+        if (element == 'NOR3' && size == sizeof(float) * 3)
         {
-            attributes[i].name = "attrNormal";
+            switch (normalIndex)
+            {
+            case 0: attributes[i].name = "attrNormal"; break;
+            case 1: attributes[i].name = "attrTangent"; break;
+            case 2: attributes[i].name = "attrBinormal"; break;
+            }
+            normalIndex++;
+            continue;
         }
-        if (offset != 0 && element == 4 && size == sizeof(char) * 4)
+
+        if (element == 'COL4' && size == sizeof(char) * 4)
         {
 #if defined(xxWINDOWS)
             attributes[i].size = GL_BGRA_EXT;
@@ -322,10 +334,24 @@ uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, int* attribute
             attributes[i].type = GL_UNSIGNED_BYTE;
             attributes[i].normalized = GL_TRUE;
             attributes[i].name = "attrColor";
+            continue;
         }
-        if (offset != 0 && element == 2 && size == sizeof(float) * 2)
+
+        if (element == 'TEX2' && size == sizeof(float) * 2)
         {
-            attributes[i].name = "attrUV0";
+            switch (textureIndex)
+            {
+            case 0: attributes[i].name = "attrUV0"; break;
+            case 1: attributes[i].name = "attrUV1"; break;
+            case 2: attributes[i].name = "attrUV2"; break;
+            case 3: attributes[i].name = "attrUV3"; break;
+            case 4: attributes[i].name = "attrUV4"; break;
+            case 5: attributes[i].name = "attrUV5"; break;
+            case 6: attributes[i].name = "attrUV6"; break;
+            case 7: attributes[i].name = "attrUV7"; break;
+            }
+            textureIndex++;
+            continue;
         }
     }
 

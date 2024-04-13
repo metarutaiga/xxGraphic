@@ -51,8 +51,8 @@ uint64_t xxCreateVertexAttributeD3D9PS(uint64_t device, int count, int* attribut
         return 0;
 
     D3DVERTEXELEMENT9 vertexElements[32];
-    BYTE xyzIndex = 0;
-    BYTE textureIndex = 0;
+    int normalIndex = 0;
+    int textureIndex = 0;
     int stride = 0;
 
     for (int i = 0; i < count; ++i)
@@ -69,46 +69,51 @@ uint64_t xxCreateVertexAttributeD3D9PS(uint64_t device, int count, int* attribut
         vertexElement.Offset = offset;
         vertexElement.Type = D3DDECLTYPE_FLOAT1;
         vertexElement.Method = D3DDECLMETHOD_DEFAULT;
-        vertexElement.Usage = D3DDECLUSAGE_POSITION;
+        vertexElement.Usage;
         vertexElement.UsageIndex = 0;
 
-        if (element == 3 && size == sizeof(float) * 3)
+        if (element == 'POS3' && size == sizeof(float) * 3)
         {
             vertexElement.Type = D3DDECLTYPE_FLOAT3;
-            switch (xyzIndex)
-            {
-            case 0:
-                vertexElement.Usage = D3DDECLUSAGE_POSITION;
-                vertexElement.UsageIndex = 0;
-                break;
-            case 1:
-                vertexElement.Usage = D3DDECLUSAGE_NORMAL;
-                vertexElement.UsageIndex = 0;
-                break;
-            case 2:
-                vertexElement.Usage = D3DDECLUSAGE_BINORMAL;
-                vertexElement.UsageIndex = 0;
-                break;
-            case 3:
-                vertexElement.Usage = D3DDECLUSAGE_TANGENT;
-                vertexElement.UsageIndex = 0;
-                break;
-            default:
-                break;
-            }
-            xyzIndex++;
+            vertexElement.Usage = D3DDECLUSAGE_POSITION;
             continue;
         }
 
-        if (element == 4 && size == sizeof(char) * 4)
+        if (element == 'BON3' && size == sizeof(float) * 3)
+        {
+            vertexElement.Type = D3DDECLTYPE_FLOAT3;
+            vertexElement.Usage = D3DDECLUSAGE_BLENDWEIGHT;
+            continue;
+        }
+
+        if (element == 'BON4' && size == sizeof(char) * 4)
+        {
+            vertexElement.Type = D3DDECLTYPE_UBYTE4;
+            vertexElement.Usage = D3DDECLUSAGE_BLENDINDICES;
+            continue;
+        }
+
+        if (element == 'NOR3' && size == sizeof(float) * 3)
+        {
+            vertexElement.Type = D3DDECLTYPE_FLOAT3;
+            switch (normalIndex)
+            {
+            case 0: vertexElement.Usage = D3DDECLUSAGE_NORMAL; break;
+            case 1: vertexElement.Usage = D3DDECLUSAGE_TANGENT; break;
+            case 2: vertexElement.Usage = D3DDECLUSAGE_BINORMAL; break;
+            }
+            normalIndex++;
+            continue;
+        }
+
+        if (element == 'COL4' && size == sizeof(char) * 4)
         {
             vertexElement.Type = D3DDECLTYPE_D3DCOLOR;
             vertexElement.Usage = D3DDECLUSAGE_COLOR;
-            vertexElement.UsageIndex = 0;
             continue;
         }
 
-        if (element == 2 && size == sizeof(float) * 2)
+        if (element == 'TEX2' && size == sizeof(float) * 2)
         {
             vertexElement.Type = D3DDECLTYPE_FLOAT2;
             vertexElement.Usage = D3DDECLUSAGE_TEXCOORD;
@@ -163,7 +168,7 @@ uint64_t xxCreateVertexShaderD3D9PS(uint64_t device, char const* shader, uint64_
     }
     else
     {
-        static char const* const macro[] = { "SHADER_HLSL", "1", "SHADER_VERTEX", "1", nullptr, nullptr };
+        static char const* const macro[] = { "SHADER_HLSL", "9", "SHADER_VERTEX", "1", nullptr, nullptr };
         ID3D10Blob* blob = D3DCompileShader(shader, macro, "Main", "vs_3_0");
         if (blob == nullptr)
             return 0;
@@ -196,7 +201,7 @@ uint64_t xxCreateFragmentShaderD3D9PS(uint64_t device, char const* shader)
     }
     else
     {
-        static char const* const macro[] = { "SHADER_HLSL", "1", "SHADER_FRAGMENT", "1", nullptr, nullptr };
+        static char const* const macro[] = { "SHADER_HLSL", "9", "SHADER_FRAGMENT", "1", nullptr, nullptr };
         ID3D10Blob* blob = D3DCompileShader(shader, macro, "Main", "ps_3_0");
         if (blob == nullptr)
             return 0;
