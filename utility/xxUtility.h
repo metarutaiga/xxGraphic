@@ -19,6 +19,7 @@
 class xxBinary;
 class xxFile;
 
+struct xxBoneData;
 struct xxConstantData;
 struct xxDrawData;
 
@@ -29,3 +30,5 @@ typedef std::shared_ptr<class xxMesh> xxMeshPtr;
 typedef std::shared_ptr<class xxModifier> xxModifierPtr;
 typedef std::shared_ptr<class xxNode> xxNodePtr;
 typedef std::shared_ptr<void> xxUnknownPtr;
+
+typedef std::weak_ptr<class xxNode> xxNodeWeakPtr;

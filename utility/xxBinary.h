@@ -42,7 +42,7 @@ public:
     template<class T>
     bool ReadReference(std::shared_ptr<T>& input)
     {
-        auto unknown = reinterpret_cast<xxUnknownPtr&>(input);
+        auto& unknown = reinterpret_cast<xxUnknownPtr&>(input);
         auto create = []() { auto ptr = T::BinaryCreate(); return reinterpret_cast<xxUnknownPtr&>(ptr); };
         auto read = reinterpret_cast<void(xxBinary::*)(xxBinary&)>(&T::BinaryRead);
         return ReadReferenceInternal(unknown, create, read);
@@ -51,7 +51,7 @@ public:
     template<class T>
     bool WriteReference(std::shared_ptr<T> const& input)
     {
-        auto unknown = reinterpret_cast<xxUnknownPtr const&>(input);
+        auto& unknown = reinterpret_cast<xxUnknownPtr const&>(input);
         auto write = reinterpret_cast<void(xxBinary::*)(xxBinary&)>(&T::BinaryWrite);
         return WriteReferenceInternal(unknown, write);
     }
@@ -82,6 +82,6 @@ public:
     }
 
     std::string const           Path;
-    int const                   Version = 0x20240401;
+    int const                   Version = 0x20240415;
     bool const                  Safe = true;
 };

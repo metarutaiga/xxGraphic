@@ -51,8 +51,6 @@ protected:
     xxNode();
     virtual ~xxNode();
 
-    typedef std::weak_ptr<class xxNode> xxNodeWeakPtr;
-
     // Parent / Children
     xxNodeWeakPtr               m_parent;
     xxNodeWeakPtr               m_this;
@@ -78,9 +76,19 @@ public:
     xxMaterialPtr               Material;
     xxMeshPtr                   Mesh;
 
-    std::vector<xxModifierPtr>  Modifiers;
-
+    std::vector<xxBoneData>     Bones;
     std::vector<xxConstantData> ConstantDatas;
+    std::vector<xxModifierPtr>  Modifiers;
+};
+
+struct xxPlusAPI xxBoneData
+{
+    void            ResetPointer();
+    xxNodeWeakPtr   bone;
+    xxMatrix4       classSkinMatrix;
+    xxMatrix4       classBoneMatrix;
+    xxMatrix4&      skinMatrix = classSkinMatrix;
+    xxMatrix4&      boneMatrix = classBoneMatrix;
 };
 
 struct xxConstantData

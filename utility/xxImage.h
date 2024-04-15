@@ -59,5 +59,5 @@ public:
     bool                FilterMag = true;
     bool                FilterMin = true;
     bool                FilterMip = true;
-    int                 Anisotropic = 1;
+    char                Anisotropic = 1;
 };
