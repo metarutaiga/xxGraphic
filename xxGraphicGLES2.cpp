@@ -299,7 +299,7 @@ uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, int* attribute
         stride += size;
 
         attributes[i].index = i;
-        attributes[i].size = element;
+        attributes[i].size = (element & 0xFF) - '0';
         attributes[i].type = GL_FLOAT;
         attributes[i].normalized = GL_FALSE;
         attributes[i].stride = 0;
@@ -309,6 +309,19 @@ uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, int* attribute
         if (element == 'POS3' && size == sizeof(float) * 3)
         {
             attributes[i].name = "attrPosition";
+            continue;
+        }
+
+        if (element == 'BON3' && size == sizeof(float) * 3)
+        {
+            attributes[i].name = "attrBoneWeight";
+            continue;
+        }
+
+        if (element == 'BON4' && size == sizeof(char) * 4)
+        {
+            attributes[i].type = GL_UNSIGNED_BYTE;
+            attributes[i].name = "attrBoneIndices";
             continue;
         }
 

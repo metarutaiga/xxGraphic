@@ -243,6 +243,7 @@ uint64_t xxCreateVertexAttributeGlide(uint64_t device, int count, int* attribute
         int size = (*attribute++);
 
         (void)stream;
+        (void)offset;
         stride += size;
 
         if (element == 'POS3' && size == sizeof(float) * 3)

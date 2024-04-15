@@ -61,6 +61,8 @@ uint64_t xxCreateVertexAttributeD3D8PS(uint64_t device, int count, int* attribut
         int element = (*attribute++);
         int size = (*attribute++);
 
+        (void)stream;
+        (void)offset;
         stride += size;
 
         DWORD& declaration = d3dVertexAttribute->declaration[i + 1];
