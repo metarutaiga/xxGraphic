@@ -347,6 +347,16 @@ void xxNode::Update(float time, bool updateMatrix)
     if (updateMatrix)
     {
         updateMatrix = UpdateMatrix();
+        for (auto& boneData : Bones)
+        {
+            auto bone = boneData.bone.lock();
+            if (bone == nullptr)
+            {
+                boneData.boneMatrix = xxMatrix4::IDENTITY;
+                continue;
+            }
+            boneData.boneMatrix = bone->WorldMatrix * boneData.skinMatrix;
+        }
     }
 
     for (xxNodePtr const& child : m_children)
@@ -411,19 +421,26 @@ void xxNode::BinaryRead(xxBinary& binary)
     binary.ReadReference(Material);
     binary.ReadReference(Mesh);
 
+    std::vector<xxNodePtr> bones;
+    binary.ReadReferences(bones);
+    for (xxNodePtr const& bone : bones)
+    {
+        Bones.push_back({bone});
+    }
+    for (auto& boneData : Bones)
+    {
+        boneData.ResetPointer();
+        binary.Read(boneData.classSkinMatrix);
+    }
+
     binary.ReadReferences(Modifiers);
 
-    size_t childCount = 0;
-    binary.ReadSize(childCount);
-    for (size_t i = 0; i < childCount; ++i)
+    binary.ReadReferences(m_children);
+    for (xxNodePtr const& child : m_children)
     {
-        xxNodePtr child = xxNode::Create();
-        if (child)
-            child->BinaryRead(binary);
-        if (child == nullptr || binary.Safe == false)
+        if (child == nullptr)
             return;
-
-        AttachChild(child);
+        child->m_parent = m_this;
     }
 }
 //------------------------------------------------------------------------------
@@ -437,17 +454,26 @@ void xxNode::BinaryWrite(xxBinary& binary) const
     binary.WriteReference(Material);
     binary.WriteReference(Mesh);
 
+    std::vector<xxNodePtr> bones;
+    for (auto const& boneData : Bones)
+    {
+        bones.push_back(boneData.bone.lock());
+    }
+    binary.WriteReferences(bones);
+    for (auto const& boneData : Bones)
+    {
+        binary.Write(boneData.classSkinMatrix);
+    }
+
     binary.WriteReferences(Modifiers);
 
-    size_t childCount = m_children.size();
-    binary.WriteSize(childCount);
-    for (size_t i = 0; i < childCount; ++i)
-    {
-        xxNodePtr const& child = m_children[i];
-        if (child)
-            child->BinaryWrite(binary);
-        if (child == nullptr || binary.Safe == false)
-            return;
-    }
+    binary.WriteReferences(m_children);
+}
+//------------------------------------------------------------------------------
+void xxBoneData::ResetPointer()
+{
+    xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&bone + sizeof(bone));
+    pointer[0] = &classSkinMatrix;
+    pointer[1] = &classBoneMatrix;
 }
 //==============================================================================

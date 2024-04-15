@@ -311,6 +311,7 @@ std::string xxMaterial::GetShader(xxMesh const* mesh, int type) const
         constantSize = 1;
 
     std::string shader;
+    shader += define("SHADER_SKINNING", mesh->Skinning ? 1 : 0);
     shader += define("SHADER_NORMAL", mesh->NormalCount);
     shader += define("SHADER_COLOR", mesh->ColorCount);
     shader += define("SHADER_TEXTURE", mesh->TextureCount);
@@ -484,6 +485,10 @@ struct Uniform
 R"(
 #if SHADER_GLSL
 attribute vec3 attrPosition;
+#if SHADER_SKINNING
+attribute vec3 attrBoneWeight;
+attribute vec4 attrBoneIndices;
+#endif
 #if SHADER_NORMAL
 attribute vec3 attrNormal;
 #endif
@@ -496,29 +501,37 @@ attribute vec2 attrUV0;
 #elif SHADER_HLSL
 struct Attribute
 {
-    float3 Position : POSITION;
+    float3 Position     : POSITION;
+#if SHADER_SKINNING
+    float3 BoneWeight   : BLENDWEIGHT;
+    uint4 BoneIndices   : BLENDINDICES;
+#endif
 #if SHADER_NORMAL
-    float3 Normal   : NORMAL;
+    float3 Normal       : NORMAL;
 #endif
 #if SHADER_COLOR
-    float4 Color    : COLOR;
+    float4 Color        : COLOR;
 #endif
 #if SHADER_TEXTURE
-    float2 UV0      : TEXCOORD;
+    float2 UV0          : TEXCOORD;
 #endif
 };
 #elif SHADER_MSL
 struct Attribute
 {
-    float3 Position [[attribute(0)]];
+    float3 Position     [[attribute(0)]];
+#if SHADER_SKINNING
+    float3 BoneWeight   [[attribute(1)]];
+    uint4 BoneIndices   [[attribute(2)]];
+#endif
 #if SHADER_NORMAL
-    float3 Normal   [[attribute(1)]];
+    float3 Normal       [[attribute(1 + SHADER_SKINNING * 2)]];
 #endif
 #if SHADER_COLOR
-    float4 Color    [[attribute(1 + SHADER_NORMAL)]];
+    float4 Color        [[attribute(1 + SHADER_SKINNING * 2 + SHADER_NORMAL)]];
 #endif
 #if SHADER_TEXTURE
-    float2 UV0      [[attribute(1 + SHADER_NORMAL + SHADER_COLOR)]];
+    float2 UV0          [[attribute(1 + SHADER_SKINNING * 2 + SHADER_NORMAL + SHADER_COLOR)]];
 #endif
 };
 #endif)"

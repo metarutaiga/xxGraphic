@@ -467,6 +467,9 @@ struct xxPlusAPI xxMatrix4x3
     xxVector4&      operator []     (size_t i)                   { return v[i]; }
     xxVector4       operator []     (size_t i) const             { return v[i]; }
 
+    static xxMatrix4x3  FromMatrix4 (xxMatrix4 const& m);
+           xxMatrix4    ToMatrix4   () const;
+
     static const xxMatrix4x3 IDENTITY;
 };
 

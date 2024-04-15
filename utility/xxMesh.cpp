@@ -7,18 +7,13 @@
 #include "xxGraphic.h"
 #include "xxBinary.h"
 #include "xxMesh.h"
+#include "xxNode.h"
 
 //==============================================================================
 //  Mesh
 //==============================================================================
-xxMesh::xxMesh(bool skinning, int normal, int color, int texture)
-    :Stride(xxSizeOf(xxVector3) * 1 +
-            xxSizeOf(xxVector3) * (skinning ? 1 : 0) +
-            xxSizeOf(uint32_t) * (skinning ? 1 : 0) +
-            xxSizeOf(xxVector3) * normal +
-            xxSizeOf(uint32_t) * color +
-            xxSizeOf(xxVector2) * texture)
-    ,Skinning(skinning)
+xxMesh::xxMesh(bool skinning, char normal, char color, char texture)
+    :Skinning(skinning)
     ,NormalCount(normal)
     ,ColorCount(color)
     ,TextureCount(texture)
@@ -219,6 +214,15 @@ uint64_t xxMesh::GetVertexAttribute() const
 //------------------------------------------------------------------------------
 void xxMesh::SetVertexCount(int count)
 {
+    if (Stride == 0)
+    {
+        const_cast<int&>(Stride) += xxSizeOf(xxVector3) * 1;
+        const_cast<int&>(Stride) += xxSizeOf(xxVector3) * (Skinning ? 1 : 0);
+        const_cast<int&>(Stride) += xxSizeOf(uint32_t) * (Skinning ? 1 : 0);
+        const_cast<int&>(Stride) += xxSizeOf(xxVector3) * NormalCount;
+        const_cast<int&>(Stride) += xxSizeOf(uint32_t) * ColorCount;
+        const_cast<int&>(Stride) += xxSizeOf(xxVector2) * TextureCount;
+    }
     char* vertex = nullptr;
     if (count)
     {
@@ -261,16 +265,14 @@ xxStrideIterator<xxVector3> xxMesh::GetBoneWeight() const
 {
     char* vertex = Vertex;
     vertex += xxSizeOf(xxVector3);
-    vertex += xxSizeOf(xxVector3);
     return xxStrideIterator<xxVector3>(vertex, Stride, Skinning ? VertexCount : 0);
 }
 //------------------------------------------------------------------------------
-xxStrideIterator<uint32_t> xxMesh::GetBoneIndex() const
+xxStrideIterator<uint32_t> xxMesh::GetBoneIndices() const
 {
     char* vertex = Vertex;
     vertex += xxSizeOf(xxVector3);
     vertex += xxSizeOf(xxVector3) * (Skinning ? 1 : 0);
-    vertex += xxSizeOf(uint32_t);
     return xxStrideIterator<uint32_t>(vertex, Stride, Skinning ? VertexCount : 0);
 }
 //------------------------------------------------------------------------------
@@ -307,7 +309,7 @@ xxStrideIterator<xxVector2> xxMesh::GetTexture(int index) const
     return xxStrideIterator<xxVector2>(vertex, Stride, TextureCount ? VertexCount : 0);
 }
 //------------------------------------------------------------------------------
-xxMeshPtr xxMesh::Create(bool skinning, int normal, int color, int texture)
+xxMeshPtr xxMesh::Create(bool skinning, char normal, char color, char texture)
 {
     xxMeshPtr mesh = xxMeshPtr(new xxMesh(skinning, normal, color, texture), [](xxMesh* mesh) { delete mesh; });
     if (mesh == nullptr)
@@ -324,10 +326,10 @@ void xxMesh::BinaryRead(xxBinary& binary)
 {
     binary.ReadString(Name);
 
-    binary.Read(const_cast<int&>(Stride));
-    binary.Read(const_cast<int&>(NormalCount));
-    binary.Read(const_cast<int&>(ColorCount));
-    binary.Read(const_cast<int&>(TextureCount));
+    binary.Read(const_cast<bool&>(Skinning));
+    binary.Read(const_cast<char&>(NormalCount));
+    binary.Read(const_cast<char&>(ColorCount));
+    binary.Read(const_cast<char&>(TextureCount));
 
     size_t vertexCount = 0;
     size_t indexCount = 0;
@@ -344,7 +346,7 @@ void xxMesh::BinaryWrite(xxBinary& binary) const
 {
     binary.WriteString(Name);
 
-    binary.Write(Stride);
+    binary.Write(Skinning);
     binary.Write(NormalCount);
     binary.Write(ColorCount);
     binary.Write(TextureCount);
