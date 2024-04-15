@@ -391,6 +391,7 @@ uint64_t xxCreateVertexAttributeMantle(uint64_t device, int count, int* attribut
         int element = (*attribute++);
         int size = (*attribute++);
 
+        (void)stream;
         stride += size;
 
         GR_MEMORY_VIEW_ATTACH_INFO& info = infos[i];
