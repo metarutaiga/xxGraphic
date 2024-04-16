@@ -65,12 +65,14 @@ MTLSWAPCHAIN* xxGetCommandBufferMetal2(id <MTLDevice> __unsafe_unretained device
     if (commandBuffer == 0)
         return 0;
 
+    swapchain->pipeline = nullptr;
     swapchain->frameCount++;
     swapchain->commandEncoder = nil;
     swapchain->argumentBufferIndex = (swapchain->argumentBufferIndex + 1) % xxCountOf(swapchain->argumentBuffers);
     swapchain->argumentBufferStep = 0;
     swapchain->vertexArgumentEncoder = nil;
     swapchain->fragmentArgumentEncoder = nil;
+    swapchain->argumentEncoderComplete = true;
 
     return swapchain;
 }
@@ -277,37 +279,8 @@ void xxSetScissorMetal2(MTLSWAPCHAIN* swapchain, int x, int y, int width, int he
 //------------------------------------------------------------------------------
 void xxSetPipelineMetal2(MTLSWAPCHAIN* swapchain, MTLPIPELINE* pipeline)
 {
+    swapchain->pipeline = pipeline;
     xxSetPipelineMetal(swapchain->commandEncoder, pipeline);
-
-    NSUInteger vertexLength = pipeline->vertexArgumentEncodedLength;
-    NSUInteger fragmentLength = pipeline->fragmentArgumentEncodedLength;
-    NSUInteger requestLength = vertexLength + fragmentLength;
-    NSUInteger vertexOffset = swapchain->argumentBufferStep * requestLength;
-    NSUInteger fragmentOffset = vertexOffset + vertexLength;
-    NSUInteger capacityLength = fragmentOffset + fragmentLength;
-
-    int argumentBufferIndex = swapchain->argumentBufferIndex;
-    id <MTLBuffer> __unsafe_unretained argumentBuffer = swapchain->argumentBuffers[argumentBufferIndex];
-    if (argumentBuffer == nil || argumentBuffer.length < capacityLength)
-    {
-        argumentBuffer = swapchain->argumentBuffers[argumentBufferIndex] = [swapchain->commandQueue.device newBufferWithLength:capacityLength * 2
-                                                                                                                       options:MTLResourceStorageModeShared];
-    }
-    swapchain->argumentBufferStep++;
-
-    swapchain->vertexArgumentEncoder = pipeline->vertexArgumentEncoder;
-    swapchain->fragmentArgumentEncoder = pipeline->fragmentArgumentEncoder;
-    [swapchain->vertexArgumentEncoder setArgumentBuffer:argumentBuffer
-                                                 offset:vertexOffset];
-    [swapchain->fragmentArgumentEncoder setArgumentBuffer:argumentBuffer
-                                                   offset:fragmentOffset];
-
-    [swapchain->commandEncoder setVertexBuffer:argumentBuffer
-                                        offset:vertexOffset
-                                       atIndex:0];
-    [swapchain->commandEncoder setFragmentBuffer:argumentBuffer
-                                          offset:fragmentOffset
-                                         atIndex:0];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersMetal2(MTLSWAPCHAIN* swapchain, int count, MTLBUFFER** buffers, MTLVertexDescriptor* __unsafe_unretained vertexAttribute)
@@ -339,6 +312,7 @@ void xxSetVertexTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE** 
         }
     }
 
+    mtlUpdateArgumentEncoder(swapchain);
     [swapchain->vertexArgumentEncoder setTextures:vertexTextures
                                         withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_TEXTURE, count)];
 }
@@ -360,18 +334,21 @@ void xxSetFragmentTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE*
         }
     }
 
+    mtlUpdateArgumentEncoder(swapchain);
     [swapchain->fragmentArgumentEncoder setTextures:fragmentTextures
                                           withRange:NSMakeRange(xxGraphicDescriptor::FRAGMENT_TEXTURE, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLSamplerState> __unsafe_unretained* samplers)
 {
+    mtlUpdateArgumentEncoder(swapchain);
     [swapchain->vertexArgumentEncoder setSamplerStates:samplers
                                              withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_SAMPLER, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentSamplersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLSamplerState> __unsafe_unretained* samplers)
 {
+    mtlUpdateArgumentEncoder(swapchain);
     [swapchain->fragmentArgumentEncoder setSamplerStates:samplers
                                                withRange:NSMakeRange(xxGraphicDescriptor::FRAGMENT_SAMPLER, count)];
 }
@@ -385,6 +362,7 @@ void xxSetVertexConstantBufferMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* buffer,
                                          usage:MTLResourceUsageRead];
     }
 
+    mtlUpdateArgumentEncoder(swapchain);
     [swapchain->vertexArgumentEncoder setBuffer:buffer->buffer
                                          offset:0
                                         atIndex:xxGraphicDescriptor::VERTEX_UNIFORM];
@@ -399,6 +377,7 @@ void xxSetFragmentConstantBufferMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* buffe
                                          usage:MTLResourceUsageRead];
     }
 
+    mtlUpdateArgumentEncoder(swapchain);
     [swapchain->fragmentArgumentEncoder setBuffer:buffer->buffer
                                            offset:0
                                           atIndex:xxGraphicDescriptor::FRAGMENT_UNIFORM];
@@ -406,11 +385,13 @@ void xxSetFragmentConstantBufferMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* buffe
 //------------------------------------------------------------------------------
 void xxDrawMetal2(MTLSWAPCHAIN* swapchain, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
 {
+    swapchain->argumentEncoderComplete = true;
     xxDrawMetal(swapchain->commandEncoder, vertexCount, instanceCount, firstVertex, firstInstance);
 }
 //------------------------------------------------------------------------------
 void xxDrawIndexedMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
+    swapchain->argumentEncoderComplete = true;
     xxDrawIndexedMetal(swapchain->commandEncoder, indexBuffer->buffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 //------------------------------------------------------------------------------

@@ -32,6 +32,9 @@ extern Class classMTLSamplerDescriptor;
 extern Class classMTLTextureDescriptor;
 extern Class classMTLVertexDescriptor;
 
+struct MTLPIPELINE;
+struct MTLSWAPCHAIN;
+
 //==============================================================================
 //  MSL Shader
 //==============================================================================
@@ -105,6 +108,7 @@ struct MTLSWAPCHAIN : public MTLFRAMEBUFFER
     float                           scale;
 
     // Metal 2
+    MTLPIPELINE*                    pipeline;
     NSUInteger                      frameCount;
     id <MTLRenderCommandEncoder>    commandEncoder;
     int                             argumentBufferIndex;
@@ -112,6 +116,7 @@ struct MTLSWAPCHAIN : public MTLFRAMEBUFFER
     id <MTLBuffer>                  argumentBuffers[4];
     id <MTLArgumentEncoder>         vertexArgumentEncoder;
     id <MTLArgumentEncoder>         fragmentArgumentEncoder;
+    bool                            argumentEncoderComplete;
 };
 //==============================================================================
 //  Buffer
@@ -154,4 +159,16 @@ struct MTLPIPELINE
     NSUInteger                      vertexArgumentEncodedLength;
     NSUInteger                      fragmentArgumentEncodedLength;
 };
+//==============================================================================
+
+//==============================================================================
+//  Argument Encoder
+//==============================================================================
+extern void mtlUpdateArgumentEncoderInternal(MTLSWAPCHAIN* swapchain);
+inline void mtlUpdateArgumentEncoder(MTLSWAPCHAIN* swapchain)
+{
+    if (swapchain->argumentEncoderComplete == false)
+        return;
+    mtlUpdateArgumentEncoderInternal(swapchain);
+}
 //==============================================================================
