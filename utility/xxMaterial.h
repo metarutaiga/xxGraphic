@@ -33,9 +33,9 @@ protected:
     xxMaterial();
     virtual ~xxMaterial();
 
-    virtual std::string         GetShader(xxMesh const* mesh, int type) const;
-    virtual int                 GetVertexConstantSize() const;
-    virtual int                 GetFragmentConstantSize() const;
+    virtual std::string         GetShader(xxDrawData const& data, int type) const;
+    virtual int                 GetVertexConstantSize(xxDrawData const& data) const;
+    virtual int                 GetFragmentConstantSize(xxDrawData const& data) const;
 
     uint64_t                    m_device = 0;
     uint64_t                    m_blendState = 0;

@@ -201,7 +201,7 @@ struct xxPlusAPI xxMatrix2x2
 
     xxMatrix2x2     operator +      (xxMatrix2x2 const& m) const { return xxMatrix2x2(*this) += m; }
     xxMatrix2x2     operator -      (xxMatrix2x2 const& m) const { return xxMatrix2x2(*this) -= m; }
-    xxMatrix2x2     operator *      (xxMatrix2x2 const& m) const { return xxMatrix2x2(*this) *= m; }
+    xxMatrix2x2     operator *      (xxMatrix2x2 const& m) const { return xxMatrix2x2(m) *= *this; }
     xxMatrix2x2     operator *      (float s) const              { return xxMatrix2x2(*this) *= s; }
     xxMatrix2x2     operator /      (float s) const              { return xxMatrix2x2(*this) /= s; }
 
@@ -349,7 +349,7 @@ struct xxPlusAPI xxMatrix3x3
 
     xxMatrix3x3     operator +      (xxMatrix3x3 const& m) const { return xxMatrix3x3(*this) += m; }
     xxMatrix3x3     operator -      (xxMatrix3x3 const& m) const { return xxMatrix3x3(*this) -= m; }
-    xxMatrix3x3     operator *      (xxMatrix3x3 const& m) const { return xxMatrix3x3(*this) *= m; }
+    xxMatrix3x3     operator *      (xxMatrix3x3 const& m) const { return xxMatrix3x3(m) *= *this; }
     xxMatrix3x3     operator *      (float s) const              { return xxMatrix3x3(*this) *= s; }
     xxMatrix3x3     operator /      (float s) const              { return xxMatrix3x3(*this) /= s; }
 
@@ -501,7 +501,7 @@ struct xxPlusAPI xxMatrix4x4
 
     xxMatrix4x4     operator +      (xxMatrix4x4 const& m) const { return xxMatrix4x4(*this) += m; }
     xxMatrix4x4     operator -      (xxMatrix4x4 const& m) const { return xxMatrix4x4(*this) -= m; }
-    xxMatrix4x4     operator *      (xxMatrix4x4 const& m) const { return xxMatrix4x4(*this) *= m; }
+    xxMatrix4x4     operator *      (xxMatrix4x4 const& m) const { return xxMatrix4x4(m) *= *this; }
     xxMatrix4x4     operator *      (float s) const              { return xxMatrix4x4(*this) *= s; }
     xxMatrix4x4     operator /      (float s) const              { return xxMatrix4x4(*this) /= s; }
 

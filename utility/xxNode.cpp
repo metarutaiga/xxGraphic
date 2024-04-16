@@ -103,6 +103,15 @@ bool xxNode::DetachChild(xxNodePtr const& node)
             pointer[1] = &node->m_classWorldMatrix;
             return true;
         }, child);
+
+        for (auto& boneData : Bones)
+        {
+            xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&boneData.classBoneMatrix + sizeof(boneData.classBoneMatrix));
+            boneData.classSkinMatrix = boneData.skinMatrix;
+            boneData.classBoneMatrix = boneData.boneMatrix;
+            pointer[0] = &boneData.classSkinMatrix;
+            pointer[1] = &boneData.classBoneMatrix;
+        }
 #endif
 
         size_t i = std::distance<xxNodePtr const*>(m_children.data(), &child);
@@ -124,53 +133,102 @@ void xxNode::CreateLinearMatrix()
 
     std::function<size_t(xxNode*)> countMatrix = [&countMatrix](xxNode* node)
     {
-        // Header
-        size_t count = 1;
+        size_t count = 0;
+
+        // Children
+        if (node->m_children.empty() == false)
+        {
+            // Header
+            count += 1;
+
+            // Children
+            for (xxNodePtr const& child : node->m_children)
+            {
+                if (child == nullptr)
+                    continue;
+                count += 2;
+            }
+        }
+
+        // Bone
+        for (auto& boneData : node->Bones)
+        {
+            xxNodePtr bone = boneData.bone.lock();
+            if (bone)
+            {
+                // Header
+                count += 1;
+
+                // Matrix
+                count += 2;
+            }
+        }
 
         // Traversal
         for (xxNodePtr const& child : node->m_children)
         {
             if (child == nullptr)
                 continue;
-            count += 2;
-            if (child->m_children.empty())
-                continue;
             count += countMatrix(child.get());
         }
+
         return count;
     };
 
-    size_t newLinearMatrixSize = 2 + countMatrix(this) + 1;
+    size_t newLinearMatrixSize = countMatrix(this) + 1;
     std::vector<xxMatrix4> newLinearMatrix(newLinearMatrixSize);
     if (newLinearMatrix.empty())
         return;
 
     std::function<void(xxNode*, xxMatrix4*&)> createLinearMatrix = [&createLinearMatrix](xxNode* node, xxMatrix4*& linearMatrix)
     {
-        // Header
-        LinearMatrixHeader* header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
-        header->parentMatrix = &node->WorldMatrix;
-        header->childrenCount = node->GetChildCount();
-
         // Children
-        for (xxNodePtr const& child : node->m_children)
+        if (node->m_children.empty() == false)
         {
-            if (child == nullptr)
-                continue;
-            xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&child->Name + sizeof(child->Name));
-            linearMatrix[0] = child->LocalMatrix;
-            linearMatrix[1] = child->WorldMatrix;
-            pointer[0] = &linearMatrix[0];
-            pointer[1] = &linearMatrix[1];
-            linearMatrix += 2;
+            // Header
+            LinearMatrixHeader* header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
+            header->parentMatrix = &node->WorldMatrix;
+            header->childrenCount = node->GetChildCount();
+
+            // Children
+            for (xxNodePtr const& child : node->m_children)
+            {
+                if (child == nullptr)
+                    continue;
+                xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&child->Name + sizeof(child->Name));
+                linearMatrix[0] = child->LocalMatrix;
+                linearMatrix[1] = child->WorldMatrix;
+                pointer[0] = &linearMatrix[0];
+                pointer[1] = &linearMatrix[1];
+                linearMatrix += 2;
+            }
+        }
+
+        // Bone
+        for (auto& boneData : node->Bones)
+        {
+            xxNodePtr bone = boneData.bone.lock();
+            if (bone)
+            {
+                // Header
+                LinearMatrixHeader* header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
+                header->parentMatrix = &bone->WorldMatrix;
+                header->childrenCount = 1;
+
+                // Matrix
+                xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&boneData.classBoneMatrix + sizeof(boneData.classBoneMatrix));
+                linearMatrix[0] = boneData.skinMatrix;
+                linearMatrix[1] = boneData.boneMatrix;
+                pointer[0] = &linearMatrix[0];
+                pointer[1] = &linearMatrix[1];
+                linearMatrix += 2;
+            }
         }
 
         // Traversal
         for (xxNodePtr const& child : node->m_children)
         {
             if (child == nullptr)
-                continue;
-            if (child->m_children.empty())
                 continue;
             createLinearMatrix(child.get(), linearMatrix);
         }
@@ -417,12 +475,9 @@ void xxNode::BinaryRead(xxBinary& binary)
 
     binary.Read(LocalMatrix);
 
-    binary.ReadReference(Camera);
-    binary.ReadReference(Material);
-    binary.ReadReference(Mesh);
-
     std::vector<xxNodePtr> bones;
     binary.ReadReferences(bones);
+    Bones.reserve(bones.size());
     for (xxNodePtr const& bone : bones)
     {
         Bones.push_back({bone});
@@ -432,6 +487,10 @@ void xxNode::BinaryRead(xxBinary& binary)
         boneData.ResetPointer();
         binary.Read(boneData.classSkinMatrix);
     }
+
+    binary.ReadReference(Camera);
+    binary.ReadReference(Material);
+    binary.ReadReference(Mesh);
 
     binary.ReadReferences(Modifiers);
 
@@ -450,10 +509,6 @@ void xxNode::BinaryWrite(xxBinary& binary) const
 
     binary.Write(LocalMatrix);
 
-    binary.WriteReference(Camera);
-    binary.WriteReference(Material);
-    binary.WriteReference(Mesh);
-
     std::vector<xxNodePtr> bones;
     for (auto const& boneData : Bones)
     {
@@ -465,6 +520,10 @@ void xxNode::BinaryWrite(xxBinary& binary) const
         binary.Write(boneData.classSkinMatrix);
     }
 
+    binary.WriteReference(Camera);
+    binary.WriteReference(Material);
+    binary.WriteReference(Mesh);
+
     binary.WriteReferences(Modifiers);
 
     binary.WriteReferences(m_children);
@@ -472,7 +531,7 @@ void xxNode::BinaryWrite(xxBinary& binary) const
 //------------------------------------------------------------------------------
 void xxBoneData::ResetPointer()
 {
-    xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&bone + sizeof(bone));
+    xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&classBoneMatrix + sizeof(classBoneMatrix));
     pointer[0] = &classSkinMatrix;
     pointer[1] = &classBoneMatrix;
 }

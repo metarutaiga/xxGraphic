@@ -72,18 +72,22 @@ public:
     xxMatrix4&                  LocalMatrix;
     xxMatrix4&                  WorldMatrix;
 
+    std::vector<xxBoneData>     Bones;
+
     xxCameraPtr                 Camera;
     xxMaterialPtr               Material;
     xxMeshPtr                   Mesh;
 
-    std::vector<xxBoneData>     Bones;
-    std::vector<xxConstantData> ConstantDatas;
     std::vector<xxModifierPtr>  Modifiers;
+
+    std::vector<xxConstantData> ConstantDatas;
 };
 
 struct xxPlusAPI xxBoneData
 {
     void            ResetPointer();
+
+public:
     xxNodeWeakPtr   bone;
     xxMatrix4       classSkinMatrix;
     xxMatrix4       classBoneMatrix;

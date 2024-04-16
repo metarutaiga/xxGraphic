@@ -38,7 +38,8 @@ void xxCamera::Update()
     ProjectionMatrix.v[2] = {                 0,                 0,      (f) / (f - n), 1 };
     ProjectionMatrix.v[3] = {                 0,                 0, (f * -n) / (f - n), 0 };
 
-    ProjectionMatrix = ProjectionMatrix * ViewportMatrix;
+    ProjectionMatrix = ViewportMatrix * ProjectionMatrix;
+    ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
 }
 //------------------------------------------------------------------------------
 void xxCamera::LookAt(xxVector3 const& worldPoint, xxVector3 const& worldUp)
@@ -95,6 +96,15 @@ xxVector3 xxCamera::GetDirectionFromScreenPos(float x, float y) const
     xxVector3 direction = Direction + Right * right + Up * up;
     direction /= direction.Length();
     return direction;
+}
+//------------------------------------------------------------------------------
+xxVector3 xxCamera::GetWorldPosToScreenPos(xxVector3 const& point) const
+{
+    xxVector4 screen = ViewProjectionMatrix * xxVector4{point.x, point.y, point.z, 1.0f};
+    screen.xyz /= screen.w;
+    screen.x = screen.x *  0.5f + 0.5f;
+    screen.y = screen.y * -0.5f + 0.5f;
+    return screen.xyz;
 }
 //------------------------------------------------------------------------------
 xxCameraPtr xxCamera::Create()

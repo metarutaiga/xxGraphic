@@ -156,11 +156,11 @@ void xxMaterial::CreatePipeline(xxDrawData const& data)
         {
             if (m_vertexShader == 0)
             {
-                m_vertexShader = xxCreateVertexShader(m_device, GetShader(data.mesh, 0).c_str(), vertexAttribute);
+                m_vertexShader = xxCreateVertexShader(m_device, GetShader(data, 0).c_str(), vertexAttribute);
             }
             if (m_fragmentShader == 0)
             {
-                m_fragmentShader = xxCreateFragmentShader(m_device, GetShader(data.mesh, 1).c_str());
+                m_fragmentShader = xxCreateFragmentShader(m_device, GetShader(data, 1).c_str());
             }
         }
         if (m_renderPass == 0)
@@ -181,7 +181,7 @@ void xxMaterial::CreateConstant(xxDrawData const& data) const
         constantData->pipeline = m_pipeline;
         if (constantData->vertexConstant == 0)
         {
-            constantData->vertexConstantSize = GetVertexConstantSize();
+            constantData->vertexConstantSize = GetVertexConstantSize(data);
             if (constantData->vertexConstantSize > 0)
             {
                 constantData->vertexConstant = xxCreateConstantBuffer(m_device, constantData->vertexConstantSize);
@@ -189,7 +189,7 @@ void xxMaterial::CreateConstant(xxDrawData const& data) const
         }
         if (constantData->fragmentConstant == 0)
         {
-            constantData->fragmentConstantSize = GetFragmentConstantSize();
+            constantData->fragmentConstantSize = GetFragmentConstantSize(data);
             if (constantData->fragmentConstantSize > 0)
             {
                 constantData->fragmentConstant = xxCreateConstantBuffer(m_device, constantData->fragmentConstantSize);
@@ -227,6 +227,18 @@ void xxMaterial::UpdateConstant(xxDrawData const& data) const
                 }
                 vector += 3 * 4;
                 size -= 3 * sizeof(xxMatrix4);
+            }
+
+            if (data.mesh->Skinning)
+            {
+                xxMatrix4x3* boneMatrix = reinterpret_cast<xxMatrix4x3*>(vector);
+
+                for (auto const& boneData : data.node->Bones)
+                {
+                    (*boneMatrix++) = xxMatrix4x3::FromMatrix4(boneData.boneMatrix);
+                }
+                vector += 75 * 3;
+                size -= 75 * sizeof(xxMatrix4x3);
             }
 
             if (Blending && size >= 1 * sizeof(xxVector4))
@@ -286,8 +298,10 @@ void xxMaterial::UpdateConstant(xxDrawData const& data) const
     }
 }
 //------------------------------------------------------------------------------
-std::string xxMaterial::GetShader(xxMesh const* mesh, int type) const
+std::string xxMaterial::GetShader(xxDrawData const& data, int type) const
 {
+    xxMesh* mesh = data.mesh;
+
     auto define = [](char const* name, size_t value)
     {
         char integer[32];
@@ -301,10 +315,10 @@ std::string xxMaterial::GetShader(xxMesh const* mesh, int type) const
     switch (type)
     {
     case 0:
-        constantSize = GetVertexConstantSize() / sizeof(xxVector4);
+        constantSize = GetVertexConstantSize(data) / sizeof(xxVector4);
         break;
     case 1:
-        constantSize = GetFragmentConstantSize() / sizeof(xxVector4);
+        constantSize = GetFragmentConstantSize(data) / sizeof(xxVector4);
         break;
     }
     if (constantSize == 0)
@@ -325,9 +339,13 @@ std::string xxMaterial::GetShader(xxMesh const* mesh, int type) const
     return shader;
 }
 //------------------------------------------------------------------------------
-int xxMaterial::GetVertexConstantSize() const
+int xxMaterial::GetVertexConstantSize(xxDrawData const& data) const
 {
     int size = 3 * sizeof(xxMatrix4);
+    if (data.mesh->Skinning)
+    {
+        size += 75 * sizeof(xxMatrix4x3);
+    }
     if (Blending)
     {
         size += 1 * sizeof(xxVector4);
@@ -339,7 +357,7 @@ int xxMaterial::GetVertexConstantSize() const
     return size;
 }
 //------------------------------------------------------------------------------
-int xxMaterial::GetFragmentConstantSize() const
+int xxMaterial::GetFragmentConstantSize(xxDrawData const& data) const
 {
     int size = 0;
     if (Specular)
@@ -616,6 +634,10 @@ vertex Varying Main(Attribute attr [[stage_in]],
 {
 #if SHADER_HLSL || SHADER_MSL
     float3 attrPosition = attr.Position;
+#if SHADER_SKINNING
+    float3 attrBoneWeight = attr.BoneWeight;
+    uint4 attrBoneIndices = attr.BoneIndices;
+#endif
 #if SHADER_NORMAL
     float3 attrNormal = attr.Normal;
 #endif
@@ -633,19 +655,34 @@ vertex Varying Main(Attribute attr [[stage_in]],
     float4x4 world = float4x4(uniBuffer[0], uniBuffer[1], uniBuffer[2], uniBuffer[3]);
     float4x4 view = float4x4(uniBuffer[4], uniBuffer[5], uniBuffer[6], uniBuffer[7]);
     float4x4 projection = float4x4(uniBuffer[8], uniBuffer[9], uniBuffer[10], uniBuffer[11]);
+
+    int uniIndex = 12;
+#if SHADER_SKINNING
+    float4 boneWeight = float4(attrBoneWeight, 1.0 - attrBoneWeight.x - attrBoneWeight.y - attrBoneWeight.z);
+#if SHADER_GLSL
+    ivec4 boneIndices = ivec4(attrBoneIndices);
+#else
+    uint4 boneIndices = attrBoneIndices;
+#endif
+    world  = float4x4(uniBuffer[uniIndex + boneIndices.x * 3], uniBuffer[uniIndex + boneIndices.x * 3 + 1], uniBuffer[uniIndex + boneIndices.x * 3 + 2], float4(0.0)) * boneWeight.x;
+    world += float4x4(uniBuffer[uniIndex + boneIndices.y * 3], uniBuffer[uniIndex + boneIndices.y * 3 + 1], uniBuffer[uniIndex + boneIndices.y * 3 + 2], float4(0.0)) * boneWeight.y;
+    world += float4x4(uniBuffer[uniIndex + boneIndices.z * 3], uniBuffer[uniIndex + boneIndices.z * 3 + 1], uniBuffer[uniIndex + boneIndices.z * 3 + 2], float4(0.0)) * boneWeight.z;
+    world += float4x4(uniBuffer[uniIndex + boneIndices.w * 3], uniBuffer[uniIndex + boneIndices.w * 3 + 1], uniBuffer[uniIndex + boneIndices.w * 3 + 2], float4(0.0)) * boneWeight.w;
+    world = transpose(world);
+    world[3][3] = 1.0;
+    uniIndex += 75 * 3;
+#endif
     float4 worldPosition = mul(float4(attrPosition, 1.0), world);
     float4 screenPosition = mul(mul(worldPosition, view), projection);
 
     float3 normal = float3(0.0, 0.0, 1.0);
     float4 color = float4(1.0, 1.0, 1.0, 1.0);
 #if SHADER_NORMAL
-    normal = attrNormal;
+    normal = mul(float4(attrNormal, 1.0), world).xyz;
 #endif
 #if SHADER_COLOR
     color = attrColor;
 #endif
-
-    int uniIndex = 12;
 #if SHADER_OPACITY
     color.a = uniBuffer[uniIndex++].x;
 #endif
