@@ -158,25 +158,23 @@ xxMatrix3 xxMatrix3::Transpose() const
 xxMatrix4x3 xxMatrix4x3::FromMatrix4(xxMatrix4 const& m)
 {
     xxMatrix4x3 t;
-    t[0].xyz = m[0].xyz;
-    t[1].xyz = m[1].xyz;
-    t[2].xyz = m[2].xyz;
-    t[0].w = m[3].x;
-    t[1].w = m[3].y;
-    t[2].w = m[3].z;
+
+    for (int y = 0; y < 4; y++)
+        for (int x = 0; x < 3; x++)
+            t.v[x].f[y] = m[y].f[x];
+
     return t;
 }
 //------------------------------------------------------------------------------
 xxMatrix4 xxMatrix4x3::ToMatrix4() const
 {
     xxMatrix4 t;
-    t[0].xyz = v[0].xyz;
-    t[1].xyz = v[1].xyz;
-    t[2].xyz = v[2].xyz;
-    t[3].x = v[0].w;
-    t[3].y = v[1].w;
-    t[3].z = v[2].w;
-    t[3].w = 1.0f;
+
+    for (int y = 0; y < 3; y++)
+        for (int x = 0; x < 4; x++)
+            t.v[x].f[y] = v[y].f[x];
+
+    t[3].f[3] = 1.0f;
     return t;
 }
 //==============================================================================
@@ -308,10 +306,10 @@ void xxMatrix4::MultiplyArray(size_t count, xxMatrix4 const* __restrict input, i
 
     for (size_t i = 0; i < count; ++i)
     {
-        (*output).v[0].v = __builtin_multiplyvector(&(*input).v->v, matrix.v[0].v);
-        (*output).v[1].v = __builtin_multiplyvector(&(*input).v->v, matrix.v[1].v);
-        (*output).v[2].v = __builtin_multiplyvector(&(*input).v->v, matrix.v[2].v);
-        (*output).v[3].v = __builtin_multiplyvector(&(*input).v->v, matrix.v[3].v);
+        (*output).v[0].v = __builtin_multiplyvector(&matrix.v->v, (*input).v[0].v);
+        (*output).v[1].v = __builtin_multiplyvector(&matrix.v->v, (*input).v[1].v);
+        (*output).v[2].v = __builtin_multiplyvector(&matrix.v->v, (*input).v[2].v);
+        (*output).v[3].v = __builtin_multiplyvector(&matrix.v->v, (*input).v[3].v);
 
         input = reinterpret_cast<xxMatrix4*>((char*)input + inputStride);
         output = reinterpret_cast<xxMatrix4*>((char*)output + outputStride);
@@ -324,10 +322,10 @@ void xxMatrix4::MultiplyLink(size_t count, xxMatrix4 const* __restrict input, in
 
     for (size_t i = 0; i < count; ++i)
     {
-        (*output).v[0].v = __builtin_multiplyvector(&(*input).v->v, matrix.v[0].v);
-        (*output).v[1].v = __builtin_multiplyvector(&(*input).v->v, matrix.v[1].v);
-        (*output).v[2].v = __builtin_multiplyvector(&(*input).v->v, matrix.v[2].v);
-        (*output).v[3].v = __builtin_multiplyvector(&(*input).v->v, matrix.v[3].v);
+        (*output).v[0].v = __builtin_multiplyvector(&matrix.v->v, (*input).v[0].v);
+        (*output).v[1].v = __builtin_multiplyvector(&matrix.v->v, (*input).v[1].v);
+        (*output).v[2].v = __builtin_multiplyvector(&matrix.v->v, (*input).v[2].v);
+        (*output).v[3].v = __builtin_multiplyvector(&matrix.v->v, (*input).v[3].v);
         matrix = (*output);
 
         input = reinterpret_cast<xxMatrix4*>((char*)input + inputStride);
