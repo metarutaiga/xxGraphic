@@ -71,3 +71,41 @@ fragment float4 Main(Varying vary [[stage_in]],
 }
 #endif)";
 //==============================================================================
+void mtlUpdateArgumentEncoderInternal(MTLSWAPCHAIN* swapchain)
+{
+    MTLPIPELINE* pipeline = swapchain->pipeline;
+
+    NSUInteger vertexLength = pipeline->vertexArgumentEncodedLength;
+    NSUInteger fragmentLength = pipeline->fragmentArgumentEncodedLength;
+    NSUInteger requestLength = vertexLength + fragmentLength;
+    NSUInteger vertexOffset = swapchain->argumentBufferStep * requestLength;
+    NSUInteger fragmentOffset = vertexOffset + vertexLength;
+    NSUInteger capacityLength = fragmentOffset + fragmentLength;
+
+    int argumentBufferIndex = swapchain->argumentBufferIndex;
+    id <MTLBuffer> __unsafe_unretained argumentBuffer = swapchain->argumentBuffers[argumentBufferIndex];
+    if (argumentBuffer == nil || argumentBuffer.length < capacityLength)
+    {
+        argumentBuffer = swapchain->argumentBuffers[argumentBufferIndex] = [swapchain->commandQueue.device newBufferWithLength:capacityLength * 2
+                                                                                                                       options:MTLResourceStorageModeShared];
+        vertexOffset = 0;
+        fragmentOffset = vertexOffset + vertexLength;
+    }
+    swapchain->argumentBufferStep++;
+
+    swapchain->vertexArgumentEncoder = pipeline->vertexArgumentEncoder;
+    swapchain->fragmentArgumentEncoder = pipeline->fragmentArgumentEncoder;
+    [swapchain->vertexArgumentEncoder setArgumentBuffer:argumentBuffer
+                                                 offset:vertexOffset];
+    [swapchain->fragmentArgumentEncoder setArgumentBuffer:argumentBuffer
+                                                   offset:fragmentOffset];
+    swapchain->argumentEncoderComplete = false;
+
+    [swapchain->commandEncoder setVertexBuffer:argumentBuffer
+                                        offset:vertexOffset
+                                       atIndex:0];
+    [swapchain->commandEncoder setFragmentBuffer:argumentBuffer
+                                          offset:fragmentOffset
+                                         atIndex:0];
+}
+//==============================================================================
