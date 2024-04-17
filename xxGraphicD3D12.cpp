@@ -814,6 +814,20 @@ uint64_t xxCreateVertexAttributeD3D12(uint64_t device, int count, int* attribute
             continue;
         }
 
+        if (element == 'BON3' && size == sizeof(float) * 3)
+        {
+            inputElement.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+            inputElement.SemanticName = "BLENDWEIGHT";
+            continue;
+        }
+
+        if (element == 'BON4' && size == sizeof(char) * 4)
+        {
+            inputElement.Format = DXGI_FORMAT_R8G8B8A8_UINT;
+            inputElement.SemanticName = "BLENDINDICES";
+            continue;
+        }
+
         if (element == 'NOR3' && size == sizeof(float) * 3)
         {
             inputElement.Format = DXGI_FORMAT_R32G32B32_FLOAT;
