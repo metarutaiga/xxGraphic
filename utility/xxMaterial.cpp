@@ -472,7 +472,12 @@ R"(
 #define float2 vec2
 #define float3 vec3
 #define float4 vec4
+#define float2x2 mat2
+#define float3x3 mat3
 #define float4x4 mat4
+#define int2 ivec2
+#define int3 ivec3
+#define int4 ivec4
 #endif)"
 //------------------------------------------------------------------------------
 //  mul
@@ -652,26 +657,24 @@ vertex Varying Main(Attribute attr [[stage_in]],
     auto uniBuffer = uni.Buffer;
 #endif
 
+    int uniIndex = 0;
     float4x4 world = float4x4(uniBuffer[0], uniBuffer[1], uniBuffer[2], uniBuffer[3]);
     float4x4 view = float4x4(uniBuffer[4], uniBuffer[5], uniBuffer[6], uniBuffer[7]);
     float4x4 projection = float4x4(uniBuffer[8], uniBuffer[9], uniBuffer[10], uniBuffer[11]);
+    uniIndex += 12;
 
-    int uniIndex = 12;
 #if SHADER_SKINNING
     float4 boneWeight = float4(attrBoneWeight, 1.0 - attrBoneWeight.x - attrBoneWeight.y - attrBoneWeight.z);
-#if SHADER_GLSL
-    ivec4 boneIndices = ivec4(attrBoneIndices);
-#else
-    uint4 boneIndices = attrBoneIndices;
-#endif
-    world  = float4x4(uniBuffer[uniIndex + boneIndices.x * 3], uniBuffer[uniIndex + boneIndices.x * 3 + 1], uniBuffer[uniIndex + boneIndices.x * 3 + 2], float4(0.0)) * boneWeight.x;
-    world += float4x4(uniBuffer[uniIndex + boneIndices.y * 3], uniBuffer[uniIndex + boneIndices.y * 3 + 1], uniBuffer[uniIndex + boneIndices.y * 3 + 2], float4(0.0)) * boneWeight.y;
-    world += float4x4(uniBuffer[uniIndex + boneIndices.z * 3], uniBuffer[uniIndex + boneIndices.z * 3 + 1], uniBuffer[uniIndex + boneIndices.z * 3 + 2], float4(0.0)) * boneWeight.z;
-    world += float4x4(uniBuffer[uniIndex + boneIndices.w * 3], uniBuffer[uniIndex + boneIndices.w * 3 + 1], uniBuffer[uniIndex + boneIndices.w * 3 + 2], float4(0.0)) * boneWeight.w;
+    int4 boneIndices = int4(attrBoneIndices);
+    world  = float4x4(uniBuffer[boneIndices.x * 3 + 12], uniBuffer[boneIndices.x * 3 + 13], uniBuffer[boneIndices.x * 3 + 14], float4(0.0)) * boneWeight.x;
+    world += float4x4(uniBuffer[boneIndices.y * 3 + 12], uniBuffer[boneIndices.y * 3 + 13], uniBuffer[boneIndices.y * 3 + 14], float4(0.0)) * boneWeight.y;
+    world += float4x4(uniBuffer[boneIndices.z * 3 + 12], uniBuffer[boneIndices.z * 3 + 13], uniBuffer[boneIndices.z * 3 + 14], float4(0.0)) * boneWeight.z;
+    world += float4x4(uniBuffer[boneIndices.w * 3 + 12], uniBuffer[boneIndices.w * 3 + 13], uniBuffer[boneIndices.w * 3 + 14], float4(0.0)) * boneWeight.w;
     world = transpose(world);
     world[3][3] = 1.0;
     uniIndex += 75 * 3;
 #endif
+
     float4 worldPosition = mul(float4(attrPosition, 1.0), world);
     float4 screenPosition = mul(mul(worldPosition, view), projection);
 
@@ -687,7 +690,7 @@ vertex Varying Main(Attribute attr [[stage_in]],
     color.a = uniBuffer[uniIndex++].x;
 #endif
 #if SHADER_LIGHTING
-    float3 worldNormal = normalize(mul(float4(attrNormal, 1.0), world).xyz);
+    float3 worldNormal = normalize(mul(float4(normal, 1.0), world).xyz);
     float3 lightDirection = uniBuffer[uniIndex++].xyz;
     float3 lightColor = uniBuffer[uniIndex++].xyz;
     float3 ambientColor = uniBuffer[uniIndex++].xyz;
