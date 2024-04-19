@@ -362,6 +362,8 @@ struct xxPlusAPI xxMatrix3x3
     xxMatrix3x3     Inverse         () const;
     xxMatrix3x3     Transpose       () const;
 
+    static xxMatrix3x3 Quaternion   (xxVector4 const& q);
+
     static const xxMatrix3x3 IDENTITY;
 };
 

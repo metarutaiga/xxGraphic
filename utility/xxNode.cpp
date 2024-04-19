@@ -35,6 +35,13 @@ xxNode::~xxNode()
     Invalidate();
 }
 //------------------------------------------------------------------------------
+void xxNode::BoneData::ResetPointer()
+{
+    xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&classBoneMatrix + sizeof(classBoneMatrix));
+    pointer[0] = &classSkinMatrix;
+    pointer[1] = &classBoneMatrix;
+}
+//------------------------------------------------------------------------------
 xxNodePtr xxNode::GetParent() const
 {
     return m_parent.lock();
@@ -287,6 +294,8 @@ bool xxNode::UpdateMatrix()
         return false;
     }
 #endif
+
+    UpdateRotateTranslateScale();
     if (m_parent.lock() == nullptr)
     {
         WorldMatrix = LocalMatrix;
@@ -397,9 +406,9 @@ void xxNode::Invalidate()
 //------------------------------------------------------------------------------
 void xxNode::Update(float time, bool updateMatrix)
 {
-    for (xxModifierPtr const& modifier : Modifiers)
+    for (auto& data : Modifiers)
     {
-        modifier->Update(time, this);
+        data.modifier->Update(data.modifier.get(), this, &data, time);
     }
 
     if (updateMatrix)
@@ -492,7 +501,13 @@ void xxNode::BinaryRead(xxBinary& binary)
     binary.ReadReference(Material);
     binary.ReadReference(Mesh);
 
-    binary.ReadReferences(Modifiers);
+    std::vector<xxModifierPtr> modifiers;
+    binary.ReadReferences(modifiers);
+    Modifiers.reserve(modifiers.size());
+    for (auto const& modifier : modifiers)
+    {
+        Modifiers.push_back({modifier});
+    }
 
     binary.ReadReferences(m_children);
     for (xxNodePtr const& child : m_children)
@@ -524,15 +539,13 @@ void xxNode::BinaryWrite(xxBinary& binary) const
     binary.WriteReference(Material);
     binary.WriteReference(Mesh);
 
-    binary.WriteReferences(Modifiers);
+    std::vector<xxModifierPtr> modifiers;
+    for (auto const& modifierData : Modifiers)
+    {
+        modifiers.push_back(modifierData.modifier);
+    }
+    binary.WriteReferences(modifiers);
 
     binary.WriteReferences(m_children);
-}
-//------------------------------------------------------------------------------
-void xxBoneData::ResetPointer()
-{
-    xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&classBoneMatrix + sizeof(classBoneMatrix));
-    pointer[0] = &classSkinMatrix;
-    pointer[1] = &classBoneMatrix;
 }
 //==============================================================================

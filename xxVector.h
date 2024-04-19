@@ -15,7 +15,7 @@
 #endif
 
 #if defined(__llvm__)
-typedef float v4sf __attribute__((vector_size(16)));
+typedef float v4sf __attribute__((vector_size(16), aligned(4)));
 #elif defined(__ARM_NEON__) || defined(__ARM_NEON) || defined(_M_ARM) || defined(_M_ARM64) || defined(_M_HYBRID_X86_ARM64)
 union v4sf
 {

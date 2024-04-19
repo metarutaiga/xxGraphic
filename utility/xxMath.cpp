@@ -152,6 +152,25 @@ xxMatrix3 xxMatrix3::Transpose() const
 
     return m;
 }
+//------------------------------------------------------------------------------
+xxMatrix3 xxMatrix3::Quaternion(xxVector4 const& q)
+{
+    xxVector4 xyzw = q;
+    xxVector4 xyzw_2 = xyzw + xyzw;
+    xxVector4 wwww = { __builtin_shufflevector(xyzw.v, xyzw.v, 3, 3, 3, 3) };
+    xxVector4 yzxw = { __builtin_shufflevector(xyzw.v, xyzw.v, 1, 2, 0, 1) };
+    xxVector4 zxyw = { __builtin_shufflevector(xyzw.v, xyzw.v, 2, 0, 1, 2) };
+    xxVector4 yzxw_2 = { __builtin_shufflevector(xyzw_2.v, xyzw_2.v, 1, 2, 0, 1) };
+    xxVector4 zxyw_2 = { __builtin_shufflevector(xyzw_2.v, xyzw_2.v, 2, 0, 1, 2) };
+    xxVector4 a = xxVector4::ONE - yzxw * yzxw_2 - zxyw * zxyw_2;
+    xxVector4 b = zxyw_2 * wwww + xyzw * yzxw_2;
+    xxVector4 c = xyzw * zxyw_2 - yzxw_2 * wwww;
+    xxMatrix3 m;
+    m.v[0] = { a.f[0], b.f[0], c.f[0] };
+    m.v[1] = { c.f[1], a.f[1], b.f[1] };
+    m.v[2] = { b.f[2], c.f[2], a.f[2] };
+    return m;
+}
 //==============================================================================
 //  Matrix 4x3
 //==============================================================================

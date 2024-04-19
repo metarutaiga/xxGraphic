@@ -11,13 +11,18 @@
 class xxPlusAPI xxModifier
 {
 public:
-    void                  (*Update)(float time, void* target) = [](float, void*){};
+    typedef std::function<void(xxModifier*, void*, xxModifierData*, float)> UpdateFunction;
+
+public:
+    UpdateFunction const    Update = [](xxModifier*, void* target, xxModifierData* data, float time) {};
 
     static xxModifierPtr    Create();
 
     static xxModifierPtr  (*BinaryCreate)();
     virtual void            BinaryRead(xxBinary& binary);
     virtual void            BinaryWrite(xxBinary& binary) const;
+
+    static void           (*ModifierLoader)(xxModifier& modifier, size_t type);
 
 protected:
     xxModifier();
@@ -26,6 +31,6 @@ protected:
 public:
     std::string             Name = "";
 
-    size_t                  DataType = 0;
+    size_t const            DataType = 0;
     std::vector<char>       Data;
 };
