@@ -17,6 +17,19 @@ class xxPlusAPI xxNode
     };
 
 public:
+    struct xxPlusAPI BoneData
+    {
+        void            ResetPointer();
+
+    public:
+        xxNodeWeakPtr   bone;
+        xxMatrix4       classSkinMatrix;
+        xxMatrix4       classBoneMatrix;
+        xxMatrix4&      skinMatrix = classSkinMatrix;
+        xxMatrix4&      boneMatrix = classBoneMatrix;
+    };
+
+public:
     xxNodePtr                   GetParent() const;
     xxNodePtr const&            GetChild(size_t index) const;
     size_t                      GetChildCount() const;
@@ -72,47 +85,13 @@ public:
     xxMatrix4&                  LocalMatrix;
     xxMatrix4&                  WorldMatrix;
 
-    std::vector<xxBoneData>     Bones;
+    std::vector<BoneData>       Bones;
 
     xxCameraPtr                 Camera;
     xxMaterialPtr               Material;
     xxMeshPtr                   Mesh;
 
-    std::vector<xxModifierPtr>  Modifiers;
+    std::vector<xxModifierData> Modifiers;
 
     std::vector<xxConstantData> ConstantDatas;
-};
-
-struct xxPlusAPI xxBoneData
-{
-    void            ResetPointer();
-
-public:
-    xxNodeWeakPtr   bone;
-    xxMatrix4       classSkinMatrix;
-    xxMatrix4       classBoneMatrix;
-    xxMatrix4&      skinMatrix = classSkinMatrix;
-    xxMatrix4&      boneMatrix = classBoneMatrix;
-};
-
-struct xxConstantData
-{
-    uint64_t    device = 0;
-    uint64_t    pipeline = 0;
-    uint64_t    vertexConstant = 0;
-    uint64_t    fragmentConstant = 0;
-    int         vertexConstantSize = 0;
-    int         fragmentConstantSize = 0;
-    int         ready = 0;
-};
-
-struct xxDrawData
-{
-    uint64_t                device = 0;
-    uint64_t                commandEncoder = 0;
-    xxCamera*               camera = nullptr;
-    mutable xxConstantData* constantData = nullptr;
-    mutable xxMesh*         mesh = nullptr;
-    mutable xxNode*         node = nullptr;
-    int                     materialIndex = 0;
 };

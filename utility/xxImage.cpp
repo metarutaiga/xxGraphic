@@ -8,7 +8,7 @@
 #include "xxBinary.h"
 #include "xxImage.h"
 
-void (*xxImage::ImageLoader)(xxImagePtr const& image, std::string const& path) = [](xxImagePtr const&, std::string const&){};
+void (*xxImage::ImageLoader)(xxImage& image, std::string const& path) = [](xxImage&, std::string const&){};
 //==============================================================================
 //  Texture
 //==============================================================================
@@ -207,6 +207,8 @@ void xxImage::BinaryRead(xxBinary& binary)
     binary.Read(FilterMin);
     binary.Read(FilterMip);
     binary.Read(Anisotropic);
+
+    ImageLoader(*this, binary.Path);
 }
 //------------------------------------------------------------------------------
 void xxImage::BinaryWrite(xxBinary& binary) const

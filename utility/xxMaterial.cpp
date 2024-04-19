@@ -47,9 +47,9 @@ void xxMaterial::Invalidate()
 //------------------------------------------------------------------------------
 void xxMaterial::Update(float time)
 {
-    for (xxModifierPtr const& modifier : Modifiers)
+    for (auto& data : Modifiers)
     {
-        modifier->Update(time, this);
+        data.modifier->Update(data.modifier.get(), this, &data, time);
     }
 }
 //------------------------------------------------------------------------------
@@ -415,11 +415,13 @@ void xxMaterial::BinaryRead(xxBinary& binary)
     binary.Read(Scissor);
 
     binary.ReadReferences(Images);
-    binary.ReadReferences(Modifiers);
 
-    for (size_t i = 0; i < Images.size(); ++i)
+    std::vector<xxModifierPtr> modifiers;
+    binary.ReadReferences(modifiers);
+    Modifiers.reserve(modifiers.size());
+    for (auto const& modifier : modifiers)
     {
-        xxImage::ImageLoader(Images[i], binary.Path);
+        Modifiers.push_back({modifier});
     }
 }
 //------------------------------------------------------------------------------
@@ -458,7 +460,13 @@ void xxMaterial::BinaryWrite(xxBinary& binary) const
     binary.Write(Scissor);
 
     binary.WriteReferences(Images);
-    binary.WriteReferences(Modifiers);
+
+    std::vector<xxModifierPtr> modifiers;
+    for (auto const& modifierData : Modifiers)
+    {
+        modifiers.push_back(modifierData.modifier);
+    }
+    binary.WriteReferences(modifiers);
 }
 //==============================================================================
 //  Default Shader
@@ -542,19 +550,19 @@ struct Attribute
 #elif SHADER_MSL
 struct Attribute
 {
-    float3 Position     [[attribute(0)]];
+    float3 Position     [[attribute(__COUNTER__)]];
 #if SHADER_SKINNING
-    float3 BoneWeight   [[attribute(1)]];
-    uint4 BoneIndices   [[attribute(2)]];
+    float3 BoneWeight   [[attribute(__COUNTER__)]];
+    uint4 BoneIndices   [[attribute(__COUNTER__)]];
 #endif
 #if SHADER_NORMAL
-    float3 Normal       [[attribute(1 + SHADER_SKINNING * 2)]];
+    float3 Normal       [[attribute(__COUNTER__)]];
 #endif
 #if SHADER_COLOR
-    float4 Color        [[attribute(1 + SHADER_SKINNING * 2 + SHADER_NORMAL)]];
+    float4 Color        [[attribute(__COUNTER__)]];
 #endif
 #if SHADER_TEXTURE
-    float2 UV0          [[attribute(1 + SHADER_SKINNING * 2 + SHADER_NORMAL + SHADER_COLOR)]];
+    float2 UV0          [[attribute(__COUNTER__)]];
 #endif
 };
 #endif)"
@@ -658,18 +666,20 @@ vertex Varying Main(Attribute attr [[stage_in]],
 #endif
 
     int uniIndex = 0;
+
     float4x4 world = float4x4(uniBuffer[0], uniBuffer[1], uniBuffer[2], uniBuffer[3]);
     float4x4 view = float4x4(uniBuffer[4], uniBuffer[5], uniBuffer[6], uniBuffer[7]);
     float4x4 projection = float4x4(uniBuffer[8], uniBuffer[9], uniBuffer[10], uniBuffer[11]);
     uniIndex += 12;
 
 #if SHADER_SKINNING
+    float4 zero4 = float4(0.0, 0.0, 0.0, 0.0);
     float4 boneWeight = float4(attrBoneWeight, 1.0 - attrBoneWeight.x - attrBoneWeight.y - attrBoneWeight.z);
     int4 boneIndices = int4(attrBoneIndices);
-    world  = float4x4(uniBuffer[boneIndices.x * 3 + 12], uniBuffer[boneIndices.x * 3 + 13], uniBuffer[boneIndices.x * 3 + 14], float4(0.0)) * boneWeight.x;
-    world += float4x4(uniBuffer[boneIndices.y * 3 + 12], uniBuffer[boneIndices.y * 3 + 13], uniBuffer[boneIndices.y * 3 + 14], float4(0.0)) * boneWeight.y;
-    world += float4x4(uniBuffer[boneIndices.z * 3 + 12], uniBuffer[boneIndices.z * 3 + 13], uniBuffer[boneIndices.z * 3 + 14], float4(0.0)) * boneWeight.z;
-    world += float4x4(uniBuffer[boneIndices.w * 3 + 12], uniBuffer[boneIndices.w * 3 + 13], uniBuffer[boneIndices.w * 3 + 14], float4(0.0)) * boneWeight.w;
+    world  = float4x4(uniBuffer[boneIndices.x * 3 + 12], uniBuffer[boneIndices.x * 3 + 13], uniBuffer[boneIndices.x * 3 + 14], zero4) * boneWeight.x;
+    world += float4x4(uniBuffer[boneIndices.y * 3 + 12], uniBuffer[boneIndices.y * 3 + 13], uniBuffer[boneIndices.y * 3 + 14], zero4) * boneWeight.y;
+    world += float4x4(uniBuffer[boneIndices.z * 3 + 12], uniBuffer[boneIndices.z * 3 + 13], uniBuffer[boneIndices.z * 3 + 14], zero4) * boneWeight.z;
+    world += float4x4(uniBuffer[boneIndices.w * 3 + 12], uniBuffer[boneIndices.w * 3 + 13], uniBuffer[boneIndices.w * 3 + 14], zero4) * boneWeight.w;
     world = transpose(world);
     world[3][3] = 1.0;
     uniIndex += 75 * 3;

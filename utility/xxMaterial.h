@@ -80,5 +80,5 @@ public:
 
     std::vector<xxImagePtr>     Images;
 
-    std::vector<xxModifierPtr>  Modifiers;
+    std::vector<xxModifierData> Modifiers;
 };
