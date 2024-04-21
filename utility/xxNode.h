@@ -70,14 +70,14 @@ protected:
     std::vector<xxNodePtr>      m_children;
 
     // Matrix
-    xxMatrix4                   m_classLocalMatrix;
-    xxMatrix4                   m_classWorldMatrix;
-    xxMatrix3                   m_legacyRotate;
-    xxVector3                   m_legacyTranslate;
-    float                       m_legacyScale;
+    xxMatrix4                   m_classLocalMatrix = xxMatrix4::IDENTITY;
+    xxMatrix4                   m_classWorldMatrix = xxMatrix4::IDENTITY;
+    xxMatrix3                   m_legacyRotate = xxMatrix3::IDENTITY;
+    xxVector3                   m_legacyTranslate = xxVector3::ZERO;
+    float                       m_legacyScale = -1.0f;
 
     std::vector<xxMatrix4>      m_linearMatrix;
-    bool                        m_linearMatrixCreate;
+    bool                        m_linearMatrixCreate = false;
 
 public:
     std::string                 Name = "";
