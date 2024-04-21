@@ -21,13 +21,6 @@ xxNode::xxNode()
     :LocalMatrix(m_classLocalMatrix)
     ,WorldMatrix(m_classWorldMatrix)
 {
-    m_classLocalMatrix = xxMatrix4::IDENTITY;
-    m_classWorldMatrix = xxMatrix4::IDENTITY;
-    m_legacyRotate = xxMatrix3::IDENTITY;
-    m_legacyTranslate = xxVector3::ZERO;
-    m_legacyScale = -1.0f;
-
-    m_linearMatrixCreate = false;
 }
 //------------------------------------------------------------------------------
 xxNode::~xxNode()
@@ -364,7 +357,10 @@ void xxNode::SetTranslate(xxVector3 const& translate)
 //------------------------------------------------------------------------------
 void xxNode::SetScale(float scale)
 {
-    CreateRotateTranslateScale();
+    if (m_legacyScale < 0.0f && scale != 1.0f)
+    {
+        CreateRotateTranslateScale();
+    }
 
     m_legacyScale = scale;
 }

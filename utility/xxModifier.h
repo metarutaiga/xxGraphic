@@ -16,7 +16,7 @@ public:
 public:
     UpdateFunction const    Update = [](xxModifier*, void* target, xxModifierData* data, float time) {};
 
-    static xxModifierPtr    Create();
+    static xxModifierPtr    Create(size_t size = 0);
 
     static xxModifierPtr  (*BinaryCreate)();
     virtual void            BinaryRead(xxBinary& binary);
