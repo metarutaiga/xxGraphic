@@ -18,8 +18,6 @@
 //  Node
 //==============================================================================
 xxNode::xxNode()
-    :LocalMatrix(m_classLocalMatrix)
-    ,WorldMatrix(m_classWorldMatrix)
 {
 }
 //------------------------------------------------------------------------------
@@ -255,7 +253,7 @@ void xxNode::CreateLinearMatrix()
 #endif
 }
 //------------------------------------------------------------------------------
-bool xxNode::UpdateMatrix()
+void xxNode::UpdateMatrix()
 {
 #if HAVE_LINEAR_MATRIX
     if (m_linearMatrixCreate)
@@ -284,11 +282,11 @@ bool xxNode::UpdateMatrix()
             header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
         }
 
-        return false;
+        return;
     }
 #endif
-
     UpdateRotateTranslateScale();
+
     if (m_parent.lock() == nullptr)
     {
         WorldMatrix = LocalMatrix;
@@ -297,8 +295,6 @@ bool xxNode::UpdateMatrix()
     {
         WorldMatrix = m_parent.lock()->WorldMatrix * LocalMatrix;
     }
-
-    return true;
 }
 //------------------------------------------------------------------------------
 xxMatrix3 xxNode::GetRotate() const
@@ -362,15 +358,15 @@ void xxNode::SetScale(float scale)
         CreateRotateTranslateScale();
     }
 
-    m_legacyScale = scale;
+    m_legacyScale = scale != 1.0f ? scale : -1.0f;
 }
 //------------------------------------------------------------------------------
 void xxNode::CreateRotateTranslateScale()
 {
-    if (m_legacyScale >= 0.0f)
-        return;
-
-    LocalMatrix.FastDecompose(m_legacyRotate, m_legacyTranslate, m_legacyScale);
+    if (m_legacyScale < 0.0f)
+    {
+        LocalMatrix.FastDecompose(m_legacyRotate, m_legacyTranslate, m_legacyScale);
+    }
 }
 //------------------------------------------------------------------------------
 void xxNode::UpdateRotateTranslateScale()
@@ -407,9 +403,23 @@ void xxNode::Update(float time, bool updateMatrix)
         data.modifier->Update(data.modifier.get(), this, &data, time);
     }
 
+#if HAVE_LINEAR_MATRIX
+    if (m_linearMatrix.empty() == false)
+    {
+        for (xxNodePtr const& child : m_children)
+        {
+            if (child == nullptr)
+                continue;
+            child->Update(time, false);
+        }
+        UpdateMatrix();
+        return;
+    }
+#endif
+
     if (updateMatrix)
     {
-        updateMatrix = UpdateMatrix();
+        UpdateMatrix();
         for (auto& boneData : Bones)
         {
             auto bone = boneData.bone.lock();

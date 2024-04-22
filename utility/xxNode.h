@@ -15,6 +15,7 @@ class xxPlusAPI xxNode
         xxMatrix4*  parentMatrix;
         size_t      childrenCount;
     };
+    static_assert(sizeof(LinearMatrixHeader) <= sizeof(xxMatrix4));
 
 public:
     struct xxPlusAPI BoneData
@@ -37,7 +38,7 @@ public:
     bool                        DetachChild(xxNodePtr const& child);
 
     void                        CreateLinearMatrix();
-    bool                        UpdateMatrix();
+    void                        UpdateMatrix();
 
     xxMatrix3                   GetRotate() const;
     xxVector3                   GetTranslate() const;
@@ -82,8 +83,8 @@ protected:
 public:
     std::string                 Name = "";
 
-    xxMatrix4&                  LocalMatrix;
-    xxMatrix4&                  WorldMatrix;
+    xxMatrix4&                  LocalMatrix = m_classLocalMatrix;
+    xxMatrix4&                  WorldMatrix = m_classWorldMatrix;
 
     std::vector<BoneData>       Bones;
 
