@@ -7,7 +7,7 @@
 #include "xxBinary.h"
 #include "xxModifier.h"
 
-void (*xxModifier::ModifierLoader)(xxModifier& modifier, size_t type) = [](xxModifier&, size_t){};
+void (*xxModifier::Loader)(xxModifier& modifier, size_t type) = [](xxModifier&, size_t){};
 //==============================================================================
 //  Modifier
 //==============================================================================
@@ -35,21 +35,17 @@ xxModifierPtr (*xxModifier::BinaryCreate)() = []() { return xxModifier::Create()
 //------------------------------------------------------------------------------
 void xxModifier::BinaryRead(xxBinary& binary)
 {
-    binary.ReadString(Name);
-
     binary.Read(const_cast<size_t&>(DataType));
 
     size_t length = 0;
     binary.ReadSize(length);
     binary.ReadArray(Data.insert(Data.end(), length, 0).base(), length);
 
-    ModifierLoader(*this, DataType);
+    Loader(*this, DataType);
 }
 //------------------------------------------------------------------------------
 void xxModifier::BinaryWrite(xxBinary& binary) const
 {
-    binary.WriteString(Name);
-
     binary.Write(DataType);
 
     size_t length = Data.size();

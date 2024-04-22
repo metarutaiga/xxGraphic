@@ -22,15 +22,13 @@ public:
     virtual void            BinaryRead(xxBinary& binary);
     virtual void            BinaryWrite(xxBinary& binary) const;
 
-    static void           (*ModifierLoader)(xxModifier& modifier, size_t type);
+    static void           (*Loader)(xxModifier& modifier, size_t type);
 
 protected:
     xxModifier();
     virtual ~xxModifier();
 
 public:
-    std::string             Name = "";
-
     size_t const            DataType = 0;
     std::vector<char>       Data;
 };

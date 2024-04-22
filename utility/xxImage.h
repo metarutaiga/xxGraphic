@@ -28,7 +28,7 @@ public:
     virtual void        BinaryRead(xxBinary& binary);
     virtual void        BinaryWrite(xxBinary& binary) const;
 
-    static void       (*ImageLoader)(xxImage& image, std::string const& path);
+    static void       (*Loader)(xxImage& image, std::string const& path);
 
 protected:
     xxImage(uint64_t format, int width, int height, int depth, int mipmap, int array);
