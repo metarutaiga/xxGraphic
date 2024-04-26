@@ -365,22 +365,6 @@ uint64_t xxBeginRenderPassD3D11(uint64_t commandBuffer, uint64_t framebuffer, ui
 
     d3dDeviceContext->OMSetRenderTargets(1, &d3dFramebuffer->renderTargetView, d3dFramebuffer->depthStencilView);
 
-    D3D11_VIEWPORT vp;
-    vp.TopLeftX = 0;
-    vp.TopLeftY = 0;
-    vp.Width = (FLOAT)width;
-    vp.Height = (FLOAT)height;
-    vp.MinDepth = 0.0f;
-    vp.MaxDepth = 1.0f;
-    d3dDeviceContext->RSSetViewports(1, &vp);
-
-    D3D11_RECT rect;
-    rect.left = 0;
-    rect.top = 0;
-    rect.right = width;
-    rect.bottom = height;
-    d3dDeviceContext->RSSetScissorRects(1, &rect);
-
     if (d3dRenderPass.clearColor)
     {
         d3dDeviceContext->ClearRenderTargetView(d3dFramebuffer->renderTargetView, color);

@@ -244,27 +244,26 @@ uint64_t xxBeginRenderPassGLES2(uint64_t commandBuffer, uint64_t framebuffer, ui
 {
     GLbitfield mask = static_cast<GLbitfield>(renderPass);
 
-    glViewport(0, 0, width, height);
-    glScissor(0, 0, width, height);
-
-    if (mask & GL_COLOR_BUFFER_BIT)
-    {
-        glClearColor(color[0], color[1], color[2], color[3]);
-    }
-    if (mask & (GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT))
-    {
-        glDepthMask(true);
-    }
-    if (mask & GL_DEPTH_BUFFER_BIT)
-    {
-        glClearDepthf(depth);
-    }
-    if (mask & GL_STENCIL_BUFFER_BIT)
-    {
-        glClearStencil(stencil);
-    }
     if (mask)
     {
+        if (mask & GL_COLOR_BUFFER_BIT)
+        {
+            glClearColor(color[0], color[1], color[2], color[3]);
+        }
+        if (mask & (GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT))
+        {
+            glDepthMask(true);
+        }
+        if (mask & GL_DEPTH_BUFFER_BIT)
+        {
+            glClearDepthf(depth);
+        }
+        if (mask & GL_STENCIL_BUFFER_BIT)
+        {
+            glClearStencil(stencil);
+        }
+        glViewport(0, 0, width, height);
+        glScissor(0, 0, width, height);
         glClear(mask);
     }
 

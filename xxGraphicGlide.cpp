@@ -204,21 +204,24 @@ void xxDestroyRenderPassGlide(uint64_t renderPass)
 //------------------------------------------------------------------------------
 uint64_t xxBeginRenderPassGlide(uint64_t commandBuffer, uint64_t framebuffer, uint64_t renderPass, int width, int height, float color[4], float depth, unsigned char stencil)
 {
-    GrColor_t grColor = 0;
-    GrAlpha_t grAlpha = 0;
+    if (renderPass & (GR_PARAM_RGB | GR_PARAM_A | GR_PARAM_Z))
+    {
+        GrColor_t grColor = 0;
+        GrAlpha_t grAlpha = 0;
 
-    grColor |= (int)(color[0] * 255);
-    grColor |= (int)(color[1] * 255) << 8;
-    grColor |= (int)(color[2] * 255) << 16;
-    grAlpha |= (int)(color[3] * 255);
+        grColor |= (int)(color[0] * 255);
+        grColor |= (int)(color[1] * 255) << 8;
+        grColor |= (int)(color[2] * 255) << 16;
+        grAlpha |= (int)(color[3] * 255);
 
-    grViewport(0, 0, width, height);
-    grClipWindow(0, 0, width, height);
-    grColorMask(renderPass & GR_PARAM_RGB ? FXTRUE : FXFALSE, renderPass & GR_PARAM_A ? FXTRUE : FXFALSE);
-    grDepthMask(renderPass & GR_PARAM_Z ? FXTRUE : FXFALSE);
-    grBufferClear(grColor, grAlpha, -1);
-    grColorMask(FXTRUE, FXTRUE);
-    grDepthMask(FXTRUE);
+        grViewport(0, 0, width, height);
+        grClipWindow(0, 0, width, height);
+        grColorMask(renderPass & GR_PARAM_RGB ? FXTRUE : FXFALSE, renderPass & GR_PARAM_A ? FXTRUE : FXFALSE);
+        grDepthMask(renderPass & GR_PARAM_Z ? FXTRUE : FXFALSE);
+        grBufferClear(grColor, grAlpha, -1);
+        grColorMask(FXTRUE, FXTRUE);
+        grDepthMask(FXTRUE);
+    }
 
     return commandBuffer;
 }
