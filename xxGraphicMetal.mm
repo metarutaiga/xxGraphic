@@ -311,24 +311,6 @@ id xxBeginRenderPassMetal(id <MTLCommandBuffer> __unsafe_unretained commandBuffe
     if (commandEncoder == nil)
         return nil;
 
-    MTLViewport vp;
-    vp.originX = 0;
-    vp.originY = 0;
-    vp.width = width;
-    vp.height = height;
-    vp.znear = 0.0f;
-    vp.zfar = 1.0f;
-    [commandEncoder setViewport:vp];
-    metalViewport = vp;
-
-    MTLScissorRect rect;
-    rect.x = 0;
-    rect.y = 0;
-    rect.width = width;
-    rect.height = height;
-    [commandEncoder setScissorRect:rect];
-    metalScissor = rect;
-
     return commandEncoder;
 }
 //------------------------------------------------------------------------------
