@@ -82,6 +82,6 @@ public:
     }
 
     std::string const           Path;
-    int const                   Version = 0x20240415;
+    int const                   Version = 0x20240427;
     bool const                  Safe = true;
 };

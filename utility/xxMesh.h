@@ -31,6 +31,8 @@ public:
     xxStrideIterator<uint32_t>  GetColor(int index) const;
     xxStrideIterator<xxVector2> GetTexture(int index) const;
 
+    void                        CalculateBound() const;
+
     static xxMeshPtr            Create(bool skinning = false, char normal = 0, char color = 0, char texture = 0);
 
     static xxMeshPtr          (*BinaryCreate)();
@@ -68,6 +70,8 @@ public:
     int const                   Stride = 0;
     char* const                 Vertex = nullptr;
     uint16_t* const             Index = nullptr;
+
+    xxVector4 const             Bound = xxVector4::ZERO;
 };
 
 template<class T>

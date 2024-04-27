@@ -15,6 +15,13 @@
 #define HAVE_LINEAR_MATRIX 1
 
 //==============================================================================
+struct LinearMatrixHeader
+{
+    xxMatrix4*  parentMatrix;
+    size_t      childrenCount;
+};
+static_assert(sizeof(LinearMatrixHeader) <= sizeof(xxMatrix4));
+//==============================================================================
 //  Node
 //==============================================================================
 xxNode::xxNode()
@@ -28,14 +35,20 @@ xxNode::~xxNode()
 //------------------------------------------------------------------------------
 void xxNode::BoneData::ResetPointer()
 {
-    xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&classBoneMatrix + sizeof(classBoneMatrix));
+    void** pointer = reinterpret_cast<void**>((char*)&classBoneMatrix + sizeof(classBoneMatrix));
     pointer[0] = &classSkinMatrix;
     pointer[1] = &classBoneMatrix;
 }
 //------------------------------------------------------------------------------
-xxNodePtr xxNode::GetParent() const
+xxNodePtr const& xxNode::GetParent() const
 {
-    return m_parent.lock();
+    if (m_parent.expired())
+    {
+        static xxNodePtr empty;
+        return empty;
+    }
+
+    return (xxNodePtr&)m_parent;
 }
 //------------------------------------------------------------------------------
 xxNodePtr const& xxNode::GetChild(size_t index) const
@@ -58,7 +71,7 @@ bool xxNode::AttachChild(xxNodePtr const& node)
 {
     if (node == nullptr)
         return false;
-    if (node->m_parent.lock() != nullptr)
+    if (node->m_parent.use_count())
         return false;
     m_children.push_back(node);
     node->m_parent = m_this;
@@ -68,9 +81,9 @@ bool xxNode::AttachChild(xxNodePtr const& node)
     node->m_linearMatrixCreate = false;
 
     xxNode* root = this;
-    while (xxNode* parent = root->m_parent.lock().get())
+    while (xxNodePtr const& parent = root->GetParent())
     {
-        root = parent;
+        root = parent.get();
     }
     root->m_linearMatrixCreate = true;
 #endif
@@ -82,7 +95,7 @@ bool xxNode::DetachChild(xxNodePtr const& node)
 {
     if (node == nullptr)
         return false;
-    if (node->m_parent.lock() == nullptr)
+    if (node->m_parent.use_count() == 0)
         return false;
 
     for (xxNodePtr const& child : m_children)
@@ -94,7 +107,7 @@ bool xxNode::DetachChild(xxNodePtr const& node)
 #if HAVE_LINEAR_MATRIX
         Traversal([](xxNodePtr const& node)
         {
-            xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&node->Name + sizeof(node->Name));
+            void** pointer = reinterpret_cast<void**>((char*)&node->Name + sizeof(node->Name));
             node->m_classLocalMatrix = node->LocalMatrix;
             node->m_classWorldMatrix = node->WorldMatrix;
             pointer[0] = &node->m_classLocalMatrix;
@@ -104,7 +117,7 @@ bool xxNode::DetachChild(xxNodePtr const& node)
 
         for (auto& boneData : Bones)
         {
-            xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&boneData.classBoneMatrix + sizeof(boneData.classBoneMatrix));
+            void** pointer = reinterpret_cast<void**>((char*)&boneData.classBoneMatrix + sizeof(boneData.classBoneMatrix));
             boneData.classSkinMatrix = boneData.skinMatrix;
             boneData.classBoneMatrix = boneData.boneMatrix;
             pointer[0] = &boneData.classSkinMatrix;
@@ -126,7 +139,7 @@ bool xxNode::DetachChild(xxNodePtr const& node)
 void xxNode::CreateLinearMatrix()
 {
 #if HAVE_LINEAR_MATRIX
-    if (m_parent.lock() != nullptr)
+    if (m_parent.use_count())
         return;
 
     std::function<size_t(xxNode*)> countMatrix = [&countMatrix](xxNode* node)
@@ -151,8 +164,7 @@ void xxNode::CreateLinearMatrix()
         // Bone
         for (auto& boneData : node->Bones)
         {
-            xxNodePtr bone = boneData.bone.lock();
-            if (bone)
+            if (boneData.bone.use_count())
             {
                 // Header
                 count += 1;
@@ -193,7 +205,7 @@ void xxNode::CreateLinearMatrix()
             {
                 if (child == nullptr)
                     continue;
-                xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&child->Name + sizeof(child->Name));
+                void** pointer = reinterpret_cast<void**>((char*)&child->Name + sizeof(child->Name));
                 linearMatrix[0] = child->LocalMatrix;
                 linearMatrix[1] = child->WorldMatrix;
                 pointer[0] = &linearMatrix[0];
@@ -205,16 +217,17 @@ void xxNode::CreateLinearMatrix()
         // Bone
         for (auto& boneData : node->Bones)
         {
-            xxNodePtr bone = boneData.bone.lock();
-            if (bone)
+            if (boneData.bone.use_count())
             {
+                xxNodePtr const& bone = (xxNodePtr&)boneData.bone;
+
                 // Header
                 LinearMatrixHeader* header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
                 header->parentMatrix = &bone->WorldMatrix;
                 header->childrenCount = 1;
 
                 // Matrix
-                xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&boneData.classBoneMatrix + sizeof(boneData.classBoneMatrix));
+                void** pointer = reinterpret_cast<void**>((char*)&boneData.classBoneMatrix + sizeof(boneData.classBoneMatrix));
                 linearMatrix[0] = boneData.skinMatrix;
                 linearMatrix[1] = boneData.boneMatrix;
                 pointer[0] = &linearMatrix[0];
@@ -234,7 +247,7 @@ void xxNode::CreateLinearMatrix()
 
     // Root
     xxMatrix4* linearMatrix = newLinearMatrix.data();
-    xxMatrix4** pointer = reinterpret_cast<xxMatrix4**>((char*)&Name + sizeof(Name));
+    void** pointer = reinterpret_cast<void**>((char*)&Name + sizeof(Name));
     linearMatrix[0] = LocalMatrix;
     linearMatrix[1] = WorldMatrix;
     pointer[0] = &linearMatrix[0];
@@ -287,19 +300,20 @@ void xxNode::UpdateMatrix()
 #endif
     UpdateRotateTranslateScale();
 
-    if (m_parent.lock() == nullptr)
+    xxNodePtr const& parent = GetParent();
+    if (parent == nullptr)
     {
         WorldMatrix = LocalMatrix;
     }
     else
     {
-        WorldMatrix = m_parent.lock()->WorldMatrix * LocalMatrix;
+        WorldMatrix = parent->WorldMatrix * LocalMatrix;
     }
 }
 //------------------------------------------------------------------------------
 xxMatrix3 xxNode::GetRotate() const
 {
-    if (m_legacyScale < 0.0f)
+    if (m_legacyScale == 1.0f)
     {
         return { LocalMatrix[0].xyz, LocalMatrix[1].xyz, LocalMatrix[2].xyz };
     }
@@ -309,7 +323,7 @@ xxMatrix3 xxNode::GetRotate() const
 //------------------------------------------------------------------------------
 xxVector3 xxNode::GetTranslate() const
 {
-    if (m_legacyScale < 0.0f)
+    if (m_legacyScale == 1.0f)
     {
         return LocalMatrix.v[3].xyz;
     }
@@ -319,17 +333,12 @@ xxVector3 xxNode::GetTranslate() const
 //------------------------------------------------------------------------------
 float xxNode::GetScale() const
 {
-    if (m_legacyScale < 0.0f)
-    {
-        return 1.0f;
-    }
-
     return m_legacyScale;
 }
 //------------------------------------------------------------------------------
 void xxNode::SetRotate(xxMatrix3 const& rotate)
 {
-    if (m_legacyScale < 0.0f)
+    if (m_legacyScale == 1.0f)
     {
         LocalMatrix.v[0].xyz = rotate.v[0];
         LocalMatrix.v[1].xyz = rotate.v[1];
@@ -342,7 +351,7 @@ void xxNode::SetRotate(xxMatrix3 const& rotate)
 //------------------------------------------------------------------------------
 void xxNode::SetTranslate(xxVector3 const& translate)
 {
-    if (m_legacyScale < 0.0f)
+    if (m_legacyScale == 1.0f)
     {
         LocalMatrix.v[3].xyz = translate;
         return;
@@ -353,25 +362,25 @@ void xxNode::SetTranslate(xxVector3 const& translate)
 //------------------------------------------------------------------------------
 void xxNode::SetScale(float scale)
 {
-    if (m_legacyScale < 0.0f && scale != 1.0f)
+    if (m_legacyScale == 1.0f && scale != 1.0f)
     {
         CreateRotateTranslateScale();
     }
 
-    m_legacyScale = scale != 1.0f ? scale : -1.0f;
+    m_legacyScale = scale;
 }
 //------------------------------------------------------------------------------
 void xxNode::CreateRotateTranslateScale()
 {
-    if (m_legacyScale < 0.0f)
-    {
-        LocalMatrix.FastDecompose(m_legacyRotate, m_legacyTranslate, m_legacyScale);
-    }
+    if (m_legacyScale == 1.0f)
+        return;
+
+    LocalMatrix.FastDecompose(m_legacyRotate, m_legacyTranslate, m_legacyScale);
 }
 //------------------------------------------------------------------------------
 void xxNode::UpdateRotateTranslateScale()
 {
-    if (m_legacyScale < 0.0f)
+    if (m_legacyScale == 1.0f)
         return;
 
     LocalMatrix.v[0].xyz = m_legacyRotate.v[0] * m_legacyScale;
@@ -420,16 +429,30 @@ void xxNode::Update(float time, bool updateMatrix)
     if (updateMatrix)
     {
         UpdateMatrix();
+    }
+
+    WorldBound.xyz = WorldMatrix.v[3].xyz;
+    WorldBound.w = 0.0f;
+    if (Bones.empty() == false)
+    {
         for (auto& boneData : Bones)
         {
-            auto bone = boneData.bone.lock();
-            if (bone == nullptr)
+            if (boneData.bone.use_count())
             {
-                boneData.boneMatrix = xxMatrix4::IDENTITY;
+                xxNodePtr const& bone = (xxNodePtr&)boneData.bone;
+                if (updateMatrix)
+                {
+                    boneData.boneMatrix = bone->WorldMatrix * boneData.skinMatrix;
+                }
+                WorldBound.BoundMerge(boneData.bound.BoundTransform(bone->WorldMatrix, bone->GetScale()));
                 continue;
             }
-            boneData.boneMatrix = bone->WorldMatrix * boneData.skinMatrix;
+            boneData.boneMatrix = xxMatrix4::IDENTITY;
         }
+    }
+    else if (Mesh)
+    {
+        WorldBound = Mesh->Bound.BoundTransform(WorldMatrix, GetScale());
     }
 
     for (xxNodePtr const& child : m_children)
@@ -437,6 +460,7 @@ void xxNode::Update(float time, bool updateMatrix)
         if (child == nullptr)
             continue;
         child->Update(time, updateMatrix);
+        WorldBound.BoundMerge(child->WorldBound);
     }
 }
 //------------------------------------------------------------------------------
@@ -500,6 +524,7 @@ void xxNode::BinaryRead(xxBinary& binary)
     for (auto& boneData : Bones)
     {
         boneData.ResetPointer();
+        binary.Read(boneData.bound);
         binary.Read(boneData.classSkinMatrix);
     }
 
@@ -538,6 +563,7 @@ void xxNode::BinaryWrite(xxBinary& binary) const
     binary.WriteReferences(bones);
     for (auto const& boneData : Bones)
     {
+        binary.Write(boneData.bound);
         binary.Write(boneData.classSkinMatrix);
     }
 

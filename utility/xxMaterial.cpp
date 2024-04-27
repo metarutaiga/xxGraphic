@@ -666,12 +666,10 @@ vertex Varying Main(Attribute attr [[stage_in]],
 #endif
 
     int uniIndex = 0;
-
     float4x4 world = float4x4(uniBuffer[0], uniBuffer[1], uniBuffer[2], uniBuffer[3]);
     float4x4 view = float4x4(uniBuffer[4], uniBuffer[5], uniBuffer[6], uniBuffer[7]);
     float4x4 projection = float4x4(uniBuffer[8], uniBuffer[9], uniBuffer[10], uniBuffer[11]);
     uniIndex += 12;
-
 #if SHADER_SKINNING
     float4 zero4 = float4(0.0, 0.0, 0.0, 0.0);
     float4 boneWeight = float4(attrBoneWeight, 1.0 - attrBoneWeight.x - attrBoneWeight.y - attrBoneWeight.z);
@@ -684,7 +682,6 @@ vertex Varying Main(Attribute attr [[stage_in]],
     world[3][3] = 1.0;
     uniIndex += 75 * 3;
 #endif
-
     float4 worldPosition = mul(float4(attrPosition, 1.0), world);
     float4 screenPosition = mul(mul(worldPosition, view), projection);
 
