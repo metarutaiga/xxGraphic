@@ -4,6 +4,7 @@
 // Copyright (c) 2019-2024 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
+#include "xxUtility.h"
 #include "xxMath.h"
 
 const xxVector2 xxVector2::ZERO         = { 0, 0 };
@@ -62,6 +63,81 @@ const xxMatrix4x4 xxMatrix4x4::IDENTITY = { 1, 0, 0, 0,
                                             0, 0, 1, 0,
                                             0, 0, 0, 1 };
 
+//==============================================================================
+//  Vector4
+//==============================================================================
+xxVector4& xxVector4::BoundMerge(xxVector3 const& v)
+{
+    if (w == 0.0f)
+    {
+        xyz = v;
+        w = FLT_EPSILON;
+        return (*this);
+    }
+
+    xxVector3 diff = v - xyz;
+
+    float length = diff.Length();
+    float radius1 = w;
+
+    if (radius1 >= length)
+    {
+        return (*this);
+    }
+
+    float radius = (radius1 + length) / 2.0f;
+    float ratio = (radius - radius1) / length;
+    xyz += diff * ratio;
+    w = radius;
+
+    return (*this);
+}
+//------------------------------------------------------------------------------
+xxVector4& xxVector4::BoundMerge(xxVector4 const& v)
+{
+    if (v.w == 0.0f)
+    {
+        return (*this);
+    }
+    if (w == 0.0f)
+    {
+        return (*this) = v;
+    }
+
+    xxVector3 diff = v.xyz - xyz;
+
+    float length = diff.Length();
+    float radius1 = w;
+    float radius2 = v.w;
+
+    if (radius1 + radius2 >= length)
+    {
+        if (radius1 - radius2 >= length)
+        {
+            return (*this);
+        }
+
+        if (radius2 - radius1 >= length)
+        {
+            return (*this) = v;
+        }
+    }
+
+    float radius = (radius1 + length + radius2) / 2.0f;
+    float ratio = (radius - radius1) / length;
+    xyz += diff * ratio;
+    w = radius;
+
+    return (*this);
+}
+//------------------------------------------------------------------------------
+xxVector4 xxVector4::BoundTransform(xxMatrix4 const& m, float s) const
+{
+    xxVector4 t;
+    t.xyz = (m * (*this)).xyz;
+    t.w = s * w;
+    return t;
+}
 //==============================================================================
 //  Matrix 2x2
 //==============================================================================

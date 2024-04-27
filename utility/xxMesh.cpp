@@ -309,6 +309,21 @@ xxStrideIterator<xxVector2> xxMesh::GetTexture(int index) const
     return xxStrideIterator<xxVector2>(vertex, Stride, TextureCount ? VertexCount : 0);
 }
 //------------------------------------------------------------------------------
+void xxMesh::CalculateBound() const
+{
+    if (VertexCount == 0)
+    {
+        const_cast<xxVector4&>(Bound) = xxVector4::ZERO;
+        return;
+    }
+    xxVector4 bound = xxVector4::ZERO;
+    for (auto it = GetVertex(); it.isEnd() == false; ++it)
+    {
+        bound.BoundMerge(*it);
+    }
+    const_cast<xxVector4&>(Bound) = bound;
+}
+//------------------------------------------------------------------------------
 xxMeshPtr xxMesh::Create(bool skinning, char normal, char color, char texture)
 {
     xxMeshPtr mesh = xxMeshPtr(new xxMesh(skinning, normal, color, texture), [](xxMesh* mesh) { delete mesh; });
@@ -340,6 +355,8 @@ void xxMesh::BinaryRead(xxBinary& binary)
 
     binary.ReadArray(Vertex, Stride * VertexCount);
     binary.ReadArray(Index, IndexCount);
+
+    binary.Read(const_cast<xxVector4&>(Bound));
 }
 //------------------------------------------------------------------------------
 void xxMesh::BinaryWrite(xxBinary& binary) const
@@ -356,5 +373,7 @@ void xxMesh::BinaryWrite(xxBinary& binary) const
 
     binary.WriteArray(Vertex, Stride * VertexCount);
     binary.WriteArray(Index, IndexCount);
+
+    binary.Write(Bound);
 }
 //==============================================================================

@@ -10,13 +10,6 @@
 
 class xxPlusAPI xxNode
 {
-    struct LinearMatrixHeader
-    {
-        xxMatrix4*  parentMatrix;
-        size_t      childrenCount;
-    };
-    static_assert(sizeof(LinearMatrixHeader) <= sizeof(xxMatrix4));
-
 public:
     struct xxPlusAPI BoneData
     {
@@ -24,6 +17,7 @@ public:
 
     public:
         xxNodeWeakPtr   bone;
+        xxVector4       bound;
         xxMatrix4       classSkinMatrix;
         xxMatrix4       classBoneMatrix;
         xxMatrix4&      skinMatrix = classSkinMatrix;
@@ -31,7 +25,7 @@ public:
     };
 
 public:
-    xxNodePtr                   GetParent() const;
+    xxNodePtr const&            GetParent() const;
     xxNodePtr const&            GetChild(size_t index) const;
     size_t                      GetChildCount() const;
     bool                        AttachChild(xxNodePtr const& child);
@@ -58,8 +52,8 @@ public:
     static xxNodePtr            Create();
 
     static xxNodePtr          (*BinaryCreate)();
-    void                        BinaryRead(xxBinary& binary);
-    void                        BinaryWrite(xxBinary& binary) const;
+    virtual void                BinaryRead(xxBinary& binary);
+    virtual void                BinaryWrite(xxBinary& binary) const;
 
 protected:
     xxNode();
@@ -70,12 +64,13 @@ protected:
     xxNodeWeakPtr               m_this;
     std::vector<xxNodePtr>      m_children;
 
-    // Matrix
     xxMatrix4                   m_classLocalMatrix = xxMatrix4::IDENTITY;
     xxMatrix4                   m_classWorldMatrix = xxMatrix4::IDENTITY;
+    xxVector4                   m_classWorldBound = xxVector4::ZERO;
+
     xxMatrix3                   m_legacyRotate = xxMatrix3::IDENTITY;
     xxVector3                   m_legacyTranslate = xxVector3::ZERO;
-    float                       m_legacyScale = -1.0f;
+    float                       m_legacyScale = 1.0f;
 
     std::vector<xxMatrix4>      m_linearMatrix;
     bool                        m_linearMatrixCreate = false;
@@ -85,6 +80,7 @@ public:
 
     xxMatrix4&                  LocalMatrix = m_classLocalMatrix;
     xxMatrix4&                  WorldMatrix = m_classWorldMatrix;
+    xxVector4&                  WorldBound = m_classWorldBound;
 
     std::vector<BoneData>       Bones;
 

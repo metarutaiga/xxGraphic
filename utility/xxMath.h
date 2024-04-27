@@ -9,6 +9,10 @@
 #include "xxSystem.h"
 #include "xxVector.h"
 
+typedef struct xxMatrix2x2 xxMatrix2;
+typedef struct xxMatrix3x3 xxMatrix3;
+typedef struct xxMatrix4x4 xxMatrix4;
+
 struct xxPlusAPI xxVector2
 {
     enum { N = 2 };
@@ -46,6 +50,8 @@ struct xxPlusAPI xxVector2
     float           SquaredLength   () const                     { return Dot(*this);             }
     float           Length          () const                     { return sqrtf(SquaredLength()); }
 
+    xxVector2       Minimum         (xxVector2 const& v) const   { xxVector2 t; for (size_t i = 0; i < N; ++i) t.f[i] = f[i] < v.f[i] ? f[i] : v.f[i]; return t; }
+    xxVector2       Maximum         (xxVector2 const& v) const   { xxVector2 t; for (size_t i = 0; i < N; ++i) t.f[i] = f[i] > v.f[i] ? f[i] : v.f[i]; return t; }
     float           Cross           (xxVector2 const& v) const   { return x * v.y - y * v.x;      }
 
     static const xxVector2 ZERO;
@@ -94,6 +100,8 @@ struct xxPlusAPI xxVector3
     float           SquaredLength   () const                     { return Dot(*this);                  }
     float           Length          () const                     { return sqrtf(SquaredLength());      }
 
+    xxVector3       Minimum         (xxVector3 const& v) const   { xxVector3 t; for (size_t i = 0; i < N; ++i) t.f[i] = f[i] < v.f[i] ? f[i] : v.f[i]; return t; }
+    xxVector3       Maximum         (xxVector3 const& v) const   { xxVector3 t; for (size_t i = 0; i < N; ++i) t.f[i] = f[i] > v.f[i] ? f[i] : v.f[i]; return t; }
     xxVector3       Cross           (xxVector3 const& v) const   { return xxVector3{ y, z, x } * xxVector3{ v.z, v.x, v.y } -
                                                                           xxVector3{ z, x, y } * xxVector3{ v.y, v.z, v.x }; }
 
@@ -153,6 +161,13 @@ struct xxPlusAPI xxVector4
     float           SquaredLength   () const                     { return Dot(*this);                            }
     float           Length          () const                     { return sqrtf(SquaredLength());                }
 
+    xxVector4       Minimum         (xxVector4 const& v) const   { xxVector4 t; for (size_t i = 0; i < N; ++i) t.f[i] = f[i] < v.f[i] ? f[i] : v.f[i]; return t; }
+    xxVector4       Maximum         (xxVector4 const& v) const   { xxVector4 t; for (size_t i = 0; i < N; ++i) t.f[i] = f[i] > v.f[i] ? f[i] : v.f[i]; return t; }
+
+    xxVector4&      BoundMerge      (xxVector3 const& v);
+    xxVector4&      BoundMerge      (xxVector4 const& v);
+    xxVector4       BoundTransform  (xxMatrix4 const& m, float s) const;
+
     static xxVector4    FromInteger (uint32_t v)                 { xxVector4 t;    for (size_t i = 0; i < N; ++i) t.f[i] = (v >> (i * 8) & 0xFF) / 255.0f; return t; }
            uint32_t     ToInteger   () const                     { uint32_t t = 0; for (size_t i = 0; i < N; ++i) t |= uint32_t(f[i] * 255.0f) << (i * 8); return t; }
 
@@ -170,10 +185,6 @@ struct xxPlusAPI xxVector4
     static const xxVector4 RED;
     static const xxVector4 WHITE;
 };
-
-typedef struct xxMatrix2x2 xxMatrix2;
-typedef struct xxMatrix3x3 xxMatrix3;
-typedef struct xxMatrix4x4 xxMatrix4;
 
 struct xxPlusAPI xxMatrix2x2
 {
