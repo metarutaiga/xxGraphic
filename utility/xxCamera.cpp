@@ -85,7 +85,7 @@ void xxCamera::SetViewportMatrix(float fromWidth, float fromHeight, float toX, f
     ViewportMatrix.v[0] = {     scaleX,          0, 0, 0 };
     ViewportMatrix.v[1] = {          0,     scaleY, 0, 0 };
     ViewportMatrix.v[2] = {          0,          0, 1, 0 };
-    ViewportMatrix.v[3] = { translateX, translateY, 0, 0 };
+    ViewportMatrix.v[3] = { translateX, translateY, 0, 1 };
 }
 //------------------------------------------------------------------------------
 xxVector3 xxCamera::GetDirectionFromScreenPos(float x, float y) const
