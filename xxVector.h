@@ -60,40 +60,31 @@ template<> inline v4sf __builtin_shufflevector<2, 2, 2, 2>(v4sf const& a, v4sf c
 template<> inline v4sf __builtin_shufflevector<3, 3, 3, 3>(v4sf const& a, v4sf const& b) { return v4sf{ .v = vdupq_laneq_f32(a.v, 3) }; }
 #define __builtin_shufflevector(a, b, c, d, e, f) __builtin_shufflevector<c, d, e, f>(a, b)
 #elif defined(__i386__) || defined(__amd64__) || defined(_M_IX86) || defined(_M_AMD64)
-union v4hi
+struct v4hi
 {
-    struct { int16_t _[4]; };
-#pragma pack(push, 4)
     int64_t v;
-#pragma pack(pop)
-    int16_t operator [] (int i) const { return _[i]; }
+    int16_t operator [] (int i) const { return ((int16_t*)&v)[i]; }
 };
-union v4sf
+struct v4sf
 {
-    struct { float _[4]; };
     __m128 v;
     float   operator [] (int i) const { return v.m128_f32[i]; }
-    v4sf    operator + (v4sf const& other) const { return v4sf{ .v = _mm_add_ps(v, other.v) }; }
-    v4sf    operator - (v4sf const& other) const { return v4sf{ .v = _mm_sub_ps(v, other.v) }; }
-    v4sf    operator * (v4sf const& other) const { return v4sf{ .v = _mm_mul_ps(v, other.v) }; }
-    v4sf    operator / (v4sf const& other) const { return v4sf{ .v = _mm_div_ps(v, other.v) }; }
+    v4sf    operator + (v4sf const& other) const { return { _mm_add_ps(v, other.v) }; }
+    v4sf    operator - (v4sf const& other) const { return { _mm_sub_ps(v, other.v) }; }
+    v4sf    operator * (v4sf const& other) const { return { _mm_mul_ps(v, other.v) }; }
+    v4sf    operator / (v4sf const& other) const { return { _mm_div_ps(v, other.v) }; }
 };
 template<typename O, typename I> inline O __builtin_convertvector(I const& a);
-#if defined(__i386__) || defined(_M_IX86)
-template<> inline v4hi __builtin_convertvector<v4hi, v4sf>(v4sf const& a) { v4hi b; _mm_storeu_si64(&b.v, _mm_packs_epi16(_mm_cvtps_epi32(a.v), __m128i())); return b; }
-template<> inline v4sf __builtin_convertvector<v4sf, v4hi>(v4hi const& a) { __m128i t = _mm_loadu_si64(&a.v); return v4sf{ .v = _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpacklo_epi16(t, t), 16)) }; };
-#else
-template<> inline v4hi __builtin_convertvector<v4hi, v4sf>(v4sf const& a) { return v4hi{ .v = _mm_cvtsi128_si64(_mm_cvtps_epi32(a.v)) }; };
-template<> inline v4sf __builtin_convertvector<v4sf, v4hi>(v4hi const& a) { return v4sf{ .v = _mm_cvtepi32_ps(_mm_cvtsi64_si128(a.v)) }; };
-#endif
+template<> inline v4hi __builtin_convertvector<v4hi, v4sf>(v4sf const& a) { __m128i t = _mm_cvtps_epi32(a.v); v4hi b; _mm_storeu_si64(&b.v, _mm_packs_epi32(t, t)); return b; }
+template<> inline v4sf __builtin_convertvector<v4sf, v4hi>(v4hi const& a) { __m128i t = _mm_loadu_si64(&a.v); return { _mm_cvtepi32_ps(_mm_srai_epi32(_mm_unpacklo_epi16(t, t), 16)) }; };
 #define __builtin_convertvector(a, b) __builtin_convertvector<b, std::remove_reference<decltype(a)>::type>(a)
 template<int x, int y, int z, int w> inline v4sf __builtin_shufflevector(v4sf const& a, v4sf const& b);
-template<> inline v4sf __builtin_shufflevector<0, 0, 0, 0>(v4sf const& a, v4sf const& b) { return v4sf{ .v = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a.v), _MM_SHUFFLE(0, 0, 0, 0))) }; }
-template<> inline v4sf __builtin_shufflevector<1, 1, 1, 1>(v4sf const& a, v4sf const& b) { return v4sf{ .v = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a.v), _MM_SHUFFLE(1, 1, 1, 1))) }; }
-template<> inline v4sf __builtin_shufflevector<1, 2, 0, 1>(v4sf const& a, v4sf const& b) { return v4sf{ .v = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a.v), _MM_SHUFFLE(1, 2, 0, 1))) }; }
-template<> inline v4sf __builtin_shufflevector<2, 0, 1, 2>(v4sf const& a, v4sf const& b) { return v4sf{ .v = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a.v), _MM_SHUFFLE(2, 0, 1, 2))) }; }
-template<> inline v4sf __builtin_shufflevector<2, 2, 2, 2>(v4sf const& a, v4sf const& b) { return v4sf{ .v = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a.v), _MM_SHUFFLE(2, 2, 2, 2))) }; }
-template<> inline v4sf __builtin_shufflevector<3, 3, 3, 3>(v4sf const& a, v4sf const& b) { return v4sf{ .v = _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a.v), _MM_SHUFFLE(3, 3, 3, 3))) }; }
+template<> inline v4sf __builtin_shufflevector<0, 0, 0, 0>(v4sf const& a, v4sf const& b) { return { _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a.v), _MM_SHUFFLE(0, 0, 0, 0))) }; }
+template<> inline v4sf __builtin_shufflevector<1, 1, 1, 1>(v4sf const& a, v4sf const& b) { return { _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a.v), _MM_SHUFFLE(1, 1, 1, 1))) }; }
+template<> inline v4sf __builtin_shufflevector<1, 2, 0, 1>(v4sf const& a, v4sf const& b) { return { _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a.v), _MM_SHUFFLE(1, 0, 2, 1))) }; }
+template<> inline v4sf __builtin_shufflevector<2, 0, 1, 2>(v4sf const& a, v4sf const& b) { return { _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a.v), _MM_SHUFFLE(2, 1, 0, 2))) }; }
+template<> inline v4sf __builtin_shufflevector<2, 2, 2, 2>(v4sf const& a, v4sf const& b) { return { _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a.v), _MM_SHUFFLE(2, 2, 2, 2))) }; }
+template<> inline v4sf __builtin_shufflevector<3, 3, 3, 3>(v4sf const& a, v4sf const& b) { return { _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a.v), _MM_SHUFFLE(3, 3, 3, 3))) }; }
 #define __builtin_shufflevector(a, b, c, d, e, f) __builtin_shufflevector<c, d, e, f>(a, b)
 #else
 struct v4hi
@@ -105,22 +96,22 @@ struct v4sf
 {
     float v[4];
     float   operator [] (int i) const { return v[i]; }
-    v4sf    operator + (v4sf const& other) const { return v4sf{ v[0] + other.v[0], v[1] + other.v[1], v[2] + other.v[2], v[3] + other.v[3] }; }
-    v4sf    operator - (v4sf const& other) const { return v4sf{ v[0] - other.v[0], v[1] - other.v[1], v[2] - other.v[2], v[3] - other.v[3] }; }
-    v4sf    operator * (v4sf const& other) const { return v4sf{ v[0] * other.v[0], v[1] * other.v[1], v[2] * other.v[2], v[3] * other.v[3] }; }
-    v4sf    operator / (v4sf const& other) const { return v4sf{ v[0] / other.v[0], v[1] / other.v[1], v[2] / other.v[2], v[3] / other.v[3] }; }
+    v4sf    operator + (v4sf const& other) const { return { v[0] + other.v[0], v[1] + other.v[1], v[2] + other.v[2], v[3] + other.v[3] }; }
+    v4sf    operator - (v4sf const& other) const { return { v[0] - other.v[0], v[1] - other.v[1], v[2] - other.v[2], v[3] - other.v[3] }; }
+    v4sf    operator * (v4sf const& other) const { return { v[0] * other.v[0], v[1] * other.v[1], v[2] * other.v[2], v[3] * other.v[3] }; }
+    v4sf    operator / (v4sf const& other) const { return { v[0] / other.v[0], v[1] / other.v[1], v[2] / other.v[2], v[3] / other.v[3] }; }
 };
-template<typename I, typename O> inline O __builtin_convertvector(I const& a);
-template<> inline v4hi __builtin_convertvector<v4hi, v4sf>(v4sf const& a) { return v4hi{ (int16_t)a.v[0], (int16_t)a.v[1], (int16_t)a.v[2], (int16_t)a.v[3] }; };
-template<> inline v4sf __builtin_convertvector<v4sf, v4hi>(v4hi const& a) { return v4sf{ (float)a.v[0], (float)a.v[1], (float)a.v[2], (float)a.v[3] }; };
+template<typename O, typename I> inline O __builtin_convertvector(I const& a);
+template<> inline v4hi __builtin_convertvector<v4hi, v4sf>(v4sf const& a) { return { (int16_t)a.v[0], (int16_t)a.v[1], (int16_t)a.v[2], (int16_t)a.v[3] }; };
+template<> inline v4sf __builtin_convertvector<v4sf, v4hi>(v4hi const& a) { return { (float)a.v[0], (float)a.v[1], (float)a.v[2], (float)a.v[3] }; };
 #define __builtin_convertvector(a, b) __builtin_convertvector<b, std::remove_reference<decltype(a)>::type>(a)
 template<int x, int y, int z, int w> inline v4sf __builtin_shufflevector(v4sf const& a, v4sf const& b);
-template<> inline v4sf __builtin_shufflevector<0, 0, 0, 0>(v4sf const& a, v4sf const& b) { return v4sf{ a.v[0], a.v[0], a.v[0], a.v[0] }; }
-template<> inline v4sf __builtin_shufflevector<1, 1, 1, 1>(v4sf const& a, v4sf const& b) { return v4sf{ a.v[1], a.v[1], a.v[1], a.v[1] }; }
-template<> inline v4sf __builtin_shufflevector<1, 2, 0, 1>(v4sf const& a, v4sf const& b) { return v4sf{ a.v[1], a.v[2], a.v[0], a.v[1] }; }
-template<> inline v4sf __builtin_shufflevector<2, 0, 1, 2>(v4sf const& a, v4sf const& b) { return v4sf{ a.v[2], a.v[0], a.v[1], a.v[2] }; }
-template<> inline v4sf __builtin_shufflevector<2, 2, 2, 2>(v4sf const& a, v4sf const& b) { return v4sf{ a.v[2], a.v[2], a.v[2], a.v[2] }; }
-template<> inline v4sf __builtin_shufflevector<3, 3, 3, 3>(v4sf const& a, v4sf const& b) { return v4sf{ a.v[3], a.v[3], a.v[3], a.v[3] }; }
+template<> inline v4sf __builtin_shufflevector<0, 0, 0, 0>(v4sf const& a, v4sf const& b) { return { a.v[0], a.v[0], a.v[0], a.v[0] }; }
+template<> inline v4sf __builtin_shufflevector<1, 1, 1, 1>(v4sf const& a, v4sf const& b) { return { a.v[1], a.v[1], a.v[1], a.v[1] }; }
+template<> inline v4sf __builtin_shufflevector<1, 2, 0, 1>(v4sf const& a, v4sf const& b) { return { a.v[1], a.v[2], a.v[0], a.v[1] }; }
+template<> inline v4sf __builtin_shufflevector<2, 0, 1, 2>(v4sf const& a, v4sf const& b) { return { a.v[2], a.v[0], a.v[1], a.v[2] }; }
+template<> inline v4sf __builtin_shufflevector<2, 2, 2, 2>(v4sf const& a, v4sf const& b) { return { a.v[2], a.v[2], a.v[2], a.v[2] }; }
+template<> inline v4sf __builtin_shufflevector<3, 3, 3, 3>(v4sf const& a, v4sf const& b) { return { a.v[3], a.v[3], a.v[3], a.v[3] }; }
 #define __builtin_shufflevector(a, b, c, d, e, f) __builtin_shufflevector<c, d, e, f>(a, b)
 #endif
 
