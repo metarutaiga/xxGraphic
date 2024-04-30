@@ -185,7 +185,7 @@ void xxNode::CreateLinearMatrix()
         return count;
     };
 
-    size_t newLinearMatrixSize = countMatrix(this) + 1;
+    size_t newLinearMatrixSize = 2 + countMatrix(this) + 1;
     std::vector<xxMatrix4> newLinearMatrix(newLinearMatrixSize);
     if (newLinearMatrix.empty())
         return;
