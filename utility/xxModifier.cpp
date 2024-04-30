@@ -39,7 +39,7 @@ void xxModifier::BinaryRead(xxBinary& binary)
 
     size_t length = 0;
     binary.ReadSize(length);
-    binary.ReadArray(Data.insert(Data.end(), length, 0).base(), length);
+    binary.ReadArray(&*Data.insert(Data.end(), length, 0), length);
 
     Loader(*this, DataType);
 }

@@ -14,6 +14,10 @@
 #include <string>
 #include <vector>
 
+#if defined(_MSC_VER)
+#pragma warning(disable:4251)
+#endif
+
 #define xxBINARY_SIGNATURE "DoubleCross"
 
 class xxBinary;
@@ -48,7 +52,7 @@ struct xxDrawData
     mutable xxConstantData* constantData = nullptr;
     mutable xxMesh*         mesh = nullptr;
     mutable xxNode*         node = nullptr;
-    int                     materialIndex = 0;
+    unsigned int            materialIndex = 0;
 };
 
 struct xxModifierData

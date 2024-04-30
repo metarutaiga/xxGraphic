@@ -228,7 +228,7 @@ bool xxBinary::WriteSize(size_t size)
 bool xxBinary::ReadString(std::string& string)
 {
     size_t length = 0;
-    return ReadSize(length) && ReadArray(string.insert(string.end(), length, 0).base(), length);
+    return ReadSize(length) && ReadArray(&*string.insert(string.end(), length, 0), length);
 }
 //------------------------------------------------------------------------------
 bool xxBinary::WriteString(std::string const& string)
