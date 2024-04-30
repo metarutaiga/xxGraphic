@@ -248,11 +248,11 @@ xxAPI xxInline char* strcasestr(char const* haystack, char const* needle)
     for (size_t length = strlen(needle); (*haystack); haystack++)
         if (_strnicmp(haystack, needle, length) == 0)
             return (char*)haystack;
-    return nullptr;
+    return NULL;
 }
 xxAPI xxInline char* strsep(char** stringp, char const* delim)
 {
-    if (**stringp == '\0') return nullptr;
+    if (**stringp == '\0') return NULL;
     char* s = *stringp;
     char* p = s + strcspn(s, delim);
     if (*p != '\0') *p++ = '\0';
