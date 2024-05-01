@@ -19,7 +19,7 @@ public:
     void                    SetViewportMatrix(float fromWidth, float fromHeight, float toX, float toY, float toWidth, float toHeight);
 
     xxVector3               GetDirectionFromScreenPos(float x, float y) const;
-    xxVector3               GetWorldPosToScreenPos(xxVector3 const& point) const;
+    xxVector4               GetWorldPosToScreenPos(xxVector3 const& point) const;
 
     static xxCameraPtr      Create();
 

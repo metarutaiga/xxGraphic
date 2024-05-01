@@ -98,13 +98,13 @@ xxVector3 xxCamera::GetDirectionFromScreenPos(float x, float y) const
     return direction;
 }
 //------------------------------------------------------------------------------
-xxVector3 xxCamera::GetWorldPosToScreenPos(xxVector3 const& point) const
+xxVector4 xxCamera::GetWorldPosToScreenPos(xxVector3 const& point) const
 {
     xxVector4 screen = ViewProjectionMatrix * xxVector4{point.x, point.y, point.z, 1.0f};
     screen.xyz /= screen.w;
     screen.x = screen.x *  0.5f + 0.5f;
     screen.y = screen.y * -0.5f + 0.5f;
-    return screen.xyz;
+    return screen;
 }
 //------------------------------------------------------------------------------
 xxCameraPtr xxCamera::Create()
