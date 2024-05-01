@@ -33,6 +33,7 @@ public:
 
     void                        CreateLinearMatrix();
     void                        UpdateMatrix();
+    void                        UpdateBound();
 
     xxMatrix3                   GetRotate() const;
     xxVector3                   GetTranslate() const;

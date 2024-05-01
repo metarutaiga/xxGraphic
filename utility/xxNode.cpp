@@ -309,6 +309,47 @@ void xxNode::UpdateMatrix()
     {
         WorldMatrix = parent->WorldMatrix * LocalMatrix;
     }
+
+    for (auto& boneData : Bones)
+    {
+        if (boneData.bone.use_count())
+        {
+            xxNodePtr const& bone = (xxNodePtr&)boneData.bone;
+            boneData.boneMatrix = bone->WorldMatrix * boneData.skinMatrix;
+            continue;
+        }
+        boneData.boneMatrix = xxMatrix4::IDENTITY;
+    }
+}
+//------------------------------------------------------------------------------
+void xxNode::UpdateBound()
+{
+    WorldBound.xyz = WorldMatrix.v[3].xyz;
+    WorldBound.w = 0.0f;
+    if (Bones.empty() == false)
+    {
+        for (auto& boneData : Bones)
+        {
+            if (boneData.bone.use_count())
+            {
+                xxNodePtr const& bone = (xxNodePtr&)boneData.bone;
+                WorldBound.BoundMerge(boneData.bound.BoundTransform(bone->WorldMatrix, bone->GetScale()));
+                continue;
+            }
+            boneData.boneMatrix = xxMatrix4::IDENTITY;
+        }
+    }
+    else if (Mesh)
+    {
+        WorldBound = Mesh->Bound.BoundTransform(WorldMatrix, GetScale());
+    }
+
+    for (xxNodePtr const& child : m_children)
+    {
+        if (child == nullptr)
+            continue;
+        WorldBound.BoundMerge(child->WorldBound);
+    }
 }
 //------------------------------------------------------------------------------
 xxMatrix3 xxNode::GetRotate() const
@@ -422,6 +463,7 @@ void xxNode::Update(float time, bool updateMatrix)
             child->Update(time, false);
         }
         UpdateMatrix();
+        UpdateBound();
         return;
     }
 #endif
@@ -431,37 +473,14 @@ void xxNode::Update(float time, bool updateMatrix)
         UpdateMatrix();
     }
 
-    WorldBound.xyz = WorldMatrix.v[3].xyz;
-    WorldBound.w = 0.0f;
-    if (Bones.empty() == false)
-    {
-        for (auto& boneData : Bones)
-        {
-            if (boneData.bone.use_count())
-            {
-                xxNodePtr const& bone = (xxNodePtr&)boneData.bone;
-                if (updateMatrix)
-                {
-                    boneData.boneMatrix = bone->WorldMatrix * boneData.skinMatrix;
-                }
-                WorldBound.BoundMerge(boneData.bound.BoundTransform(bone->WorldMatrix, bone->GetScale()));
-                continue;
-            }
-            boneData.boneMatrix = xxMatrix4::IDENTITY;
-        }
-    }
-    else if (Mesh)
-    {
-        WorldBound = Mesh->Bound.BoundTransform(WorldMatrix, GetScale());
-    }
-
     for (xxNodePtr const& child : m_children)
     {
         if (child == nullptr)
             continue;
         child->Update(time, updateMatrix);
-        WorldBound.BoundMerge(child->WorldBound);
     }
+
+    UpdateBound();
 }
 //------------------------------------------------------------------------------
 void xxNode::Draw(xxDrawData const& data)
