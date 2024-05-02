@@ -149,8 +149,8 @@ void xxDrawGLES31(uint64_t commandEncoder, int vertexCount, int instanceCount, i
 
     DrawArraysIndirectCommand& indirectCommand = *(DrawArraysIndirectCommand*)((char*)g_indirectCommand + sizeof(DrawElementsIndirectCommand) * index);
     indirectCommand.count = vertexCount;
-    indirectCommand.primCount = instanceCount;
-    indirectCommand.first = firstVertex;
+    indirectCommand.instanceCount = instanceCount;
+    indirectCommand.firstVertex = firstVertex;
     indirectCommand.baseInstance = firstInstance;
 
     glDrawArraysIndirect(GL_TRIANGLES, (DrawElementsIndirectCommand*)nullptr + index);

@@ -221,8 +221,8 @@ struct PIPELINEGL
 struct DrawArraysIndirectCommand
 {
     GLuint  count;
-    GLuint  primCount;
-    GLuint  first;
+    GLuint  instanceCount;
+    GLuint  firstVertex;
     GLuint  baseInstance;
 };
 //------------------------------------------------------------------------------
