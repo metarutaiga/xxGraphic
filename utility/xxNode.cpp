@@ -62,11 +62,6 @@ xxNodePtr const& xxNode::GetChild(size_t index) const
     return m_children[index];
 }
 //------------------------------------------------------------------------------
-size_t xxNode::GetChildCount() const
-{
-    return m_children.size();
-}
-//------------------------------------------------------------------------------
 bool xxNode::AttachChild(xxNodePtr const& node)
 {
     if (node == nullptr)
@@ -324,11 +319,11 @@ void xxNode::UpdateMatrix()
 //------------------------------------------------------------------------------
 void xxNode::UpdateBound()
 {
-    WorldBound.xyz = WorldMatrix.v[3].xyz;
+    WorldBound.xyz = GetWorldTranslate();
     WorldBound.w = 0.0f;
     if (Bones.empty() == false)
     {
-        for (auto& boneData : Bones)
+        for (auto const& boneData : Bones)
         {
             if (boneData.bone.use_count())
             {
@@ -370,11 +365,6 @@ xxVector3 xxNode::GetTranslate() const
     }
 
     return m_legacyTranslate;
-}
-//------------------------------------------------------------------------------
-float xxNode::GetScale() const
-{
-    return m_legacyScale;
 }
 //------------------------------------------------------------------------------
 void xxNode::SetRotate(xxMatrix3 const& rotate)
@@ -450,6 +440,8 @@ void xxNode::Update(float time, bool updateMatrix)
 {
     for (auto& data : Modifiers)
     {
+        if (data.modifier == nullptr)
+            continue;
         data.modifier->Update(data.modifier.get(), this, &data, time);
     }
 
@@ -533,31 +525,24 @@ void xxNode::BinaryRead(xxBinary& binary)
 
     binary.Read(LocalMatrix);
 
-    std::vector<xxNodePtr> bones;
-    binary.ReadReferences(bones);
-    Bones.reserve(bones.size());
-    for (xxNodePtr const& bone : bones)
+    binary.ReadContainer(Bones, [](xxBinary& binary, BoneData& data)
     {
-        Bones.push_back({bone});
-    }
-    for (auto& boneData : Bones)
-    {
-        boneData.ResetPointer();
-        binary.Read(boneData.bound);
-        binary.Read(boneData.classSkinMatrix);
-    }
+        xxNodePtr bone;
+        data.ResetPointer();
+        binary.ReadReference(bone);
+        data.bone = bone;
+        binary.Read(data.bound);
+        binary.Read(data.classSkinMatrix);
+    });
 
     binary.ReadReference(Camera);
     binary.ReadReference(Material);
     binary.ReadReference(Mesh);
 
-    std::vector<xxModifierPtr> modifiers;
-    binary.ReadReferences(modifiers);
-    Modifiers.reserve(modifiers.size());
-    for (auto const& modifier : modifiers)
+    binary.ReadContainer(Modifiers, [](xxBinary& binary, xxModifierData& data)
     {
-        Modifiers.push_back({modifier});
-    }
+        binary.ReadReference(data.modifier);
+    });
 
     binary.ReadReferences(m_children);
     for (xxNodePtr const& child : m_children)
@@ -574,28 +559,21 @@ void xxNode::BinaryWrite(xxBinary& binary) const
 
     binary.Write(LocalMatrix);
 
-    std::vector<xxNodePtr> bones;
-    for (auto const& boneData : Bones)
+    binary.WriteContainer(Bones, [](xxBinary& binary, BoneData const& data)
     {
-        bones.push_back(boneData.bone.lock());
-    }
-    binary.WriteReferences(bones);
-    for (auto const& boneData : Bones)
-    {
-        binary.Write(boneData.bound);
-        binary.Write(boneData.classSkinMatrix);
-    }
+        binary.WriteReference((xxNodePtr const&)data.bone);
+        binary.Write(data.bound);
+        binary.Write(data.classSkinMatrix);
+    });
 
     binary.WriteReference(Camera);
     binary.WriteReference(Material);
     binary.WriteReference(Mesh);
 
-    std::vector<xxModifierPtr> modifiers;
-    for (auto const& modifierData : Modifiers)
+    binary.WriteContainer(Modifiers, [](xxBinary& binary, xxModifierData const& data)
     {
-        modifiers.push_back(modifierData.modifier);
-    }
-    binary.WriteReferences(modifiers);
+        binary.WriteReference(data.modifier);
+    });
 
     binary.WriteReferences(m_children);
 }

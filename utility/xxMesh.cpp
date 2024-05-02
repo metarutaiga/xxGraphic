@@ -317,9 +317,9 @@ void xxMesh::CalculateBound() const
         return;
     }
     xxVector4 bound = xxVector4::ZERO;
-    for (auto it = GetVertex(); it.isEnd() == false; ++it)
+    for (auto& vertex : GetVertex())
     {
-        bound.BoundMerge(*it);
+        bound.BoundMerge(vertex);
     }
     const_cast<xxVector4&>(Bound) = bound;
 }

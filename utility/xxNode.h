@@ -24,10 +24,15 @@ public:
         xxMatrix4&      boneMatrix = classBoneMatrix;
     };
 
+    auto                        begin() { return m_children.begin(); }
+    auto                        begin() const { return m_children.begin(); }
+    auto                        end() { return m_children.end(); }
+    auto                        end() const { return m_children.end(); }
+
 public:
     xxNodePtr const&            GetParent() const;
     xxNodePtr const&            GetChild(size_t index) const;
-    size_t                      GetChildCount() const;
+    size_t                      GetChildCount() const { return m_children.size(); }
     bool                        AttachChild(xxNodePtr const& child);
     bool                        DetachChild(xxNodePtr const& child);
 
@@ -37,7 +42,8 @@ public:
 
     xxMatrix3                   GetRotate() const;
     xxVector3                   GetTranslate() const;
-    float                       GetScale() const;
+    float                       GetScale() const { return m_legacyScale; }
+    xxVector3                   GetWorldTranslate() const { return WorldMatrix.v[3].xyz; }
     void                        SetRotate(xxMatrix3 const& rotate);
     void                        SetTranslate(xxVector3 const& translate);
     void                        SetScale(float scale);

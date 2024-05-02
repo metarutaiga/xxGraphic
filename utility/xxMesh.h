@@ -90,6 +90,11 @@ struct xxStrideIterator
         return (*m_now);
     }
 
+    bool operator != (xxStrideIterator const& it) const
+    {
+        return m_now != it.m_now;
+    }
+
     xxStrideIterator& operator ++ ()
     {
         m_now = reinterpret_cast<T*>(reinterpret_cast<char*>(m_now) + m_stride);
@@ -103,18 +108,23 @@ struct xxStrideIterator
         return iterator;
     }
 
-    void toBegin()
+    xxStrideIterator begin() const
     {
-        m_now = m_begin;
+        xxStrideIterator iterator = (*this);
+        iterator.m_now = m_begin;
+        return iterator;
     }
 
-    bool isEnd() const
+    xxStrideIterator end() const
     {
-        return m_now == m_end;
+        xxStrideIterator iterator = (*this);
+        iterator.m_now = m_end;
+        return iterator;
     }
 
+private:
     T*              m_now;
-    T* const        m_begin;
-    T* const        m_end;
-    size_t const    m_stride;
+    T*              m_begin;
+    T*              m_end;
+    size_t          m_stride;
 };

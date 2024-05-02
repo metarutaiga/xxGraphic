@@ -16,9 +16,6 @@ public:
     void                Invalidate();
     void                Update(uint64_t device);
 
-    uint64_t            GetTexture() const;
-    uint64_t            GetSampler() const;
-
     static xxImagePtr   Create(uint64_t format, int width, int height, int depth, int mipmap, int array);
     static xxImagePtr   Create2D(uint64_t format, int width, int height, int mipmap);
     static xxImagePtr   Create3D(uint64_t format, int width, int height, int depth, int mipmap);
@@ -35,10 +32,6 @@ protected:
     virtual ~xxImage();
 
     void                Initialize(uint64_t format, int width, int height, int depth, int mipmap, int array);
-
-    uint64_t            m_device = 0;
-    uint64_t            m_texture = 0;
-    uint64_t            m_sampler = 0;
 
     void*               m_images[16] = {};
     bool                m_imageModified = true;
@@ -60,4 +53,8 @@ public:
     bool                FilterMin = true;
     bool                FilterMip = true;
     char                Anisotropic = 1;
+
+    uint64_t const      Device = 0;
+    uint64_t const      Texture = 0;
+    uint64_t const      Sampler = 0;
 };
