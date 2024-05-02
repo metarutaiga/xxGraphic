@@ -57,31 +57,43 @@ public:
     }
 
     template<class T>
-    bool ReadReferences(std::vector<T>& container)
+    bool ReadContainer(T& container, void(*read)(xxBinary&, typename T::value_type&) = [](xxBinary& binary, typename T::value_type& data) { binary.Read(data); })
     {
         size_t count = 0;
         ReadSize(count);
         container.resize(count);
-        for (size_t i = 0; i < count; ++i)
+        for (typename T::value_type& data : container)
         {
-            ReadReference(container[i]);
+            read(*this, data);
         }
         return true;
     }
 
     template<class T>
-    bool WriteReferences(std::vector<T> const& container)
+    bool WriteContainer(T const& container, void(*write)(xxBinary&, typename T::value_type const&) = [](xxBinary& binary, typename T::value_type const& data) { binary.Write(data); })
     {
         size_t count = container.size();
         WriteSize(count);
-        for (size_t i = 0; i < count; ++i)
+        for (typename T::value_type const& data : container)
         {
-            WriteReference(container[i]);
+            write(*this, data);
         }
         return true;
     }
 
+    template<class T>
+    bool ReadReferences(T& container)
+    {
+        return ReadContainer(container, [](xxBinary& binary, typename T::value_type& data) { binary.ReadReference(data); });
+    }
+
+    template<class T>
+    bool WriteReferences(T const& container)
+    {
+        return WriteContainer(container, [](xxBinary& binary, typename T::value_type const& data) { binary.WriteReference(data); });
+    }
+
     std::string const           Path;
-    int const                   Version = 0x20240427;
+    int const                   Version = 0x20240502;
     bool const                  Safe = true;
 };

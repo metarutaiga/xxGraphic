@@ -78,6 +78,7 @@ public:
     bool                        Cull = false;
     bool                        Scissor = false;
 
+    std::vector<xxVector4>      Colors;
     std::vector<xxImagePtr>     Images;
 
     std::vector<xxModifierData> Modifiers;

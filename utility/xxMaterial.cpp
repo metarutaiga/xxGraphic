@@ -90,8 +90,8 @@ void xxMaterial::Draw(xxDrawData const& data) const
     {
         xxImage* image = Images[i].get();
         image->Update(data.device);
-        textures[i] = image->GetTexture();
-        samplers[i] = image->GetSampler();
+        textures[i] = image->Texture;
+        samplers[i] = image->Sampler;
     }
 
     xxSetFragmentTextures(data.commandEncoder, textureCount, textures);
@@ -414,15 +414,13 @@ void xxMaterial::BinaryRead(xxBinary& binary)
     binary.Read(Cull);
     binary.Read(Scissor);
 
+    binary.ReadContainer(Colors);
     binary.ReadReferences(Images);
 
-    std::vector<xxModifierPtr> modifiers;
-    binary.ReadReferences(modifiers);
-    Modifiers.reserve(modifiers.size());
-    for (auto const& modifier : modifiers)
+    binary.ReadContainer(Modifiers, [](xxBinary& binary, xxModifierData& data)
     {
-        Modifiers.push_back({modifier});
-    }
+        binary.ReadReference(data.modifier);
+    });
 }
 //------------------------------------------------------------------------------
 void xxMaterial::BinaryWrite(xxBinary& binary) const
@@ -459,14 +457,13 @@ void xxMaterial::BinaryWrite(xxBinary& binary) const
     binary.Write(Cull);
     binary.Write(Scissor);
 
+    binary.WriteContainer(Colors);
     binary.WriteReferences(Images);
 
-    std::vector<xxModifierPtr> modifiers;
-    for (auto const& modifierData : Modifiers)
+    binary.WriteContainer(Modifiers, [](xxBinary& binary, xxModifierData const& data)
     {
-        modifiers.push_back(modifierData.modifier);
-    }
-    binary.WriteReferences(modifiers);
+        binary.WriteReference(data.modifier);
+    });
 }
 //==============================================================================
 //  Default Shader

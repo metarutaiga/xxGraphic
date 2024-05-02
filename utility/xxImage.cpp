@@ -92,26 +92,26 @@ void* xxImage::operator () (int x, int y, int z, int mipmap, int array)
 //------------------------------------------------------------------------------
 void xxImage::Invalidate()
 {
-    xxDestroyTexture(m_texture);
-    xxDestroySampler(m_sampler);
+    xxDestroyTexture(Texture);
+    xxDestroySampler(Sampler);
 
-    m_texture = 0;
-    m_sampler = 0;
+    const_cast<uint64_t&>(Texture) = 0;
+    const_cast<uint64_t&>(Sampler) = 0;
 
     m_imageModified = true;
 }
 //------------------------------------------------------------------------------
 void xxImage::Update(uint64_t device)
 {
-    m_device = device;
+    const_cast<uint64_t&>(Device) = device;
 
-    if (m_texture == 0)
+    if (Texture == 0)
     {
-        m_texture = xxCreateTexture(m_device, 0, Width, Height, Depth, Mipmap, Array, nullptr);
+        const_cast<uint64_t&>(Texture) = xxCreateTexture(device, 0, Width, Height, Depth, Mipmap, Array, nullptr);
     }
-    if (m_sampler == 0)
+    if (Sampler == 0)
     {
-        m_sampler = xxCreateSampler(m_device, ClampU, ClampV, ClampW, FilterMag, FilterMin, FilterMip, Anisotropic);
+        const_cast<uint64_t&>(Sampler) = xxCreateSampler(device, ClampU, ClampV, ClampW, FilterMag, FilterMin, FilterMip, Anisotropic);
     }
 
     if (m_imageModified == false)
@@ -127,7 +127,7 @@ void xxImage::Update(uint64_t device)
                 continue;
 
             int stride = 0;
-            void* target = xxMapTexture(m_device, m_texture, &stride, mipmap, array);
+            void* target = xxMapTexture(device, Texture, &stride, mipmap, array);
             if (target == nullptr)
                 continue;
 
@@ -151,19 +151,9 @@ void xxImage::Update(uint64_t device)
                 }
             }
 
-            xxUnmapTexture(m_device, m_texture, mipmap, array);
+            xxUnmapTexture(device, Texture, mipmap, array);
         }
     }
-}
-//------------------------------------------------------------------------------
-uint64_t xxImage::GetTexture() const
-{
-    return m_texture;
-}
-//------------------------------------------------------------------------------
-uint64_t xxImage::GetSampler() const
-{
-    return m_sampler;
 }
 //------------------------------------------------------------------------------
 xxImagePtr xxImage::Create(uint64_t format, int width, int height, int depth, int mipmap, int array)
