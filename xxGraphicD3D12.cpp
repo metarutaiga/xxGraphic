@@ -250,10 +250,10 @@ uint64_t xxCreateDeviceD3D12(uint64_t instance)
 
     if (g_rootSignature == nullptr)
     {
-        D3D12_DESCRIPTOR_RANGE constantRanges[8] = {};
-        D3D12_DESCRIPTOR_RANGE resourceRanges[8] = {};
-        D3D12_DESCRIPTOR_RANGE samplerRanges[8] = {};
-        for (int i = 0; i < 8; ++i)
+        D3D12_DESCRIPTOR_RANGE constantRanges[16] = {};
+        D3D12_DESCRIPTOR_RANGE resourceRanges[16] = {};
+        D3D12_DESCRIPTOR_RANGE samplerRanges[16] = {};
+        for (int i = 0; i < 16; ++i)
         {
             constantRanges[i].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
             constantRanges[i].BaseShaderRegister = i;
