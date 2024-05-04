@@ -17,15 +17,16 @@
 #if defined(xxMACOS)
 #   define VK_USE_PLATFORM_MACOS_MVK    1
 #   define VK_MVK_moltenvk              1
-#   include <CoreGraphics/CoreGraphics.h>
-#   include <Metal/Metal.h>
+#   import <Cocoa/Cocoa.h>
+#   import <Metal/Metal.h>
+#   import <QuartzCore/CAMetalLayer.h>
 #endif
 
 #if defined(xxIOS)
 #   define VK_USE_PLATFORM_IOS_MVK      1
 #   define VK_MVK_moltenvk              1
-#   include <CoreGraphics/CoreGraphics.h>
-#   include <Metal/Metal.h>
+#   import <UIKit/UIKit.h>
+#   import <Metal/Metal.h>
 #endif
 
 #if defined(xxWINDOWS)
