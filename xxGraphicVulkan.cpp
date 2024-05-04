@@ -139,6 +139,12 @@ uint64_t xxCreateInstanceVulkan()
         g_vulkanLibrary = xxLoadLibrary("libMoltenVK.dylib");
     if (g_vulkanBackendLibrary == nullptr)
         g_vulkanBackendLibrary = xxLoadLibrary("libMoltenVK.dylib");
+#if defined(xxMACOS)
+    if (g_vulkanLibrary == nullptr)
+        g_vulkanLibrary = xxLoadLibrary("/opt/homebrew/lib/libMoltenVK.dylib");
+    if (g_vulkanBackendLibrary == nullptr)
+        g_vulkanBackendLibrary = xxLoadLibrary("/opt/homebrew/lib/libMoltenVK.dylib");
+#endif
     VK_MVK_moltenvk = true;
 #endif
 
@@ -162,7 +168,9 @@ uint64_t xxCreateInstanceVulkan()
         for (uint32_t i = 0; i < instanceExtensionCount; ++i)
         {
             instanceExtensionNames[i] = instanceExtensionProperties[i].extensionName;
+#if defined(_DEBUG)
             xxLog("xxGraphic", "%s : %s", "VkInstance", instanceExtensionNames[i]);
+#endif
         }
     }
 
@@ -237,7 +245,9 @@ uint64_t xxCreateInstanceVulkan()
         debugReportInfo.pfnCallback = vkDebugReportCallbackEXT;
 
         VkDebugUtilsMessengerEXT debugReport = VK_NULL_HANDLE;
+#if defined(_DEBUG)
         vkCreateDebugReportCallbackEXT(instance, &debugReportInfo, g_callbacks, &debugReport);
+#endif
 
         g_debugReport = debugReport;
     }
@@ -253,11 +263,13 @@ void xxDestroyInstanceVulkan(uint64_t instance)
 
     if (vkInstance)
     {
+#if defined(_DEBUG)
         if (VK_EXT_debug_report && g_debugReport != VK_NULL_HANDLE)
         {
             vkDestroyDebugReportCallbackEXT(vkInstance, g_debugReport, g_callbacks);
             g_debugReport = VK_NULL_HANDLE;
         }
+#endif
         vkDestroyInstance(vkInstance, g_callbacks);
     }
     g_instance = VK_NULL_HANDLE;
@@ -356,7 +368,9 @@ uint64_t xxCreateDeviceVulkan(uint64_t instance)
         for (uint32_t i = 0; i < deviceExtensionCount; ++i)
         {
             deviceExtensionNames[i] = deviceExtensionProperties[i].extensionName;
+#if defined(_DEBUG)
             xxLog("xxGraphic", "%s : %s", "VkDevice", deviceExtensionNames[i]);
+#endif
         }
     }
 
@@ -560,21 +574,22 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
         }
     }
 #elif defined(xxMACOS)
-    id nsWindow = (__bridge id)view;
+    NSWindow* __unsafe_unretained nsWindow = (__bridge NSWindow*)view;
     if (nsWindow == nil)
         return 0;
-    id nsViewController = objc_msgSend(nsWindow, sel_getUid("contentViewController"));
-    if (nsViewController == nil)
-        return 0;
-    id nsView = objc_msgSend(nsViewController, sel_getUid("view"));
+    NSView* __unsafe_unretained nsView = nsWindow.contentViewController.view;
+    if (nsView == nil)
+        nsView = nsWindow.contentView;
     if (nsView == nil)
         return 0;
-    CGFloat contentsScale = ((CGFloat(*)(id, SEL, ...))objc_msgSend)(nsWindow, sel_registerName("backingScaleFactor"));
+    float contentsScale = nsWindow.backingScaleFactor;
 
-    id layer = objc_msgSend((id)objc_getClass("CAMetalLayer"), sel_getUid("layer"));
-    objc_msgSend(layer, sel_getUid("setContentsScale:"), contentsScale);
-    objc_msgSend(nsView, sel_getUid("setLayer:"), layer);
-    objc_msgSend(nsView, sel_getUid("setWantsLayer:"), YES);
+    CAMetalLayer* layer = [CAMetalLayer layer];
+    layer.displaySyncEnabled = NO;
+    nsView.layer = layer;
+    nsView.wantsLayer = YES;
+    layer.contentsScale = contentsScale;
+    layer.framebufferOnly = NO;
 
     VkMacOSSurfaceCreateInfoMVK surfaceInfo = {};
     surfaceInfo.sType = VK_STRUCTURE_TYPE_MACOS_SURFACE_CREATE_INFO_MVK;
@@ -591,19 +606,21 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
         }
     }
 #elif defined(xxIOS)
-    id nsWindow = (__bridge id)view;
+    UIWindow* __unsafe_unretained nsWindow = (__bridge UIWindow*)view;
     if (nsWindow == nil)
         return 0;
-    id nsViewController = objc_msgSend(nsWindow, sel_getUid("rootViewController"));
-    if (nsViewController == nil)
-        return 0;
-    id nsView = objc_msgSend(nsViewController, sel_getUid("view"));
+    UIView* __unsafe_unretained nsView = nsWindow.rootViewController.view;
+    if (nsView == nil)
+        nsView = nsWindow;
     if (nsView == nil)
         return 0;
-    CGFloat contentsScale = ((CGFloat(*)(id, SEL, ...))objc_msgSend)(objc_msgSend(nsWindow, sel_getUid("screen")), sel_registerName("nativeScale"));
+    float contentsScale = nsWindow.screen.nativeScale;
 
-    id layer = objc_msgSend(nsView, sel_getUid("layer"));
-    objc_msgSend(layer, sel_getUid("setContentsScale:"), contentsScale);
+    CAMetalLayer* layer = (CAMetalLayer*)nsView.layer;
+    layer.drawableSize = CGSizeMake(width * contentsScale, height * contentsScale);
+    layer.contentsScale = contentsScale;
+    layer.device = device;
+    layer.framebufferOnly = NO;
 
     VkIOSSurfaceCreateInfoMVK surfaceInfo = {};
     surfaceInfo.sType = VK_STRUCTURE_TYPE_IOS_SURFACE_CREATE_INFO_MVK;
@@ -659,6 +676,7 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
     vkGetPhysicalDeviceSurfaceFormatsKHR(g_physicalDevice, surface, &surfaceFormatCount, surfaceFormats);
 
     VkFormat imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+#if defined(xxWINDOWS)
     if (imageFormat == VK_FORMAT_R8G8B8A8_UNORM)
     {
         for (uint32_t i = 0; i < surfaceFormatCount; ++i)
@@ -670,6 +688,7 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
             }
         }
     }
+#endif
     xxFree(surfaceFormats);
 
     uint32_t presentModeCount = 0;
