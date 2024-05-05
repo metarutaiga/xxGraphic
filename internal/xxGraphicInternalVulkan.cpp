@@ -5,9 +5,10 @@
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "xxGraphicInternalVulkan.h"
+#include "vulkan/glslang_c_interface.h"
 
-bool VK_KHR_push_descriptor;
 bool VK_EXT_debug_report;
+bool VK_KHR_push_descriptor;
 bool VK_MVK_moltenvk;
 //==============================================================================
 //  Loader
@@ -354,5 +355,164 @@ VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetKHREmulate(VkDevice device, VkD
     };
     (void*&)cmdDrawIndexed = vkGetProcAddress("vkCmdDrawIndexed");
     vkCmdDrawIndexedEntry = drawIndexed;
+}
+//==============================================================================
+//  Shader
+//==============================================================================
+namespace glslang {
+static void*                    glslangLibrary = nullptr;
+static void*                    glslangResourceLibrary = nullptr;
+static void*                    spirvLibrary = nullptr;
+static int                      (*initialize_process)(void);
+static void                     (*finalize_process)(void);
+static const glslang_resource_t*(*default_resource)(void);
+static glslang_shader_t*        (*shader_create)(const glslang_input_t* input);
+static void                     (*shader_delete)(glslang_shader_t* shader);
+static void                     (*shader_set_preamble)(glslang_shader_t* shader, const char* s);
+static void                     (*shader_set_entry_point)(void*, const char* s);
+static int                      (*shader_preprocess)(glslang_shader_t* shader, const glslang_input_t* input);
+static int                      (*shader_parse)(glslang_shader_t* shader, const glslang_input_t* input);
+static const char*              (*shader_get_info_log)(glslang_shader_t* shader);
+static glslang_program_t*       (*program_create)(void);
+static void                     (*program_delete)(glslang_program_t* program);
+static void                     (*program_add_shader)(glslang_program_t* program, glslang_shader_t* shader);
+static int                      (*program_link)(glslang_program_t* program, int messages);
+static void                     (*program_SPIRV_generate)(glslang_program_t* program, glslang_stage_t stage);
+static size_t                   (*program_SPIRV_get_size)(glslang_program_t* program);
+static void                     (*program_SPIRV_get)(glslang_program_t* program, unsigned int*);
+static const char*              (*program_get_info_log)(glslang_program_t* program);
+}
+//------------------------------------------------------------------------------
+VKAPI_ATTR void VKAPI_CALL vkCompileShader(char const* code, char const*const* macro, int type, uint32_t** output, size_t* size)
+{
+    if (glslang::glslangLibrary == nullptr || glslang::glslangResourceLibrary == nullptr || glslang::spirvLibrary == nullptr)
+    {
+#if defined(xxMACOS)
+        if (glslang::glslangLibrary == nullptr)
+            glslang::glslangLibrary = xxLoadLibrary("libglslang.dylib");
+        if (glslang::glslangResourceLibrary == nullptr)
+            glslang::glslangResourceLibrary = xxLoadLibrary("libglslang-default-resource-limits.dylib");
+        if (glslang::spirvLibrary == nullptr)
+            glslang::spirvLibrary = xxLoadLibrary("libSPIRV.dylib");
+        if (glslang::glslangLibrary == nullptr)
+            glslang::glslangLibrary = xxLoadLibrary("/opt/homebrew/lib/libglslang.dylib");
+        if (glslang::glslangResourceLibrary == nullptr)
+            glslang::glslangResourceLibrary = xxLoadLibrary("/opt/homebrew/lib/libglslang-default-resource-limits.dylib");
+        if (glslang::spirvLibrary == nullptr)
+            glslang::spirvLibrary = xxLoadLibrary("/opt/homebrew/lib/libSPIRV.dylib");
+#endif
+        if (glslang::glslangLibrary == nullptr || glslang::glslangResourceLibrary == nullptr || glslang::spirvLibrary == nullptr)
+            return;
+        (void*&)glslang::initialize_process = xxGetProcAddress(glslang::glslangLibrary, "glslang_initialize_process");
+        (void*&)glslang::finalize_process = xxGetProcAddress(glslang::glslangLibrary, "glslang_finalize_process");
+        (void*&)glslang::default_resource =xxGetProcAddress(glslang::glslangResourceLibrary, "glslang_default_resource");
+        (void*&)glslang::shader_create = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_create");
+        (void*&)glslang::shader_delete = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_delete");
+        (void*&)glslang::shader_set_preamble = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_set_preamble");
+        (void*&)glslang::shader_set_entry_point = xxGetProcAddress(glslang::glslangLibrary, "_ZN7glslang7TShader13setEntryPointEPKc");
+        (void*&)glslang::shader_preprocess = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_preprocess");
+        (void*&)glslang::shader_parse = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_parse");
+        (void*&)glslang::shader_get_info_log = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_get_info_log");
+        (void*&)glslang::program_create = xxGetProcAddress(glslang::glslangLibrary, "glslang_program_create");
+        (void*&)glslang::program_delete = xxGetProcAddress(glslang::glslangLibrary, "glslang_program_delete");
+        (void*&)glslang::program_add_shader = xxGetProcAddress(glslang::glslangLibrary, "glslang_program_add_shader");
+        (void*&)glslang::program_link = xxGetProcAddress(glslang::glslangLibrary, "glslang_program_link");
+        (void*&)glslang::program_SPIRV_generate = xxGetProcAddress(glslang::spirvLibrary, "glslang_program_SPIRV_generate");
+        (void*&)glslang::program_SPIRV_get_size = xxGetProcAddress(glslang::spirvLibrary, "glslang_program_SPIRV_get_size");
+        (void*&)glslang::program_SPIRV_get = xxGetProcAddress(glslang::spirvLibrary, "glslang_program_SPIRV_get");
+        (void*&)glslang::program_get_info_log = xxGetProcAddress(glslang::glslangLibrary, "glslang_program_get_info_log");
+    }
+
+    glslang_input_t input =
+    {
+        .language = GLSLANG_SOURCE_HLSL,
+        .client = GLSLANG_CLIENT_VULKAN,
+        .client_version = GLSLANG_TARGET_VULKAN_1_0,
+        .target_language = GLSLANG_TARGET_SPV,
+        .target_language_version = GLSLANG_TARGET_SPV_1_0,
+        .code = code,
+        .default_version = 100,
+        .default_profile = GLSLANG_NO_PROFILE,
+        .force_default_version_and_profile = false,
+        .forward_compatible = false,
+        .messages = GLSLANG_MSG_DEFAULT_BIT,
+        .resource = glslang::default_resource(),
+    };
+    switch (type)
+    {
+    case 'vert':
+        input.stage = GLSLANG_STAGE_VERTEX;
+        break;
+    case 'frag':
+        input.stage = GLSLANG_STAGE_FRAGMENT;
+        break;
+    }
+
+    glslang::initialize_process();
+    glslang_shader_t* shader = glslang::shader_create(&input);
+
+    char* preamble = nullptr;
+    if (macro)
+    {
+        size_t length = sizeof("#define Main main");
+        for (size_t i = 0; i < 256; i += 2)
+        {
+            if (macro[i + 0] == nullptr || macro[i + 1] == nullptr)
+                break;
+            length += sizeof("#define");
+            length += strlen(macro[i + 0]) + 1;
+            length += strlen(macro[i + 1]) + 1;
+        }
+        preamble = xxAlloc(char, length + 1);
+        strcpy(preamble, "#define Main main");
+        strcat(preamble, "\n");
+        for (size_t i = 0; i < 256; i += 2)
+        {
+            if (macro[i + 0] == nullptr || macro[i + 1] == nullptr)
+                break;
+            strcat(preamble, "#define");
+            strcat(preamble, " ");
+            strcat(preamble, macro[i + 0]);
+            strcat(preamble, " ");
+            strcat(preamble, macro[i + 1]);
+            strcat(preamble, "\n");
+        }
+        glslang::shader_set_preamble(shader, preamble);
+    }
+
+    glslang::shader_set_entry_point(*(void**)shader, "main");
+    if (glslang::shader_preprocess(shader, &input) == 0 || glslang::shader_parse(shader, &input) == 0)
+    {
+        xxLog("Glslang", "%s", glslang::shader_get_info_log(shader));
+        glslang::shader_delete(shader);
+        glslang::finalize_process();
+        xxFree(preamble);
+        return;
+    }
+
+    glslang_program_t* program = glslang::program_create();
+    glslang::program_add_shader(program, shader);
+    if (glslang::program_link(program, GLSLANG_MSG_SPV_RULES_BIT | GLSLANG_MSG_VULKAN_RULES_BIT) == 0)
+    {
+        xxLog("Glslang", "%s", glslang::program_get_info_log(program));
+        glslang::shader_delete(shader);
+        glslang::program_delete(program);
+        glslang::finalize_process();
+        xxFree(preamble);
+        return;
+    }
+
+    glslang::program_SPIRV_generate(program, input.stage);
+    glslang::shader_delete(shader);
+
+    (*output) = xxAlloc(uint32_t, glslang::program_SPIRV_get_size(program));
+    (*size) = glslang::program_SPIRV_get_size(program) * sizeof(uint32_t);
+    if (*output)
+    {
+        glslang::program_SPIRV_get(program, *output);
+    }
+    glslang::program_delete(program);
+    glslang::finalize_process();
+    xxFree(preamble);
 }
 //==============================================================================

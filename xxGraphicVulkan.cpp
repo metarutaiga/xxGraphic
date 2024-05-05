@@ -1805,22 +1805,31 @@ uint64_t xxCreateVertexShaderVulkan(uint64_t device, char const* shader, uint64_
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
 
+    VkShaderModuleCreateInfo info = {};
+    info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+
+    uint32_t* temp = nullptr;
     if (strcmp(shader, "default") == 0)
     {
-        VkShaderModuleCreateInfo info = {};
-        info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         info.codeSize = vertexShaderCodeSPIRVSize;
         info.pCode = vertexShaderCodeSPIRV;
-
-        VkShaderModule vkShader = VK_NULL_HANDLE;
-        VkResult result = vkCreateShaderModule(vkDevice, &info, g_callbacks, &vkShader);
-        if (result != VK_SUCCESS)
-            return 0;
-
-        return static_cast<uint64_t>(vkShader);
+    }
+    else
+    {
+        static char const* const macro[] = { "SHADER_HLSL", "9", "SHADER_VERTEX", "1", nullptr, nullptr };
+        size_t size = 0;
+        vkCompileShader(shader, macro, 'vert', &temp, &size);
+        info.codeSize = size;
+        info.pCode = temp;
     }
 
-    return 0;
+    VkShaderModule vkShader = VK_NULL_HANDLE;
+    VkResult result = vkCreateShaderModule(vkDevice, &info, g_callbacks, &vkShader);
+    xxFree(temp);
+    if (result != VK_SUCCESS)
+        return 0;
+
+    return static_cast<uint64_t>(vkShader);
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateFragmentShaderVulkan(uint64_t device, char const* shader)
@@ -1829,22 +1838,30 @@ uint64_t xxCreateFragmentShaderVulkan(uint64_t device, char const* shader)
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
 
+    VkShaderModuleCreateInfo info = {};
+    info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+
+    uint32_t* temp = nullptr;
     if (strcmp(shader, "default") == 0)
     {
-        VkShaderModuleCreateInfo info = {};
-        info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         info.codeSize = fragmentShaderCodeSPIRVSize;
         info.pCode = fragmentShaderCodeSPIRV;
-
-        VkShaderModule vkShader = VK_NULL_HANDLE;
-        VkResult result = vkCreateShaderModule(vkDevice, &info, g_callbacks, &vkShader);
-        if (result != VK_SUCCESS)
-            return 0;
-
-        return static_cast<uint64_t>(vkShader);
+    }
+    else
+    {
+        static char const* const macro[] = { "SHADER_HLSL", "9", "SHADER_FRAGMENT", "1", nullptr, nullptr };
+        size_t size = 0;
+        vkCompileShader(shader, macro, 'frag', &temp, &size);
+        info.codeSize = size;
+        info.pCode = temp;
     }
 
-    return 0;
+    VkShaderModule vkShader = VK_NULL_HANDLE;
+    VkResult result = vkCreateShaderModule(vkDevice, &info, g_callbacks, &vkShader);
+    if (result != VK_SUCCESS)
+        return 0;
+
+    return static_cast<uint64_t>(vkShader);
 }
 //------------------------------------------------------------------------------
 void xxDestroyShaderVulkan(uint64_t device, uint64_t shader)

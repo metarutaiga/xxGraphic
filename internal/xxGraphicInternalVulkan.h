@@ -38,8 +38,8 @@
 #include "vulkan/vulkan_beta.h"
 #undef VK_EXT_debug_report
 #undef VK_KHR_push_descriptor
-extern bool VK_KHR_push_descriptor;
 extern bool VK_EXT_debug_report;
+extern bool VK_KHR_push_descriptor;
 #if VK_MVK_moltenvk
 #undef VK_MVK_moltenvk
 extern bool VK_MVK_moltenvk;
@@ -49,6 +49,7 @@ extern "C" void VKAPI_CALL vkGetMTLTextureMVK(VkImage image, id<MTLTexture>* pMT
 
 extern VKAPI_ATTR void* VKAPI_CALL vkGetProcAddress(char const* name);
 extern VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetKHREmulate(VkDevice device, VkDescriptorSetLayout setLayout, VkPipelineLayout pipelineLayout);
+extern VKAPI_ATTR void VKAPI_CALL vkCompileShader(char const* code, char const*const* macro, int type, uint32_t** output, size_t* size);
 //==============================================================================
 //  Blend Factor
 //==============================================================================
