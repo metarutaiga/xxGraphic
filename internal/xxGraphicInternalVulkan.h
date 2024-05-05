@@ -47,6 +47,7 @@ extern "C" void VKAPI_CALL vkGetMTLTextureMVK(VkImage image, id<MTLTexture>* pMT
 #endif
 
 extern VKAPI_ATTR void* VKAPI_CALL vkGetProcAddress(char const* name);
+extern VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetKHREmulate(VkDevice device, VkDescriptorSetLayout setLayout, VkPipelineLayout pipelineLayout);
 //==============================================================================
 //  Blend Factor
 //==============================================================================
