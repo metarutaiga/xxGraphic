@@ -225,7 +225,7 @@ static VkDescriptorSet          g_descriptorSetCurrent = VK_NULL_HANDLE;
 static int                      g_descriptorSetAvailable = 0;
 static int                      g_descriptorSetSwapIndex = 0;
 //------------------------------------------------------------------------------
-static VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetKHRInternal(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint32_t set, uint32_t descriptorWriteCount, const VkWriteDescriptorSet* pDescriptorWrites) __attribute__((optnone))
+static VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetKHRInternal(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint32_t set, uint32_t descriptorWriteCount, const VkWriteDescriptorSet* pDescriptorWrites)
 {
     if (g_descriptorSetCurrent == VK_NULL_HANDLE)
     {
@@ -283,7 +283,7 @@ static VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetKHRInternal(VkCommandBuf
     vkUpdateDescriptorSets(g_device, descriptorWriteCount, pDescriptorWrites, 0, nullptr);
 }
 //------------------------------------------------------------------------------
-VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetKHREmulate(VkDevice device, VkPipelineLayout pipelineLayout, VkDescriptorSetLayout setLayout)
+VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetKHREmulate(VkDevice device, VkDescriptorSetLayout setLayout, VkPipelineLayout pipelineLayout)
 {
     g_device = device;
     g_setLayout = setLayout;
@@ -304,7 +304,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetKHREmulate(VkDevice device, VkP
         g_descriptorSetCurrent = VK_NULL_HANDLE;
         return queuePresent(queue, pPresentInfo);
     };
-    queuePresent = vkQueuePresentKHREntry;
+    (void*&)queuePresent = vkGetProcAddress("vkQueuePresentKHR");
     vkQueuePresentKHREntry = present;
 
     // vkDestroyDevice
@@ -322,7 +322,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetKHREmulate(VkDevice device, VkP
         memset(g_descriptorSetArray, 0, sizeof(g_descriptorSetArray));
         return destroyDevice(device, pAllocator);
     };
-    destroyDevice = vkDestroyDeviceEntry;
+    (void*&)destroyDevice = vkGetProcAddress("vkDestroyDevice");
     vkDestroyDeviceEntry = destroy;
 
     // vkCmdDraw
@@ -337,7 +337,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetKHREmulate(VkDevice device, VkP
         }
         return cmdDraw(commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
     };
-    cmdDraw = vkCmdDrawEntry;
+    (void*&)cmdDraw = vkGetProcAddress("vkCmdDraw");
     vkCmdDrawEntry = draw;
 
     // vkCmdDrawIndexed
@@ -352,7 +352,7 @@ VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetKHREmulate(VkDevice device, VkP
         }
         return cmdDrawIndexed(commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
     };
-    cmdDrawIndexed = vkCmdDrawIndexedEntry;
+    (void*&)cmdDrawIndexed = vkGetProcAddress("vkCmdDrawIndexed");
     vkCmdDrawIndexedEntry = drawIndexed;
 }
 //==============================================================================
