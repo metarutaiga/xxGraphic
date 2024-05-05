@@ -869,6 +869,10 @@ uint64_t xxGetCommandBufferVulkan(uint64_t device, uint64_t swapchain)
     if (vkSwapchain == nullptr)
         return 0;
 
+    uint32_t imageIndex = vkSwapchain->imageIndex;
+    VkFence fence = vkSwapchain->fences[imageIndex];
+    vkWaitForFences(vkDevice, 1, &fence, VK_TRUE, 1 * NSEC_PER_SEC);
+
     VkResult result = vkAcquireNextImageKHR(vkDevice, vkSwapchain->swapchain, UINT64_MAX, vkSwapchain->imageSemaphores[vkSwapchain->semaphoreIndex], VK_NULL_HANDLE, &vkSwapchain->imageIndex);
     switch (result)
     {
@@ -885,9 +889,6 @@ uint64_t xxGetCommandBufferVulkan(uint64_t device, uint64_t swapchain)
         return 0;
     }
 
-    uint32_t imageIndex = vkSwapchain->imageIndex;
-    VkFence fence = vkSwapchain->fences[imageIndex];
-    vkWaitForFences(vkDevice, 1, &fence, VK_TRUE, UINT64_MAX);
     vkResetFences(vkDevice, 1, &fence);
 
     VkCommandBuffer commandBuffer = vkSwapchain->commandBuffers[imageIndex];
