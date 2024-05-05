@@ -23,77 +23,7 @@ static VkDescriptorSetLayout            g_setLayout = VK_NULL_HANDLE;
 static VkPipelineLayout                 g_pipelineLayout = VK_NULL_HANDLE;
 static VkDebugUtilsMessengerEXT         g_debugReport = VK_NULL_HANDLE;
 static uint32_t                         g_graphicFamily = 0;
-static VkDescriptorPool                 g_descriptorPools[256] = {};
-static VkDescriptorSet                  g_descriptorSetArray[65536] = {};
-static VkDescriptorSet                  g_descriptorSetCurrent = VK_NULL_HANDLE;
-static int                              g_descriptorSetAvailable = 0;
-static int                              g_descriptorSetSwapIndex = 0;
 
-//==============================================================================
-//  DescriptorSet
-//==============================================================================
-static VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetEXT(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint32_t set, uint32_t descriptorWriteCount, const VkWriteDescriptorSet* pDescriptorWrites)
-{
-    if (VK_KHR_push_descriptor)
-    {
-        return vkCmdPushDescriptorSetKHR(commandBuffer, pipelineBindPoint, layout, set, descriptorWriteCount, pDescriptorWrites);
-    }
-
-    if (g_descriptorSetCurrent == VK_NULL_HANDLE)
-    {
-        g_descriptorSetAvailable--;
-        g_descriptorSetCurrent = g_descriptorSetArray[g_descriptorSetAvailable];
-        if (xxUnlikely(g_descriptorSetCurrent == VK_NULL_HANDLE))
-        {
-            int descriptorSetChunk = xxCountOf(g_descriptorSetArray) / xxCountOf(g_descriptorPools);
-            int descriptorPoolIndex = g_descriptorSetAvailable / descriptorSetChunk;
-
-            VkDescriptorPool pool = g_descriptorPools[descriptorPoolIndex];
-            if (xxUnlikely(pool == VK_NULL_HANDLE))
-            {
-                unsigned int count = xxCountOf(g_descriptorSetArray) / xxCountOf(g_descriptorPools);
-
-                VkDescriptorPoolSize sizes[3];
-                sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                sizes[0].descriptorCount = (xxGraphicDescriptor::VERTEX_UNIFORM_COUNT + xxGraphicDescriptor::FRAGMENT_UNIFORM_COUNT) * count;
-                sizes[1].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-                sizes[1].descriptorCount = (xxGraphicDescriptor::VERTEX_TEXTURE_COUNT + xxGraphicDescriptor::FRAGMENT_TEXTURE_COUNT) * count;
-                sizes[2].type = VK_DESCRIPTOR_TYPE_SAMPLER;
-                sizes[2].descriptorCount = (xxGraphicDescriptor::VERTEX_SAMPLER_COUNT + xxGraphicDescriptor::FRAGMENT_SAMPLER_COUNT) * count;
-
-                VkDescriptorPoolCreateInfo info = {};
-                info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-                info.poolSizeCount = xxCountOf(sizes);
-                info.pPoolSizes = sizes;
-                info.maxSets = count;
-                vkCreateDescriptorPool(g_device, &info, nullptr, &pool);
-                if (pool == VK_NULL_HANDLE)
-                    return;
-
-                g_descriptorPools[descriptorPoolIndex] = pool;
-            }
-
-            VkDescriptorSetAllocateInfo setInfo = {};
-            setInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-            setInfo.descriptorPool = pool;
-            setInfo.descriptorSetCount = 1;
-            setInfo.pSetLayouts = &g_setLayout;
-            vkAllocateDescriptorSets(g_device, &setInfo, &g_descriptorSetCurrent);
-            if (g_descriptorSetCurrent == VK_NULL_HANDLE)
-                return;
-
-            g_descriptorSetArray[g_descriptorSetAvailable] = g_descriptorSetCurrent;
-        }
-    }
-
-    for (uint32_t i = 0; i < descriptorWriteCount; ++i)
-    {
-        VkWriteDescriptorSet& kWrite = *(VkWriteDescriptorSet*)&pDescriptorWrites[i];
-        kWrite.dstSet = g_descriptorSetCurrent;
-    }
-
-    vkUpdateDescriptorSets(g_device, descriptorWriteCount, pDescriptorWrites, 0, nullptr);
-}
 //==============================================================================
 //  Instance
 //==============================================================================
@@ -490,7 +420,10 @@ uint64_t xxCreateDeviceVulkan(uint64_t instance)
     g_device = vkDevice;
     g_setLayout = setLayout;
     g_pipelineLayout = pipelineLayout;
-    g_descriptorSetAvailable = xxCountOf(g_descriptorSetArray);
+    if (VK_KHR_push_descriptor == false)
+    {
+        vkCmdPushDescriptorSetKHREmulate(vkDevice, setLayout, pipelineLayout);
+    }
 
     return reinterpret_cast<uint64_t>(vkDevice);
 }
@@ -502,19 +435,6 @@ void xxDestroyDeviceVulkan(uint64_t device)
         return;
 
     vkQueueWaitIdle(g_queue);
-
-    if (VK_KHR_push_descriptor == false)
-    {
-        for (int i = 0; i < xxCountOf(g_descriptorPools); ++i)
-        {
-            VkDescriptorPool pool = g_descriptorPools[i];
-            if (pool == VK_NULL_HANDLE)
-                continue;
-            g_descriptorPools[i] = VK_NULL_HANDLE;
-            vkDestroyDescriptorPool(vkDevice, pool, g_callbacks);
-        }
-        memset(g_descriptorSetArray, 0, sizeof(g_descriptorSetArray));
-    }
 
     vkDestroyPipelineLayout(vkDevice, g_pipelineLayout, g_callbacks);
     vkDestroyDescriptorSetLayout(vkDevice, g_setLayout, g_callbacks);
@@ -933,17 +853,6 @@ void xxPresentSwapchainVulkan(uint64_t swapchain)
     vkSwapchain->semaphoreIndex++;
     if (vkSwapchain->semaphoreIndex >= vkSwapchain->imageCount)
         vkSwapchain->semaphoreIndex = 0;
-
-    if (VK_KHR_push_descriptor == false)
-    {
-        g_descriptorSetSwapIndex++;
-        if (g_descriptorSetSwapIndex >= 8)
-        {
-            g_descriptorSetSwapIndex = 0;
-            g_descriptorSetAvailable = xxCountOf(g_descriptorSetArray);
-        }
-        g_descriptorSetCurrent = VK_NULL_HANDLE;
-    }
 }
 //------------------------------------------------------------------------------
 uint64_t xxGetCommandBufferVulkan(uint64_t device, uint64_t swapchain)
@@ -2201,7 +2110,7 @@ void xxSetVertexTexturesVulkan(uint64_t commandEncoder, int count, const uint64_
         sets[i].pTexelBufferView = nullptr;
     }
 
-    vkCmdPushDescriptorSetEXT(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
+    vkCmdPushDescriptorSetKHR(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentTexturesVulkan(uint64_t commandEncoder, int count, const uint64_t* textures)
@@ -2228,7 +2137,7 @@ void xxSetFragmentTexturesVulkan(uint64_t commandEncoder, int count, const uint6
         sets[i].pTexelBufferView = nullptr;
     }
 
-    vkCmdPushDescriptorSetEXT(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
+    vkCmdPushDescriptorSetKHR(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersVulkan(uint64_t commandEncoder, int count, const uint64_t* samplers)
@@ -2255,7 +2164,7 @@ void xxSetVertexSamplersVulkan(uint64_t commandEncoder, int count, const uint64_
         sets[i].pTexelBufferView = nullptr;
     }
 
-    vkCmdPushDescriptorSetEXT(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
+    vkCmdPushDescriptorSetKHR(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentSamplersVulkan(uint64_t commandEncoder, int count, const uint64_t* samplers)
@@ -2282,7 +2191,7 @@ void xxSetFragmentSamplersVulkan(uint64_t commandEncoder, int count, const uint6
         sets[i].pTexelBufferView = nullptr;
     }
 
-    vkCmdPushDescriptorSetEXT(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
+    vkCmdPushDescriptorSetKHR(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, int size)
@@ -2306,7 +2215,7 @@ void xxSetVertexConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, i
     set.pBufferInfo = &bufferInfo;
     set.pTexelBufferView = nullptr;
 
-    vkCmdPushDescriptorSetEXT(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, 1, &set);
+    vkCmdPushDescriptorSetKHR(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, 1, &set);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, int size)
@@ -2330,22 +2239,12 @@ void xxSetFragmentConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer,
     set.pBufferInfo = &bufferInfo;
     set.pTexelBufferView = nullptr;
 
-    vkCmdPushDescriptorSetEXT(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, 1, &set);
+    vkCmdPushDescriptorSetKHR(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, 1, &set);
 }
 //------------------------------------------------------------------------------
 void xxDrawVulkan(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
-
-    if (VK_KHR_push_descriptor == false)
-    {
-        VkDescriptorSet set = g_descriptorSetCurrent;
-        if (set != VK_NULL_HANDLE)
-        {
-            vkCmdBindDescriptorSets(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, 1, &set, 0, nullptr);
-            g_descriptorSetCurrent = VK_NULL_HANDLE;
-        }
-    }
 
     vkCmdDraw(vkCommandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
 }
@@ -2354,16 +2253,6 @@ void xxDrawIndexedVulkan(uint64_t commandEncoder, uint64_t indexBuffer, int inde
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
     BUFFERVK* vkIndexBuffer = reinterpret_cast<BUFFERVK*>(indexBuffer);
-
-    if (VK_KHR_push_descriptor == false)
-    {
-        VkDescriptorSet set = g_descriptorSetCurrent;
-        if (set != VK_NULL_HANDLE)
-        {
-            vkCmdBindDescriptorSets(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, 1, &set, 0, nullptr);
-            g_descriptorSetCurrent = VK_NULL_HANDLE;
-        }
-    }
 
     VkIndexType indexType = (INDEX_BUFFER_WIDTH == /* DISABLES CODE */ (2)) ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
     vkCmdBindIndexBuffer(vkCommandBuffer, vkIndexBuffer->buffer, 0, indexType);

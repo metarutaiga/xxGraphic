@@ -213,4 +213,146 @@ VK_PROTOTYPE(VkBool32, vkGetPhysicalDeviceWin32PresentationSupportKHR, (VkPhysic
 VK_PROTOTYPE(VkResult, vkSetMTLTextureMVK, (VkImage image, id<MTLTexture> pMTLTexture), image, pMTLTexture);
 VK_PROTOTYPE(void, vkGetMTLTextureMVK, (VkImage image, id<MTLTexture>* pMTLTexture), image, pMTLTexture);
 #endif
+//==============================================================================
+//  VK_KHR_push_descriptor
+//==============================================================================
+static VkDevice                 g_device = VK_NULL_HANDLE;
+static VkDescriptorSetLayout    g_setLayout = VK_NULL_HANDLE;
+static VkPipelineLayout         g_pipelineLayout = VK_NULL_HANDLE;
+static VkDescriptorPool         g_descriptorPools[256] = {};
+static VkDescriptorSet          g_descriptorSetArray[65536] = {};
+static VkDescriptorSet          g_descriptorSetCurrent = VK_NULL_HANDLE;
+static int                      g_descriptorSetAvailable = 0;
+static int                      g_descriptorSetSwapIndex = 0;
 //------------------------------------------------------------------------------
+static VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetKHRInternal(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint32_t set, uint32_t descriptorWriteCount, const VkWriteDescriptorSet* pDescriptorWrites) __attribute__((optnone))
+{
+    if (g_descriptorSetCurrent == VK_NULL_HANDLE)
+    {
+        g_descriptorSetAvailable--;
+        g_descriptorSetCurrent = g_descriptorSetArray[g_descriptorSetAvailable];
+        if (xxUnlikely(g_descriptorSetCurrent == VK_NULL_HANDLE))
+        {
+            int descriptorSetChunk = xxCountOf(g_descriptorSetArray) / xxCountOf(g_descriptorPools);
+            int descriptorPoolIndex = g_descriptorSetAvailable / descriptorSetChunk;
+
+            VkDescriptorPool pool = g_descriptorPools[descriptorPoolIndex];
+            if (xxUnlikely(pool == VK_NULL_HANDLE))
+            {
+                unsigned int count = xxCountOf(g_descriptorSetArray) / xxCountOf(g_descriptorPools);
+
+                VkDescriptorPoolSize sizes[3];
+                sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                sizes[0].descriptorCount = (xxGraphicDescriptor::VERTEX_UNIFORM_COUNT + xxGraphicDescriptor::FRAGMENT_UNIFORM_COUNT) * count;
+                sizes[1].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+                sizes[1].descriptorCount = (xxGraphicDescriptor::VERTEX_TEXTURE_COUNT + xxGraphicDescriptor::FRAGMENT_TEXTURE_COUNT) * count;
+                sizes[2].type = VK_DESCRIPTOR_TYPE_SAMPLER;
+                sizes[2].descriptorCount = (xxGraphicDescriptor::VERTEX_SAMPLER_COUNT + xxGraphicDescriptor::FRAGMENT_SAMPLER_COUNT) * count;
+
+                VkDescriptorPoolCreateInfo info = {};
+                info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+                info.poolSizeCount = xxCountOf(sizes);
+                info.pPoolSizes = sizes;
+                info.maxSets = count;
+                vkCreateDescriptorPool(g_device, &info, nullptr, &pool);
+                if (pool == VK_NULL_HANDLE)
+                    return;
+
+                g_descriptorPools[descriptorPoolIndex] = pool;
+            }
+
+            VkDescriptorSetAllocateInfo setInfo = {};
+            setInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+            setInfo.descriptorPool = pool;
+            setInfo.descriptorSetCount = 1;
+            setInfo.pSetLayouts = &g_setLayout;
+            vkAllocateDescriptorSets(g_device, &setInfo, &g_descriptorSetCurrent);
+            if (g_descriptorSetCurrent == VK_NULL_HANDLE)
+                return;
+
+            g_descriptorSetArray[g_descriptorSetAvailable] = g_descriptorSetCurrent;
+        }
+    }
+
+    for (uint32_t i = 0; i < descriptorWriteCount; ++i)
+    {
+        VkWriteDescriptorSet& kWrite = *(VkWriteDescriptorSet*)&pDescriptorWrites[i];
+        kWrite.dstSet = g_descriptorSetCurrent;
+    }
+
+    vkUpdateDescriptorSets(g_device, descriptorWriteCount, pDescriptorWrites, 0, nullptr);
+}
+//------------------------------------------------------------------------------
+VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetKHREmulate(VkDevice device, VkPipelineLayout pipelineLayout, VkDescriptorSetLayout setLayout)
+{
+    g_device = device;
+    g_setLayout = setLayout;
+    g_pipelineLayout = pipelineLayout;
+    g_descriptorSetAvailable = xxCountOf(g_descriptorSetArray);
+    vkCmdPushDescriptorSetKHREntry = vkCmdPushDescriptorSetKHRInternal;
+
+    // vkQueuePresentKHR
+    static VkResult (VKAPI_CALL*queuePresent)(VkQueue queue, const VkPresentInfoKHR* pPresentInfo);
+    auto present = [](VkQueue queue, const VkPresentInfoKHR* pPresentInfo)
+    {
+        g_descriptorSetSwapIndex++;
+        if (g_descriptorSetSwapIndex >= 8)
+        {
+            g_descriptorSetSwapIndex = 0;
+            g_descriptorSetAvailable = xxCountOf(g_descriptorSetArray);
+        }
+        g_descriptorSetCurrent = VK_NULL_HANDLE;
+        return queuePresent(queue, pPresentInfo);
+    };
+    queuePresent = vkQueuePresentKHREntry;
+    vkQueuePresentKHREntry = present;
+
+    // vkDestroyDevice
+    static void (VKAPI_CALL*destroyDevice)(VkDevice device, const VkAllocationCallbacks* pAllocator);
+    auto destroy = [](VkDevice device, const VkAllocationCallbacks* pAllocator)
+    {
+        for (int i = 0; i < xxCountOf(g_descriptorPools); ++i)
+        {
+            VkDescriptorPool pool = g_descriptorPools[i];
+            if (pool == VK_NULL_HANDLE)
+                continue;
+            g_descriptorPools[i] = VK_NULL_HANDLE;
+            vkDestroyDescriptorPool(device, pool, pAllocator);
+        }
+        memset(g_descriptorSetArray, 0, sizeof(g_descriptorSetArray));
+        return destroyDevice(device, pAllocator);
+    };
+    destroyDevice = vkDestroyDeviceEntry;
+    vkDestroyDeviceEntry = destroy;
+
+    // vkCmdDraw
+    static void (VKAPI_CALL*cmdDraw)(VkCommandBuffer commandBuffer, uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance);
+    auto draw = [](VkCommandBuffer commandBuffer, uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
+    {
+        VkDescriptorSet set = g_descriptorSetCurrent;
+        if (set != VK_NULL_HANDLE)
+        {
+            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, 1, &set, 0, nullptr);
+            g_descriptorSetCurrent = VK_NULL_HANDLE;
+        }
+        return cmdDraw(commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
+    };
+    cmdDraw = vkCmdDrawEntry;
+    vkCmdDrawEntry = draw;
+
+    // vkCmdDrawIndexed
+    static void(VKAPI_CALL*cmdDrawIndexed)(VkCommandBuffer commandBuffer, uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance);
+    auto drawIndexed = [](VkCommandBuffer commandBuffer, uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance)
+    {
+        VkDescriptorSet set = g_descriptorSetCurrent;
+        if (set != VK_NULL_HANDLE)
+        {
+            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, 1, &set, 0, nullptr);
+            g_descriptorSetCurrent = VK_NULL_HANDLE;
+        }
+        return cmdDrawIndexed(commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+    };
+    cmdDrawIndexed = vkCmdDrawIndexedEntry;
+    vkCmdDrawIndexedEntry = drawIndexed;
+}
+//==============================================================================
