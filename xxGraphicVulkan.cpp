@@ -71,6 +71,8 @@ uint64_t xxCreateInstanceVulkan()
         g_vulkanBackendLibrary = xxLoadLibrary("libMoltenVK.dylib");
 #if defined(xxMACOS)
     if (g_vulkanLibrary == nullptr)
+        g_vulkanLibrary = xxLoadLibrary("/opt/homebrew/lib/libvulkan.dylib");
+    if (g_vulkanLibrary == nullptr)
         g_vulkanLibrary = xxLoadLibrary("/opt/homebrew/lib/libMoltenVK.dylib");
     if (g_vulkanBackendLibrary == nullptr)
         g_vulkanBackendLibrary = xxLoadLibrary("/opt/homebrew/lib/libMoltenVK.dylib");
@@ -111,7 +113,7 @@ uint64_t xxCreateInstanceVulkan()
     VkLayerProperties* instanceLayerProperties = xxAlloc(VkLayerProperties, instanceLayerCount);
     vkEnumerateInstanceLayerProperties(&instanceLayerCount, instanceLayerProperties);
 
-    char const** instanceLayerNames = xxAlloc(char const*, instanceLayerCount);
+    char const** instanceLayerNames = xxAlloc(char const*, instanceLayerCount + 3);
     if (instanceLayerNames && instanceLayerProperties)
     {
         for (uint32_t i = 0; i < instanceLayerCount; ++i)
@@ -136,6 +138,9 @@ uint64_t xxCreateInstanceVulkan()
 
     VkInstanceCreateInfo instanceCreateInfo = {};
     instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+#if defined(xxMACOS) || defined(xxIOS)
+    instanceCreateInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
     instanceCreateInfo.pApplicationInfo = &appInfo;
     instanceCreateInfo.enabledExtensionCount = instanceExtensionCount;
     instanceCreateInfo.ppEnabledExtensionNames = instanceExtensionNames;

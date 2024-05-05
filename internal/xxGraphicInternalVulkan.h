@@ -35,6 +35,7 @@
 
 #define VK_DEFINE_NON_DISPATCHABLE_HANDLE(object) typedef uint64_t object;
 #include "vulkan/vulkan.h"
+#include "vulkan/vulkan_beta.h"
 #undef VK_EXT_debug_report
 #undef VK_KHR_push_descriptor
 extern bool VK_KHR_push_descriptor;
