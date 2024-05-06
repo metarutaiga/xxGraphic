@@ -14,7 +14,7 @@
 //  Vulkan SPIR-V Assembly Shader
 //==============================================================================
 #define _glsl_std_450                   0x4c534c47, 0x6474732e, 0x3035342e
-#define _main                           0x6e69616d
+#define _Main                           0x6e69614d
 #define Op(op, length)                  (op | (length << SpvWordCountShift))
 //------------------------------------------------------------------------------
 const uint32_t vertexShaderCodeSPIRV[] =
@@ -23,7 +23,7 @@ const uint32_t vertexShaderCodeSPIRV[] =
     Op(SpvOpCapability, 2),             SpvCapabilityShader,
     Op(SpvOpExtInstImport, 6),          1, _glsl_std_450, 0,
     Op(SpvOpMemoryModel, 3),            SpvAddressingModelLogical, SpvMemoryModelGLSL450,
-    Op(SpvOpEntryPoint, 11),            SpvExecutionModelVertex, 4, _main, 0, 23, 122, 128, 130, 132, 134,
+    Op(SpvOpEntryPoint, 11),            SpvExecutionModelVertex, 4, _Main, 0, 23, 122, 128, 130, 132, 134,
     Op(SpvOpDecorate, 4),               12, SpvDecorationArrayStride, 16,
     Op(SpvOpMemberDecorate, 5),         13, 0, SpvDecorationOffset, 0,
     Op(SpvOpDecorate, 3),               13, SpvDecorationBlock,
@@ -163,7 +163,7 @@ const uint32_t fragmentShaderCodeSPIRV[] =
     Op(SpvOpCapability, 2),             SpvCapabilityShader,
     Op(SpvOpExtInstImport, 6),          1, _glsl_std_450, 0,
     Op(SpvOpMemoryModel, 3),            SpvAddressingModelLogical, SpvMemoryModelGLSL450,
-    Op(SpvOpEntryPoint, 7),             SpvExecutionModelFragment, 4, _main, 0, 9, 13,
+    Op(SpvOpEntryPoint, 7),             SpvExecutionModelFragment, 4, _Main, 0, 9, 13,
     Op(SpvOpExecutionMode, 3),          4, SpvExecutionModeOriginUpperLeft,
     Op(SpvOpDecorate, 4),               9, SpvDecorationLocation, 0,
     Op(SpvOpDecorate, 4),               13, SpvDecorationLocation, 0,

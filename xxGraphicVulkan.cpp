@@ -2010,11 +2010,11 @@ uint64_t xxCreatePipelineVulkan(uint64_t device, uint64_t renderPass, uint64_t b
     stage[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     stage[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
     stage[0].module = vkVertexShader;
-    stage[0].pName = "main";
+    stage[0].pName = "Main";
     stage[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     stage[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
     stage[1].module = vkFragmentShader;
-    stage[1].pName = "main";
+    stage[1].pName = "Main";
 
     VkPipelineVertexInputStateCreateInfo vertexInfo = {};
     vertexInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
