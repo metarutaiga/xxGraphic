@@ -450,7 +450,7 @@ VKAPI_ATTR void VKAPI_CALL vkCompileShader(char const* code, char const*const* m
     char* preamble = nullptr;
     if (macro)
     {
-        size_t length = sizeof("#define Main main");
+        size_t length = 0;
         for (size_t i = 0; i < 256; i += 2)
         {
             if (macro[i + 0] == nullptr || macro[i + 1] == nullptr)
@@ -460,8 +460,7 @@ VKAPI_ATTR void VKAPI_CALL vkCompileShader(char const* code, char const*const* m
             length += strlen(macro[i + 1]) + 1;
         }
         preamble = xxAlloc(char, length + 1);
-        strcpy(preamble, "#define Main main");
-        strcat(preamble, "\n");
+        preamble[0] = 0;
         for (size_t i = 0; i < 256; i += 2)
         {
             if (macro[i + 0] == nullptr || macro[i + 1] == nullptr)
@@ -476,7 +475,7 @@ VKAPI_ATTR void VKAPI_CALL vkCompileShader(char const* code, char const*const* m
         glslang::shader_set_preamble(shader, preamble);
     }
 
-    glslang::shader_set_entry_point(*(void**)shader, "main");
+    glslang::shader_set_entry_point(*(void**)shader, "Main");
     glslang::shader_set_invertY(*(void**)shader, true);
     if (glslang::shader_preprocess(shader, &input) == 0 || glslang::shader_parse(shader, &input) == 0)
     {
