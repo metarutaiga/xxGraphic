@@ -493,19 +493,36 @@ R"(
 //  Uniform
 //------------------------------------------------------------------------------
 R"(
-#if SHADER_UNIFORM
 #if SHADER_GLSL || SHADER_HLSL
+#if SHADER_UNIFORM
 uniform float4 uniBuffer[SHADER_UNIFORM];
+#endif
+#if SHADER_HLSL >= 10
+sampler samDiffuse;
+Texture2D<float4> texDiffuse;
+#else
+uniform sampler2D samDiffuse;
+#endif
 #elif SHADER_MSL
 struct Uniform
 {
 #if SHADER_MSL_ARGUMENT
-    device float4* Buffer [[id(0)]];
+#if SHADER_VERTEX
+    device float4* Buffer       [[id(0)]];
 #else
+    device float4* Buffer       [[id(1)]];
+    texture2d<float> Diffuse    [[id(4)]];
+    sampler DiffuseSampler      [[id(18)]];
+#endif
+#elif SHADER_UNIFORM
     float4 Buffer[SHADER_UNIFORM];
 #endif
 };
-#endif
+struct Sampler
+{
+    texture2d<float> Diffuse    [[texture(0)]];
+    sampler DiffuseSampler      [[sampler(0)]];
+};
 #endif)"
 //------------------------------------------------------------------------------
 //  Attribute
@@ -612,30 +629,6 @@ struct Varying
 };
 #endif)"
 //------------------------------------------------------------------------------
-//  Sampler
-//------------------------------------------------------------------------------
-R"(
-#if SHADER_GLSL || SHADER_HLSL
-#if SHADER_HLSL >= 10
-sampler samDiffuse;
-Texture2D<float4> texDiffuse;
-#else
-uniform sampler2D samDiffuse;
-#endif
-#elif SHADER_MSL
-struct Sampler
-{
-#if SHADER_MSL_ARGUMENT
-    device float4* Buffer       [[id(1)]];
-    texture2d<float> Diffuse    [[id(4)]];
-    sampler DiffuseSampler      [[id(18)]];
-#else
-    texture2d<float> Diffuse    [[texture(0)]];
-    sampler DiffuseSampler      [[sampler(0)]];
-#endif
-};
-#endif)"
-//------------------------------------------------------------------------------
 //  Vertex Shader
 //------------------------------------------------------------------------------
 R"(
@@ -645,8 +638,7 @@ void main()
 #elif SHADER_HLSL
 Varying Main(Attribute attr)
 #elif SHADER_MSL
-vertex Varying Main(Attribute attr [[stage_in]],
-                    constant Uniform& uni [[buffer(0)]])
+vertex Varying Main(Attribute attr [[stage_in]], constant Uniform& uni [[buffer(0)]])
 #endif
 {
 #if SHADER_HLSL || SHADER_MSL
@@ -752,12 +744,7 @@ void main()
 #elif SHADER_HLSL
 float4 Main(Varying vary) : COLOR0
 #elif SHADER_MSL
-fragment float4 Main(Varying vary [[stage_in]],
-#if SHADER_MSL_ARGUMENT
-                     constant Sampler& sam [[buffer(0)]])
-#else
-                     constant Uniform& uni [[buffer(0)]], Sampler sam)
-#endif
+fragment float4 Main(Varying vary [[stage_in]], constant Uniform& uni [[buffer(0)]], Sampler sam)
 #endif
 {
 #if SHADER_HLSL || SHADER_MSL
@@ -768,11 +755,6 @@ fragment float4 Main(Varying vary [[stage_in]],
     float3 varyWorldNormal = vary.WorldNormal;
 #endif
 #endif
-#endif
-#if SHADER_MSL && SHADER_MSL_ARGUMENT
-    auto uniBuffer = sam.Buffer;
-#elif SHADER_MSL
-    auto uniBuffer = uni.Buffer;
 #endif
 
     float4 color = float4(1.0, 1.0, 1.0, 1.0);
@@ -789,10 +771,17 @@ fragment float4 Main(Varying vary [[stage_in]],
     color = color * tex2D(samDiffuse, vary.UV0);
 #endif
 #elif SHADER_MSL && SHADER_TEXTURE
+#if SHADER_MSL_ARGUMENT
+    color = color * uni.Diffuse.sample(uni.DiffuseSampler, vary.UV0);
+#else
     color = color * sam.Diffuse.sample(sam.DiffuseSampler, vary.UV0);
+#endif
 #endif
 
 #if SHADER_UNIFORM
+#if SHADER_MSL
+    auto uniBuffer = uni.Buffer;
+#endif
     int uniIndex = 0;
 #if SHADER_SPECULAR
     float3 cameraPosition = uniBuffer[uniIndex++].xyz;
