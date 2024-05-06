@@ -321,8 +321,6 @@ std::string xxMaterial::GetShader(xxDrawData const& data, int type) const
         constantSize = GetFragmentConstantSize(data) / sizeof(xxVector4);
         break;
     }
-    if (constantSize == 0)
-        constantSize = 1;
 
     std::string shader;
     shader += define("SHADER_SKINNING", mesh->Skinning ? 1 : 0);
@@ -495,6 +493,7 @@ R"(
 //  Uniform
 //------------------------------------------------------------------------------
 R"(
+#if SHADER_UNIFORM
 #if SHADER_GLSL || SHADER_HLSL
 uniform float4 uniBuffer[SHADER_UNIFORM];
 #elif SHADER_MSL
@@ -506,11 +505,13 @@ struct Uniform
     float4 Buffer[SHADER_UNIFORM];
 #endif
 };
+#endif
 #endif)"
 //------------------------------------------------------------------------------
 //  Attribute
 //------------------------------------------------------------------------------
 R"(
+#if SHADER_VERTEX
 #if SHADER_GLSL
 attribute vec3 attrPosition;
 #if SHADER_SKINNING
@@ -562,6 +563,7 @@ struct Attribute
     float2 UV0          [[attribute(__COUNTER__)]];
 #endif
 };
+#endif
 #endif)"
 //------------------------------------------------------------------------------
 //  Varying
@@ -614,7 +616,12 @@ struct Varying
 //------------------------------------------------------------------------------
 R"(
 #if SHADER_GLSL || SHADER_HLSL
+#if SHADER_HLSL >= 10
+sampler samDiffuse;
+Texture2D<float4> texDiffuse;
+#else
 uniform sampler2D samDiffuse;
+#endif
 #elif SHADER_MSL
 struct Sampler
 {
@@ -776,11 +783,16 @@ fragment float4 Main(Varying vary [[stage_in]],
 #if SHADER_GLSL && SHADER_TEXTURE
     color = color * texture2D(samDiffuse, varyUV0);
 #elif SHADER_HLSL && SHADER_TEXTURE
+#if SHADER_HLSL >= 10
+    color = color * texDiffuse.Sample(samDiffuse, vary.UV0);
+#else
     color = color * tex2D(samDiffuse, vary.UV0);
+#endif
 #elif SHADER_MSL && SHADER_TEXTURE
     color = color * sam.Diffuse.sample(sam.DiffuseSampler, vary.UV0);
 #endif
 
+#if SHADER_UNIFORM
     int uniIndex = 0;
 #if SHADER_SPECULAR
     float3 cameraPosition = uniBuffer[uniIndex++].xyz;
@@ -793,6 +805,7 @@ fragment float4 Main(Varying vary [[stage_in]],
     float3 H = normalize(V + L);
     float phong = pow(max(dot(N, H), 0.0001), specularHighlight);
     color.rgb = color.rgb + specularColor * phong;
+#endif
 #endif
 
 #if SHADER_GLSL
