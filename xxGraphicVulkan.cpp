@@ -69,14 +69,6 @@ uint64_t xxCreateInstanceVulkan()
         g_vulkanLibrary = xxLoadLibrary("libMoltenVK.dylib");
     if (g_vulkanBackendLibrary == nullptr)
         g_vulkanBackendLibrary = xxLoadLibrary("libMoltenVK.dylib");
-#if defined(xxMACOS)
-    if (g_vulkanLibrary == nullptr)
-        g_vulkanLibrary = xxLoadLibrary("/opt/homebrew/lib/libvulkan.dylib");
-    if (g_vulkanLibrary == nullptr)
-        g_vulkanLibrary = xxLoadLibrary("/opt/homebrew/lib/libMoltenVK.dylib");
-    if (g_vulkanBackendLibrary == nullptr)
-        g_vulkanBackendLibrary = xxLoadLibrary("/opt/homebrew/lib/libMoltenVK.dylib");
-#endif
     VK_MVK_moltenvk = true;
 #endif
 
@@ -734,16 +726,30 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
         }
     }
 
+    uint64_t depthStencil = xxCreateTexture(device, 'DS24', width, height, 1, 1, 1, nullptr);
+    if (depthStencil)
+    {
+        TEXTUREVK* vkTexture = reinterpret_cast<TEXTUREVK*>(depthStencil);
+        vkSwapchain->depthStencil = vkTexture->image;
+        vkSwapchain->depthStencilView = vkTexture->imageView;
+        vkTexture->image = VK_NULL_HANDLE;
+        vkTexture->imageView = VK_NULL_HANDLE;
+        xxDestroyTexture(depthStencil);
+    }
+
     VkFramebufferCreateInfo framebufferInfo = {};
     framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     framebufferInfo.renderPass = vkRenderPass;
-    framebufferInfo.attachmentCount = 1;
+    framebufferInfo.attachmentCount = depthStencil ? 2 : 1;
     framebufferInfo.width = width;
     framebufferInfo.height = height;
     framebufferInfo.layers = 1;
     for (uint32_t i = 0; i < vkSwapchain->imageCount; i++)
     {
-        framebufferInfo.pAttachments = &vkSwapchain->imageViews[i];
+        VkImageView attachments[2] = {};
+        attachments[0] = vkSwapchain->imageViews[i];
+        attachments[1] = vkSwapchain->depthStencilView;
+        framebufferInfo.pAttachments = attachments;
         VkResult result = vkCreateFramebuffer(vkDevice, &framebufferInfo, g_callbacks, &vkSwapchain->framebuffers[i]);
         if (result != VK_SUCCESS)
         {
@@ -980,13 +986,18 @@ uint64_t xxCreateRenderPassVulkan(uint64_t device, bool clearColor, bool clearDe
         return 0;
 
 #if defined(xxWINDOWS)
-    VkFormat imageFormat = VK_FORMAT_B8G8R8A8_UNORM;
+    VkFormat colorFormat = VK_FORMAT_B8G8R8A8_UNORM;
 #else
-    VkFormat imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+    VkFormat colorFormat = VK_FORMAT_R8G8B8A8_UNORM;
+#endif
+#if defined(xxMACOS) || defined(xxIOS)
+    VkFormat depthFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
+#else
+    VkFormat depthFormat = VK_FORMAT_D24_UNORM_S8_UINT;
 #endif
 
-    VkAttachmentDescription attachments[1] = {};
-    attachments[0].format = imageFormat;
+    VkAttachmentDescription attachments[2] = {};
+    attachments[0].format = colorFormat;
     attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
     attachments[0].loadOp = clearColor ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     attachments[0].storeOp = storeColor ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -994,15 +1005,28 @@ uint64_t xxCreateRenderPassVulkan(uint64_t device, bool clearColor, bool clearDe
     attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     attachments[0].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     attachments[0].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    attachments[1].format = depthFormat;
+    attachments[1].samples = VK_SAMPLE_COUNT_1_BIT;
+    attachments[1].loadOp = clearDepth ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    attachments[1].storeOp = storeDepth ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    attachments[1].stencilLoadOp = clearStencil ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    attachments[1].stencilStoreOp = storeStencil ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    attachments[1].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    attachments[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
     VkAttachmentReference colorAttachment = {};
     colorAttachment.attachment = 0;
     colorAttachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+    VkAttachmentReference depthAttachment = {};
+    depthAttachment.attachment = 1;
+    depthAttachment.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
     VkSubpassDescription subpass = {};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorAttachment;
+    subpass.pDepthStencilAttachment = &depthAttachment;
 
     VkSubpassDependency dependency = {};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -1014,7 +1038,7 @@ uint64_t xxCreateRenderPassVulkan(uint64_t device, bool clearColor, bool clearDe
 
     VkRenderPassCreateInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    info.attachmentCount = 1;
+    info.attachmentCount = 2;
     info.pAttachments = attachments;
     info.subpassCount = 1;
     info.pSubpasses = &subpass;
@@ -1064,7 +1088,7 @@ uint64_t xxBeginRenderPassVulkan(uint64_t commandBuffer, uint64_t framebuffer, u
     info.framebuffer = vkFramebuffer;
     info.renderArea.extent.width = width;
     info.renderArea.extent.height = height;
-    info.clearValueCount = 1;
+    info.clearValueCount = 2;
     info.pClearValues = clearValues;
     vkCmdBeginRenderPass(vkCommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
 
@@ -1110,6 +1134,18 @@ uint64_t xxCreateVertexAttributeVulkan(uint64_t device, int count, int* attribut
         if (element == 'POS3' && size == sizeof(float) * 3)
         {
             attributeDesc.format = VK_FORMAT_R32G32B32_SFLOAT;
+            continue;
+        }
+
+        if (element == 'BON3' && size == sizeof(float) * 3)
+        {
+            attributeDesc.format = VK_FORMAT_R32G32B32_SFLOAT;
+            continue;
+        }
+
+        if (element == 'BON4' && size == sizeof(char) * 4)
+        {
+            attributeDesc.format = VK_FORMAT_R8G8B8A8_UINT;
             continue;
         }
 
@@ -1456,6 +1492,16 @@ uint64_t xxCreateTextureVulkan(uint64_t device, int format, int width, int heigh
 #else
     VkFormat imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
 #endif
+    VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    if (format == 'DS24')
+    {
+#if defined(xxMACOS) || defined(xxIOS)
+        imageFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
+#else
+        imageFormat = VK_FORMAT_D24_UNORM_S8_UINT;
+#endif
+        aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+    }
 
     VkImageCreateInfo imageInfo = {};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -1512,7 +1558,7 @@ uint64_t xxCreateTextureVulkan(uint64_t device, int format, int width, int heigh
     imageViewInfo.image = image;
     imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     imageViewInfo.format = imageFormat;
-    imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageViewInfo.subresourceRange.aspectMask = aspectMask;
     imageViewInfo.subresourceRange.levelCount = 1;
     imageViewInfo.subresourceRange.layerCount = 1;
 
@@ -1816,7 +1862,7 @@ uint64_t xxCreateVertexShaderVulkan(uint64_t device, char const* shader, uint64_
     }
     else
     {
-        static char const* const macro[] = { "SHADER_HLSL", "9", "SHADER_VERTEX", "1", nullptr, nullptr };
+        static char const* const macro[] = { "SHADER_HLSL", "12", "SHADER_VERTEX", "1", nullptr, nullptr };
         size_t size = 0;
         vkCompileShader(shader, macro, 'vert', &temp, &size);
         info.codeSize = size;
@@ -1849,7 +1895,7 @@ uint64_t xxCreateFragmentShaderVulkan(uint64_t device, char const* shader)
     }
     else
     {
-        static char const* const macro[] = { "SHADER_HLSL", "9", "SHADER_FRAGMENT", "1", nullptr, nullptr };
+        static char const* const macro[] = { "SHADER_HLSL", "12", "SHADER_FRAGMENT", "1", nullptr, nullptr };
         size_t size = 0;
         vkCompileShader(shader, macro, 'frag', &temp, &size);
         info.codeSize = size;
@@ -1927,7 +1973,7 @@ uint64_t xxCreateRasterizerStateVulkan(uint64_t device, bool cull, bool scissor)
     rasterizerState->sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizerState->polygonMode = VK_POLYGON_MODE_FILL;
     rasterizerState->cullMode = cull ? VK_CULL_MODE_BACK_BIT : VK_CULL_MODE_NONE;
-    rasterizerState->frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    rasterizerState->frontFace = VK_FRONT_FACE_CLOCKWISE;
     rasterizerState->lineWidth = 1.0f;
 
     return reinterpret_cast<uint64_t>(rasterizerState);
