@@ -370,6 +370,7 @@ static glslang_shader_t*        (*shader_create)(const glslang_input_t* input);
 static void                     (*shader_delete)(glslang_shader_t* shader);
 static void                     (*shader_set_preamble)(glslang_shader_t* shader, const char* s);
 static void                     (*shader_set_entry_point)(void*, const char* s);
+static void                     (*shader_set_invertY)(void*, bool invertY);
 static int                      (*shader_preprocess)(glslang_shader_t* shader, const glslang_input_t* input);
 static int                      (*shader_parse)(glslang_shader_t* shader, const glslang_input_t* input);
 static const char*              (*shader_get_info_log)(glslang_shader_t* shader);
@@ -394,12 +395,6 @@ VKAPI_ATTR void VKAPI_CALL vkCompileShader(char const* code, char const*const* m
             glslang::glslangResourceLibrary = xxLoadLibrary("libglslang-default-resource-limits.dylib");
         if (glslang::spirvLibrary == nullptr)
             glslang::spirvLibrary = xxLoadLibrary("libSPIRV.dylib");
-        if (glslang::glslangLibrary == nullptr)
-            glslang::glslangLibrary = xxLoadLibrary("/opt/homebrew/lib/libglslang.dylib");
-        if (glslang::glslangResourceLibrary == nullptr)
-            glslang::glslangResourceLibrary = xxLoadLibrary("/opt/homebrew/lib/libglslang-default-resource-limits.dylib");
-        if (glslang::spirvLibrary == nullptr)
-            glslang::spirvLibrary = xxLoadLibrary("/opt/homebrew/lib/libSPIRV.dylib");
 #endif
         if (glslang::glslangLibrary == nullptr || glslang::glslangResourceLibrary == nullptr || glslang::spirvLibrary == nullptr)
             return;
@@ -410,6 +405,7 @@ VKAPI_ATTR void VKAPI_CALL vkCompileShader(char const* code, char const*const* m
         (void*&)glslang::shader_delete = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_delete");
         (void*&)glslang::shader_set_preamble = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_set_preamble");
         (void*&)glslang::shader_set_entry_point = xxGetProcAddress(glslang::glslangLibrary, "_ZN7glslang7TShader13setEntryPointEPKc");
+        (void*&)glslang::shader_set_invertY = xxGetProcAddress(glslang::glslangLibrary, "_ZN7glslang7TShader10setInvertYEb");
         (void*&)glslang::shader_preprocess = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_preprocess");
         (void*&)glslang::shader_parse = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_parse");
         (void*&)glslang::shader_get_info_log = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_get_info_log");
@@ -481,6 +477,7 @@ VKAPI_ATTR void VKAPI_CALL vkCompileShader(char const* code, char const*const* m
     }
 
     glslang::shader_set_entry_point(*(void**)shader, "main");
+    glslang::shader_set_invertY(*(void**)shader, true);
     if (glslang::shader_preprocess(shader, &input) == 0 || glslang::shader_parse(shader, &input) == 0)
     {
         xxLog("Glslang", "%s", glslang::shader_get_info_log(shader));
