@@ -521,6 +521,7 @@ MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, int 
     if (pixelFormat >= MTLPixelFormatDepth16Unorm)
     {
         desc.usage = MTLTextureUsageRenderTarget;
+        desc.resourceOptions = MTLResourceStorageModePrivate;
     }
 
     if (ioSurface)
