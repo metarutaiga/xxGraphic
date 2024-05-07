@@ -48,6 +48,7 @@ extern "C" void VKAPI_CALL vkGetMTLTextureMVK(VkImage image, id<MTLTexture>* pMT
 #endif
 
 extern VKAPI_ATTR void* VKAPI_CALL vkGetProcAddress(char const* name);
+extern VKAPI_ATTR void VKAPI_CALL vkExitProcAddress();
 extern VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetKHREmulate(VkDevice device, VkDescriptorSetLayout setLayout, VkPipelineLayout pipelineLayout);
 extern VKAPI_ATTR void VKAPI_CALL vkCompileShader(char const* code, char const*const* macro, int type, uint32_t** output, size_t* size);
 //==============================================================================
@@ -94,14 +95,14 @@ inline VkCompareOp vkCompareOp(char const* name)
 //==============================================================================
 //  Framebuffer
 //==============================================================================
-struct FRAMEBUFFERVK
+struct VKFRAMEBUFFER
 {
     VkFramebuffer       framebuffer;
 };
 //==============================================================================
 //  Swapchain
 //==============================================================================
-struct SWAPCHAINVK : public FRAMEBUFFERVK
+struct VKSWAPCHAIN : public VKFRAMEBUFFER
 {
     VkCommandBuffer     commandBuffers[8];
 
@@ -132,7 +133,7 @@ struct SWAPCHAINVK : public FRAMEBUFFERVK
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-struct VERTEXATTRIBUTEVK
+struct VKVERTEXATTRIBUTE
 {
     VkVertexInputAttributeDescription   attributeDesc[16];
     uint32_t                            attributeCount;
@@ -142,7 +143,7 @@ struct VERTEXATTRIBUTEVK
 //==============================================================================
 //  Buffer
 //==============================================================================
-struct BUFFERVK
+struct VKBUFFER
 {
     VkBuffer        buffer;
     VkDeviceMemory  memory;
@@ -153,7 +154,7 @@ struct BUFFERVK
 //==============================================================================
 //  Texture
 //==============================================================================
-struct TEXTUREVK
+struct VKTEXTURE
 {
     VkImageView     imageView;
     VkImage         image;

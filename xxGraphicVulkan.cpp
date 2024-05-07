@@ -201,6 +201,8 @@ void xxDestroyInstanceVulkan(uint64_t instance)
     }
     g_instance = VK_NULL_HANDLE;
 
+    vkExitProcAddress();
+
     if (g_vulkanLibrary)
     {
         xxFreeLibrary(g_vulkanLibrary);
@@ -274,6 +276,13 @@ uint64_t xxCreateDeviceVulkan(uint64_t instance)
         if (g_graphicFamily < queueFamilyCount)
         {
             vkPhysicalDevice = physicalDevice;
+
+            VkPhysicalDeviceProperties physicalDeviceProperties = {};
+            vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+            xxLog("xxGraphic", "%s %d.%d.%d (%s)", "Vulkan", VK_VERSION_MAJOR(physicalDeviceProperties.apiVersion),
+                                                             VK_VERSION_MINOR(physicalDeviceProperties.apiVersion),
+                                                             VK_VERSION_PATCH(physicalDeviceProperties.apiVersion),
+                                                             physicalDeviceProperties.deviceName);
             break;
         }
     }
@@ -465,13 +474,13 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
     VkRenderPass vkRenderPass = static_cast<uint64_t>(renderPass);
     if (vkRenderPass == VK_NULL_HANDLE)
         return 0;
-    SWAPCHAINVK* vkOldSwapchain = reinterpret_cast<SWAPCHAINVK*>(oldSwapchain);
+    VKSWAPCHAIN* vkOldSwapchain = reinterpret_cast<VKSWAPCHAIN*>(oldSwapchain);
     if (vkOldSwapchain && vkOldSwapchain->view == view && vkOldSwapchain->width == width && vkOldSwapchain->height == height)
         return oldSwapchain;
-    SWAPCHAINVK* vkSwapchain = xxAlloc(SWAPCHAINVK);
+    VKSWAPCHAIN* vkSwapchain = xxAlloc(VKSWAPCHAIN);
     if (vkSwapchain == nullptr)
         return 0;
-    memset(vkSwapchain, 0, sizeof(SWAPCHAINVK));
+    memset(vkSwapchain, 0, sizeof(VKSWAPCHAIN));
 
 #if defined(xxANDROID)
     float contentsScale = 1.0f;
@@ -726,15 +735,15 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
         }
     }
 
-    uint64_t depthStencil = xxCreateTexture(device, 'DS24', width, height, 1, 1, 1, nullptr);
+    uint64_t depthStencil = xxCreateTextureVulkan(device, 'DS24', width, height, 1, 1, 1, nullptr);
     if (depthStencil)
     {
-        TEXTUREVK* vkTexture = reinterpret_cast<TEXTUREVK*>(depthStencil);
+        VKTEXTURE* vkTexture = reinterpret_cast<VKTEXTURE*>(depthStencil);
         vkSwapchain->depthStencil = vkTexture->image;
         vkSwapchain->depthStencilView = vkTexture->imageView;
         vkTexture->image = VK_NULL_HANDLE;
         vkTexture->imageView = VK_NULL_HANDLE;
-        xxDestroyTexture(depthStencil);
+        xxDestroyTextureVulkan(depthStencil);
     }
 
     VkFramebufferCreateInfo framebufferInfo = {};
@@ -798,7 +807,7 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
 //------------------------------------------------------------------------------
 void xxDestroySwapchainVulkan(uint64_t swapchain)
 {
-    SWAPCHAINVK* vkSwapchain = reinterpret_cast<SWAPCHAINVK*>(swapchain);
+    VKSWAPCHAIN* vkSwapchain = reinterpret_cast<VKSWAPCHAIN*>(swapchain);
     if (vkSwapchain == nullptr)
         return;
 
@@ -833,7 +842,7 @@ void xxDestroySwapchainVulkan(uint64_t swapchain)
 //------------------------------------------------------------------------------
 void xxPresentSwapchainVulkan(uint64_t swapchain)
 {
-    SWAPCHAINVK* vkSwapchain = reinterpret_cast<SWAPCHAINVK*>(swapchain);
+    VKSWAPCHAIN* vkSwapchain = reinterpret_cast<VKSWAPCHAIN*>(swapchain);
 
     VkPresentInfoKHR info = {};
     info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -871,7 +880,7 @@ uint64_t xxGetCommandBufferVulkan(uint64_t device, uint64_t swapchain)
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
-    SWAPCHAINVK* vkSwapchain = reinterpret_cast<SWAPCHAINVK*>(swapchain);
+    VKSWAPCHAIN* vkSwapchain = reinterpret_cast<VKSWAPCHAIN*>(swapchain);
     if (vkSwapchain == nullptr)
         return 0;
 
@@ -905,7 +914,7 @@ uint64_t xxGetCommandBufferVulkan(uint64_t device, uint64_t swapchain)
 //------------------------------------------------------------------------------
 uint64_t xxGetFramebufferVulkan(uint64_t device, uint64_t swapchain, float* scale)
 {
-    SWAPCHAINVK* vkSwapchain = reinterpret_cast<SWAPCHAINVK*>(swapchain);
+    VKSWAPCHAIN* vkSwapchain = reinterpret_cast<VKSWAPCHAIN*>(swapchain);
     if (vkSwapchain == nullptr)
         return 0;
 
@@ -953,7 +962,7 @@ void xxSubmitCommandBufferVulkan(uint64_t commandBuffer, uint64_t swapchain)
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandBuffer);
     if (vkCommandBuffer == VK_NULL_HANDLE)
         return;
-    SWAPCHAINVK* vkSwapchain = reinterpret_cast<SWAPCHAINVK*>(swapchain);
+    VKSWAPCHAIN* vkSwapchain = reinterpret_cast<VKSWAPCHAIN*>(swapchain);
 
     VkSubmitInfo info = {};
     info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1108,10 +1117,10 @@ void xxEndRenderPassVulkan(uint64_t commandEncoder, uint64_t framebuffer, uint64
 //==============================================================================
 uint64_t xxCreateVertexAttributeVulkan(uint64_t device, int count, int* attribute)
 {
-    VERTEXATTRIBUTEVK* vkVertexAttribute = xxAlloc(VERTEXATTRIBUTEVK);
+    VKVERTEXATTRIBUTE* vkVertexAttribute = xxAlloc(VKVERTEXATTRIBUTE);
     if (vkVertexAttribute == nullptr)
         return 0;
-    memset(vkVertexAttribute, 0, sizeof(VERTEXATTRIBUTEVK));
+    memset(vkVertexAttribute, 0, sizeof(VKVERTEXATTRIBUTE));
 
     VkVertexInputAttributeDescription* attributeDescs = vkVertexAttribute->attributeDesc;
     int stride = 0;
@@ -1186,7 +1195,7 @@ uint64_t xxCreateVertexAttributeVulkan(uint64_t device, int count, int* attribut
 //------------------------------------------------------------------------------
 void xxDestroyVertexAttributeVulkan(uint64_t vertexAttribute)
 {
-    VERTEXATTRIBUTEVK* vkVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEVK*>(vertexAttribute);
+    VKVERTEXATTRIBUTE* vkVertexAttribute = reinterpret_cast<VKVERTEXATTRIBUTE*>(vertexAttribute);
     if (vkVertexAttribute == nullptr)
         return;
 
@@ -1201,10 +1210,10 @@ uint64_t xxCreateConstantBufferVulkan(uint64_t device, int size)
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
 
-    BUFFERVK* vkBuffer = xxAlloc(BUFFERVK);
+    VKBUFFER* vkBuffer = xxAlloc(VKBUFFER);
     if (vkBuffer == nullptr)
         return 0;
-    memset(vkBuffer, 0, sizeof(BUFFERVK));
+    memset(vkBuffer, 0, sizeof(VKBUFFER));
 
     VkBufferCreateInfo bufferInfo = {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -1272,10 +1281,10 @@ uint64_t xxCreateIndexBufferVulkan(uint64_t device, int size)
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
 
-    BUFFERVK* vkBuffer = xxAlloc(BUFFERVK);
+    VKBUFFER* vkBuffer = xxAlloc(VKBUFFER);
     if (vkBuffer == nullptr)
         return 0;
-    memset(vkBuffer, 0, sizeof(BUFFERVK));
+    memset(vkBuffer, 0, sizeof(VKBUFFER));
 
     VkBufferCreateInfo bufferInfo = {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -1343,10 +1352,10 @@ uint64_t xxCreateVertexBufferVulkan(uint64_t device, int size, uint64_t vertexAt
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
 
-    BUFFERVK* vkBuffer = xxAlloc(BUFFERVK);
+    VKBUFFER* vkBuffer = xxAlloc(VKBUFFER);
     if (vkBuffer == nullptr)
         return 0;
-    memset(vkBuffer, 0, sizeof(BUFFERVK));
+    memset(vkBuffer, 0, sizeof(VKBUFFER));
 
     VkBufferCreateInfo bufferInfo = {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -1413,7 +1422,7 @@ void xxDestroyBufferVulkan(uint64_t device, uint64_t buffer)
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
         return;
-    BUFFERVK* vkBuffer = reinterpret_cast<BUFFERVK*>(buffer);
+    VKBUFFER* vkBuffer = reinterpret_cast<VKBUFFER*>(buffer);
     if (vkBuffer == nullptr)
         return;
 
@@ -1432,7 +1441,7 @@ void* xxMapBufferVulkan(uint64_t device, uint64_t buffer)
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
         return nullptr;
-    BUFFERVK* vkBuffer = reinterpret_cast<BUFFERVK*>(buffer);
+    VKBUFFER* vkBuffer = reinterpret_cast<VKBUFFER*>(buffer);
     if (vkBuffer == nullptr)
         return nullptr;
     if (vkBuffer->ptr)
@@ -1459,7 +1468,7 @@ void xxUnmapBufferVulkan(uint64_t device, uint64_t buffer)
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
         return;
-    BUFFERVK* vkBuffer = reinterpret_cast<BUFFERVK*>(buffer);
+    VKBUFFER* vkBuffer = reinterpret_cast<VKBUFFER*>(buffer);
     if (vkBuffer == nullptr)
         return;
     if (vkBuffer->ptr)
@@ -1482,10 +1491,10 @@ uint64_t xxCreateTextureVulkan(uint64_t device, int format, int width, int heigh
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
 
-    TEXTUREVK* vkTexture = xxAlloc(TEXTUREVK);
+    VKTEXTURE* vkTexture = xxAlloc(VKTEXTURE);
     if (vkTexture == nullptr)
         return 0;
-    memset(vkTexture, 0, sizeof(TEXTUREVK));
+    memset(vkTexture, 0, sizeof(VKTEXTURE));
 
 #if defined(xxWINDOWS)
     VkFormat imageFormat = VK_FORMAT_B8G8R8A8_UNORM;
@@ -1627,7 +1636,7 @@ uint64_t xxCreateTextureVulkan(uint64_t device, int format, int width, int heigh
 //------------------------------------------------------------------------------
 void xxDestroyTextureVulkan(uint64_t texture)
 {
-    TEXTUREVK* vkTexture = reinterpret_cast<TEXTUREVK*>(texture);
+    VKTEXTURE* vkTexture = reinterpret_cast<VKTEXTURE*>(texture);
     if (vkTexture == nullptr)
         return;
 
@@ -1652,7 +1661,7 @@ void* xxMapTextureVulkan(uint64_t device, uint64_t texture, int* stride, int lev
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
         return nullptr;
-    TEXTUREVK* vkTexture = reinterpret_cast<TEXTUREVK*>(texture);
+    VKTEXTURE* vkTexture = reinterpret_cast<VKTEXTURE*>(texture);
     if (vkTexture == nullptr)
         return nullptr;
 
@@ -1719,7 +1728,7 @@ void xxUnmapTextureVulkan(uint64_t device, uint64_t texture, int level, int arra
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
         return;
-    TEXTUREVK* vkTexture = reinterpret_cast<TEXTUREVK*>(texture);
+    VKTEXTURE* vkTexture = reinterpret_cast<VKTEXTURE*>(texture);
     if (vkTexture == nullptr)
         return;
 
@@ -1996,7 +2005,7 @@ uint64_t xxCreatePipelineVulkan(uint64_t device, uint64_t renderPass, uint64_t b
     VkPipelineRasterizationStateCreateInfo* vkRasterizerState = reinterpret_cast<VkPipelineRasterizationStateCreateInfo*>(rasterizerState);
     if (vkRasterizerState == nullptr)
         return 0;
-    VERTEXATTRIBUTEVK* vkVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEVK*>(vertexAttribute);
+    VKVERTEXATTRIBUTE* vkVertexAttribute = reinterpret_cast<VKVERTEXATTRIBUTE*>(vertexAttribute);
     if (vkVertexAttribute == nullptr)
         return 0;
     VkShaderModule vkVertexShader = static_cast<VkShaderModule>(vertexShader);
@@ -2147,7 +2156,7 @@ void xxSetVertexBuffersVulkan(uint64_t commandEncoder, int count, const uint64_t
 
     for (int i = 0; i < count; ++i)
     {
-        BUFFERVK* vkBuffer = reinterpret_cast<BUFFERVK*>(buffers[i]);
+        VKBUFFER* vkBuffer = reinterpret_cast<VKBUFFER*>(buffers[i]);
         vkBuffers[i] = vkBuffer->buffer;
         vkOffsets[i] = 0;
     }
@@ -2163,7 +2172,7 @@ void xxSetVertexTexturesVulkan(uint64_t commandEncoder, int count, const uint64_
 
     for (int i = 0; i < count; ++i)
     {
-        TEXTUREVK* vkTexture = reinterpret_cast<TEXTUREVK*>(textures[i]);
+        VKTEXTURE* vkTexture = reinterpret_cast<VKTEXTURE*>(textures[i]);
         imageInfos[i].sampler = VK_NULL_HANDLE;
         imageInfos[i].imageView = vkTexture->imageView;
         imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -2190,7 +2199,7 @@ void xxSetFragmentTexturesVulkan(uint64_t commandEncoder, int count, const uint6
 
     for (int i = 0; i < count; ++i)
     {
-        TEXTUREVK* vkTexture = reinterpret_cast<TEXTUREVK*>(textures[i]);
+        VKTEXTURE* vkTexture = reinterpret_cast<VKTEXTURE*>(textures[i]);
         imageInfos[i].sampler = VK_NULL_HANDLE;
         imageInfos[i].imageView = vkTexture->imageView;
         imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -2266,7 +2275,7 @@ void xxSetFragmentSamplersVulkan(uint64_t commandEncoder, int count, const uint6
 void xxSetVertexConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
-    BUFFERVK* vkBuffer = reinterpret_cast<BUFFERVK*>(buffer);
+    VKBUFFER* vkBuffer = reinterpret_cast<VKBUFFER*>(buffer);
     VkDescriptorBufferInfo bufferInfo;
     VkWriteDescriptorSet set;
 
@@ -2290,7 +2299,7 @@ void xxSetVertexConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, i
 void xxSetFragmentConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
-    BUFFERVK* vkBuffer = reinterpret_cast<BUFFERVK*>(buffer);
+    VKBUFFER* vkBuffer = reinterpret_cast<VKBUFFER*>(buffer);
     VkDescriptorBufferInfo bufferInfo;
     VkWriteDescriptorSet set;
 
@@ -2321,7 +2330,7 @@ void xxDrawVulkan(uint64_t commandEncoder, int vertexCount, int instanceCount, i
 void xxDrawIndexedVulkan(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
-    BUFFERVK* vkIndexBuffer = reinterpret_cast<BUFFERVK*>(indexBuffer);
+    VKBUFFER* vkIndexBuffer = reinterpret_cast<VKBUFFER*>(indexBuffer);
 
     VkIndexType indexType = (INDEX_BUFFER_WIDTH == /* DISABLES CODE */ (2)) ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
     vkCmdBindIndexBuffer(vkCommandBuffer, vkIndexBuffer->buffer, 0, indexType);
