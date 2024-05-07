@@ -304,11 +304,7 @@ std::string xxMaterial::GetShader(xxDrawData const& data, int type) const
 
     auto define = [](char const* name, size_t value)
     {
-        char integer[32];
-        std::string line;
-        snprintf(integer, 32, "%zd", value);
-        line += "#define"; line += ' '; line += name; line += ' '; line += integer; line += '\n';
-        return line;
+        return std::string("#define") + ' ' + name + ' ' + std::to_string(value) + '\n';
     };
 
     size_t constantSize = 0;
