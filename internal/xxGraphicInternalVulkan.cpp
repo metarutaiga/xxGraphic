@@ -13,6 +13,34 @@ bool VK_MVK_moltenvk;
 //==============================================================================
 //  Loader
 //==============================================================================
+struct RestoreAddress
+{
+    void** address;
+    void* value;
+    RestoreAddress* next;
+};
+static RestoreAddress* restoreAddresses;
+//------------------------------------------------------------------------------
+VKAPI_ATTR void VKAPI_CALL vkExitProcAddress()
+{
+    while (restoreAddresses)
+    {
+        RestoreAddress* next = restoreAddresses->next;
+        (*restoreAddresses->address) = restoreAddresses->value;
+        xxFree(restoreAddresses);
+        restoreAddresses = next;
+    }
+}
+//------------------------------------------------------------------------------
+static VKAPI_ATTR void VKAPI_CALL vkRestoreAddress(void** address, void* value)
+{
+    RestoreAddress* restoreAddress = xxAlloc(RestoreAddress);
+    restoreAddress->address = address;
+    restoreAddress->value = value;
+    restoreAddress->next = restoreAddresses;
+    restoreAddresses = restoreAddress;
+}
+//------------------------------------------------------------------------------
 #define VK_PROTOTYPE(type, prototype, parameter, ...) \
 extern type (VKAPI_CALL* prototype ## Entry) parameter; \
 extern "C" type VKAPI_CALL prototype parameter \
@@ -25,6 +53,7 @@ static void* VKAPI_CALL prototype ## Dummy parameter \
 } \
 static type VKAPI_CALL prototype ## Trunk parameter \
 { \
+    vkRestoreAddress((void**)&prototype ## Entry, (void*)prototype ## Trunk); \
     prototype ## Entry = (type (VKAPI_CALL*) parameter)vkGetProcAddress(#prototype); \
     if (prototype ## Entry == NULL) \
         prototype ## Entry = (type (VKAPI_CALL*) parameter)prototype ## Dummy; \

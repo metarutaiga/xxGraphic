@@ -196,16 +196,12 @@ MTLSWAPCHAIN* xxCreateSwapchainMetal(id <MTLDevice> __unsafe_unretained device, 
     swapchain->height = height;
     swapchain->scale = contentsScale;
 
-    MTLTextureDescriptor* desc = [classMTLTextureDescriptor new];
-    desc.textureType = MTLTextureType2D;
-    desc.pixelFormat = MTLPixelFormatDepth32Float;
-    desc.width = width * contentsScale;
-    desc.height = height * contentsScale;
-    desc.usage = MTLTextureUsageRenderTarget;
-#if defined(xxMACOS_LEGACY) || defined(xxIOS_LEGACY)
-    desc.resourceOptions = MTLResourceStorageModePrivate;
-#endif
-    swapchain->depthstencil = [device newTextureWithDescriptor:desc];
+    MTLTEXTURE* depthStencil = xxCreateTextureMetal(device, 'DS24', width * contentsScale, height * contentsScale, 1, 1, 1, nullptr);
+    if (depthStencil)
+    {
+        swapchain->depthstencil = depthStencil->texture;
+        xxDestroyTextureMetal(depthStencil);
+    }
 
     return swapchain;
 }
@@ -462,6 +458,11 @@ MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, int 
         return 0;
 
     MTLPixelFormat pixelFormat = MTLPixelFormatRGBA8Unorm;
+    if (format == 'DS24')
+    {
+        pixelFormat = MTLPixelFormatDepth32Float_Stencil8;
+    }
+
 #if defined(xxMACOS_LEGACY)
     MTLResourceOptions options = MTLResourceStorageModeManaged;
 #else
@@ -495,7 +496,7 @@ MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, int 
             options = buffer.storageMode << MTLResourceStorageModeShift;
         }
     }
-    else if (mipmap == 1)
+    else if (mipmap == 1 && pixelFormat == MTLPixelFormatRGBA8Unorm)
     {
         int alignment = 256;
         if (@available(macOS 10.13, iOS 11.0, *))
@@ -517,6 +518,10 @@ MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, int 
                                                                                         height:height
                                                                                      mipmapped:mipmap > 1];
     desc.resourceOptions = options;
+    if (pixelFormat >= MTLPixelFormatDepth16Unorm)
+    {
+        desc.usage = MTLTextureUsageRenderTarget;
+    }
 
     if (ioSurface)
     {
@@ -747,7 +752,7 @@ MTLPIPELINE* xxCreatePipelineMetal(id <MTLDevice> __unsafe_unretained device, MT
     desc.fragmentFunction = fragmentShader;
     desc.vertexDescriptor = vertexAttribute;
     desc.colorAttachments[0] = blendState;
-    desc.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float;
+    desc.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
 
     NSError* error;
     pipeline->pipeline = [device newRenderPipelineStateWithDescriptor:desc

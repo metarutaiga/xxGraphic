@@ -252,10 +252,15 @@ uint64_t xxTSCFrequency()
     return xxTSCFrequencyInteger;
 }
 //------------------------------------------------------------------------------
-float xxGetCurrentTime()
+float xxGetCurrentTime(double* fp64)
 {
-    if (xxTSCInitialized == 0)
+    if (xxUnlikely(xxTSCInitialized == 0))
         xxTSCInitialize();
+    if (xxUnlikely(fp64 != nullptr))
+    {
+        (*fp64) = (double)(xxTSC() - xxTSCInitialized) * xxTSCInvFrequencyFloat;
+        return 0.0f;
+    }
     return (float)(xxTSC() - xxTSCInitialized) * xxTSCInvFrequencyFloat;
 }
 //------------------------------------------------------------------------------
