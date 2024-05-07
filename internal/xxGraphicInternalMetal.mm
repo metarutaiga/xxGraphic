@@ -101,11 +101,21 @@ void mtlUpdateArgumentEncoderInternal(MTLSWAPCHAIN* swapchain)
                                                    offset:fragmentOffset];
     swapchain->argumentEncoderComplete = false;
 
-    [swapchain->commandEncoder setVertexBuffer:argumentBuffer
-                                        offset:vertexOffset
-                                       atIndex:0];
-    [swapchain->commandEncoder setFragmentBuffer:argumentBuffer
-                                          offset:fragmentOffset
-                                         atIndex:0];
+    if (vertexOffset == 0)
+    {
+        [swapchain->commandEncoder setVertexBuffer:argumentBuffer
+                                            offset:vertexOffset
+                                           atIndex:0];
+        [swapchain->commandEncoder setFragmentBuffer:argumentBuffer
+                                              offset:fragmentOffset
+                                             atIndex:0];
+    }
+    else
+    {
+        [swapchain->commandEncoder setVertexBufferOffset:vertexOffset
+                                                 atIndex:0];
+        [swapchain->commandEncoder setFragmentBufferOffset:fragmentOffset
+                                                   atIndex:0];
+    }
 }
 //==============================================================================
