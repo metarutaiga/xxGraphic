@@ -29,6 +29,12 @@ public:
     auto                        end() { return m_children.end(); }
     auto                        end() const { return m_children.end(); }
 
+    enum
+    {
+        UPDATE_SKIP             = 0b00000001,
+        UPDATE_NEED             = 0b00000010,
+    };
+
 public:
     xxNodePtr const&            GetParent() const;
     xxNodePtr const&            GetChild(size_t index) const;
@@ -41,9 +47,9 @@ public:
     void                        UpdateBound();
 
     xxMatrix3                   GetRotate() const;
-    xxVector3                   GetTranslate() const;
+    xxVector3 const&            GetTranslate() const;
     float                       GetScale() const { return m_legacyScale; }
-    xxVector3                   GetWorldTranslate() const { return WorldMatrix.v[3].xyz; }
+    xxVector3 const&            GetWorldTranslate() const { return WorldMatrix.v[3].xyz; }
     void                        SetRotate(xxMatrix3 const& rotate);
     void                        SetTranslate(xxVector3 const& translate);
     void                        SetScale(float scale);
@@ -54,7 +60,7 @@ public:
     void                        Update(float time, bool updateMatrix = true);
     void                        Draw(xxDrawData const& data);
 
-    static bool                 Traversal(std::function<bool(xxNodePtr const&)> callback, xxNodePtr const& node);
+    static bool                 Traversal(xxNodePtr const& node, std::function<bool(xxNodePtr const&)> callback);
 
     static xxNodePtr            Create();
 
@@ -84,6 +90,7 @@ protected:
 
 public:
     std::string                 Name = "";
+    size_t                      Flags = 0;
 
     xxMatrix4&                  LocalMatrix = m_classLocalMatrix;
     xxMatrix4&                  WorldMatrix = m_classWorldMatrix;

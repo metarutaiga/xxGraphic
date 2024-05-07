@@ -233,9 +233,9 @@ void xxMaterial::UpdateConstant(xxDrawData const& data) const
             {
                 xxMatrix4x3* boneMatrix = reinterpret_cast<xxMatrix4x3*>(vector);
 
-                for (auto const& boneData : data.node->Bones)
+                for (auto const& data : data.node->Bones)
                 {
-                    (*boneMatrix++) = xxMatrix4x3::FromMatrix4(boneData.boneMatrix);
+                    (*boneMatrix++) = xxMatrix4x3::FromMatrix4(data.boneMatrix);
                 }
                 vector += 75 * 3;
                 size -= 75 * sizeof(xxMatrix4x3);

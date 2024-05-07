@@ -12,7 +12,7 @@
 #include "xxModifier.h"
 #include "xxNode.h"
 
-#define HAVE_LINEAR_MATRIX 1
+#define HAVE_LINEAR_MATRIX 0
 
 //==============================================================================
 struct LinearMatrixHeader
@@ -100,7 +100,7 @@ bool xxNode::DetachChild(xxNodePtr const& node)
         node->m_parent.reset();
 
 #if HAVE_LINEAR_MATRIX
-        Traversal([](xxNodePtr const& node)
+        Traversal(child, [](xxNodePtr const& node)
         {
             void** pointer = reinterpret_cast<void**>((char*)&node->Name + sizeof(node->Name));
             node->m_classLocalMatrix = node->LocalMatrix;
@@ -108,15 +108,15 @@ bool xxNode::DetachChild(xxNodePtr const& node)
             pointer[0] = &node->m_classLocalMatrix;
             pointer[1] = &node->m_classWorldMatrix;
             return true;
-        }, child);
+        });
 
-        for (auto& boneData : Bones)
+        for (auto& data : Bones)
         {
-            void** pointer = reinterpret_cast<void**>((char*)&boneData.classBoneMatrix + sizeof(boneData.classBoneMatrix));
-            boneData.classSkinMatrix = boneData.skinMatrix;
-            boneData.classBoneMatrix = boneData.boneMatrix;
-            pointer[0] = &boneData.classSkinMatrix;
-            pointer[1] = &boneData.classBoneMatrix;
+            void** pointer = reinterpret_cast<void**>((char*)&data.classBoneMatrix + sizeof(data.classBoneMatrix));
+            data.classSkinMatrix = data.skinMatrix;
+            data.classBoneMatrix = data.boneMatrix;
+            pointer[0] = &data.classSkinMatrix;
+            pointer[1] = &data.classBoneMatrix;
         }
 #endif
 
@@ -157,9 +157,9 @@ void xxNode::CreateLinearMatrix()
         }
 
         // Bone
-        for (auto& boneData : node->Bones)
+        for (auto& data : node->Bones)
         {
-            if (boneData.bone.use_count())
+            if (data.bone.use_count())
             {
                 // Header
                 count += 1;
@@ -210,11 +210,11 @@ void xxNode::CreateLinearMatrix()
         }
 
         // Bone
-        for (auto& boneData : node->Bones)
+        for (auto& data : node->Bones)
         {
-            if (boneData.bone.use_count())
+            if (data.bone.use_count())
             {
-                xxNodePtr const& bone = (xxNodePtr&)boneData.bone;
+                xxNodePtr const& bone = (xxNodePtr&)data.bone;
 
                 // Header
                 LinearMatrixHeader* header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
@@ -222,9 +222,9 @@ void xxNode::CreateLinearMatrix()
                 header->childrenCount = 1;
 
                 // Matrix
-                void** pointer = reinterpret_cast<void**>((char*)&boneData.classBoneMatrix + sizeof(boneData.classBoneMatrix));
-                linearMatrix[0] = boneData.skinMatrix;
-                linearMatrix[1] = boneData.boneMatrix;
+                void** pointer = reinterpret_cast<void**>((char*)&data.classBoneMatrix + sizeof(data.classBoneMatrix));
+                linearMatrix[0] = data.skinMatrix;
+                linearMatrix[1] = data.boneMatrix;
                 pointer[0] = &linearMatrix[0];
                 pointer[1] = &linearMatrix[1];
                 linearMatrix += 2;
@@ -305,15 +305,15 @@ void xxNode::UpdateMatrix()
         WorldMatrix = parent->WorldMatrix * LocalMatrix;
     }
 
-    for (auto& boneData : Bones)
+    for (auto& data : Bones)
     {
-        if (boneData.bone.use_count())
+        if (data.bone.use_count())
         {
-            xxNodePtr const& bone = (xxNodePtr&)boneData.bone;
-            boneData.boneMatrix = bone->WorldMatrix * boneData.skinMatrix;
+            xxNodePtr const& bone = (xxNodePtr&)data.bone;
+            data.boneMatrix = bone->WorldMatrix * data.skinMatrix;
             continue;
         }
-        boneData.boneMatrix = xxMatrix4::IDENTITY;
+        data.boneMatrix = xxMatrix4::IDENTITY;
     }
 }
 //------------------------------------------------------------------------------
@@ -323,15 +323,15 @@ void xxNode::UpdateBound()
     WorldBound.w = 0.0f;
     if (Bones.empty() == false)
     {
-        for (auto const& boneData : Bones)
+        for (auto const& data : Bones)
         {
-            if (boneData.bone.use_count())
+            if (data.bone.use_count())
             {
-                xxNodePtr const& bone = (xxNodePtr&)boneData.bone;
-                WorldBound.BoundMerge(boneData.bound.BoundTransform(bone->WorldMatrix, bone->GetScale()));
+                xxNodePtr const& bone = (xxNodePtr&)data.bone;
+                WorldBound.BoundMerge(data.bound.BoundTransform(bone->WorldMatrix, bone->GetScale()));
                 continue;
             }
-            boneData.boneMatrix = xxMatrix4::IDENTITY;
+            data.boneMatrix = xxMatrix4::IDENTITY;
         }
     }
     else if (Mesh)
@@ -343,7 +343,10 @@ void xxNode::UpdateBound()
     {
         if (child == nullptr)
             continue;
-        WorldBound.BoundMerge(child->WorldBound);
+        if ((child->Flags & UPDATE_SKIP) == 0)
+        {
+            WorldBound.BoundMerge(child->WorldBound);
+        }
     }
 }
 //------------------------------------------------------------------------------
@@ -357,7 +360,7 @@ xxMatrix3 xxNode::GetRotate() const
     return m_legacyRotate;
 }
 //------------------------------------------------------------------------------
-xxVector3 xxNode::GetTranslate() const
+xxVector3 const& xxNode::GetTranslate() const
 {
     if (m_legacyScale == 1.0f)
     {
@@ -469,7 +472,10 @@ void xxNode::Update(float time, bool updateMatrix)
     {
         if (child == nullptr)
             continue;
-        child->Update(time, updateMatrix);
+        if ((child->Flags & UPDATE_SKIP) == 0)
+        {
+            child->Update(time, updateMatrix);
+        }
     }
 
     UpdateBound();
@@ -493,14 +499,14 @@ void xxNode::Draw(xxDrawData const& data)
     Mesh->Draw(data.commandEncoder);
 }
 //------------------------------------------------------------------------------
-bool xxNode::Traversal(std::function<bool(xxNodePtr const&)> callback, xxNodePtr const& node)
+bool xxNode::Traversal(xxNodePtr const& node, std::function<bool(xxNodePtr const&)> callback)
 {
     if (node == nullptr)
         return false;
     if (callback(node) == false)
         return false;
     for (xxNodePtr const& child : node->m_children)
-        if (Traversal(callback, child) == false)
+        if (Traversal(child, callback) == false)
             return false;
     return true;
 }
@@ -522,6 +528,7 @@ xxNodePtr (*xxNode::BinaryCreate)() = []() { return xxNode::Create(); };
 void xxNode::BinaryRead(xxBinary& binary)
 {
     binary.ReadString(Name);
+    binary.ReadSize(Flags);
 
     binary.Read(LocalMatrix);
 
@@ -556,6 +563,7 @@ void xxNode::BinaryRead(xxBinary& binary)
 void xxNode::BinaryWrite(xxBinary& binary) const
 {
     binary.WriteString(Name);
+    binary.WriteSize(Flags);
 
     binary.Write(LocalMatrix);
 
