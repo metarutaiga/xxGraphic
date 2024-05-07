@@ -76,9 +76,9 @@ bool xxNode::AttachChild(xxNodePtr const& node)
     node->m_linearMatrixCreate = false;
 
     xxNode* root = this;
-    while (xxNodePtr const& parent = root->GetParent())
+    while (xxNode* parent = root->GetParent().get())
     {
-        root = parent.get();
+        root = parent;
     }
     root->m_linearMatrixCreate = true;
 #endif
