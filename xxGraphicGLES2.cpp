@@ -469,7 +469,7 @@ void xxUnmapBufferGLES2(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureGLES2(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external)
+uint64_t xxCreateTextureGLES2(uint64_t device, uint64_t format, int width, int height, int depth, int mipmap, int array, void const* external)
 {
     if (width == 0 || height == 0 || depth == 0 || mipmap == 0 || array == 0)
         return 0;

@@ -448,7 +448,7 @@ void xxUnmapBufferMetal(id <MTLDevice> __unsafe_unretained device, id <MTLBuffer
 //==============================================================================
 //  Texture
 //==============================================================================
-MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, int format, int width, int height, int depth, int mipmap, int array, void const* external)
+MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, uint64_t format, int width, int height, int depth, int mipmap, int array, void const* external)
 {
     if (device == nil)
         return 0;

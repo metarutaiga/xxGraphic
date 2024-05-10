@@ -493,7 +493,7 @@ void xxUnmapBufferD3D8(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureD3D8(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external)
+uint64_t xxCreateTextureD3D8(uint64_t device, uint64_t format, int width, int height, int depth, int mipmap, int array, void const* external)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(device);
     if (d3dDevice == nullptr)

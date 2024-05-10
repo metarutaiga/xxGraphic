@@ -163,6 +163,12 @@
 #   define xxInline                 __inline
 #endif
 
+#if defined(_MSC_VER)
+#   define xxFOURCC                 _byteswap_uint32
+#else
+#   define xxFOURCC                 __builtin_bswap32
+#endif
+
 //==============================================================================
 //  Allocator
 //==============================================================================

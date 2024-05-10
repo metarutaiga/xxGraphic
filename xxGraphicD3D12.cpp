@@ -1038,7 +1038,7 @@ void xxUnmapBufferD3D12(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureD3D12(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external)
+uint64_t xxCreateTextureD3D12(uint64_t device, uint64_t format, int width, int height, int depth, int mipmap, int array, void const* external)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
