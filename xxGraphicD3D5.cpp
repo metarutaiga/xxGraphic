@@ -549,7 +549,7 @@ void xxUnmapBufferD3D5(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureD3D5(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external)
+uint64_t xxCreateTextureD3D5(uint64_t device, uint64_t format, int width, int height, int depth, int mipmap, int array, void const* external)
 {
     DDSURFACEDESC desc = {};
     desc.dwSize = sizeof(DDSURFACEDESC);

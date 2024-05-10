@@ -66,7 +66,7 @@ void            xxUnmapBufferGLES2(uint64_t device, uint64_t buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t        xxCreateTextureGLES2(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external);
+uint64_t        xxCreateTextureGLES2(uint64_t device, uint64_t format, int width, int height, int depth, int mipmap, int array, void const* external);
 void            xxDestroyTextureGLES2(uint64_t texture);
 void*           xxMapTextureGLES2(uint64_t device, uint64_t texture, int* stride, int level, int array);
 void            xxUnmapTextureGLES2(uint64_t device, uint64_t texture, int level, int array);

@@ -66,7 +66,7 @@ void            xxUnmapBufferD3D6(uint64_t device, uint64_t buffer);
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t        xxCreateTextureD3D6(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external);
+uint64_t        xxCreateTextureD3D6(uint64_t device, uint64_t format, int width, int height, int depth, int mipmap, int array, void const* external);
 void            xxDestroyTextureD3D6(uint64_t texture);
 void*           xxMapTextureD3D6(uint64_t device, uint64_t texture, int* stride, int level, int array);
 void            xxUnmapTextureD3D6(uint64_t device, uint64_t texture, int level, int array);

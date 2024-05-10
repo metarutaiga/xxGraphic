@@ -159,7 +159,7 @@ void xxUnmapBufferNULL(uint64_t device, uint64_t buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-uint64_t xxCreateTextureNULL(uint64_t device, int format, int width, int height, int depth, int mipmap, int array, void const* external)
+uint64_t xxCreateTextureNULL(uint64_t device, uint64_t format, int width, int height, int depth, int mipmap, int array, void const* external)
 {
     return 0;
 }

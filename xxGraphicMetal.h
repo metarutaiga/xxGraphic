@@ -67,7 +67,7 @@ void            xxUnmapBufferMetal(id <MTLDevice> device, id <MTLBuffer> buffer)
 //==============================================================================
 //  Texture
 //==============================================================================
-MTLTEXTURE*     xxCreateTextureMetal(id <MTLDevice> device, int format, int width, int height, int depth, int mipmap, int array, void const* external);
+MTLTEXTURE*     xxCreateTextureMetal(id <MTLDevice> device, uint64_t format, int width, int height, int depth, int mipmap, int array, void const* external);
 void            xxDestroyTextureMetal(MTLTEXTURE* texture);
 void*           xxMapTextureMetal(id <MTLDevice> device, MTLTEXTURE* texture, int* stride, int level, int array);
 void            xxUnmapTextureMetal(id <MTLDevice> device, MTLTEXTURE* texture, int level, int array);
