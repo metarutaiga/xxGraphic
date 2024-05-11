@@ -331,3 +331,17 @@ inline T xxTemplateCompareOp(char const* name)
     if (g) return GREATER;
     return ALWAYS;
 }
+
+#if defined(__LP64__)
+constexpr unsigned long long operator""_FOURCC (char const* text, unsigned long length)
+#else
+constexpr unsigned long long operator""_FOURCC (char const* text, unsigned long long length)
+#endif
+{
+    unsigned long long value = 0;
+    for (unsigned int i = 0; i < length; ++i)
+    {
+        value += (unsigned char)text[i] << (i * 8);
+    }
+    return value;
+};

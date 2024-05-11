@@ -394,6 +394,7 @@ char* xxOpenDirectory(uint64_t* handle, char const* path, ...)
     if (handle == nullptr)
         return nullptr;
 
+    bool folder;
     char const* filename;
 #if defined(xxWINDOWS)
     WIN32_FIND_DATAA data;
@@ -415,6 +416,7 @@ char* xxOpenDirectory(uint64_t* handle, char const* path, ...)
             return nullptr;
     }
 
+    folder = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
     filename = data.cFileName;
 #else
     DIR** dir = (DIR**)handle;
@@ -427,6 +429,7 @@ char* xxOpenDirectory(uint64_t* handle, char const* path, ...)
     if (dirent == nullptr)
         return nullptr;
 
+    folder = dirent->d_type == DT_DIR;
     filename = dirent->d_name;
 #endif
 
@@ -447,19 +450,34 @@ char* xxOpenDirectory(uint64_t* handle, char const* path, ...)
 
         if (filename)
         {
-            result = strdup(filename);
+            size_t length = strlen(filename);
+            result = xxAlloc(char, length + 2);
+            if (result)
+            {
+                strcpy(result, filename);
+                if (folder)
+                {
+#if defined(xxWINDOWS)
+                    strcat(result, "\\");
+#else
+                    strcat(result, "/");
+#endif
+                }
+            }
             break;
         }
 #if defined(xxWINDOWS)
         if (FindNextFileA((*dir), &data) == FALSE)
             return nullptr;
 
+        folder = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
         filename = data.cFileName;
 #else
         dirent = readdir(*dir);
         if (dirent == nullptr)
             return nullptr;
 
+        folder = dirent->d_type == DT_DIR;
         filename = dirent->d_name;
 #endif
         if (filename == nullptr)
