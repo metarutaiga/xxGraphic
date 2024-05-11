@@ -11,6 +11,8 @@
 class xxPlusAPI xxImage
 {
 public:
+    void                Initialize(uint64_t format, int width, int height, int depth, int mipmap, int array);
+
     void*               operator () (int x = 0, int y = 0, int z = 0, int mipmap = 0, int array = 0);
 
     void                Invalidate();
@@ -25,16 +27,15 @@ public:
     virtual void        BinaryRead(xxBinary& binary);
     virtual void        BinaryWrite(xxBinary& binary) const;
 
-    static void       (*Loader)(xxImage& image, std::string const& path);
+    static size_t     (*Calculate)(uint64_t format, int width, int height, int depth);
+    static void       (*Loader)(xxImagePtr& image, std::string const& path);
 
 protected:
     xxImage(uint64_t format, int width, int height, int depth, int mipmap, int array);
     virtual ~xxImage();
 
-    void                Initialize(uint64_t format, int width, int height, int depth, int mipmap, int array);
-
     void*               m_images[16] = {};
-    bool                m_imageModified = true;
+    bool                m_imageModified = false;
 
 public:
     std::string         Name = "";

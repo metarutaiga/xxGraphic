@@ -8,7 +8,6 @@
 #include "xxBinary.h"
 #include "xxImage.h"
 
-void (*xxImage::Loader)(xxImage& image, std::string const& path) = [](xxImage&, std::string const&){};
 //==============================================================================
 //  Texture
 //==============================================================================
@@ -46,13 +45,15 @@ void xxImage::Initialize(uint64_t format, int width, int height, int depth, int 
             depth = 1;
 
         xxFree(m_images[i]);
-        size_t size = xxSizeOf(uint32_t) * width * height * depth * array;
+        size_t size = Calculate(format, width, height, depth) * array;
         m_images[i] = xxAlloc(char, size);
 
         width >>= 1;
         height >>= 1;
         depth >>= 1;
     }
+
+    m_imageModified = true;
 }
 //------------------------------------------------------------------------------
 void* xxImage::operator () (int x, int y, int z, int mipmap, int array)
@@ -78,16 +79,16 @@ void* xxImage::operator () (int x, int y, int z, int mipmap, int array)
     if (z >= levelDepth)
         return nullptr;
 
-    int offset = 0;
-    offset += z * (levelWidth * levelHeight);
-    offset += y * (levelWidth);
-    offset += x;
+    size_t offset = 0;
+    offset += Calculate(Format, levelWidth, levelHeight, z);
+    offset += Calculate(Format, levelWidth, y, 1);
+    offset += Calculate(Format, x, 1, 1);
 
     void* image = m_images[mipmap];
     if (image == nullptr)
         return nullptr;
 
-    return reinterpret_cast<char*>(image) + offset * xxSizeOf(uint32_t);
+    return reinterpret_cast<char*>(image) + offset;
 }
 //------------------------------------------------------------------------------
 void xxImage::Invalidate()
@@ -107,7 +108,7 @@ void xxImage::Update(uint64_t device)
 
     if (Texture == 0)
     {
-        const_cast<uint64_t&>(Texture) = xxCreateTexture(device, 0, Width, Height, Depth, Mipmap, Array, nullptr);
+        const_cast<uint64_t&>(Texture) = xxCreateTexture(device, Format, Width, Height, Depth, Mipmap, Array, nullptr);
     }
     if (Sampler == 0)
     {
@@ -141,12 +142,13 @@ void xxImage::Update(uint64_t device)
             if (levelDepth == 0)
                 levelDepth = 1;
 
+            size_t line = Calculate(Format, levelWidth, 1, 1);
             for (int depth = 0; depth < levelDepth; ++depth)
             {
                 for (int height = 0; height < levelHeight; ++height)
                 {
-                    memcpy(target, source, levelWidth * sizeof(int));
-                    source = reinterpret_cast<char*>(source) + levelWidth * sizeof(int);
+                    memcpy(target, source, line);
+                    source = reinterpret_cast<char*>(source) + line;
                     target = reinterpret_cast<char*>(target) + stride;
                 }
             }
@@ -181,6 +183,13 @@ xxImagePtr xxImage::CreateCube(uint64_t format, int width, int height, int mipma
 {
     return Create(format, width, height, 1, mipmap, 6);
 }
+//------------------------------------------------------------------------------
+size_t (*xxImage::Calculate)(uint64_t format, int width, int height, int depth) = [](uint64_t format, int width, int height, int depth)
+{
+    return width * height * depth * sizeof(uint32_t);
+};
+//------------------------------------------------------------------------------
+void (*xxImage::Loader)(xxImagePtr& image, std::string const& path) = [](xxImagePtr&, std::string const&) {};
 //==============================================================================
 //  Binary
 //==============================================================================
@@ -197,8 +206,6 @@ void xxImage::BinaryRead(xxBinary& binary)
     binary.Read(FilterMin);
     binary.Read(FilterMip);
     binary.Read(Anisotropic);
-
-    Loader(*this, binary.Path);
 }
 //------------------------------------------------------------------------------
 void xxImage::BinaryWrite(xxBinary& binary) const
