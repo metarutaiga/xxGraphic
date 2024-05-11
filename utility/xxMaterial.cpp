@@ -410,6 +410,10 @@ void xxMaterial::BinaryRead(xxBinary& binary)
 
     binary.ReadContainer(Colors);
     binary.ReadReferences(Images);
+    for (auto& image : Images)
+    {
+        xxImage::Loader(image, binary.Path);
+    }
 
     binary.ReadContainer(Modifiers, [](xxBinary& binary, xxModifierData& data)
     {

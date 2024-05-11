@@ -7,7 +7,6 @@
 #include "xxBinary.h"
 #include "xxModifier.h"
 
-void (*xxModifier::Loader)(xxModifier& modifier, size_t type) = [](xxModifier&, size_t){};
 //==============================================================================
 //  Modifier
 //==============================================================================
@@ -28,6 +27,10 @@ xxModifierPtr xxModifier::Create(size_t size)
     modifier->Data.resize(size);
     return modifier;
 }
+//------------------------------------------------------------------------------
+void (*xxModifier::Loader)(xxModifier& modifier, size_t type) = [](xxModifier&, size_t)
+{
+};
 //==============================================================================
 //  Binary
 //==============================================================================
