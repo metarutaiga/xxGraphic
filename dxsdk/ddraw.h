@@ -2994,6 +2994,25 @@ typedef struct _DDCOLORCONTROL
 #endif // !D3D_DISABLE_9EX
 /* -- D3D9Ex only */
 
+#if defined (UNDER_CE) && defined (CE_SPLIT_PRIMARY)
+
+/*
+ * CE-specific flag: has to be specified together with DDSCAPS_PRIMARYSURFACE
+ * It makes the specified surface a new visible (primary) surface, but leaves
+ * (now offscreen) GDI surface intact.
+ *
+ * Note that "normal" (GDI) PRIMARYSURFACE has to
+ * be created before the request to create NONGDIPRIMARY can succeed.
+ *
+ */
+
+#define DDSCAPS4_NONGDIPRIMARY    0x80000000l
+
+#else
+
+
+#endif
+
 
  /****************************************************************************
  *
