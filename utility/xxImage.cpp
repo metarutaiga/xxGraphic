@@ -33,7 +33,14 @@ void xxImage::Initialize(uint64_t format, int width, int height, int depth, int 
     const_cast<int&>(Array) = array;
 
     if (width == 0 || height == 0 || depth == 0 || mipmap == 0 || array == 0)
+    {
+        for (void*& image : m_images)
+        {
+            xxFree(image);
+            image = nullptr;
+        }
         return;
+    }
 
     for (int i = 0; i < mipmap; ++i)
     {
