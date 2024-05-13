@@ -24,11 +24,11 @@ class xxBinary;
 class xxFile;
 
 typedef std::shared_ptr<class xxCamera> xxCameraPtr;
-typedef std::shared_ptr<class xxImage> xxImagePtr;
 typedef std::shared_ptr<class xxMaterial> xxMaterialPtr;
 typedef std::shared_ptr<class xxMesh> xxMeshPtr;
 typedef std::shared_ptr<class xxModifier> xxModifierPtr;
 typedef std::shared_ptr<class xxNode> xxNodePtr;
+typedef std::shared_ptr<class xxTexture> xxTexturePtr;
 typedef std::shared_ptr<void> xxUnknownPtr;
 
 typedef std::weak_ptr<class xxNode> xxNodeWeakPtr;

@@ -16,8 +16,8 @@ public:
     void                        Setup(xxDrawData const& data);
     void                        Draw(xxDrawData const& data) const;
 
-    xxImagePtr const&           GetImage(size_t index) const;
-    void                        SetImage(size_t index, xxImagePtr const& image);
+    xxTexturePtr const&         GetTexture(size_t index) const;
+    void                        SetTexture(size_t index, xxTexturePtr const& texture);
 
     virtual void                CreatePipeline(xxDrawData const& data);
     virtual void                CreateConstant(xxDrawData const& data) const;
@@ -79,7 +79,7 @@ public:
     bool                        Scissor = false;
 
     std::vector<xxVector4>      Colors;
-    std::vector<xxImagePtr>     Images;
+    std::vector<xxTexturePtr>   Textures;
 
     std::vector<xxModifierData> Modifiers;
 };

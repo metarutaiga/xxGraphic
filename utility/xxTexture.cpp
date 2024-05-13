@@ -1,29 +1,29 @@
 //==============================================================================
-// xxGraphic : Image Source
+// xxGraphic : Texture Source
 //
 // Copyright (c) 2019-2024 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "xxGraphic.h"
 #include "xxBinary.h"
-#include "xxImage.h"
+#include "xxTexture.h"
 
 //==============================================================================
 //  Texture
 //==============================================================================
-xxImage::xxImage(uint64_t format, int width, int height, int depth, int mipmap, int array)
+xxTexture::xxTexture(uint64_t format, int width, int height, int depth, int mipmap, int array)
 {
     Initialize(format, width, height, depth, mipmap, array);
 }
 //------------------------------------------------------------------------------
-xxImage::~xxImage()
+xxTexture::~xxTexture()
 {
     Invalidate();
     for (void* image : m_images)
         xxFree(image);
 }
 //------------------------------------------------------------------------------
-void xxImage::Initialize(uint64_t format, int width, int height, int depth, int mipmap, int array)
+void xxTexture::Initialize(uint64_t format, int width, int height, int depth, int mipmap, int array)
 {
     const_cast<uint64_t&>(Format) = format;
     const_cast<int&>(Width) = width;
@@ -63,7 +63,7 @@ void xxImage::Initialize(uint64_t format, int width, int height, int depth, int 
     m_imageModified = true;
 }
 //------------------------------------------------------------------------------
-void* xxImage::operator () (int x, int y, int z, int mipmap, int array)
+void* xxTexture::operator () (int x, int y, int z, int mipmap, int array)
 {
     if (array >= Array)
         return nullptr;
@@ -98,7 +98,7 @@ void* xxImage::operator () (int x, int y, int z, int mipmap, int array)
     return reinterpret_cast<char*>(image) + offset;
 }
 //------------------------------------------------------------------------------
-void xxImage::Invalidate()
+void xxTexture::Invalidate()
 {
     xxDestroyTexture(Texture);
     xxDestroySampler(Sampler);
@@ -109,7 +109,7 @@ void xxImage::Invalidate()
     m_imageModified = true;
 }
 //------------------------------------------------------------------------------
-void xxImage::Update(uint64_t device)
+void xxTexture::Update(uint64_t device)
 {
     const_cast<uint64_t&>(Device) = device;
 
@@ -150,9 +150,10 @@ void xxImage::Update(uint64_t device)
                 levelDepth = 1;
 
             size_t line = Calculate(Format, levelWidth, 1, 1);
+            size_t face = Calculate(Format, levelWidth, levelHeight, 1);
             for (int depth = 0; depth < levelDepth; ++depth)
             {
-                for (int height = 0; height < levelHeight; ++height)
+                for (size_t offset = 0; offset < face; offset += line)
                 {
                     memcpy(target, source, line);
                     source = reinterpret_cast<char*>(source) + line;
@@ -165,9 +166,9 @@ void xxImage::Update(uint64_t device)
     }
 }
 //------------------------------------------------------------------------------
-xxImagePtr xxImage::Create(uint64_t format, int width, int height, int depth, int mipmap, int array)
+xxTexturePtr xxTexture::Create(uint64_t format, int width, int height, int depth, int mipmap, int array)
 {
-    xxImagePtr image = xxImagePtr(new xxImage(format, width, height, depth, mipmap, array), [](xxImage* image) { delete image; });
+    xxTexturePtr image = xxTexturePtr(new xxTexture(format, width, height, depth, mipmap, array), [](xxTexture* image) { delete image; });
     if (image == nullptr)
         return nullptr;
     if (width && height && depth && mipmap && array && image->m_images[0] == nullptr)
@@ -176,33 +177,33 @@ xxImagePtr xxImage::Create(uint64_t format, int width, int height, int depth, in
     return image;
 }
 //------------------------------------------------------------------------------
-xxImagePtr xxImage::Create2D(uint64_t format, int width, int height, int mipmap)
+xxTexturePtr xxTexture::Create2D(uint64_t format, int width, int height, int mipmap)
 {
     return Create(format, width, height, 1, mipmap, 1);
 }
 //------------------------------------------------------------------------------
-xxImagePtr xxImage::Create3D(uint64_t format, int width, int height, int depth, int mipmap)
+xxTexturePtr xxTexture::Create3D(uint64_t format, int width, int height, int depth, int mipmap)
 {
     return Create(format, width, height, depth, mipmap, 1);
 }
 //------------------------------------------------------------------------------
-xxImagePtr xxImage::CreateCube(uint64_t format, int width, int height, int mipmap)
+xxTexturePtr xxTexture::CreateCube(uint64_t format, int width, int height, int mipmap)
 {
     return Create(format, width, height, 1, mipmap, 6);
 }
 //------------------------------------------------------------------------------
-size_t (*xxImage::Calculate)(uint64_t format, int width, int height, int depth) = [](uint64_t format, int width, int height, int depth)
+size_t (*xxTexture::Calculate)(uint64_t format, int width, int height, int depth) = [](uint64_t format, int width, int height, int depth)
 {
     return width * height * depth * sizeof(uint32_t);
 };
 //------------------------------------------------------------------------------
-void (*xxImage::Loader)(xxImagePtr& image, std::string const& path) = [](xxImagePtr&, std::string const&) {};
+void (*xxTexture::Loader)(xxTexturePtr& texture, std::string const& path) = [](xxTexturePtr&, std::string const&) {};
 //==============================================================================
 //  Binary
 //==============================================================================
-xxImagePtr (*xxImage::BinaryCreate)() = []() { return xxImage::Create(0, 0, 0, 0, 0, 0); };
+xxTexturePtr (*xxTexture::BinaryCreate)() = []() { return xxTexture::Create(0, 0, 0, 0, 0, 0); };
 //------------------------------------------------------------------------------
-void xxImage::BinaryRead(xxBinary& binary)
+void xxTexture::BinaryRead(xxBinary& binary)
 {
     binary.ReadString(Name);
 
@@ -215,7 +216,7 @@ void xxImage::BinaryRead(xxBinary& binary)
     binary.Read(Anisotropic);
 }
 //------------------------------------------------------------------------------
-void xxImage::BinaryWrite(xxBinary& binary) const
+void xxTexture::BinaryWrite(xxBinary& binary) const
 {
     binary.WriteString(Name);
 
