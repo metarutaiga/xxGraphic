@@ -341,7 +341,7 @@ constexpr unsigned long long operator""_FOURCC (char const* text, unsigned long 
     unsigned long long value = 0;
     for (unsigned int i = 0; i < length; ++i)
     {
-        value += (unsigned char)text[i] << (i * 8);
+        value += (unsigned long long)(unsigned char)text[i] << (i * 8);
     }
     return value;
 };
