@@ -196,7 +196,7 @@ MTLSWAPCHAIN* xxCreateSwapchainMetal(id <MTLDevice> __unsafe_unretained device, 
     swapchain->height = height;
     swapchain->scale = contentsScale;
 
-    MTLTEXTURE* depthStencil = xxCreateTextureMetal(device, 'DS24', width * contentsScale, height * contentsScale, 1, 1, 1, nullptr);
+    MTLTEXTURE* depthStencil = xxCreateTextureMetal(device, "DS24"_FOURCC, width * contentsScale, height * contentsScale, 1, 1, 1, nullptr);
     if (depthStencil)
     {
         swapchain->depthstencil = depthStencil->texture;
@@ -457,10 +457,140 @@ MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, uint
     if (output == nullptr)
         return 0;
 
+    MTLTextureSwizzleChannels swizzle = MTLTextureSwizzleChannelsDefault;
     MTLPixelFormat pixelFormat = MTLPixelFormatRGBA8Unorm;
-    if (format == 'DS24')
+    int onePixel = 0;
+    int stride = 0;
+    switch (format)
     {
+    case "RGB565"_FOURCC:
+        swizzle.red = MTLTextureSwizzleBlue;
+        swizzle.blue = MTLTextureSwizzleRed;
+    case "BGR565"_FOURCC:
+        pixelFormat = MTLPixelFormatB5G6R5Unorm;
+        onePixel = sizeof(uint16_t);
+        stride = width * sizeof(uint16_t);
+        break;
+    case "ARGB1555"_FOURCC:
+        swizzle.red = MTLTextureSwizzleBlue;
+        swizzle.blue = MTLTextureSwizzleRed;
+    case "ABGR1555"_FOURCC:
+        pixelFormat = MTLPixelFormatA1BGR5Unorm;
+        onePixel = sizeof(uint16_t);
+        stride = width * sizeof(uint16_t);
+        break;
+    case "ARGB4444"_FOURCC:
+        swizzle.red = MTLTextureSwizzleBlue;
+        swizzle.blue = MTLTextureSwizzleRed;
+    case "ABGR4444"_FOURCC:
+        pixelFormat = MTLPixelFormatABGR4Unorm;
+        onePixel = sizeof(uint16_t);
+        stride = width * sizeof(uint16_t);
+        break;
+    case "RGBA4444"_FOURCC:
+        swizzle.red = MTLTextureSwizzleAlpha;
+        swizzle.green = MTLTextureSwizzleBlue;
+        swizzle.blue = MTLTextureSwizzleGreen;
+        swizzle.alpha = MTLTextureSwizzleRed;
+        pixelFormat = MTLPixelFormatABGR4Unorm;
+        onePixel = sizeof(uint16_t);
+        stride = width * sizeof(uint16_t);
+        break;
+    case "BGRA4444"_FOURCC:
+        swizzle.red = MTLTextureSwizzleGreen;
+        swizzle.green = MTLTextureSwizzleBlue;
+        swizzle.blue = MTLTextureSwizzleAlpha;
+        swizzle.alpha = MTLTextureSwizzleRed;
+        pixelFormat = MTLPixelFormatABGR4Unorm;
+        onePixel = sizeof(uint16_t);
+        stride = width * sizeof(uint16_t);
+        break;
+    case "RGBA5551"_FOURCC:
+        swizzle.red = MTLTextureSwizzleBlue;
+        swizzle.blue = MTLTextureSwizzleRed;
+    case "BGRA5551"_FOURCC:
+        pixelFormat = MTLPixelFormatBGR5A1Unorm;
+        onePixel = sizeof(uint16_t);
+        stride = width * sizeof(uint16_t);
+        break;
+    case "ARGB8888"_FOURCC:
+        swizzle.red = MTLTextureSwizzleGreen;
+        swizzle.green = MTLTextureSwizzleBlue;
+        swizzle.blue = MTLTextureSwizzleAlpha;
+        swizzle.alpha = MTLTextureSwizzleRed;
+    case "RGBA8888"_FOURCC:
+        pixelFormat = MTLPixelFormatRGBA8Unorm;
+        onePixel = sizeof(uint32_t);
+        stride = width * sizeof(uint32_t);
+        break;
+    case "ABGR8888"_FOURCC:
+        swizzle.red = MTLTextureSwizzleAlpha;
+        swizzle.green = MTLTextureSwizzleRed;
+        swizzle.blue = MTLTextureSwizzleGreen;
+        swizzle.alpha = MTLTextureSwizzleBlue;
+    case "BGRA8888"_FOURCC:
+        pixelFormat = MTLPixelFormatBGRA8Unorm;
+        onePixel = sizeof(uint32_t);
+        stride = width * sizeof(uint32_t);
+        break;
+    case "BC1"_FOURCC:
+    case "DXT1"_FOURCC:
+        pixelFormat = MTLPixelFormatBC1_RGBA;
+        onePixel = 8;
+        stride = (width + 3) / 4 * 8;
+        break;
+    case "BC2"_FOURCC:
+    case "DXT3"_FOURCC:
+        pixelFormat = MTLPixelFormatBC2_RGBA;
+        onePixel = 16;
+        stride = (width + 3) / 4 * 16;
+        break;
+    case "BC3"_FOURCC:
+    case "DXT5"_FOURCC:
+        pixelFormat = MTLPixelFormatBC3_RGBA;
+        onePixel = 16;
+        stride = (width + 3) / 4 * 16;
+        break;
+    case "BC4S"_FOURCC:
+        pixelFormat = MTLPixelFormatBC4_RSnorm;
+        onePixel = 8;
+        stride = (width + 3) / 4 * 8;
+        break;
+    case "BC4U"_FOURCC:
+    case "ATI1"_FOURCC:
+        pixelFormat = MTLPixelFormatBC4_RUnorm;
+        onePixel = 8;
+        stride = (width + 3) / 4 * 8;
+        break;
+    case "BC5S"_FOURCC:
+        pixelFormat = MTLPixelFormatBC5_RGSnorm;
+        onePixel = 16;
+        stride = (width + 3) / 4 * 16;
+        break;
+    case "BC5U"_FOURCC:
+    case "ATI2"_FOURCC:
+        pixelFormat = MTLPixelFormatBC5_RGUnorm;
+        onePixel = 16;
+        stride = (width + 3) / 4 * 16;
+        break;
+    case "BC6H"_FOURCC:
+        pixelFormat = MTLPixelFormatBC6H_RGBFloat;
+        onePixel = 16;
+        stride = (width + 3) / 4 * 16;
+        break;
+    case "BC7"_FOURCC:
+        pixelFormat = MTLPixelFormatBC7_RGBAUnorm;
+        onePixel = 16;
+        stride = (width + 3) / 4 * 16;
+        break;
+    case "DS24"_FOURCC:
         pixelFormat = MTLPixelFormatDepth32Float_Stencil8;
+        onePixel = sizeof(uint32_t);
+        stride = width * sizeof(uint32_t);
+        break;
+    default:
+        xxLog("xxGraphic", "Unknown format (%.8s)", &format);
+        return 0;
     }
 
 #if defined(xxMACOS_LEGACY)
@@ -469,7 +599,6 @@ MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, uint
     MTLResourceOptions options = MTLResourceStorageModeShared;
 #endif
 
-    int stride = 0;
     IOSurfaceRef ioSurface = nullptr;
     id <MTLTexture> texture = nil;
     id <MTLBuffer> buffer = nil;
@@ -503,14 +632,10 @@ MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, uint
         {
             alignment = (int)[device minimumLinearTextureAlignmentForPixelFormat:pixelFormat];
         }
-        stride = width * sizeof(int);
+        stride = width * sizeof(uint32_t);
         stride = (stride + (alignment - 1)) & ~(alignment - 1);
         buffer = [device newBufferWithLength:stride * height
                                      options:options];
-    }
-    else
-    {
-        stride = width * sizeof(int);
     }
 
     MTLTextureDescriptor* desc = [classMTLTextureDescriptor texture2DDescriptorWithPixelFormat:pixelFormat
@@ -523,6 +648,7 @@ MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, uint
         desc.usage = MTLTextureUsageRenderTarget;
         desc.resourceOptions = MTLResourceStorageModePrivate;
     }
+    desc.swizzle = swizzle;
 
     if (ioSurface)
     {
@@ -550,8 +676,8 @@ MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, uint
     for (int i = 0; i < mipmap; ++i)
     {
         output->strides[i] = (stride >> i);
-        if (output->strides[i] < sizeof(int))
-            output->strides[i] = sizeof(int);
+        if (output->strides[i] < onePixel)
+            output->strides[i] = onePixel;
     }
 
     return output;
@@ -564,12 +690,18 @@ void xxDestroyTextureMetal(MTLTEXTURE* texture)
 //------------------------------------------------------------------------------
 void* xxMapTextureMetal(id <MTLDevice> __unsafe_unretained device, MTLTEXTURE* texture, int* stride, int level, int array)
 {
+    if (texture == nullptr)
+        return nullptr;
     (*stride) = texture->strides[level];
     if (texture->buffer)
     {
         return texture->buffer.contents;
     }
-    NSUInteger count = texture->texture.width * texture->texture.height * sizeof(int);
+    NSUInteger height = texture->texture.height >> level;
+    if (height == 0)
+        height = 1;
+
+    NSUInteger count = texture->strides[level] * height;
     texture->temporary = xxRealloc(texture->temporary, char, count);
     return texture->temporary;
 }
@@ -580,6 +712,11 @@ void xxUnmapTextureMetal(id <MTLDevice> __unsafe_unretained device, MTLTEXTURE* 
     {
         NSUInteger width = texture->texture.width >> level;
         NSUInteger height = texture->texture.height >> level;
+        if (width == 0)
+            width = 1;
+        if (height == 0)
+            height = 1;
+
         [texture->texture replaceRegion:MTLRegionMake2D(0, 0, width, height)
                             mipmapLevel:level
                               withBytes:texture->temporary
