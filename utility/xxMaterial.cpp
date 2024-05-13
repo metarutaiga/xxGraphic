@@ -7,7 +7,7 @@
 #include "xxGraphic.h"
 #include "xxBinary.h"
 #include "xxCamera.h"
-#include "xxImage.h"
+#include "xxTexture.h"
 #include "xxMesh.h"
 #include "xxModifier.h"
 #include "xxNode.h"
@@ -85,38 +85,38 @@ void xxMaterial::Draw(xxDrawData const& data) const
     uint64_t textures[16];
     uint64_t samplers[16];
 
-    int textureCount = (int)Images.size();
+    int textureCount = (int)Textures.size();
     for (int i = 0; i < textureCount; ++i)
     {
-        xxImage* image = Images[i].get();
-        image->Update(data.device);
-        textures[i] = image->Texture;
-        samplers[i] = image->Sampler;
+        xxTexturePtr const& texture = Textures[i];
+        texture->Update(data.device);
+        textures[i] = texture->Texture;
+        samplers[i] = texture->Sampler;
     }
 
     xxSetFragmentTextures(data.commandEncoder, textureCount, textures);
     xxSetFragmentSamplers(data.commandEncoder, textureCount, samplers);
 }
 //------------------------------------------------------------------------------
-xxImagePtr const& xxMaterial::GetImage(size_t index) const
+xxTexturePtr const& xxMaterial::GetTexture(size_t index) const
 {
-    if (Images.size() <= index)
+    if (Textures.size() <= index)
     {
-        static xxImagePtr empty;
+        static xxTexturePtr empty;
         return empty;
     }
 
-    return Images[index];
+    return Textures[index];
 }
 //------------------------------------------------------------------------------
-void xxMaterial::SetImage(size_t index, xxImagePtr const& image)
+void xxMaterial::SetTexture(size_t index, xxTexturePtr const& texture)
 {
-    if (Images.size() <= index)
+    if (Textures.size() <= index)
     {
-        Images.resize(index + 1);
+        Textures.resize(index + 1);
     }
 
-    Images[index] = image;
+    Textures[index] = texture;
 }
 //------------------------------------------------------------------------------
 void xxMaterial::CreatePipeline(xxDrawData const& data)
@@ -409,10 +409,10 @@ void xxMaterial::BinaryRead(xxBinary& binary)
     binary.Read(Scissor);
 
     binary.ReadContainer(Colors);
-    binary.ReadReferences(Images);
-    for (auto& image : Images)
+    binary.ReadReferences(Textures);
+    for (auto& texture : Textures)
     {
-        xxImage::Loader(image, binary.Path);
+        xxTexture::Loader(texture, binary.Path);
     }
 
     binary.ReadContainer(Modifiers, [](xxBinary& binary, xxModifierData& data)
@@ -456,7 +456,7 @@ void xxMaterial::BinaryWrite(xxBinary& binary) const
     binary.Write(Scissor);
 
     binary.WriteContainer(Colors);
-    binary.WriteReferences(Images);
+    binary.WriteReferences(Textures);
 
     binary.WriteContainer(Modifiers, [](xxBinary& binary, xxModifierData const& data)
     {
