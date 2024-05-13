@@ -735,7 +735,7 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
         }
     }
 
-    uint64_t depthStencil = xxCreateTextureVulkan(device, 'DS24', width, height, 1, 1, 1, nullptr);
+    uint64_t depthStencil = xxCreateTextureVulkan(device, "DS24"_FOURCC, width, height, 1, 1, 1, nullptr);
     if (depthStencil)
     {
         VKTEXTURE* vkTexture = reinterpret_cast<VKTEXTURE*>(depthStencil);
@@ -1496,20 +1496,144 @@ uint64_t xxCreateTextureVulkan(uint64_t device, uint64_t format, int width, int 
         return 0;
     memset(vkTexture, 0, sizeof(VKTEXTURE));
 
-#if defined(xxWINDOWS)
-    VkFormat imageFormat = VK_FORMAT_B8G8R8A8_UNORM;
-#else
+    VkComponentMapping swizzle = {};
     VkFormat imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-#endif
-    VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    if (format == 'DS24')
+    int onePixel = 0;
+    int stride = 0;
+    switch (format)
     {
+    case "RGB565"_FOURCC:
+        swizzle.r = VK_COMPONENT_SWIZZLE_B;
+        swizzle.b = VK_COMPONENT_SWIZZLE_R;
+    case "BGR565"_FOURCC:
+        imageFormat = VK_FORMAT_R5G6B5_UNORM_PACK16;
+        onePixel = sizeof(uint16_t);
+        stride = width * sizeof(uint16_t);
+        break;
+    case "ARGB1555"_FOURCC:
+        swizzle.r = VK_COMPONENT_SWIZZLE_B;
+        swizzle.b = VK_COMPONENT_SWIZZLE_R;
+    case "ABGR1555"_FOURCC:
+        imageFormat = VK_FORMAT_R5G5B5A1_UNORM_PACK16;
+        onePixel = sizeof(uint16_t);
+        stride = width * sizeof(uint16_t);
+        break;
+    case "ARGB4444"_FOURCC:
+        swizzle.r = VK_COMPONENT_SWIZZLE_B;
+        swizzle.b = VK_COMPONENT_SWIZZLE_R;
+    case "ABGR4444"_FOURCC:
+        imageFormat = VK_FORMAT_R4G4B4A4_UNORM_PACK16;
+        onePixel = sizeof(uint16_t);
+        stride = width * sizeof(uint16_t);
+        break;
+    case "RGBA4444"_FOURCC:
+        swizzle.r = VK_COMPONENT_SWIZZLE_A;
+        swizzle.g = VK_COMPONENT_SWIZZLE_B;
+        swizzle.b = VK_COMPONENT_SWIZZLE_G;
+        swizzle.a = VK_COMPONENT_SWIZZLE_R;
+        imageFormat = VK_FORMAT_R4G4B4A4_UNORM_PACK16;
+        onePixel = sizeof(uint16_t);
+        stride = width * sizeof(uint16_t);
+        break;
+    case "BGRA4444"_FOURCC:
+        swizzle.r = VK_COMPONENT_SWIZZLE_G;
+        swizzle.g = VK_COMPONENT_SWIZZLE_B;
+        swizzle.b = VK_COMPONENT_SWIZZLE_A;
+        swizzle.a = VK_COMPONENT_SWIZZLE_R;
+        imageFormat = VK_FORMAT_R4G4B4A4_UNORM_PACK16;
+        onePixel = sizeof(uint16_t);
+        stride = width * sizeof(uint16_t);
+        break;
+    case "RGBA5551"_FOURCC:
+        swizzle.r = VK_COMPONENT_SWIZZLE_B;
+        swizzle.b = VK_COMPONENT_SWIZZLE_R;
+    case "BGRA5551"_FOURCC:
+        imageFormat = VK_FORMAT_A1R5G5B5_UNORM_PACK16;
+        onePixel = sizeof(uint16_t);
+        stride = width * sizeof(uint16_t);
+        break;
+    case "ARGB8888"_FOURCC:
+        swizzle.r = VK_COMPONENT_SWIZZLE_G;
+        swizzle.g = VK_COMPONENT_SWIZZLE_B;
+        swizzle.b = VK_COMPONENT_SWIZZLE_A;
+        swizzle.a = VK_COMPONENT_SWIZZLE_R;
+    case "RGBA8888"_FOURCC:
+        imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+        onePixel = sizeof(uint32_t);
+        stride = width * sizeof(uint32_t);
+        break;
+    case "ABGR8888"_FOURCC:
+        swizzle.r = VK_COMPONENT_SWIZZLE_A;
+        swizzle.g = VK_COMPONENT_SWIZZLE_R;
+        swizzle.b = VK_COMPONENT_SWIZZLE_G;
+        swizzle.a = VK_COMPONENT_SWIZZLE_B;
+    case "BGRA8888"_FOURCC:
+        imageFormat = VK_FORMAT_B8G8R8A8_UNORM;
+        onePixel = sizeof(uint32_t);
+        stride = width * sizeof(uint32_t);
+        break;
+    case "BC1"_FOURCC:
+    case "DXT1"_FOURCC:
+        imageFormat = VK_FORMAT_BC1_RGBA_UNORM_BLOCK;
+        onePixel = 8;
+        stride = (width + 3) / 4 * 8;
+        break;
+    case "BC2"_FOURCC:
+    case "DXT3"_FOURCC:
+        imageFormat = VK_FORMAT_BC2_UNORM_BLOCK;
+        onePixel = 16;
+        stride = (width + 3) / 4 * 16;
+        break;
+    case "BC3"_FOURCC:
+    case "DXT5"_FOURCC:
+        imageFormat = VK_FORMAT_BC3_UNORM_BLOCK;
+        onePixel = 16;
+        stride = (width + 3) / 4 * 16;
+        break;
+    case "BC4S"_FOURCC:
+        imageFormat = VK_FORMAT_BC4_SNORM_BLOCK;
+        onePixel = 8;
+        stride = (width + 3) / 4 * 8;
+        break;
+    case "BC4U"_FOURCC:
+    case "ATI1"_FOURCC:
+        imageFormat = VK_FORMAT_BC4_UNORM_BLOCK;
+        onePixel = 8;
+        stride = (width + 3) / 4 * 8;
+        break;
+    case "BC5S"_FOURCC:
+        imageFormat = VK_FORMAT_BC5_SNORM_BLOCK;
+        onePixel = 16;
+        stride = (width + 3) / 4 * 16;
+        break;
+    case "BC5U"_FOURCC:
+    case "ATI2"_FOURCC:
+        imageFormat = VK_FORMAT_BC5_UNORM_BLOCK;
+        onePixel = 16;
+        stride = (width + 3) / 4 * 16;
+        break;
+    case "BC6H"_FOURCC:
+        imageFormat = VK_FORMAT_BC6H_SFLOAT_BLOCK;
+        onePixel = 16;
+        stride = (width + 3) / 4 * 16;
+        break;
+    case "BC7"_FOURCC:
+        imageFormat = VK_FORMAT_BC7_UNORM_BLOCK;
+        onePixel = 16;
+        stride = (width + 3) / 4 * 16;
+        break;
+    case "DS24"_FOURCC:
 #if defined(xxMACOS) || defined(xxIOS)
         imageFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
 #else
         imageFormat = VK_FORMAT_D24_UNORM_S8_UINT;
 #endif
-        aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+        onePixel = sizeof(uint32_t);
+        stride = width * sizeof(uint32_t);
+        break;
+    default:
+        xxLog("xxGraphic", "Unknown format (%.8s)", &format);
+        return 0;
     }
 
     VkImageCreateInfo imageInfo = {};
@@ -1518,9 +1642,9 @@ uint64_t xxCreateTextureVulkan(uint64_t device, uint64_t format, int width, int 
     imageInfo.format = imageFormat;
     imageInfo.extent.width = width;
     imageInfo.extent.height = height;
-    imageInfo.extent.depth = 1;
-    imageInfo.mipLevels = 1;
-    imageInfo.arrayLayers = 1;
+    imageInfo.extent.depth = depth;
+    imageInfo.mipLevels = mipmap;
+    imageInfo.arrayLayers = array;
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
@@ -1567,9 +1691,14 @@ uint64_t xxCreateTextureVulkan(uint64_t device, uint64_t format, int width, int 
     imageViewInfo.image = image;
     imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     imageViewInfo.format = imageFormat;
-    imageViewInfo.subresourceRange.aspectMask = aspectMask;
-    imageViewInfo.subresourceRange.levelCount = 1;
-    imageViewInfo.subresourceRange.layerCount = 1;
+    imageViewInfo.components = swizzle;
+    imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    imageViewInfo.subresourceRange.levelCount = mipmap;
+    imageViewInfo.subresourceRange.layerCount = array;
+    if (imageFormat >= VK_FORMAT_D16_UNORM && imageFormat <= VK_FORMAT_D32_SFLOAT_S8_UINT)
+    {
+        imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+    }
 
     VkImageView imageView = VK_NULL_HANDLE;
     VkResult imageViewResult = vkCreateImageView(vkDevice, &imageViewInfo, g_callbacks, &imageView);
@@ -1585,6 +1714,12 @@ uint64_t xxCreateTextureVulkan(uint64_t device, uint64_t format, int width, int 
     vkTexture->depth = depth;
     vkTexture->mipmap = mipmap;
     vkTexture->array = array;
+    for (int i = 0; i < mipmap; ++i)
+    {
+        vkTexture->strides[i] = (stride >> i);
+        if (vkTexture->strides[i] < onePixel)
+            vkTexture->strides[i] = onePixel;
+    }
 
     if (external)
     {
@@ -1667,9 +1802,13 @@ void* xxMapTextureVulkan(uint64_t device, uint64_t texture, int* stride, int lev
 
     if (vkTexture->uploadBuffer == VK_NULL_HANDLE)
     {
+        uint32_t height = vkTexture->height >> level;
+        if (height == 0)
+            height = 1;
+
         VkBufferCreateInfo bufferInfo = {};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferInfo.size = vkTexture->size;
+        bufferInfo.size = vkTexture->strides[level] * height;
         bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
@@ -1713,7 +1852,7 @@ void* xxMapTextureVulkan(uint64_t device, uint64_t texture, int* stride, int lev
         vkTexture->uploadBuffer = buffer;
         vkTexture->uploadMemory = memory;
         vkTexture->uploadSize = size;
-        vkTexture->uploadStride = size / vkTexture->array / vkTexture->depth / vkTexture->height;
+        vkTexture->uploadStride = vkTexture->strides[level];
     }
 
     void* ptr = nullptr;
@@ -1763,30 +1902,33 @@ void xxUnmapTextureVulkan(uint64_t device, uint64_t texture, int level, int arra
     copyBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     copyBarrier.image = vkTexture->image;
     copyBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    copyBarrier.subresourceRange.levelCount = 1;
-    copyBarrier.subresourceRange.layerCount = 1;
+    copyBarrier.subresourceRange.baseMipLevel = level;
+    copyBarrier.subresourceRange.levelCount = vkTexture->mipmap;
+    copyBarrier.subresourceRange.baseArrayLayer = array;
+    copyBarrier.subresourceRange.layerCount = vkTexture->array;
     vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &copyBarrier);
 
     VkBufferImageCopy region = {};
     region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    region.imageSubresource.mipLevel = level;
+    region.imageSubresource.baseArrayLayer = array;
     region.imageSubresource.layerCount = vkTexture->array;
-    region.imageExtent.width = vkTexture->width;
-    region.imageExtent.height = vkTexture->height;
-    region.imageExtent.depth = vkTexture->depth;
+    region.imageExtent.width = vkTexture->width >> level;
+    region.imageExtent.height = vkTexture->height >> level;
+    region.imageExtent.depth = vkTexture->depth >> level;
+    if (region.imageExtent.width == 0)
+        region.imageExtent.width = 1;
+    if (region.imageExtent.height == 0)
+        region.imageExtent.height = 1;
+    if (region.imageExtent.depth == 0)
+        region.imageExtent.depth = 1;
     vkCmdCopyBufferToImage(commandBuffer, vkTexture->uploadBuffer, vkTexture->image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
-    VkImageMemoryBarrier useBarrier = {};
-    useBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    VkImageMemoryBarrier useBarrier = copyBarrier;
     useBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
     useBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
     useBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
     useBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    useBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    useBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    useBarrier.image = vkTexture->image;
-    useBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    useBarrier.subresourceRange.levelCount = 1;
-    useBarrier.subresourceRange.layerCount = 1;
     vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &useBarrier);
 
     vkEndCommandBuffer(commandBuffer);

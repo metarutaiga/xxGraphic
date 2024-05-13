@@ -12,6 +12,7 @@
 #define KHRONOS_STATIC
 #define GL_GLES_PROTOTYPES 1
 #include "gl/gl32.h"
+#include "gl/gl2ext.h"
 
 #ifndef GL_APPLE_texture_format_BGRA8888
 #define GL_APPLE_texture_format_BGRA8888 1
@@ -26,6 +27,14 @@
 #define GL_PROXY_TEXTURE_RECTANGLE_ARB    0x84F7
 #define GL_MAX_RECTANGLE_TEXTURE_SIZE_ARB 0x84F8
 #endif /* GL_EXT_texture_rectangle */
+
+#ifndef GL_UNSIGNED_INT_8_8_8_8
+#define GL_UNSIGNED_INT_8_8_8_8           0x8035
+#endif /* GL_UNSIGNED_INT_8_8_8_8 */
+
+#ifndef GL_UNSIGNED_SHORT_5_6_5_REV
+#define GL_UNSIGNED_SHORT_5_6_5_REV       0x8364
+#endif /* GL_UNSIGNED_SHORT_5_6_5_REV */
 
 #ifndef GL_UNSIGNED_INT_8_8_8_8_REV
 #define GL_UNSIGNED_INT_8_8_8_8_REV       0x8367
@@ -114,7 +123,7 @@ struct SWAPCHAINGL
     float       scale;
     uint64_t    pipeline;
     uint64_t    vertexBuffers[8];
-    GLenum      textureTypes[8];
+    GLenum      textureTargets[8];
     bool        textureMipmaps[8];
 };
 //==============================================================================
@@ -151,6 +160,8 @@ struct BUFFERGL
 struct TEXTUREGL
 {
     GLuint          texture;
+    GLenum          target;
+    GLenum          format;
     GLenum          type;
     void*           memory;
     unsigned int    width;
@@ -158,6 +169,7 @@ struct TEXTUREGL
     unsigned int    depth;
     unsigned int    mipmap;
     unsigned int    array;
+    unsigned int    strides[16];
     void const*     external;
     void const*     image;
     void const*     device;

@@ -165,6 +165,7 @@ struct VKTEXTURE
     uint32_t        depth;
     uint32_t        mipmap;
     uint32_t        array;
+    int             strides[16];
     VkBuffer        uploadBuffer;
     VkDeviceMemory  uploadMemory;
     VkDeviceSize    uploadSize;

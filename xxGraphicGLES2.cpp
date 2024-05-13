@@ -138,7 +138,7 @@ uint64_t xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view
     glSwapchain->scale = glGetScaleContext(glSwapchain->context, glSwapchain->view);
     glSwapchain->pipeline = 0;
     memset(glSwapchain->vertexBuffers, 0, sizeof(glSwapchain->vertexBuffers));
-    memset(glSwapchain->textureTypes, 0, sizeof(glSwapchain->textureTypes));
+    memset(glSwapchain->textureTargets, 0, sizeof(glSwapchain->textureTargets));
     memset(glSwapchain->textureMipmaps, 0, sizeof(glSwapchain->textureMipmaps));
 
     return reinterpret_cast<uint64_t>(glSwapchain);
@@ -176,7 +176,7 @@ uint64_t xxGetCommandBufferGLES2(uint64_t device, uint64_t swapchain)
 
     glSwapchain->pipeline = 0;
     memset(glSwapchain->vertexBuffers, 0, sizeof(glSwapchain->vertexBuffers));
-    memset(glSwapchain->textureTypes, 0, sizeof(glSwapchain->textureTypes));
+    memset(glSwapchain->textureTargets, 0, sizeof(glSwapchain->textureTargets));
     memset(glSwapchain->textureMipmaps, 0, sizeof(glSwapchain->textureMipmaps));
 
     return reinterpret_cast<uint64_t>(glSwapchain);
@@ -486,8 +486,136 @@ uint64_t xxCreateTextureGLES2(uint64_t device, uint64_t format, int width, int h
         return 0;
     }
 
-    glTexture->type = 0;
+    GLenum pixelFormat = GL_RGBA;
+    GLenum pixelType = GL_UNSIGNED_BYTE;
+    int onePixel = 0;
+    int stride = 0;
+    switch (format)
+    {
+    case "RGB565"_FOURCC:
+        pixelFormat = GL_RGB565;
+        pixelType = GL_UNSIGNED_SHORT_5_6_5_REV;
+        onePixel = sizeof(uint16_t);
+        stride = width * sizeof(uint16_t);
+        break;
+    case "BGR565"_FOURCC:
+        pixelFormat = GL_RGB565;
+        pixelType = GL_UNSIGNED_SHORT_5_6_5;
+        onePixel = sizeof(uint16_t);
+        stride = width * sizeof(uint16_t);
+        break;
+    case "ABGR1555"_FOURCC:
+        pixelFormat = GL_RGB5_A1;
+        pixelType = GL_UNSIGNED_SHORT_5_5_5_1;
+        onePixel = sizeof(uint16_t);
+        stride = width * sizeof(uint16_t);
+        break;
+    case "ABGR4444"_FOURCC:
+        pixelFormat = GL_RGBA4;
+        pixelType = GL_UNSIGNED_SHORT_4_4_4_4;
+        onePixel = sizeof(uint16_t);
+        stride = width * sizeof(uint16_t);
+        break;
+    case "RGBA4444"_FOURCC:
+        pixelFormat = GL_RGBA4;
+        pixelType = GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT;
+        onePixel = sizeof(uint16_t);
+        stride = width * sizeof(uint16_t);
+        break;
+    case "RGBA5551"_FOURCC:
+        pixelFormat = GL_RGB5_A1;
+        pixelType = GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT;
+        onePixel = sizeof(uint16_t);
+        stride = width * sizeof(uint16_t);
+        break;
+    case "ARGB8888"_FOURCC:
+        pixelFormat = GL_BGRA_EXT;
+        pixelType = GL_UNSIGNED_INT_8_8_8_8;
+        onePixel = sizeof(uint32_t);
+        stride = width * sizeof(uint32_t);
+        break;
+    case "RGBA8888"_FOURCC:
+        pixelFormat = GL_RGBA;
+        pixelType = GL_UNSIGNED_BYTE;
+        onePixel = sizeof(uint32_t);
+        stride = width * sizeof(uint32_t);
+        break;
+    case "ABGR8888"_FOURCC:
+        pixelFormat = GL_RGBA;
+        pixelType = GL_UNSIGNED_INT_8_8_8_8;
+        onePixel = sizeof(uint32_t);
+        stride = width * sizeof(uint32_t);
+        break;
+    case "BGRA8888"_FOURCC:
+        pixelFormat = GL_BGRA_EXT;
+        pixelType = GL_UNSIGNED_BYTE;
+        onePixel = sizeof(uint32_t);
+        stride = width * sizeof(uint32_t);
+        break;
+    case "BC1"_FOURCC:
+    case "DXT1"_FOURCC:
+        pixelFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+        onePixel = 8;
+        stride = (width + 3) / 4 * 8;
+        break;
+    case "BC2"_FOURCC:
+    case "DXT3"_FOURCC:
+        pixelFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+        onePixel = 16;
+        stride = (width + 3) / 4 * 16;
+        break;
+    case "BC3"_FOURCC:
+    case "DXT5"_FOURCC:
+        pixelFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+        onePixel = 16;
+        stride = (width + 3) / 4 * 16;
+        break;
+    case "BC4S"_FOURCC:
+        pixelFormat = GL_COMPRESSED_SIGNED_RED_RGTC1_EXT;
+        onePixel = 8;
+        stride = (width + 3) / 4 * 8;
+        break;
+    case "BC4U"_FOURCC:
+    case "ATI1"_FOURCC:
+        pixelFormat = GL_COMPRESSED_RED_RGTC1_EXT;
+        onePixel = 8;
+        stride = (width + 3) / 4 * 8;
+        break;
+    case "BC5S"_FOURCC:
+        pixelFormat = GL_COMPRESSED_SIGNED_RED_GREEN_RGTC2_EXT;
+        onePixel = 16;
+        stride = (width + 3) / 4 * 16;
+        break;
+    case "BC5U"_FOURCC:
+    case "ATI2"_FOURCC:
+        pixelFormat = GL_COMPRESSED_RED_GREEN_RGTC2_EXT;
+        onePixel = 16;
+        stride = (width + 3) / 4 * 16;
+        break;
+    case "BC6H"_FOURCC:
+        pixelFormat = GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_EXT;
+        onePixel = 16;
+        stride = (width + 3) / 4 * 16;
+        break;
+    case "BC7"_FOURCC:
+        pixelFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_EXT;
+        onePixel = 16;
+        stride = (width + 3) / 4 * 16;
+        break;
+    case "DS24"_FOURCC:
+        pixelFormat = GL_DEPTH24_STENCIL8_OES;
+        onePixel = sizeof(uint32_t);
+        stride = width * sizeof(uint32_t);
+        break;
+    default:
+        xxLog("xxGraphic", "Unknown format (%.8s)", &format);
+        return 0;
+    }
+
     glTexture->texture = texture;
+    glTexture->target = 0;
+    glTexture->format = pixelFormat;
+    glTexture->type = pixelType;
     glTexture->memory = nullptr;
     glTexture->width = width;
     glTexture->height = height;
@@ -497,13 +625,19 @@ uint64_t xxCreateTextureGLES2(uint64_t device, uint64_t format, int width, int h
     glTexture->external = external;
     glTexture->image = nullptr;
     glTexture->device = nullptr;
+    for (int i = 0; i < mipmap; ++i)
+    {
+        glTexture->strides[i] = (stride >> i);
+        if (glTexture->strides[i] < onePixel)
+            glTexture->strides[i] = onePixel;
+    }
 
     GLuint externalTexture = static_cast<GLuint>(reinterpret_cast<size_t>(external));
     if (glIsTexture(externalTexture))
     {
         glDeleteTextures(1, &texture);
         glTexture->texture = externalTexture;
-        glTexture->type = GL_TEXTURE_2D;
+        glTexture->target = GL_TEXTURE_2D;
         glTexture->external = external;
         external = nullptr;
     }
@@ -516,7 +650,7 @@ uint64_t xxCreateTextureGLES2(uint64_t device, uint64_t format, int width, int h
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexture->type = GL_TEXTURE_2D;
+        glTexture->target = GL_TEXTURE_2D;
         glTexture->image = xxCreateImageFromHardwareBuffer(external);
         xxBindTextureWithImage(glTexture->image);
 #elif defined(xxMACOS)
@@ -525,7 +659,7 @@ uint64_t xxCreateTextureGLES2(uint64_t device, uint64_t format, int width, int h
         glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexture->type = GL_TEXTURE_RECTANGLE_ARB;
+        glTexture->target = GL_TEXTURE_RECTANGLE_ARB;
         xxBindTextureWithSurface(glTexture->external);
 #elif defined(xxMACCATALYST)
 #elif defined(xxIOS)
@@ -534,7 +668,7 @@ uint64_t xxCreateTextureGLES2(uint64_t device, uint64_t format, int width, int h
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexture->type = GL_TEXTURE_2D;
+        glTexture->target = GL_TEXTURE_2D;
         xxBindTextureWithSurface(glTexture->external);
 #elif defined(xxWINDOWS)
         glBindTexture(GL_TEXTURE_2D, texture);
@@ -542,7 +676,7 @@ uint64_t xxCreateTextureGLES2(uint64_t device, uint64_t format, int width, int h
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexture->type = GL_TEXTURE_2D;
+        glTexture->target = GL_TEXTURE_2D;
         glTexture->device = xxGetDeviceFromDirect3DTexture(external);
         glTexture->image = xxCreateImageFromDirect3DTexture(glTexture->device, external, texture);
 #endif
@@ -570,7 +704,7 @@ void xxDestroyTextureGLES2(uint64_t texture)
 #elif defined(xxWINDOWS)
         xxDestroyImage(glTexture->device, glTexture->image);
 #endif
-    }   
+    }
 
     if (glTexture->texture)
     {
@@ -591,18 +725,16 @@ void* xxMapTextureGLES2(uint64_t device, uint64_t texture, int* stride, int leve
         return nullptr;
 #endif
 
-    unsigned int width = glTexture->width >> level;
     unsigned int height = glTexture->height >> level;
     unsigned int depth = glTexture->depth >> level;
-    if (width == 0)
-        width = 1;
     if (height == 0)
         height = 1;
     if (depth == 0)
         depth = 1;
-    glTexture->memory = xxRealloc(glTexture->memory, char, width * height * depth * 4);
 
-    (*stride) = width * 4;
+    glTexture->memory = xxRealloc(glTexture->memory, char, glTexture->strides[level] * height * depth);
+
+    (*stride) = glTexture->strides[level];
     return glTexture->memory;
 }
 //------------------------------------------------------------------------------
@@ -630,36 +762,64 @@ void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, int level, int array
     if (glTexture->depth == 1 && glTexture->array == 1)
     {
         glBindTexture(GL_TEXTURE_2D, glTexture->texture);
-        if (glTexture->type == 0)
+        if (glTexture->target == 0)
         {
-            glTexture->type = GL_TEXTURE_2D;
+            glTexture->target = GL_TEXTURE_2D;
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, glTexture->mipmap > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
         }
-#if defined(xxWINDOWS)
-        int format = GL_BGRA_EXT;
-#else
-        int format = GL_RGBA;
-#endif
-        glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, width, height, 0, format, GL_UNSIGNED_BYTE, glTexture->memory);
+
+        switch (glTexture->format)
+        {
+        case GL_RGBA4:
+        case GL_RGB5_A1:
+            glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, width, height, 0, GL_RGBA, glTexture->type, glTexture->memory);
+            break;
+        case GL_RGB565:
+            glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, width, height, 0, GL_RGB, glTexture->type, glTexture->memory);
+            break;
+        case GL_RGBA:
+        case GL_BGRA_EXT:
+        case GL_DEPTH24_STENCIL8_OES:
+            glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, width, height, 0, glTexture->format, glTexture->type, glTexture->memory);
+            break;
+        default:
+            GLsizei imageSize = glTexture->strides[level] * ((height >> level) + 3) / 4;
+            glCompressedTexImage2D(GL_TEXTURE_2D, level, glTexture->format, width, height, 0, imageSize, glTexture->memory);
+            break;
+        }
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     if (glTexture->width == glTexture->height && glTexture->depth == 1 && glTexture->array == 6)
     {
         glBindTexture(GL_TEXTURE_CUBE_MAP, glTexture->texture);
-        if (glTexture->type == 0)
+        if (glTexture->target == 0)
         {
-            glTexture->type = GL_TEXTURE_CUBE_MAP;
+            glTexture->target = GL_TEXTURE_CUBE_MAP;
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, glTexture->mipmap > 1 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
         }
-#if defined(xxWINDOWS)
-        int format = GL_BGRA_EXT;
-#else
-        int format = GL_RGBA;
-#endif
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + array, level, GL_RGBA, width, height, 0, format, GL_UNSIGNED_BYTE, glTexture->memory);
+
+        switch (glTexture->format)
+        {
+        case GL_RGBA4:
+        case GL_RGB5_A1:
+            glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, width, height, 0, GL_RGBA, glTexture->type, glTexture->memory);
+            break;
+        case GL_RGB565:
+            glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, width, height, 0, GL_RGB, glTexture->type, glTexture->memory);
+            break;
+        case GL_RGBA:
+        case GL_BGRA_EXT:
+        case GL_DEPTH24_STENCIL8_OES:
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + array, level, GL_RGBA, width, height, 0, glTexture->format, glTexture->type, glTexture->memory);
+            break;
+        default:
+            GLsizei imageSize = glTexture->strides[level] * ((height >> level) + 3) / 4;
+            glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + array, level, glTexture->format, width, height, 0, imageSize, glTexture->memory);
+            break;
+        }
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
 
@@ -1023,8 +1183,8 @@ void xxSetFragmentTexturesGLES2(uint64_t commandEncoder, int count, const uint64
         if (glTexture == nullptr)
             continue;
         glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(glTexture->type, glTexture->texture);
-        glSwapchain->textureTypes[i] = glTexture->type;
+        glBindTexture(glTexture->target, glTexture->texture);
+        glSwapchain->textureTargets[i] = glTexture->target;
         glSwapchain->textureMipmaps[i] = (glTexture->mipmap > 1);
     }
 }
@@ -1042,9 +1202,9 @@ void xxSetFragmentSamplersGLES2(uint64_t commandEncoder, int count, const uint64
     {
         SAMPLERGL glSampler = { samplers[i] };
         glActiveTexture(GL_TEXTURE0 + i);
-        glTexParameteri(glSwapchain->textureTypes[i], GL_TEXTURE_WRAP_S, glSampler.addressU ? GL_CLAMP_TO_EDGE : GL_REPEAT);
-        glTexParameteri(glSwapchain->textureTypes[i], GL_TEXTURE_WRAP_T, glSampler.addressV ? GL_CLAMP_TO_EDGE : GL_REPEAT);
-        glTexParameteri(glSwapchain->textureTypes[i], GL_TEXTURE_MAG_FILTER, glSampler.magFilter ? GL_LINEAR : GL_NEAREST);
+        glTexParameteri(glSwapchain->textureTargets[i], GL_TEXTURE_WRAP_S, glSampler.addressU ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+        glTexParameteri(glSwapchain->textureTargets[i], GL_TEXTURE_WRAP_T, glSampler.addressV ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+        glTexParameteri(glSwapchain->textureTargets[i], GL_TEXTURE_MAG_FILTER, glSampler.magFilter ? GL_LINEAR : GL_NEAREST);
 
         GLenum minFilter;
         if (glSwapchain->textureMipmaps[i])
@@ -1055,7 +1215,7 @@ void xxSetFragmentSamplersGLES2(uint64_t commandEncoder, int count, const uint64
         {
             minFilter = glSampler.minFilter ? GL_LINEAR : GL_NEAREST;
         }
-        glTexParameteri(glSwapchain->textureTypes[i], GL_TEXTURE_MIN_FILTER, minFilter);
+        glTexParameteri(glSwapchain->textureTargets[i], GL_TEXTURE_MIN_FILTER, minFilter);
     }
 }
 //------------------------------------------------------------------------------
