@@ -486,127 +486,38 @@ uint64_t xxCreateTextureGLES2(uint64_t device, uint64_t format, int width, int h
         return 0;
     }
 
-    GLenum pixelFormat = GL_RGBA;
-    GLenum pixelType = GL_UNSIGNED_BYTE;
-    int onePixel = 0;
-    int stride = 0;
+    struct { GLenum pixelFormat; GLenum pixelType; int onePixel; int stride; } T;
     switch (format)
     {
-    case "RGB565"_FOURCC:
-        pixelFormat = GL_RGB565;
-        pixelType = GL_UNSIGNED_SHORT_5_6_5_REV;
-        onePixel = sizeof(uint16_t);
-        stride = width * sizeof(uint16_t);
-        break;
-    case "BGR565"_FOURCC:
-        pixelFormat = GL_RGB565;
-        pixelType = GL_UNSIGNED_SHORT_5_6_5;
-        onePixel = sizeof(uint16_t);
-        stride = width * sizeof(uint16_t);
-        break;
-    case "ABGR1555"_FOURCC:
-        pixelFormat = GL_RGB5_A1;
-        pixelType = GL_UNSIGNED_SHORT_5_5_5_1;
-        onePixel = sizeof(uint16_t);
-        stride = width * sizeof(uint16_t);
-        break;
-    case "ABGR4444"_FOURCC:
-        pixelFormat = GL_RGBA4;
-        pixelType = GL_UNSIGNED_SHORT_4_4_4_4;
-        onePixel = sizeof(uint16_t);
-        stride = width * sizeof(uint16_t);
-        break;
-    case "RGBA4444"_FOURCC:
-        pixelFormat = GL_RGBA4;
-        pixelType = GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT;
-        onePixel = sizeof(uint16_t);
-        stride = width * sizeof(uint16_t);
-        break;
-    case "RGBA5551"_FOURCC:
-        pixelFormat = GL_RGB5_A1;
-        pixelType = GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT;
-        onePixel = sizeof(uint16_t);
-        stride = width * sizeof(uint16_t);
-        break;
-    case "ARGB8888"_FOURCC:
-        pixelFormat = GL_BGRA_EXT;
-        pixelType = GL_UNSIGNED_INT_8_8_8_8;
-        onePixel = sizeof(uint32_t);
-        stride = width * sizeof(uint32_t);
-        break;
-    case "RGBA8888"_FOURCC:
-        pixelFormat = GL_RGBA;
-        pixelType = GL_UNSIGNED_BYTE;
-        onePixel = sizeof(uint32_t);
-        stride = width * sizeof(uint32_t);
-        break;
-    case "ABGR8888"_FOURCC:
-        pixelFormat = GL_RGBA;
-        pixelType = GL_UNSIGNED_INT_8_8_8_8;
-        onePixel = sizeof(uint32_t);
-        stride = width * sizeof(uint32_t);
-        break;
-    case "BGRA8888"_FOURCC:
-        pixelFormat = GL_BGRA_EXT;
-        pixelType = GL_UNSIGNED_BYTE;
-        onePixel = sizeof(uint32_t);
-        stride = width * sizeof(uint32_t);
-        break;
+    case "RGB565"_FOURCC:   T = { GL_RGB,       GL_UNSIGNED_SHORT_5_6_5_REV,                2,  width * 2 }; break;
+    case "BGR565"_FOURCC:   T = { GL_RGB,       GL_UNSIGNED_SHORT_5_6_5,                    2,  width * 2 }; break;
+    case "ARGB1555"_FOURCC: T = { GL_BGRA_EXT,  GL_UNSIGNED_SHORT_5_5_5_1,                  2,  width * 2 }; break;
+    case "ABGR1555"_FOURCC: T = { GL_RGBA,      GL_UNSIGNED_SHORT_5_5_5_1,                  2,  width * 2 }; break;
+    case "ARGB4444"_FOURCC: T = { GL_BGRA_EXT,  GL_UNSIGNED_SHORT_4_4_4_4,                  2,  width * 2 }; break;
+    case "ABGR4444"_FOURCC: T = { GL_RGBA,      GL_UNSIGNED_SHORT_4_4_4_4,                  2,  width * 2 }; break;
+    case "RGBA4444"_FOURCC: T = { GL_RGBA,      GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT,          2,  width * 2 }; break;
+    case "BGRA4444"_FOURCC: T = { GL_BGRA_EXT,  GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT,          2,  width * 2 }; break;
+    case "RGBA5551"_FOURCC: T = { GL_RGBA,      GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT,          2,  width * 2 }; break;
+    case "BGRA5551"_FOURCC: T = { GL_BGRA_EXT,  GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT,          2,  width * 2 }; break;
+    case "ARGB8888"_FOURCC: T = { GL_BGRA_EXT,  GL_UNSIGNED_INT_8_8_8_8,                    4,  width * 4 }; break;
+    case "RGBA8888"_FOURCC: T = { GL_RGBA,      GL_UNSIGNED_BYTE,                           4,  width * 4 }; break;
+    case "ABGR8888"_FOURCC: T = { GL_RGBA,      GL_UNSIGNED_INT_8_8_8_8,                    4,  width * 4 }; break;
+    case "BGRA8888"_FOURCC: T = { GL_BGRA_EXT,  GL_UNSIGNED_BYTE,                           4,  width * 4 }; break;
+    case "DS24"_FOURCC:     T = { GL_DEPTH_STENCIL_OES, GL_DEPTH24_STENCIL8_OES,            4,  width * 4 }; break;
     case "BC1"_FOURCC:
-    case "DXT1"_FOURCC:
-        pixelFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-        onePixel = 8;
-        stride = (width + 3) / 4 * 8;
-        break;
+    case "DXT1"_FOURCC:     T = { 0,            GL_COMPRESSED_RGBA_S3TC_DXT1_EXT,           8,  (width + 3) / 4 * 8 };  break;
     case "BC2"_FOURCC:
-    case "DXT3"_FOURCC:
-        pixelFormat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-        onePixel = 16;
-        stride = (width + 3) / 4 * 16;
-        break;
+    case "DXT3"_FOURCC:     T = { 0,            GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,           16, (width + 3) / 4 * 16 }; break;
     case "BC3"_FOURCC:
-    case "DXT5"_FOURCC:
-        pixelFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-        onePixel = 16;
-        stride = (width + 3) / 4 * 16;
-        break;
-    case "BC4S"_FOURCC:
-        pixelFormat = GL_COMPRESSED_SIGNED_RED_RGTC1_EXT;
-        onePixel = 8;
-        stride = (width + 3) / 4 * 8;
-        break;
+    case "DXT5"_FOURCC:     T = { 0,            GL_COMPRESSED_RGBA_S3TC_DXT5_EXT,           16, (width + 3) / 4 * 16 }; break;
+    case "BC4S"_FOURCC:     T = { 0,            GL_COMPRESSED_SIGNED_RED_RGTC1_EXT,         8,  (width + 3) / 4 * 8 };  break;
     case "BC4U"_FOURCC:
-    case "ATI1"_FOURCC:
-        pixelFormat = GL_COMPRESSED_RED_RGTC1_EXT;
-        onePixel = 8;
-        stride = (width + 3) / 4 * 8;
-        break;
-    case "BC5S"_FOURCC:
-        pixelFormat = GL_COMPRESSED_SIGNED_RED_GREEN_RGTC2_EXT;
-        onePixel = 16;
-        stride = (width + 3) / 4 * 16;
-        break;
+    case "ATI1"_FOURCC:     T = { 0,            GL_COMPRESSED_RED_RGTC1_EXT,                8,  (width + 3) / 4 * 8 };  break;
+    case "BC5S"_FOURCC:     T = { 0,            GL_COMPRESSED_SIGNED_RED_GREEN_RGTC2_EXT,   16, (width + 3) / 4 * 16 }; break;
     case "BC5U"_FOURCC:
-    case "ATI2"_FOURCC:
-        pixelFormat = GL_COMPRESSED_RED_GREEN_RGTC2_EXT;
-        onePixel = 16;
-        stride = (width + 3) / 4 * 16;
-        break;
-    case "BC6H"_FOURCC:
-        pixelFormat = GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_EXT;
-        onePixel = 16;
-        stride = (width + 3) / 4 * 16;
-        break;
-    case "BC7"_FOURCC:
-        pixelFormat = GL_COMPRESSED_RGBA_BPTC_UNORM_EXT;
-        onePixel = 16;
-        stride = (width + 3) / 4 * 16;
-        break;
-    case "DS24"_FOURCC:
-        pixelFormat = GL_DEPTH24_STENCIL8_OES;
-        onePixel = sizeof(uint32_t);
-        stride = width * sizeof(uint32_t);
-        break;
+    case "ATI2"_FOURCC:     T = { 0,            GL_COMPRESSED_RED_GREEN_RGTC2_EXT,          16, (width + 3) / 4 * 16 }; break;
+    case "BC6H"_FOURCC:     T = { 0,            GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_EXT,    16, (width + 3) / 4 * 16 }; break;
+    case "BC7"_FOURCC:      T = { 0,            GL_COMPRESSED_RGBA_BPTC_UNORM_EXT,          16, (width + 3) / 4 * 16 }; break;
     default:
         xxLog("xxGraphic", "Unknown format (%.8s)", &format);
         return 0;
@@ -614,8 +525,8 @@ uint64_t xxCreateTextureGLES2(uint64_t device, uint64_t format, int width, int h
 
     glTexture->texture = texture;
     glTexture->target = 0;
-    glTexture->format = pixelFormat;
-    glTexture->type = pixelType;
+    glTexture->format = T.pixelFormat;
+    glTexture->type = T.pixelType;
     glTexture->memory = nullptr;
     glTexture->width = width;
     glTexture->height = height;
@@ -627,9 +538,9 @@ uint64_t xxCreateTextureGLES2(uint64_t device, uint64_t format, int width, int h
     glTexture->device = nullptr;
     for (int i = 0; i < mipmap; ++i)
     {
-        glTexture->strides[i] = (stride >> i);
-        if (glTexture->strides[i] < onePixel)
-            glTexture->strides[i] = onePixel;
+        glTexture->strides[i] = (T.stride >> i);
+        if (glTexture->strides[i] < T.onePixel)
+            glTexture->strides[i] = T.onePixel;
     }
 
     GLuint externalTexture = static_cast<GLuint>(reinterpret_cast<size_t>(external));
@@ -771,21 +682,19 @@ void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, int level, int array
 
         switch (glTexture->format)
         {
-        case GL_RGBA4:
-        case GL_RGB5_A1:
-            glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, width, height, 0, GL_RGBA, glTexture->type, glTexture->memory);
-            break;
-        case GL_RGB565:
-            glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, width, height, 0, GL_RGB, glTexture->type, glTexture->memory);
+        case GL_RGB:
+            glTexImage2D(GL_TEXTURE_2D, level, GL_RGB, width, height, 0, glTexture->format, glTexture->type, glTexture->memory);
             break;
         case GL_RGBA:
         case GL_BGRA_EXT:
-        case GL_DEPTH24_STENCIL8_OES:
             glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, width, height, 0, glTexture->format, glTexture->type, glTexture->memory);
             break;
-        default:
-            GLsizei imageSize = glTexture->strides[level] * ((height >> level) + 3) / 4;
-            glCompressedTexImage2D(GL_TEXTURE_2D, level, glTexture->format, width, height, 0, imageSize, glTexture->memory);
+        case GL_DEPTH24_STENCIL8_OES:
+            glTexImage2D(GL_TEXTURE_2D, level, GL_DEPTH_STENCIL_OES, width, height, 0, glTexture->format, glTexture->type, glTexture->memory);
+            break;
+        case 0:
+            GLsizei imageSize = glTexture->strides[level] * ((height + 3) / 4);
+            glCompressedTexImage2D(GL_TEXTURE_2D, level, glTexture->type, width, height, 0, imageSize, glTexture->memory);
             break;
         }
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -803,21 +712,16 @@ void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, int level, int array
 
         switch (glTexture->format)
         {
-        case GL_RGBA4:
-        case GL_RGB5_A1:
-            glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, width, height, 0, GL_RGBA, glTexture->type, glTexture->memory);
-            break;
-        case GL_RGB565:
-            glTexImage2D(GL_TEXTURE_2D, level, GL_RGBA, width, height, 0, GL_RGB, glTexture->type, glTexture->memory);
+        case GL_RGB:
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + array, level, GL_RGB, width, height, 0, glTexture->format, glTexture->type, glTexture->memory);
             break;
         case GL_RGBA:
         case GL_BGRA_EXT:
-        case GL_DEPTH24_STENCIL8_OES:
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + array, level, GL_RGBA, width, height, 0, glTexture->format, glTexture->type, glTexture->memory);
             break;
-        default:
-            GLsizei imageSize = glTexture->strides[level] * ((height >> level) + 3) / 4;
-            glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + array, level, glTexture->format, width, height, 0, imageSize, glTexture->memory);
+        case 0:
+            GLsizei imageSize = glTexture->strides[level] * ((height + 3) / 4);
+            glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + array, level, glTexture->type, width, height, 0, imageSize, glTexture->memory);
             break;
         }
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);

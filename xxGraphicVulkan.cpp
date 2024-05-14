@@ -1496,150 +1496,59 @@ uint64_t xxCreateTextureVulkan(uint64_t device, uint64_t format, int width, int 
         return 0;
     memset(vkTexture, 0, sizeof(VKTEXTURE));
 
-    VkComponentMapping swizzle = {};
-    VkFormat imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-    int onePixel = 0;
-    int stride = 0;
+    #define R VK_COMPONENT_SWIZZLE_R
+    #define G VK_COMPONENT_SWIZZLE_G
+    #define B VK_COMPONENT_SWIZZLE_B
+    #define A VK_COMPONENT_SWIZZLE_A
+    struct { VkComponentMapping swizzle; VkFormat imageFormat; int onePixel; int stride; } T;
     switch (format)
     {
-    case "RGB565"_FOURCC:
-        swizzle.r = VK_COMPONENT_SWIZZLE_B;
-        swizzle.b = VK_COMPONENT_SWIZZLE_R;
-    case "BGR565"_FOURCC:
-        imageFormat = VK_FORMAT_R5G6B5_UNORM_PACK16;
-        onePixel = sizeof(uint16_t);
-        stride = width * sizeof(uint16_t);
-        break;
-    case "ARGB1555"_FOURCC:
-        swizzle.r = VK_COMPONENT_SWIZZLE_B;
-        swizzle.b = VK_COMPONENT_SWIZZLE_R;
-    case "ABGR1555"_FOURCC:
-        imageFormat = VK_FORMAT_R5G5B5A1_UNORM_PACK16;
-        onePixel = sizeof(uint16_t);
-        stride = width * sizeof(uint16_t);
-        break;
-    case "ARGB4444"_FOURCC:
-        swizzle.r = VK_COMPONENT_SWIZZLE_B;
-        swizzle.b = VK_COMPONENT_SWIZZLE_R;
-    case "ABGR4444"_FOURCC:
-        imageFormat = VK_FORMAT_R4G4B4A4_UNORM_PACK16;
-        onePixel = sizeof(uint16_t);
-        stride = width * sizeof(uint16_t);
-        break;
-    case "RGBA4444"_FOURCC:
-        swizzle.r = VK_COMPONENT_SWIZZLE_A;
-        swizzle.g = VK_COMPONENT_SWIZZLE_B;
-        swizzle.b = VK_COMPONENT_SWIZZLE_G;
-        swizzle.a = VK_COMPONENT_SWIZZLE_R;
-        imageFormat = VK_FORMAT_R4G4B4A4_UNORM_PACK16;
-        onePixel = sizeof(uint16_t);
-        stride = width * sizeof(uint16_t);
-        break;
-    case "BGRA4444"_FOURCC:
-        swizzle.r = VK_COMPONENT_SWIZZLE_G;
-        swizzle.g = VK_COMPONENT_SWIZZLE_B;
-        swizzle.b = VK_COMPONENT_SWIZZLE_A;
-        swizzle.a = VK_COMPONENT_SWIZZLE_R;
-        imageFormat = VK_FORMAT_R4G4B4A4_UNORM_PACK16;
-        onePixel = sizeof(uint16_t);
-        stride = width * sizeof(uint16_t);
-        break;
-    case "RGBA5551"_FOURCC:
-        swizzle.r = VK_COMPONENT_SWIZZLE_B;
-        swizzle.b = VK_COMPONENT_SWIZZLE_R;
-    case "BGRA5551"_FOURCC:
-        imageFormat = VK_FORMAT_A1R5G5B5_UNORM_PACK16;
-        onePixel = sizeof(uint16_t);
-        stride = width * sizeof(uint16_t);
-        break;
-    case "ARGB8888"_FOURCC:
-        swizzle.r = VK_COMPONENT_SWIZZLE_G;
-        swizzle.g = VK_COMPONENT_SWIZZLE_B;
-        swizzle.b = VK_COMPONENT_SWIZZLE_A;
-        swizzle.a = VK_COMPONENT_SWIZZLE_R;
-    case "RGBA8888"_FOURCC:
-        imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-        onePixel = sizeof(uint32_t);
-        stride = width * sizeof(uint32_t);
-        break;
-    case "ABGR8888"_FOURCC:
-        swizzle.r = VK_COMPONENT_SWIZZLE_A;
-        swizzle.g = VK_COMPONENT_SWIZZLE_R;
-        swizzle.b = VK_COMPONENT_SWIZZLE_G;
-        swizzle.a = VK_COMPONENT_SWIZZLE_B;
-    case "BGRA8888"_FOURCC:
-        imageFormat = VK_FORMAT_B8G8R8A8_UNORM;
-        onePixel = sizeof(uint32_t);
-        stride = width * sizeof(uint32_t);
-        break;
-    case "BC1"_FOURCC:
-    case "DXT1"_FOURCC:
-        imageFormat = VK_FORMAT_BC1_RGBA_UNORM_BLOCK;
-        onePixel = 8;
-        stride = (width + 3) / 4 * 8;
-        break;
-    case "BC2"_FOURCC:
-    case "DXT3"_FOURCC:
-        imageFormat = VK_FORMAT_BC2_UNORM_BLOCK;
-        onePixel = 16;
-        stride = (width + 3) / 4 * 16;
-        break;
-    case "BC3"_FOURCC:
-    case "DXT5"_FOURCC:
-        imageFormat = VK_FORMAT_BC3_UNORM_BLOCK;
-        onePixel = 16;
-        stride = (width + 3) / 4 * 16;
-        break;
-    case "BC4S"_FOURCC:
-        imageFormat = VK_FORMAT_BC4_SNORM_BLOCK;
-        onePixel = 8;
-        stride = (width + 3) / 4 * 8;
-        break;
-    case "BC4U"_FOURCC:
-    case "ATI1"_FOURCC:
-        imageFormat = VK_FORMAT_BC4_UNORM_BLOCK;
-        onePixel = 8;
-        stride = (width + 3) / 4 * 8;
-        break;
-    case "BC5S"_FOURCC:
-        imageFormat = VK_FORMAT_BC5_SNORM_BLOCK;
-        onePixel = 16;
-        stride = (width + 3) / 4 * 16;
-        break;
-    case "BC5U"_FOURCC:
-    case "ATI2"_FOURCC:
-        imageFormat = VK_FORMAT_BC5_UNORM_BLOCK;
-        onePixel = 16;
-        stride = (width + 3) / 4 * 16;
-        break;
-    case "BC6H"_FOURCC:
-        imageFormat = VK_FORMAT_BC6H_SFLOAT_BLOCK;
-        onePixel = 16;
-        stride = (width + 3) / 4 * 16;
-        break;
-    case "BC7"_FOURCC:
-        imageFormat = VK_FORMAT_BC7_UNORM_BLOCK;
-        onePixel = 16;
-        stride = (width + 3) / 4 * 16;
-        break;
-    case "DS24"_FOURCC:
+    case "RGB565"_FOURCC:   T = { {B, G, R, A}, VK_FORMAT_R5G6B5_UNORM_PACK16,      2,  width * 2 }; break;
+    case "BGR565"_FOURCC:   T = { {R, G, B, A}, VK_FORMAT_R5G6B5_UNORM_PACK16,      2,  width * 2 }; break;
+    case "ARGB1555"_FOURCC: T = { {B, G, R, A}, VK_FORMAT_R5G5B5A1_UNORM_PACK16,    2,  width * 2 }; break;
+    case "ABGR1555"_FOURCC: T = { {R, G, B, A}, VK_FORMAT_R5G5B5A1_UNORM_PACK16,    2,  width * 2 }; break;
+    case "ARGB4444"_FOURCC: T = { {B, G, R, A}, VK_FORMAT_R4G4B4A4_UNORM_PACK16,    2,  width * 2 }; break;
+    case "ABGR4444"_FOURCC: T = { {R, G, B, A}, VK_FORMAT_R4G4B4A4_UNORM_PACK16,    2,  width * 2 }; break;
+    case "RGBA4444"_FOURCC: T = { {A, B, G, R}, VK_FORMAT_R4G4B4A4_UNORM_PACK16,    2,  width * 2 }; break;
+    case "BGRA4444"_FOURCC: T = { {G, B, A, R}, VK_FORMAT_R4G4B4A4_UNORM_PACK16,    2,  width * 2 }; break;
+    case "RGBA5551"_FOURCC: T = { {B, G, R, A}, VK_FORMAT_A1R5G5B5_UNORM_PACK16,    2,  width * 2 }; break;
+    case "BGRA5551"_FOURCC: T = { {R, G, B, A}, VK_FORMAT_A1R5G5B5_UNORM_PACK16,    2,  width * 2 }; break;
+    case "ARGB8888"_FOURCC: T = { {G, B, A, R}, VK_FORMAT_R8G8B8A8_UNORM,           4,  width * 4 }; break;
+    case "RGBA8888"_FOURCC: T = { {R, G, B, A}, VK_FORMAT_R8G8B8A8_UNORM,           4,  width * 4 }; break;
+    case "ABGR8888"_FOURCC: T = { {A, R, G, B}, VK_FORMAT_B8G8R8A8_UNORM,           4,  width * 4 }; break;
+    case "BGRA8888"_FOURCC: T = { {R, G, B, A}, VK_FORMAT_B8G8R8A8_UNORM,           4,  width * 4 }; break;
 #if defined(xxMACOS) || defined(xxIOS)
-        imageFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
+    case "DS24"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_D32_SFLOAT_S8_UINT,       4,  width * 4 }; break;
 #else
-        imageFormat = VK_FORMAT_D24_UNORM_S8_UINT;
+    case "DS24"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_D24_UNORM_S8_UINT,        4,  width * 4 }; break;
 #endif
-        onePixel = sizeof(uint32_t);
-        stride = width * sizeof(uint32_t);
-        break;
+    case "BC1"_FOURCC:
+    case "DXT1"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_BC1_RGBA_UNORM_BLOCK,     8,  (width + 3) / 4 * 8 };  break;
+    case "BC2"_FOURCC:
+    case "DXT3"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_BC2_UNORM_BLOCK,          16, (width + 3) / 4 * 16 }; break;
+    case "BC3"_FOURCC:
+    case "DXT5"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_BC3_UNORM_BLOCK,          16, (width + 3) / 4 * 16 }; break;
+    case "BC4S"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_BC4_SNORM_BLOCK,          8,  (width + 3) / 4 * 8 };  break;
+    case "BC4U"_FOURCC:
+    case "ATI1"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_BC4_UNORM_BLOCK,          8,  (width + 3) / 4 * 8 };  break;
+    case "BC5S"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_BC5_SNORM_BLOCK,          16, (width + 3) / 4 * 16 }; break;
+    case "BC5U"_FOURCC:
+    case "ATI2"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_BC5_UNORM_BLOCK,          16, (width + 3) / 4 * 16 }; break;
+    case "BC6H"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_BC6H_SFLOAT_BLOCK,        16, (width + 3) / 4 * 16 }; break;
+    case "BC7"_FOURCC:      T = { {R, G, B, A}, VK_FORMAT_BC7_UNORM_BLOCK,          16, (width + 3) / 4 * 16 }; break;
     default:
         xxLog("xxGraphic", "Unknown format (%.8s)", &format);
         return 0;
     }
+    #undef R
+    #undef G
+    #undef B
+    #undef A
 
     VkImageCreateInfo imageInfo = {};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageInfo.imageType = VK_IMAGE_TYPE_2D;
-    imageInfo.format = imageFormat;
+    imageInfo.format = T.imageFormat;
     imageInfo.extent.width = width;
     imageInfo.extent.height = height;
     imageInfo.extent.depth = depth;
@@ -1690,12 +1599,12 @@ uint64_t xxCreateTextureVulkan(uint64_t device, uint64_t format, int width, int 
     imageViewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     imageViewInfo.image = image;
     imageViewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    imageViewInfo.format = imageFormat;
-    imageViewInfo.components = swizzle;
+    imageViewInfo.format = T.imageFormat;
+    imageViewInfo.components = T.swizzle;
     imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     imageViewInfo.subresourceRange.levelCount = mipmap;
     imageViewInfo.subresourceRange.layerCount = array;
-    if (imageFormat >= VK_FORMAT_D16_UNORM && imageFormat <= VK_FORMAT_D32_SFLOAT_S8_UINT)
+    if (T.imageFormat >= VK_FORMAT_D16_UNORM && T.imageFormat <= VK_FORMAT_D32_SFLOAT_S8_UINT)
     {
         imageViewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
     }
@@ -1716,9 +1625,9 @@ uint64_t xxCreateTextureVulkan(uint64_t device, uint64_t format, int width, int 
     vkTexture->array = array;
     for (int i = 0; i < mipmap; ++i)
     {
-        vkTexture->strides[i] = (stride >> i);
-        if (vkTexture->strides[i] < onePixel)
-            vkTexture->strides[i] = onePixel;
+        vkTexture->strides[i] = (T.stride >> i);
+        if (vkTexture->strides[i] < T.onePixel)
+            vkTexture->strides[i] = T.onePixel;
     }
 
     if (external)

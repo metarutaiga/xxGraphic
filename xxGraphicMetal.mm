@@ -457,141 +457,50 @@ MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, uint
     if (output == nullptr)
         return 0;
 
-    MTLTextureSwizzleChannels swizzle = MTLTextureSwizzleChannelsDefault;
-    MTLPixelFormat pixelFormat = MTLPixelFormatRGBA8Unorm;
-    int onePixel = 0;
-    int stride = 0;
+    #define R MTLTextureSwizzleRed
+    #define G MTLTextureSwizzleGreen
+    #define B MTLTextureSwizzleBlue
+    #define A MTLTextureSwizzleAlpha
+    struct { MTLTextureSwizzleChannels swizzle; MTLPixelFormat pixelFormat; int onePixel; int stride; } T;
     switch (format)
     {
-    case "RGB565"_FOURCC:
-        swizzle.red = MTLTextureSwizzleBlue;
-        swizzle.blue = MTLTextureSwizzleRed;
-    case "BGR565"_FOURCC:
-        pixelFormat = MTLPixelFormatB5G6R5Unorm;
-        onePixel = sizeof(uint16_t);
-        stride = width * sizeof(uint16_t);
-        break;
-    case "ARGB1555"_FOURCC:
-        swizzle.red = MTLTextureSwizzleBlue;
-        swizzle.blue = MTLTextureSwizzleRed;
-    case "ABGR1555"_FOURCC:
-        pixelFormat = MTLPixelFormatA1BGR5Unorm;
-        onePixel = sizeof(uint16_t);
-        stride = width * sizeof(uint16_t);
-        break;
-    case "ARGB4444"_FOURCC:
-        swizzle.red = MTLTextureSwizzleBlue;
-        swizzle.blue = MTLTextureSwizzleRed;
-    case "ABGR4444"_FOURCC:
-        pixelFormat = MTLPixelFormatABGR4Unorm;
-        onePixel = sizeof(uint16_t);
-        stride = width * sizeof(uint16_t);
-        break;
-    case "RGBA4444"_FOURCC:
-        swizzle.red = MTLTextureSwizzleAlpha;
-        swizzle.green = MTLTextureSwizzleBlue;
-        swizzle.blue = MTLTextureSwizzleGreen;
-        swizzle.alpha = MTLTextureSwizzleRed;
-        pixelFormat = MTLPixelFormatABGR4Unorm;
-        onePixel = sizeof(uint16_t);
-        stride = width * sizeof(uint16_t);
-        break;
-    case "BGRA4444"_FOURCC:
-        swizzle.red = MTLTextureSwizzleGreen;
-        swizzle.green = MTLTextureSwizzleBlue;
-        swizzle.blue = MTLTextureSwizzleAlpha;
-        swizzle.alpha = MTLTextureSwizzleRed;
-        pixelFormat = MTLPixelFormatABGR4Unorm;
-        onePixel = sizeof(uint16_t);
-        stride = width * sizeof(uint16_t);
-        break;
-    case "RGBA5551"_FOURCC:
-        swizzle.red = MTLTextureSwizzleBlue;
-        swizzle.blue = MTLTextureSwizzleRed;
-    case "BGRA5551"_FOURCC:
-        pixelFormat = MTLPixelFormatBGR5A1Unorm;
-        onePixel = sizeof(uint16_t);
-        stride = width * sizeof(uint16_t);
-        break;
-    case "ARGB8888"_FOURCC:
-        swizzle.red = MTLTextureSwizzleGreen;
-        swizzle.green = MTLTextureSwizzleBlue;
-        swizzle.blue = MTLTextureSwizzleAlpha;
-        swizzle.alpha = MTLTextureSwizzleRed;
-    case "RGBA8888"_FOURCC:
-        pixelFormat = MTLPixelFormatRGBA8Unorm;
-        onePixel = sizeof(uint32_t);
-        stride = width * sizeof(uint32_t);
-        break;
-    case "ABGR8888"_FOURCC:
-        swizzle.red = MTLTextureSwizzleAlpha;
-        swizzle.green = MTLTextureSwizzleRed;
-        swizzle.blue = MTLTextureSwizzleGreen;
-        swizzle.alpha = MTLTextureSwizzleBlue;
-    case "BGRA8888"_FOURCC:
-        pixelFormat = MTLPixelFormatBGRA8Unorm;
-        onePixel = sizeof(uint32_t);
-        stride = width * sizeof(uint32_t);
-        break;
+    case "RGB565"_FOURCC:   T = { {B, G, R, A}, MTLPixelFormatB5G6R5Unorm,  2,  width * 2 }; break;
+    case "BGR565"_FOURCC:   T = { {R, G, B, A}, MTLPixelFormatB5G6R5Unorm,  2,  width * 2 }; break;
+    case "ARGB1555"_FOURCC: T = { {B, G, R, A}, MTLPixelFormatA1BGR5Unorm,  2,  width * 2 }; break;
+    case "ABGR1555"_FOURCC: T = { {R, G, B, A}, MTLPixelFormatA1BGR5Unorm,  2,  width * 2 }; break;
+    case "ARGB4444"_FOURCC: T = { {B, G, R, A}, MTLPixelFormatABGR4Unorm,   2,  width * 2 }; break;
+    case "ABGR4444"_FOURCC: T = { {R, G, B, A}, MTLPixelFormatABGR4Unorm,   2,  width * 2 }; break;
+    case "RGBA4444"_FOURCC: T = { {A, B, G, R}, MTLPixelFormatABGR4Unorm,   2,  width * 2 }; break;
+    case "BGRA4444"_FOURCC: T = { {G, B, A, R}, MTLPixelFormatABGR4Unorm,   2,  width * 2 }; break;
+    case "RGBA5551"_FOURCC: T = { {B, G, R, A}, MTLPixelFormatBGR5A1Unorm,  2,  width * 2 }; break;
+    case "BGRA5551"_FOURCC: T = { {R, G, B, A}, MTLPixelFormatBGR5A1Unorm,  2,  width * 2 }; break;
+    case "ARGB8888"_FOURCC: T = { {G, B, A, R}, MTLPixelFormatRGBA8Unorm,   4,  width * 4 }; break;
+    case "RGBA8888"_FOURCC: T = { {R, G, B, A}, MTLPixelFormatRGBA8Unorm,   4,  width * 4 }; break;
+    case "ABGR8888"_FOURCC: T = { {A, R, G, B}, MTLPixelFormatBGRA8Unorm,   4,  width * 4 }; break;
+    case "BGRA8888"_FOURCC: T = { {R, G, B, A}, MTLPixelFormatBGRA8Unorm,   4,  width * 4 }; break;
+    case "DS24"_FOURCC:     T = { {R, G, B, A}, MTLPixelFormatDepth32Float_Stencil8, 4, width * 4 }; break;
     case "BC1"_FOURCC:
-    case "DXT1"_FOURCC:
-        pixelFormat = MTLPixelFormatBC1_RGBA;
-        onePixel = 8;
-        stride = (width + 3) / 4 * 8;
-        break;
+    case "DXT1"_FOURCC:     T = { {R, G, B, A}, MTLPixelFormatBC1_RGBA,     8,  (width + 3) / 4 * 8 };  break;
     case "BC2"_FOURCC:
-    case "DXT3"_FOURCC:
-        pixelFormat = MTLPixelFormatBC2_RGBA;
-        onePixel = 16;
-        stride = (width + 3) / 4 * 16;
-        break;
+    case "DXT3"_FOURCC:     T = { {R, G, B, A}, MTLPixelFormatBC2_RGBA,     16, (width + 3) / 4 * 16 }; break;
     case "BC3"_FOURCC:
-    case "DXT5"_FOURCC:
-        pixelFormat = MTLPixelFormatBC3_RGBA;
-        onePixel = 16;
-        stride = (width + 3) / 4 * 16;
-        break;
-    case "BC4S"_FOURCC:
-        pixelFormat = MTLPixelFormatBC4_RSnorm;
-        onePixel = 8;
-        stride = (width + 3) / 4 * 8;
-        break;
+    case "DXT5"_FOURCC:     T = { {R, G, B, A}, MTLPixelFormatBC3_RGBA,     16, (width + 3) / 4 * 16 }; break;
+    case "BC4S"_FOURCC:     T = { {R, G, B, A}, MTLPixelFormatBC4_RSnorm,   8,  (width + 3) / 4 * 8 };  break;
     case "BC4U"_FOURCC:
-    case "ATI1"_FOURCC:
-        pixelFormat = MTLPixelFormatBC4_RUnorm;
-        onePixel = 8;
-        stride = (width + 3) / 4 * 8;
-        break;
-    case "BC5S"_FOURCC:
-        pixelFormat = MTLPixelFormatBC5_RGSnorm;
-        onePixel = 16;
-        stride = (width + 3) / 4 * 16;
-        break;
+    case "ATI1"_FOURCC:     T = { {R, G, B, A}, MTLPixelFormatBC4_RUnorm,   8,  (width + 3) / 4 * 8 };  break;
+    case "BC5S"_FOURCC:     T = { {R, G, B, A}, MTLPixelFormatBC5_RGSnorm,  16, (width + 3) / 4 * 16 }; break;
     case "BC5U"_FOURCC:
-    case "ATI2"_FOURCC:
-        pixelFormat = MTLPixelFormatBC5_RGUnorm;
-        onePixel = 16;
-        stride = (width + 3) / 4 * 16;
-        break;
-    case "BC6H"_FOURCC:
-        pixelFormat = MTLPixelFormatBC6H_RGBFloat;
-        onePixel = 16;
-        stride = (width + 3) / 4 * 16;
-        break;
-    case "BC7"_FOURCC:
-        pixelFormat = MTLPixelFormatBC7_RGBAUnorm;
-        onePixel = 16;
-        stride = (width + 3) / 4 * 16;
-        break;
-    case "DS24"_FOURCC:
-        pixelFormat = MTLPixelFormatDepth32Float_Stencil8;
-        onePixel = sizeof(uint32_t);
-        stride = width * sizeof(uint32_t);
-        break;
+    case "ATI2"_FOURCC:     T = { {R, G, B, A}, MTLPixelFormatBC5_RGUnorm,  16, (width + 3) / 4 * 16 }; break;
+    case "BC6H"_FOURCC:     T = { {R, G, B, A}, MTLPixelFormatBC6H_RGBFloat,16, (width + 3) / 4 * 16 }; break;
+    case "BC7"_FOURCC:      T = { {R, G, B, A}, MTLPixelFormatBC7_RGBAUnorm,16, (width + 3) / 4 * 16 }; break;
     default:
         xxLog("xxGraphic", "Unknown format (%.8s)", &format);
         return 0;
     }
+    #undef R
+    #undef G
+    #undef B
+    #undef A
 
 #if defined(xxMACOS_LEGACY)
     MTLResourceOptions options = MTLResourceStorageModeManaged;
@@ -604,11 +513,11 @@ MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, uint
     id <MTLBuffer> buffer = nil;
     if (external)
     {
-        pixelFormat = MTLPixelFormatBGRA8Unorm;
+        T.pixelFormat = MTLPixelFormatBGRA8Unorm;
         if ([NSStringFromClass([(__bridge id)external class]) containsString:@"IOSurface"])
         {
             ioSurface = (IOSurfaceRef)external;
-            stride = 0;
+            T.stride = 0;
 #if defined(xxMACOS) || defined(xxMACCATALYST)
             options = MTLResourceStorageModeManaged;
 #endif
@@ -616,39 +525,39 @@ MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, uint
         else if ([NSStringFromClass([(__bridge id)external class]) containsString:@"Texture"])
         {
             texture = (__bridge id)external;
-            stride = 0;
+            T.stride = 0;
         }
         else
         {
             buffer = (__bridge id)external;
-            stride = (int)buffer.length / height;
+            T.stride = (int)buffer.length / height;
             options = buffer.storageMode << MTLResourceStorageModeShift;
         }
     }
-    else if (mipmap == 1 && pixelFormat == MTLPixelFormatRGBA8Unorm)
+    else if (mipmap == 1 && T.pixelFormat == MTLPixelFormatRGBA8Unorm)
     {
         int alignment = 256;
         if (@available(macOS 10.13, iOS 11.0, *))
         {
-            alignment = (int)[device minimumLinearTextureAlignmentForPixelFormat:pixelFormat];
+            alignment = (int)[device minimumLinearTextureAlignmentForPixelFormat:T.pixelFormat];
         }
-        stride = width * sizeof(uint32_t);
-        stride = (stride + (alignment - 1)) & ~(alignment - 1);
-        buffer = [device newBufferWithLength:stride * height
+        T.stride = width * sizeof(uint32_t);
+        T.stride = (T.stride + (alignment - 1)) & ~(alignment - 1);
+        buffer = [device newBufferWithLength:T.stride * height
                                      options:options];
     }
 
-    MTLTextureDescriptor* desc = [classMTLTextureDescriptor texture2DDescriptorWithPixelFormat:pixelFormat
+    MTLTextureDescriptor* desc = [classMTLTextureDescriptor texture2DDescriptorWithPixelFormat:T.pixelFormat
                                                                                          width:width
                                                                                         height:height
                                                                                      mipmapped:mipmap > 1];
     desc.resourceOptions = options;
-    if (pixelFormat >= MTLPixelFormatDepth16Unorm)
+    if (T.pixelFormat >= MTLPixelFormatDepth16Unorm)
     {
         desc.usage = MTLTextureUsageRenderTarget;
         desc.resourceOptions = MTLResourceStorageModePrivate;
     }
-    desc.swizzle = swizzle;
+    desc.swizzle = T.swizzle;
 
     if (ioSurface)
     {
@@ -664,7 +573,7 @@ MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, uint
     {
         texture = [buffer newTextureWithDescriptor:desc
                                             offset:0
-                                       bytesPerRow:stride];
+                                       bytesPerRow:T.stride];
     }
     else
     {
@@ -675,9 +584,9 @@ MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, uint
     output->buffer = buffer;
     for (int i = 0; i < mipmap; ++i)
     {
-        output->strides[i] = (stride >> i);
-        if (output->strides[i] < onePixel)
-            output->strides[i] = onePixel;
+        output->strides[i] = (T.stride >> i);
+        if (output->strides[i] < T.onePixel)
+            output->strides[i] = T.onePixel;
     }
 
     return output;
