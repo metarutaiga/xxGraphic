@@ -13,7 +13,10 @@
 //==============================================================================
 xxTexture::xxTexture(uint64_t format, int width, int height, int depth, int mipmap, int array)
 {
-    Initialize(format, width, height, depth, mipmap, array);
+    if (format && width && height && depth && mipmap && array)
+    {
+        Initialize(format, width, height, depth, mipmap, array);
+    }
 }
 //------------------------------------------------------------------------------
 xxTexture::~xxTexture()
