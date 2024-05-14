@@ -32,6 +32,7 @@ typedef std::shared_ptr<class xxTexture> xxTexturePtr;
 typedef std::shared_ptr<void> xxUnknownPtr;
 
 typedef std::weak_ptr<class xxNode> xxNodeWeakPtr;
+typedef std::weak_ptr<class xxTexture> xxTextureWeakPtr;
 
 struct xxConstantData
 {
