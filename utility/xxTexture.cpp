@@ -116,10 +116,12 @@ void xxTexture::Update(uint64_t device)
 {
     const_cast<uint64_t&>(Device) = device;
 
+    bool destroy = false;
     if (Texture == 0)
     {
         if (Format == 0)
         {
+            destroy = true;
             Reader((xxTexturePtr&)m_this);
         }
         const_cast<uint64_t&>(Texture) = xxCreateTexture(device, Format, Width, Height, Depth, Mipmap, Array, nullptr);
@@ -172,10 +174,13 @@ void xxTexture::Update(uint64_t device)
         }
     }
 
-    for (void*& image : m_images)
+    if (destroy)
     {
-        xxFree(image);
-        image = nullptr;
+        for (void*& image : m_images)
+        {
+            xxFree(image);
+            image = nullptr;
+        }
     }
 }
 //------------------------------------------------------------------------------
