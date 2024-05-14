@@ -115,6 +115,10 @@ void xxTexture::Update(uint64_t device)
 
     if (Texture == 0)
     {
+        if (Format == 0)
+        {
+            Reader((xxTexturePtr&)m_this);
+        }
         const_cast<uint64_t&>(Texture) = xxCreateTexture(device, Format, Width, Height, Depth, Mipmap, Array, nullptr);
     }
     if (Sampler == 0)
@@ -164,17 +168,24 @@ void xxTexture::Update(uint64_t device)
             xxUnmapTexture(device, Texture, mipmap, array);
         }
     }
+
+    for (void*& image : m_images)
+    {
+        xxFree(image);
+        image = nullptr;
+    }
 }
 //------------------------------------------------------------------------------
 xxTexturePtr xxTexture::Create(uint64_t format, int width, int height, int depth, int mipmap, int array)
 {
-    xxTexturePtr image = xxTexturePtr(new xxTexture(format, width, height, depth, mipmap, array), [](xxTexture* image) { delete image; });
-    if (image == nullptr)
+    xxTexturePtr texture = xxTexturePtr(new xxTexture(format, width, height, depth, mipmap, array), [](xxTexture* texture) { delete texture; });
+    if (texture == nullptr)
         return nullptr;
-    if (width && height && depth && mipmap && array && image->m_images[0] == nullptr)
+    if (width && height && depth && mipmap && array && texture->m_images[0] == nullptr)
         return nullptr;
 
-    return image;
+    texture->m_this = texture;
+    return texture;
 }
 //------------------------------------------------------------------------------
 xxTexturePtr xxTexture::Create2D(uint64_t format, int width, int height, int mipmap)
@@ -198,10 +209,11 @@ size_t (*xxTexture::Calculate)(uint64_t format, int width, int height, int depth
 };
 //------------------------------------------------------------------------------
 void (*xxTexture::Loader)(xxTexturePtr& texture, std::string const& path) = [](xxTexturePtr&, std::string const&) {};
+void (*xxTexture::Reader)(xxTexturePtr const& texture) = [](xxTexturePtr const&) {};
 //==============================================================================
 //  Binary
 //==============================================================================
-xxTexturePtr (*xxTexture::BinaryCreate)() = []() { return xxTexture::Create(0, 0, 0, 0, 0, 0); };
+xxTexturePtr (*xxTexture::BinaryCreate)() = []() { return xxTexture::Create(); };
 //------------------------------------------------------------------------------
 void xxTexture::BinaryRead(xxBinary& binary)
 {

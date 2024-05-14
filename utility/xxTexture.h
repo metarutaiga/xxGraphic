@@ -18,7 +18,7 @@ public:
     void                    Invalidate();
     void                    Update(uint64_t device);
 
-    static xxTexturePtr     Create(uint64_t format, int width, int height, int depth, int mipmap, int array);
+    static xxTexturePtr     Create(uint64_t format = 0, int width = 0, int height = 0, int depth = 0, int mipmap = 0, int array = 0);
     static xxTexturePtr     Create2D(uint64_t format, int width, int height, int mipmap);
     static xxTexturePtr     Create3D(uint64_t format, int width, int height, int depth, int mipmap);
     static xxTexturePtr     CreateCube(uint64_t format, int width, int height, int mipmap);
@@ -29,16 +29,19 @@ public:
 
     static size_t         (*Calculate)(uint64_t format, int width, int height, int depth);
     static void           (*Loader)(xxTexturePtr& texture, std::string const& path);
+    static void           (*Reader)(xxTexturePtr const& texture);
 
 protected:
     xxTexture(uint64_t format, int width, int height, int depth, int mipmap, int array);
     virtual ~xxTexture();
 
+    xxTextureWeakPtr        m_this;
     void*                   m_images[16] = {};
     bool                    m_imageModified = false;
 
 public:
     std::string             Name = "";
+    std::string             Path = "";
 
     uint64_t const          Format = 0;
     int const               Width = 0;
