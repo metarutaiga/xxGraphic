@@ -1051,6 +1051,43 @@ uint64_t xxCreateTextureD3D12(uint64_t device, uint64_t format, int width, int h
     if (d3dTexture == nullptr)
         return 0;
 
+    struct { DXGI_FORMAT pixelFormat; UINT mapping; } T;
+    switch (format)
+    {
+    case "RGB565"_FOURCC:   T = { DXGI_FORMAT_B5G6R5_UNORM,         D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(2, 1, 0, 3) }; break;
+    case "BGR565"_FOURCC:   T = { DXGI_FORMAT_B5G6R5_UNORM,         D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING            }; break;
+    case "ARGB1555"_FOURCC: T = { DXGI_FORMAT_B5G5R5A1_UNORM,       D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING            }; break;
+    case "ABGR1555"_FOURCC: T = { DXGI_FORMAT_B5G5R5A1_UNORM,       D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING            }; break;
+    case "ARGB4444"_FOURCC: T = { DXGI_FORMAT_B4G4R4A4_UNORM,       D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(1, 0, 3, 2) }; break;
+    case "ABGR4444"_FOURCC: T = { DXGI_FORMAT_B4G4R4A4_UNORM,       D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(3, 0, 1, 2) }; break;
+    case "RGBA4444"_FOURCC: T = { DXGI_FORMAT_B4G4R4A4_UNORM,       D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(2, 1, 0, 3) }; break;
+    case "BGRA4444"_FOURCC: T = { DXGI_FORMAT_B4G4R4A4_UNORM,       D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING            }; break;
+    case "RGBA5551"_FOURCC: T = { DXGI_FORMAT_B5G5R5A1_UNORM,       D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(2, 1, 0, 3) }; break;
+    case "BGRA5551"_FOURCC: T = { DXGI_FORMAT_B5G5R5A1_UNORM,       D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING            }; break;
+    case "ARGB8888"_FOURCC: T = { DXGI_FORMAT_R8G8B8A8_UNORM,       D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(1, 2, 3, 0) }; break;
+    case "RGBA8888"_FOURCC: T = { DXGI_FORMAT_R8G8B8A8_UNORM,       D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING            }; break;
+    case "ABGR8888"_FOURCC: T = { DXGI_FORMAT_B8G8R8A8_UNORM,       D3D12_ENCODE_SHADER_4_COMPONENT_MAPPING(3, 0, 1, 2) }; break;
+    case "BGRA8888"_FOURCC: T = { DXGI_FORMAT_B8G8R8A8_UNORM,       D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING            }; break;
+    case "DS24"_FOURCC:     T = { DXGI_FORMAT_D24_UNORM_S8_UINT,    D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING            }; break;
+    case "BC1"_FOURCC:
+    case "DXT1"_FOURCC:     T = { DXGI_FORMAT_BC1_UNORM,            D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING            }; break;
+    case "BC2"_FOURCC:
+    case "DXT3"_FOURCC:     T = { DXGI_FORMAT_BC2_UNORM,            D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING            }; break;
+    case "BC3"_FOURCC:
+    case "DXT5"_FOURCC:     T = { DXGI_FORMAT_BC3_UNORM,            D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING            }; break;
+    case "BC4S"_FOURCC:     T = { DXGI_FORMAT_BC4_SNORM,            D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING            }; break;
+    case "BC4U"_FOURCC:
+    case "ATI1"_FOURCC:     T = { DXGI_FORMAT_BC4_UNORM,            D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING            }; break;
+    case "BC5S"_FOURCC:     T = { DXGI_FORMAT_BC5_SNORM,            D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING            }; break;
+    case "BC5U"_FOURCC:
+    case "ATI2"_FOURCC:     T = { DXGI_FORMAT_BC5_UNORM,            D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING            }; break;
+    case "BC6H"_FOURCC:     T = { DXGI_FORMAT_BC6H_SF16,            D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING            }; break;
+    case "BC7"_FOURCC:      T = { DXGI_FORMAT_BC7_UNORM,            D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING            }; break;
+    default:
+        xxLog("xxGraphic", "Unknown format (%.8s)", &format);
+        return 0;
+    }
+
     D3D12_SHADER_RESOURCE_VIEW_DESC viewDesc = {};
     ID3D12Resource* d3dResource = nullptr;
 
@@ -1067,7 +1104,7 @@ uint64_t xxCreateTextureD3D12(uint64_t device, uint64_t format, int width, int h
         desc.Height = height;
         desc.DepthOrArraySize = 1;
         desc.MipLevels = mipmap;
-        desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        desc.Format = T.pixelFormat;
         desc.SampleDesc.Count = 1;
 
         ID3D12Resource* texture = nullptr;
@@ -1082,7 +1119,7 @@ uint64_t xxCreateTextureD3D12(uint64_t device, uint64_t format, int width, int h
         viewDesc.Format = desc.Format;
         viewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
         viewDesc.Texture2D.MipLevels = mipmap;
-        viewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        viewDesc.Shader4ComponentMapping = T.mapping;
     }
 
     if (d3dResource == nullptr)
@@ -1094,6 +1131,7 @@ uint64_t xxCreateTextureD3D12(uint64_t device, uint64_t format, int width, int h
     d3dTexture->texture = d3dResource;
     d3dTexture->textureCPUHandle = {};
     d3dTexture->textureGPUHandle = {};
+    d3dTexture->format = T.pixelFormat;
     d3dTexture->width = width;
     d3dTexture->height = height;
     d3dTexture->depth = depth;
@@ -1213,7 +1251,7 @@ void xxUnmapTextureD3D12(uint64_t device, uint64_t texture, int level, int array
             textureLocation.SubresourceIndex = level;
             uploadLocation.pResource = d3dTexture->upload;
             uploadLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-            uploadLocation.PlacedFootprint.Footprint.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+            uploadLocation.PlacedFootprint.Footprint.Format = d3dTexture->format;
             uploadLocation.PlacedFootprint.Footprint.Width = width;
             uploadLocation.PlacedFootprint.Footprint.Height = height;
             uploadLocation.PlacedFootprint.Footprint.Depth = depth;

@@ -661,6 +661,43 @@ uint64_t xxCreateTextureD3D10(uint64_t device, uint64_t format, int width, int h
     if (d3dTexture == nullptr)
         return 0;
 
+    DXGI_FORMAT pixelFormat;
+    switch (format)
+    {
+    case "RGB565"_FOURCC:
+    case "BGR565"_FOURCC:   pixelFormat = DXGI_FORMAT_B5G6R5_UNORM;         break;
+    case "ARGB1555"_FOURCC:
+    case "ABGR1555"_FOURCC: pixelFormat = DXGI_FORMAT_B5G5R5A1_UNORM;       break;
+    case "ARGB4444"_FOURCC:
+    case "ABGR4444"_FOURCC:
+    case "RGBA4444"_FOURCC:
+    case "BGRA4444"_FOURCC: pixelFormat = DXGI_FORMAT_B4G4R4A4_UNORM;       break;
+    case "RGBA5551"_FOURCC:
+    case "BGRA5551"_FOURCC: pixelFormat = DXGI_FORMAT_B5G5R5A1_UNORM;       break;
+    case "ARGB8888"_FOURCC:
+    case "RGBA8888"_FOURCC: pixelFormat = DXGI_FORMAT_R8G8B8A8_UNORM;       break;
+    case "ABGR8888"_FOURCC:
+    case "BGRA8888"_FOURCC: pixelFormat = DXGI_FORMAT_B8G8R8A8_UNORM;       break;
+    case "DS24"_FOURCC:     pixelFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;    break;
+    case "BC1"_FOURCC:
+    case "DXT1"_FOURCC:     pixelFormat = DXGI_FORMAT_BC1_UNORM;            break;
+    case "BC2"_FOURCC:
+    case "DXT3"_FOURCC:     pixelFormat = DXGI_FORMAT_BC2_UNORM;            break;
+    case "BC3"_FOURCC:
+    case "DXT5"_FOURCC:     pixelFormat = DXGI_FORMAT_BC3_UNORM;            break;
+    case "BC4S"_FOURCC:     pixelFormat = DXGI_FORMAT_BC4_SNORM;            break;
+    case "BC4U"_FOURCC:
+    case "ATI1"_FOURCC:     pixelFormat = DXGI_FORMAT_BC4_UNORM;            break;
+    case "BC5S"_FOURCC:     pixelFormat = DXGI_FORMAT_BC5_SNORM;            break;
+    case "BC5U"_FOURCC:
+    case "ATI2"_FOURCC:     pixelFormat = DXGI_FORMAT_BC5_UNORM;            break;
+    case "BC6H"_FOURCC:     pixelFormat = DXGI_FORMAT_BC6H_SF16;            break;
+    case "BC7"_FOURCC:      pixelFormat = DXGI_FORMAT_BC7_UNORM;            break;
+    default:
+        xxLog("xxGraphic", "Unknown format (%.8s)", &format);
+        return 0;
+    }
+
     D3D10_SHADER_RESOURCE_VIEW_DESC viewDesc = {};
     ID3D10Resource* d3dTextureGPU = nullptr;
     ID3D10Resource* d3dTextureCPU = nullptr;
@@ -692,7 +729,7 @@ uint64_t xxCreateTextureD3D10(uint64_t device, uint64_t format, int width, int h
         texture2DDesc.Height = height;
         texture2DDesc.MipLevels = mipmap;
         texture2DDesc.ArraySize = array;
-        texture2DDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        texture2DDesc.Format = pixelFormat;
         texture2DDesc.SampleDesc.Count = 1;
         texture2DDesc.Usage = mipmap > 1 ? D3D10_USAGE_DEFAULT : D3D10_USAGE_DYNAMIC;
         texture2DDesc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
@@ -734,7 +771,7 @@ uint64_t xxCreateTextureD3D10(uint64_t device, uint64_t format, int width, int h
         texture2DDesc.Height = height;
         texture2DDesc.MipLevels = mipmap;
         texture2DDesc.ArraySize = array;
-        texture2DDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        texture2DDesc.Format = pixelFormat;
         texture2DDesc.SampleDesc.Count = 1;
         texture2DDesc.Usage = mipmap > 1 ? D3D10_USAGE_DEFAULT : D3D10_USAGE_DYNAMIC;
         texture2DDesc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
@@ -777,7 +814,7 @@ uint64_t xxCreateTextureD3D10(uint64_t device, uint64_t format, int width, int h
         texture3DDesc.Height = height;
         texture3DDesc.Depth = depth;
         texture3DDesc.MipLevels = mipmap;
-        texture3DDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        texture3DDesc.Format = pixelFormat;
         texture3DDesc.Usage = mipmap > 1 ? D3D10_USAGE_DEFAULT : D3D10_USAGE_DYNAMIC;
         texture3DDesc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
         texture3DDesc.CPUAccessFlags = mipmap > 1 ? 0 : D3D10_CPU_ACCESS_WRITE;
