@@ -4,7 +4,7 @@
 // Copyright (c) 2019-2024 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
-#include "xxGraphic.h"
+#include <xxGraphic/xxGraphic.h>
 #include "xxBinary.h"
 #include "xxMesh.h"
 #include "xxNode.h"
