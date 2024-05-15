@@ -169,7 +169,7 @@ struct TEXTUREGL
     unsigned int    depth;
     unsigned int    mipmap;
     unsigned int    array;
-    unsigned int    strides[16];
+    int             strides[16];
     void const*     external;
     void const*     image;
     void const*     device;
