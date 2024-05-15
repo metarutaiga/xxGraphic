@@ -403,7 +403,14 @@ char* xxOpenDirectory(uint64_t* handle, char const* path, ...)
     if ((*dir) == nullptr)
     {
         char temp[MAX_PATH];
-        snprintf(temp, MAX_PATH, "%s\\%s", path, "*.*");
+        snprintf(temp, MAX_PATH, "%s/%s", path, "*.*");
+        for (char& c : temp)
+        {
+            if (c == 0)
+                break;
+            if (c == '/')
+                c = '\\';
+        }
         (*dir) = FindFirstFileA(temp, &data);
         if ((*dir) == INVALID_HANDLE_VALUE)
             return nullptr;
@@ -457,11 +464,7 @@ char* xxOpenDirectory(uint64_t* handle, char const* path, ...)
                 strcpy(result, filename);
                 if (folder)
                 {
-#if defined(xxWINDOWS)
-                    strcat(result, "\\");
-#else
                     strcat(result, "/");
-#endif
                 }
             }
             break;

@@ -876,6 +876,7 @@ struct D3D12TEXTURE
     ID3D12Resource*             texture;
     D3D12_CPU_DESCRIPTOR_HANDLE textureCPUHandle;
     D3D12_GPU_DESCRIPTOR_HANDLE textureGPUHandle;
+    DXGI_FORMAT                 format;
     UINT                        width;
     UINT                        height;
     UINT                        depth;

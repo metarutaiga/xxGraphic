@@ -540,6 +540,45 @@ uint64_t xxCreateTextureD3D9(uint64_t device, uint64_t format, int width, int he
     if (width == 0 || height == 0 || depth == 0 || mipmap == 0 || array == 0)
         return 0;
 
+    D3DFORMAT D3DFMT_ATI1 = D3DFORMAT(MAKEFOURCC('A', 'T', 'I', '1'));
+    D3DFORMAT D3DFMT_ATI2 = D3DFORMAT(MAKEFOURCC('A', 'T', 'I', '2'));
+    D3DFORMAT pixelFormat;
+    switch (format)
+    {
+    case "RGB565"_FOURCC:
+    case "BGR565"_FOURCC:   pixelFormat = D3DFMT_R5G6B5;    break;
+    case "ARGB1555"_FOURCC:
+    case "ABGR1555"_FOURCC: pixelFormat = D3DFMT_A1R5G5B5;  break;
+    case "ARGB4444"_FOURCC:
+    case "ABGR4444"_FOURCC:
+    case "RGBA4444"_FOURCC:
+    case "BGRA4444"_FOURCC: pixelFormat = D3DFMT_A4R4G4B4;  break;
+    case "RGBA5551"_FOURCC:
+    case "BGRA5551"_FOURCC: pixelFormat = D3DFMT_A1R5G5B5;  break;
+    case "ARGB8888"_FOURCC:
+    case "RGBA8888"_FOURCC:
+    case "ABGR8888"_FOURCC:
+    case "BGRA8888"_FOURCC: pixelFormat = D3DFMT_A8R8G8B8;  break;
+    case "DS24"_FOURCC:     pixelFormat = D3DFMT_D24S8;     break;
+    case "BC1"_FOURCC:
+    case "DXT1"_FOURCC:     pixelFormat = D3DFMT_DXT1;      break;
+    case "BC2"_FOURCC:
+    case "DXT3"_FOURCC:     pixelFormat = D3DFMT_DXT3;      break;
+    case "BC3"_FOURCC:
+    case "DXT5"_FOURCC:     pixelFormat = D3DFMT_DXT5;      break;
+    case "BC4S"_FOURCC:     pixelFormat = D3DFMT_ATI1;      break;
+    case "BC4U"_FOURCC:
+    case "ATI1"_FOURCC:     pixelFormat = D3DFMT_ATI1;      break;
+    case "BC5S"_FOURCC:     pixelFormat = D3DFMT_ATI2;      break;
+    case "BC5U"_FOURCC:
+    case "ATI2"_FOURCC:     pixelFormat = D3DFMT_ATI2;      break;
+    case "BC6H"_FOURCC:     pixelFormat = D3DFMT_DXT5;      break;
+    case "BC7"_FOURCC:      pixelFormat = D3DFMT_DXT5;      break;
+    default:
+        xxLog("xxGraphic", "Unknown format (%.8s)", &format);
+        return 0;
+    }
+
     if (external)
     {
         IUnknown* unknown = (IUnknown*)external;
@@ -554,7 +593,7 @@ uint64_t xxCreateTextureD3D9(uint64_t device, uint64_t format, int width, int he
     if (depth == 1 && array == 1)
     {
         LPDIRECT3DTEXTURE9 d3dTexture = nullptr;
-        HRESULT hResult = d3dDevice->CreateTexture(width, height, mipmap, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &d3dTexture, nullptr);
+        HRESULT hResult = d3dDevice->CreateTexture(width, height, mipmap, D3DUSAGE_DYNAMIC, pixelFormat, D3DPOOL_DEFAULT, &d3dTexture, nullptr);
         if (hResult != S_OK)
             return 0;
 
@@ -564,7 +603,7 @@ uint64_t xxCreateTextureD3D9(uint64_t device, uint64_t format, int width, int he
     if (width == height && depth == 1 && array == 6)
     {
         LPDIRECT3DCUBETEXTURE9 d3dCubeTexture = nullptr;
-        HRESULT hResult = d3dDevice->CreateCubeTexture(width, mipmap, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &d3dCubeTexture, nullptr);
+        HRESULT hResult = d3dDevice->CreateCubeTexture(width, mipmap, D3DUSAGE_DYNAMIC, pixelFormat, D3DPOOL_DEFAULT, &d3dCubeTexture, nullptr);
         if (hResult != S_OK)
             return 0;
 
@@ -574,7 +613,7 @@ uint64_t xxCreateTextureD3D9(uint64_t device, uint64_t format, int width, int he
     if (depth != 1 && array == 1)
     {
         LPDIRECT3DVOLUMETEXTURE9 d3dVolumeTexture = nullptr;
-        HRESULT hResult = d3dDevice->CreateVolumeTexture(width, height, depth, mipmap, D3DUSAGE_DYNAMIC, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &d3dVolumeTexture, nullptr);
+        HRESULT hResult = d3dDevice->CreateVolumeTexture(width, height, depth, mipmap, D3DUSAGE_DYNAMIC, pixelFormat, D3DPOOL_DEFAULT, &d3dVolumeTexture, nullptr);
         if (hResult != S_OK)
             return 0;
 

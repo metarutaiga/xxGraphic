@@ -6,6 +6,8 @@
 //==============================================================================
 #pragma once
 
+#include <stddef.h>
+
 #define NUM_BACK_BUFFERS 3
 
 enum xxGraphicDescriptor
@@ -333,13 +335,13 @@ inline T xxTemplateCompareOp(char const* name)
 }
 
 #if defined(__LP64__)
-constexpr unsigned long long operator""_FOURCC (char const* text, unsigned long length)
+constexpr unsigned long long operator""_FOURCC (char const* text, size_t length)
 #else
-constexpr unsigned long long operator""_FOURCC (char const* text, unsigned long long length)
+constexpr unsigned long long operator""_FOURCC (char const* text, size_t length)
 #endif
 {
     unsigned long long value = 0;
-    for (unsigned int i = 0; i < length; ++i)
+    for (size_t i = 0; i < length; ++i)
     {
         value += (unsigned long long)(unsigned char)text[i] << (i * 8);
     }
