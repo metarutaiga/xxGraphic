@@ -6,8 +6,8 @@
 //==============================================================================
 #pragma once
 
-#include "xxSystem.h"
-#include "xxVector.h"
+#include <xxGraphic/xxSystem.h>
+#include <xxGraphic/xxVector.h>
 
 typedef struct xxMatrix2x2 xxMatrix2;
 typedef struct xxMatrix3x3 xxMatrix3;
