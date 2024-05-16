@@ -33,8 +33,8 @@ xxNodePtr xxBinary::Load(char const* name)
         const_cast<std::string&>(binary.Path) = xxFile::GetPath(name);
 
         char signature[12];
-        if (file->Read(signature, 12) &&
-            file->Read(const_cast<int*>(&binary.Version), 4) &&
+        if (file->Read(signature, 12) == 12 &&
+            file->Read(const_cast<int*>(&binary.Version), 4) == 4 &&
             strcmp(signature, xxBINARY_SIGNATURE) == 0)
         {
             node = xxNode::BinaryCreate();
@@ -69,8 +69,8 @@ bool xxBinary::Save(char const* name, xxNodePtr const& node)
         const_cast<std::string&>(binary.Path) = xxFile::GetPath(name);
 
         char signature[12] = xxBINARY_SIGNATURE;
-        if (file->Write(signature, 12) &&
-            file->Write(&binary.Version, 4))
+        if (file->Write(signature, 12) == 12 &&
+            file->Write(&binary.Version, 4) == 4)
         {
             if (node)
             {
@@ -95,7 +95,7 @@ bool xxBinary::Read(void* data, size_t size)
         return false;
     m_called++;
 
-    if (m_file->Read(data, size) == false)
+    if (m_file->Read(data, size) != size)
     {
         m_failed = m_called;
         const_cast<bool&>(Safe) = false;
@@ -111,7 +111,7 @@ bool xxBinary::Write(void const* data, size_t size)
         return false;
     m_called++;
 
-    if (m_file->Write(data, size) == false)
+    if (m_file->Write(data, size) != size)
     {
         m_failed = m_called;
         const_cast<bool&>(Safe) = false;

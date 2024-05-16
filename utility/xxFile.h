@@ -14,8 +14,8 @@ public:
     xxFile(void* file);
     virtual ~xxFile();
 
-    virtual bool        Read(void* data, size_t size);
-    virtual bool        Write(void const* data, size_t size);
+    virtual size_t      Read(void* data, size_t size);
+    virtual size_t      Write(void const* data, size_t size);
 
     virtual size_t      Position() const;
     virtual size_t      Size() const;
