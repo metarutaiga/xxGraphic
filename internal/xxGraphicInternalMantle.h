@@ -66,7 +66,7 @@ inline GR_COMPARE_FUNC grCompareOp(char const* name)
 //==============================================================================
 //  Framebuffer
 //==============================================================================
-struct FRAMEBUFFERGR
+struct GRFRAMEBUFFER
 {
     GR_IMAGE                colorImage;
     GR_GPU_MEMORY           colorMemory;
@@ -78,7 +78,7 @@ struct FRAMEBUFFERGR
 //==============================================================================
 //  Swapchain
 //==============================================================================
-struct SWAPCHAINGR : public FRAMEBUFFERGR
+struct GRSWAPCHAIN : public GRFRAMEBUFFER
 {
     GR_CMD_BUFFER   commandBuffers[NUM_BACK_BUFFERS];
     int             commandBufferIndex;
@@ -89,7 +89,7 @@ struct SWAPCHAINGR : public FRAMEBUFFERGR
 //==============================================================================
 //  Render Pass
 //==============================================================================
-union RENDERPASSGR
+union GRRENDERPASS
 {
     uint64_t    value;
     struct
@@ -101,7 +101,7 @@ union RENDERPASSGR
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-struct VERTEXATTRIBUTEGR
+struct GRVERTEXATTRIBUTE
 {
     GR_MEMORY_VIEW_ATTACH_INFO  infos[16];
     int                         count;

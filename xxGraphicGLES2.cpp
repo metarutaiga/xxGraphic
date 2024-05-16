@@ -113,10 +113,10 @@ bool xxTestDeviceGLES2(uint64_t device)
 //==============================================================================
 uint64_t xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain)
 {
-    SWAPCHAINGL* glOldSwapchain = reinterpret_cast<SWAPCHAINGL*>(oldSwapchain);
+    GLSWAPCHAIN* glOldSwapchain = reinterpret_cast<GLSWAPCHAIN*>(oldSwapchain);
     if (glOldSwapchain && glOldSwapchain->view == view && glOldSwapchain->width == width && glOldSwapchain->height == height)
         return oldSwapchain;
-    SWAPCHAINGL* glSwapchain = xxAlloc(SWAPCHAINGL);
+    GLSWAPCHAIN* glSwapchain = xxAlloc(GLSWAPCHAIN);
     if (glSwapchain == nullptr)
         return 0;
 
@@ -146,7 +146,7 @@ uint64_t xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view
 //------------------------------------------------------------------------------
 void xxDestroySwapchainGLES2(uint64_t swapchain)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(swapchain);
+    GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(swapchain);
     if (glSwapchain == nullptr)
         return;
 
@@ -156,7 +156,7 @@ void xxDestroySwapchainGLES2(uint64_t swapchain)
 //------------------------------------------------------------------------------
 void xxPresentSwapchainGLES2(uint64_t swapchain)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(swapchain);
+    GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(swapchain);
     if (glSwapchain == nullptr)
         return;
 
@@ -165,7 +165,7 @@ void xxPresentSwapchainGLES2(uint64_t swapchain)
 //------------------------------------------------------------------------------
 uint64_t xxGetCommandBufferGLES2(uint64_t device, uint64_t swapchain)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(swapchain);
+    GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(swapchain);
     if (glSwapchain == nullptr)
         return 0;
 
@@ -184,7 +184,7 @@ uint64_t xxGetCommandBufferGLES2(uint64_t device, uint64_t swapchain)
 //------------------------------------------------------------------------------
 uint64_t xxGetFramebufferGLES2(uint64_t device, uint64_t swapchain, float* scale)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(swapchain);
+    GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(swapchain);
 
     if (scale)
     {
@@ -279,11 +279,11 @@ void xxEndRenderPassGLES2(uint64_t commandEncoder, uint64_t framebuffer, uint64_
 //==============================================================================
 uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, int* attribute)
 {
-    VERTEXATTRIBUTEGL* glVertexAttribute = xxAlloc(VERTEXATTRIBUTEGL);
+    GLVERTEXATTRIBUTE* glVertexAttribute = xxAlloc(GLVERTEXATTRIBUTE);
     if (glVertexAttribute == nullptr)
         return 0;
 
-    VERTEXATTRIBUTEGL::Attribute* attributes = glVertexAttribute->attributes;
+    GLVERTEXATTRIBUTE::Attribute* attributes = glVertexAttribute->attributes;
     int normalIndex = 0;
     int textureIndex = 0;
     int stride = 0;
@@ -379,7 +379,7 @@ uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, int* attribute
 //------------------------------------------------------------------------------
 void xxDestroyVertexAttributeGLES2(uint64_t vertexAttribute)
 {
-    VERTEXATTRIBUTEGL* glVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEGL*>(vertexAttribute);
+    GLVERTEXATTRIBUTE* glVertexAttribute = reinterpret_cast<GLVERTEXATTRIBUTE*>(vertexAttribute);
 
     xxFree(glVertexAttribute);
 }
@@ -388,7 +388,7 @@ void xxDestroyVertexAttributeGLES2(uint64_t vertexAttribute)
 //==============================================================================
 uint64_t xxCreateConstantBufferGLES2(uint64_t device, int size)
 {
-    BUFFERGL* glBuffer = xxAlloc(BUFFERGL);
+    GLBUFFER* glBuffer = xxAlloc(GLBUFFER);
     if (glBuffer == nullptr)
         return 0;
 
@@ -402,7 +402,7 @@ uint64_t xxCreateConstantBufferGLES2(uint64_t device, int size)
 //------------------------------------------------------------------------------
 uint64_t xxCreateIndexBufferGLES2(uint64_t device, int size)
 {
-    BUFFERGL* glBuffer = xxAlloc(BUFFERGL);
+    GLBUFFER* glBuffer = xxAlloc(GLBUFFER);
     if (glBuffer == nullptr)
         return 0;
 
@@ -419,7 +419,7 @@ uint64_t xxCreateIndexBufferGLES2(uint64_t device, int size)
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexBufferGLES2(uint64_t device, int size, uint64_t vertexAttribute)
 {
-    BUFFERGL* glBuffer = xxAlloc(BUFFERGL);
+    GLBUFFER* glBuffer = xxAlloc(GLBUFFER);
     if (glBuffer == nullptr)
         return 0;
 
@@ -436,7 +436,7 @@ uint64_t xxCreateVertexBufferGLES2(uint64_t device, int size, uint64_t vertexAtt
 //------------------------------------------------------------------------------
 void xxDestroyBufferGLES2(uint64_t device, uint64_t buffer)
 {
-    BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(buffer);
+    GLBUFFER* glBuffer = reinterpret_cast<GLBUFFER*>(buffer);
     if (glBuffer == nullptr)
         return;
 
@@ -448,7 +448,7 @@ void xxDestroyBufferGLES2(uint64_t device, uint64_t buffer)
 //------------------------------------------------------------------------------
 void* xxMapBufferGLES2(uint64_t device, uint64_t buffer)
 {
-    BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(buffer);
+    GLBUFFER* glBuffer = reinterpret_cast<GLBUFFER*>(buffer);
     if (glBuffer == nullptr)
         return nullptr;
 
@@ -457,7 +457,7 @@ void* xxMapBufferGLES2(uint64_t device, uint64_t buffer)
 //------------------------------------------------------------------------------
 void xxUnmapBufferGLES2(uint64_t device, uint64_t buffer)
 {
-    BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(buffer);
+    GLBUFFER* glBuffer = reinterpret_cast<GLBUFFER*>(buffer);
     if (glBuffer == nullptr)
         return;
     if (glBuffer->type == GL_UNIFORM_BUFFER)
@@ -474,7 +474,7 @@ uint64_t xxCreateTextureGLES2(uint64_t device, uint64_t format, int width, int h
     if (width == 0 || height == 0 || depth == 0 || mipmap == 0 || array == 0)
         return 0;
 
-    TEXTUREGL* glTexture = xxAlloc(TEXTUREGL);
+    GLTEXTURE* glTexture = xxAlloc(GLTEXTURE);
     if (glTexture == nullptr)
         return 0;
 
@@ -598,7 +598,7 @@ uint64_t xxCreateTextureGLES2(uint64_t device, uint64_t format, int width, int h
 //------------------------------------------------------------------------------
 void xxDestroyTextureGLES2(uint64_t texture)
 {
-    TEXTUREGL* glTexture = reinterpret_cast<TEXTUREGL*>(texture);
+    GLTEXTURE* glTexture = reinterpret_cast<GLTEXTURE*>(texture);
     if (glTexture == nullptr)
         return;
 
@@ -627,7 +627,7 @@ void xxDestroyTextureGLES2(uint64_t texture)
 //------------------------------------------------------------------------------
 void* xxMapTextureGLES2(uint64_t device, uint64_t texture, int* stride, int level, int array)
 {
-    TEXTUREGL* glTexture = reinterpret_cast<TEXTUREGL*>(texture);
+    GLTEXTURE* glTexture = reinterpret_cast<GLTEXTURE*>(texture);
     if (glTexture == nullptr)
         return nullptr;
 
@@ -651,7 +651,7 @@ void* xxMapTextureGLES2(uint64_t device, uint64_t texture, int* stride, int leve
 //------------------------------------------------------------------------------
 void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, int level, int array)
 {
-    TEXTUREGL* glTexture = reinterpret_cast<TEXTUREGL*>(texture);
+    GLTEXTURE* glTexture = reinterpret_cast<GLTEXTURE*>(texture);
     if (glTexture == nullptr)
         return;
 
@@ -738,7 +738,7 @@ void xxUnmapTextureGLES2(uint64_t device, uint64_t texture, int level, int array
 //==============================================================================
 uint64_t xxCreateSamplerGLES2(uint64_t device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy)
 {
-    SAMPLERGL glSampler = {};
+    GLSAMPLER glSampler = {};
 
     glSampler.addressU = clampU;
     glSampler.addressV = clampV;
@@ -902,7 +902,7 @@ static void checkProgram(GLuint glProgram)
 //------------------------------------------------------------------------------
 uint64_t xxCreateBlendStateGLES2(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha)
 {
-    BLENDGL* glBlend = xxAlloc(BLENDGL);
+    GLBLEND* glBlend = xxAlloc(GLBLEND);
     if (glBlend == nullptr)
         return 0;
     glBlend->blendSourceColor = glBlendFactor(sourceColor);
@@ -922,7 +922,7 @@ uint64_t xxCreateBlendStateGLES2(uint64_t device, char const* sourceColor, char 
 //------------------------------------------------------------------------------
 uint64_t xxCreateDepthStencilStateGLES2(uint64_t device, char const* depthTest, bool depthWrite)
 {
-    STATEGL glState = {};
+    GLSTATE glState = {};
     glState.depthTest = glCompareOp(depthTest);
     glState.depthWrite = depthWrite;
     return static_cast<uint64_t>(glState.value);
@@ -930,7 +930,7 @@ uint64_t xxCreateDepthStencilStateGLES2(uint64_t device, char const* depthTest, 
 //------------------------------------------------------------------------------
 uint64_t xxCreateRasterizerStateGLES2(uint64_t device, bool cull, bool scissor)
 {
-    STATEGL glState = {};
+    GLSTATE glState = {};
     glState.cull = cull;
     glState.scissor = scissor;
     return static_cast<uint64_t>(glState.value);
@@ -938,23 +938,23 @@ uint64_t xxCreateRasterizerStateGLES2(uint64_t device, bool cull, bool scissor)
 //------------------------------------------------------------------------------
 uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
 {
-    VERTEXATTRIBUTEGL* glVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEGL*>(vertexAttribute);
+    GLVERTEXATTRIBUTE* glVertexAttribute = reinterpret_cast<GLVERTEXATTRIBUTE*>(vertexAttribute);
     if (glVertexAttribute == nullptr)
         return 0;
-    PIPELINEGL* glPipeline = xxAlloc(PIPELINEGL);
+    GLPIPELINE* glPipeline = xxAlloc(GLPIPELINE);
     if (glPipeline == nullptr)
         return 0;
 
-    BLENDGL* glBlendState = reinterpret_cast<BLENDGL*>(blendState);
-    STATEGL glDepthStencilState = { depthStencilState };
-    STATEGL glRasterizerState = { rasterizerState };
+    GLBLEND* glBlendState = reinterpret_cast<GLBLEND*>(blendState);
+    GLSTATE glDepthStencilState = { depthStencilState };
+    GLSTATE glRasterizerState = { rasterizerState };
 
     GLuint glProgram = glCreateProgram();
 
-    VERTEXATTRIBUTEGL::Attribute* attributes = glVertexAttribute->attributes;
+    GLVERTEXATTRIBUTE::Attribute* attributes = glVertexAttribute->attributes;
     for (int i = 0; i < glVertexAttribute->count; ++i)
     {
-        VERTEXATTRIBUTEGL::Attribute& attribute = attributes[i];
+        GLVERTEXATTRIBUTE::Attribute& attribute = attributes[i];
         glBindAttribLocation(glProgram, attribute.index, attribute.name);
     }
 
@@ -970,7 +970,7 @@ uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t bl
     glPipeline->texture = glGetUniformLocation(glProgram, "samDiffuse");
     glPipeline->uniformVS = glGetUniformLocation(glProgram, "uniBufferVS");
     glPipeline->uniformFS = glGetUniformLocation(glProgram, "uniBufferFS");
-    glPipeline->blend = glBlendState ? (*glBlendState) : BLENDGL{ .blendEnable = GL_FALSE };
+    glPipeline->blend = glBlendState ? (*glBlendState) : GLBLEND{ .blendEnable = GL_FALSE };
     glPipeline->state.depthTest = glDepthStencilState.depthTest;
     glPipeline->state.depthWrite = glDepthStencilState.depthWrite;
     glPipeline->state.cull = glRasterizerState.cull;
@@ -981,7 +981,7 @@ uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t bl
 //------------------------------------------------------------------------------
 void xxDestroyBlendStateGLES2(uint64_t blendState)
 {
-    BLENDGL* glBlend = reinterpret_cast<BLENDGL*>(blendState);
+    GLBLEND* glBlend = reinterpret_cast<GLBLEND*>(blendState);
 
     xxFree(glBlend);
 }
@@ -998,7 +998,7 @@ void xxDestroyRasterizerStateGLES2(uint64_t rasterizerState)
 //------------------------------------------------------------------------------
 void xxDestroyPipelineGLES2(uint64_t pipeline)
 {
-    PIPELINEGL* glPipeline = reinterpret_cast<PIPELINEGL*>(pipeline);
+    GLPIPELINE* glPipeline = reinterpret_cast<GLPIPELINE*>(pipeline);
     if (glPipeline == nullptr)
         return;
 
@@ -1015,7 +1015,7 @@ void xxSetViewportGLES2(uint64_t commandEncoder, int x, int y, int width, int he
 //------------------------------------------------------------------------------
 void xxSetScissorGLES2(uint64_t commandEncoder, int x, int y, int width, int height)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
+    GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(commandEncoder);
 
     y = (int)(glSwapchain->height * glSwapchain->scale) - y - height;
     glScissor(x, y, width, height);
@@ -1023,14 +1023,14 @@ void xxSetScissorGLES2(uint64_t commandEncoder, int x, int y, int width, int hei
 //------------------------------------------------------------------------------
 void xxSetPipelineGLES2(uint64_t commandEncoder, uint64_t pipeline)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
-    PIPELINEGL* glPipeline = reinterpret_cast<PIPELINEGL*>(pipeline);
-    VERTEXATTRIBUTEGL* vertexAttribute = glPipeline->vertexAttribute;
-    VERTEXATTRIBUTEGL::Attribute* attributes = vertexAttribute->attributes;
+    GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(commandEncoder);
+    GLPIPELINE* glPipeline = reinterpret_cast<GLPIPELINE*>(pipeline);
+    GLVERTEXATTRIBUTE* vertexAttribute = glPipeline->vertexAttribute;
+    GLVERTEXATTRIBUTE::Attribute* attributes = vertexAttribute->attributes;
 
     for (int i = 0; i < vertexAttribute->count; ++i)
     {
-        VERTEXATTRIBUTEGL::Attribute& attribute = attributes[i];
+        GLVERTEXATTRIBUTE::Attribute& attribute = attributes[i];
         glEnableVertexAttribArray(attribute.index);
     }
 
@@ -1064,7 +1064,7 @@ void xxSetPipelineGLES2(uint64_t commandEncoder, uint64_t pipeline)
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersGLES2(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
+    GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(commandEncoder);
  
     for (int i = 0; i < count; ++i)
     {
@@ -1079,11 +1079,11 @@ void xxSetVertexTexturesGLES2(uint64_t commandEncoder, int count, const uint64_t
 //------------------------------------------------------------------------------
 void xxSetFragmentTexturesGLES2(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
+    GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(commandEncoder);
 
     for (int i = 0; i < count; ++i)
     {
-        TEXTUREGL* glTexture = reinterpret_cast<TEXTUREGL*>(textures[i]);
+        GLTEXTURE* glTexture = reinterpret_cast<GLTEXTURE*>(textures[i]);
         if (glTexture == nullptr)
             continue;
         glActiveTexture(GL_TEXTURE0 + i);
@@ -1100,11 +1100,11 @@ void xxSetVertexSamplersGLES2(uint64_t commandEncoder, int count, const uint64_t
 //------------------------------------------------------------------------------
 void xxSetFragmentSamplersGLES2(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
+    GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(commandEncoder);
 
     for (int i = 0; i < count; ++i)
     {
-        SAMPLERGL glSampler = { samplers[i] };
+        GLSAMPLER glSampler = { samplers[i] };
         glActiveTexture(GL_TEXTURE0 + i);
         glTexParameteri(glSwapchain->textureTargets[i], GL_TEXTURE_WRAP_S, glSampler.addressU ? GL_CLAMP_TO_EDGE : GL_REPEAT);
         glTexParameteri(glSwapchain->textureTargets[i], GL_TEXTURE_WRAP_T, glSampler.addressV ? GL_CLAMP_TO_EDGE : GL_REPEAT);
@@ -1125,37 +1125,37 @@ void xxSetFragmentSamplersGLES2(uint64_t commandEncoder, int count, const uint64
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, int size)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
-    PIPELINEGL* glPipeline = reinterpret_cast<PIPELINEGL*>(glSwapchain->pipeline);
-    BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(buffer);
+    GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(commandEncoder);
+    GLPIPELINE* glPipeline = reinterpret_cast<GLPIPELINE*>(glSwapchain->pipeline);
+    GLBUFFER* glBuffer = reinterpret_cast<GLBUFFER*>(buffer);
 
     glUniform4fv(glPipeline->uniformVS, size / sizeof(float) / 4, (GLfloat*)glBuffer->memory);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, int size)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
-    PIPELINEGL* glPipeline = reinterpret_cast<PIPELINEGL*>(glSwapchain->pipeline);
-    BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(buffer);
+    GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(commandEncoder);
+    GLPIPELINE* glPipeline = reinterpret_cast<GLPIPELINE*>(glSwapchain->pipeline);
+    GLBUFFER* glBuffer = reinterpret_cast<GLBUFFER*>(buffer);
 
     glUniform4fv(glPipeline->uniformFS, size / sizeof(float) / 4, (GLfloat*)glBuffer->memory);
 }
 //------------------------------------------------------------------------------
 void xxDrawGLES2(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
-    PIPELINEGL* glPipeline = reinterpret_cast<PIPELINEGL*>(glSwapchain->pipeline);
-    VERTEXATTRIBUTEGL* vertexAttribute = glPipeline->vertexAttribute;
-    VERTEXATTRIBUTEGL::Attribute* attributes = vertexAttribute->attributes;
+    GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(commandEncoder);
+    GLPIPELINE* glPipeline = reinterpret_cast<GLPIPELINE*>(glSwapchain->pipeline);
+    GLVERTEXATTRIBUTE* vertexAttribute = glPipeline->vertexAttribute;
+    GLVERTEXATTRIBUTE::Attribute* attributes = vertexAttribute->attributes;
 
     int currentStream = -1;
     for (int i = 0; i < vertexAttribute->count; ++i)
     {
-        VERTEXATTRIBUTEGL::Attribute& attribute = attributes[i];
+        GLVERTEXATTRIBUTE::Attribute& attribute = attributes[i];
         if (currentStream != attribute.stream)
         {
             currentStream = attribute.stream;
-            BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(glSwapchain->vertexBuffers[attribute.stream]);
+            GLBUFFER* glBuffer = reinterpret_cast<GLBUFFER*>(glSwapchain->vertexBuffers[attribute.stream]);
 
             glBindBuffer(GL_ARRAY_BUFFER, glBuffer->buffer);
         }
@@ -1167,20 +1167,20 @@ void xxDrawGLES2(uint64_t commandEncoder, int vertexCount, int instanceCount, in
 //------------------------------------------------------------------------------
 void xxDrawIndexedGLES2(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
-    SWAPCHAINGL* glSwapchain = reinterpret_cast<SWAPCHAINGL*>(commandEncoder);
-    BUFFERGL* glIndexBuffer = reinterpret_cast<BUFFERGL*>(indexBuffer);
-    PIPELINEGL* glPipeline = reinterpret_cast<PIPELINEGL*>(glSwapchain->pipeline);
-    VERTEXATTRIBUTEGL* vertexAttribute = glPipeline->vertexAttribute;
-    VERTEXATTRIBUTEGL::Attribute* attributes = vertexAttribute->attributes;
+    GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(commandEncoder);
+    GLBUFFER* glIndexBuffer = reinterpret_cast<GLBUFFER*>(indexBuffer);
+    GLPIPELINE* glPipeline = reinterpret_cast<GLPIPELINE*>(glSwapchain->pipeline);
+    GLVERTEXATTRIBUTE* vertexAttribute = glPipeline->vertexAttribute;
+    GLVERTEXATTRIBUTE::Attribute* attributes = vertexAttribute->attributes;
 
     int currentStream = -1;
     for (int i = 0; i < vertexAttribute->count; ++i)
     {
-        VERTEXATTRIBUTEGL::Attribute& attribute = attributes[i];
+        GLVERTEXATTRIBUTE::Attribute& attribute = attributes[i];
         if (currentStream != attribute.stream)
         {
             currentStream = attribute.stream;
-            BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(glSwapchain->vertexBuffers[attribute.stream]);
+            GLBUFFER* glBuffer = reinterpret_cast<GLBUFFER*>(glSwapchain->vertexBuffers[attribute.stream]);
 
             glBindBuffer(GL_ARRAY_BUFFER, glBuffer->buffer);
         }

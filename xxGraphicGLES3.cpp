@@ -70,7 +70,7 @@ uint64_t xxCreateInstanceGLES3()
 //==============================================================================
 uint64_t xxCreateIndexBufferGLES3(uint64_t device, int size)
 {
-    BUFFERGL* glBuffer = xxAlloc(BUFFERGL);
+    GLBUFFER* glBuffer = xxAlloc(GLBUFFER);
     if (glBuffer == nullptr)
         return 0;
 
@@ -90,7 +90,7 @@ uint64_t xxCreateIndexBufferGLES3(uint64_t device, int size)
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexBufferGLES3(uint64_t device, int size, uint64_t vertexAttribute)
 {
-    BUFFERGL* glBuffer = xxAlloc(BUFFERGL);
+    GLBUFFER* glBuffer = xxAlloc(GLBUFFER);
     if (glBuffer == nullptr)
         return 0;
 
@@ -110,7 +110,7 @@ uint64_t xxCreateVertexBufferGLES3(uint64_t device, int size, uint64_t vertexAtt
 //------------------------------------------------------------------------------
 void* xxMapBufferGLES3(uint64_t device, uint64_t buffer)
 {
-    BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(buffer);
+    GLBUFFER* glBuffer = reinterpret_cast<GLBUFFER*>(buffer);
     if (glBuffer == nullptr)
         return nullptr;
     if (glBuffer->memory)
@@ -122,7 +122,7 @@ void* xxMapBufferGLES3(uint64_t device, uint64_t buffer)
 //------------------------------------------------------------------------------
 void xxUnmapBufferGLES3(uint64_t device, uint64_t buffer)
 {
-    BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(buffer);
+    GLBUFFER* glBuffer = reinterpret_cast<GLBUFFER*>(buffer);
     if (glBuffer == nullptr)
         return;
     if (glBuffer->memory)
