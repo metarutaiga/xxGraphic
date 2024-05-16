@@ -23,22 +23,22 @@ xxFile::~xxFile()
     }
 }
 //------------------------------------------------------------------------------
-bool xxFile::Read(void* data, size_t size)
+size_t xxFile::Read(void* data, size_t size)
 {
     FILE* file = reinterpret_cast<FILE*>(m_handle);
     if (file == nullptr)
-        return false;
+        return 0;
 
-    return (size == 0) || (fread(data, size, 1, file) == 1);
+    return fread(data, 1, size, file);
 }
 //------------------------------------------------------------------------------
-bool xxFile::Write(void const* data, size_t size)
+size_t xxFile::Write(void const* data, size_t size)
 {
     FILE* file = reinterpret_cast<FILE*>(m_handle);
     if (file == nullptr)
-        return false;
+        return 0;
 
-    return (size == 0) || (fwrite(data, size, 1, file) == 1);
+    return fwrite(data, 1, size, file);;
 }
 //------------------------------------------------------------------------------
 size_t xxFile::Position() const
