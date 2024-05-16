@@ -88,12 +88,12 @@ inline GLenum glCompareOp(char const* name)
 //==============================================================================
 //  Function
 //==============================================================================
-extern uint64_t             (*glCreateContext)(uint64_t device, void* view, void** display);
-extern void                 (*glDestroyContext)(uint64_t context, void* view, void* display);
-extern void*                (*glGetProcAddress)(char const* name);
-extern float                (*glGetScaleContext)(uint64_t context, void* view);
-extern void                 (*glMakeCurrentContext)(uint64_t context, void* display);
-extern void                 (*glPresentContext)(uint64_t context, void* display);
+extern uint64_t (*glCreateContext)(uint64_t device, void* view, void** display);
+extern void     (*glDestroyContext)(uint64_t context, void* view, void* display);
+extern void*    (*glGetProcAddress)(char const* name);
+extern float    (*glGetScaleContext)(uint64_t context, void* view);
+extern void     (*glMakeCurrentContext)(uint64_t context, void* display);
+extern void     (*glPresentContext)(uint64_t context, void* display);
 //==============================================================================
 inline void* getSymbolExtension(void* (GL_APIENTRYP getSymbol)(char const* name, bool* failed), char const* name, bool* failed)
 {
@@ -113,7 +113,7 @@ inline void* getSymbolExtension(void* (GL_APIENTRYP getSymbol)(char const* name,
 //==============================================================================
 //  Swapchain
 //==============================================================================
-struct SWAPCHAINGL
+struct GLSWAPCHAIN
 {
     uint64_t    context;
     void*       view;
@@ -129,7 +129,7 @@ struct SWAPCHAINGL
 //==============================================================================
 //  Vertex Attribute
 //==============================================================================
-struct VERTEXATTRIBUTEGL
+struct GLVERTEXATTRIBUTE
 {
     struct Attribute
     {
@@ -147,7 +147,7 @@ struct VERTEXATTRIBUTEGL
 //==============================================================================
 //  Buffer
 //==============================================================================
-struct BUFFERGL
+struct GLBUFFER
 {
     GLenum  type;
     GLuint  buffer;
@@ -157,7 +157,7 @@ struct BUFFERGL
 //==============================================================================
 //  Texture
 //==============================================================================
-struct TEXTUREGL
+struct GLTEXTURE
 {
     GLuint          texture;
     GLenum          target;
@@ -177,7 +177,7 @@ struct TEXTUREGL
 //==============================================================================
 //  Sampler
 //==============================================================================
-union SAMPLERGL
+union GLSAMPLER
 {
     uint64_t    value;
     struct
@@ -194,7 +194,7 @@ union SAMPLERGL
 //==============================================================================
 //  Pipeline
 //==============================================================================
-struct BLENDGL
+struct GLBLEND
 {
     GLboolean   blendEnable;
     GLenum      blendSourceColor;
@@ -205,7 +205,7 @@ struct BLENDGL
     GLenum      blendDestinationAlpha;
 };
 //------------------------------------------------------------------------------
-union STATEGL
+union GLSTATE
 {
     uint64_t        value;
     struct
@@ -217,15 +217,15 @@ union STATEGL
     };
 };
 //------------------------------------------------------------------------------
-struct PIPELINEGL
+struct GLPIPELINE
 {
     GLuint              program;
-    VERTEXATTRIBUTEGL*  vertexAttribute;
+    GLVERTEXATTRIBUTE*  vertexAttribute;
     GLint               texture;
     GLint               uniformVS;
     GLint               uniformFS;
-    BLENDGL             blend;
-    STATEGL             state;
+    GLBLEND             blend;
+    GLSTATE             state;
 };
 //==============================================================================
 //  Indirect Command

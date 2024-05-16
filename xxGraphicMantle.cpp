@@ -151,10 +151,10 @@ uint64_t xxCreateSwapchainMantle(uint64_t device, uint64_t renderPass, void* vie
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
         return 0;
-    SWAPCHAINGR* grOldSwapchain = reinterpret_cast<SWAPCHAINGR*>(oldSwapchain);
+    GRSWAPCHAIN* grOldSwapchain = reinterpret_cast<GRSWAPCHAIN*>(oldSwapchain);
     if (grOldSwapchain && grOldSwapchain->view == view && grOldSwapchain->width == width && grOldSwapchain->height == height)
         return oldSwapchain;
-    SWAPCHAINGR* grSwapchain = xxAlloc(SWAPCHAINGR, 1);
+    GRSWAPCHAIN* grSwapchain = xxAlloc(GRSWAPCHAIN, 1);
     if (grSwapchain == nullptr)
         return 0;
 
@@ -239,7 +239,7 @@ uint64_t xxCreateSwapchainMantle(uint64_t device, uint64_t renderPass, void* vie
 //------------------------------------------------------------------------------
 void xxDestroySwapchainMantle(uint64_t swapchain)
 {
-    SWAPCHAINGR* grSwapchain = reinterpret_cast<SWAPCHAINGR*>(swapchain);
+    GRSWAPCHAIN* grSwapchain = reinterpret_cast<GRSWAPCHAIN*>(swapchain);
     if (grSwapchain == nullptr)
         return;
 
@@ -248,7 +248,7 @@ void xxDestroySwapchainMantle(uint64_t swapchain)
 //------------------------------------------------------------------------------
 void xxPresentSwapchainMantle(uint64_t swapchain)
 {
-    SWAPCHAINGR* grSwapchain = reinterpret_cast<SWAPCHAINGR*>(swapchain);
+    GRSWAPCHAIN* grSwapchain = reinterpret_cast<GRSWAPCHAIN*>(swapchain);
     if (grSwapchain == nullptr)
         return;
 
@@ -269,7 +269,7 @@ uint64_t xxGetCommandBufferMantle(uint64_t device, uint64_t swapchain)
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
         return 0;
-    SWAPCHAINGR* grSwapchain = reinterpret_cast<SWAPCHAINGR*>(swapchain);
+    GRSWAPCHAIN* grSwapchain = reinterpret_cast<GRSWAPCHAIN*>(swapchain);
     if (grSwapchain == nullptr)
         return 0;
 
@@ -293,7 +293,7 @@ uint64_t xxGetFramebufferMantle(uint64_t device, uint64_t swapchain, float* scal
         (*scale) = 1.0f;
     }
 
-    FRAMEBUFFERGR* grFramebuffer = reinterpret_cast<SWAPCHAINGR*>(swapchain);
+    GRFRAMEBUFFER* grFramebuffer = reinterpret_cast<GRSWAPCHAIN*>(swapchain);
     if (grFramebuffer == nullptr)
         return 0;
 
@@ -331,7 +331,7 @@ void xxSubmitCommandBufferMantle(uint64_t commandBuffer, uint64_t swapchain)
 //==============================================================================
 uint64_t xxCreateRenderPassMantle(uint64_t device, bool clearColor, bool clearDepth, bool clearStencil, bool storeColor, bool storeDepth, bool storeStencil)
 {
-    RENDERPASSGR grRenderPass = {};
+    GRRENDERPASS grRenderPass = {};
 
     if (clearColor)
         grRenderPass.clearColor = true;
@@ -351,10 +351,10 @@ uint64_t xxBeginRenderPassMantle(uint64_t commandBuffer, uint64_t framebuffer, u
     GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandBuffer);
     if (grCommandBuffer == GR_NULL_HANDLE)
         return 0;
-    FRAMEBUFFERGR* grFramebuffer = reinterpret_cast<SWAPCHAINGR*>(framebuffer);
+    GRFRAMEBUFFER* grFramebuffer = reinterpret_cast<GRSWAPCHAIN*>(framebuffer);
     if (grFramebuffer == nullptr)
         return 0;
-    RENDERPASSGR grRenderPass = { renderPass };
+    GRRENDERPASS grRenderPass = { renderPass };
 
     if (grRenderPass.clearColor)
     {
@@ -377,7 +377,7 @@ void xxEndRenderPassMantle(uint64_t commandEncoder, uint64_t framebuffer, uint64
 //==============================================================================
 uint64_t xxCreateVertexAttributeMantle(uint64_t device, int count, int* attribute)
 {
-    VERTEXATTRIBUTEGR* grVertexAttribute = xxAlloc(VERTEXATTRIBUTEGR, 1);
+    GRVERTEXATTRIBUTE* grVertexAttribute = xxAlloc(GRVERTEXATTRIBUTE, 1);
     if (grVertexAttribute == nullptr)
         return 0;
 
@@ -450,7 +450,7 @@ uint64_t xxCreateVertexAttributeMantle(uint64_t device, int count, int* attribut
 //------------------------------------------------------------------------------
 void xxDestroyVertexAttributeMantle(uint64_t vertexAttribute)
 {
-    VERTEXATTRIBUTEGR* grVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEGR*>(vertexAttribute);
+    GRVERTEXATTRIBUTE* grVertexAttribute = reinterpret_cast<GRVERTEXATTRIBUTE*>(vertexAttribute);
 
     xxFree(grVertexAttribute);
 }
@@ -831,7 +831,7 @@ void xxSetPipelineMantle(uint64_t commandEncoder, uint64_t pipeline)
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersMantle(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
-    VERTEXATTRIBUTEGR* grVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEGR*>(vertexAttribute);
+    GRVERTEXATTRIBUTE* grVertexAttribute = reinterpret_cast<GRVERTEXATTRIBUTE*>(vertexAttribute);
     GR_MEMORY_VIEW_ATTACH_INFO* infos = grVertexAttribute->infos;
 
     for (int i = 0; i < count; ++i)

@@ -123,17 +123,17 @@ uint64_t xxGetCommandBufferGLES31(uint64_t device, uint64_t swapchain)
 //==============================================================================
 void xxSetVertexBuffersGLES31(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
-    VERTEXATTRIBUTEGL* glVertexAttribute = reinterpret_cast<VERTEXATTRIBUTEGL*>(vertexAttribute);
-    VERTEXATTRIBUTEGL::Attribute* attributes = glVertexAttribute->attributes;
+    GLVERTEXATTRIBUTE* glVertexAttribute = reinterpret_cast<GLVERTEXATTRIBUTE*>(vertexAttribute);
+    GLVERTEXATTRIBUTE::Attribute* attributes = glVertexAttribute->attributes;
 
     int currentStream = -1;
     for (int i = 0; i < glVertexAttribute->count; ++i)
     {
-        VERTEXATTRIBUTEGL::Attribute& attribute = attributes[i];
+        GLVERTEXATTRIBUTE::Attribute& attribute = attributes[i];
         if (currentStream != attribute.stream)
         {
             currentStream = attribute.stream;
-            BUFFERGL* glBuffer = reinterpret_cast<BUFFERGL*>(buffers[attribute.stream]);
+            GLBUFFER* glBuffer = reinterpret_cast<GLBUFFER*>(buffers[attribute.stream]);
 
             glBindBuffer(GL_ARRAY_BUFFER, glBuffer->buffer);
         }
