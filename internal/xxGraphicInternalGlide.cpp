@@ -187,20 +187,32 @@ static void FX_CALL gto_grDrawTriangle(const void *a, const void *b, const void 
     for (int i = 0; i < 3; ++i)
     {
         const void *p = (i != 2) ? (i != 1) ? a : b : c;
-        if (g_vertexLayout[GR_PARAM_ST0] != 0xFF)
+        GLfloat w = 1.0f;
+        if (g_vertexLayout[GR_PARAM_Q] != 0xFF)
         {
-            GLfloat *v = (GLfloat*)((char*)p + g_vertexLayout[GR_PARAM_ST0]);
-            gto_glTexCoord4f(v[0], v[1], 0.0f, 1.0f);
+            GLfloat *v = (GLfloat*)((char*)p + g_vertexLayout[GR_PARAM_Q]);
+            w = 1.0f / v[0];
         }
         if (g_vertexLayout[GR_PARAM_PARGB] != 0xFF)
         {
             GLubyte *v = (GLubyte*)((char*)p + g_vertexLayout[GR_PARAM_PARGB]);
             gto_glColor4f(v[R] / 255.0f, v[G] / 255.0f, v[B] / 255.0f, v[A] / 255.0f);
         }
+        if (g_vertexLayout[GR_PARAM_ST0] != 0xFF)
+        {
+            GLfloat *v = (GLfloat*)((char*)p + g_vertexLayout[GR_PARAM_ST0]);
+            gto_glTexCoord4f(v[0] * w, v[1] * w, 0.0f, 1.0f);
+        }
         if (g_vertexLayout[GR_PARAM_XY] != 0xFF)
         {
             GLfloat *v = (GLfloat*)((char*)p + g_vertexLayout[GR_PARAM_XY]);
-            gto_glVertex4f(v[0], v[1], 1.0f / v[2], 1.0f / v[3]);
+            GLfloat z = 0.0f;
+            if (g_vertexLayout[GR_PARAM_Z] != 0xFF)
+            {
+                GLfloat *v = (GLfloat*)((char*)p + g_vertexLayout[GR_PARAM_Z]);
+                z = 65535.0f / (65535.0f - v[0]);
+            }
+            gto_glVertex4f(v[0] * w, v[1] * w, z, w);
         }
     }
 
@@ -248,6 +260,7 @@ static GrContext_t FX_CALL gto_grSstWinOpen(void *window, GrScreenResolution_t s
     static const NSOpenGLPixelFormatAttribute attributes[] =
     {
         NSOpenGLPFADoubleBuffer,
+        NSOpenGLPFADepthSize, 24,
         0
     };
     NSWindow* nsWindows = (__bridge NSWindow*)window;
@@ -274,6 +287,7 @@ static GrContext_t FX_CALL gto_grSstWinOpen(void *window, GrScreenResolution_t s
         .nSize = sizeof(PIXELFORMATDESCRIPTOR),
         .nVersion = 1,
         .dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+        .cDepthBits = 24,
     };
     HWND hWnd = (HWND)window;
     HDC hDC = GetDC(hWnd);
