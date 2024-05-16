@@ -57,7 +57,7 @@ uint64_t xxCreateInstanceGlide()
 
     grVertexLayout(GR_PARAM_XY, xxOffsetOf(GrVertex, x), GR_PARAM_ENABLE);
     grVertexLayout(GR_PARAM_Z, xxOffsetOf(GrVertex, ooz), GR_PARAM_ENABLE);
-    grVertexLayout(GR_PARAM_W, xxOffsetOf(GrVertex, oow), GR_PARAM_ENABLE);
+    grVertexLayout(GR_PARAM_Q, xxOffsetOf(GrVertex, oow), GR_PARAM_ENABLE);
     grVertexLayout(GR_PARAM_PARGB, xxOffsetOf(GrVertex, rgba), GR_PARAM_ENABLE);
     grVertexLayout(GR_PARAM_ST0, xxOffsetOf(GrVertex, sow), GR_PARAM_ENABLE);
 
@@ -218,7 +218,7 @@ uint64_t xxBeginRenderPassGlide(uint64_t commandBuffer, uint64_t framebuffer, ui
         grClipWindow(0, 0, width, height);
         grColorMask(renderPass & GR_PARAM_RGB ? FXTRUE : FXFALSE, renderPass & GR_PARAM_A ? FXTRUE : FXFALSE);
         grDepthMask(renderPass & GR_PARAM_Z ? FXTRUE : FXFALSE);
-        grBufferClear(grColor, grAlpha, -1);
+        grBufferClear(grColor, grAlpha, 0xFFFF);
         grColorMask(FXTRUE, FXTRUE);
         grDepthMask(FXTRUE);
     }
@@ -251,6 +251,12 @@ uint64_t xxCreateVertexAttributeGlide(uint64_t device, int count, int* attribute
 
         if (element == 'POS3' && size == sizeof(float) * 3)
             grVertexAttribute.flags |= GR_PARAM_XY | GR_PARAM_Z;
+        if (element == 'BON3' && size == sizeof(float) * 3)
+            grVertexAttribute.flags |= /*GR_PARAM_BONE*/0x80;
+        if (element == 'BON4' && size == sizeof(char) * 4)
+            grVertexAttribute.flags |= /*GR_PARAM_BONE*/0x80;
+        if (element == 'NOR3' && size == sizeof(float) * 3)
+            grVertexAttribute.flags |= /*GR_PARAM_NORMAL*/0x08;
         if (element == 'COL4' && size == sizeof(char) * 4)
             grVertexAttribute.flags |= GR_PARAM_PARGB;
         if (element == 'TEX2' && size == sizeof(float) * 2)
@@ -602,22 +608,34 @@ void xxDrawGlide(uint64_t commandEncoder, int vertexCount, int instanceCount, in
             v4sf p1 = __builtin_multiplyvector(g_worldViewProjectionScreenMatrix, v4sf{ v1[0], v1[1], v1[2], 1.0f });
             v4sf p2 = __builtin_multiplyvector(g_worldViewProjectionScreenMatrix, v4sf{ v2[0], v2[1], v2[2], 1.0f });
 
-            t0.x = p0[0];
-            t1.x = p1[0];
-            t2.x = p2[0];
-
-            t0.y = p0[1];
-            t1.y = p1[1];
-            t2.y = p2[1];
+            t0.oow = 1.0f / p0[3];
+            t1.oow = 1.0f / p1[3];
+            t2.oow = 1.0f / p2[3];
 
             t0.ooz = 65535.0f / p0[2];
             t1.ooz = 65535.0f / p1[2];
             t2.ooz = 65535.0f / p2[2];
 
-            t0.oow = 1.0f / p0[3];
-            t1.oow = 1.0f / p1[3];
-            t2.oow = 1.0f / p2[3];
+            t0.y = p0[1] * t0.oow;
+            t1.y = p1[1] * t1.oow;
+            t2.y = p2[1] * t2.oow;
 
+            t0.x = p0[0] * t0.oow;
+            t1.x = p1[0] * t1.oow;
+            t2.x = p2[0] * t2.oow;
+
+            v0 += 3;
+            v1 += 3;
+            v2 += 3;
+        }
+        if (grVertexAttribute.flags & /*GR_PARAM_BONE*/0x80)
+        {
+            v0 += 4;
+            v1 += 4;
+            v2 += 4;
+        }
+        if (grVertexAttribute.flags & /*GR_PARAM_NORMAL*/0x08)
+        {
             v0 += 3;
             v1 += 3;
             v2 += 3;
@@ -634,9 +652,13 @@ void xxDrawGlide(uint64_t commandEncoder, int vertexCount, int instanceCount, in
         }
         if (grVertexAttribute.flags & GR_PARAM_ST0)
         {
-            t0.sow = v0[0]; t0.tow = v0[1];
-            t1.sow = v1[0]; t1.tow = v1[1];
-            t2.sow = v2[0]; t2.tow = v2[1];
+            t0.sow = v0[0] * t0.oow;
+            t1.sow = v1[0] * t1.oow;
+            t2.sow = v2[0] * t2.oow;
+
+            t0.tow = v0[1] * t0.oow;
+            t1.tow = v1[1] * t1.oow;
+            t2.tow = v2[1] * t2.oow;
 
             v0 += 2;
             v1 += 2;
@@ -666,22 +688,34 @@ void xxDrawIndexedGlide(uint64_t commandEncoder, uint64_t indexBuffer, int index
             v4sf p1 = __builtin_multiplyvector(g_worldViewProjectionScreenMatrix, v4sf{ v1[0], v1[1], v1[2], 1.0f });
             v4sf p2 = __builtin_multiplyvector(g_worldViewProjectionScreenMatrix, v4sf{ v2[0], v2[1], v2[2], 1.0f });
 
-            t0.x = p0[0];
-            t1.x = p1[0];
-            t2.x = p2[0];
-
-            t0.y = p0[1];
-            t1.y = p1[1];
-            t2.y = p2[1];
+            t0.oow = 1.0f / p0[3];
+            t1.oow = 1.0f / p1[3];
+            t2.oow = 1.0f / p2[3];
 
             t0.ooz = 65535.0f / p0[2];
             t1.ooz = 65535.0f / p1[2];
             t2.ooz = 65535.0f / p2[2];
 
-            t0.oow = 1.0f / p0[3];
-            t1.oow = 1.0f / p1[3];
-            t2.oow = 1.0f / p2[3];
+            t0.y = p0[1] * t0.oow;
+            t1.y = p1[1] * t1.oow;
+            t2.y = p2[1] * t2.oow;
 
+            t0.x = p0[0] * t0.oow;
+            t1.x = p1[0] * t1.oow;
+            t2.x = p2[0] * t2.oow;
+
+            v0 += 3;
+            v1 += 3;
+            v2 += 3;
+        }
+        if (grVertexAttribute.flags & /*GR_PARAM_BONE*/0x80)
+        {
+            v0 += 4;
+            v1 += 4;
+            v2 += 4;
+        }
+        if (grVertexAttribute.flags & /*GR_PARAM_NORMAL*/0x08)
+        {
             v0 += 3;
             v1 += 3;
             v2 += 3;
@@ -698,9 +732,13 @@ void xxDrawIndexedGlide(uint64_t commandEncoder, uint64_t indexBuffer, int index
         }
         if (grVertexAttribute.flags & GR_PARAM_ST0)
         {
-            t0.sow = v0[0]; t0.tow = v0[1];
-            t1.sow = v1[0]; t1.tow = v1[1];
-            t2.sow = v2[0]; t2.tow = v2[1];
+            t0.sow = v0[0] * t0.oow;
+            t1.sow = v1[0] * t1.oow;
+            t2.sow = v2[0] * t2.oow;
+
+            t0.tow = v0[1] * t0.oow;
+            t1.tow = v1[1] * t1.oow;
+            t2.tow = v2[1] * t2.oow;
 
             v0 += 2;
             v1 += 2;
