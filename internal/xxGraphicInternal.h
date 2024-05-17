@@ -7,6 +7,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdint.h>
 
 #define NUM_BACK_BUFFERS 3
 
@@ -334,16 +335,18 @@ inline T xxTemplateCompareOp(char const* name)
     return ALWAYS;
 }
 
-#if defined(__LP64__)
-constexpr unsigned long long operator""_FOURCC (char const* text, size_t length)
-#else
-constexpr unsigned long long operator""_FOURCC (char const* text, size_t length)
-#endif
+constexpr uint32_t operator ""_cc(char const* text, size_t length)
 {
-    unsigned long long value = 0;
+    uint32_t value = 0;
     for (size_t i = 0; i < length; ++i)
-    {
-        value += (unsigned long long)(unsigned char)text[i] << (i * 8);
-    }
+        value += uint32_t(uint8_t(text[i])) << (i * 8);
+    return value;
+};
+
+constexpr uint64_t operator ""_CC(char const* text, size_t length)
+{
+    uint64_t value = 0;
+    for (size_t i = 0; i < length; ++i)
+        value += uint64_t(uint8_t(text[i])) << (i * 8);
     return value;
 };
