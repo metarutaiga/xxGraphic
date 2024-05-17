@@ -489,35 +489,35 @@ uint64_t xxCreateTextureGLES2(uint64_t device, uint64_t format, int width, int h
     struct { GLenum pixelFormat; GLenum pixelType; int onePixel; int stride; } T;
     switch (format)
     {
-    case "RGB565"_FOURCC:   T = { GL_RGB,       GL_UNSIGNED_SHORT_5_6_5_REV,                2,  width * 2 }; break;
-    case "BGR565"_FOURCC:   T = { GL_RGB,       GL_UNSIGNED_SHORT_5_6_5,                    2,  width * 2 }; break;
-    case "ARGB1555"_FOURCC: T = { GL_BGRA_EXT,  GL_UNSIGNED_SHORT_5_5_5_1,                  2,  width * 2 }; break;
-    case "ABGR1555"_FOURCC: T = { GL_RGBA,      GL_UNSIGNED_SHORT_5_5_5_1,                  2,  width * 2 }; break;
-    case "ARGB4444"_FOURCC: T = { GL_BGRA_EXT,  GL_UNSIGNED_SHORT_4_4_4_4,                  2,  width * 2 }; break;
-    case "ABGR4444"_FOURCC: T = { GL_RGBA,      GL_UNSIGNED_SHORT_4_4_4_4,                  2,  width * 2 }; break;
-    case "RGBA4444"_FOURCC: T = { GL_RGBA,      GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT,          2,  width * 2 }; break;
-    case "BGRA4444"_FOURCC: T = { GL_BGRA_EXT,  GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT,          2,  width * 2 }; break;
-    case "RGBA5551"_FOURCC: T = { GL_RGBA,      GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT,          2,  width * 2 }; break;
-    case "BGRA5551"_FOURCC: T = { GL_BGRA_EXT,  GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT,          2,  width * 2 }; break;
-    case "ARGB8888"_FOURCC: T = { GL_BGRA_EXT,  GL_UNSIGNED_INT_8_8_8_8,                    4,  width * 4 }; break;
-    case "RGBA8888"_FOURCC: T = { GL_RGBA,      GL_UNSIGNED_BYTE,                           4,  width * 4 }; break;
-    case "ABGR8888"_FOURCC: T = { GL_RGBA,      GL_UNSIGNED_INT_8_8_8_8,                    4,  width * 4 }; break;
-    case "BGRA8888"_FOURCC: T = { GL_BGRA_EXT,  GL_UNSIGNED_BYTE,                           4,  width * 4 }; break;
-    case "DS24"_FOURCC:     T = { GL_DEPTH_STENCIL_OES, GL_DEPTH24_STENCIL8_OES,            4,  width * 4 }; break;
-    case "BC1"_FOURCC:
-    case "DXT1"_FOURCC:     T = { 0,            GL_COMPRESSED_RGBA_S3TC_DXT1_EXT,           8,  (width + 3) / 4 * 8 };  break;
-    case "BC2"_FOURCC:
-    case "DXT3"_FOURCC:     T = { 0,            GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,           16, (width + 3) / 4 * 16 }; break;
-    case "BC3"_FOURCC:
-    case "DXT5"_FOURCC:     T = { 0,            GL_COMPRESSED_RGBA_S3TC_DXT5_EXT,           16, (width + 3) / 4 * 16 }; break;
-    case "BC4S"_FOURCC:     T = { 0,            GL_COMPRESSED_SIGNED_RED_RGTC1_EXT,         8,  (width + 3) / 4 * 8 };  break;
-    case "BC4U"_FOURCC:
-    case "ATI1"_FOURCC:     T = { 0,            GL_COMPRESSED_RED_RGTC1_EXT,                8,  (width + 3) / 4 * 8 };  break;
-    case "BC5S"_FOURCC:     T = { 0,            GL_COMPRESSED_SIGNED_RED_GREEN_RGTC2_EXT,   16, (width + 3) / 4 * 16 }; break;
-    case "BC5U"_FOURCC:
-    case "ATI2"_FOURCC:     T = { 0,            GL_COMPRESSED_RED_GREEN_RGTC2_EXT,          16, (width + 3) / 4 * 16 }; break;
-    case "BC6H"_FOURCC:     T = { 0,            GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_EXT,    16, (width + 3) / 4 * 16 }; break;
-    case "BC7"_FOURCC:      T = { 0,            GL_COMPRESSED_RGBA_BPTC_UNORM_EXT,          16, (width + 3) / 4 * 16 }; break;
+    case "RGB565"_CC:   T = { GL_RGB,       GL_UNSIGNED_SHORT_5_6_5_REV,                2,  width * 2 }; break;
+    case "BGR565"_CC:   T = { GL_RGB,       GL_UNSIGNED_SHORT_5_6_5,                    2,  width * 2 }; break;
+    case "ARGB1555"_CC: T = { GL_BGRA_EXT,  GL_UNSIGNED_SHORT_5_5_5_1,                  2,  width * 2 }; break;
+    case "ABGR1555"_CC: T = { GL_RGBA,      GL_UNSIGNED_SHORT_5_5_5_1,                  2,  width * 2 }; break;
+    case "ARGB4444"_CC: T = { GL_BGRA_EXT,  GL_UNSIGNED_SHORT_4_4_4_4,                  2,  width * 2 }; break;
+    case "ABGR4444"_CC: T = { GL_RGBA,      GL_UNSIGNED_SHORT_4_4_4_4,                  2,  width * 2 }; break;
+    case "RGBA4444"_CC: T = { GL_RGBA,      GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT,          2,  width * 2 }; break;
+    case "BGRA4444"_CC: T = { GL_BGRA_EXT,  GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT,          2,  width * 2 }; break;
+    case "RGBA5551"_CC: T = { GL_RGBA,      GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT,          2,  width * 2 }; break;
+    case "BGRA5551"_CC: T = { GL_BGRA_EXT,  GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT,          2,  width * 2 }; break;
+    case "ARGB8888"_CC: T = { GL_BGRA_EXT,  GL_UNSIGNED_INT_8_8_8_8,                    4,  width * 4 }; break;
+    case "RGBA8888"_CC: T = { GL_RGBA,      GL_UNSIGNED_BYTE,                           4,  width * 4 }; break;
+    case "ABGR8888"_CC: T = { GL_RGBA,      GL_UNSIGNED_INT_8_8_8_8,                    4,  width * 4 }; break;
+    case "BGRA8888"_CC: T = { GL_BGRA_EXT,  GL_UNSIGNED_BYTE,                           4,  width * 4 }; break;
+    case "DS24"_cc:     T = { GL_DEPTH_STENCIL_OES, GL_DEPTH24_STENCIL8_OES,            4,  width * 4 }; break;
+    case "BC1"_cc:
+    case "DXT1"_cc:     T = { 0,            GL_COMPRESSED_RGBA_S3TC_DXT1_EXT,           8,  (width + 3) / 4 * 8 };  break;
+    case "BC2"_cc:
+    case "DXT3"_cc:     T = { 0,            GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,           16, (width + 3) / 4 * 16 }; break;
+    case "BC3"_cc:
+    case "DXT5"_cc:     T = { 0,            GL_COMPRESSED_RGBA_S3TC_DXT5_EXT,           16, (width + 3) / 4 * 16 }; break;
+    case "BC4S"_cc:     T = { 0,            GL_COMPRESSED_SIGNED_RED_RGTC1_EXT,         8,  (width + 3) / 4 * 8 };  break;
+    case "BC4U"_cc:
+    case "ATI1"_cc:     T = { 0,            GL_COMPRESSED_RED_RGTC1_EXT,                8,  (width + 3) / 4 * 8 };  break;
+    case "BC5S"_cc:     T = { 0,            GL_COMPRESSED_SIGNED_RED_GREEN_RGTC2_EXT,   16, (width + 3) / 4 * 16 }; break;
+    case "BC5U"_cc:
+    case "ATI2"_cc:     T = { 0,            GL_COMPRESSED_RED_GREEN_RGTC2_EXT,          16, (width + 3) / 4 * 16 }; break;
+    case "BC6H"_cc:     T = { 0,            GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT_EXT,    16, (width + 3) / 4 * 16 }; break;
+    case "BC7"_cc:      T = { 0,            GL_COMPRESSED_RGBA_BPTC_UNORM_EXT,          16, (width + 3) / 4 * 16 }; break;
     default:
         xxLog("xxGraphic", "Unknown format (%.8s)", &format);
         return 0;

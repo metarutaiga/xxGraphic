@@ -196,7 +196,7 @@ MTLSWAPCHAIN* xxCreateSwapchainMetal(id <MTLDevice> __unsafe_unretained device, 
     swapchain->height = height;
     swapchain->scale = contentsScale;
 
-    MTLTEXTURE* depthStencil = xxCreateTextureMetal(device, "DS24"_FOURCC, width * contentsScale, height * contentsScale, 1, 1, 1, nullptr);
+    MTLTEXTURE* depthStencil = xxCreateTextureMetal(device, "DS24"_cc, width * contentsScale, height * contentsScale, 1, 1, 1, nullptr);
     if (depthStencil)
     {
         swapchain->depthstencil = depthStencil->texture;
@@ -464,35 +464,35 @@ MTLTEXTURE* xxCreateTextureMetal(id <MTLDevice> __unsafe_unretained device, uint
     struct { MTLTextureSwizzleChannels swizzle; MTLPixelFormat pixelFormat; int onePixel; int stride; } T;
     switch (format)
     {
-    case "RGB565"_FOURCC:   T = { {B, G, R, A}, MTLPixelFormatB5G6R5Unorm,  2,  width * 2 }; break;
-    case "BGR565"_FOURCC:   T = { {R, G, B, A}, MTLPixelFormatB5G6R5Unorm,  2,  width * 2 }; break;
-    case "ARGB1555"_FOURCC: T = { {B, G, R, A}, MTLPixelFormatA1BGR5Unorm,  2,  width * 2 }; break;
-    case "ABGR1555"_FOURCC: T = { {R, G, B, A}, MTLPixelFormatA1BGR5Unorm,  2,  width * 2 }; break;
-    case "ARGB4444"_FOURCC: T = { {B, G, R, A}, MTLPixelFormatABGR4Unorm,   2,  width * 2 }; break;
-    case "ABGR4444"_FOURCC: T = { {R, G, B, A}, MTLPixelFormatABGR4Unorm,   2,  width * 2 }; break;
-    case "RGBA4444"_FOURCC: T = { {A, B, G, R}, MTLPixelFormatABGR4Unorm,   2,  width * 2 }; break;
-    case "BGRA4444"_FOURCC: T = { {G, B, A, R}, MTLPixelFormatABGR4Unorm,   2,  width * 2 }; break;
-    case "RGBA5551"_FOURCC: T = { {B, G, R, A}, MTLPixelFormatBGR5A1Unorm,  2,  width * 2 }; break;
-    case "BGRA5551"_FOURCC: T = { {R, G, B, A}, MTLPixelFormatBGR5A1Unorm,  2,  width * 2 }; break;
-    case "ARGB8888"_FOURCC: T = { {G, B, A, R}, MTLPixelFormatRGBA8Unorm,   4,  width * 4 }; break;
-    case "RGBA8888"_FOURCC: T = { {R, G, B, A}, MTLPixelFormatRGBA8Unorm,   4,  width * 4 }; break;
-    case "ABGR8888"_FOURCC: T = { {A, R, G, B}, MTLPixelFormatBGRA8Unorm,   4,  width * 4 }; break;
-    case "BGRA8888"_FOURCC: T = { {R, G, B, A}, MTLPixelFormatBGRA8Unorm,   4,  width * 4 }; break;
-    case "DS24"_FOURCC:     T = { {R, G, B, A}, MTLPixelFormatDepth32Float_Stencil8, 4, width * 4 }; break;
-    case "BC1"_FOURCC:
-    case "DXT1"_FOURCC:     T = { {R, G, B, A}, MTLPixelFormatBC1_RGBA,     8,  (width + 3) / 4 * 8 };  break;
-    case "BC2"_FOURCC:
-    case "DXT3"_FOURCC:     T = { {R, G, B, A}, MTLPixelFormatBC2_RGBA,     16, (width + 3) / 4 * 16 }; break;
-    case "BC3"_FOURCC:
-    case "DXT5"_FOURCC:     T = { {R, G, B, A}, MTLPixelFormatBC3_RGBA,     16, (width + 3) / 4 * 16 }; break;
-    case "BC4S"_FOURCC:     T = { {R, G, B, A}, MTLPixelFormatBC4_RSnorm,   8,  (width + 3) / 4 * 8 };  break;
-    case "BC4U"_FOURCC:
-    case "ATI1"_FOURCC:     T = { {R, G, B, A}, MTLPixelFormatBC4_RUnorm,   8,  (width + 3) / 4 * 8 };  break;
-    case "BC5S"_FOURCC:     T = { {R, G, B, A}, MTLPixelFormatBC5_RGSnorm,  16, (width + 3) / 4 * 16 }; break;
-    case "BC5U"_FOURCC:
-    case "ATI2"_FOURCC:     T = { {R, G, B, A}, MTLPixelFormatBC5_RGUnorm,  16, (width + 3) / 4 * 16 }; break;
-    case "BC6H"_FOURCC:     T = { {R, G, B, A}, MTLPixelFormatBC6H_RGBFloat,16, (width + 3) / 4 * 16 }; break;
-    case "BC7"_FOURCC:      T = { {R, G, B, A}, MTLPixelFormatBC7_RGBAUnorm,16, (width + 3) / 4 * 16 }; break;
+    case "RGB565"_CC:   T = { {B, G, R, A}, MTLPixelFormatB5G6R5Unorm,  2,  width * 2 }; break;
+    case "BGR565"_CC:   T = { {R, G, B, A}, MTLPixelFormatB5G6R5Unorm,  2,  width * 2 }; break;
+    case "ARGB1555"_CC: T = { {B, G, R, A}, MTLPixelFormatA1BGR5Unorm,  2,  width * 2 }; break;
+    case "ABGR1555"_CC: T = { {R, G, B, A}, MTLPixelFormatA1BGR5Unorm,  2,  width * 2 }; break;
+    case "ARGB4444"_CC: T = { {B, G, R, A}, MTLPixelFormatABGR4Unorm,   2,  width * 2 }; break;
+    case "ABGR4444"_CC: T = { {R, G, B, A}, MTLPixelFormatABGR4Unorm,   2,  width * 2 }; break;
+    case "RGBA4444"_CC: T = { {A, B, G, R}, MTLPixelFormatABGR4Unorm,   2,  width * 2 }; break;
+    case "BGRA4444"_CC: T = { {G, B, A, R}, MTLPixelFormatABGR4Unorm,   2,  width * 2 }; break;
+    case "RGBA5551"_CC: T = { {B, G, R, A}, MTLPixelFormatBGR5A1Unorm,  2,  width * 2 }; break;
+    case "BGRA5551"_CC: T = { {R, G, B, A}, MTLPixelFormatBGR5A1Unorm,  2,  width * 2 }; break;
+    case "ARGB8888"_CC: T = { {G, B, A, R}, MTLPixelFormatRGBA8Unorm,   4,  width * 4 }; break;
+    case "RGBA8888"_CC: T = { {R, G, B, A}, MTLPixelFormatRGBA8Unorm,   4,  width * 4 }; break;
+    case "ABGR8888"_CC: T = { {A, R, G, B}, MTLPixelFormatBGRA8Unorm,   4,  width * 4 }; break;
+    case "BGRA8888"_CC: T = { {R, G, B, A}, MTLPixelFormatBGRA8Unorm,   4,  width * 4 }; break;
+    case "DS24"_cc:     T = { {R, G, B, A}, MTLPixelFormatDepth32Float_Stencil8, 4, width * 4 }; break;
+    case "BC1"_cc:
+    case "DXT1"_cc:     T = { {R, G, B, A}, MTLPixelFormatBC1_RGBA,     8,  (width + 3) / 4 * 8 };  break;
+    case "BC2"_cc:
+    case "DXT3"_cc:     T = { {R, G, B, A}, MTLPixelFormatBC2_RGBA,     16, (width + 3) / 4 * 16 }; break;
+    case "BC3"_cc:
+    case "DXT5"_cc:     T = { {R, G, B, A}, MTLPixelFormatBC3_RGBA,     16, (width + 3) / 4 * 16 }; break;
+    case "BC4S"_cc:     T = { {R, G, B, A}, MTLPixelFormatBC4_RSnorm,   8,  (width + 3) / 4 * 8 };  break;
+    case "BC4U"_cc:
+    case "ATI1"_cc:     T = { {R, G, B, A}, MTLPixelFormatBC4_RUnorm,   8,  (width + 3) / 4 * 8 };  break;
+    case "BC5S"_cc:     T = { {R, G, B, A}, MTLPixelFormatBC5_RGSnorm,  16, (width + 3) / 4 * 16 }; break;
+    case "BC5U"_cc:
+    case "ATI2"_cc:     T = { {R, G, B, A}, MTLPixelFormatBC5_RGUnorm,  16, (width + 3) / 4 * 16 }; break;
+    case "BC6H"_cc:     T = { {R, G, B, A}, MTLPixelFormatBC6H_RGBFloat,16, (width + 3) / 4 * 16 }; break;
+    case "BC7"_cc:      T = { {R, G, B, A}, MTLPixelFormatBC7_RGBAUnorm,16, (width + 3) / 4 * 16 }; break;
     default:
         xxLog("xxGraphic", "Unknown format (%.8s)", &format);
         return 0;

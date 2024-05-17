@@ -735,7 +735,7 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
         }
     }
 
-    uint64_t depthStencil = xxCreateTextureVulkan(device, "DS24"_FOURCC, width, height, 1, 1, 1, nullptr);
+    uint64_t depthStencil = xxCreateTextureVulkan(device, "DS24"_cc, width, height, 1, 1, 1, nullptr);
     if (depthStencil)
     {
         VKTEXTURE* vkTexture = reinterpret_cast<VKTEXTURE*>(depthStencil);
@@ -1503,39 +1503,39 @@ uint64_t xxCreateTextureVulkan(uint64_t device, uint64_t format, int width, int 
     struct { VkComponentMapping swizzle; VkFormat imageFormat; int onePixel; int stride; } T;
     switch (format)
     {
-    case "RGB565"_FOURCC:   T = { {B, G, R, A}, VK_FORMAT_R5G6B5_UNORM_PACK16,      2,  width * 2 }; break;
-    case "BGR565"_FOURCC:   T = { {R, G, B, A}, VK_FORMAT_R5G6B5_UNORM_PACK16,      2,  width * 2 }; break;
-    case "ARGB1555"_FOURCC: T = { {B, G, R, A}, VK_FORMAT_R5G5B5A1_UNORM_PACK16,    2,  width * 2 }; break;
-    case "ABGR1555"_FOURCC: T = { {R, G, B, A}, VK_FORMAT_R5G5B5A1_UNORM_PACK16,    2,  width * 2 }; break;
-    case "ARGB4444"_FOURCC: T = { {B, G, R, A}, VK_FORMAT_R4G4B4A4_UNORM_PACK16,    2,  width * 2 }; break;
-    case "ABGR4444"_FOURCC: T = { {R, G, B, A}, VK_FORMAT_R4G4B4A4_UNORM_PACK16,    2,  width * 2 }; break;
-    case "RGBA4444"_FOURCC: T = { {A, B, G, R}, VK_FORMAT_R4G4B4A4_UNORM_PACK16,    2,  width * 2 }; break;
-    case "BGRA4444"_FOURCC: T = { {G, B, A, R}, VK_FORMAT_R4G4B4A4_UNORM_PACK16,    2,  width * 2 }; break;
-    case "RGBA5551"_FOURCC: T = { {B, G, R, A}, VK_FORMAT_A1R5G5B5_UNORM_PACK16,    2,  width * 2 }; break;
-    case "BGRA5551"_FOURCC: T = { {R, G, B, A}, VK_FORMAT_A1R5G5B5_UNORM_PACK16,    2,  width * 2 }; break;
-    case "ARGB8888"_FOURCC: T = { {G, B, A, R}, VK_FORMAT_R8G8B8A8_UNORM,           4,  width * 4 }; break;
-    case "RGBA8888"_FOURCC: T = { {R, G, B, A}, VK_FORMAT_R8G8B8A8_UNORM,           4,  width * 4 }; break;
-    case "ABGR8888"_FOURCC: T = { {A, R, G, B}, VK_FORMAT_B8G8R8A8_UNORM,           4,  width * 4 }; break;
-    case "BGRA8888"_FOURCC: T = { {R, G, B, A}, VK_FORMAT_B8G8R8A8_UNORM,           4,  width * 4 }; break;
+    case "RGB565"_CC:   T = { {B, G, R, A}, VK_FORMAT_R5G6B5_UNORM_PACK16,      2,  width * 2 }; break;
+    case "BGR565"_CC:   T = { {R, G, B, A}, VK_FORMAT_R5G6B5_UNORM_PACK16,      2,  width * 2 }; break;
+    case "ARGB1555"_CC: T = { {B, G, R, A}, VK_FORMAT_R5G5B5A1_UNORM_PACK16,    2,  width * 2 }; break;
+    case "ABGR1555"_CC: T = { {R, G, B, A}, VK_FORMAT_R5G5B5A1_UNORM_PACK16,    2,  width * 2 }; break;
+    case "ARGB4444"_CC: T = { {B, G, R, A}, VK_FORMAT_R4G4B4A4_UNORM_PACK16,    2,  width * 2 }; break;
+    case "ABGR4444"_CC: T = { {R, G, B, A}, VK_FORMAT_R4G4B4A4_UNORM_PACK16,    2,  width * 2 }; break;
+    case "RGBA4444"_CC: T = { {A, B, G, R}, VK_FORMAT_R4G4B4A4_UNORM_PACK16,    2,  width * 2 }; break;
+    case "BGRA4444"_CC: T = { {G, B, A, R}, VK_FORMAT_R4G4B4A4_UNORM_PACK16,    2,  width * 2 }; break;
+    case "RGBA5551"_CC: T = { {B, G, R, A}, VK_FORMAT_A1R5G5B5_UNORM_PACK16,    2,  width * 2 }; break;
+    case "BGRA5551"_CC: T = { {R, G, B, A}, VK_FORMAT_A1R5G5B5_UNORM_PACK16,    2,  width * 2 }; break;
+    case "ARGB8888"_CC: T = { {G, B, A, R}, VK_FORMAT_R8G8B8A8_UNORM,           4,  width * 4 }; break;
+    case "RGBA8888"_CC: T = { {R, G, B, A}, VK_FORMAT_R8G8B8A8_UNORM,           4,  width * 4 }; break;
+    case "ABGR8888"_CC: T = { {A, R, G, B}, VK_FORMAT_B8G8R8A8_UNORM,           4,  width * 4 }; break;
+    case "BGRA8888"_CC: T = { {R, G, B, A}, VK_FORMAT_B8G8R8A8_UNORM,           4,  width * 4 }; break;
 #if defined(xxMACOS) || defined(xxIOS)
-    case "DS24"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_D32_SFLOAT_S8_UINT,       4,  width * 4 }; break;
+    case "DS24"_cc:     T = { {R, G, B, A}, VK_FORMAT_D32_SFLOAT_S8_UINT,       4,  width * 4 }; break;
 #else
-    case "DS24"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_D24_UNORM_S8_UINT,        4,  width * 4 }; break;
+    case "DS24"_cc:     T = { {R, G, B, A}, VK_FORMAT_D24_UNORM_S8_UINT,        4,  width * 4 }; break;
 #endif
-    case "BC1"_FOURCC:
-    case "DXT1"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_BC1_RGBA_UNORM_BLOCK,     8,  (width + 3) / 4 * 8 };  break;
-    case "BC2"_FOURCC:
-    case "DXT3"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_BC2_UNORM_BLOCK,          16, (width + 3) / 4 * 16 }; break;
-    case "BC3"_FOURCC:
-    case "DXT5"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_BC3_UNORM_BLOCK,          16, (width + 3) / 4 * 16 }; break;
-    case "BC4S"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_BC4_SNORM_BLOCK,          8,  (width + 3) / 4 * 8 };  break;
-    case "BC4U"_FOURCC:
-    case "ATI1"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_BC4_UNORM_BLOCK,          8,  (width + 3) / 4 * 8 };  break;
-    case "BC5S"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_BC5_SNORM_BLOCK,          16, (width + 3) / 4 * 16 }; break;
-    case "BC5U"_FOURCC:
-    case "ATI2"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_BC5_UNORM_BLOCK,          16, (width + 3) / 4 * 16 }; break;
-    case "BC6H"_FOURCC:     T = { {R, G, B, A}, VK_FORMAT_BC6H_SFLOAT_BLOCK,        16, (width + 3) / 4 * 16 }; break;
-    case "BC7"_FOURCC:      T = { {R, G, B, A}, VK_FORMAT_BC7_UNORM_BLOCK,          16, (width + 3) / 4 * 16 }; break;
+    case "BC1"_cc:
+    case "DXT1"_cc:     T = { {R, G, B, A}, VK_FORMAT_BC1_RGBA_UNORM_BLOCK,     8,  (width + 3) / 4 * 8 };  break;
+    case "BC2"_cc:
+    case "DXT3"_cc:     T = { {R, G, B, A}, VK_FORMAT_BC2_UNORM_BLOCK,          16, (width + 3) / 4 * 16 }; break;
+    case "BC3"_cc:
+    case "DXT5"_cc:     T = { {R, G, B, A}, VK_FORMAT_BC3_UNORM_BLOCK,          16, (width + 3) / 4 * 16 }; break;
+    case "BC4S"_cc:     T = { {R, G, B, A}, VK_FORMAT_BC4_SNORM_BLOCK,          8,  (width + 3) / 4 * 8 };  break;
+    case "BC4U"_cc:
+    case "ATI1"_cc:     T = { {R, G, B, A}, VK_FORMAT_BC4_UNORM_BLOCK,          8,  (width + 3) / 4 * 8 };  break;
+    case "BC5S"_cc:     T = { {R, G, B, A}, VK_FORMAT_BC5_SNORM_BLOCK,          16, (width + 3) / 4 * 16 }; break;
+    case "BC5U"_cc:
+    case "ATI2"_cc:     T = { {R, G, B, A}, VK_FORMAT_BC5_UNORM_BLOCK,          16, (width + 3) / 4 * 16 }; break;
+    case "BC6H"_cc:     T = { {R, G, B, A}, VK_FORMAT_BC6H_SFLOAT_BLOCK,        16, (width + 3) / 4 * 16 }; break;
+    case "BC7"_cc:      T = { {R, G, B, A}, VK_FORMAT_BC7_UNORM_BLOCK,          16, (width + 3) / 4 * 16 }; break;
     default:
         xxLog("xxGraphic", "Unknown format (%.8s)", &format);
         return 0;

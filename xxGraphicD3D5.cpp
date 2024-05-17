@@ -554,35 +554,35 @@ uint64_t xxCreateTextureD3D5(uint64_t device, uint64_t format, int width, int he
     DDPIXELFORMAT pixelFormat;
     switch (format)
     {
-    case "RGB565"_FOURCC:   pixelFormat = { 0, DDPF_RGB, 0, 16, 0xFF, 0xFF00, 0xFF0000 }; break;
-    case "BGR565"_FOURCC:   pixelFormat = { 0, DDPF_RGB, 0, 16, 0xFF0000, 0xFF00, 0xFF }; break;
-    case "ARGB1555"_FOURCC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 16, 0xF800, 0x7C0, 0x3E, 0x1 }; break;
-    case "ABGR1555"_FOURCC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 16, 0x3E, 0x7C0, 0xF800, 0x1 }; break;
-    case "ARGB4444"_FOURCC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 16, 0xF0, 0xF00, 0xF000, 0xF }; break;
-    case "ABGR4444"_FOURCC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 16, 0xF000, 0xF00, 0xF0, 0xF }; break;
-    case "RGBA4444"_FOURCC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 16, 0xF, 0xF0, 0xF00, 0xF000 }; break;
-    case "BGRA4444"_FOURCC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 16, 0xF00, 0xF0, 0xF, 0xF000 }; break;
-    case "RGBA5551"_FOURCC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 16, 0x1F, 0x3E0, 0x7C00, 0x8000 }; break;
-    case "BGRA5551"_FOURCC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 16, 0x7C00, 0x3E0, 0x1F, 0x8000 }; break;
-    case "ARGB8888"_FOURCC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 32, 0xFF00, 0xFF0000, 0xFF000000, 0xFF }; break;
-    case "RGBA8888"_FOURCC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 32, 0xFF, 0xFF00, 0xFF0000, 0xFF000000 }; break;
-    case "ABGR8888"_FOURCC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 32, 0xFF000000, 0xFF0000, 0xFF00, 0xFF }; break;
-    case "BGRA8888"_FOURCC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 32, 0xFF0000, 0xFF00, 0xFF, 0xFF000000 }; break;
-    case "DS24"_FOURCC:     pixelFormat = { 0, DDPF_ZBUFFER | DDPF_STENCILBUFFER, 0, 24, 8 };   break;
-    case "BC1"_FOURCC:
-    case "DXT1"_FOURCC:     pixelFormat = { 0, DDPF_FOURCC, DWORD("DXT1"_FOURCC) }; break;
-    case "BC2"_FOURCC:
-    case "DXT3"_FOURCC:     pixelFormat = { 0, DDPF_FOURCC, DWORD("DXT3"_FOURCC) }; break;
-    case "BC3"_FOURCC:
-    case "DXT5"_FOURCC:     pixelFormat = { 0, DDPF_FOURCC, DWORD("DXT5"_FOURCC) }; break;
-    case "BC4S"_FOURCC:     pixelFormat = { 0, DDPF_FOURCC, DWORD("ATI1"_FOURCC) }; break;
-    case "BC4U"_FOURCC:
-    case "ATI1"_FOURCC:     pixelFormat = { 0, DDPF_FOURCC, DWORD("ATI1"_FOURCC) }; break;
-    case "BC5S"_FOURCC:     pixelFormat = { 0, DDPF_FOURCC, DWORD("ATI2"_FOURCC) }; break;
-    case "BC5U"_FOURCC:
-    case "ATI2"_FOURCC:     pixelFormat = { 0, DDPF_FOURCC, DWORD("ATI2"_FOURCC) }; break;
-    case "BC6H"_FOURCC:     pixelFormat = { 0, DDPF_FOURCC, DWORD("DXT5"_FOURCC) }; break;
-    case "BC7"_FOURCC:      pixelFormat = { 0, DDPF_FOURCC, DWORD("DXT5"_FOURCC) }; break;
+    case "RGB565"_CC:   pixelFormat = { 0, DDPF_RGB, 0, 16, 0xFF, 0xFF00, 0xFF0000 }; break;
+    case "BGR565"_CC:   pixelFormat = { 0, DDPF_RGB, 0, 16, 0xFF0000, 0xFF00, 0xFF }; break;
+    case "ARGB1555"_CC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 16, 0xF800, 0x7C0, 0x3E, 0x1 }; break;
+    case "ABGR1555"_CC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 16, 0x3E, 0x7C0, 0xF800, 0x1 }; break;
+    case "ARGB4444"_CC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 16, 0xF0, 0xF00, 0xF000, 0xF }; break;
+    case "ABGR4444"_CC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 16, 0xF000, 0xF00, 0xF0, 0xF }; break;
+    case "RGBA4444"_CC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 16, 0xF, 0xF0, 0xF00, 0xF000 }; break;
+    case "BGRA4444"_CC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 16, 0xF00, 0xF0, 0xF, 0xF000 }; break;
+    case "RGBA5551"_CC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 16, 0x1F, 0x3E0, 0x7C00, 0x8000 }; break;
+    case "BGRA5551"_CC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 16, 0x7C00, 0x3E0, 0x1F, 0x8000 }; break;
+    case "ARGB8888"_CC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 32, 0xFF00, 0xFF0000, 0xFF000000, 0xFF }; break;
+    case "RGBA8888"_CC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 32, 0xFF, 0xFF00, 0xFF0000, 0xFF000000 }; break;
+    case "ABGR8888"_CC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 32, 0xFF000000, 0xFF0000, 0xFF00, 0xFF }; break;
+    case "BGRA8888"_CC: pixelFormat = { 0, DDPF_RGB | DDPF_ALPHAPIXELS, 0, 32, 0xFF0000, 0xFF00, 0xFF, 0xFF000000 }; break;
+    case "DS24"_cc:     pixelFormat = { 0, DDPF_ZBUFFER | DDPF_STENCILBUFFER, 0, 24, 8 };   break;
+    case "BC1"_cc:
+    case "DXT1"_cc:     pixelFormat = { 0, DDPF_FOURCC, "DXT1"_cc }; break;
+    case "BC2"_cc:
+    case "DXT3"_cc:     pixelFormat = { 0, DDPF_FOURCC, "DXT3"_cc }; break;
+    case "BC3"_cc:
+    case "DXT5"_cc:     pixelFormat = { 0, DDPF_FOURCC, "DXT5"_cc }; break;
+    case "BC4S"_cc:     pixelFormat = { 0, DDPF_FOURCC, "ATI1"_cc }; break;
+    case "BC4U"_cc:
+    case "ATI1"_cc:     pixelFormat = { 0, DDPF_FOURCC, "ATI1"_cc }; break;
+    case "BC5S"_cc:     pixelFormat = { 0, DDPF_FOURCC, "ATI2"_cc }; break;
+    case "BC5U"_cc:
+    case "ATI2"_cc:     pixelFormat = { 0, DDPF_FOURCC, "ATI2"_cc }; break;
+    case "BC6H"_cc:     pixelFormat = { 0, DDPF_FOURCC, "DXT5"_cc }; break;
+    case "BC7"_cc:      pixelFormat = { 0, DDPF_FOURCC, "DXT5"_cc }; break;
     default:
         xxLog("xxGraphic", "Unknown format (%.8s)", &format);
         return 0;

@@ -507,35 +507,35 @@ uint64_t xxCreateTextureD3D8(uint64_t device, uint64_t format, int width, int he
     D3DFORMAT pixelFormat;
     switch (format)
     {
-    case "RGB565"_FOURCC:
-    case "BGR565"_FOURCC:   pixelFormat = D3DFMT_R5G6B5;    break;
-    case "ARGB1555"_FOURCC:
-    case "ABGR1555"_FOURCC: pixelFormat = D3DFMT_A1R5G5B5;  break;
-    case "ARGB4444"_FOURCC:
-    case "ABGR4444"_FOURCC:
-    case "RGBA4444"_FOURCC:
-    case "BGRA4444"_FOURCC: pixelFormat = D3DFMT_A4R4G4B4;  break;
-    case "RGBA5551"_FOURCC:
-    case "BGRA5551"_FOURCC: pixelFormat = D3DFMT_A1R5G5B5;  break;
-    case "ARGB8888"_FOURCC:
-    case "RGBA8888"_FOURCC:
-    case "ABGR8888"_FOURCC:
-    case "BGRA8888"_FOURCC: pixelFormat = D3DFMT_A8R8G8B8;  break;
-    case "DS24"_FOURCC:     pixelFormat = D3DFMT_D24S8;     break;
-    case "BC1"_FOURCC:
-    case "DXT1"_FOURCC:     pixelFormat = D3DFMT_DXT1;      break;
-    case "BC2"_FOURCC:
-    case "DXT3"_FOURCC:     pixelFormat = D3DFMT_DXT3;      break;
-    case "BC3"_FOURCC:
-    case "DXT5"_FOURCC:     pixelFormat = D3DFMT_DXT5;      break;
-    case "BC4S"_FOURCC:     pixelFormat = D3DFMT_ATI1;      break;
-    case "BC4U"_FOURCC:
-    case "ATI1"_FOURCC:     pixelFormat = D3DFMT_ATI1;      break;
-    case "BC5S"_FOURCC:     pixelFormat = D3DFMT_ATI2;      break;
-    case "BC5U"_FOURCC:
-    case "ATI2"_FOURCC:     pixelFormat = D3DFMT_ATI2;      break;
-    case "BC6H"_FOURCC:     pixelFormat = D3DFMT_DXT5;      break;
-    case "BC7"_FOURCC:      pixelFormat = D3DFMT_DXT5;      break;
+    case "RGB565"_CC:
+    case "BGR565"_CC:   pixelFormat = D3DFMT_R5G6B5;    break;
+    case "ARGB1555"_CC:
+    case "ABGR1555"_CC: pixelFormat = D3DFMT_A1R5G5B5;  break;
+    case "ARGB4444"_CC:
+    case "ABGR4444"_CC:
+    case "RGBA4444"_CC:
+    case "BGRA4444"_CC: pixelFormat = D3DFMT_A4R4G4B4;  break;
+    case "RGBA5551"_CC:
+    case "BGRA5551"_CC: pixelFormat = D3DFMT_A1R5G5B5;  break;
+    case "ARGB8888"_CC:
+    case "RGBA8888"_CC:
+    case "ABGR8888"_CC:
+    case "BGRA8888"_CC: pixelFormat = D3DFMT_A8R8G8B8;  break;
+    case "DS24"_cc:     pixelFormat = D3DFMT_D24S8;     break;
+    case "BC1"_cc:
+    case "DXT1"_cc:     pixelFormat = D3DFMT_DXT1;      break;
+    case "BC2"_cc:
+    case "DXT3"_cc:     pixelFormat = D3DFMT_DXT3;      break;
+    case "BC3"_cc:
+    case "DXT5"_cc:     pixelFormat = D3DFMT_DXT5;      break;
+    case "BC4S"_cc:     pixelFormat = D3DFMT_ATI1;      break;
+    case "BC4U"_cc:
+    case "ATI1"_cc:     pixelFormat = D3DFMT_ATI1;      break;
+    case "BC5S"_cc:     pixelFormat = D3DFMT_ATI2;      break;
+    case "BC5U"_cc:
+    case "ATI2"_cc:     pixelFormat = D3DFMT_ATI2;      break;
+    case "BC6H"_cc:     pixelFormat = D3DFMT_DXT5;      break;
+    case "BC7"_cc:      pixelFormat = D3DFMT_DXT5;      break;
     default:
         xxLog("xxGraphic", "Unknown format (%.8s)", &format);
         return 0;
