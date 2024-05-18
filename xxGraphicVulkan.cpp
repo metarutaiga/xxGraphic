@@ -1922,7 +1922,9 @@ uint64_t xxCreateVertexShaderVulkan(uint64_t device, char const* shader, uint64_
     }
     else
     {
-        static char const* const macro[] = { "SHADER_HLSL", "12", "SHADER_VERTEX", "1", nullptr, nullptr };
+        static char const* const macro[] = { "SHADER_HLSL", "12",
+                                             "SHADER_VERTEX", "1",
+                                             nullptr, nullptr };
         size_t size = 0;
         vkCompileShader(shader, macro, 'vert', &temp, &size);
         info.codeSize = size;
@@ -1955,7 +1957,9 @@ uint64_t xxCreateFragmentShaderVulkan(uint64_t device, char const* shader)
     }
     else
     {
-        static char const* const macro[] = { "SHADER_HLSL", "12", "SHADER_FRAGMENT", "1", nullptr, nullptr };
+        static char const* const macro[] = { "SHADER_HLSL", "12",
+                                             "SHADER_FRAGMENT", "1",
+                                             nullptr, nullptr };
         size_t size = 0;
         vkCompileShader(shader, macro, 'frag', &temp, &size);
         info.codeSize = size;

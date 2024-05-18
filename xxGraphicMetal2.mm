@@ -195,10 +195,16 @@ id xxCreateVertexShaderMetal2(id <MTLDevice> __unsafe_unretained device, char co
 
     NSError* error;
     MTLCompileOptions* options = [classMTLCompileOptions new];
-    options.preprocessorMacros = @{ @"SHADER_MSL" : @(1), @"SHADER_VERTEX" : @(1), @"SHADER_MSL_ARGUMENT" : @(1) };
+    options.preprocessorMacros = @{ @"SHADER_MSL" : @(2),
+                                    @"SHADER_VERTEX" : @(1) };;
     options.fastMathEnabled = YES;
 
-    NSString* code = [NSString stringWithFormat:@"%s%s", "#include <metal_stdlib>\nusing namespace metal;\n", shader];
+    NSMutableString* code = [NSMutableString new];
+    [code appendString:@"#include <metal_stdlib>"];
+    [code appendString:@"\n"];
+    [code appendString:@"using namespace metal;"];
+    [code appendString:@"\n"];
+    [code appendString:@(shader)];
     id <MTLLibrary> library = [device newLibraryWithSource:code
                                                    options:options
                                                      error:&error];
@@ -226,10 +232,16 @@ id xxCreateFragmentShaderMetal2(id <MTLDevice> __unsafe_unretained device, char 
 
     NSError* error;
     MTLCompileOptions* options = [classMTLCompileOptions new];
-    options.preprocessorMacros = @{ @"SHADER_MSL" : @(1), @"SHADER_FRAGMENT" : @(1), @"SHADER_MSL_ARGUMENT" : @(1) };
+    options.preprocessorMacros = @{ @"SHADER_MSL" : @(2),
+                                    @"SHADER_FRAGMENT" : @(1) };;
     options.fastMathEnabled = YES;
 
-    NSString* code = [NSString stringWithFormat:@"%s%s", "#include <metal_stdlib>\nusing namespace metal;\n", shader];
+    NSMutableString* code = [NSMutableString new];
+    [code appendString:@"#include <metal_stdlib>"];
+    [code appendString:@"\n"];
+    [code appendString:@"using namespace metal;"];
+    [code appendString:@"\n"];
+    [code appendString:@(shader)];
     id <MTLLibrary> library = [device newLibraryWithSource:code
                                                    options:options
                                                      error:&error];

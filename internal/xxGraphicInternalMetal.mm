@@ -8,14 +8,30 @@
 #include "xxGraphicInternalMetal.h"
 
 //==============================================================================
-char const* const mtlDefaultShaderCode =
-R"(struct Uniform
-{
-#if SHADER_MSL_ARGUMENT
-    device float4* Buffer [[id(0)]];
+#if defined(__clang__)
+char const* const mtlDefaultShaderCode __attribute__((weak)) =
 #else
-    float4 Buffer[12];
+char const* const mtlDefaultShaderCode =
 #endif
+R"(
+struct Uniform
+{
+#if SHADER_MSL >= 2
+#if SHADER_VERTEX
+    device float4* Buffer       [[id(0)]];
+#else
+    texture2d<float> Diffuse    [[id(4)]];
+    sampler DiffuseSampler      [[id(18)]];
+#endif
+#elif SHADER_UNIFORM
+    float4 Buffer[SHADER_UNIFORM];
+#endif
+};
+
+struct Sampler
+{
+    texture2d<float> Diffuse    [[texture(0)]];
+    sampler DiffuseSampler      [[sampler(0)]];
 };
 
 struct Attribute
@@ -32,20 +48,8 @@ struct Varying
     float2 UV0;
 };
 
-struct Sampler
-{
-#if SHADER_MSL_ARGUMENT
-    texture2d<float> Diffuse    [[id(4)]];
-    sampler DiffuseSampler      [[id(18)]];
-#else
-    texture2d<float> Diffuse    [[texture(0)]];
-    sampler DiffuseSampler      [[sampler(0)]];
-#endif
-};
-
 #if SHADER_VERTEX
-vertex Varying Main(Attribute attr [[stage_in]],
-                    constant Uniform& uni [[buffer(0)]])
+vertex Varying Main(Attribute attr [[stage_in]], constant Uniform& uni [[buffer(0)]])
 {
     auto uniBuffer = uni.Buffer;
     float4x4 world = float4x4(uniBuffer[0], uniBuffer[1], uniBuffer[2], uniBuffer[3]);
@@ -60,14 +64,13 @@ vertex Varying Main(Attribute attr [[stage_in]],
 #endif
 
 #if SHADER_FRAGMENT
-fragment float4 Main(Varying vary [[stage_in]],
-#if SHADER_MSL_ARGUMENT
-                     constant Sampler& sam [[buffer(0)]])
-#else
-                     Sampler sam)
-#endif
+fragment float4 Main(Varying vary [[stage_in]], constant Uniform& uni [[buffer(0)]], Sampler sam)
 {
+#if SHADER_MSL >= 2
+    return vary.Color * uni.Diffuse.sample(uni.DiffuseSampler, vary.UV0);
+#else
     return vary.Color * sam.Diffuse.sample(sam.DiffuseSampler, vary.UV0);
+#endif
 }
 #endif)";
 //==============================================================================

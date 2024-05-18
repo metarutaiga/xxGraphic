@@ -9,7 +9,11 @@
 //==============================================================================
 //  GLSL Shader
 //==============================================================================
+#if defined(__clang__)
+char const* const glDefaultShaderCode __attribute__((weak)) =
+#else
 char const* const glDefaultShaderCode =
+#endif
 R"(uniform vec4 uniBuffer[12];
 
 attribute vec3 attrPosition;
