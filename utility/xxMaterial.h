@@ -46,8 +46,6 @@ protected:
     uint64_t                    m_renderPass = 0;
     uint64_t                    m_pipeline = 0;
 
-    static char const           ms_defaultShader[];
-
 public:
     std::string                 Name = "";
 
@@ -82,4 +80,6 @@ public:
     std::vector<xxTexturePtr>   Textures;
 
     std::vector<xxModifierData> Modifiers;
+
+    static char const           DefaultShader[];
 };
