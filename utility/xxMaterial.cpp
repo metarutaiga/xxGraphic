@@ -328,7 +328,7 @@ std::string xxMaterial::GetShader(xxDrawData const& data, int type) const
     shader += define("SHADER_LIGHTING", mesh->NormalCount && Lighting ? 1 : 0);
     shader += define("SHADER_SPECULAR", mesh->NormalCount && Lighting && Specular ? 1 : 0);
     shader += ShaderOption;
-    shader += Shader.empty() ? ms_defaultShader : Shader;
+    shader += Shader.empty() ? DefaultShader : Shader;
 
     return shader;
 }
@@ -466,7 +466,57 @@ void xxMaterial::BinaryWrite(xxBinary& binary) const
 //==============================================================================
 //  Default Shader
 //==============================================================================
-char const xxMaterial::ms_defaultShader[] =
+#if defined(__clang__)
+extern char const* const glDefaultShaderCode = xxMaterial::DefaultShader;
+extern char const* const mtlDefaultShaderCode = xxMaterial::DefaultShader;
+#else
+#pragma comment(linker, "/alternatename:glDefaultShaderCode=?DefaultShader@xxMaterial@@2QBDB")
+#endif
+//------------------------------------------------------------------------------
+char const xxMaterial::DefaultShader[] =
+//------------------------------------------------------------------------------
+//  Default
+//------------------------------------------------------------------------------
+R"(
+#ifndef SHADER_GLSL
+#define SHADER_GLSL 0
+#endif
+#ifndef SHADER_HLSL
+#define SHADER_HLSL 0
+#endif
+#ifndef SHADER_MSL
+#define SHADER_MSL 0
+#endif
+#ifndef SHADER_VERTEX
+#define SHADER_VERTEX 0
+#endif
+#ifndef SHADER_FRAGMENT
+#define SHADER_FRAGMENT 0
+#endif
+#ifndef SHADER_SKINNING
+#define SHADER_SKINNING 0
+#endif
+#ifndef SHADER_NORMAL
+#define SHADER_NORMAL 0
+#endif
+#ifndef SHADER_COLOR
+#define SHADER_COLOR 1
+#endif
+#ifndef SHADER_TEXTURE
+#define SHADER_TEXTURE 1
+#endif
+#ifndef SHADER_UNIFORM
+#define SHADER_UNIFORM 12
+#endif
+#ifndef SHADER_OPACITY
+#define SHADER_OPACITY 0
+#endif
+#ifndef SHADER_LIGHTING
+#define SHADER_LIGHTING 0
+#endif
+#ifndef SHADER_SPECULAR
+#define SHADER_SPECULAR 0
+#endif)"
 //------------------------------------------------------------------------------
 //  Compatible type
 //------------------------------------------------------------------------------
@@ -506,7 +556,7 @@ uniform sampler2D samDiffuse;
 #elif SHADER_MSL
 struct Uniform
 {
-#if SHADER_MSL_ARGUMENT
+#if SHADER_MSL >= 2
 #if SHADER_VERTEX
     device float4* Buffer       [[id(0)]];
 #else
@@ -771,7 +821,7 @@ fragment float4 Main(Varying vary [[stage_in]], constant Uniform& uni [[buffer(0
     color = color * tex2D(samDiffuse, vary.UV0);
 #endif
 #elif SHADER_MSL && SHADER_TEXTURE
-#if SHADER_MSL_ARGUMENT
+#if SHADER_MSL >= 2
     color = color * uni.Diffuse.sample(uni.DiffuseSampler, vary.UV0);
 #else
     color = color * sam.Diffuse.sample(sam.DiffuseSampler, vary.UV0);
