@@ -36,13 +36,17 @@ static void GL_APIENTRY wglShaderSourceLegacy(GLuint shader, GLsizei count, cons
 
     for (GLsizei i = 0; i < count; ++i)
     {
+        const GLchar* val = (i >= 2) ? string[i - 2] : nullptr;
         const GLchar* var = string[i];
         if (strcmp(var, "#version 100") == 0)
             var = "#version 120";
         if (strncmp(var, "precision", sizeof("precision") - 1) == 0)
             var = "";
-        if (strncmp(var, "#define uniform uniform highp", sizeof("#define uniform uniform highp") - 1) == 0)
-            var = "";
+        if (val)
+        {
+            if (strcmp(val, "uniform") == 0 && strcmp(var, "uniform highp") == 0)
+                var = "uniform";
+        }
         replaceString[i] = var;
     }
 
@@ -58,26 +62,30 @@ static void GL_APIENTRY wglShaderSource(GLuint shader, GLsizei count, const GLch
     bool fragmentShader = false;
     for (GLsizei i = 0; i < count; ++i)
     {
+        const GLchar* val = (i >= 2) ? string[i - 2] : nullptr;
         const GLchar* var = string[i];
         if (strcmp(var, "#version 100") == 0)
             var = "#version 140";
         if (strncmp(var, "precision", sizeof("precision") - 1) == 0)
             var = "";
-        if (strcmp(var, "#define SHADER_FRAGMENT 1") == 0)
+        if (val)
         {
-            var =   "#define SHADER_FRAGMENT 1\n"
-                    "#ifndef gl_FragColor\n"
-                    "#define gl_FragColor fragColor\n"
-                    "out vec4 fragColor;\n"
-                    "#endif";
-            fragmentShader = true;
+            if (strcmp(val, "SHADER_FRAGMENT") == 0 && strcmp(var, "1") == 0)
+            {
+                var =   "1\n"
+                        "#ifndef gl_FragColor\n"
+                        "#define gl_FragColor fragColor\n"
+                        "out vec4 fragColor;\n"
+                        "#endif";
+                fragmentShader = true;
+            }
+            if (strcmp(val, "uniform") == 0 && strcmp(var, "uniform highp") == 0)
+                var = "uniform";
+            if (strcmp(val, "attribute") == 0 && strcmp(var, "attribute") == 0)
+                var = "in";
+            if (strcmp(val, "varying") == 0 && strcmp(var, "varying") == 0)
+                var = fragmentShader ? "in" : "out";
         }
-        if (strncmp(var, "#define uniform uniform highp", sizeof("#define uniform uniform highp") - 1) == 0)
-            var = "";
-        if (strncmp(var, "#define attribute", sizeof("#define attribute") - 1) == 0)
-            var = fragmentShader ? "#define attribute" : "#define attribute in";
-        if (strncmp(var, "#define varying", sizeof("#define varying") - 1) == 0)
-            var = fragmentShader ? "#define varying in" : "#define varying out";
         replaceString[i] = var;
     }
 

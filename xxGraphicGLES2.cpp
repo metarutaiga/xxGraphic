@@ -801,29 +801,41 @@ static void checkShader(GLuint glShader, char const* shader)
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexShaderGLES2(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
+    static char const* const macro[][2] =
+    {
+        { "SHADER_GLSL", "1" },
+        { "SHADER_VERTEX", "1" },
+        { "uniBuffer", "uniBufferVS" },
+        { "uniform", "uniform highp" },
+        { "attribute", "attribute" },
+        { "varying", "varying" },
+    };
+    size_t size = xxCountOf(macro);
+
     if (strcmp(shader, "default") == 0)
     {
         shader = glDefaultShaderCode;
     }
 
-    char const* sources[] =
+    GLsizei count = 0;
+    char const* sources[2 + size * 6 + 2 + 1];
+    sources[count++] = "#version 100";
+    sources[count++] = "\n";
+    for (size_t i = 0; i < size; ++i)
     {
-        "#version 100", "\n",
-        "#define SHADER_GLSL 1", "\n",
-        "#define SHADER_HLSL 0", "\n",
-        "#define SHADER_MSL 0", "\n",
-        "#define SHADER_VERTEX 1", "\n",
-        "#define SHADER_FRAGMENT 0", "\n",
-        "#define uniBuffer uniBufferVS", "\n",
-        "#define uniform uniform highp", "\n",
-        "#define attribute attribute", "\n",
-        "#define varying varying", "\n",
-        "precision highp float;", "\n",
-        shader
-    };
+        sources[count++] = "#define";
+        sources[count++] = " ";
+        sources[count++] = macro[i][0];
+        sources[count++] = " ";
+        sources[count++] = macro[i][1];
+        sources[count++] = "\n";
+    }
+    sources[count++] = "precision highp float;";
+    sources[count++] = "\n";
+    sources[count++] = shader;
 
     GLuint glShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(glShader, xxCountOf(sources), sources, nullptr);
+    glShaderSource(glShader, count, sources, nullptr);
     glCompileShader(glShader);
     checkShader(glShader, shader);
 
@@ -832,29 +844,41 @@ uint64_t xxCreateVertexShaderGLES2(uint64_t device, char const* shader, uint64_t
 //------------------------------------------------------------------------------
 uint64_t xxCreateFragmentShaderGLES2(uint64_t device, char const* shader)
 {
+    static char const* const macro[][2] =
+    {
+        { "SHADER_GLSL", "1" },
+        { "SHADER_FRAGMENT", "1" },
+        { "uniBuffer", "uniBufferFS" },
+        { "uniform", "uniform highp" },
+        { "attribute", "" },
+        { "varying", "varying" },
+    };
+    size_t size = xxCountOf(macro);
+
     if (strcmp(shader, "default") == 0)
     {
         shader = glDefaultShaderCode;
     }
 
-    char const* sources[] =
+    GLsizei count = 0;
+    char const* sources[2 + size * 6 + 2 + 1];
+    sources[count++] = "#version 100";
+    sources[count++] = "\n";
+    for (size_t i = 0; i < size; ++i)
     {
-        "#version 100", "\n",
-        "#define SHADER_GLSL 1", "\n",
-        "#define SHADER_HLSL 0", "\n",
-        "#define SHADER_MSL 0", "\n",
-        "#define SHADER_VERTEX 0", "\n",
-        "#define SHADER_FRAGMENT 1", "\n",
-        "#define uniBuffer uniBufferFS", "\n",
-        "#define uniform uniform highp", "\n",
-        "#define attribute", "\n",
-        "#define varying varying", "\n",
-        "precision mediump float;", "\n",
-        shader
-    };
+        sources[count++] = "#define";
+        sources[count++] = " ";
+        sources[count++] = macro[i][0];
+        sources[count++] = " ";
+        sources[count++] = macro[i][1];
+        sources[count++] = "\n";
+    }
+    sources[count++] = "precision mediump float;";
+    sources[count++] = "\n";
+    sources[count++] = shader;
 
     GLuint glShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(glShader, xxCountOf(sources), sources, nullptr);
+    glShaderSource(glShader, count, sources, nullptr);
     glCompileShader(glShader);
     checkShader(glShader, shader);
 
