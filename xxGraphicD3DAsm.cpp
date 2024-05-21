@@ -46,8 +46,8 @@ const DWORD vertexShaderCode10[] =
     D3DSIO_MAD, _DST(TEMP, 0), _SRC(CONST, 9), _SRCM(TEMP, 1, Y), _SRC(TEMP, 0),    // mad r0, c9, r1.y, r0
     D3DSIO_MAD, _DST(TEMP, 0), _SRC(CONST, 10), _SRCM(TEMP, 1, Z), _SRC(TEMP, 0),   // mad r0, c10, r1.z, r0
     D3DSIO_MAD, _DST(RASTOUT, 0), _SRC(CONST, 11), _SRCM(TEMP, 1, W), _SRC(TEMP, 0),// mad oPos, c11, r1.w, r0
-    D3DSIO_MOV, _DST(ATTROUT, 0), _SRC(INPUT, 1),                                   // mov oD0, v1
-    D3DSIO_MOV, _DSTM(TEXCRDOUT, 0, XY), _SRC(INPUT, 2),                            // mov oT0.xy, v2
+    D3DSIO_MOV, _DST(ATTROUT, 0), _SRC(INPUT, 5),                                   // mov oD0, v5
+    D3DSIO_MOV, _DSTM(TEXCRDOUT, 0, XY), _SRC(INPUT, 7),                            // mov oT0.xy, v7
     D3DSIO_END
 };
 //------------------------------------------------------------------------------
