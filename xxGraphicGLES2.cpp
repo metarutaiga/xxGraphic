@@ -810,7 +810,7 @@ uint64_t xxCreateVertexShaderGLES2(uint64_t device, char const* shader, uint64_t
         { "attribute", "attribute" },
         { "varying", "varying" },
     };
-    size_t size = xxCountOf(macro);
+    constexpr size_t size = xxCountOf(macro);
 
     if (strcmp(shader, "default") == 0)
     {
@@ -853,7 +853,7 @@ uint64_t xxCreateFragmentShaderGLES2(uint64_t device, char const* shader)
         { "attribute", "" },
         { "varying", "varying" },
     };
-    size_t size = xxCountOf(macro);
+    constexpr size_t size = xxCountOf(macro);
 
     if (strcmp(shader, "default") == 0)
     {
