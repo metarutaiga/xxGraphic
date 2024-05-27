@@ -11,6 +11,7 @@
 #   include <dlfcn.h>
 #   include <mach/mach_time.h>
 #   include <mach-o/dyld.h>
+#   include <malloc/malloc.h>
 #   include <pthread.h>
 #   include <sys/sysctl.h>
 #   include <sys/syscall.h>
@@ -21,6 +22,7 @@
 #if defined(__linux__)
 #   include <dirent.h>
 #   include <dlfcn.h>
+#   include <pthread.h>
 #   include <sys/time.h>
 #   include <sys/types.h>
 #   include <unistd.h>
@@ -56,6 +58,19 @@
 //==============================================================================
 //  Allocator
 //==============================================================================
+#if INTPTR_MAX == INT64_MAX
+size_t xxAllocSize(const void* ptr)
+{
+#if defined(_WIN32)
+    return _msize((void*)ptr);
+#elif defined(__APPLE__)
+    return malloc_size(ptr);
+#else
+    return malloc_usable_size(ptr);
+#endif
+}
+#endif
+//------------------------------------------------------------------------------
 void* xxAlignedAlloc(size_t size, size_t alignment)
 {
 #if defined(_WIN32)
@@ -93,6 +108,17 @@ void xxAlignedFree(void* ptr)
     return _aligned_free(ptr);
 #else
     return free(ptr);
+#endif
+}
+//------------------------------------------------------------------------------
+size_t xxAlignedAllocSize(const void* ptr, size_t alignment)
+{
+#if defined(_WIN32)
+    return _aligned_msize((void*)ptr, alignment, alignment);
+#elif defined(__APPLE__)
+    return malloc_size(ptr);
+#else
+    return malloc_usable_size(ptr);
 #endif
 }
 //==============================================================================
@@ -312,7 +338,23 @@ uint64_t xxGetCurrentThreadId()
 //------------------------------------------------------------------------------
 int xxGetIncrementThreadId()
 {
+#if defined(xxANDROID)
+    static pthread_key_t key = 0;
+    if (xxUnlikely(key == 0))
+    {
+        pthread_key_create(&key, [](void* ptr) { xxFree(ptr); });
+    }
+    int* threadIdPointer = (int*)pthread_getspecific(key);
+    if (xxUnlikely(threadIdPointer == nullptr))
+    {
+        threadIdPointer = xxAlloc(int);
+        (*threadIdPointer) = 0;
+        pthread_setspecific(key, threadIdPointer);
+    }
+    int& threadId = (*threadIdPointer);
+#else
     static int thread_local threadId;
+#endif
     if (xxUnlikely(threadId == 0))
     {
         static int increment = 0;
