@@ -170,14 +170,17 @@
 #   define xxAlloc(T, ...)          (T*)malloc(sizeof(T) * (__VA_ARGS__ + 1 != 1 ? __VA_ARGS__ + 0 : 1))
 #   define xxRealloc(ptr, T, count) (T*)realloc(ptr, sizeof(T) * count)
 #   define xxFree(ptr)              free(ptr)
+    xxAPI size_t xxAllocSize(const void* ptr);
 #else
 #   define xxAlloc(T, ...)          (T*)xxAlignedAlloc(sizeof(T) * (__VA_ARGS__ + 1 != 1 ? __VA_ARGS__ + 0 : 1), 16)
 #   define xxRealloc(ptr, T, count) (T*)xxAlignedRealloc(ptr, sizeof(T) * count, 16)
 #   define xxFree(ptr)              xxAlignedFree(ptr)
+#   define xxAllocSize(ptr)         xxAlignedAllocSize(ptr, 16)
 #endif
 xxAPI void* xxAlignedAlloc(size_t size, size_t alignment);
 xxAPI void* xxAlignedRealloc(void* ptr, size_t size, size_t alignment);
 xxAPI void xxAlignedFree(void* ptr);
+xxAPI size_t xxAlignedAllocSize(const void* ptr, size_t alignment);
 //==============================================================================
 //  Library
 //==============================================================================
