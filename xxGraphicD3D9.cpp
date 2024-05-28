@@ -366,9 +366,9 @@ uint64_t xxCreateVertexAttributeD3D9(uint64_t device, int count, int* attribute)
         stride += size;
 
         if (element == 'POS3' && size == sizeof(float) * 3)
-            d3dVertexAttribute.fvf |= D3DFVF_XYZ;
+            d3dVertexAttribute.fvf  = D3DFVF_XYZ | (d3dVertexAttribute.fvf & ~D3DFVF_POSITION_MASK);
         if (element == 'BON3' && size == sizeof(float) * 3)
-            d3dVertexAttribute.fvf |= D3DFVF_XYZB4;
+            d3dVertexAttribute.fvf  = D3DFVF_XYZB4 | (d3dVertexAttribute.fvf & ~D3DFVF_POSITION_MASK);
         if (element == 'BON4' && size == sizeof(char) * 4)
             d3dVertexAttribute.fvf |= D3DFVF_LASTBETA_UBYTE4;
         if (element == 'NOR3' && size == sizeof(float) * 3)
@@ -745,7 +745,6 @@ uint64_t xxCreateSamplerD3D9(uint64_t device, bool clampU, bool clampV, bool cla
     {
         d3dSampler.magFilter = linearMag ? D3DTEXF_ANISOTROPIC : D3DTEXF_POINT;
         d3dSampler.minFilter = linearMin ? D3DTEXF_ANISOTROPIC : D3DTEXF_POINT;
-        d3dSampler.mipFilter = linearMip ? D3DTEXF_ANISOTROPIC : D3DTEXF_POINT;
     }
 
     return static_cast<uint64_t>(d3dSampler.value);

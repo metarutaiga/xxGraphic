@@ -328,6 +328,12 @@ typedef struct D3D12_GPU_DESCRIPTOR_HANDLE { UINT64 ptr; } D3D12_GPU_DESCRIPTOR_
 typedef UINT64 D3D12_GPU_VIRTUAL_ADDRESS;
 #endif
 
+struct D3DBlob : public IUnknown
+{
+    virtual LPCSTR STDMETHODCALLTYPE GetBufferPointer() = 0;
+    virtual SIZE_T STDMETHODCALLTYPE GetBufferSize() = 0;
+};
+
 template <class T>
 inline ULONG SafeRelease(T*& ptr)
 {
@@ -386,6 +392,33 @@ inline void PatchD3DIM(char const* name)
     xxFreeLibrary(d3dim);
 }
 
+inline void D3DDumpBlob(struct ID3D10Blob* blob, char const* label)
+{
+    if (blob == nullptr)
+        return;
+    D3DBlob* text = (D3DBlob*)blob;
+
+    size_t size = text->GetBufferSize();
+    char* temp = xxAlloc(char, size + 1);
+    if (temp)
+    {
+        memcpy(temp, text->GetBufferPointer(), size);
+        temp[size] = 0;
+
+        char* lasts = temp;
+        char* line = strsep(&lasts, "\r\n");
+        while (line)
+        {
+            xxLog(label, "%s", line);
+            line = strsep(&lasts, "\r\n");
+        }
+
+        xxFree(temp);
+    }
+
+    text->Release();
+}
+
 inline struct ID3D10Blob* D3DCompileShader(char const* shader, char const*const* macro, char const* entry, char const* target)
 {
     static HRESULT(WINAPI * D3DCompile)(char const*, size_t, char const*, char const*const*, void*, char const*, char const*, int, int, ID3D10Blob**, ID3D10Blob**) = nullptr;
@@ -410,39 +443,27 @@ inline struct ID3D10Blob* D3DCompileShader(char const* shader, char const*const*
         {
             D3D10CompileShader(shader, strlen(shader), nullptr, macro, nullptr, entry, target, 0, &blob, &error);
         }
-        if (error)
-        {
-            struct Blob : public IUnknown
-            {
-                virtual LPCSTR STDMETHODCALLTYPE GetBufferPointer() = 0;
-                virtual SIZE_T STDMETHODCALLTYPE GetBufferSize() = 0;
-            };
-            Blob* blob = (Blob*)error;
-
-            size_t size = blob->GetBufferSize();
-            char* temp = xxAlloc(char, size + 1);
-            if (temp)
-            {
-                memcpy(temp, blob->GetBufferPointer(), size);
-                temp[size] = 0;
-
-                char* lasts = temp;
-                char* line = strsep(&lasts, "\r\n");
-                while (line)
-                {
-                    xxLog("D3DCompileShader", "%s", line);
-                    line = strsep(&lasts, "\r\n");
-                }
-
-                xxFree(temp);
-            }
-
-            blob->Release();
-        }
+        D3DDumpBlob(error, "D3DCompileShader");
         return blob;
     }
 
     return nullptr;
+}
+
+inline void D3DDisassembleShader(struct ID3D10Blob* shader)
+{
+    static HRESULT(WINAPI * D3DDisassemble)(LPCVOID, SIZE_T, UINT, LPCSTR, ID3D10Blob**) = nullptr;
+    if (D3DDisassemble == nullptr)
+    {
+        (void*&)D3DDisassemble = GetProcAddress(LoadLibraryA("d3dcompiler_47.dll"), "D3DDisassemble");
+    }
+    D3DBlob* blob = (D3DBlob*)shader;
+    if (D3DDisassemble)
+    {
+        ID3D10Blob* text = nullptr;
+        D3DDisassemble(blob->GetBufferPointer(), blob->GetBufferSize(), 0, nullptr, &text);
+        D3DDumpBlob(text, "D3DDisassembleShader");
+    }
 }
 
 //==============================================================================
@@ -775,8 +796,9 @@ union D3DVERTEXATTRIBUTE2
     uint64_t    value;
     struct
     {
-        DWORD   fvf;
-        int     stride;
+        WORD    fvf;
+        WORD    stride;
+        DWORD   offset;
     };
 };
 //------------------------------------------------------------------------------

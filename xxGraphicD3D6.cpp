@@ -439,6 +439,10 @@ uint64_t xxCreateVertexAttributeD3D6(uint64_t device, int count, int* attribute)
 
         if (element == 'POS3' && size == sizeof(float) * 3)
             d3dVertexAttribute.fvf |= D3DFVF_XYZ;
+        if (element == 'BON3' && size == sizeof(float) * 3)
+            d3dVertexAttribute.fvf += D3DFVF_TEX1;
+        if (element == 'BON4' && size == sizeof(char) * 4)
+            d3dVertexAttribute.fvf += D3DFVF_TEX1;
         if (element == 'NOR3' && size == sizeof(float) * 3)
             d3dVertexAttribute.fvf |= D3DFVF_NORMAL;
         if (element == 'COL4' && size == sizeof(char) * 4)

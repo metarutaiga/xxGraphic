@@ -424,11 +424,20 @@ uint64_t xxCreateVertexAttributeD3D5(uint64_t device, int count, int* attribute)
         stride += size;
 
         if (element == 'POS3' && size == sizeof(float) * 3)
+        {
             d3dVertexAttribute.fvf |= D3DFVF_XYZ;
+            d3dVertexAttribute.offset |= 1 << (offset / sizeof(float));
+        }
         if (element == 'COL4' && size == sizeof(char) * 4)
+        {
             d3dVertexAttribute.fvf |= D3DFVF_DIFFUSE;
+            d3dVertexAttribute.offset |= 1 << (offset / sizeof(float));
+        }
         if (element == 'TEX2' && size == sizeof(float) * 2)
+        {
             d3dVertexAttribute.fvf += D3DFVF_TEX1;
+            d3dVertexAttribute.offset |= 1 << (offset / sizeof(float));
+        }
     }
 
     d3dVertexAttribute.stride = stride;
@@ -856,25 +865,44 @@ void xxSetVertexBuffersD3D5(uint64_t commandEncoder, int count, const uint64_t* 
     {
         d3dVertexBuffer->dirty = false;
 
+        int vertexOffset = -1;
+        int diffuseOffset = -1;
+        int textureOffset = -1;
+        int offsetBits = d3dVertexAttribute.offset;
+        if (d3dVertexAttribute.fvf & D3DFVF_XYZ)
+        {
+            vertexOffset = xxCountTrailingZeros(offsetBits);
+            offsetBits &= ~(1 << vertexOffset);
+        }
+        if (d3dVertexAttribute.fvf & D3DFVF_DIFFUSE)
+        {
+            diffuseOffset = xxCountTrailingZeros(offsetBits);
+            offsetBits &= ~(1 << diffuseOffset);
+        }
+        if (d3dVertexAttribute.fvf & D3DFVF_TEX1)
+        {
+            textureOffset = xxCountTrailingZeros(offsetBits);
+            offsetBits &= ~(1 << textureOffset);
+        }
+
         float* source = (float*)d3dVertexBuffer->buffer;
         D3DLVERTEX* target = (D3DLVERTEX*)d3dVertexBuffer->address;
         for (UINT i = 0; i < d3dVertexBuffer->count; ++i)
         {
-            int offset = 0;
-            if (d3dVertexAttribute.fvf & D3DFVF_XYZ)
+            if (vertexOffset != -1)
             {
-                target->dvX = source[offset++];
-                target->dvY = source[offset++];
-                target->dvZ = source[offset++];
+                target->dvX = source[vertexOffset + 0];
+                target->dvY = source[vertexOffset + 1];
+                target->dvZ = source[vertexOffset + 2];
             }
-            if (d3dVertexAttribute.fvf & D3DFVF_DIFFUSE)
+            if (diffuseOffset != -1)
             {
-                target->dcColor = (D3DCOLOR&)source[offset++];
+                target->dcColor = (D3DCOLOR&)source[diffuseOffset];
             }
-            if (d3dVertexAttribute.fvf & D3DFVF_TEX1)
+            if (textureOffset != -1)
             {
-                target->dvTU = source[offset++];
-                target->dvTV = source[offset++];
+                target->dvTU = source[textureOffset + 0];
+                target->dvTV = source[textureOffset + 1];
             }
 
             source = (float*)((char*)source + d3dVertexAttribute.stride);

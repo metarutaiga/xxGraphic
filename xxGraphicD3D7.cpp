@@ -410,7 +410,11 @@ uint64_t xxCreateVertexAttributeD3D7(uint64_t device, int count, int* attribute)
         stride += size;
 
         if (element == 'POS3' && size == sizeof(float) * 3)
-            d3dVertexAttribute.fvf |= D3DFVF_XYZ;
+            d3dVertexAttribute.fvf  = D3DFVF_XYZ | (d3dVertexAttribute.fvf & ~D3DFVF_POSITION_MASK);
+        if (element == 'BON3' && size == sizeof(float) * 3)
+            d3dVertexAttribute.fvf  = D3DFVF_XYZB3 | (d3dVertexAttribute.fvf & ~D3DFVF_POSITION_MASK);
+        if (element == 'BON4' && size == sizeof(char) * 4)
+            d3dVertexAttribute.fvf |= D3DFVF_RESERVED1;
         if (element == 'NOR3' && size == sizeof(float) * 3)
             d3dVertexAttribute.fvf |= D3DFVF_NORMAL;
         if (element == 'COL4' && size == sizeof(char) * 4)

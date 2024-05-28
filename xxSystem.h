@@ -234,9 +234,9 @@ xxAPI xxInline xxConstexpr unsigned int xxHash(char const* key, size_t count xxD
 #define xxCountTrailingZeros    __builtin_ctz
 #define xxPopulationCount       __builtin_popcount
 #elif defined(_M_IX86) || defined(_M_AMD64)
-#define xxFindFirstSet          1 + __lzcnt
-#define xxCountLeadingZeros     __lzcnt
-#define xxCountTrailingZeros    __tzcnt
+#define xxFindFirstSet          1 + _lzcnt_u32
+#define xxCountLeadingZeros     _lzcnt_u32
+#define xxCountTrailingZeros    _tzcnt_u32
 #define xxPopulationCount       __popcnt
 #elif defined(_M_ARM) || defined(_M_ARM64)
 #define xxFindFirstSet          1 + _CountLeadingZeros
