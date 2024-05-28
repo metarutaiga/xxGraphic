@@ -241,7 +241,7 @@ xxAPI xxInline xxConstexpr unsigned int xxHash(char const* key, size_t count xxD
 #elif defined(_M_ARM) || defined(_M_ARM64)
 #define xxFindFirstSet          1 + _CountLeadingZeros
 #define xxCountLeadingZeros     _CountLeadingZeros
-#define xxCountTrailingZeros    _CountTrailinZeros
+#define xxCountTrailingZeros    _CountTrailingZeros
 #define xxPopulationCount       _CountOneBits
 #endif
 //==============================================================================
