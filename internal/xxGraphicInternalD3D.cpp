@@ -53,7 +53,7 @@ void D3DDisassembleShader(struct ID3D10Blob* shader)
     {
         (void*&)D3DDisassemble = GetProcAddress(LoadLibraryA("d3dcompiler_47.dll"), "D3DDisassemble");
     }
-    else if (D3D10DisassembleShader == nullptr)
+    if (D3DDisassemble == nullptr && D3D10DisassembleShader == nullptr)
     {
         (void*&)D3D10DisassembleShader = GetProcAddress(LoadLibraryA("d3d10.dll"), "D3D10DisassembleShader");
     }
@@ -153,7 +153,7 @@ void D3DDowngradeShader(struct ID3D10Blob* shader, char const* target)
                 input += 3;
                 break;
             case D3DSIO_COMMENT:
-                output += (input[0] >> 16) + 1;
+//              output += (input[0] >> 16) + 1;
                 input += (input[0] >> 16) + 1;
                 break;
             case D3DSIO_END:
@@ -196,7 +196,7 @@ void D3DDowngradeShader(struct ID3D10Blob* shader, char const* target)
                 input += count + 1;
                 break;
             case D3DSIO_COMMENT:
-                output += (input[0] >> 16) + 1;
+//              output += (input[0] >> 16) + 1;
                 input += (input[0] >> 16) + 1;
                 break;
             case D3DSIO_END:
