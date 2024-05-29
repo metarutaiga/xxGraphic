@@ -328,12 +328,6 @@ typedef struct D3D12_GPU_DESCRIPTOR_HANDLE { UINT64 ptr; } D3D12_GPU_DESCRIPTOR_
 typedef UINT64 D3D12_GPU_VIRTUAL_ADDRESS;
 #endif
 
-struct D3DBlob : public IUnknown
-{
-    virtual LPCSTR STDMETHODCALLTYPE GetBufferPointer() = 0;
-    virtual SIZE_T STDMETHODCALLTYPE GetBufferSize() = 0;
-};
-
 template <class T>
 inline ULONG SafeRelease(T*& ptr)
 {
@@ -346,125 +340,12 @@ inline ULONG SafeRelease(T*& ptr)
     return ref;
 }
 
-inline void ViewportFromScissor(float projectionMatrix[4][4], int fromX, int fromY, int fromWidth, int fromHeight, int toX, int toY, int toWidth, int toHeight)
-{
-    float invWidth = 1.0f / toWidth;
-    float invHeight = 1.0f / toHeight;
-    float scaleWidth = fromWidth * invWidth;
-    float scaleHeight = fromHeight * invHeight;
-    float offsetWidth = scaleWidth + 2.0f * (fromX - (toX + toWidth * 0.5f)) * invWidth;
-    float offsetHeight = scaleHeight + 2.0f * (fromY - (toY + toHeight * 0.5f)) * invHeight;
-    projectionMatrix[0][0] = projectionMatrix[0][0] * scaleWidth;
-    projectionMatrix[1][1] = projectionMatrix[1][1] * scaleHeight;
-    projectionMatrix[3][0] = projectionMatrix[3][0] * scaleWidth + offsetWidth;
-    projectionMatrix[3][1] = projectionMatrix[3][1] * scaleHeight - offsetHeight;
-}
-
-inline void PatchD3DIM(char const* name)
-{
-    void* d3dim = xxLoadLibrary(name);
-    if (d3dim == nullptr)
-        return;
-
-    // https://github.com/UCyborg/LegacyD3DResolutionHack
-    PIMAGE_DOS_HEADER dosHeader = (PIMAGE_DOS_HEADER)d3dim;
-    PIMAGE_NT_HEADERS ntHeader = (PIMAGE_NT_HEADERS)((char*)dosHeader + dosHeader->e_lfanew);
-    char* codeBase = (char*)d3dim + ntHeader->OptionalHeader.BaseOfCode;
-    DWORD codeSize = ntHeader->OptionalHeader.SizeOfCode;
-
-    static const BYTE wantedBytes[] = { 0xB8, 0x00, 0x08, 0x00, 0x00, 0x39 };
-    for (DWORD i = 0, size = codeSize - sizeof(wantedBytes); i < size; ++i)
-    {
-        if (memcmp(codeBase + i, wantedBytes, sizeof(wantedBytes)) == 0)
-        {
-            DWORD oldProtect;
-            if (VirtualProtect(&codeBase[i + 1], 4, PAGE_EXECUTE_READWRITE, &oldProtect))
-            {
-                codeBase[i + 1] = -1;
-                codeBase[i + 2] = -1;
-                codeBase[i + 3] = -1;
-                codeBase[i + 4] = -1;
-                VirtualProtect(&codeBase[i + 1], 4, oldProtect, &oldProtect);
-            }
-        }
-    }
-
-    xxFreeLibrary(d3dim);
-}
-
-inline void D3DDumpBlob(struct ID3D10Blob* blob, char const* label)
-{
-    if (blob == nullptr)
-        return;
-    D3DBlob* text = (D3DBlob*)blob;
-
-    size_t size = text->GetBufferSize();
-    char* temp = xxAlloc(char, size + 1);
-    if (temp)
-    {
-        memcpy(temp, text->GetBufferPointer(), size);
-        temp[size] = 0;
-
-        char* lasts = temp;
-        char* line = strsep(&lasts, "\r\n");
-        while (line)
-        {
-            xxLog(label, "%s", line);
-            line = strsep(&lasts, "\r\n");
-        }
-
-        xxFree(temp);
-    }
-
-    text->Release();
-}
-
-inline struct ID3D10Blob* D3DCompileShader(char const* shader, char const*const* macro, char const* entry, char const* target)
-{
-    static HRESULT(WINAPI * D3DCompile)(char const*, size_t, char const*, char const*const*, void*, char const*, char const*, int, int, ID3D10Blob**, ID3D10Blob**) = nullptr;
-    static HRESULT(WINAPI * D3D10CompileShader)(char const*, size_t, char const*, char const*const*, void*, char const*, char const*, int, ID3D10Blob**, ID3D10Blob**) = nullptr;
-    if (D3DCompile == nullptr)
-    {
-        (void*&)D3DCompile = GetProcAddress(LoadLibraryA("d3dcompiler_47.dll"), "D3DCompile");
-    }
-    if (D3DCompile == nullptr && D3D10CompileShader == nullptr)
-    {
-        (void*&)D3D10CompileShader = GetProcAddress(LoadLibraryA("d3d10.dll"), "D3D10CompileShader");
-    }
-    if (D3DCompile || D3D10CompileShader)
-    {
-        ID3D10Blob* blob = nullptr;
-        ID3D10Blob* error = nullptr;
-        if (D3DCompile)
-        {
-            D3DCompile(shader, strlen(shader), nullptr, macro, nullptr, entry, target, (1 << 12), 0, &blob, &error);
-        }
-        else if (D3D10CompileShader)
-        {
-            D3D10CompileShader(shader, strlen(shader), nullptr, macro, nullptr, entry, target, 0, &blob, &error);
-        }
-        D3DDumpBlob(error, "D3DCompileShader");
-        return blob;
-    }
-
-    return nullptr;
-}
-
-inline void D3DDisassembleShader(struct ID3D10Blob* shader)
-{
-    static HRESULT(WINAPI * D3DDisassemble)(LPCVOID, SIZE_T, UINT, LPCSTR, ID3D10Blob**) = nullptr;
-    if (D3DDisassemble == nullptr)
-    {
-        (void*&)D3DDisassemble = GetProcAddress(LoadLibraryA("d3dcompiler_47.dll"), "D3DDisassemble");
-    }
-    D3DBlob* blob = (D3DBlob*)shader;
-    if (D3DDisassemble)
-    {
-        ID3D10Blob* text = nullptr;
-        D3DDisassemble(blob->GetBufferPointer(), blob->GetBufferSize(), 0, nullptr, &text);
-        D3DDumpBlob(text, "D3DDisassembleShader");
-    }
-}
+struct ID3D10Blob* D3DCompileShader(char const* shader, char const*const* macro, char const* entry, char const* target);
+void D3DDisassembleShader(struct ID3D10Blob* shader);
+void D3DDowngradeShader(struct ID3D10Blob* shader, char const* target);
+void D3DDumpBlob(struct ID3D10Blob* blob, char const* label);
+void PatchD3DIM(char const* name);
+void ViewportFromScissor(float projectionMatrix[4][4], int fromX, int fromY, int fromWidth, int fromHeight, int toX, int toY, int toWidth, int toHeight);
 
 //==============================================================================
 //  Blend Factor
