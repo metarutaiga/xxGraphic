@@ -148,77 +148,7 @@ uint64_t xxCreateVertexShaderD3D8PS(uint64_t device, char const* shader, uint64_
         if (blob == nullptr)
             return 0;
 
-        struct Shader
-        {
-            static void Downgrade(DWORD* shader)
-            {
-                uint8_t mapping[16];
-                DWORD* output = shader;
-                DWORD* input = shader;
-                memset(mapping, 0xFF, sizeof(mapping));
-                (*output++) = D3DVS_VERSION(1, 0);
-                input++;
-                for (;;)
-                {
-                    switch (input[0] & D3DSI_OPCODE_MASK)
-                    {
-                    default:
-                        (*output++) = (*input++);
-                        while (input[0] & 0x80000000)
-                            (*output++) = (*input++);
-                        break;
-                    case D3DSIO_MOV:
-                        (*output++) = D3DSIO_MOV;
-                        (*output++) = input[1];
-                        if ((input[2] & 0xFFFFFF00) == 0x90E40000)
-                        {
-                            (*output++) = 0x90E40000 | mapping[input[2] & 0xF];
-                        }
-                        else
-                        {
-                            (*output++) = input[2];
-                        }
-                        input += 3;
-                        break;
-                    case 31/*D3DSIO_DCL*/:
-                        switch (input[1] & 0xF)
-                        {
-                        case 0:// D3DDECLUSAGE_POSITION:
-                            mapping[input[2] & 0xF] = D3DVSDE_POSITION;
-                            break;
-                        case 1:// D3DDECLUSAGE_BLENDWEIGHT:
-                            mapping[input[2] & 0xF] = D3DVSDE_BLENDWEIGHT;
-                            break;
-                        case 2:// D3DDECLUSAGE_BLENDINDICES:
-                            mapping[input[2] & 0xF] = D3DVSDE_BLENDINDICES;
-                            break;
-                        case 3:// D3DDECLUSAGE_NORMAL:
-                            mapping[input[2] & 0xF] = D3DVSDE_NORMAL;
-                            break;
-                        case 4:// D3DDECLUSAGE_PSIZE:
-                            mapping[input[2] & 0xF] = D3DVSDE_PSIZE;
-                            break;
-                        case 5:// D3DDECLUSAGE_TEXCOORD:
-                            mapping[input[2] & 0xF] = D3DVSDE_TEXCOORD0;
-                            break;
-                        case 10:// D3DDECLUSAGE_COLOR:
-                            mapping[input[2] & 0xF] = D3DVSDE_DIFFUSE;
-                            break;
-                        }
-                        input += 3;
-                        break;
-                    case D3DSIO_COMMENT:
-                        output += (input[0] >> 16) + 1;
-                        input += (input[0] >> 16) + 1;
-                        break;
-                    case D3DSIO_END:
-                        (*output++) = D3DSIO_END;
-                        return;
-                    }
-                }
-            }
-        };
-        Shader::Downgrade((DWORD*)blob->GetBufferPointer());
+        D3DDowngradeShader(blob, "vs_1_0");
 #if defined(_DEBUG)
         D3DDisassembleShader(blob);
 #endif
@@ -259,62 +189,7 @@ uint64_t xxCreateFragmentShaderD3D8PS(uint64_t device, char const* shader)
         if (blob == nullptr)
             return 0;
 
-        struct Shader
-        {
-            static void Downgrade(DWORD* shader)
-            {
-                int D3DSI_INSTLENGTH_MASK = 0x0F000000;
-                int D3DSI_INSTLENGTH_SHIFT = 24;
-                DWORD* output = shader;
-                DWORD* input = shader;
-                (*output++) = D3DPS_VERSION(1, 0);
-                input++;
-                for (;;)
-                {
-                    int count = input[0] >> D3DSI_INSTLENGTH_SHIFT;
-                    switch (input[0] & D3DSI_OPCODE_MASK)
-                    {
-                    case D3DSIO_MOV:
-                        if (input[1] != 0x800F0800)
-                        {
-                            (*output++) = D3DSIO_MOV;
-                            (*output++) = input[1];
-                            (*output++) = input[2];
-                        }
-                        input += count + 1;
-                        break;
-                    case D3DSIO_ADD:
-                    case D3DSIO_MUL:
-                        (*output++) = (*input++) & ~D3DSI_INSTLENGTH_MASK;
-                        for (int i = 0; i < count; ++i)
-                            (*output++) = (*input++);
-                        break;
-                    case D3DSIO_TEX:
-                        (*output++) = D3DSIO_TEX;
-                        (*output++) = input[2] & ~D3DSP_DSTMOD_MASK | D3DSP_WRITEMASK_ALL;
-                        (*output++) = D3DSIO_MOV;
-                        (*output++) = input[1];
-                        (*output++) = input[2];
-                        input += count + 1;
-                        break;
-                    case 31/*D3DSIO_DCL*/:
-                        input += count + 1;
-                        break;
-                    case D3DSIO_COMMENT:
-                        output += (input[0] >> 16) + 1;
-                        input += (input[0] >> 16) + 1;
-                        break;
-                    case D3DSIO_END:
-                        (*output++) = D3DSIO_END;
-                        return;
-                    default:
-                        xxLog("xxGraphic", "Unknown Opcode (%08X)", (*input++));
-                        break;
-                    }
-                }
-            }
-        };
-        Shader::Downgrade((DWORD*)blob->GetBufferPointer());
+        D3DDowngradeShader(blob, "ps_1_0");
 #if defined(_DEBUG)
         D3DDisassembleShader(blob);
 #endif
