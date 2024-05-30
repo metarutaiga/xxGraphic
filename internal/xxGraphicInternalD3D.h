@@ -730,6 +730,15 @@ struct D3DVERTEXBUFFER2
     void*           address;
 };
 //------------------------------------------------------------------------------
+struct D3DVERTEXBUFFER3
+{
+    void*           buffer;
+    UINT            size;
+    UINT            count;
+    DWORD           fvf;
+    void*           address;
+};
+//------------------------------------------------------------------------------
 struct D3D10BUFFER
 {
     ID3D10Buffer*   buffer;
