@@ -826,6 +826,8 @@ void xxSetScissorD3D8(uint64_t commandEncoder, int x, int y, int width, int heig
 
     D3DVIEWPORT8 vp;
     d3dDevice->GetViewport(&vp);
+    if (vp.X == x && vp.Y == y && vp.Width == width && vp.Height == height)
+        return;
 
     D3DMATRIX projection;
     d3dDevice->GetTransform(D3DTS_PROJECTION, &projection);

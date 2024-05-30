@@ -799,6 +799,8 @@ void xxSetScissorD3D7(uint64_t commandEncoder, int x, int y, int width, int heig
 
     D3DVIEWPORT7 vp;
     d3dDevice->GetViewport(&vp);
+    if (vp.dwX == x && vp.dwY == y && vp.dwWidth == width && vp.dwHeight == height)
+        return;
 
     D3DMATRIX projection;
     d3dDevice->GetTransform(D3DTRANSFORMSTATE_PROJECTION, &projection);
@@ -913,7 +915,6 @@ void xxDrawIndexedD3D7(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
 {
     LPDIRECT3DDEVICE7 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE7>(commandEncoder);
 
-    static WORD wordIndexBuffer[65536];
     WORD* indexArray = nullptr;
     if (INDEX_BUFFER_WIDTH == 2)
     {
@@ -922,6 +923,7 @@ void xxDrawIndexedD3D7(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
     }
     else
     {
+        static WORD wordIndexBuffer[65536];
         DWORD* d3dIndexBuffer = reinterpret_cast<DWORD*>(getResourceData(indexBuffer));
         DWORD* p = d3dIndexBuffer + firstIndex;
         WORD* q = wordIndexBuffer;

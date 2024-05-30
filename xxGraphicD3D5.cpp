@@ -420,7 +420,6 @@ uint64_t xxCreateVertexAttributeD3D5(uint64_t device, int count, int* attribute)
         int size = (*attribute++);
 
         (void)stream;
-        (void)offset;
         stride += size;
 
         if (element == 'POS3' && size == sizeof(float) * 3)
@@ -818,6 +817,8 @@ void xxSetScissorD3D5(uint64_t commandEncoder, int x, int y, int width, int heig
     D3DVIEWPORT2 vp;
     vp.dwSize = sizeof(D3DVIEWPORT2);
     viewport->GetViewport2(&vp);
+    if (vp.dwX == x && vp.dwY == y && vp.dwWidth == width && vp.dwHeight == height)
+        return;
 
     D3DMATRIX projection;
     d3dDevice->GetTransform(D3DTRANSFORMSTATE_PROJECTION, &projection);
@@ -857,7 +858,6 @@ void xxSetPipelineD3D5(uint64_t commandEncoder, uint64_t pipeline)
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersD3D5(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
-    LPDIRECT3DDEVICE2 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE2>(commandEncoder);
     D3DVERTEXBUFFER2* d3dVertexBuffer = reinterpret_cast<D3DVERTEXBUFFER2*>(getResourceData(buffers[0]));
     D3DVERTEXATTRIBUTE2 d3dVertexAttribute = { vertexAttribute };
 
@@ -972,45 +972,36 @@ void xxDrawD3D5(uint64_t commandEncoder, int vertexCount, int instanceCount, int
 {
     LPDIRECT3DDEVICE2 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE2>(commandEncoder);
 
-    d3dDevice->DrawPrimitive(D3DPT_TRIANGLELIST, D3DVT_LVERTEX, (char*)g_vertexBuffer->address + sizeof(D3DLVERTEX) * firstVertex, vertexCount, 0);
+    void* address = (char*)g_vertexBuffer->address + sizeof(D3DLVERTEX) * firstVertex;
+    d3dDevice->DrawPrimitive(D3DPT_TRIANGLELIST, D3DVT_LVERTEX, address, vertexCount, 0);
 }
 //------------------------------------------------------------------------------
 void xxDrawIndexedD3D5(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     LPDIRECT3DDEVICE2 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE2>(commandEncoder);
 
-    static WORD wordIndexBuffer[65536];
     WORD* indexArray = nullptr;
-    if (INDEX_BUFFER_WIDTH == 2 && vertexOffset == 0)
+    if (INDEX_BUFFER_WIDTH == 2)
     {
         WORD* d3dIndexBuffer = reinterpret_cast<WORD*>(getResourceData(indexBuffer));
         indexArray = d3dIndexBuffer + firstIndex;
     }
-    else if (INDEX_BUFFER_WIDTH == 2)
-    {
-        WORD* d3dIndexBuffer = reinterpret_cast<WORD*>(getResourceData(indexBuffer));
-        WORD* p = d3dIndexBuffer + firstIndex;
-        WORD* q = wordIndexBuffer;
-        #pragma loop(ivdep)
-        for (int i = 0; i < indexCount; ++i)
-        {
-            (*q++) = (*p++) + vertexOffset;
-        }
-        indexArray = wordIndexBuffer;
-    }
     else
     {
+        static WORD wordIndexBuffer[65536];
         DWORD* d3dIndexBuffer = reinterpret_cast<DWORD*>(getResourceData(indexBuffer));
         DWORD* p = d3dIndexBuffer + firstIndex;
         WORD* q = wordIndexBuffer;
         #pragma loop(ivdep)
         for (int i = 0; i < indexCount; ++i)
         {
-            (*q++) = (WORD)((*p++) + vertexOffset);
+            (*q++) = (WORD)(*p++);
         }
         indexArray = wordIndexBuffer;
     }
 
-    d3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, D3DVT_LVERTEX, g_vertexBuffer->address, g_vertexBuffer->count, indexArray, indexCount, 0);
+    void* address = (char*)g_vertexBuffer->address + sizeof(D3DLVERTEX) * vertexOffset;
+    UINT count = g_vertexBuffer->count - vertexOffset;
+    d3dDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, D3DVT_LVERTEX, address, count, indexArray, indexCount, 0);
 }
 //==============================================================================

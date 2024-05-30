@@ -21,7 +21,11 @@ typedef HRESULT (WINAPI *PFN_DIRECT_DRAW_CREATE)(GUID*, LPDIRECTDRAW*, IUnknown*
 static void*                        g_ddrawLibrary = nullptr;
 static LPDIRECTDRAW4                g_ddraw = nullptr;
 static LPDIRECTDRAWSURFACE4         g_primarySurface = nullptr;
+#if USE_VB
 static LPDIRECT3DVERTEXBUFFER       g_vertexBuffer = nullptr;
+#else
+static D3DVERTEXBUFFER3*            g_vertexBuffer = nullptr;
+#endif
 
 //==============================================================================
 //  Instance
@@ -123,18 +127,8 @@ uint64_t xxCreateDeviceD3D6(uint64_t instance)
             return 0;
     }
 
-    const IID* iid = nullptr;
     LPDIRECT3DDEVICE3 d3dDevice = nullptr;
-    if (d3dDevice == nullptr)
-    {
-        iid = &__uuidof(IDirect3DTnLHalDevice);
-        d3d->CreateDevice(*iid, backSurface, &d3dDevice, nullptr);
-    }
-    if (d3dDevice == nullptr)
-    {
-        iid = &__uuidof(IDirect3DHALDevice);
-        d3d->CreateDevice(*iid, backSurface, &d3dDevice, nullptr);
-    }
+    d3d->CreateDevice(__uuidof(IDirect3DHALDevice), backSurface, &d3dDevice, nullptr);
     if (d3dDevice == nullptr)
     {
         backSurface->Release();
@@ -151,11 +145,6 @@ uint64_t xxCreateDeviceD3D6(uint64_t instance)
     IUnknown* unknown = nullptr;
     xxLocalBreak()
     {
-        if ((*iid) == __uuidof(IDirect3DTnLHalDevice))
-        {
-            xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "6.0 Hardware Transform and Lighting", xxGetInstanceName());
-            break;
-        }
         if (d3dDevice->QueryInterface(__uuidof(IDirect3DDevice3), (void**)&unknown) == S_OK)
         {
             xxLog("xxGraphic", "%s %s (%s)", "Direct3D", "6.0", xxGetInstanceName());
@@ -173,7 +162,6 @@ void xxDestroyDeviceD3D6(uint64_t device)
 
     SafeRelease(d3dDevice);
     SafeRelease(g_primarySurface);
-    g_vertexBuffer = nullptr;
 }
 //------------------------------------------------------------------------------
 bool xxResetDeviceD3D6(uint64_t device)
@@ -434,21 +422,28 @@ uint64_t xxCreateVertexAttributeD3D6(uint64_t device, int count, int* attribute)
         int size = (*attribute++);
 
         (void)stream;
-        (void)offset;
         stride += size;
 
         if (element == 'POS3' && size == sizeof(float) * 3)
+        {
             d3dVertexAttribute.fvf |= D3DFVF_XYZ;
-        if (element == 'BON3' && size == sizeof(float) * 3)
-            d3dVertexAttribute.fvf += D3DFVF_TEX1;
-        if (element == 'BON4' && size == sizeof(char) * 4)
-            d3dVertexAttribute.fvf += D3DFVF_TEX1;
+            d3dVertexAttribute.offset |= 1 << (offset / sizeof(float));
+        }
         if (element == 'NOR3' && size == sizeof(float) * 3)
+        {
             d3dVertexAttribute.fvf |= D3DFVF_NORMAL;
+            d3dVertexAttribute.offset |= 1 << (offset / sizeof(float));
+        }
         if (element == 'COL4' && size == sizeof(char) * 4)
+        {
             d3dVertexAttribute.fvf |= D3DFVF_DIFFUSE;
+            d3dVertexAttribute.offset |= 1 << (offset / sizeof(float));
+        }
         if (element == 'TEX2' && size == sizeof(float) * 2)
+        {
             d3dVertexAttribute.fvf += D3DFVF_TEX1;
+            d3dVertexAttribute.offset |= 1 << (offset / sizeof(float));
+        }
     }
 
     d3dVertexAttribute.stride = stride;
@@ -479,6 +474,7 @@ uint64_t xxCreateIndexBufferD3D6(uint64_t device, int size)
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexBufferD3D6(uint64_t device, int size, uint64_t vertexAttribute)
 {
+#if USE_VB
     LPDIRECT3DDEVICE3 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE3>(device);
     if (d3dDevice == nullptr)
         return 0;
@@ -504,6 +500,58 @@ uint64_t xxCreateVertexBufferD3D6(uint64_t device, int size, uint64_t vertexAttr
         return 0;
 
     return reinterpret_cast<uint64_t>(buffer) | D3DRTYPE_VERTEXBUFFER;
+#else
+    D3DVERTEXATTRIBUTE2 d3dVertexAttribute = { vertexAttribute };
+    if (d3dVertexAttribute.stride == 0)
+        return 0;
+    D3DVERTEXBUFFER3* d3dVertexBuffer = xxAlloc(D3DVERTEXBUFFER3);
+    if (d3dVertexBuffer == nullptr)
+        return 0;
+    D3DDRAWPRIMITIVESTRIDEDDATA* stridedData = xxAlloc(D3DDRAWPRIMITIVESTRIDEDDATA);
+    if (stridedData == nullptr)
+    {
+        xxFree(d3dVertexBuffer);
+        return 0;
+    }
+
+    d3dVertexBuffer->buffer = xxAlloc(char, size);
+    d3dVertexBuffer->size = size;
+    d3dVertexBuffer->count = size / d3dVertexAttribute.stride;
+    d3dVertexBuffer->fvf = d3dVertexAttribute.fvf;
+    d3dVertexBuffer->address = stridedData;
+
+    int offsetBits = d3dVertexAttribute.offset;
+    if (d3dVertexAttribute.fvf & D3DFVF_XYZ)
+    {
+        int offset = xxCountTrailingZeros(offsetBits);
+        offsetBits &= ~(1 << offset);
+        stridedData->position.lpvData = (char*)d3dVertexBuffer->buffer + offset * 4;
+        stridedData->position.dwStride = d3dVertexAttribute.stride;
+    }
+    if (d3dVertexAttribute.fvf & D3DFVF_NORMAL)
+    {
+        int offset = xxCountTrailingZeros(offsetBits);
+        offsetBits &= ~(1 << offset);
+        stridedData->normal.lpvData = (char*)d3dVertexBuffer->buffer + offset * 4;
+        stridedData->normal.dwStride = d3dVertexAttribute.stride;
+    }
+    if (d3dVertexAttribute.fvf & D3DFVF_DIFFUSE)
+    {
+        int offset = xxCountTrailingZeros(offsetBits);
+        offsetBits &= ~(1 << offset);
+        stridedData->diffuse.lpvData = (char*)d3dVertexBuffer->buffer + offset * 4;
+        stridedData->diffuse.dwStride = d3dVertexAttribute.stride;
+    }
+    if (d3dVertexAttribute.fvf & D3DFVF_TEX1)
+    {
+        int offset = xxCountTrailingZeros(offsetBits);
+        offsetBits &= ~(1 << offset);
+        stridedData->textureCoords[0].lpvData = (char*)d3dVertexBuffer->buffer + offset * 4;
+        stridedData->textureCoords[0].dwStride = d3dVertexAttribute.stride;
+    }
+
+    return reinterpret_cast<uint64_t>(d3dVertexBuffer) | D3DRTYPE_VERTEXBUFFER;
+#endif
 }
 //------------------------------------------------------------------------------
 void xxDestroyBufferD3D6(uint64_t device, uint64_t buffer)
@@ -520,11 +568,21 @@ void xxDestroyBufferD3D6(uint64_t device, uint64_t buffer)
     }
     case D3DRTYPE_VERTEXBUFFER:
     {
+#if USE_VB
         LPDIRECT3DVERTEXBUFFER d3dVertexBuffer = reinterpret_cast<LPDIRECT3DVERTEXBUFFER>(getResourceData(buffer));
         if (d3dVertexBuffer == nullptr)
             return;
 
         d3dVertexBuffer->Release();
+#else
+        D3DVERTEXBUFFER3* d3dVertexBuffer = reinterpret_cast<D3DVERTEXBUFFER3*>(getResourceData(buffer));
+        if (d3dVertexBuffer == nullptr)
+            break;
+
+        xxFree(d3dVertexBuffer->buffer);
+        xxFree(d3dVertexBuffer->address);
+        xxFree(d3dVertexBuffer);
+#endif
         break;
     }
     default:
@@ -547,6 +605,7 @@ void* xxMapBufferD3D6(uint64_t device, uint64_t buffer)
     }
     case D3DRTYPE_VERTEXBUFFER:
     {
+#if USE_VB
         LPDIRECT3DVERTEXBUFFER d3dVertexBuffer = reinterpret_cast<LPDIRECT3DVERTEXBUFFER>(getResourceData(buffer));
         if (d3dVertexBuffer == nullptr)
             return nullptr;
@@ -557,6 +616,13 @@ void* xxMapBufferD3D6(uint64_t device, uint64_t buffer)
             break;
 
         return ptr;
+#else
+        D3DVERTEXBUFFER3* d3dVertexBuffer = reinterpret_cast<D3DVERTEXBUFFER3*>(getResourceData(buffer));
+        if (d3dVertexBuffer == nullptr)
+            break;
+
+        return d3dVertexBuffer->buffer;
+#endif
     }
     default:
         break;
@@ -576,11 +642,13 @@ void xxUnmapBufferD3D6(uint64_t device, uint64_t buffer)
     }
     case D3DRTYPE_VERTEXBUFFER:
     {
+#if USE_VB
         LPDIRECT3DVERTEXBUFFER d3dVertexBuffer = reinterpret_cast<LPDIRECT3DVERTEXBUFFER>(getResourceData(buffer));
         if (d3dVertexBuffer == nullptr)
             return;
 
         d3dVertexBuffer->Unlock();
+#endif
         return;
     }
     default:
@@ -857,6 +925,8 @@ void xxSetScissorD3D6(uint64_t commandEncoder, int x, int y, int width, int heig
     D3DVIEWPORT2 vp;
     vp.dwSize = sizeof(D3DVIEWPORT2);
     viewport->GetViewport2(&vp);
+    if (vp.dwX == x && vp.dwY == y && vp.dwWidth == width && vp.dwHeight == height)
+        return;
 
     D3DMATRIX projection;
     d3dDevice->GetTransform(D3DTRANSFORMSTATE_PROJECTION, &projection);
@@ -901,7 +971,11 @@ void xxSetPipelineD3D6(uint64_t commandEncoder, uint64_t pipeline)
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersD3D6(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
+#if USB_VB
     g_vertexBuffer = reinterpret_cast<LPDIRECT3DVERTEXBUFFER>(getResourceData(buffers[0]));
+#else
+    g_vertexBuffer = reinterpret_cast<D3DVERTEXBUFFER3*>(getResourceData(buffers[0]));
+#endif
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesD3D6(uint64_t commandEncoder, int count, const uint64_t* textures)
@@ -962,14 +1036,28 @@ void xxSetFragmentConstantBufferD3D6(uint64_t commandEncoder, uint64_t buffer, i
 void xxDrawD3D6(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
 {
     LPDIRECT3DDEVICE3 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE3>(commandEncoder);
-
+#if USE_VB
     d3dDevice->DrawPrimitiveVB(D3DPT_TRIANGLELIST, g_vertexBuffer, firstVertex, vertexCount, 0);
+#else
+    LPD3DDRAWPRIMITIVESTRIDEDDATA stridedData = reinterpret_cast<LPD3DDRAWPRIMITIVESTRIDEDDATA>(g_vertexBuffer->address);
+    if (firstVertex != 0)
+    {
+        static D3DDRAWPRIMITIVESTRIDEDDATA data;
+        data = (*stridedData);
+        data.position.lpvData = (char*)data.position.lpvData + data.position.dwStride * firstVertex;
+        data.normal.lpvData = (char*)data.normal.lpvData + data.normal.dwStride * firstVertex;
+        data.diffuse.lpvData = (char*)data.diffuse.lpvData + data.diffuse.dwStride * firstVertex;
+        data.textureCoords[0].lpvData = (char*)data.textureCoords[0].lpvData + data.textureCoords[0].dwStride * firstVertex;
+        stridedData = &data;
+    }
+    d3dDevice->DrawPrimitiveStrided(D3DPT_TRIANGLELIST, g_vertexBuffer->fvf, stridedData, vertexCount, 0);
+#endif
 }
 //------------------------------------------------------------------------------
 void xxDrawIndexedD3D6(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     LPDIRECT3DDEVICE3 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE3>(commandEncoder);
-
+#if USE_VB
     static WORD wordIndexBuffer[65536];
     WORD* indexArray = nullptr;
     if (INDEX_BUFFER_WIDTH == 2 && vertexOffset == 0)
@@ -1003,5 +1091,40 @@ void xxDrawIndexedD3D6(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
     }
 
     d3dDevice->DrawIndexedPrimitiveVB(D3DPT_TRIANGLELIST, g_vertexBuffer, indexArray, indexCount, 0);
+#else
+    WORD* indexArray = nullptr;
+    if (INDEX_BUFFER_WIDTH == 2)
+    {
+        WORD* d3dIndexBuffer = reinterpret_cast<WORD*>(getResourceData(indexBuffer));
+        indexArray = d3dIndexBuffer + firstIndex;
+    }
+    else
+    {
+        static WORD wordIndexBuffer[65536];
+        DWORD* d3dIndexBuffer = reinterpret_cast<DWORD*>(getResourceData(indexBuffer));
+        DWORD* p = d3dIndexBuffer + firstIndex;
+        WORD* q = wordIndexBuffer;
+        #pragma loop(ivdep)
+        for (int i = 0; i < indexCount; ++i)
+        {
+            (*q++) = (WORD)(*p++);
+        }
+        indexArray = wordIndexBuffer;
+    }
+
+    LPD3DDRAWPRIMITIVESTRIDEDDATA stridedData = reinterpret_cast<LPD3DDRAWPRIMITIVESTRIDEDDATA>(g_vertexBuffer->address);
+    if (vertexOffset != 0)
+    {
+        static D3DDRAWPRIMITIVESTRIDEDDATA data;
+        data = (*stridedData);
+        data.position.lpvData = (char*)data.position.lpvData + data.position.dwStride * vertexOffset;
+        data.normal.lpvData = (char*)data.normal.lpvData + data.normal.dwStride * vertexOffset;
+        data.diffuse.lpvData = (char*)data.diffuse.lpvData + data.diffuse.dwStride * vertexOffset;
+        data.textureCoords[0].lpvData = (char*)data.textureCoords[0].lpvData + data.textureCoords[0].dwStride * vertexOffset;
+        stridedData = &data;
+    }
+    UINT count = g_vertexBuffer->count - vertexOffset;
+    d3dDevice->DrawIndexedPrimitiveStrided(D3DPT_TRIANGLELIST, g_vertexBuffer->fvf, stridedData, count, indexArray, indexCount, 0);
+#endif
 }
 //==============================================================================
