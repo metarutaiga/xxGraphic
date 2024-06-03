@@ -96,30 +96,41 @@ xxFile* (*xxFile::Save)(char const* name) = [](char const* name) -> xxFile*
 //------------------------------------------------------------------------------
 std::string xxFile::GetName(char const* name)
 {
-    const char* leftName = strrchr(name, '/');
-    if (leftName == nullptr)
-        leftName = strrchr(name, '\\');
-
-    if (leftName)
-        leftName++;
-    else if (leftName == nullptr)
-        leftName = name;
-
-    const char* rightName = strrchr(name, '.');
-    if (rightName == nullptr)
-        rightName = name + strlen(name);
-
-    return std::string(leftName, rightName);
+    size_t dot = std::string::npos;
+    std::string output;
+    for (char c; (c = *name); ++name)
+    {
+        if (c == '/' || c == '\\')
+        {
+            dot = std::string::npos;
+            output.clear();
+            continue;
+        }
+        if (c == '.')
+        {
+            dot = output.size();
+        }
+        output.push_back(c);
+    }
+    if (dot != std::string::npos)
+        output.resize(dot);
+    return output;
 }
 //------------------------------------------------------------------------------
 std::string xxFile::GetPath(char const* name)
 {
-    size_t pos;
-    std::string output = name;
-    if ((pos = output.rfind('/')) != std::string::npos)
-        output.resize(pos + 1);
-    else if ((pos = output.rfind('\\')) != std::string::npos)
-        output.resize(pos + 1);
+    size_t slash = std::string::npos;
+    std::string output;
+    for (char c; (c = *name); ++name)
+    {
+        if (c == '/' || c == '\\')
+        {
+            slash = output.size();
+        }
+        output.push_back(c);
+    }
+    if (slash != std::string::npos)
+        output.resize(slash);
     return output;
 }
 //==============================================================================

@@ -63,7 +63,7 @@ void xxTexture::Initialize(uint64_t format, int width, int height, int depth, in
         depth >>= 1;
     }
 
-    m_imageModified = true;
+    Dirty = true;
 }
 //------------------------------------------------------------------------------
 void* xxTexture::operator () (int x, int y, int z, int mipmap, int array)
@@ -109,7 +109,7 @@ void xxTexture::Invalidate()
     const_cast<uint64_t&>(Texture) = 0;
     const_cast<uint64_t&>(Sampler) = 0;
 
-    m_imageModified = true;
+    Dirty = true;
 }
 //------------------------------------------------------------------------------
 void xxTexture::Update(uint64_t device)
@@ -131,9 +131,9 @@ void xxTexture::Update(uint64_t device)
         const_cast<uint64_t&>(Sampler) = xxCreateSampler(device, ClampU, ClampV, ClampW, FilterMag, FilterMin, FilterMip, Anisotropic);
     }
 
-    if (m_imageModified == false)
+    if (Dirty == false)
         return;
-    m_imageModified = false;
+    Dirty = false;
 
     for (int array = 0; array < Array; ++array)
     {

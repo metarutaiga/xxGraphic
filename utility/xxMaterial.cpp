@@ -276,6 +276,12 @@ void xxMaterial::UpdateConstant(xxDrawData const& data) const
         xxVector4* vector = reinterpret_cast<xxVector4*>(xxMapBuffer(m_device, constantData->fragmentConstant));
         if (vector)
         {
+            if (AlphaTest && size >= 1 * sizeof(xxVector4))
+            {
+                vector[0].x = AlphaTestReference;
+                vector += 1;
+                size -= 1 * sizeof(xxVector4);
+            }
             if (Specular && size >= 3 * sizeof(xxVector4))
             {
                 if (camera)
@@ -319,12 +325,13 @@ std::string xxMaterial::GetShader(xxDrawData const& data, int type) const
     }
 
     std::string shader;
-    shader += define("SHADER_SKINNING", mesh->Skinning ? 1 : 0);
+    shader += define("SHADER_SKINNING", type == 0 && mesh->Skinning ? 1 : 0);
     shader += define("SHADER_NORMAL", mesh->NormalCount);
     shader += define("SHADER_COLOR", mesh->ColorCount);
     shader += define("SHADER_TEXTURE", mesh->TextureCount);
     shader += define("SHADER_UNIFORM", constantSize);
-    shader += define("SHADER_OPACITY", Blending ? 1 : 0);
+    shader += define("SHADER_ALPHATEST", type == 1 && AlphaTest ? 1 : 0);
+    shader += define("SHADER_OPACITY", type == 1 && Blending ? 1 : 0);
     shader += define("SHADER_LIGHTING", mesh->NormalCount && Lighting ? 1 : 0);
     shader += define("SHADER_SPECULAR", mesh->NormalCount && Lighting && Specular ? 1 : 0);
     shader += ShaderOption;
@@ -354,6 +361,10 @@ int xxMaterial::GetVertexConstantSize(xxDrawData const& data) const
 int xxMaterial::GetFragmentConstantSize(xxDrawData const& data) const
 {
     int size = 0;
+    if (AlphaTest)
+    {
+        size += 1 * sizeof(xxVector4);
+    }
     if (Specular)
     {
         size += 3 * sizeof(xxVector4);
@@ -390,6 +401,12 @@ void xxMaterial::BinaryRead(xxBinary& binary)
 
     binary.Read(Lighting);
     binary.Read(Specular);
+
+    binary.Read(AlphaTest);
+    if (AlphaTest)
+    {
+        binary.Read(AlphaTestReference);
+    }
 
     binary.Read(Blending);
     if (Blending)
@@ -437,6 +454,12 @@ void xxMaterial::BinaryWrite(xxBinary& binary) const
 
     binary.Write(Lighting);
     binary.Write(Specular);
+
+    binary.Write(AlphaTest);
+    if (AlphaTest)
+    {
+        binary.Write(AlphaTestReference);
+    }
 
     binary.Write(Blending);
     if (Blending)
@@ -507,6 +530,9 @@ R"(
 #endif
 #ifndef SHADER_UNIFORM
 #define SHADER_UNIFORM 12
+#endif
+#ifndef SHADER_ALPHATEST
+#define SHADER_ALPHATEST 0
 #endif
 #ifndef SHADER_OPACITY
 #define SHADER_OPACITY 0
@@ -833,6 +859,19 @@ fragment float4 Main(Varying vary [[stage_in]], constant Uniform& uni [[buffer(0
     auto uniBuffer = uni.Buffer;
 #endif
     int uniIndex = 0;
+#if SHADER_ALPHATEST
+    float alphaRef = uniBuffer[uniIndex++].x;
+    if (color.a < alphaRef)
+    {
+#if SHADER_GLSL
+        discard;
+#elif SHADER_HLSL
+        clip(-1);
+#elif SHADER_MSL
+        discard_fragment();
+#endif
+    }
+#endif
 #if SHADER_SPECULAR
     float3 cameraPosition = uniBuffer[uniIndex++].xyz;
     float3 lightDirection = uniBuffer[uniIndex++].xyz;

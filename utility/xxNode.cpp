@@ -370,6 +370,11 @@ xxVector3 const& xxNode::GetTranslate() const
     return m_legacyTranslate;
 }
 //------------------------------------------------------------------------------
+float xxNode::GetWorldScale() const
+{
+    return WorldMatrix.v[0].xyz.Length();
+}
+//------------------------------------------------------------------------------
 void xxNode::SetRotate(xxMatrix3 const& rotate)
 {
     if (m_legacyScale == 1.0f)

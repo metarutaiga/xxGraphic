@@ -23,7 +23,7 @@ public:
     void                        SetVertexCount(int count);
     void                        SetIndexCount(int count);
 
-    xxStrideIterator<xxVector3> GetVertex() const;
+    xxStrideIterator<xxVector3> GetPosition() const;
     xxStrideIterator<xxVector3> GetBoneWeight() const;
     xxStrideIterator<uint32_t>  GetBoneIndices() const;
 

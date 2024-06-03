@@ -62,15 +62,18 @@ public:
     bool                        Lighting = false;
     bool                        Specular = false;
 
+    bool                        AlphaTest = false;
+    float                       AlphaTestReference = 0.5f;
+
     bool                        Blending = false;
     std::string                 BlendSourceColor = "SrcAlpha";
-    std::string                 BlendOperationColor = "+";
+    std::string                 BlendOperationColor = "";
     std::string                 BlendDestinationColor = "1-SrcAlpha";
     std::string                 BlendSourceAlpha = "1";
-    std::string                 BlendOperationAlpha = "+";
+    std::string                 BlendOperationAlpha = "";
     std::string                 BlendDestinationAlpha = "0";
 
-    std::string                 DepthTest = "Always";
+    std::string                 DepthTest = "";
     bool                        DepthWrite = false;
 
     bool                        Cull = false;

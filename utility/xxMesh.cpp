@@ -223,16 +223,16 @@ void xxMesh::SetVertexCount(int count)
         const_cast<int&>(Stride) += xxSizeOf(uint32_t) * ColorCount;
         const_cast<int&>(Stride) += xxSizeOf(xxVector2) * TextureCount;
     }
-    char* vertex = nullptr;
-    if (count)
+    char* vertex = Vertex;
+    if (count != VertexCount)
     {
-        vertex = xxAlloc(char, count * Stride);
+        vertex = xxRealloc(Vertex, char, count * Stride);
         if (vertex == nullptr)
         {
+            xxFree(Vertex);
             count = 0;
         }
     }
-    xxFree(Vertex);
     const_cast<int&>(VertexCount) = count;
     const_cast<char*&>(Vertex) = vertex;
     m_vertexSizeChanged = true;
@@ -240,22 +240,22 @@ void xxMesh::SetVertexCount(int count)
 //------------------------------------------------------------------------------
 void xxMesh::SetIndexCount(int count)
 {
-    uint16_t* index = nullptr;
-    if (count)
+    uint16_t* index = Index;
+    if (count != IndexCount)
     {
-        index = xxAlloc(uint16_t, count);
+        index = xxRealloc(Index, uint16_t, count);
         if (index == nullptr)
         {
+            xxFree(Index);
             count = 0;
         }
     }
-    xxFree(Index);
     const_cast<int&>(IndexCount) = count;
     const_cast<uint16_t*&>(Index) = index;
     m_indexSizeChanged = true;
 }
 //------------------------------------------------------------------------------
-xxStrideIterator<xxVector3> xxMesh::GetVertex() const
+xxStrideIterator<xxVector3> xxMesh::GetPosition() const
 {
     char* vertex = Vertex;
     return xxStrideIterator<xxVector3>(vertex, Stride, VertexCount);
@@ -317,9 +317,9 @@ void xxMesh::CalculateBound() const
         return;
     }
     xxVector4 bound = xxVector4::ZERO;
-    for (auto& vertex : GetVertex())
+    for (auto& position : GetPosition())
     {
-        bound.BoundMerge(vertex);
+        bound.BoundMerge(position);
     }
     const_cast<xxVector4&>(Bound) = bound;
 }
