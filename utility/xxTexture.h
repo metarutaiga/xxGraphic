@@ -37,7 +37,6 @@ protected:
 
     xxTextureWeakPtr        m_this;
     void*                   m_images[16] = {};
-    bool                    m_imageModified = false;
 
 public:
     std::string             Name = "";
@@ -49,6 +48,7 @@ public:
     int const               Depth = 0;
     int const               Mipmap = 0;
     int const               Array = 0;
+    bool                    Dirty = false;
 
     bool                    ClampU = true;
     bool                    ClampV = true;

@@ -31,8 +31,9 @@ public:
 
     enum
     {
-        UPDATE_SKIP             = 0b00000001,
-        UPDATE_NEED             = 0b00000010,
+        RESERVED0               = 0b00000001,
+        UPDATE_SKIP             = 0b00000010,
+        UPDATE_NEED             = 0b00000100,
     };
 
 public:
@@ -49,7 +50,9 @@ public:
     xxMatrix3                   GetRotate() const;
     xxVector3 const&            GetTranslate() const;
     float                       GetScale() const { return m_legacyScale; }
+    xxMatrix3                   GetWorldRotate() const { return { WorldMatrix.v[0].xyz, WorldMatrix.v[1].xyz, WorldMatrix.v[2].xyz }; }
     xxVector3 const&            GetWorldTranslate() const { return WorldMatrix.v[3].xyz; }
+    float                       GetWorldScale() const;
     void                        SetRotate(xxMatrix3 const& rotate);
     void                        SetTranslate(xxVector3 const& translate);
     void                        SetScale(float scale);
