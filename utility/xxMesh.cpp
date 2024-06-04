@@ -232,10 +232,11 @@ void xxMesh::SetVertexCount(int count)
             xxFree(Vertex);
             count = 0;
         }
+        m_vertexSizeChanged = true;
     }
     const_cast<int&>(VertexCount) = count;
     const_cast<char*&>(Vertex) = vertex;
-    m_vertexSizeChanged = true;
+    m_vertexDataModified = true;
 }
 //------------------------------------------------------------------------------
 void xxMesh::SetIndexCount(int count)
@@ -249,10 +250,11 @@ void xxMesh::SetIndexCount(int count)
             xxFree(Index);
             count = 0;
         }
+        m_indexSizeChanged = true;
     }
     const_cast<int&>(IndexCount) = count;
     const_cast<uint16_t*&>(Index) = index;
-    m_indexSizeChanged = true;
+    m_indexDataModified = true;
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<xxVector3> xxMesh::GetPosition() const

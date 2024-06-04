@@ -79,15 +79,15 @@ struct xxStrideIterator
 {
     xxStrideIterator(void* base, size_t stride, size_t size)
         :m_stride(stride)
-        ,m_now(reinterpret_cast<T*>(base))
-        ,m_begin(reinterpret_cast<T*>(base))
-        ,m_end(reinterpret_cast<T*>(reinterpret_cast<char*>(base) + stride * size))
+        ,m_now(reinterpret_cast<char*>(base))
+        ,m_begin(reinterpret_cast<char*>(base))
+        ,m_end(reinterpret_cast<char*>(base) + stride * size)
     {
     }
 
     T& operator * () const
     {
-        return (*m_now);
+        return reinterpret_cast<T&>(*m_now);
     }
 
     bool operator != (xxStrideIterator const& it) const
@@ -95,16 +95,23 @@ struct xxStrideIterator
         return m_now != it.m_now;
     }
 
+    xxStrideIterator operator + (size_t offset) const
+    {
+        xxStrideIterator iterator = (*this);
+        iterator.m_now = m_now + m_stride * offset;
+        return iterator;
+    }
+
     xxStrideIterator& operator ++ ()
     {
-        m_now = reinterpret_cast<T*>(reinterpret_cast<char*>(m_now) + m_stride);
+        m_now = m_now + m_stride;
         return (*this);
     }
 
     xxStrideIterator operator ++ (int)
     {
         xxStrideIterator iterator = (*this);
-        m_now = reinterpret_cast<T*>(reinterpret_cast<char*>(m_now) + m_stride);
+        m_now = m_now + m_stride;
         return iterator;
     }
 
@@ -123,8 +130,8 @@ struct xxStrideIterator
     }
 
 private:
-    T*              m_now;
-    T*              m_begin;
-    T*              m_end;
+    char*           m_now;
+    char*           m_begin;
+    char*           m_end;
     size_t          m_stride;
 };
