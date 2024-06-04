@@ -63,6 +63,18 @@ const xxMatrix4x4 xxMatrix4x4::IDENTITY = { 1, 0, 0, 0,
                                             0, 0, 1, 0,
                                             0, 0, 0, 1 };
 
+static_assert(sizeof(xxVector2) == 8);
+static_assert(sizeof(xxVector3) == 12);
+static_assert(sizeof(xxVector4) == 16);
+static_assert(sizeof(xxMatrix2x2) == 16);
+static_assert(sizeof(xxMatrix2x3) == 24);
+static_assert(sizeof(xxMatrix2x4) == 32);
+static_assert(sizeof(xxMatrix3x2) == 24);
+static_assert(sizeof(xxMatrix3x3) == 36);
+static_assert(sizeof(xxMatrix3x4) == 48);
+static_assert(sizeof(xxMatrix4x2) == 32);
+static_assert(sizeof(xxMatrix4x3) == 48);
+static_assert(sizeof(xxMatrix4x4) == 64);
 //==============================================================================
 //  Vector4
 //==============================================================================
