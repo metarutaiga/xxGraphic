@@ -335,6 +335,8 @@ inline T xxTemplateCompareOp(char const* name)
     return ALWAYS;
 }
 
+#ifndef xxFourCC
+#define xxFourCC
 constexpr uint32_t operator ""_cc(char const* text, size_t length)
 {
     uint32_t value = 0;
@@ -342,7 +344,10 @@ constexpr uint32_t operator ""_cc(char const* text, size_t length)
         value += uint32_t(uint8_t(text[i])) << (i * 8);
     return value;
 };
+#endif
 
+#ifndef xxEightCC
+#define xxEightCC
 constexpr uint64_t operator ""_CC(char const* text, size_t length)
 {
     uint64_t value = 0;
@@ -350,3 +355,4 @@ constexpr uint64_t operator ""_CC(char const* text, size_t length)
         value += uint64_t(uint8_t(text[i])) << (i * 8);
     return value;
 };
+#endif
