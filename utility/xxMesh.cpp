@@ -10,6 +10,8 @@
 #include "xxNode.h"
 
 //==============================================================================
+int xxMesh::ms_bufferCount = 4;
+//==============================================================================
 //  Mesh
 //==============================================================================
 xxMesh::xxMesh(bool skinning, char normal, char color, char texture)
@@ -121,19 +123,19 @@ void xxMesh::Setup(uint64_t device)
         m_vertexAttribute = xxCreateVertexAttribute(m_device, dataCount, data);
     }
 
-    if (m_vertexDataModified || m_vertexSizeChanged)
+    if (m_vertexDataModified || m_vertexSizeChanged[m_vertexBufferIndex])
     {
         if (m_vertexBuffers[m_vertexBufferIndex])
         {
             m_vertexBufferIndex++;
-            if (m_vertexBufferIndex >= xxCountOf(m_vertexBuffers))
+            if (m_vertexBufferIndex >= ms_bufferCount)
                 m_vertexBufferIndex = 0;
         }
         int index = m_vertexBufferIndex;
 
-        if (m_vertexSizeChanged)
+        if (m_vertexSizeChanged[index])
         {
-            m_vertexSizeChanged = false;
+            m_vertexSizeChanged[index] = false;
 
             xxDestroyBuffer(m_device, m_vertexBuffers[index]);
             m_vertexBuffers[index] = 0;
@@ -157,19 +159,19 @@ void xxMesh::Setup(uint64_t device)
         }
     }
 
-    if (m_indexDataModified || m_indexSizeChanged)
+    if (m_indexDataModified || m_indexSizeChanged[m_indexBufferIndex])
     {
         if (m_indexBuffers[m_indexBufferIndex])
         {
             m_indexBufferIndex++;
-            if (m_indexBufferIndex >= xxCountOf(m_indexBuffers))
+            if (m_indexBufferIndex >= ms_bufferCount)
                 m_indexBufferIndex = 0;
         }
         int index = m_indexBufferIndex;
 
-        if (m_indexSizeChanged)
+        if (m_indexSizeChanged[index])
         {
-            m_indexSizeChanged = false;
+            m_indexSizeChanged[index] = false;
 
             xxDestroyBuffer(m_device, m_indexBuffers[index]);
             m_indexBuffers[index] = 0;
@@ -232,7 +234,10 @@ void xxMesh::SetVertexCount(int count)
             xxFree(Vertex);
             count = 0;
         }
-        m_vertexSizeChanged = true;
+        for (int i = 0; i < ms_bufferCount; ++i)
+        {
+            m_vertexSizeChanged[i] = true;
+        }
     }
     const_cast<int&>(VertexCount) = count;
     const_cast<char*&>(Vertex) = vertex;
@@ -250,7 +255,10 @@ void xxMesh::SetIndexCount(int count)
             xxFree(Index);
             count = 0;
         }
-        m_indexSizeChanged = true;
+        for (int i = 0; i < ms_bufferCount; ++i)
+        {
+            m_indexSizeChanged[i] = true;
+        }
     }
     const_cast<int&>(IndexCount) = count;
     const_cast<uint16_t*&>(Index) = index;
@@ -324,6 +332,11 @@ void xxMesh::CalculateBound() const
         bound.BoundMerge(position);
     }
     const_cast<xxVector4&>(Bound) = bound;
+}
+//------------------------------------------------------------------------------
+void xxMesh::BufferCount(int count)
+{
+    ms_bufferCount = std::clamp(count, 1, 4);
 }
 //------------------------------------------------------------------------------
 xxMeshPtr xxMesh::Create(bool skinning, char normal, char color, char texture)

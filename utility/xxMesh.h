@@ -33,6 +33,8 @@ public:
 
     void                        CalculateBound() const;
 
+    static void                 BufferCount(int count);
+
     static xxMeshPtr            Create(bool skinning = false, char normal = 0, char color = 0, char texture = 0);
 
     static xxMeshPtr          (*BinaryCreate)();
@@ -49,12 +51,14 @@ protected:
     uint64_t                    m_indexBuffers[4] = {};
 
     bool                        m_vertexDataModified = false;
-    bool                        m_vertexSizeChanged = false;
+    bool                        m_vertexSizeChanged[4] = { false, false, false, false };
     bool                        m_indexDataModified = false;
-    bool                        m_indexSizeChanged = false;
+    bool                        m_indexSizeChanged[4] = { false, false, false, false };
 
     char                        m_vertexBufferIndex = 0;
     char                        m_indexBufferIndex = 0;
+
+    static int                  ms_bufferCount;
 
 public:
     std::string                 Name = "";
