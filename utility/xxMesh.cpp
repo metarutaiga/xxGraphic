@@ -54,143 +54,121 @@ void xxMesh::Setup(uint64_t device)
 
     if (m_vertexAttribute == 0)
     {
-        int dataCount = 0;
-        int data[64];
-        int* dataPtr = data;
+        std::vector<std::array<int, 4>> attributes;
         int offset = 0;
 
         // position
-        dataCount++;
-        (*dataPtr++) = 0;
-        (*dataPtr++) = offset;
-        (*dataPtr++) = 'POS3';
-        (*dataPtr++) = xxSizeOf(xxVector3);
+        attributes.push_back({0, offset, 'POS3', xxSizeOf(xxVector3)});
         offset += xxSizeOf(xxVector3);
 
         // skinning
         if (Skinning)
         {
             // bone weight
-            dataCount++;
-            (*dataPtr++) = 0;
-            (*dataPtr++) = offset;
-            (*dataPtr++) = 'BON3';
-            (*dataPtr++) = xxSizeOf(xxVector3);
+            attributes.push_back({0, offset, 'BON3', xxSizeOf(xxVector3)});
             offset += xxSizeOf(xxVector3);
 
             // bone index
-            dataCount++;
-            (*dataPtr++) = 0;
-            (*dataPtr++) = offset;
-            (*dataPtr++) = 'BON4';
-            (*dataPtr++) = xxSizeOf(uint32_t);
+            attributes.push_back({0, offset, 'BON4', xxSizeOf(uint32_t)});
             offset += xxSizeOf(uint32_t);
         }
 
         // normal
         for (int i = 0; i < NormalCount; ++i)
         {
-            dataCount++;
-            (*dataPtr++) = 0;
-            (*dataPtr++) = offset;
-            (*dataPtr++) = 'NOR3';
-            (*dataPtr++) = xxSizeOf(xxVector3);
+            attributes.push_back({0, offset, 'NOR3', xxSizeOf(xxVector3)});
             offset += xxSizeOf(xxVector3);
         }
 
         // color
         for (int i = 0; i < ColorCount; ++i)
         {
-            dataCount++;
-            (*dataPtr++) = 0;
-            (*dataPtr++) = offset;
-            (*dataPtr++) = 'COL4';
-            (*dataPtr++) = xxSizeOf(uint32_t);
+            attributes.push_back({0, offset, 'COL4', xxSizeOf(uint32_t)});
             offset += xxSizeOf(uint32_t);
         }
 
         // texture
         for (int i = 0; i < TextureCount; ++i)
         {
-            dataCount++;
-            (*dataPtr++) = 0;
-            (*dataPtr++) = offset;
-            (*dataPtr++) = 'TEX2';
-            (*dataPtr++) = xxSizeOf(xxVector2);
+            attributes.push_back({0, offset, 'TEX2', xxSizeOf(xxVector2)});
             offset += xxSizeOf(xxVector2);
         }
 
-        m_vertexAttribute = xxCreateVertexAttribute(m_device, dataCount, data);
+        int count = (int)attributes.size();
+        int* attribute = attributes.front().data();
+        m_vertexAttribute = xxCreateVertexAttribute(m_device, count, attribute);
     }
 
-    if (m_vertexDataModified || m_vertexSizeChanged[m_vertexBufferIndex])
+    int vertexBufferIndex = m_vertexBufferIndex;
+    if (m_vertexDataModified || m_vertexSizeChanged[vertexBufferIndex])
     {
-        if (m_vertexBuffers[m_vertexBufferIndex])
+        m_vertexDataModified = false;
+
+        if (m_vertexBuffers[vertexBufferIndex])
         {
             m_vertexBufferIndex++;
             if (m_vertexBufferIndex >= ms_bufferCount)
                 m_vertexBufferIndex = 0;
-        }
-        int index = m_vertexBufferIndex;
-
-        if (m_vertexSizeChanged[index])
-        {
-            m_vertexSizeChanged[index] = false;
-
-            xxDestroyBuffer(m_device, m_vertexBuffers[index]);
-            m_vertexBuffers[index] = 0;
-        }
-        if (m_vertexBuffers[index] == 0 && VertexCount != 0)
-        {
-            m_vertexBuffers[index] = xxCreateVertexBuffer(m_device, Stride * VertexCount, m_vertexAttribute);
-            m_vertexDataModified = true;
+            vertexBufferIndex = m_vertexBufferIndex;
         }
 
-        if (m_vertexDataModified)
+        uint64_t vertexBuffer = m_vertexBuffers[vertexBufferIndex];
+        if (m_vertexSizeChanged[vertexBufferIndex])
         {
-            void* ptr = xxMapBuffer(m_device, m_vertexBuffers[index]);
+            m_vertexSizeChanged[vertexBufferIndex] = false;
+
+            xxDestroyBuffer(m_device, vertexBuffer);
+            vertexBuffer = 0;
+        }
+        if (vertexBuffer == 0)
+        {
+            vertexBuffer = m_vertexBuffers[vertexBufferIndex] = VertexCount ? xxCreateVertexBuffer(m_device, Stride * VertexCount, m_vertexAttribute) : 0;
+        }
+
+        if (vertexBuffer)
+        {
+            void* ptr = xxMapBuffer(m_device, vertexBuffer);
             if (ptr)
             {
-                m_vertexDataModified = false;
-
                 memcpy(ptr, Vertex, Stride * VertexCount);
-                xxUnmapBuffer(m_device, m_vertexBuffers[index]);
+                xxUnmapBuffer(m_device, vertexBuffer);
             }
         }
     }
 
-    if (m_indexDataModified || m_indexSizeChanged[m_indexBufferIndex])
+    int indexBufferIndex = m_indexBufferIndex;
+    if (m_indexDataModified || m_indexSizeChanged[indexBufferIndex])
     {
-        if (m_indexBuffers[m_indexBufferIndex])
+        m_indexDataModified = false;
+
+        if (m_indexBuffers[indexBufferIndex])
         {
             m_indexBufferIndex++;
             if (m_indexBufferIndex >= ms_bufferCount)
                 m_indexBufferIndex = 0;
-        }
-        int index = m_indexBufferIndex;
-
-        if (m_indexSizeChanged[index])
-        {
-            m_indexSizeChanged[index] = false;
-
-            xxDestroyBuffer(m_device, m_indexBuffers[index]);
-            m_indexBuffers[index] = 0;
-        }
-        if (m_indexBuffers[index] == 0 && IndexCount != 0)
-        {
-            m_indexBuffers[index] = xxCreateIndexBuffer(m_device, xxSizeOf(uint16_t) * IndexCount);
-            m_indexDataModified = true;
+            indexBufferIndex = m_indexBufferIndex;
         }
 
-        if (m_indexDataModified)
+        uint64_t indexBuffer = m_indexBuffers[indexBufferIndex];
+        if (m_indexSizeChanged[indexBufferIndex])
         {
-            void* ptr = xxMapBuffer(m_device, m_indexBuffers[index]);
+            m_indexSizeChanged[indexBufferIndex] = false;
+
+            xxDestroyBuffer(m_device, indexBuffer);
+            indexBuffer = 0;
+        }
+        if (indexBuffer == 0)
+        {
+            indexBuffer = m_indexBuffers[indexBufferIndex] = IndexCount ? xxCreateIndexBuffer(m_device, xxSizeOf(uint16_t) * IndexCount) : 0;
+        }
+
+        if (indexBuffer)
+        {
+            void* ptr = xxMapBuffer(m_device, indexBuffer);
             if (ptr)
             {
-                m_indexDataModified = false;
-
                 memcpy(ptr, Index, xxSizeOf(uint16_t) * IndexCount);
-                xxUnmapBuffer(m_device, m_indexBuffers[index]);
+                xxUnmapBuffer(m_device, indexBuffer);
             }
         }
     }
