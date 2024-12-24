@@ -222,6 +222,8 @@ VK_PROTOTYPE(VkResult, vkAcquireNextImage2KHR, (VkDevice device, const VkAcquire
 VK_PROTOTYPE(void, vkCmdPushDescriptorSetKHR, (VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, VkPipelineLayout layout, uint32_t set, uint32_t descriptorWriteCount, const VkWriteDescriptorSet* pDescriptorWrites), commandBuffer, pipelineBindPoint, layout, set, descriptorWriteCount, pDescriptorWrites);
 VK_PROTOTYPE(void, vkCmdPushDescriptorSetWithTemplateKHR, (VkCommandBuffer commandBuffer, VkDescriptorUpdateTemplate descriptorUpdateTemplate, VkPipelineLayout layout, uint32_t set, const void* pData), commandBuffer, descriptorUpdateTemplate, layout, set, pData);
 //------------------------------------------------------------------------------
+VK_PROTOTYPE(void, vkCmdDrawMeshTasksEXT, (VkCommandBuffer commandBuffer, uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ), commandBuffer, groupCountX, groupCountY, groupCountZ);
+//------------------------------------------------------------------------------
 #if VK_USE_PLATFORM_ANDROID_KHR
 VK_PROTOTYPE(VkResult, vkCreateAndroidSurfaceKHR, (VkInstance instance, const VkAndroidSurfaceCreateInfoKHR* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkSurfaceKHR* pSurface), instance, pCreateInfo, pAllocator, pSurface);
 #endif
@@ -465,6 +467,9 @@ VKAPI_ATTR void VKAPI_CALL vkCompileShader(char const* code, char const*const* m
     };
     switch (type)
     {
+    case 'mesh':
+        input.stage = GLSLANG_STAGE_MESH;
+        break;
     case 'vert':
         input.stage = GLSLANG_STAGE_VERTEX;
         break;

@@ -17,6 +17,7 @@ typedef HRESULT (WINAPI *PFN_DIRECT_DRAW_CREATE)(GUID*, LPDIRECTDRAW*, IUnknown*
 #define D3DRTYPE_CONSTANTBUFFER     0
 #define D3DRTYPE_INDEXBUFFER        1
 #define D3DRTYPE_VERTEXBUFFER       2
+#define D3DRTYPE_STORAGEBUFFER      3
 
 static void*                        g_ddrawLibrary = nullptr;
 static LPDIRECTDRAW4                g_ddraw = nullptr;
@@ -465,7 +466,7 @@ uint64_t xxCreateConstantBufferD3D6(uint64_t device, int size)
     return reinterpret_cast<uint64_t>(d3dBuffer) | D3DRTYPE_CONSTANTBUFFER;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateIndexBufferD3D6(uint64_t device, int size)
+uint64_t xxCreateIndexBufferD3D6(uint64_t device, int size, int bits)
 {
     char* d3dBuffer = xxAlloc(char, size);
 
@@ -554,12 +555,20 @@ uint64_t xxCreateVertexBufferD3D6(uint64_t device, int size, uint64_t vertexAttr
 #endif
 }
 //------------------------------------------------------------------------------
+uint64_t xxCreateStorageBufferD3D6(uint64_t device, int size)
+{
+    char* d3dBuffer = xxAlloc(char, size);
+
+    return reinterpret_cast<uint64_t>(d3dBuffer) | D3DRTYPE_STORAGEBUFFER;
+}
+//------------------------------------------------------------------------------
 void xxDestroyBufferD3D6(uint64_t device, uint64_t buffer)
 {
     switch (getResourceType(buffer))
     {
     case D3DRTYPE_CONSTANTBUFFER:
     case D3DRTYPE_INDEXBUFFER:
+    case D3DRTYPE_STORAGEBUFFER:
     {
         char* d3dBuffer = reinterpret_cast<char*>(getResourceData(buffer));
 
@@ -799,6 +808,11 @@ void xxDestroySamplerD3D6(uint64_t sampler)
 //==============================================================================
 //  Shader
 //==============================================================================
+uint64_t xxCreateMeshShaderD3D6(uint64_t device, char const* shader)
+{
+    return 0;
+}
+//------------------------------------------------------------------------------
 uint64_t xxCreateVertexShaderD3D6(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
     return 0;
@@ -844,7 +858,7 @@ uint64_t xxCreateRasterizerStateD3D6(uint64_t device, bool cull, bool scissor)
     return static_cast<uint64_t>(d3dRenderState.value);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreatePipelineD3D6(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+uint64_t xxCreatePipelineD3D6(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t meshShader, uint64_t vertexShader, uint64_t fragmentShader)
 {
     D3DPIPELINE3* d3dPipeline = xxAlloc(D3DPIPELINE3);
     if (d3dPipeline == nullptr)
@@ -969,6 +983,11 @@ void xxSetPipelineD3D6(uint64_t commandEncoder, uint64_t pipeline)
     }
 }
 //------------------------------------------------------------------------------
+void xxSetMeshBuffersD3D6(uint64_t commandEncoder, int count, const uint64_t* buffers)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetVertexBuffersD3D6(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
 #if USB_VB
@@ -1015,6 +1034,11 @@ void xxSetFragmentSamplersD3D6(uint64_t commandEncoder, int count, const uint64_
     }
 }
 //------------------------------------------------------------------------------
+void xxSetMeshConstantBufferD3D6(uint64_t commandEncoder, uint64_t buffer, int size)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetVertexConstantBufferD3D6(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     LPDIRECT3DDEVICE3 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE3>(commandEncoder);
@@ -1054,18 +1078,23 @@ void xxDrawD3D6(uint64_t commandEncoder, int vertexCount, int instanceCount, int
 #endif
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedD3D6(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawMeshedD3D6(uint64_t commandEncoder, int x, int y, int z)
+{
+
+}
+//------------------------------------------------------------------------------
+void xxDrawIndexedD3D6(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     LPDIRECT3DDEVICE3 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE3>(commandEncoder);
 #if USE_VB
     static WORD wordIndexBuffer[65536];
     WORD* indexArray = nullptr;
-    if (INDEX_BUFFER_WIDTH == 2 && vertexOffset == 0)
+    if (vertexCount < 65536 && vertexOffset == 0)
     {
         WORD* d3dIndexBuffer = reinterpret_cast<WORD*>(getResourceData(indexBuffer));
         indexArray = d3dIndexBuffer + firstIndex;
     }
-    else if (INDEX_BUFFER_WIDTH == 2)
+    else if (vertexCount < 65536)
     {
         WORD* d3dIndexBuffer = reinterpret_cast<WORD*>(getResourceData(indexBuffer));
         WORD* p = d3dIndexBuffer + firstIndex;
@@ -1093,7 +1122,7 @@ void xxDrawIndexedD3D6(uint64_t commandEncoder, uint64_t indexBuffer, int indexC
     d3dDevice->DrawIndexedPrimitiveVB(D3DPT_TRIANGLELIST, g_vertexBuffer, indexArray, indexCount, 0);
 #else
     WORD* indexArray = nullptr;
-    if (INDEX_BUFFER_WIDTH == 2)
+    if (vertexCount < 65536)
     {
         WORD* d3dIndexBuffer = reinterpret_cast<WORD*>(getResourceData(indexBuffer));
         indexArray = d3dIndexBuffer + firstIndex;

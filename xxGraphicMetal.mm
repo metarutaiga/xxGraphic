@@ -10,6 +10,7 @@
 
 Class                       classMTLCompileOptions = nil;
 Class                       classMTLDepthStencilDescriptor = nil;
+Class                       classMTLMeshRenderPipelineDescriptor = nil;
 Class                       classMTLRenderPassDescriptor = nil;
 Class                       classMTLRenderPipelineColorAttachmentDescriptor = nil;
 Class                       classMTLRenderPipelineDescriptor = nil;
@@ -64,6 +65,7 @@ id xxCreateInstanceMetal()
 
     classMTLCompileOptions = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLCompileOptions");
     classMTLDepthStencilDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLDepthStencilDescriptor");
+    classMTLMeshRenderPipelineDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLMeshRenderPipelineDescriptor");
     classMTLRenderPassDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLRenderPassDescriptor");
     classMTLRenderPipelineColorAttachmentDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLRenderPipelineColorAttachmentDescriptor");
     classMTLRenderPipelineDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLRenderPipelineDescriptor");
@@ -406,7 +408,7 @@ id xxCreateConstantBufferMetal(id <MTLDevice> __unsafe_unretained device, int si
     return buffer;
 }
 //------------------------------------------------------------------------------
-id xxCreateIndexBufferMetal(id <MTLDevice> __unsafe_unretained device, int size)
+id xxCreateIndexBufferMetal(id <MTLDevice> __unsafe_unretained device, int size, int bits)
 {
     if (device == nil)
         return 0;
@@ -419,6 +421,18 @@ id xxCreateIndexBufferMetal(id <MTLDevice> __unsafe_unretained device, int size)
 }
 //------------------------------------------------------------------------------
 id xxCreateVertexBufferMetal(id <MTLDevice> __unsafe_unretained device, int size, MTLVertexDescriptor* __unsafe_unretained vertexAttribute)
+{
+    if (device == nil)
+        return 0;
+
+    id <MTLBuffer> buffer = [device newBufferWithLength:size
+                                                options:MTLResourceStorageModeShared];
+
+    objc_retain(buffer);
+    return buffer;
+}
+//------------------------------------------------------------------------------
+id xxCreateStorageBufferMetal(id <MTLDevice> __unsafe_unretained device, int size)
 {
     if (device == nil)
         return 0;
@@ -674,6 +688,43 @@ void xxDestroySamplerMetal(id <MTLSamplerState> __unsafe_unretained sampler)
 //==============================================================================
 //  Shader
 //==============================================================================
+id xxCreateMeshShaderMetal(id <MTLDevice> __unsafe_unretained device, char const* shader)
+{
+    if (device == nil)
+        return 0;
+
+    if (strcmp(shader, "default") == 0)
+    {
+        shader = mtlDefaultShaderCode;
+    }
+
+    NSError* error;
+    MTLCompileOptions* options = [classMTLCompileOptions new];
+    options.preprocessorMacros = @{ @"SHADER_MSL" : @(1),
+                                    @"SHADER_MESH" : @(1) };;
+    options.fastMathEnabled = YES;
+
+    NSMutableString* code = [NSMutableString new];
+    [code appendString:@"#include <metal_stdlib>"];
+    [code appendString:@"\n"];
+    [code appendString:@"using namespace metal;"];
+    [code appendString:@"\n"];
+    [code appendString:@(shader)];
+    id <MTLLibrary> library = [device newLibraryWithSource:code
+                                                   options:options
+                                                     error:&error];
+    if (library == nil)
+    {
+        xxLog("xxGraphic", "%s", error.localizedDescription.UTF8String);
+        return 0;
+    }
+
+    id <MTLFunction> function = [library newFunctionWithName:@"Main"];
+
+    objc_retain(function);
+    return function;
+}
+//------------------------------------------------------------------------------
 id xxCreateVertexShaderMetal(id <MTLDevice> __unsafe_unretained device, char const* shader, MTLVertexDescriptor* __unsafe_unretained vertexAttribute)
 {
     if (device == nil)
@@ -797,7 +848,7 @@ uint64_t xxCreateRasterizerStateMetal(id <MTLDevice> __unsafe_unretained device,
     return state;
 }
 //------------------------------------------------------------------------------
-MTLPIPELINE* xxCreatePipelineMetal(id <MTLDevice> __unsafe_unretained device, MTLRenderPassDescriptor* __unsafe_unretained renderPass, MTLRenderPipelineColorAttachmentDescriptor* __unsafe_unretained blendState, id <MTLDepthStencilState> __unsafe_unretained depthStencilState, uint64_t rasterizerState, MTLVertexDescriptor* __unsafe_unretained vertexAttribute, id <MTLFunction> __unsafe_unretained vertexShader, id <MTLFunction> __unsafe_unretained fragmentShader)
+MTLPIPELINE* xxCreatePipelineMetal(id <MTLDevice> __unsafe_unretained device, MTLRenderPassDescriptor* __unsafe_unretained renderPass, MTLRenderPipelineColorAttachmentDescriptor* __unsafe_unretained blendState, id <MTLDepthStencilState> __unsafe_unretained depthStencilState, uint64_t rasterizerState, MTLVertexDescriptor* __unsafe_unretained vertexAttribute, id <MTLFunction> __unsafe_unretained meshShader, id <MTLFunction> __unsafe_unretained vertexShader, id <MTLFunction> __unsafe_unretained fragmentShader)
 {
     if (device == nil)
         return 0;
@@ -806,16 +857,31 @@ MTLPIPELINE* xxCreatePipelineMetal(id <MTLDevice> __unsafe_unretained device, MT
     if (pipeline == nullptr)
         return 0;
 
-    MTLRenderPipelineDescriptor* desc = [classMTLRenderPipelineDescriptor new];
-    desc.vertexFunction = vertexShader;
-    desc.fragmentFunction = fragmentShader;
-    desc.vertexDescriptor = vertexAttribute;
-    desc.colorAttachments[0] = blendState;
-    desc.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
-
     NSError* error;
-    pipeline->pipeline = [device newRenderPipelineStateWithDescriptor:desc
-                                                                error:&error];
+    if (meshShader)
+    {
+        MTLMeshRenderPipelineDescriptor* desc = [classMTLMeshRenderPipelineDescriptor new];
+        desc.meshFunction = meshShader;
+        desc.fragmentFunction = fragmentShader;
+        desc.colorAttachments[0] = blendState;
+        desc.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
+        pipeline->pipeline = [device newRenderPipelineStateWithMeshDescriptor:desc
+                                                                      options:MTLPipelineOptionNone
+                                                                   reflection:nil
+                                                                        error:&error];
+    }
+    else
+    {
+        MTLRenderPipelineDescriptor* desc = [classMTLRenderPipelineDescriptor new];
+        desc.vertexFunction = vertexShader;
+        desc.fragmentFunction = fragmentShader;
+        desc.vertexDescriptor = vertexAttribute;
+        desc.colorAttachments[0] = blendState;
+        desc.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
+        pipeline->pipeline = [device newRenderPipelineStateWithDescriptor:desc
+                                                                    error:&error];
+    }
+
     if (pipeline->pipeline == nil)
     {
         xxLog("xxGraphic", "%s", error.localizedDescription.UTF8String);
@@ -906,6 +972,15 @@ void xxSetPipelineMetal(id <MTLRenderCommandEncoder> __unsafe_unretained command
     }
 }
 //------------------------------------------------------------------------------
+void xxSetMeshBuffersMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, id <MTLBuffer> __unsafe_unretained* buffers)
+{
+    static const NSUInteger offsets[8] = {};
+
+    [commandEncoder setMeshBuffers:buffers
+                           offsets:offsets
+                         withRange:NSMakeRange(0, count)];
+}
+//------------------------------------------------------------------------------
 void xxSetVertexBuffersMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, id <MTLBuffer> __unsafe_unretained* buffers, MTLVertexDescriptor* __unsafe_unretained vertexAttribute)
 {
     static const NSUInteger offsets[8] = {};
@@ -956,6 +1031,13 @@ void xxSetFragmentSamplersMetal(id <MTLRenderCommandEncoder> __unsafe_unretained
                                    withRange:NSMakeRange(0, count)];
 }
 //------------------------------------------------------------------------------
+void xxSetMeshConstantBufferMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, id <MTLBuffer> __unsafe_unretained buffer, int size)
+{
+    [commandEncoder setMeshBuffer:buffer
+                           offset:0
+                          atIndex:xxGraphicDescriptor::MESH_UNIFORM];
+}
+//------------------------------------------------------------------------------
 void xxSetVertexConstantBufferMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, id <MTLBuffer> __unsafe_unretained buffer, int size)
 {
     [commandEncoder setVertexBuffer:buffer
@@ -979,9 +1061,16 @@ void xxDrawMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder
                       baseInstance:firstInstance];
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, id <MTLBuffer> __unsafe_unretained indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawMeshedMetal(id <MTLRenderCommandEncoder> commandEncoder, int x, int y, int z)
 {
-    MTLIndexType indexType = (INDEX_BUFFER_WIDTH == /* DISABLES CODE */(2)) ? MTLIndexTypeUInt16 : MTLIndexTypeUInt32;
+    [commandEncoder drawMeshThreadgroups:MTLSize(x, y, z)
+             threadsPerObjectThreadgroup:MTLSize(0, 0, 0)
+               threadsPerMeshThreadgroup:MTLSize(128, 1, 1)];
+}
+//------------------------------------------------------------------------------
+void xxDrawIndexedMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, id <MTLBuffer> __unsafe_unretained indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+{
+    MTLIndexType indexType = vertexCount < 65536 ? MTLIndexTypeUInt16 : MTLIndexTypeUInt32;
 #if TARGET_OS_SIMULATOR
     MTLVertexDescriptor* __unsafe_unretained desc = (__bridge id)reinterpret_cast<void*>(metalVertexAttribute);
     MTLVertexBufferLayoutDescriptor* __unsafe_unretained layout = desc.layouts[xxGraphicDescriptor::VERTEX_BUFFER];
@@ -991,13 +1080,13 @@ void xxDrawIndexedMetal(id <MTLRenderCommandEncoder> __unsafe_unretained command
                                indexCount:indexCount
                                 indexType:indexType
                               indexBuffer:indexBuffer
-                        indexBufferOffset:firstIndex * INDEX_BUFFER_WIDTH];
+                        indexBufferOffset:firstIndex * (vertexCount < 65536 ? 2 : 4)];
 #else
     [commandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
                                indexCount:indexCount
                                 indexType:indexType
                               indexBuffer:indexBuffer
-                        indexBufferOffset:firstIndex * INDEX_BUFFER_WIDTH
+                        indexBufferOffset:firstIndex * (vertexCount < 65536 ? 2 : 4)
                             instanceCount:instanceCount
                                baseVertex:vertexOffset
                              baseInstance:firstInstance];

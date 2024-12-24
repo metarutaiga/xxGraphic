@@ -28,7 +28,11 @@
 #endif
 
 #ifndef GL_UNIFORM_BUFFER
-#define GL_UNIFORM_BUFFER                 0x8A11
+#define GL_UNIFORM_BUFFER           0x8A11
+#endif
+
+#ifndef GL_SHADER_STORAGE_BUFFER
+#define GL_SHADER_STORAGE_BUFFER    0x90D2
 #endif
 
 //==============================================================================
@@ -400,7 +404,7 @@ uint64_t xxCreateConstantBufferGLES2(uint64_t device, int size)
     return reinterpret_cast<uint64_t>(glBuffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateIndexBufferGLES2(uint64_t device, int size)
+uint64_t xxCreateIndexBufferGLES2(uint64_t device, int size, int bits)
 {
     GLBUFFER* glBuffer = xxAlloc(GLBUFFER);
     if (glBuffer == nullptr)
@@ -428,6 +432,20 @@ uint64_t xxCreateVertexBufferGLES2(uint64_t device, int size, uint64_t vertexAtt
 
     glBuffer->type = GL_ARRAY_BUFFER;
     glBuffer->buffer = buffer;
+    glBuffer->memory = xxAlloc(char, size);
+    glBuffer->size = size;
+
+    return reinterpret_cast<uint64_t>(glBuffer);
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateStorageBufferGLES2(uint64_t device, int size)
+{
+    GLBUFFER* glBuffer = xxAlloc(GLBUFFER);
+    if (glBuffer == nullptr)
+        return 0;
+
+    glBuffer->type = GL_SHADER_STORAGE_BUFFER;
+    glBuffer->buffer = 0;
     glBuffer->memory = xxAlloc(char, size);
     glBuffer->size = size;
 
@@ -799,6 +817,11 @@ static void checkShader(GLuint glShader, char const* shader)
     }
 }
 //------------------------------------------------------------------------------
+uint64_t xxCreateMeshShaderGLES2(uint64_t device, char const* shader)
+{
+    return 0;
+}
+//------------------------------------------------------------------------------
 uint64_t xxCreateVertexShaderGLES2(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
     static char const* const macro[][2] =
@@ -960,7 +983,7 @@ uint64_t xxCreateRasterizerStateGLES2(uint64_t device, bool cull, bool scissor)
     return static_cast<uint64_t>(glState.value);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t meshShader, uint64_t vertexShader, uint64_t fragmentShader)
 {
     GLVERTEXATTRIBUTE* glVertexAttribute = reinterpret_cast<GLVERTEXATTRIBUTE*>(vertexAttribute);
     if (glVertexAttribute == nullptr)
@@ -1086,6 +1109,11 @@ void xxSetPipelineGLES2(uint64_t commandEncoder, uint64_t pipeline)
     glSwapchain->pipeline = pipeline;
 }
 //------------------------------------------------------------------------------
+void xxSetMeshBuffersGLES2(uint64_t commandEncoder, int count, const uint64_t* buffers)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetVertexBuffersGLES2(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(commandEncoder);
@@ -1147,6 +1175,11 @@ void xxSetFragmentSamplersGLES2(uint64_t commandEncoder, int count, const uint64
     }
 }
 //------------------------------------------------------------------------------
+void xxSetMeshConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, int size)
+{
+    
+}
+//------------------------------------------------------------------------------
 void xxSetVertexConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(commandEncoder);
@@ -1189,7 +1222,12 @@ void xxDrawGLES2(uint64_t commandEncoder, int vertexCount, int instanceCount, in
     glDrawArrays(GL_TRIANGLES, firstVertex, vertexCount);
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedGLES2(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawMeshedGLES2(uint64_t commandEncoder, int x, int y, int z)
+{
+    
+}
+//------------------------------------------------------------------------------
+void xxDrawIndexedGLES2(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(commandEncoder);
     GLBUFFER* glIndexBuffer = reinterpret_cast<GLBUFFER*>(indexBuffer);
@@ -1211,8 +1249,8 @@ void xxDrawIndexedGLES2(uint64_t commandEncoder, uint64_t indexBuffer, int index
         glVertexAttribPointer(attribute.index, attribute.size, attribute.type, attribute.normalized, attribute.stride, attribute.pointer + vertexOffset * attribute.stride);
     }
 
-    GLenum indexType = (INDEX_BUFFER_WIDTH == 2) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+    GLenum indexType = vertexCount < 65536 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glIndexBuffer->buffer);
-    glDrawElements(GL_TRIANGLES, indexCount, indexType, (char*)nullptr + firstIndex * INDEX_BUFFER_WIDTH);
+    glDrawElements(GL_TRIANGLES, indexCount, indexType, (char*)nullptr + firstIndex * (vertexCount < 65536 ? 2 : 4));
 }
 //==============================================================================

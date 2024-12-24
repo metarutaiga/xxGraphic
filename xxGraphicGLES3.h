@@ -20,7 +20,7 @@ uint64_t        xxCreateInstanceGLES3();
 //==============================================================================
 //  Buffer
 //==============================================================================
-uint64_t        xxCreateIndexBufferGLES3(uint64_t device, int size);
+uint64_t        xxCreateIndexBufferGLES3(uint64_t device, int size, int bits);
 uint64_t        xxCreateVertexBufferGLES3(uint64_t device, int size, uint64_t vertexAttribute);
 void*           xxMapBufferGLES3(uint64_t device, uint64_t buffer);
 void            xxUnmapBufferGLES3(uint64_t device, uint64_t buffer);

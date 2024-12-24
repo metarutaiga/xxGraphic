@@ -478,7 +478,7 @@ uint64_t xxCreateConstantBufferMantle(uint64_t device, int size)
     return reinterpret_cast<uint64_t>(memory);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateIndexBufferMantle(uint64_t device, int size)
+uint64_t xxCreateIndexBufferMantle(uint64_t device, int size, int bits)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
@@ -500,6 +500,27 @@ uint64_t xxCreateIndexBufferMantle(uint64_t device, int size)
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexBufferMantle(uint64_t device, int size, uint64_t vertexAttribute)
+{
+    GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
+    if (grDevice == GR_NULL_HANDLE)
+        return 0;
+
+    intptr_t pageSize = (intptr_t)g_heapProps.pageSize;
+
+    GR_MEMORY_ALLOC_INFO allocInfo = {};
+    allocInfo.size = ((1 + size) / pageSize) * pageSize;
+    allocInfo.alignment = 0;
+    allocInfo.memPriority = GR_MEMORY_PRIORITY_HIGH;
+    allocInfo.heapCount = 1;
+    allocInfo.heaps[0] = g_suitableHeap;
+
+    GR_GPU_MEMORY memory = GR_NULL_HANDLE;
+    grAllocMemory(grDevice, &allocInfo, &memory);
+
+    return reinterpret_cast<uint64_t>(memory);
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateStorageBufferMantle(uint64_t device, int size)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
@@ -620,6 +641,11 @@ void xxDestroySamplerMantle(uint64_t sampler)
 //==============================================================================
 //  Shader
 //==============================================================================
+uint64_t xxCreateMeshShaderMantle(uint64_t device, char const* shader)
+{
+    return 0;
+}
+//------------------------------------------------------------------------------
 uint64_t xxCreateVertexShaderMantle(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
@@ -733,7 +759,7 @@ uint64_t xxCreateRasterizerStateMantle(uint64_t device, bool cull, bool scissor)
     return reinterpret_cast<uint64_t>(rasterizerState);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreatePipelineMantle(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+uint64_t xxCreatePipelineMantle(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t meshShader, uint64_t vertexShader, uint64_t fragmentShader)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
@@ -829,6 +855,11 @@ void xxSetPipelineMantle(uint64_t commandEncoder, uint64_t pipeline)
     grCmdBindPipeline(grCommandBuffer, GR_PIPELINE_BIND_POINT_GRAPHICS, grPipeline);
 }
 //------------------------------------------------------------------------------
+void xxSetMeshBuffersMantle(uint64_t commandEncoder, int count, const uint64_t* buffers)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetVertexBuffersMantle(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     GRVERTEXATTRIBUTE* grVertexAttribute = reinterpret_cast<GRVERTEXATTRIBUTE*>(vertexAttribute);
@@ -898,6 +929,11 @@ void xxSetFragmentSamplersMantle(uint64_t commandEncoder, int count, const uint6
     grAttachSamplerDescriptors(0, BASE_PIXEL_SAMPLER, count, grSamplers);
 }
 //------------------------------------------------------------------------------
+void xxSetMeshConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer, int size)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetVertexConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     GR_GPU_MEMORY grMemory = reinterpret_cast<GR_GPU_MEMORY>(buffer);
@@ -937,12 +973,17 @@ void xxDrawMantle(uint64_t commandEncoder, int vertexCount, int instanceCount, i
     grCmdDraw(grCommandBuffer, firstVertex, vertexCount, firstInstance, instanceCount);
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedMantle(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawMeshedMantle(uint64_t commandEncoder, int x, int y, int z)
+{
+
+}
+//------------------------------------------------------------------------------
+void xxDrawIndexedMantle(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandEncoder);
     GR_GPU_MEMORY grIndexBuffer = reinterpret_cast<GR_GPU_MEMORY>(indexBuffer);
 
-    GR_INDEX_TYPE format = (INDEX_BUFFER_WIDTH == 2) ? GR_INDEX_16 : GR_INDEX_32;
+    GR_INDEX_TYPE format = vertexCount < 65536 ? GR_INDEX_16 : GR_INDEX_32;
     grCmdBindIndexData(grCommandBuffer, grIndexBuffer, 0, format);
     grCmdDrawIndexed(grCommandBuffer, firstIndex, indexCount, vertexOffset, firstInstance, instanceCount);
 }

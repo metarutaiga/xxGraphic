@@ -68,7 +68,7 @@ uint64_t xxCreateInstanceGLES3()
 //==============================================================================
 //  Buffer
 //==============================================================================
-uint64_t xxCreateIndexBufferGLES3(uint64_t device, int size)
+uint64_t xxCreateIndexBufferGLES3(uint64_t device, int size, int bits)
 {
     GLBUFFER* glBuffer = xxAlloc(GLBUFFER);
     if (glBuffer == nullptr)

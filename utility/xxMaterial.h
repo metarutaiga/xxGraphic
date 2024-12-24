@@ -41,6 +41,7 @@ protected:
     uint64_t                    m_blendState = 0;
     uint64_t                    m_depthStencilState = 0;
     uint64_t                    m_rasterizerState = 0;
+    uint64_t                    m_meshShader = 0;
     uint64_t                    m_vertexShader = 0;
     uint64_t                    m_fragmentShader = 0;
     uint64_t                    m_renderPass = 0;
@@ -78,6 +79,9 @@ public:
 
     bool                        Cull = false;
     bool                        Scissor = false;
+
+    bool                        BackfaceCulling = false;
+    bool                        FrustumCulling = false;
 
     std::vector<xxVector4>      Colors;
     std::vector<xxTexturePtr>   Textures;

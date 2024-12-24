@@ -901,7 +901,7 @@ uint64_t xxCreateConstantBufferD3D12(uint64_t device, int size)
     return reinterpret_cast<uint64_t>(d3dResource);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateIndexBufferD3D12(uint64_t device, int size)
+uint64_t xxCreateIndexBufferD3D12(uint64_t device, int size, int bits)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
@@ -973,6 +973,50 @@ uint64_t xxCreateVertexBufferD3D12(uint64_t device, int size, uint64_t vertexAtt
     d3dResource->size = size;
     d3dResource->cpuAddress = nullptr;
     d3dResource->gpuAddress = resource->GetGPUVirtualAddress();
+
+    return reinterpret_cast<uint64_t>(d3dResource);
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateStorageBufferD3D12(uint64_t device, int size)
+{
+    ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
+    if (d3dDevice == nullptr)
+        return 0;
+    D3D12RESOURCE* d3dResource = xxAlloc(D3D12RESOURCE);
+    if (d3dResource == nullptr)
+        return 0;
+
+    D3D12_HEAP_PROPERTIES properties = {};
+    properties.Type = D3D12_HEAP_TYPE_UPLOAD;
+    properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    properties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+
+    D3D12_RESOURCE_DESC desc = {};
+    desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    desc.Width = (size + 255) & ~255;
+    desc.Height = 1;
+    desc.DepthOrArraySize = 1;
+    desc.MipLevels = 1;
+    desc.SampleDesc.Count = 1;
+    desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+    ID3D12Resource* resource = nullptr;
+    HRESULT hResult = d3dDevice->CreateCommittedResource(&properties, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&resource));
+    if (hResult != S_OK)
+        return 0;
+
+    d3dResource->resource = resource;
+    d3dResource->resourceCPUHandle = {};
+    d3dResource->resourceGPUHandle = {};
+    d3dResource->size = size;
+    d3dResource->cpuAddress = nullptr;
+    d3dResource->gpuAddress = resource->GetGPUVirtualAddress();
+    createShaderHeap(d3dResource->resourceCPUHandle, d3dResource->resourceGPUHandle);
+
+    D3D12_CONSTANT_BUFFER_VIEW_DESC viewDesc = {};
+    viewDesc.BufferLocation = d3dResource->gpuAddress;
+    viewDesc.SizeInBytes = (size + 255) & ~255;
+    d3dDevice->CreateConstantBufferView(&viewDesc, d3dResource->resourceCPUHandle);
 
     return reinterpret_cast<uint64_t>(d3dResource);
 }
@@ -1326,6 +1370,41 @@ void xxDestroySamplerD3D12(uint64_t sampler)
 //==============================================================================
 //  Shader
 //==============================================================================
+uint64_t xxCreateMeshShaderD3D12(uint64_t device, char const* shader)
+{
+    ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
+    if (d3dDevice == nullptr)
+        return 0;
+
+    if (strcmp(shader, "default") == 0)
+    {
+        void* d3dShader = xxAlloc(char, vertexShaderCode40[6]);
+        if (d3dShader == nullptr)
+            return 0;
+        memcpy(d3dShader, vertexShaderCode40, vertexShaderCode40[6]);
+
+        return reinterpret_cast<uint64_t>(d3dShader);
+    }
+    else
+    {
+        static char const* const macro[] = { "SHADER_HLSL", "12",
+                                             "SHADER_VERTEX", "1",
+                                             nullptr, nullptr };
+        ID3D10Blob* blob = D3DCompileShader(shader, macro, "Main", "ms_6_5");
+        if (blob == nullptr)
+            return 0;
+
+        void* d3dShader = xxAlloc(char, blob->GetBufferSize());
+        if (d3dShader == nullptr)
+            return 0;
+        memcpy(d3dShader, blob->GetBufferPointer(), blob->GetBufferSize());
+
+        return reinterpret_cast<uint64_t>(d3dShader);
+    }
+
+    return 0;
+}
+//------------------------------------------------------------------------------
 uint64_t xxCreateVertexShaderD3D12(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
@@ -1464,7 +1543,7 @@ uint64_t xxCreateRasterizerStateD3D12(uint64_t device, bool cull, bool scissor)
     return reinterpret_cast<uint64_t>(d3dDesc);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreatePipelineD3D12(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+uint64_t xxCreatePipelineD3D12(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t meshShader, uint64_t vertexShader, uint64_t fragmentShader)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
@@ -1577,6 +1656,17 @@ void xxSetPipelineD3D12(uint64_t commandEncoder, uint64_t pipeline)
     d3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 //------------------------------------------------------------------------------
+void xxSetMeshBuffersD3D12(uint64_t commandEncoder, int count, const uint64_t* buffers)
+{
+    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
+
+    for (int i = 0; i < count; ++i)
+    {
+        D3D12RESOURCE* d3dBuffer = reinterpret_cast<D3D12RESOURCE*>(buffers[i]);
+        d3dCommandList->SetGraphicsRootDescriptorTable(i, d3dBuffer->resourceGPUHandle);
+    }
+}
+//------------------------------------------------------------------------------
 void xxSetVertexBuffersD3D12(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
@@ -1638,6 +1728,14 @@ void xxSetFragmentSamplersD3D12(uint64_t commandEncoder, int count, const uint64
     }
 }
 //------------------------------------------------------------------------------
+void xxSetMeshConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, int size)
+{
+    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
+    D3D12RESOURCE* d3dBuffer = reinterpret_cast<D3D12RESOURCE*>(buffer);
+
+    d3dCommandList->SetGraphicsRootDescriptorTable(xxGraphicDescriptor::MESH_UNIFORM, d3dBuffer->resourceGPUHandle);
+}
+//------------------------------------------------------------------------------
 void xxSetVertexConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
@@ -1661,12 +1759,19 @@ void xxDrawD3D12(uint64_t commandEncoder, int vertexCount, int instanceCount, in
     d3dCommandList->DrawInstanced(vertexCount, instanceCount, firstVertex, firstInstance);
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedD3D12(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawMeshedD3D12(uint64_t commandEncoder, int x, int y, int z)
+{
+    ID3D12GraphicsCommandList6* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList6*>(commandEncoder);
+
+    d3dCommandList->DispatchMesh(x, y, z);
+}
+//------------------------------------------------------------------------------
+void xxDrawIndexedD3D12(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
     D3D12RESOURCE* d3dIndexBuffer = reinterpret_cast<D3D12RESOURCE*>(indexBuffer);
 
-    DXGI_FORMAT format = (INDEX_BUFFER_WIDTH == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+    DXGI_FORMAT format = vertexCount < 65536  ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
     D3D12_INDEX_BUFFER_VIEW d3dIndexBufferView = {};
     d3dIndexBufferView.BufferLocation = d3dIndexBuffer->gpuAddress;
     d3dIndexBufferView.SizeInBytes = d3dIndexBuffer->size;

@@ -94,6 +94,8 @@ public:
     }
 
     std::string const           Path;
-    int const                   Version = 0x20240603;
+    int const                   Version = 0;
     bool const                  Safe = true;
+
+    static int constexpr        Current = 0x20241222;
 };

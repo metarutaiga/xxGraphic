@@ -114,6 +114,7 @@ struct MTLSWAPCHAIN : public MTLFRAMEBUFFER
     int                             argumentBufferIndex;
     int                             argumentBufferStep;
     id <MTLBuffer>                  argumentBuffers[4];
+    id <MTLArgumentEncoder>         meshArgumentEncoder;
     id <MTLArgumentEncoder>         vertexArgumentEncoder;
     id <MTLArgumentEncoder>         fragmentArgumentEncoder;
     bool                            argumentEncoderComplete;
@@ -152,10 +153,13 @@ struct MTLPIPELINE
     bool                            scissorEnable;
 
     // Metal 2
+    id <MTLFunction>                meshShader;
     id <MTLFunction>                vertexShader;
     id <MTLFunction>                fragmentShader;
+    id <MTLArgumentEncoder>         meshArgumentEncoder;
     id <MTLArgumentEncoder>         vertexArgumentEncoder;
     id <MTLArgumentEncoder>         fragmentArgumentEncoder;
+    NSUInteger                      meshArgumentEncodedLength;
     NSUInteger                      vertexArgumentEncodedLength;
     NSUInteger                      fragmentArgumentEncodedLength;
 };

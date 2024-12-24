@@ -22,7 +22,7 @@ uint64_t        xxCreateInstanceGLES32();
 //==============================================================================
 void            xxSetVertexBuffersGLES32(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
 void            xxDrawGLES32(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance);
-void            xxDrawIndexedGLES32(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+void            xxDrawIndexedGLES32(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 
 #endif

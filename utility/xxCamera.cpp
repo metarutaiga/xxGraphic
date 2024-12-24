@@ -70,6 +70,35 @@ void xxCamera::SetFOV(float aspect, float fov, float depth)
     FrustumFar = depth;
 }
 //------------------------------------------------------------------------------
+void xxCamera::GetFrustumPlanes(xxVector4 left[2], xxVector4 right[2], xxVector4 top[2], xxVector4 bottom[2], xxVector4 near[2], xxVector4 far[2]) const
+{
+    float left0 = 1.0f / std::sqrtf(1.0f + FrustumLeft * FrustumLeft);
+    float left1 = FrustumLeft * left0;
+    left[0].xyz = Right * left0 - Direction * left1;
+    left[1].xyz = Location;
+
+    float right0 = 1.0f / std::sqrtf(1.0f + FrustumRight * FrustumRight);
+    float right1 = FrustumRight * right0;
+    right[0].xyz = Direction * right1 - Right * right0;
+    right[1].xyz = Location;
+
+    float top0 = 1.0f / std::sqrtf(1.0f + FrustumTop * FrustumTop);
+    float top1 = FrustumTop * top0;
+    top[0].xyz = Direction * top1 - Up * top0;
+    top[1].xyz = Location;
+
+    float bottom0 = 1.0f / std::sqrtf(1.0f + FrustumBottom * FrustumBottom);
+    float bottom1 = FrustumBottom * bottom0;
+    bottom[0].xyz = Up * bottom0 - Direction * bottom1;
+    bottom[1].xyz = Location;
+
+    near[0].xyz = Direction;
+    near[1].xyz = Location + Direction * FrustumNear;
+
+    far[0].xyz = -Direction;
+    far[1].xyz = Location + Direction * FrustumFar;
+}
+//------------------------------------------------------------------------------
 xxCameraPtr xxCamera::Create()
 {
     xxCameraPtr camera = xxCameraPtr(new xxCamera(), [](xxCamera* camera) { delete camera; });

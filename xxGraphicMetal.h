@@ -59,8 +59,9 @@ void            xxDestroyVertexAttributeMetal(MTLVertexDescriptor* vertexAttribu
 //  Buffer
 //==============================================================================
 id              xxCreateConstantBufferMetal(id <MTLDevice> device, int size);
-id              xxCreateIndexBufferMetal(id <MTLDevice> device, int size);
+id              xxCreateIndexBufferMetal(id <MTLDevice> device, int size, int bits);
 id              xxCreateVertexBufferMetal(id <MTLDevice> device, int size, MTLVertexDescriptor* vertexAttribute);
+id              xxCreateStorageBufferMetal(id <MTLDevice> device, int size);
 void            xxDestroyBufferMetal(id <MTLDevice> device, id <MTLBuffer> buffer);
 void*           xxMapBufferMetal(id <MTLDevice> device, id <MTLBuffer> buffer);
 void            xxUnmapBufferMetal(id <MTLDevice> device, id <MTLBuffer> buffer);
@@ -79,6 +80,7 @@ void            xxDestroySamplerMetal(id <MTLSamplerState> sampler);
 //==============================================================================
 //  Shader
 //==============================================================================
+id              xxCreateMeshShaderMetal(id <MTLDevice> device, char const* shader);
 id              xxCreateVertexShaderMetal(id <MTLDevice> device, char const* shader, MTLVertexDescriptor* vertexAttribute);
 id              xxCreateFragmentShaderMetal(id <MTLDevice> device, char const* shader);
 void            xxDestroyShaderMetal(id <MTLDevice> device, id <MTLFunction> shader);
@@ -88,7 +90,7 @@ void            xxDestroyShaderMetal(id <MTLDevice> device, id <MTLFunction> sha
 id              xxCreateBlendStateMetal(id <MTLDevice> device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha);
 id              xxCreateDepthStencilStateMetal(id <MTLDevice> device, char const* depthTest, bool depthWrite);
 uint64_t        xxCreateRasterizerStateMetal(id <MTLDevice> device, bool cull, bool scissor);
-MTLPIPELINE*    xxCreatePipelineMetal(id <MTLDevice> device, MTLRenderPassDescriptor* renderPass, MTLRenderPipelineColorAttachmentDescriptor* blendState, id <MTLDepthStencilState> depthStencilState, uint64_t rasterizerState, MTLVertexDescriptor* vertexAttribute, id <MTLFunction> vertexShader, id <MTLFunction> fragmentShader);
+MTLPIPELINE*    xxCreatePipelineMetal(id <MTLDevice> device, MTLRenderPassDescriptor* renderPass, MTLRenderPipelineColorAttachmentDescriptor* blendState, id <MTLDepthStencilState> depthStencilState, uint64_t rasterizerState, MTLVertexDescriptor* vertexAttribute, id <MTLFunction> meshShader, id <MTLFunction> vertexShader, id <MTLFunction> fragmentShader);
 void            xxDestroyBlendStateMetal(MTLRenderPipelineColorAttachmentDescriptor* blendState);
 void            xxDestroyDepthStencilStateMetal(id <MTLDepthStencilState> depthStencilState);
 void            xxDestroyRasterizerStateMetal(uint64_t rasterizerState);
@@ -99,15 +101,18 @@ void            xxDestroyPipelineMetal(MTLPIPELINE* pipeline);
 void            xxSetViewportMetal(id <MTLRenderCommandEncoder> commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
 void            xxSetScissorMetal(id <MTLRenderCommandEncoder> commandEncoder, int x, int y, int width, int height);
 void            xxSetPipelineMetal(id <MTLRenderCommandEncoder> commandEncoder, MTLPIPELINE* pipeline);
+void            xxSetMeshBuffersMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, id <MTLBuffer> __unsafe_unretained* buffers);
 void            xxSetVertexBuffersMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, id <MTLBuffer> __unsafe_unretained* buffers, MTLVertexDescriptor* vertexAttribute);
 void            xxSetVertexTexturesMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, MTLTEXTURE** textures);
 void            xxSetFragmentTexturesMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, MTLTEXTURE** textures);
 void            xxSetVertexSamplersMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, id <MTLSamplerState> __unsafe_unretained* samplers);
 void            xxSetFragmentSamplersMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, id <MTLSamplerState> __unsafe_unretained* samplers);
+void            xxSetMeshConstantBufferMetal(id <MTLRenderCommandEncoder> commandEncoder, id <MTLBuffer> buffer, int size);
 void            xxSetVertexConstantBufferMetal(id <MTLRenderCommandEncoder> commandEncoder, id <MTLBuffer> buffer, int size);
 void            xxSetFragmentConstantBufferMetal(id <MTLRenderCommandEncoder> commandEncoder, id <MTLBuffer> buffer, int size);
 void            xxDrawMetal(id <MTLRenderCommandEncoder> commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance);
-void            xxDrawIndexedMetal(id <MTLRenderCommandEncoder> commandEncoder, id <MTLBuffer> indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+void            xxDrawMeshedMetal(id <MTLRenderCommandEncoder> commandEncoder, int x, int y, int z);
+void            xxDrawIndexedMetal(id <MTLRenderCommandEncoder> commandEncoder, id <MTLBuffer> indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 
 #endif

@@ -58,8 +58,9 @@ void            xxDestroyVertexAttributeNULL(uint64_t vertexAttribute);
 //  Buffer
 //==============================================================================
 uint64_t        xxCreateConstantBufferNULL(uint64_t device, int size);
-uint64_t        xxCreateIndexBufferNULL(uint64_t device, int size);
+uint64_t        xxCreateIndexBufferNULL(uint64_t device, int size, int bits);
 uint64_t        xxCreateVertexBufferNULL(uint64_t device, int size, uint64_t vertexAttribute);
+uint64_t        xxCreateStorageBufferNULL(uint64_t device, int size);
 void            xxDestroyBufferNULL(uint64_t device, uint64_t buffer);
 void*           xxMapBufferNULL(uint64_t device, uint64_t buffer);
 void            xxUnmapBufferNULL(uint64_t device, uint64_t buffer);
@@ -78,6 +79,7 @@ void            xxDestroySamplerNULL(uint64_t sampler);
 //==============================================================================
 //  Shader
 //==============================================================================
+uint64_t        xxCreateMeshShaderNULL(uint64_t device, char const* shader);
 uint64_t        xxCreateVertexShaderNULL(uint64_t device, char const* shader, uint64_t vertexAttribute);
 uint64_t        xxCreateFragmentShaderNULL(uint64_t device, char const* shader);
 void            xxDestroyShaderNULL(uint64_t device, uint64_t shader);
@@ -87,7 +89,7 @@ void            xxDestroyShaderNULL(uint64_t device, uint64_t shader);
 uint64_t        xxCreateBlendStateNULL(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha);
 uint64_t        xxCreateDepthStencilStateNULL(uint64_t device, char const* depthTest, bool depthWrite);
 uint64_t        xxCreateRasterizerStateNULL(uint64_t device, bool cull, bool scissor);
-uint64_t        xxCreatePipelineNULL(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
+uint64_t        xxCreatePipelineNULL(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t meshShader, uint64_t vertexShader, uint64_t fragmentShader);
 void            xxDestroyBlendStateNULL(uint64_t blendState);
 void            xxDestroyDepthStencilStateNULL(uint64_t depthStencilState);
 void            xxDestroyRasterizerStateNULL(uint64_t rasterizerState);
@@ -98,15 +100,18 @@ void            xxDestroyPipelineNULL(uint64_t pipeline);
 void            xxSetViewportNULL(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
 void            xxSetScissorNULL(uint64_t commandEncoder, int x, int y, int width, int height);
 void            xxSetPipelineNULL(uint64_t commandEncoder, uint64_t pipeline);
+void            xxSetMeshBuffersNULL(uint64_t commandEncoder, int count, const uint64_t* buffers);
 void            xxSetVertexBuffersNULL(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
 void            xxSetVertexTexturesNULL(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetFragmentTexturesNULL(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetVertexSamplersNULL(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetFragmentSamplersNULL(uint64_t commandEncoder, int count, const uint64_t* samplers);
+void            xxSetMeshConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, int size);
 void            xxSetVertexConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, int size);
 void            xxSetFragmentConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, int size);
 void            xxDrawNULL(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance);
-void            xxDrawIndexedNULL(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+void            xxDrawMeshedNULL(uint64_t commandEncoder, int x, int y, int z);
+void            xxDrawIndexedNULL(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 
 #endif

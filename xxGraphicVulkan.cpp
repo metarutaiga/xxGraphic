@@ -1275,7 +1275,7 @@ uint64_t xxCreateConstantBufferVulkan(uint64_t device, int size)
     return reinterpret_cast<uint64_t>(vkBuffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateIndexBufferVulkan(uint64_t device, int size)
+uint64_t xxCreateIndexBufferVulkan(uint64_t device, int size, int bits)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
@@ -1361,6 +1361,77 @@ uint64_t xxCreateVertexBufferVulkan(uint64_t device, int size, uint64_t vertexAt
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = size;
     bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    VkBuffer buffer = VK_NULL_HANDLE;
+    VkResult bufferResult = vkCreateBuffer(vkDevice, &bufferInfo, g_callbacks, &buffer);
+    if (bufferResult != VK_SUCCESS)
+        return 0;
+
+    VkMemoryRequirements req;
+    vkGetBufferMemoryRequirements(vkDevice, buffer, &req);
+
+    VkPhysicalDeviceMemoryProperties prop;
+    vkGetPhysicalDeviceMemoryProperties(g_physicalDevice, &prop);
+
+    uint32_t persistentMemoryTypeIndex = UINT32_MAX;
+    for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
+    {
+        if ((prop.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == VK_MEMORY_PROPERTY_HOST_COHERENT_BIT && req.memoryTypeBits & (1 << i))
+        {
+            persistentMemoryTypeIndex = i;
+            break;
+        }
+    }
+
+    uint32_t localMemoryTypeIndex = UINT32_MAX;
+    for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
+    {
+        if ((prop.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) == VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT && req.memoryTypeBits & (1 << i))
+        {
+            localMemoryTypeIndex = i;
+            break;
+        }
+    }
+
+    VkMemoryAllocateInfo allocInfo = {};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = req.size;
+    allocInfo.memoryTypeIndex = persistentMemoryTypeIndex != UINT32_MAX ? persistentMemoryTypeIndex : localMemoryTypeIndex;
+
+    VkDeviceMemory memory = VK_NULL_HANDLE;
+    VkResult memoryResult = vkAllocateMemory(vkDevice, &allocInfo, g_callbacks, &memory);
+    if (memoryResult != VK_SUCCESS)
+        return 0;
+
+    VkResult bindResult = vkBindBufferMemory(vkDevice, buffer, memory, 0);
+    if (bindResult != VK_SUCCESS)
+        return 0;
+
+    vkBuffer->buffer = buffer;
+    vkBuffer->memory = memory;
+    vkBuffer->size = size;
+    vkBuffer->ptr = nullptr;
+    vkBuffer->persistent = (persistentMemoryTypeIndex != UINT32_MAX);
+
+    return reinterpret_cast<uint64_t>(vkBuffer);
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateStorageBufferVulkan(uint64_t device, int size)
+{
+    VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
+    if (vkDevice == VK_NULL_HANDLE)
+        return 0;
+
+    VKBUFFER* vkBuffer = xxAlloc(VKBUFFER);
+    if (vkBuffer == nullptr)
+        return 0;
+    memset(vkBuffer, 0, sizeof(VKBUFFER));
+
+    VkBufferCreateInfo bufferInfo = {};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = size;
+    bufferInfo.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
     VkBuffer buffer = VK_NULL_HANDLE;
@@ -1905,6 +1976,40 @@ void xxDestroySamplerVulkan(uint64_t sampler)
 //==============================================================================
 //  Shader
 //==============================================================================
+uint64_t xxCreateMeshShaderVulkan(uint64_t device, char const* shader)
+{
+    VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
+    if (vkDevice == VK_NULL_HANDLE)
+        return 0;
+
+    VkShaderModuleCreateInfo info = {};
+    info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+
+    uint32_t* temp = nullptr;
+    if (strcmp(shader, "default") == 0)
+    {
+        info.codeSize = fragmentShaderCodeSPIRVSize;
+        info.pCode = fragmentShaderCodeSPIRV;
+    }
+    else
+    {
+        static char const* const macro[] = { "SHADER_HLSL", "12",
+                                             "SHADER_MESH", "1",
+                                             nullptr, nullptr };
+        size_t size = 0;
+        vkCompileShader(shader, macro, 'mesh', &temp, &size);
+        info.codeSize = size;
+        info.pCode = temp;
+    }
+
+    VkShaderModule vkShader = VK_NULL_HANDLE;
+    VkResult result = vkCreateShaderModule(vkDevice, &info, g_callbacks, &vkShader);
+    if (result != VK_SUCCESS)
+        return 0;
+
+    return static_cast<uint64_t>(vkShader);
+}
+//------------------------------------------------------------------------------
 uint64_t xxCreateVertexShaderVulkan(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
@@ -2043,7 +2148,7 @@ uint64_t xxCreateRasterizerStateVulkan(uint64_t device, bool cull, bool scissor)
     return reinterpret_cast<uint64_t>(rasterizerState);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreatePipelineVulkan(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+uint64_t xxCreatePipelineVulkan(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t meshShader, uint64_t vertexShader, uint64_t fragmentShader)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
     if (vkDevice == VK_NULL_HANDLE)
@@ -2203,6 +2308,11 @@ void xxSetPipelineVulkan(uint64_t commandEncoder, uint64_t pipeline)
     vkCmdBindPipeline(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkPipeline);
 }
 //------------------------------------------------------------------------------
+void xxSetMeshBuffersVulkan(uint64_t commandEncoder, int count, const uint64_t* buffers)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetVertexBuffersVulkan(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
@@ -2327,6 +2437,11 @@ void xxSetFragmentSamplersVulkan(uint64_t commandEncoder, int count, const uint6
     vkCmdPushDescriptorSetKHR(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
 }
 //------------------------------------------------------------------------------
+void xxSetMeshConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, int size)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetVertexConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
@@ -2382,12 +2497,19 @@ void xxDrawVulkan(uint64_t commandEncoder, int vertexCount, int instanceCount, i
     vkCmdDraw(vkCommandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedVulkan(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawMeshedVulkan(uint64_t commandEncoder, int x, int y, int z)
+{
+    VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
+
+    vkCmdDrawMeshTasksEXT(vkCommandBuffer, x, y, z);
+}
+//------------------------------------------------------------------------------
+void xxDrawIndexedVulkan(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
     VKBUFFER* vkIndexBuffer = reinterpret_cast<VKBUFFER*>(indexBuffer);
 
-    VkIndexType indexType = (INDEX_BUFFER_WIDTH == /* DISABLES CODE */ (2)) ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
+    VkIndexType indexType = vertexCount < 65536 ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
     vkCmdBindIndexBuffer(vkCommandBuffer, vkIndexBuffer->buffer, 0, indexType);
     vkCmdDrawIndexed(vkCommandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }

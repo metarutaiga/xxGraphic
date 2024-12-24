@@ -571,7 +571,7 @@ uint64_t xxCreateConstantBufferD3D11(uint64_t device, int size)
     return reinterpret_cast<uint64_t>(d3dBuffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateIndexBufferD3D11(uint64_t device, int size)
+uint64_t xxCreateIndexBufferD3D11(uint64_t device, int size, int bits)
 {
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
     if (d3dDevice == nullptr)
@@ -612,6 +612,34 @@ uint64_t xxCreateVertexBufferD3D11(uint64_t device, int size, uint64_t vertexAtt
     desc.ByteWidth = size;
     desc.Usage = D3D11_USAGE_DYNAMIC;
     desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+    ID3D11Buffer* buffer = nullptr;
+    HRESULT hResult = d3dDevice->CreateBuffer(&desc, nullptr, &buffer);
+    if (hResult != S_OK)
+        return 0;
+
+    d3dBuffer->buffer = buffer;
+    d3dBuffer->size = size;
+    d3dBuffer->map = D3D11_MAP_WRITE_NO_OVERWRITE;
+    d3dBuffer->address = nullptr;
+
+    return reinterpret_cast<uint64_t>(d3dBuffer);
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateStorageBufferD3D11(uint64_t device, int size)
+{
+    ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
+    if (d3dDevice == nullptr)
+        return 0;
+    D3D11BUFFER* d3dBuffer = xxAlloc(D3D11BUFFER);
+    if (d3dBuffer == nullptr)
+        return 0;
+
+    D3D11_BUFFER_DESC desc = {};
+    desc.ByteWidth = size;
+    desc.Usage = D3D11_USAGE_DYNAMIC;
+    desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
     desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
     ID3D11Buffer* buffer = nullptr;
@@ -1042,6 +1070,11 @@ void xxDestroySamplerD3D11(uint64_t sampler)
 //==============================================================================
 //  Shader
 //==============================================================================
+uint64_t xxCreateMeshShaderD3D11(uint64_t device, char const* shader)
+{
+    return 0;
+}
+//------------------------------------------------------------------------------
 uint64_t xxCreateVertexShaderD3D11(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
@@ -1194,7 +1227,7 @@ uint64_t xxCreateRasterizerStateD3D11(uint64_t device, bool cull, bool scissor)
     return reinterpret_cast<uint64_t>(d3dRasterizerState);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreatePipelineD3D11(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+uint64_t xxCreatePipelineD3D11(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t meshShader, uint64_t vertexShader, uint64_t fragmentShader)
 {
     D3D11PIPELINE* d3dPipeline = xxAlloc(D3D11PIPELINE);
     if (d3dPipeline == nullptr)
@@ -1289,6 +1322,11 @@ void xxSetPipelineD3D11(uint64_t commandEncoder, uint64_t pipeline)
     d3dDeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 //------------------------------------------------------------------------------
+void xxSetMeshBuffersD3D11(uint64_t commandEncoder, int count, const uint64_t* buffers)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetVertexBuffersD3D11(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandEncoder);
@@ -1362,6 +1400,11 @@ void xxSetFragmentSamplersD3D11(uint64_t commandEncoder, int count, const uint64
     d3dDeviceContext->PSSetSamplers(0, count, d3dSamplerStates);
 }
 //------------------------------------------------------------------------------
+void xxSetMeshConstantBufferD3D11(uint64_t commandEncoder, uint64_t buffer, int size)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetVertexConstantBufferD3D11(uint64_t commandEncoder, uint64_t buffer, int size)
 {
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandEncoder);
@@ -1385,12 +1428,17 @@ void xxDrawD3D11(uint64_t commandEncoder, int vertexCount, int instanceCount, in
     d3dDeviceContext->DrawInstanced(vertexCount, instanceCount, firstVertex, firstInstance);
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedD3D11(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawMeshedD3D11(uint64_t commandEncoder, int x, int y, int z)
+{
+
+}
+//------------------------------------------------------------------------------
+void xxDrawIndexedD3D11(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandEncoder);
     D3D11BUFFER* d3dIndexBuffer = reinterpret_cast<D3D11BUFFER*>(indexBuffer);
 
-    DXGI_FORMAT format = (INDEX_BUFFER_WIDTH == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+    DXGI_FORMAT format = vertexCount < 65536  ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
     d3dDeviceContext->IASetIndexBuffer(d3dIndexBuffer->buffer, format, 0);
     d3dDeviceContext->DrawIndexedInstanced(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }

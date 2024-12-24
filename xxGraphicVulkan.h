@@ -58,8 +58,9 @@ void            xxDestroyVertexAttributeVulkan(uint64_t vertexAttribute);
 //  Buffer
 //==============================================================================
 uint64_t        xxCreateConstantBufferVulkan(uint64_t device, int size);
-uint64_t        xxCreateIndexBufferVulkan(uint64_t device, int size);
+uint64_t        xxCreateIndexBufferVulkan(uint64_t device, int size, int bits);
 uint64_t        xxCreateVertexBufferVulkan(uint64_t device, int size, uint64_t vertexAttribute);
+uint64_t        xxCreateStorageBufferVulkan(uint64_t device, int size);
 void            xxDestroyBufferVulkan(uint64_t device, uint64_t buffer);
 void*           xxMapBufferVulkan(uint64_t device, uint64_t buffer);
 void            xxUnmapBufferVulkan(uint64_t device, uint64_t buffer);
@@ -78,6 +79,7 @@ void            xxDestroySamplerVulkan(uint64_t sampler);
 //==============================================================================
 //  Shader
 //==============================================================================
+uint64_t        xxCreateMeshShaderVulkan(uint64_t device, char const* shader);
 uint64_t        xxCreateVertexShaderVulkan(uint64_t device, char const* shader, uint64_t vertexAttribute);
 uint64_t        xxCreateFragmentShaderVulkan(uint64_t device, char const* shader);
 void            xxDestroyShaderVulkan(uint64_t device, uint64_t shader);
@@ -87,7 +89,7 @@ void            xxDestroyShaderVulkan(uint64_t device, uint64_t shader);
 uint64_t        xxCreateBlendStateVulkan(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha);
 uint64_t        xxCreateDepthStencilStateVulkan(uint64_t device, char const* depthTest, bool depthWrite);
 uint64_t        xxCreateRasterizerStateVulkan(uint64_t device, bool cull, bool scissor);
-uint64_t        xxCreatePipelineVulkan(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
+uint64_t        xxCreatePipelineVulkan(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t meshShader, uint64_t vertexShader, uint64_t fragmentShader);
 void            xxDestroyBlendStateVulkan(uint64_t blendState);
 void            xxDestroyDepthStencilStateVulkan(uint64_t depthStencilState);
 void            xxDestroyRasterizerStateVulkan(uint64_t rasterizerState);
@@ -98,15 +100,18 @@ void            xxDestroyPipelineVulkan(uint64_t pipeline);
 void            xxSetViewportVulkan(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
 void            xxSetScissorVulkan(uint64_t commandEncoder, int x, int y, int width, int height);
 void            xxSetPipelineVulkan(uint64_t commandEncoder, uint64_t pipeline);
+void            xxSetMeshBuffersVulkan(uint64_t commandEncoder, int count, const uint64_t* buffers);
 void            xxSetVertexBuffersVulkan(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
 void            xxSetVertexTexturesVulkan(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetFragmentTexturesVulkan(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetVertexSamplersVulkan(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetFragmentSamplersVulkan(uint64_t commandEncoder, int count, const uint64_t* samplers);
+void            xxSetMeshConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, int size);
 void            xxSetVertexConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, int size);
 void            xxSetFragmentConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, int size);
 void            xxDrawVulkan(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance);
-void            xxDrawIndexedVulkan(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+void            xxDrawMeshedVulkan(uint64_t commandEncoder, int x, int y, int z);
+void            xxDrawIndexedVulkan(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 
 #endif
