@@ -58,8 +58,9 @@ void            xxDestroyVertexAttributeD3D11(uint64_t vertexAttribute);
 //  Buffer
 //==============================================================================
 uint64_t        xxCreateConstantBufferD3D11(uint64_t device, int size);
-uint64_t        xxCreateIndexBufferD3D11(uint64_t device, int size);
+uint64_t        xxCreateIndexBufferD3D11(uint64_t device, int size, int bits);
 uint64_t        xxCreateVertexBufferD3D11(uint64_t device, int size, uint64_t vertexAttribute);
+uint64_t        xxCreateStorageBufferD3D11(uint64_t device, int size);
 void            xxDestroyBufferD3D11(uint64_t device, uint64_t buffer);
 void*           xxMapBufferD3D11(uint64_t device, uint64_t buffer);
 void            xxUnmapBufferD3D11(uint64_t device, uint64_t buffer);
@@ -78,6 +79,7 @@ void            xxDestroySamplerD3D11(uint64_t sampler);
 //==============================================================================
 //  Shader
 //==============================================================================
+uint64_t        xxCreateMeshShaderD3D11(uint64_t device, char const* shader);
 uint64_t        xxCreateVertexShaderD3D11(uint64_t device, char const* shader, uint64_t vertexAttribute);
 uint64_t        xxCreateFragmentShaderD3D11(uint64_t device, char const* shader);
 void            xxDestroyShaderD3D11(uint64_t device, uint64_t shader);
@@ -87,7 +89,7 @@ void            xxDestroyShaderD3D11(uint64_t device, uint64_t shader);
 uint64_t        xxCreateBlendStateD3D11(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha);
 uint64_t        xxCreateDepthStencilStateD3D11(uint64_t device, char const* depthTest, bool depthWrite);
 uint64_t        xxCreateRasterizerStateD3D11(uint64_t device, bool cull, bool scissor);
-uint64_t        xxCreatePipelineD3D11(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
+uint64_t        xxCreatePipelineD3D11(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t meshShader, uint64_t vertexShader, uint64_t fragmentShader);
 void            xxDestroyBlendStateD3D11(uint64_t blendState);
 void            xxDestroyDepthStencilStateD3D11(uint64_t depthStencilState);
 void            xxDestroyRasterizerStateD3D11(uint64_t rasterizerState);
@@ -98,15 +100,18 @@ void            xxDestroyPipelineD3D11(uint64_t pipeline);
 void            xxSetViewportD3D11(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
 void            xxSetScissorD3D11(uint64_t commandEncoder, int x, int y, int width, int height);
 void            xxSetPipelineD3D11(uint64_t commandEncoder, uint64_t pipeline);
+void            xxSetMeshBuffersD3D11(uint64_t commandEncoder, int count, const uint64_t* buffers);
 void            xxSetVertexBuffersD3D11(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
 void            xxSetVertexTexturesD3D11(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetFragmentTexturesD3D11(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetVertexSamplersD3D11(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetFragmentSamplersD3D11(uint64_t commandEncoder, int count, const uint64_t* samplers);
+void            xxSetMeshConstantBufferD3D11(uint64_t commandEncoder, uint64_t buffer, int size);
 void            xxSetVertexConstantBufferD3D11(uint64_t commandEncoder, uint64_t buffer, int size);
 void            xxSetFragmentConstantBufferD3D11(uint64_t commandEncoder, uint64_t buffer, int size);
 void            xxDrawD3D11(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance);
-void            xxDrawIndexedD3D11(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+void            xxDrawMeshedD3D11(uint64_t commandEncoder, int x, int y, int z);
+void            xxDrawIndexedD3D11(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 
 #endif

@@ -30,12 +30,14 @@ id xxCreateInstanceMetal2()
     xxRegisterFunctionSingle(xxCreateConstantBuffer, xxCreateConstantBufferMetal2);
     xxRegisterFunctionSingle(xxCreateIndexBuffer, xxCreateIndexBufferMetal2);
     xxRegisterFunctionSingle(xxCreateVertexBuffer, xxCreateVertexBufferMetal2);
+    xxRegisterFunctionSingle(xxCreateStorageBuffer, xxCreateStorageBufferMetal2);
     xxRegisterFunctionSingle(xxDestroyBuffer, xxDestroyBufferMetal2);
     xxRegisterFunctionSingle(xxMapBuffer, xxMapBufferMetal2);
     xxRegisterFunctionSingle(xxUnmapBuffer, xxUnmapBufferMetal2);
 
     xxRegisterFunctionSingle(xxCreateSampler, xxCreateSamplerMetal2);
 
+    xxRegisterFunctionSingle(xxCreateMeshShader, xxCreateMeshShaderMetal2);
     xxRegisterFunctionSingle(xxCreateVertexShader, xxCreateVertexShaderMetal2);
     xxRegisterFunctionSingle(xxCreateFragmentShader, xxCreateFragmentShaderMetal2);
 
@@ -44,14 +46,17 @@ id xxCreateInstanceMetal2()
     xxRegisterFunctionSingle(xxSetViewport, xxSetViewportMetal2);
     xxRegisterFunctionSingle(xxSetScissor, xxSetScissorMetal2);
     xxRegisterFunctionSingle(xxSetPipeline, xxSetPipelineMetal2);
+    xxRegisterFunctionSingle(xxSetMeshBuffers, xxSetMeshBuffersMetal2);
     xxRegisterFunctionSingle(xxSetVertexBuffers, xxSetVertexBuffersMetal2);
     xxRegisterFunctionSingle(xxSetVertexTextures, xxSetVertexTexturesMetal2);
     xxRegisterFunctionSingle(xxSetFragmentTextures, xxSetFragmentTexturesMetal2);
     xxRegisterFunctionSingle(xxSetVertexSamplers, xxSetVertexSamplersMetal2);
     xxRegisterFunctionSingle(xxSetFragmentSamplers, xxSetFragmentSamplersMetal2);
+    xxRegisterFunctionSingle(xxSetMeshConstantBuffer, xxSetMeshConstantBufferMetal2);
     xxRegisterFunctionSingle(xxSetVertexConstantBuffer, xxSetVertexConstantBufferMetal2);
     xxRegisterFunctionSingle(xxSetFragmentConstantBuffer, xxSetFragmentConstantBufferMetal2);
     xxRegisterFunctionSingle(xxDraw, xxDrawMetal2);
+    xxRegisterFunctionSingle(xxDrawMeshed, xxDrawMeshedMetal2);
     xxRegisterFunctionSingle(xxDrawIndexed, xxDrawIndexedMetal2);
 
     return instance;
@@ -70,6 +75,7 @@ MTLSWAPCHAIN* xxGetCommandBufferMetal2(id <MTLDevice> __unsafe_unretained device
     swapchain->commandEncoder = nil;
     swapchain->argumentBufferIndex = (swapchain->argumentBufferIndex + 1) % xxCountOf(swapchain->argumentBuffers);
     swapchain->argumentBufferStep = 0;
+    swapchain->meshArgumentEncoder = nil;
     swapchain->vertexArgumentEncoder = nil;
     swapchain->fragmentArgumentEncoder = nil;
     swapchain->argumentEncoderComplete = true;
@@ -113,7 +119,7 @@ MTLBUFFER* xxCreateConstantBufferMetal2(id <MTLDevice> __unsafe_unretained devic
     return buffer;
 }
 //------------------------------------------------------------------------------
-MTLBUFFER* xxCreateIndexBufferMetal2(id <MTLDevice> __unsafe_unretained device, int size)
+MTLBUFFER* xxCreateIndexBufferMetal2(id <MTLDevice> __unsafe_unretained device, int size, int bits)
 {
     if (device == nil)
         return 0;
@@ -129,6 +135,21 @@ MTLBUFFER* xxCreateIndexBufferMetal2(id <MTLDevice> __unsafe_unretained device, 
 }
 //------------------------------------------------------------------------------
 MTLBUFFER* xxCreateVertexBufferMetal2(id <MTLDevice> __unsafe_unretained device, int size, MTLVertexDescriptor* __unsafe_unretained vertexAttribute)
+{
+    if (device == nil)
+        return 0;
+
+    MTLBUFFER* buffer = new MTLBUFFER{};
+    if (buffer == nullptr)
+        return 0;
+
+    buffer->buffer = [device newBufferWithLength:size
+                                         options:MTLResourceStorageModeShared];
+
+    return buffer;
+}
+//------------------------------------------------------------------------------
+MTLBUFFER* xxCreateStorageBufferMetal2(id <MTLDevice> __unsafe_unretained device, int size)
 {
     if (device == nil)
         return 0;
@@ -183,6 +204,43 @@ id xxCreateSamplerMetal2(id <MTLDevice> __unsafe_unretained device, bool clampU,
 //==============================================================================
 //  Shader
 //==============================================================================
+id xxCreateMeshShaderMetal2(id <MTLDevice> __unsafe_unretained device, char const* shader)
+{
+    if (device == nil)
+        return 0;
+
+    if (strcmp(shader, "default") == 0)
+    {
+        shader = mtlDefaultShaderCode;
+    }
+
+    NSError* error;
+    MTLCompileOptions* options = [classMTLCompileOptions new];
+    options.preprocessorMacros = @{ @"SHADER_MSL" : @(2),
+                                    @"SHADER_MESH" : @(1) };;
+    options.fastMathEnabled = YES;
+
+    NSMutableString* code = [NSMutableString new];
+    [code appendString:@"#include <metal_stdlib>"];
+    [code appendString:@"\n"];
+    [code appendString:@"using namespace metal;"];
+    [code appendString:@"\n"];
+    [code appendString:@(shader)];
+    id <MTLLibrary> library = [device newLibraryWithSource:code
+                                                   options:options
+                                                     error:&error];
+    if (library == nil)
+    {
+        xxLog("xxGraphic", "%s", error.localizedDescription.UTF8String);
+        return 0;
+    }
+
+    id <MTLFunction> function = [library newFunctionWithName:@"Main"];
+
+    objc_retain(function);
+    return function;
+}
+//------------------------------------------------------------------------------
 id xxCreateVertexShaderMetal2(id <MTLDevice> __unsafe_unretained device, char const* shader, MTLVertexDescriptor* __unsafe_unretained vertexAttribute)
 {
     if (device == nil)
@@ -259,18 +317,22 @@ id xxCreateFragmentShaderMetal2(id <MTLDevice> __unsafe_unretained device, char 
 //==============================================================================
 //  Pipeline
 //==============================================================================
-MTLPIPELINE* xxCreatePipelineMetal2(id <MTLDevice> __unsafe_unretained device, MTLRenderPassDescriptor* __unsafe_unretained renderPass, MTLRenderPipelineColorAttachmentDescriptor* __unsafe_unretained blendState, id <MTLDepthStencilState> __unsafe_unretained depthStencilState, uint64_t rasterizerState, MTLVertexDescriptor* __unsafe_unretained vertexAttribute, id <MTLFunction> __unsafe_unretained vertexShader, id <MTLFunction> __unsafe_unretained fragmentShader)
+MTLPIPELINE* xxCreatePipelineMetal2(id <MTLDevice> __unsafe_unretained device, MTLRenderPassDescriptor* __unsafe_unretained renderPass, MTLRenderPipelineColorAttachmentDescriptor* __unsafe_unretained blendState, id <MTLDepthStencilState> __unsafe_unretained depthStencilState, uint64_t rasterizerState, MTLVertexDescriptor* __unsafe_unretained vertexAttribute, id <MTLFunction> __unsafe_unretained meshShader, id <MTLFunction> __unsafe_unretained vertexShader, id <MTLFunction> __unsafe_unretained fragmentShader)
 {
-    MTLPIPELINE* pipeline = xxCreatePipelineMetal(device, renderPass, blendState, depthStencilState, rasterizerState, vertexAttribute, vertexShader, fragmentShader);
+    MTLPIPELINE* pipeline = xxCreatePipelineMetal(device, renderPass, blendState, depthStencilState, rasterizerState, vertexAttribute, meshShader, vertexShader, fragmentShader);
     if (pipeline == 0)
         return 0;
 
+    pipeline->meshShader = meshShader;
     pipeline->vertexShader = vertexShader;
     pipeline->fragmentShader = fragmentShader;
+    pipeline->meshArgumentEncoder = [pipeline->meshShader newArgumentEncoderWithBufferIndex:0];
     pipeline->vertexArgumentEncoder = [pipeline->vertexShader newArgumentEncoderWithBufferIndex:0];
     pipeline->fragmentArgumentEncoder = [pipeline->fragmentShader newArgumentEncoderWithBufferIndex:0];
+    pipeline->meshArgumentEncodedLength = pipeline->meshArgumentEncoder.encodedLength;
     pipeline->vertexArgumentEncodedLength = pipeline->vertexArgumentEncoder.encodedLength;
     pipeline->fragmentArgumentEncodedLength = pipeline->fragmentArgumentEncoder.encodedLength;
+    pipeline->meshArgumentEncodedLength = (pipeline->meshArgumentEncodedLength + 255) & ~255;
     pipeline->vertexArgumentEncodedLength = (pipeline->vertexArgumentEncodedLength + 255) & ~255;
     pipeline->fragmentArgumentEncodedLength = (pipeline->fragmentArgumentEncodedLength + 255) & ~255;
 
@@ -293,6 +355,32 @@ void xxSetPipelineMetal2(MTLSWAPCHAIN* swapchain, MTLPIPELINE* pipeline)
 {
     swapchain->pipeline = pipeline;
     xxSetPipelineMetal(swapchain->commandEncoder, pipeline);
+}
+//------------------------------------------------------------------------------
+void xxSetMeshBuffersMetal2(MTLSWAPCHAIN* swapchain, int count, MTLBUFFER** buffers)
+{
+    id <MTLBuffer> __unsafe_unretained meshBuffers[8];
+
+    for (int i = 0; i < count; ++i)
+    {
+        id <MTLBuffer> __unsafe_unretained buffer = buffers[i]->buffer;
+        meshBuffers[i] = buffer;
+
+        if (buffers[i]->frameCount != swapchain->frameCount)
+        {
+            buffers[i]->frameCount = swapchain->frameCount;
+            [swapchain->commandEncoder useResource:buffer
+                                             usage:MTLResourceUsageRead
+                                            stages:MTLRenderStageMesh];
+        }
+    }
+
+    static NSUInteger const offsets[8] = {};
+
+    mtlUpdateArgumentEncoder(swapchain);
+    [swapchain->meshArgumentEncoder setBuffers:meshBuffers
+                                       offsets:offsets
+                                     withRange:NSMakeRange(0, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersMetal2(MTLSWAPCHAIN* swapchain, int count, MTLBUFFER** buffers, MTLVertexDescriptor* __unsafe_unretained vertexAttribute)
@@ -320,7 +408,8 @@ void xxSetVertexTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE** 
         {
             textures[i]->frameCount = swapchain->frameCount;
             [swapchain->commandEncoder useResource:texture
-                                             usage:MTLResourceUsageSample];
+                                             usage:MTLResourceUsageRead
+                                            stages:MTLRenderStageVertex];
         }
     }
 
@@ -342,7 +431,8 @@ void xxSetFragmentTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE*
         {
             textures[i]->frameCount = swapchain->frameCount;
             [swapchain->commandEncoder useResource:texture
-                                             usage:MTLResourceUsageSample];
+                                             usage:MTLResourceUsageRead
+                                            stages:MTLRenderStageFragment];
         }
     }
 
@@ -365,13 +455,30 @@ void xxSetFragmentSamplersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLSamp
                                                withRange:NSMakeRange(xxGraphicDescriptor::FRAGMENT_SAMPLER, count)];
 }
 //------------------------------------------------------------------------------
+void xxSetMeshConstantBufferMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* buffer, int size)
+{
+    if (buffer->frameCount != swapchain->frameCount)
+    {
+        buffer->frameCount = swapchain->frameCount;
+        [swapchain->commandEncoder useResource:buffer->buffer
+                                         usage:MTLResourceUsageRead
+                                        stages:MTLRenderStageMesh];
+    }
+
+    mtlUpdateArgumentEncoder(swapchain);
+    [swapchain->meshArgumentEncoder setBuffer:buffer->buffer
+                                       offset:0
+                                      atIndex:xxGraphicDescriptor::MESH_UNIFORM];
+}
+//------------------------------------------------------------------------------
 void xxSetVertexConstantBufferMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* buffer, int size)
 {
     if (buffer->frameCount != swapchain->frameCount)
     {
         buffer->frameCount = swapchain->frameCount;
         [swapchain->commandEncoder useResource:buffer->buffer
-                                         usage:MTLResourceUsageRead];
+                                         usage:MTLResourceUsageRead
+                                        stages:MTLRenderStageVertex];
     }
 
     mtlUpdateArgumentEncoder(swapchain);
@@ -386,7 +493,8 @@ void xxSetFragmentConstantBufferMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* buffe
     {
         buffer->frameCount = swapchain->frameCount;
         [swapchain->commandEncoder useResource:buffer->buffer
-                                         usage:MTLResourceUsageRead];
+                                         usage:MTLResourceUsageRead
+                                        stages:MTLRenderStageFragment];
     }
 
     mtlUpdateArgumentEncoder(swapchain);
@@ -401,9 +509,15 @@ void xxDrawMetal2(MTLSWAPCHAIN* swapchain, int vertexCount, int instanceCount, i
     xxDrawMetal(swapchain->commandEncoder, vertexCount, instanceCount, firstVertex, firstInstance);
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawMeshedMetal2(MTLSWAPCHAIN* swapchain, int x, int y, int z)
 {
     swapchain->argumentEncoderComplete = true;
-    xxDrawIndexedMetal(swapchain->commandEncoder, indexBuffer->buffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+    xxDrawMeshedMetal(swapchain->commandEncoder, x, y, z);
+}
+//------------------------------------------------------------------------------
+void xxDrawIndexedMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+{
+    swapchain->argumentEncoderComplete = true;
+    xxDrawIndexedMetal(swapchain->commandEncoder, indexBuffer->buffer, indexCount, vertexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 //------------------------------------------------------------------------------

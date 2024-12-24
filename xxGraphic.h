@@ -54,8 +54,9 @@ xxAPI void          (*xxDestroyVertexAttribute)(uint64_t vertexAttribute);
 //  Buffer
 //==============================================================================
 xxAPI uint64_t      (*xxCreateConstantBuffer)(uint64_t device, int size);
-xxAPI uint64_t      (*xxCreateIndexBuffer)(uint64_t device, int size);
+xxAPI uint64_t      (*xxCreateIndexBuffer)(uint64_t device, int size, int bits);
 xxAPI uint64_t      (*xxCreateVertexBuffer)(uint64_t device, int size, uint64_t vertexAttribute);
+xxAPI uint64_t      (*xxCreateStorageBuffer)(uint64_t device, int size);
 xxAPI void          (*xxDestroyBuffer)(uint64_t device, uint64_t buffer);
 xxAPI void*         (*xxMapBuffer)(uint64_t device, uint64_t buffer);
 xxAPI void          (*xxUnmapBuffer)(uint64_t device, uint64_t buffer);
@@ -74,6 +75,7 @@ xxAPI void          (*xxDestroySampler)(uint64_t sampler);
 //==============================================================================
 //  Shader
 //==============================================================================
+xxAPI uint64_t      (*xxCreateMeshShader)(uint64_t device, char const* shader);
 xxAPI uint64_t      (*xxCreateVertexShader)(uint64_t device, char const* shader, uint64_t vertexAttribute);
 xxAPI uint64_t      (*xxCreateFragmentShader)(uint64_t device, char const* shader);
 xxAPI void          (*xxDestroyShader)(uint64_t device, uint64_t shader);
@@ -83,7 +85,7 @@ xxAPI void          (*xxDestroyShader)(uint64_t device, uint64_t shader);
 xxAPI uint64_t      (*xxCreateBlendState)(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha);
 xxAPI uint64_t      (*xxCreateDepthStencilState)(uint64_t device, char const* depthTest, bool depthWrite);
 xxAPI uint64_t      (*xxCreateRasterizerState)(uint64_t device, bool cull, bool scissor);
-xxAPI uint64_t      (*xxCreatePipeline)(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
+xxAPI uint64_t      (*xxCreatePipeline)(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t meshShader, uint64_t vertexShader, uint64_t fragmentShader);
 xxAPI void          (*xxDestroyBlendState)(uint64_t blendState);
 xxAPI void          (*xxDestroyDepthStencilState)(uint64_t depthStencilState);
 xxAPI void          (*xxDestroyRasterizerState)(uint64_t rasterizerState);
@@ -94,13 +96,16 @@ xxAPI void          (*xxDestroyPipeline)(uint64_t pipeline);
 xxAPI void          (*xxSetViewport)(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
 xxAPI void          (*xxSetScissor)(uint64_t commandEncoder, int x, int y, int width, int height);
 xxAPI void          (*xxSetPipeline)(uint64_t commandEncoder, uint64_t pipeline);
+xxAPI void          (*xxSetMeshBuffers)(uint64_t commandEncoder, int count, const uint64_t* buffers);
 xxAPI void          (*xxSetVertexBuffers)(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
 xxAPI void          (*xxSetVertexTextures)(uint64_t commandEncoder, int count, const uint64_t* textures);
 xxAPI void          (*xxSetFragmentTextures)(uint64_t commandEncoder, int count, const uint64_t* textures);
 xxAPI void          (*xxSetVertexSamplers)(uint64_t commandEncoder, int count, const uint64_t* samplers);
 xxAPI void          (*xxSetFragmentSamplers)(uint64_t commandEncoder, int count, const uint64_t* samplers);
+xxAPI void          (*xxSetMeshConstantBuffer)(uint64_t commandEncoder, uint64_t buffer, int size);
 xxAPI void          (*xxSetVertexConstantBuffer)(uint64_t commandEncoder, uint64_t buffer, int size);
 xxAPI void          (*xxSetFragmentConstantBuffer)(uint64_t commandEncoder, uint64_t buffer, int size);
 xxAPI void          (*xxDraw)(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance);
-xxAPI void          (*xxDrawIndexed)(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+xxAPI void          (*xxDrawMeshed)(uint64_t commandEncoder, int x, int y, int z);
+xxAPI void          (*xxDrawIndexed)(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================

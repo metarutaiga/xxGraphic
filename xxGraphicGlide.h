@@ -58,8 +58,9 @@ void            xxDestroyVertexAttributeGlide(uint64_t vertexAttribute);
 //  Buffer
 //==============================================================================
 uint64_t        xxCreateConstantBufferGlide(uint64_t device, int size);
-uint64_t        xxCreateIndexBufferGlide(uint64_t device, int size);
+uint64_t        xxCreateIndexBufferGlide(uint64_t device, int size, int bits);
 uint64_t        xxCreateVertexBufferGlide(uint64_t device, int size, uint64_t vertexAttribute);
+uint64_t        xxCreateStorageBufferGlide(uint64_t device, int size);
 void            xxDestroyBufferGlide(uint64_t device, uint64_t buffer);
 void*           xxMapBufferGlide(uint64_t device, uint64_t buffer);
 void            xxUnmapBufferGlide(uint64_t device, uint64_t buffer);
@@ -78,6 +79,7 @@ void            xxDestroySamplerGlide(uint64_t sampler);
 //==============================================================================
 //  Shader
 //==============================================================================
+uint64_t        xxCreateMeshShaderGlide(uint64_t device, char const* shader);
 uint64_t        xxCreateVertexShaderGlide(uint64_t device, char const* shader, uint64_t vertexAttribute);
 uint64_t        xxCreateFragmentShaderGlide(uint64_t device, char const* shader);
 void            xxDestroyShaderGlide(uint64_t device, uint64_t shader);
@@ -87,7 +89,7 @@ void            xxDestroyShaderGlide(uint64_t device, uint64_t shader);
 uint64_t        xxCreateBlendStateGlide(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha);
 uint64_t        xxCreateDepthStencilStateGlide(uint64_t device, char const* depthTest, bool depthWrite);
 uint64_t        xxCreateRasterizerStateGlide(uint64_t device, bool cull, bool scissor);
-uint64_t        xxCreatePipelineGlide(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader);
+uint64_t        xxCreatePipelineGlide(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t meshShader, uint64_t vertexShader, uint64_t fragmentShader);
 void            xxDestroyBlendStateGlide(uint64_t blendState);
 void            xxDestroyDepthStencilStateGlide(uint64_t depthStencilState);
 void            xxDestroyRasterizerStateGlide(uint64_t rasterizerState);
@@ -98,15 +100,18 @@ void            xxDestroyPipelineGlide(uint64_t pipeline);
 void            xxSetViewportGlide(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ);
 void            xxSetScissorGlide(uint64_t commandEncoder, int x, int y, int width, int height);
 void            xxSetPipelineGlide(uint64_t commandEncoder, uint64_t pipeline);
+void            xxSetMeshBuffersGlide(uint64_t commandEncoder, int count, const uint64_t* buffers);
 void            xxSetVertexBuffersGlide(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
 void            xxSetVertexTexturesGlide(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetFragmentTexturesGlide(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetVertexSamplersGlide(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetFragmentSamplersGlide(uint64_t commandEncoder, int count, const uint64_t* samplers);
+void            xxSetMeshConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, int size);
 void            xxSetVertexConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, int size);
 void            xxSetFragmentConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, int size);
 void            xxDrawGlide(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance);
-void            xxDrawIndexedGlide(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+void            xxDrawMeshedGlide(uint64_t commandEncoder, int x, int y, int z);
+void            xxDrawIndexedGlide(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 
 #endif

@@ -98,9 +98,9 @@ void xxDrawGLES32(uint64_t commandEncoder, int vertexCount, int instanceCount, i
     glDrawArraysInstanced(GL_TRIANGLES, firstVertex, vertexCount, instanceCount);
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedGLES32(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawIndexedGLES32(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
-    GLenum indexType = (INDEX_BUFFER_WIDTH == 2) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
-    glDrawElementsInstancedBaseVertex(GL_TRIANGLES, indexCount, indexType, (char*)nullptr + firstIndex * INDEX_BUFFER_WIDTH, instanceCount, vertexOffset);
+    GLenum indexType = vertexCount < 65536 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+    glDrawElementsInstancedBaseVertex(GL_TRIANGLES, indexCount, indexType, (char*)nullptr + firstIndex * (vertexCount < 65536 ? 2 : 4), instanceCount, vertexOffset);
 }
 //==============================================================================

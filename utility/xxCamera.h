@@ -17,6 +17,8 @@ public:
 
     void                    SetFOV(float aspect, float fov, float depth);
 
+    void                    GetFrustumPlanes(xxVector4 left[2], xxVector4 right[2], xxVector4 top[2], xxVector4 bottom[2], xxVector4 near[2], xxVector4 far[2]) const;
+
     static xxCameraPtr      Create();
 
     static xxCameraPtr    (*BinaryCreate)();

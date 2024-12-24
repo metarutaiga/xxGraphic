@@ -121,7 +121,7 @@
 
 #define xxSizeOf(var)               (sizeof(var))
 #define xxCountOf(var)              (sizeof(var) / sizeof(*var))
-#define xxOffsetOf(s, m)            ((char*)&((s*)nullptr)->m - (char*)nullptr)
+#define xxOffsetOf(s, m)            ((int)((char*)&((s*)nullptr)->m - (char*)nullptr))
 
 #define xxRotateLeft(v, s)          ((v << s) | (v >> (sizeof(v) * 8 - s)))
 #define xxRotateRight(v, s)         ((v >> s) | (v << (sizeof(v) * 8 - s)))
@@ -243,6 +243,20 @@ xxAPI xxInline xxConstexpr unsigned int xxHash(char const* key, size_t count xxD
 #define xxCountLeadingZeros     _CountLeadingZeros
 #define xxCountTrailingZeros    _CountTrailingZeros
 #define xxPopulationCount       _CountOneBits
+#endif
+//==============================================================================
+//  Byte order
+//==============================================================================
+#if defined(__llvm__)
+#define xxHTONS                 __builtin_bswap16
+#define xxHTONL                 __builtin_bswap32
+#define xxNTOHS                 __builtin_bswap16
+#define xxNTOHL                 __builtin_bswap32
+#elif defined(_WIN32)
+#define xxHTONS                 _byteswap_ushort
+#define xxHTONL                 _byteswap_ulong
+#define xxNTOHS                 _byteswap_ushort
+#define xxNTOHL                 _byteswap_ulong
 #endif
 //==============================================================================
 //  String

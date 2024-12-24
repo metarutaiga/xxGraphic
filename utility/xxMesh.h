@@ -14,14 +14,30 @@ struct xxStrideIterator;
 class xxPlusAPI xxMesh
 {
 public:
+    enum
+    {
+        STORAGE0                = 0,
+        STORAGE1                = 1,
+        STORAGE2                = 2,
+        STORAGE3                = 3,
+        STORAGE4                = 4,
+        STORAGE5                = 5,
+        STORAGEMAX,
+        INDEX                   = 6,
+        VERTEX                  = 7,
+        MAX,
+    };
+
+public:
     void                        Invalidate();
     void                        Setup(uint64_t device);
     void                        Draw(uint64_t commandEncoder, int instanceCount = 1, int firstIndex = 0, int vertexOffset = 0, int firstInstance = 0);
 
     uint64_t                    GetVertexAttribute() const;
 
-    void                        SetVertexCount(int count);
     void                        SetIndexCount(int count);
+    void                        SetVertexCount(int count);
+    void                        SetStorageCount(int index, int count, int stride);
 
     xxStrideIterator<xxVector3> GetPosition() const;
     xxStrideIterator<xxVector3> GetBoneWeight() const;
@@ -33,32 +49,27 @@ public:
 
     void                        CalculateBound() const;
 
-    static void                 BufferCount(int count);
+    static void                 TransitionBufferCount(int count);
 
     static xxMeshPtr            Create(bool skinning = false, char normal = 0, char color = 0, char texture = 0);
 
     static xxMeshPtr          (*BinaryCreate)();
     virtual void                BinaryRead(xxBinary& binary);
     virtual void                BinaryWrite(xxBinary& binary) const;
-
+    
 protected:
     xxMesh(bool skinning, char normal, char color, char texture);
     virtual ~xxMesh();
 
     uint64_t                    m_device = 0;
     uint64_t                    m_vertexAttribute = 0;
-    uint64_t                    m_vertexBuffers[4] = {};
-    uint64_t                    m_indexBuffers[4] = {};
+    uint64_t                    m_buffers[MAX][4] = {};
 
-    bool                        m_vertexDataModified = false;
-    bool                        m_vertexSizeChanged[4] = { false, false, false, false };
-    bool                        m_indexDataModified = false;
-    bool                        m_indexSizeChanged[4] = { false, false, false, false };
+    char                        m_bufferIndex[MAX] = {};
+    bool                        m_dataModified[MAX] = {};
+    bool                        m_sizeChanged[MAX][4] = {};
 
-    char                        m_vertexBufferIndex = 0;
-    char                        m_indexBufferIndex = 0;
-
-    static int                  ms_bufferCount;
+    static int                  ms_transitionBufferCount;
 
 public:
     std::string                 Name = "";
@@ -68,12 +79,27 @@ public:
     char const                  ColorCount = 0;
     char const                  TextureCount = 0;
 
-    int const                   VertexCount = 0;
-    int const                   IndexCount = 0;
-
-    int const                   Stride = 0;
-    char* const                 Vertex = nullptr;
-    uint16_t* const             Index = nullptr;
+    union
+    {
+        struct
+        {
+            int const           Count[MAX] = {};
+            int const           Stride[MAX] = {};
+            char* const         Storage[MAX] = {};
+        };
+        struct
+        {
+            int const           DummyCount[MAX - 2];
+            int const           IndexCount;
+            int const           VertexCount;
+            int const           DummyStride[MAX - 2];
+            int const           IndexStride;
+            int const           VertexStride;
+            char* const         DummyStorage[MAX - 2];
+            char* const         Index;
+            char* const         Vertex;
+        };
+    };
 
     xxVector4 const             Bound = xxVector4::ZERO;
 };
@@ -134,8 +160,8 @@ struct xxStrideIterator
     }
 
 private:
-    char*           m_now;
-    char*           m_begin;
-    char*           m_end;
-    size_t          m_stride;
+    char*   m_now;
+    char*   m_begin;
+    char*   m_end;
+    size_t  m_stride;
 };

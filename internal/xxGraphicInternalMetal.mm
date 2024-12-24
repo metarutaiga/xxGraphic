@@ -78,10 +78,12 @@ void mtlUpdateArgumentEncoderInternal(MTLSWAPCHAIN* swapchain)
 {
     MTLPIPELINE* pipeline = swapchain->pipeline;
 
+    NSUInteger meshLength = pipeline->meshArgumentEncodedLength;
     NSUInteger vertexLength = pipeline->vertexArgumentEncodedLength;
     NSUInteger fragmentLength = pipeline->fragmentArgumentEncodedLength;
-    NSUInteger requestLength = vertexLength + fragmentLength;
-    NSUInteger vertexOffset = swapchain->argumentBufferStep * requestLength;
+    NSUInteger requestLength = meshLength + vertexLength + fragmentLength;
+    NSUInteger meshOffset = swapchain->argumentBufferStep * requestLength;
+    NSUInteger vertexOffset = meshOffset + meshLength;
     NSUInteger fragmentOffset = vertexOffset + vertexLength;
     NSUInteger capacityLength = fragmentOffset + fragmentLength;
 
@@ -91,13 +93,17 @@ void mtlUpdateArgumentEncoderInternal(MTLSWAPCHAIN* swapchain)
     {
         argumentBuffer = swapchain->argumentBuffers[argumentBufferIndex] = [swapchain->commandQueue.device newBufferWithLength:capacityLength * 2
                                                                                                                        options:MTLResourceStorageModeShared];
-        vertexOffset = 0;
+        meshOffset = 0;
+        vertexOffset = meshOffset + meshLength;
         fragmentOffset = vertexOffset + vertexLength;
     }
     swapchain->argumentBufferStep++;
 
+    swapchain->meshArgumentEncoder = pipeline->meshArgumentEncoder;
     swapchain->vertexArgumentEncoder = pipeline->vertexArgumentEncoder;
     swapchain->fragmentArgumentEncoder = pipeline->fragmentArgumentEncoder;
+    [swapchain->meshArgumentEncoder setArgumentBuffer:argumentBuffer
+                                               offset:meshOffset];
     [swapchain->vertexArgumentEncoder setArgumentBuffer:argumentBuffer
                                                  offset:vertexOffset];
     [swapchain->fragmentArgumentEncoder setArgumentBuffer:argumentBuffer
@@ -106,6 +112,9 @@ void mtlUpdateArgumentEncoderInternal(MTLSWAPCHAIN* swapchain)
 
     if (vertexOffset == 0)
     {
+        [swapchain->commandEncoder setMeshBuffer:argumentBuffer
+                                          offset:meshOffset
+                                         atIndex:0];
         [swapchain->commandEncoder setVertexBuffer:argumentBuffer
                                             offset:vertexOffset
                                            atIndex:0];
@@ -115,6 +124,8 @@ void mtlUpdateArgumentEncoderInternal(MTLSWAPCHAIN* swapchain)
     }
     else
     {
+        [swapchain->commandEncoder setMeshBufferOffset:meshOffset
+                                               atIndex:0];
         [swapchain->commandEncoder setVertexBufferOffset:vertexOffset
                                                  atIndex:0];
         [swapchain->commandEncoder setFragmentBufferOffset:fragmentOffset

@@ -282,7 +282,7 @@ uint64_t xxCreateConstantBufferGlide(uint64_t device, int size)
     return reinterpret_cast<uint64_t>(grBuffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateIndexBufferGlide(uint64_t device, int size)
+uint64_t xxCreateIndexBufferGlide(uint64_t device, int size, int bits)
 {
     char* grBuffer = xxAlloc(char, size);
 
@@ -290,6 +290,13 @@ uint64_t xxCreateIndexBufferGlide(uint64_t device, int size)
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexBufferGlide(uint64_t device, int size, uint64_t vertexAttribute)
+{
+    char* grBuffer = xxAlloc(char, size);
+
+    return reinterpret_cast<uint64_t>(grBuffer);
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateStorageBufferGlide(uint64_t device, int size)
 {
     char* grBuffer = xxAlloc(char, size);
 
@@ -400,6 +407,11 @@ void xxDestroySamplerGlide(uint64_t sampler)
 //==============================================================================
 //  Shader
 //==============================================================================
+uint64_t xxCreateMeshShaderGlide(uint64_t device, char const* shader)
+{
+    return 0;
+}
+//------------------------------------------------------------------------------
 uint64_t xxCreateVertexShaderGlide(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
     return 0;
@@ -443,7 +455,7 @@ uint64_t xxCreateRasterizerStateGlide(uint64_t device, bool cull, bool scissor)
     return static_cast<uint64_t>(grPipeline.value);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreatePipelineGlide(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+uint64_t xxCreatePipelineGlide(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t meshShader, uint64_t vertexShader, uint64_t fragmentShader)
 {
     GrPipeline grBlendState = { blendState };
     GrPipeline grDepthStencilState = { depthStencilState };
@@ -503,6 +515,11 @@ void xxSetPipelineGlide(uint64_t commandEncoder, uint64_t pipeline)
     grCullMode(grPipeline.cull ? GR_CULL_NEGATIVE : GR_CULL_DISABLE);
 }
 //------------------------------------------------------------------------------
+void xxSetMeshBuffersGlide(uint64_t commandEncoder, int count, const uint64_t* buffers)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetVertexBuffersGlide(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
     g_vertexBuffer = buffers[0];
@@ -537,6 +554,11 @@ void xxSetFragmentSamplersGlide(uint64_t commandEncoder, int count, const uint64
         grTexFilterMode(GR_TMU0 + i, grSampler.minFilter, grSampler.magFilter);
         grTexMipMapMode(GR_TMU0 + i, grSampler.mipFilter, grSampler.mipFilter == GR_MIPMAP_NEAREST_DITHER ? FXTRUE : FXFALSE);
     }
+}
+//------------------------------------------------------------------------------
+void xxSetMeshConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, int size)
+{
+    
 }
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, int size)
@@ -669,15 +691,32 @@ void xxDrawGlide(uint64_t commandEncoder, int vertexCount, int instanceCount, in
     }
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedGlide(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawMeshedGlide(uint64_t commandEncoder, int x, int y, int z)
+{
+    
+}
+//------------------------------------------------------------------------------
+void xxDrawIndexedGlide(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     GrVertexAttribute grVertexAttribute = { g_vertexAttribute };
-    uint16_t* grIndexBuffer = reinterpret_cast<uint16_t*>(indexBuffer) + firstIndex;
+    uint16_t* grIndexBuffer16 = nullptr;
+    uint32_t* grIndexBuffer32 = nullptr;
+    if (vertexCount < 65536)
+    {
+        grIndexBuffer16 = reinterpret_cast<uint16_t*>(indexBuffer) + firstIndex;
+    }
+    else
+    {
+        grIndexBuffer32 = reinterpret_cast<uint32_t*>(indexBuffer) + firstIndex;
+    }
     for (int i = 0; i < indexCount; i += 3)
     {
-        float* v0 = reinterpret_cast<float*>(g_vertexBuffer + (vertexOffset + grIndexBuffer[i + 0]) * grVertexAttribute.stride);
-        float* v1 = reinterpret_cast<float*>(g_vertexBuffer + (vertexOffset + grIndexBuffer[i + 1]) * grVertexAttribute.stride);
-        float* v2 = reinterpret_cast<float*>(g_vertexBuffer + (vertexOffset + grIndexBuffer[i + 2]) * grVertexAttribute.stride);
+        int i0 = grIndexBuffer16 ? grIndexBuffer16[i + 0] : grIndexBuffer32[i + 0];
+        int i1 = grIndexBuffer16 ? grIndexBuffer16[i + 1] : grIndexBuffer32[i + 1];
+        int i2 = grIndexBuffer16 ? grIndexBuffer16[i + 2] : grIndexBuffer32[i + 2];
+        float* v0 = reinterpret_cast<float*>(g_vertexBuffer + (vertexOffset + i0) * grVertexAttribute.stride);
+        float* v1 = reinterpret_cast<float*>(g_vertexBuffer + (vertexOffset + i1) * grVertexAttribute.stride);
+        float* v2 = reinterpret_cast<float*>(g_vertexBuffer + (vertexOffset + i2) * grVertexAttribute.stride);
         GrVertex t0;
         GrVertex t1;
         GrVertex t2;

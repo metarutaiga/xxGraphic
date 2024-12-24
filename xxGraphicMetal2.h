@@ -31,8 +31,9 @@ void            xxEndRenderPassMetal2(MTLSWAPCHAIN* swapchain, MTLFRAMEBUFFER* f
 //  Buffer
 //==============================================================================
 MTLBUFFER*      xxCreateConstantBufferMetal2(id <MTLDevice> device, int size);
-MTLBUFFER*      xxCreateIndexBufferMetal2(id <MTLDevice> device, int size);
+MTLBUFFER*      xxCreateIndexBufferMetal2(id <MTLDevice> device, int size, int bits);
 MTLBUFFER*      xxCreateVertexBufferMetal2(id <MTLDevice> device, int size, MTLVertexDescriptor* vertexAttribute);
+MTLBUFFER*      xxCreateStorageBufferMetal2(id <MTLDevice> device, int size);
 void            xxDestroyBufferMetal2(id <MTLDevice> device, MTLBUFFER* buffer);
 void*           xxMapBufferMetal2(id <MTLDevice> device, MTLBUFFER* buffer);
 void            xxUnmapBufferMetal2(id <MTLDevice> device, MTLBUFFER* buffer);
@@ -43,27 +44,31 @@ id              xxCreateSamplerMetal2(id <MTLDevice> device, bool clampU, bool c
 //==============================================================================
 //  Shader
 //==============================================================================
+id              xxCreateMeshShaderMetal2(id <MTLDevice> device, char const* shader);
 id              xxCreateVertexShaderMetal2(id <MTLDevice> device, char const* shader, MTLVertexDescriptor* vertexAttribute);
 id              xxCreateFragmentShaderMetal2(id <MTLDevice> device, char const* shader);
 //==============================================================================
 //  Pipeline
 //==============================================================================
-MTLPIPELINE*    xxCreatePipelineMetal2(id <MTLDevice> device, MTLRenderPassDescriptor* renderPass, MTLRenderPipelineColorAttachmentDescriptor* blendState, id <MTLDepthStencilState> depthStencilState, uint64_t rasterizerState, MTLVertexDescriptor* vertexAttribute, id <MTLFunction> vertexShader, id <MTLFunction> fragmentShader);
+MTLPIPELINE*    xxCreatePipelineMetal2(id <MTLDevice> device, MTLRenderPassDescriptor* renderPass, MTLRenderPipelineColorAttachmentDescriptor* blendState, id <MTLDepthStencilState> depthStencilState, uint64_t rasterizerState, MTLVertexDescriptor* vertexAttribute, id <MTLFunction> meshShader, id <MTLFunction> vertexShader, id <MTLFunction> fragmentShader);
 //==============================================================================
 //  Command
 //==============================================================================
 void            xxSetViewportMetal2(MTLSWAPCHAIN* swapchain, int x, int y, int width, int height, float minZ, float maxZ);
 void            xxSetScissorMetal2(MTLSWAPCHAIN* swapchain, int x, int y, int width, int height);
 void            xxSetPipelineMetal2(MTLSWAPCHAIN* swapchain, MTLPIPELINE* pipeline);
+void            xxSetMeshBuffersMetal2(MTLSWAPCHAIN* swapchain, int count, MTLBUFFER** buffers);
 void            xxSetVertexBuffersMetal2(MTLSWAPCHAIN* swapchain, int count, MTLBUFFER** buffers, MTLVertexDescriptor* vertexAttribute);
 void            xxSetVertexTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE** textures);
 void            xxSetFragmentTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE** textures);
 void            xxSetVertexSamplersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLSamplerState> __unsafe_unretained* samplers);
 void            xxSetFragmentSamplersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLSamplerState> __unsafe_unretained* samplers);
+void            xxSetMeshConstantBufferMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* buffer, int size);
 void            xxSetVertexConstantBufferMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* buffer, int size);
 void            xxSetFragmentConstantBufferMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* buffer, int size);
 void            xxDrawMetal2(MTLSWAPCHAIN* swapchain, int vertexCount, int instanceCount, int firstVertex, int firstInstance);
-void            xxDrawIndexedMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+void            xxDrawMeshedMetal2(MTLSWAPCHAIN* swapchain, int x, int y, int z);
+void            xxDrawIndexedMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 
 #endif

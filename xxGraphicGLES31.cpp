@@ -156,7 +156,7 @@ void xxDrawGLES31(uint64_t commandEncoder, int vertexCount, int instanceCount, i
     glDrawArraysIndirect(GL_TRIANGLES, (DrawElementsIndirectCommand*)nullptr + index);
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedGLES31(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawIndexedGLES31(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
     int index = g_indirectIndex++;
     if (g_indirectIndex >= NUM_INDIRECT_BUFFER_SIZE)
@@ -169,7 +169,7 @@ void xxDrawIndexedGLES31(uint64_t commandEncoder, uint64_t indexBuffer, int inde
     indirectCommand.baseVertex = vertexOffset;
     indirectCommand.baseInstance = firstInstance;
 
-    GLenum indexType = (INDEX_BUFFER_WIDTH == 2) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+    GLenum indexType = vertexCount < 65536 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
     glDrawElementsIndirect(GL_TRIANGLES, indexType, (DrawElementsIndirectCommand*)nullptr + index);
 }
 //==============================================================================

@@ -132,12 +132,17 @@ uint64_t xxCreateConstantBufferNULL(uint64_t device, int size)
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateIndexBufferNULL(uint64_t device, int size)
+uint64_t xxCreateIndexBufferNULL(uint64_t device, int size, int bits)
 {
     return 0;
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateVertexBufferNULL(uint64_t device, int size, uint64_t vertexAttribute)
+{
+    return 0;
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateStorageBufferNULL(uint64_t device, int size)
 {
     return 0;
 }
@@ -193,6 +198,11 @@ void xxDestroySamplerNULL(uint64_t sampler)
 //==============================================================================
 //  Shader
 //==============================================================================
+uint64_t xxCreateMeshShaderNULL(uint64_t device, char const* shader)
+{
+    return 0;
+}
+//------------------------------------------------------------------------------
 uint64_t xxCreateVertexShaderNULL(uint64_t device, char const* shader, uint64_t vertexAttribute)
 {
     return 0;
@@ -225,7 +235,7 @@ uint64_t xxCreateRasterizerStateNULL(uint64_t device, bool cull, bool scissor)
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreatePipelineNULL(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t vertexShader, uint64_t fragmentShader)
+uint64_t xxCreatePipelineNULL(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t meshShader, uint64_t vertexShader, uint64_t fragmentShader)
 {
     return 0;
 }
@@ -267,6 +277,11 @@ void xxSetPipelineNULL(uint64_t commandEncoder, uint64_t pipeline)
 
 }
 //------------------------------------------------------------------------------
+void xxSetMeshBuffersNULL(uint64_t commandEncoder, int count, const uint64_t* buffers)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetVertexBuffersNULL(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute)
 {
 
@@ -292,6 +307,11 @@ void xxSetFragmentSamplersNULL(uint64_t commandEncoder, int count, const uint64_
 
 }
 //------------------------------------------------------------------------------
+void xxSetMeshConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, int size)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetVertexConstantBufferNULL(uint64_t commandEncoder, uint64_t buffer, int size)
 {
 
@@ -307,7 +327,12 @@ void xxDrawNULL(uint64_t commandEncoder, int vertexCount, int instanceCount, int
 
 }
 //------------------------------------------------------------------------------
-void xxDrawIndexedNULL(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+void xxDrawMeshedNULL(uint64_t commandEncoder, int x, int y, int z)
+{
+    
+}
+//------------------------------------------------------------------------------
+void xxDrawIndexedNULL(uint64_t commandEncoder, uint64_t indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
 
 }

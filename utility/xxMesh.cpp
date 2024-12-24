@@ -10,7 +10,7 @@
 #include "xxNode.h"
 
 //==============================================================================
-int xxMesh::ms_bufferCount = 4;
+int xxMesh::ms_transitionBufferCount = 4;
 //==============================================================================
 //  Mesh
 //==============================================================================
@@ -25,27 +25,25 @@ xxMesh::xxMesh(bool skinning, char normal, char color, char texture)
 xxMesh::~xxMesh()
 {
     Invalidate();
-    xxFree(Vertex);
-    xxFree(Index);
+    for (int i = STORAGE0; i < MAX; ++i)
+        xxFree(Storage[i]);
 }
 //------------------------------------------------------------------------------
 void xxMesh::Invalidate()
 {
     xxDestroyVertexAttribute(m_vertexAttribute);
-    for (uint64_t buffer : m_vertexBuffers)
-        xxDestroyBuffer(m_device, buffer);
-    for (uint64_t buffer : m_indexBuffers)
-        xxDestroyBuffer(m_device, buffer);
+    for (int i = STORAGE0; i < MAX; ++i)
+    {
+        for (int j = 0; j < 4; ++j)
+        {
+            xxDestroyBuffer(m_device, m_buffers[i][j]);
+            m_buffers[i][j] = 0;
+        }
+        m_dataModified[i] = (Count[i] != 0);
+    }
 
     m_device = 0;
     m_vertexAttribute = 0;
-    for (uint64_t& buffer : m_vertexBuffers)
-        buffer = 0;
-    for (uint64_t& buffer : m_indexBuffers)
-        buffer = 0;
-
-    m_vertexDataModified = (VertexCount != 0);
-    m_indexDataModified = (IndexCount != 0);
 }
 //------------------------------------------------------------------------------
 void xxMesh::Setup(uint64_t device)
@@ -99,76 +97,57 @@ void xxMesh::Setup(uint64_t device)
         m_vertexAttribute = xxCreateVertexAttribute(m_device, count, attribute);
     }
 
-    int vertexBufferIndex = m_vertexBufferIndex;
-    if (m_vertexDataModified || m_vertexSizeChanged[vertexBufferIndex])
+    for (int i = STORAGE0; i < MAX; ++i)
     {
-        m_vertexDataModified = false;
-
-        if (m_vertexBuffers[vertexBufferIndex])
+        int bufferIndex = m_bufferIndex[i];
+        if (m_dataModified[i] || m_sizeChanged[i][bufferIndex])
         {
-            m_vertexBufferIndex++;
-            if (m_vertexBufferIndex >= ms_bufferCount)
-                m_vertexBufferIndex = 0;
-            vertexBufferIndex = m_vertexBufferIndex;
-        }
+            m_dataModified[i] = false;
 
-        uint64_t vertexBuffer = m_vertexBuffers[vertexBufferIndex];
-        if (m_vertexSizeChanged[vertexBufferIndex])
-        {
-            m_vertexSizeChanged[vertexBufferIndex] = false;
-
-            xxDestroyBuffer(m_device, vertexBuffer);
-            vertexBuffer = 0;
-        }
-        if (vertexBuffer == 0)
-        {
-            vertexBuffer = m_vertexBuffers[vertexBufferIndex] = VertexCount ? xxCreateVertexBuffer(m_device, Stride * VertexCount, m_vertexAttribute) : 0;
-        }
-
-        if (vertexBuffer)
-        {
-            void* ptr = xxMapBuffer(m_device, vertexBuffer);
-            if (ptr)
+            if (m_buffers[i][bufferIndex])
             {
-                memcpy(ptr, Vertex, Stride * VertexCount);
-                xxUnmapBuffer(m_device, vertexBuffer);
+                bufferIndex++;
+                if (bufferIndex >= ms_transitionBufferCount)
+                    bufferIndex = 0;
+                m_bufferIndex[i] = bufferIndex;
             }
-        }
-    }
 
-    int indexBufferIndex = m_indexBufferIndex;
-    if (m_indexDataModified || m_indexSizeChanged[indexBufferIndex])
-    {
-        m_indexDataModified = false;
-
-        if (m_indexBuffers[indexBufferIndex])
-        {
-            m_indexBufferIndex++;
-            if (m_indexBufferIndex >= ms_bufferCount)
-                m_indexBufferIndex = 0;
-            indexBufferIndex = m_indexBufferIndex;
-        }
-
-        uint64_t indexBuffer = m_indexBuffers[indexBufferIndex];
-        if (m_indexSizeChanged[indexBufferIndex])
-        {
-            m_indexSizeChanged[indexBufferIndex] = false;
-
-            xxDestroyBuffer(m_device, indexBuffer);
-            indexBuffer = 0;
-        }
-        if (indexBuffer == 0)
-        {
-            indexBuffer = m_indexBuffers[indexBufferIndex] = IndexCount ? xxCreateIndexBuffer(m_device, xxSizeOf(uint16_t) * IndexCount) : 0;
-        }
-
-        if (indexBuffer)
-        {
-            void* ptr = xxMapBuffer(m_device, indexBuffer);
-            if (ptr)
+            uint64_t buffer = m_buffers[i][bufferIndex];
+            if (m_sizeChanged[i][bufferIndex])
             {
-                memcpy(ptr, Index, xxSizeOf(uint16_t) * IndexCount);
-                xxUnmapBuffer(m_device, indexBuffer);
+                m_sizeChanged[i][bufferIndex] = false;
+
+                xxDestroyBuffer(m_device, buffer);
+                buffer = 0;
+            }
+            if (buffer == 0)
+            {
+                if (Count[i])
+                {
+                    switch (i)
+                    {
+                    case INDEX:
+                        buffer = xxCreateIndexBuffer(m_device, Count[INDEX] * Stride[INDEX], Stride[INDEX] != xxSizeOf(uint32_t) ? 16 : 32);
+                        break;
+                    case VERTEX:
+                        buffer = xxCreateVertexBuffer(m_device, Count[VERTEX] * Stride[VERTEX], m_vertexAttribute);
+                        break;
+                    default:
+                        buffer = xxCreateStorageBuffer(m_device, Count[i] * Stride[i]);
+                        break;
+                    }
+                }
+                m_buffers[i][bufferIndex] = buffer;
+            }
+
+            if (buffer)
+            {
+                void* ptr = xxMapBuffer(m_device, buffer);
+                if (ptr)
+                {
+                    memcpy(ptr, Storage[i], Count[i] * Stride[i]);
+                    xxUnmapBuffer(m_device, buffer);
+                }
             }
         }
     }
@@ -176,14 +155,25 @@ void xxMesh::Setup(uint64_t device)
 //------------------------------------------------------------------------------
 void xxMesh::Draw(uint64_t commandEncoder, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 {
-    xxSetVertexBuffers(commandEncoder, 1, &m_vertexBuffers[m_vertexBufferIndex], m_vertexAttribute);
-    if (IndexCount == 0)
+    if (Count[INDEX] == 0)
     {
-        xxDraw(commandEncoder, VertexCount - firstIndex * 3, instanceCount, vertexOffset + firstIndex * 3, firstInstance);
+        xxSetVertexBuffers(commandEncoder, 1, &m_buffers[VERTEX][m_bufferIndex[VERTEX]], m_vertexAttribute);
+        xxDraw(commandEncoder, Count[VERTEX] - firstIndex * 3, instanceCount, vertexOffset + firstIndex * 3, firstInstance);
+    }
+    else if (Count[STORAGE0] != 0)
+    {
+        uint64_t buffers[4];
+        buffers[0] = m_buffers[VERTEX][m_bufferIndex[VERTEX]];
+        buffers[1] = m_buffers[STORAGE0][m_bufferIndex[STORAGE0]];
+        buffers[2] = m_buffers[STORAGE1][m_bufferIndex[STORAGE1]];
+        buffers[3] = m_buffers[STORAGE2][m_bufferIndex[STORAGE2]];
+        xxSetMeshBuffers(commandEncoder, 4, buffers);
+        xxDrawMeshed(commandEncoder, Count[STORAGE0], 1, 1);
     }
     else
     {
-        xxDrawIndexed(commandEncoder, m_indexBuffers[m_indexBufferIndex], IndexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+        xxSetVertexBuffers(commandEncoder, 1, &m_buffers[VERTEX][m_bufferIndex[VERTEX]], m_vertexAttribute);
+        xxDrawIndexed(commandEncoder, m_buffers[INDEX][m_bufferIndex[INDEX]], Count[INDEX], Count[VERTEX], instanceCount, firstIndex, vertexOffset, firstInstance);
     }
 }
 //------------------------------------------------------------------------------
@@ -192,114 +182,159 @@ uint64_t xxMesh::GetVertexAttribute() const
     return m_vertexAttribute;
 }
 //------------------------------------------------------------------------------
-void xxMesh::SetVertexCount(int count)
-{
-    if (Stride == 0)
-    {
-        const_cast<int&>(Stride) += xxSizeOf(xxVector3) * 1;
-        const_cast<int&>(Stride) += xxSizeOf(xxVector3) * (Skinning ? 1 : 0);
-        const_cast<int&>(Stride) += xxSizeOf(uint32_t) * (Skinning ? 1 : 0);
-        const_cast<int&>(Stride) += xxSizeOf(xxVector3) * NormalCount;
-        const_cast<int&>(Stride) += xxSizeOf(uint32_t) * ColorCount;
-        const_cast<int&>(Stride) += xxSizeOf(xxVector2) * TextureCount;
-    }
-    char* vertex = Vertex;
-    if (count != VertexCount)
-    {
-        vertex = xxRealloc(Vertex, char, count * Stride);
-        if (vertex == nullptr)
-        {
-            xxFree(Vertex);
-            count = 0;
-        }
-        for (int i = 0; i < ms_bufferCount; ++i)
-        {
-            m_vertexSizeChanged[i] = true;
-        }
-    }
-    const_cast<int&>(VertexCount) = count;
-    const_cast<char*&>(Vertex) = vertex;
-    m_vertexDataModified = true;
-}
-//------------------------------------------------------------------------------
 void xxMesh::SetIndexCount(int count)
 {
-    uint16_t* index = Index;
-    if (count != IndexCount)
+    if (Stride[INDEX] == 0)
     {
-        index = xxRealloc(Index, uint16_t, count);
+        const_cast<int&>(Stride[INDEX]) = Count[VERTEX] < 65536 ? xxSizeOf(uint16_t) : xxSizeOf(uint32_t);
+    }
+    if (count != Count[INDEX])
+    {
+        char* index = nullptr;
+        if (count)
+        {
+            index = xxRealloc(Storage[INDEX], char, count * xxSizeOf(uint32_t));
+        }
         if (index == nullptr)
         {
-            xxFree(Index);
+            xxFree(Storage[INDEX]);
             count = 0;
         }
-        for (int i = 0; i < ms_bufferCount; ++i)
+        for (int i = 0; i < ms_transitionBufferCount; ++i)
         {
-            m_indexSizeChanged[i] = true;
+            m_sizeChanged[INDEX][i] = true;
+        }
+        const_cast<int&>(Count[INDEX]) = count;
+        const_cast<char*&>(Storage[INDEX]) = index;
+    }
+    m_dataModified[INDEX] = true;
+}
+//------------------------------------------------------------------------------
+void xxMesh::SetVertexCount(int count)
+{
+    if (Stride[VERTEX] == 0)
+    {
+        const_cast<int&>(Stride[VERTEX]) += xxSizeOf(xxVector3) * 1;
+        const_cast<int&>(Stride[VERTEX]) += xxSizeOf(xxVector3) * (Skinning ? 1 : 0);
+        const_cast<int&>(Stride[VERTEX]) += xxSizeOf(uint32_t) * (Skinning ? 1 : 0);
+        const_cast<int&>(Stride[VERTEX]) += xxSizeOf(xxVector3) * NormalCount;
+        const_cast<int&>(Stride[VERTEX]) += xxSizeOf(uint32_t) * ColorCount;
+        const_cast<int&>(Stride[VERTEX]) += xxSizeOf(xxVector2) * TextureCount;
+    }
+    if (count != Count[VERTEX])
+    {
+        char* vertex = nullptr;
+        if (count)
+        {
+            vertex = xxRealloc(Storage[VERTEX], char, count * Stride[VERTEX]);
+        }
+        if (vertex == nullptr)
+        {
+            xxFree(Storage[VERTEX]);
+            count = 0;
+        }
+        for (int i = 0; i < ms_transitionBufferCount; ++i)
+        {
+            m_sizeChanged[VERTEX][i] = true;
+        }
+        const_cast<int&>(Count[VERTEX]) = count;
+        const_cast<char*&>(Storage[VERTEX]) = vertex;
+        if (Count[INDEX] && (Stride[INDEX] != (count < 65536 ? xxSizeOf(uint16_t) : xxSizeOf(uint32_t))))
+        {
+            count = Count[INDEX];
+            const_cast<int&>(Count[INDEX]) = 0;
+            const_cast<int&>(Stride[INDEX]) = 0;
+            SetIndexCount(count);
         }
     }
-    const_cast<int&>(IndexCount) = count;
-    const_cast<uint16_t*&>(Index) = index;
-    m_indexDataModified = true;
+    m_dataModified[VERTEX] = true;
+}
+//------------------------------------------------------------------------------
+void xxMesh::SetStorageCount(int index, int count, int stride)
+{
+    if (index < STORAGE0 || index >= STORAGEMAX)
+        return;
+
+    if (count != Count[index] || stride != Stride[index])
+    {
+        char* storage = nullptr;
+        if (count)
+        {
+            storage = xxRealloc(Storage[index], char, count * stride);
+        }
+        if (storage == nullptr)
+        {
+            xxFree(Storage[index]);
+            count = 0;
+        }
+        for (int i = 0; i < ms_transitionBufferCount; ++i)
+        {
+            m_sizeChanged[index][i] = true;
+        }
+        const_cast<int&>(Count[index]) = count;
+        const_cast<int&>(Stride[index]) = stride;
+        const_cast<char*&>(Storage[index]) = storage;
+    }
+    m_dataModified[index] = true;
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<xxVector3> xxMesh::GetPosition() const
 {
-    char* vertex = Vertex;
-    return xxStrideIterator<xxVector3>(vertex, Stride, VertexCount);
+    char* vertex = Storage[VERTEX];
+    return xxStrideIterator<xxVector3>(vertex, Stride[VERTEX], Count[VERTEX]);
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<xxVector3> xxMesh::GetBoneWeight() const
 {
-    char* vertex = Vertex;
+    char* vertex = Storage[VERTEX];
     vertex += xxSizeOf(xxVector3);
-    return xxStrideIterator<xxVector3>(vertex, Stride, Skinning ? VertexCount : 0);
+    return xxStrideIterator<xxVector3>(vertex, Stride[VERTEX], Skinning ? Count[VERTEX] : 0);
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<uint32_t> xxMesh::GetBoneIndices() const
 {
-    char* vertex = Vertex;
+    char* vertex = Storage[VERTEX];
     vertex += xxSizeOf(xxVector3);
     vertex += xxSizeOf(xxVector3) * (Skinning ? 1 : 0);
-    return xxStrideIterator<uint32_t>(vertex, Stride, Skinning ? VertexCount : 0);
+    return xxStrideIterator<uint32_t>(vertex, Stride[VERTEX], Skinning ? Count[VERTEX] : 0);
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<xxVector3> xxMesh::GetNormal(int index) const
 {
-    char* vertex = Vertex;
+    char* vertex = Storage[VERTEX];
     vertex += xxSizeOf(xxVector3);
     vertex += xxSizeOf(xxVector3) * (Skinning ? 1 : 0);
     vertex += xxSizeOf(uint32_t) * (Skinning ? 1 : 0);
     vertex += xxSizeOf(xxVector3) * index;
-    return xxStrideIterator<xxVector3>(vertex, Stride, NormalCount ? VertexCount : 0);
+    return xxStrideIterator<xxVector3>(vertex, Stride[VERTEX], NormalCount ? Count[VERTEX] : 0);
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<uint32_t> xxMesh::GetColor(int index) const
 {
-    char* vertex = Vertex;
+    char* vertex = Storage[VERTEX];
     vertex += xxSizeOf(xxVector3);
     vertex += xxSizeOf(xxVector3) * (Skinning ? 1 : 0);
     vertex += xxSizeOf(uint32_t) * (Skinning ? 1 : 0);
     vertex += xxSizeOf(xxVector3) * NormalCount;
     vertex += xxSizeOf(uint32_t) * index;
-    return xxStrideIterator<uint32_t>(vertex, Stride, ColorCount ? VertexCount : 0);
+    return xxStrideIterator<uint32_t>(vertex, Stride[VERTEX], ColorCount ? Count[VERTEX] : 0);
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<xxVector2> xxMesh::GetTexture(int index) const
 {
-    char* vertex = Vertex;
+    char* vertex = Storage[VERTEX];
     vertex += xxSizeOf(xxVector3);
     vertex += xxSizeOf(xxVector3) * (Skinning ? 1 : 0);
     vertex += xxSizeOf(uint32_t) * (Skinning ? 1 : 0);
     vertex += xxSizeOf(xxVector3) * NormalCount;
     vertex += xxSizeOf(uint32_t) * ColorCount;
     vertex += xxSizeOf(xxVector2) * index;
-    return xxStrideIterator<xxVector2>(vertex, Stride, TextureCount ? VertexCount : 0);
+    return xxStrideIterator<xxVector2>(vertex, Stride[VERTEX], TextureCount ? Count[VERTEX] : 0);
 }
 //------------------------------------------------------------------------------
 void xxMesh::CalculateBound() const
 {
-    if (VertexCount == 0)
+    if (Count[VERTEX] == 0)
     {
         const_cast<xxVector4&>(Bound) = xxVector4::ZERO;
         return;
@@ -312,9 +347,9 @@ void xxMesh::CalculateBound() const
     const_cast<xxVector4&>(Bound) = bound;
 }
 //------------------------------------------------------------------------------
-void xxMesh::BufferCount(int count)
+void xxMesh::TransitionBufferCount(int count)
 {
-    ms_bufferCount = std::clamp(count, 1, 4);
+    ms_transitionBufferCount = std::clamp(count, 1, 4);
 }
 //------------------------------------------------------------------------------
 xxMeshPtr xxMesh::Create(bool skinning, char normal, char color, char texture)
@@ -339,15 +374,44 @@ void xxMesh::BinaryRead(xxBinary& binary)
     binary.Read(const_cast<char&>(ColorCount));
     binary.Read(const_cast<char&>(TextureCount));
 
-    size_t vertexCount = 0;
-    size_t indexCount = 0;
-    binary.ReadSize(vertexCount);
-    binary.ReadSize(indexCount);
-    SetVertexCount(static_cast<int>(vertexCount));
-    SetIndexCount(static_cast<int>(indexCount));
+    size_t count[MAX] = {};
+    size_t stride[MAX] = {};
+    if (binary.Version < 0x20241221)
+    {
+        binary.ReadSize(count[VERTEX]);
+        binary.ReadSize(count[INDEX]);
+    }
+    else
+    {
+        for (int i = STORAGE0; i < MAX; ++i)
+        {
+            binary.ReadSize(count[i]);
+        }
+        for (int i = STORAGE0; i < STORAGEMAX; ++i)
+        {
+            binary.ReadSize(stride[i]);
+        }
+    }
 
-    binary.ReadArray(Vertex, Stride * VertexCount);
-    binary.ReadArray(Index, IndexCount);
+    SetIndexCount(static_cast<int>(count[INDEX]));
+    SetVertexCount(static_cast<int>(count[VERTEX]));
+    for (int i = STORAGE0; i < STORAGEMAX; ++i)
+    {
+        SetStorageCount(i, static_cast<int>(count[i]), static_cast<int>(stride[i]));
+    }
+
+    if (binary.Version < 0x20241221)
+    {
+        binary.ReadArray(Storage[VERTEX], Count[VERTEX] * Stride[VERTEX]);
+        binary.ReadArray((uint16_t*)Storage[INDEX], Count[INDEX]);
+    }
+    else
+    {
+        for (int i = STORAGE0; i < MAX; ++i)
+        {
+            binary.ReadArray(Storage[i], Count[i] * Stride[i]);
+        }
+    }
 
     binary.Read(const_cast<xxVector4&>(Bound));
 }
@@ -361,11 +425,18 @@ void xxMesh::BinaryWrite(xxBinary& binary) const
     binary.Write(ColorCount);
     binary.Write(TextureCount);
 
-    binary.WriteSize(VertexCount);
-    binary.WriteSize(IndexCount);
-
-    binary.WriteArray(Vertex, Stride * VertexCount);
-    binary.WriteArray(Index, IndexCount);
+    for (int i = STORAGE0; i < MAX; ++i)
+    {
+        binary.WriteSize(Count[i]);
+    }
+    for (int i = STORAGE0; i < STORAGEMAX; ++i)
+    {
+        binary.WriteSize(Stride[i]);
+    }
+    for (int i = STORAGE0; i < MAX; ++i)
+    {
+        binary.WriteArray(Storage[i], Count[i] * Stride[i]);
+    }
 
     binary.Write(Bound);
 }
