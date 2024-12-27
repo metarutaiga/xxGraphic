@@ -110,7 +110,7 @@ void mtlUpdateArgumentEncoderInternal(MTLSWAPCHAIN* swapchain)
                                                    offset:fragmentOffset];
     swapchain->argumentEncoderComplete = false;
 
-    if (vertexOffset == 0)
+    if (meshOffset == 0)
     {
         [swapchain->commandEncoder setMeshBuffer:argumentBuffer
                                           offset:meshOffset
