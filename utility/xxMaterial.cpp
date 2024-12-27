@@ -252,7 +252,10 @@ void xxMaterial::UpdateConstant(xxDrawData const& data) const
 
                 if (camera)
                 {
-                    camera->GetFrustumPlanes(&frustum[0], &frustum[2], &frustum[4], &frustum[6], &frustum[8], &frustum[10]);
+                    for (int i = 0; i < 12; ++i)
+                    {
+                        frustum[i] = data.frustum[i];
+                    }
                 }
                 else
                 {
