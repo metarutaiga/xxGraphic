@@ -49,6 +49,7 @@ struct xxPlusAPI xxVector2
     float               Dot             (xxVector2 const& v) const   { return x * v.x + y * v.y;      }
     float               SquaredLength   () const                     { return Dot(*this);             }
     float               Length          () const                     { return sqrtf(SquaredLength()); }
+    xxVector2           Normalize       () const                     { return (*this) / Length();     }
 
     xxVector2           Minimum         (xxVector2 const& v) const   { xxVector2 t; for (size_t i = 0; i < N; ++i) t.f[i] = f[i] < v.f[i] ? f[i] : v.f[i]; return t; }
     xxVector2           Maximum         (xxVector2 const& v) const   { xxVector2 t; for (size_t i = 0; i < N; ++i) t.f[i] = f[i] > v.f[i] ? f[i] : v.f[i]; return t; }
@@ -100,6 +101,7 @@ struct xxPlusAPI xxVector3
     float               Dot             (xxVector3 const& v) const   { return x * v.x + y * v.y + z * v.z; }
     float               SquaredLength   () const                     { return Dot(*this);                  }
     float               Length          () const                     { return sqrtf(SquaredLength());      }
+    xxVector3           Normalize       () const                     { return (*this) / Length();          }
 
     xxVector3           Minimum         (xxVector3 const& v) const   { xxVector3 t; for (size_t i = 0; i < N; ++i) t.f[i] = f[i] < v.f[i] ? f[i] : v.f[i]; return t; }
     xxVector3           Maximum         (xxVector3 const& v) const   { xxVector3 t; for (size_t i = 0; i < N; ++i) t.f[i] = f[i] > v.f[i] ? f[i] : v.f[i]; return t; }
@@ -163,6 +165,7 @@ struct xxPlusAPI xxVector4
     float               Dot             (xxVector4 const& v) const   { return x * v.x + y * v.y + z * v.z + w * v.w; }
     float               SquaredLength   () const                     { return Dot(*this);                            }
     float               Length          () const                     { return sqrtf(SquaredLength());                }
+    xxVector4           Normalize       () const                     { return (*this) / Length();                    }
 
     xxVector4           Minimum         (xxVector4 const& v) const   { xxVector4 t; for (size_t i = 0; i < N; ++i) t.f[i] = f[i] < v.f[i] ? f[i] : v.f[i]; return t; }
     xxVector4           Maximum         (xxVector4 const& v) const   { xxVector4 t; for (size_t i = 0; i < N; ++i) t.f[i] = f[i] > v.f[i] ? f[i] : v.f[i]; return t; }
