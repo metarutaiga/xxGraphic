@@ -230,6 +230,8 @@ struct xxPlusAPI xxMatrix2x2
     xxVector2&          operator []     (size_t i)                   { return v[i]; }
     xxVector2 const&    operator []     (size_t i) const             { return v[i]; }
 
+                        operator        xxVector2 const* () const    { return v; }
+                        operator        xxVector2* ()                { return v; }
                         operator        float const* () const        { return f; }
                         operator        float* ()                    { return f; }
 
@@ -272,6 +274,8 @@ struct xxPlusAPI xxMatrix2x3
     xxVector2&          operator []     (size_t i)                   { return v[i]; }
     xxVector2 const&    operator []     (size_t i) const             { return v[i]; }
 
+                        operator        xxVector2 const* () const    { return v; }
+                        operator        xxVector2* ()                { return v; }
                         operator        float const* () const        { return f; }
                         operator        float* ()                    { return f; }
 
@@ -311,6 +315,8 @@ struct xxPlusAPI xxMatrix2x4
     xxVector2&          operator []     (size_t i)                   { return v[i]; }
     xxVector2 const&    operator []     (size_t i) const             { return v[i]; }
 
+                        operator        xxVector2 const* () const    { return v; }
+                        operator        xxVector2* ()                { return v; }
                         operator        float const* () const        { return f; }
                         operator        float* ()                    { return f; }
 
@@ -348,6 +354,8 @@ struct xxPlusAPI xxMatrix3x2
     xxVector3&          operator []     (size_t i)                   { return v[i]; }
     xxVector3 const&    operator []     (size_t i) const             { return v[i]; }
 
+                        operator        xxVector3 const* () const    { return v; }
+                        operator        xxVector3* ()                { return v; }
                         operator        float const* () const        { return f; }
                         operator        float* ()                    { return f; }
 
@@ -390,6 +398,8 @@ struct xxPlusAPI xxMatrix3x3
     xxVector3&          operator []     (size_t i)                   { return v[i]; }
     xxVector3 const&    operator []     (size_t i) const             { return v[i]; }
 
+                        operator        xxVector3 const* () const    { return v; }
+                        operator        xxVector3* ()                { return v; }
                         operator        float const* () const        { return f; }
                         operator        float* ()                    { return f; }
 
@@ -435,6 +445,8 @@ struct xxPlusAPI xxMatrix3x4
     xxVector3&          operator []     (size_t i)                   { return v[i]; }
     xxVector3 const&    operator []     (size_t i) const             { return v[i]; }
 
+                        operator        xxVector3 const* () const    { return v; }
+                        operator        xxVector3* ()                { return v; }
                         operator        float const* () const        { return f; }
                         operator        float* ()                    { return f; }
 
@@ -472,6 +484,8 @@ struct xxPlusAPI xxMatrix4x2
     xxVector4&          operator []     (size_t i)                   { return v[i]; }
     xxVector4 const&    operator []     (size_t i) const             { return v[i]; }
 
+                        operator        xxVector4 const* () const    { return v; }
+                        operator        xxVector4* ()                { return v; }
                         operator        float const* () const        { return f; }
                         operator        float* ()                    { return f; }
 
@@ -510,6 +524,8 @@ struct xxPlusAPI xxMatrix4x3
     xxVector4&          operator []     (size_t i)                   { return v[i]; }
     xxVector4 const&    operator []     (size_t i) const             { return v[i]; }
 
+                        operator        xxVector4 const* () const    { return v; }
+                        operator        xxVector4* ()                { return v; }
                         operator        float const* () const        { return f; }
                         operator        float* ()                    { return f; }
 
@@ -556,6 +572,8 @@ struct xxPlusAPI xxMatrix4x4
     xxVector4&          operator []     (size_t i)                   { return v[i]; }
     xxVector4 const&    operator []     (size_t i) const             { return v[i]; }
 
+                        operator        xxVector4 const* () const    { return v; }
+                        operator        xxVector4* ()                { return v; }
                         operator        float const* () const        { return f; }
                         operator        float* ()                    { return f; }
 

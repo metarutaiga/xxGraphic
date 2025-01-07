@@ -101,16 +101,19 @@ void xxCamera::GetFrustumPlanes(xxVector4 left[2], xxVector4 right[2], xxVector4
 //------------------------------------------------------------------------------
 xxCameraPtr xxCamera::Create()
 {
+    return xxCamera::BinaryCreate();
+}
+//==============================================================================
+//  Binary
+//==============================================================================
+xxCameraPtr (*xxCamera::BinaryCreate)() = []() -> xxCameraPtr
+{
     xxCameraPtr camera = xxCameraPtr(new xxCamera(), [](xxCamera* camera) { delete camera; });
     if (camera == nullptr)
         return nullptr;
 
     return camera;
-}
-//==============================================================================
-//  Binary
-//==============================================================================
-xxCameraPtr (*xxCamera::BinaryCreate)() = xxCamera::Create;
+};
 //------------------------------------------------------------------------------
 void xxCamera::BinaryRead(xxBinary& binary)
 {

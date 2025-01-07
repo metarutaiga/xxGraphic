@@ -354,16 +354,28 @@ void xxMesh::TransitionBufferCount(int count)
 //------------------------------------------------------------------------------
 xxMeshPtr xxMesh::Create(bool skinning, char normal, char color, char texture)
 {
-    xxMeshPtr mesh = xxMeshPtr(new xxMesh(skinning, normal, color, texture), [](xxMesh* mesh) { delete mesh; });
+    xxMeshPtr mesh = xxMesh::BinaryCreate();
     if (mesh == nullptr)
         return nullptr;
+
+    const_cast<bool&>(mesh->Skinning) = skinning;
+    const_cast<char&>(mesh->NormalCount) = normal;
+    const_cast<char&>(mesh->ColorCount) = color;
+    const_cast<char&>(mesh->TextureCount) = texture;
 
     return mesh;
 }
 //==============================================================================
 //  Binary
 //==============================================================================
-xxMeshPtr (*xxMesh::BinaryCreate)() = []() { return Create(); };
+xxMeshPtr (*xxMesh::BinaryCreate)() = []() -> xxMeshPtr
+{
+    xxMeshPtr mesh = xxMeshPtr(new xxMesh(false, 0, 0, 0), [](xxMesh* mesh) { delete mesh; });
+    if (mesh == nullptr)
+        return nullptr;
+
+    return mesh;
+};
 //------------------------------------------------------------------------------
 void xxMesh::BinaryRead(xxBinary& binary)
 {

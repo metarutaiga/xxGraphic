@@ -51,7 +51,7 @@ struct xxDrawData
     uint64_t                device = 0;
     uint64_t                commandEncoder = 0;
     xxCamera*               camera = nullptr;
-    xxVector4*              frustum = nullptr;
+    xxMatrix4x2*            frustum = nullptr;
     mutable xxConstantData* constantData = nullptr;
     mutable xxMesh*         mesh = nullptr;
     mutable xxNode*         node = nullptr;
