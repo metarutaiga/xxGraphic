@@ -28,16 +28,6 @@ MTLSWAPCHAIN*   xxGetCommandBufferMetal2(id <MTLDevice> device, MTLSWAPCHAIN* sw
 MTLSWAPCHAIN*   xxBeginRenderPassMetal2(MTLSWAPCHAIN* swapchain, MTLFRAMEBUFFER* framebuffer, MTLRenderPassDescriptor* renderPass, int width, int height, float color[4], float depth, unsigned char stencil);
 void            xxEndRenderPassMetal2(MTLSWAPCHAIN* swapchain, MTLFRAMEBUFFER* framebuffer, MTLRenderPassDescriptor* renderPass);
 //==============================================================================
-//  Buffer
-//==============================================================================
-MTLBUFFER*      xxCreateConstantBufferMetal2(id <MTLDevice> device, int size);
-MTLBUFFER*      xxCreateIndexBufferMetal2(id <MTLDevice> device, int size, int bits);
-MTLBUFFER*      xxCreateVertexBufferMetal2(id <MTLDevice> device, int size, MTLVertexDescriptor* vertexAttribute);
-MTLBUFFER*      xxCreateStorageBufferMetal2(id <MTLDevice> device, int size);
-void            xxDestroyBufferMetal2(id <MTLDevice> device, MTLBUFFER* buffer);
-void*           xxMapBufferMetal2(id <MTLDevice> device, MTLBUFFER* buffer);
-void            xxUnmapBufferMetal2(id <MTLDevice> device, MTLBUFFER* buffer);
-//==============================================================================
 //  Sampler
 //==============================================================================
 id              xxCreateSamplerMetal2(id <MTLDevice> device, bool clampU, bool clampV, bool clampW, bool linearMag, bool linearMin, bool linearMip, int anisotropy);
@@ -57,18 +47,18 @@ MTLPIPELINE*    xxCreatePipelineMetal2(id <MTLDevice> device, MTLRenderPassDescr
 void            xxSetViewportMetal2(MTLSWAPCHAIN* swapchain, int x, int y, int width, int height, float minZ, float maxZ);
 void            xxSetScissorMetal2(MTLSWAPCHAIN* swapchain, int x, int y, int width, int height);
 void            xxSetPipelineMetal2(MTLSWAPCHAIN* swapchain, MTLPIPELINE* pipeline);
-void            xxSetMeshBuffersMetal2(MTLSWAPCHAIN* swapchain, int count, MTLBUFFER** buffers);
-void            xxSetVertexBuffersMetal2(MTLSWAPCHAIN* swapchain, int count, MTLBUFFER** buffers, MTLVertexDescriptor* vertexAttribute);
+void            xxSetMeshBuffersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLBuffer> __unsafe_unretained* buffers);
+void            xxSetVertexBuffersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLBuffer> __unsafe_unretained* buffers, MTLVertexDescriptor* vertexAttribute);
 void            xxSetVertexTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE** textures);
 void            xxSetFragmentTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE** textures);
 void            xxSetVertexSamplersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLSamplerState> __unsafe_unretained* samplers);
 void            xxSetFragmentSamplersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLSamplerState> __unsafe_unretained* samplers);
-void            xxSetMeshConstantBufferMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* buffer, int size);
-void            xxSetVertexConstantBufferMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* buffer, int size);
-void            xxSetFragmentConstantBufferMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* buffer, int size);
+void            xxSetMeshConstantBufferMetal2(MTLSWAPCHAIN* swapchain, id <MTLBuffer> __unsafe_unretained buffer, int size);
+void            xxSetVertexConstantBufferMetal2(MTLSWAPCHAIN* swapchain, id <MTLBuffer> __unsafe_unretained buffer, int size);
+void            xxSetFragmentConstantBufferMetal2(MTLSWAPCHAIN* swapchain, id <MTLBuffer> __unsafe_unretained buffer, int size);
 void            xxDrawMetal2(MTLSWAPCHAIN* swapchain, int vertexCount, int instanceCount, int firstVertex, int firstInstance);
 void            xxDrawMeshedMetal2(MTLSWAPCHAIN* swapchain, int x, int y, int z);
-void            xxDrawIndexedMetal2(MTLSWAPCHAIN* swapchain, MTLBUFFER* indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
+void            xxDrawIndexedMetal2(MTLSWAPCHAIN* swapchain, id <MTLBuffer> __unsafe_unretained indexBuffer, int indexCount, int vertexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance);
 //==============================================================================
 
 #endif
