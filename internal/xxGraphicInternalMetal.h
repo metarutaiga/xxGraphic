@@ -110,6 +110,7 @@ struct MTLSWAPCHAIN : public MTLFRAMEBUFFER
     // Metal 2
     MTLPIPELINE*                    pipeline;
     NSUInteger                      frameCount;
+    NSString*                       frameString;
     id <MTLRenderCommandEncoder>    commandEncoder;
     int                             argumentBufferIndex;
     int                             argumentBufferStep;
@@ -118,16 +119,6 @@ struct MTLSWAPCHAIN : public MTLFRAMEBUFFER
     id <MTLArgumentEncoder>         vertexArgumentEncoder;
     id <MTLArgumentEncoder>         fragmentArgumentEncoder;
     bool                            argumentEncoderComplete;
-};
-//==============================================================================
-//  Buffer
-//==============================================================================
-struct MTLBUFFER
-{
-    id <MTLBuffer>                  buffer;
-
-    // Metal 2
-    NSUInteger                      frameCount;
 };
 //==============================================================================
 //  Texture
