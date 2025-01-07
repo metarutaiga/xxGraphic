@@ -186,13 +186,14 @@ void xxTexture::Update(uint64_t device)
 //------------------------------------------------------------------------------
 xxTexturePtr xxTexture::Create(uint64_t format, int width, int height, int depth, int mipmap, int array)
 {
-    xxTexturePtr texture = xxTexturePtr(new xxTexture(format, width, height, depth, mipmap, array), [](xxTexture* texture) { delete texture; });
+    xxTexturePtr texture = xxTexture::BinaryCreate();
     if (texture == nullptr)
         return nullptr;
+
+    texture->Initialize(format, width, height, depth, mipmap, array);
     if (width && height && depth && mipmap && array && texture->m_images[0] == nullptr)
         return nullptr;
 
-    texture->m_this = texture;
     return texture;
 }
 //------------------------------------------------------------------------------
@@ -221,7 +222,15 @@ void (*xxTexture::Reader)(xxTexturePtr const& texture) = [](xxTexturePtr const&)
 //==============================================================================
 //  Binary
 //==============================================================================
-xxTexturePtr (*xxTexture::BinaryCreate)() = []() { return xxTexture::Create(); };
+xxTexturePtr (*xxTexture::BinaryCreate)() = []() -> xxTexturePtr
+{
+    xxTexturePtr texture = xxTexturePtr(new xxTexture(0, 0, 0, 0, 0, 0), [](xxTexture* texture) { delete texture; });
+    if (texture == nullptr)
+        return nullptr;
+
+    texture->m_this = texture;
+    return texture;
+};
 //------------------------------------------------------------------------------
 void xxTexture::BinaryRead(xxBinary& binary)
 {

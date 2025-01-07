@@ -248,24 +248,24 @@ void xxMaterial::UpdateConstant(xxDrawData const& data) const
 
             if (size >= 12 * sizeof(xxVector4) && m_meshShader && (BackfaceCulling || FrustumCulling))
             {
-                xxVector4* frustum = reinterpret_cast<xxVector4*>(vector);
+                xxMatrix4x2* frustum = reinterpret_cast<xxMatrix4x2*>(vector);
 
                 if (camera)
                 {
-                    for (int i = 0; i < 12; ++i)
+                    for (int i = 0; i < 6; ++i)
                     {
                         frustum[i] = data.frustum[i];
                     }
                 }
                 else
                 {
-                    for (int i = 0; i < 12; ++i)
+                    for (int i = 0; i < 6; ++i)
                     {
-                        frustum[i] = xxVector4::ZERO;
+                        frustum[i] = {};
                     }
                 }
-                vector += 12;
-                size -= 12 * sizeof(xxVector4);
+                vector += 6;
+                size -= 6 * sizeof(xxMatrix4x2);
             }
 
             if (size >= 75 * sizeof(xxMatrix4x3) && data.mesh->Skinning)
@@ -419,16 +419,19 @@ int xxMaterial::GetFragmentConstantSize(xxDrawData const& data) const
 //------------------------------------------------------------------------------
 xxMaterialPtr xxMaterial::Create()
 {
+    return xxMaterial::BinaryCreate();
+}
+//==============================================================================
+//  Binary
+//==============================================================================
+xxMaterialPtr (*xxMaterial::BinaryCreate)() = []() -> xxMaterialPtr
+{
     xxMaterialPtr material = xxMaterialPtr(new xxMaterial(), [](xxMaterial* material) { delete material; });
     if (material == nullptr)
         return nullptr;
 
     return material;
-}
-//==============================================================================
-//  Binary
-//==============================================================================
-xxMaterialPtr (*xxMaterial::BinaryCreate)() = xxMaterial::Create;
+};
 //------------------------------------------------------------------------------
 void xxMaterial::BinaryRead(xxBinary& binary)
 {

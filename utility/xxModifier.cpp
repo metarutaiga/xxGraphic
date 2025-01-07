@@ -20,7 +20,7 @@ xxModifier::~xxModifier()
 //------------------------------------------------------------------------------
 xxModifierPtr xxModifier::Create(size_t size)
 {
-    xxModifierPtr modifier = xxModifierPtr(new xxModifier(), [](xxModifier* Modifier) { delete Modifier; });
+    xxModifierPtr modifier = xxModifier::BinaryCreate();
     if (modifier == nullptr)
         return nullptr;
 
@@ -34,7 +34,14 @@ void (*xxModifier::Loader)(xxModifier& modifier, size_t type) = [](xxModifier&, 
 //==============================================================================
 //  Binary
 //==============================================================================
-xxModifierPtr (*xxModifier::BinaryCreate)() = []() { return xxModifier::Create(); };
+xxModifierPtr (*xxModifier::BinaryCreate)() = []() -> xxModifierPtr
+{
+    xxModifierPtr modifier = xxModifierPtr(new xxModifier(), [](xxModifier* Modifier) { delete Modifier; });
+    if (modifier == nullptr)
+        return nullptr;
+
+    return modifier;
+};
 //------------------------------------------------------------------------------
 void xxModifier::BinaryRead(xxBinary& binary)
 {

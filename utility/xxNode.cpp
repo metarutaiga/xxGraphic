@@ -518,17 +518,20 @@ bool xxNode::Traversal(xxNodePtr const& node, std::function<bool(xxNodePtr const
 //------------------------------------------------------------------------------
 xxNodePtr xxNode::Create()
 {
+    return xxNode::BinaryCreate();
+}
+//==============================================================================
+//  Binary
+//==============================================================================
+xxNodePtr (*xxNode::BinaryCreate)() = []() -> xxNodePtr
+{
     xxNodePtr node = xxNodePtr(new xxNode, [](xxNode* node) { delete node; });
     if (node == nullptr)
         return nullptr;
 
     node->m_this = node;
     return node;
-}
-//==============================================================================
-//  Binary
-//==============================================================================
-xxNodePtr (*xxNode::BinaryCreate)() = []() { return xxNode::Create(); };
+};
 //------------------------------------------------------------------------------
 void xxNode::BinaryRead(xxBinary& binary)
 {
