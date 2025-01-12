@@ -20,19 +20,21 @@ void        (*xxDestroyDevice)(uint64_t device);
 bool        (*xxResetDevice)(uint64_t device);
 bool        (*xxTestDevice)(uint64_t device);
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-//==============================================================================
 //  Swapchain
 //==============================================================================
 uint64_t    (*xxCreateSwapchain)(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain);
 void        (*xxDestroySwapchain)(uint64_t swapchain);
 void        (*xxPresentSwapchain)(uint64_t swapchain);
-uint64_t    (*xxGetCommandBuffer)(uint64_t device, uint64_t swapchain);
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t    (*xxCreateFramebuffer)(uint64_t device, uint64_t texture);
+void        (*xxDestroyFramebuffer)(uint64_t framebuffer);
 uint64_t    (*xxGetFramebuffer)(uint64_t device, uint64_t swapchain, float* scale);
 //==============================================================================
 //  Command Buffer
 //==============================================================================
+uint64_t    (*xxGetCommandBuffer)(uint64_t device, uint64_t swapchain);
 bool        (*xxBeginCommandBuffer)(uint64_t commandBuffer);
 void        (*xxEndCommandBuffer)(uint64_t commandBuffer);
 void        (*xxSubmitCommandBuffer)(uint64_t commandBuffer, uint64_t swapchain);
@@ -55,6 +57,7 @@ uint64_t    (*xxCreateConstantBuffer)(uint64_t device, int size);
 uint64_t    (*xxCreateIndexBuffer)(uint64_t device, int size, int bits);
 uint64_t    (*xxCreateVertexBuffer)(uint64_t device, int size, uint64_t vertexAttribute);
 uint64_t    (*xxCreateStorageBuffer)(uint64_t device, int size);
+uint64_t    (*xxCreateInstanceBuffer)(uint64_t device, int size);
 void        (*xxDestroyBuffer)(uint64_t device, uint64_t buffer);
 void*       (*xxMapBuffer)(uint64_t device, uint64_t buffer);
 void        (*xxUnmapBuffer)(uint64_t device, uint64_t buffer);
@@ -99,6 +102,7 @@ void        (*xxSetVertexBuffers)(uint64_t commandEncoder, int count, const uint
 void        (*xxSetMeshTextures)(uint64_t commandEncoder, int count, const uint64_t* textures);
 void        (*xxSetVertexTextures)(uint64_t commandEncoder, int count, const uint64_t* textures);
 void        (*xxSetFragmentTextures)(uint64_t commandEncoder, int count, const uint64_t* textures);
+void        (*xxSetMeshSamplers)(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void        (*xxSetVertexSamplers)(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void        (*xxSetFragmentSamplers)(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void        (*xxSetMeshConstantBuffer)(uint64_t commandEncoder, uint64_t buffer, int size);

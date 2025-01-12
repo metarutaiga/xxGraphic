@@ -129,9 +129,6 @@ struct MTLTEXTURE
     id <MTLBuffer>                  buffer;
     int                             strides[16];
     void*                           temporary;
-
-    // Metal 2
-    NSUInteger                      frameCount;
 };
 //==============================================================================
 //  Pipeline

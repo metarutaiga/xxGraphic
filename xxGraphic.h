@@ -22,19 +22,21 @@ xxAPI void          (*xxDestroyDevice)(uint64_t device);
 xxAPI bool          (*xxResetDevice)(uint64_t device);
 xxAPI bool          (*xxTestDevice)(uint64_t device);
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-//==============================================================================
 //  Swapchain
 //==============================================================================
 xxAPI uint64_t      (*xxCreateSwapchain)(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain);
 xxAPI void          (*xxDestroySwapchain)(uint64_t swapchain);
 xxAPI void          (*xxPresentSwapchain)(uint64_t swapchain);
-xxAPI uint64_t      (*xxGetCommandBuffer)(uint64_t device, uint64_t swapchain);
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+xxAPI uint64_t      (*xxCreateFramebuffer)(uint64_t device, uint64_t texture);
+xxAPI void          (*xxDestroyFramebuffer)(uint64_t framebuffer);
 xxAPI uint64_t      (*xxGetFramebuffer)(uint64_t device, uint64_t swapchain, float* scale);
 //==============================================================================
 //  Command Buffer
 //==============================================================================
+xxAPI uint64_t      (*xxGetCommandBuffer)(uint64_t device, uint64_t swapchain);
 xxAPI bool          (*xxBeginCommandBuffer)(uint64_t commandBuffer);
 xxAPI void          (*xxEndCommandBuffer)(uint64_t commandBuffer);
 xxAPI void          (*xxSubmitCommandBuffer)(uint64_t commandBuffer, uint64_t swapchain);
@@ -57,6 +59,7 @@ xxAPI uint64_t      (*xxCreateConstantBuffer)(uint64_t device, int size);
 xxAPI uint64_t      (*xxCreateIndexBuffer)(uint64_t device, int size, int bits);
 xxAPI uint64_t      (*xxCreateVertexBuffer)(uint64_t device, int size, uint64_t vertexAttribute);
 xxAPI uint64_t      (*xxCreateStorageBuffer)(uint64_t device, int size);
+xxAPI uint64_t      (*xxCreateInstanceBuffer)(uint64_t device, int size);
 xxAPI void          (*xxDestroyBuffer)(uint64_t device, uint64_t buffer);
 xxAPI void*         (*xxMapBuffer)(uint64_t device, uint64_t buffer);
 xxAPI void          (*xxUnmapBuffer)(uint64_t device, uint64_t buffer);
@@ -98,8 +101,10 @@ xxAPI void          (*xxSetScissor)(uint64_t commandEncoder, int x, int y, int w
 xxAPI void          (*xxSetPipeline)(uint64_t commandEncoder, uint64_t pipeline);
 xxAPI void          (*xxSetMeshBuffers)(uint64_t commandEncoder, int count, const uint64_t* buffers);
 xxAPI void          (*xxSetVertexBuffers)(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
+xxAPI void          (*xxSetMeshTextures)(uint64_t commandEncoder, int count, const uint64_t* textures);
 xxAPI void          (*xxSetVertexTextures)(uint64_t commandEncoder, int count, const uint64_t* textures);
 xxAPI void          (*xxSetFragmentTextures)(uint64_t commandEncoder, int count, const uint64_t* textures);
+xxAPI void          (*xxSetMeshSamplers)(uint64_t commandEncoder, int count, const uint64_t* samplers);
 xxAPI void          (*xxSetVertexSamplers)(uint64_t commandEncoder, int count, const uint64_t* samplers);
 xxAPI void          (*xxSetFragmentSamplers)(uint64_t commandEncoder, int count, const uint64_t* samplers);
 xxAPI void          (*xxSetMeshConstantBuffer)(uint64_t commandEncoder, uint64_t buffer, int size);

@@ -874,7 +874,39 @@ void xxPresentSwapchainVulkan(uint64_t swapchain)
     if (vkSwapchain->semaphoreIndex >= vkSwapchain->imageCount)
         vkSwapchain->semaphoreIndex = 0;
 }
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t xxCreateFramebufferVulkan(uint64_t device, uint64_t texture)
+{
+    return 0;
+}
 //------------------------------------------------------------------------------
+void xxDestroyFramebufferVulkan(uint64_t framebuffer)
+{
+
+}
+//------------------------------------------------------------------------------
+uint64_t xxGetFramebufferVulkan(uint64_t device, uint64_t swapchain, float* scale)
+{
+    VKSWAPCHAIN* vkSwapchain = reinterpret_cast<VKSWAPCHAIN*>(swapchain);
+    if (vkSwapchain == nullptr)
+        return 0;
+
+    if (scale)
+    {
+        (*scale) = vkSwapchain->scale;
+    }
+
+    uint32_t imageIndex = vkSwapchain->imageIndex;
+    VkFramebuffer framebuffer = vkSwapchain->framebuffers[imageIndex];
+    vkSwapchain->framebuffer = framebuffer;
+
+    return static_cast<uint64_t>(framebuffer);
+}
+//==============================================================================
+//  Command Buffer
+//==============================================================================
 uint64_t xxGetCommandBufferVulkan(uint64_t device, uint64_t swapchain)
 {
     VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
@@ -912,26 +944,6 @@ uint64_t xxGetCommandBufferVulkan(uint64_t device, uint64_t swapchain)
     return reinterpret_cast<uint64_t>(commandBuffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxGetFramebufferVulkan(uint64_t device, uint64_t swapchain, float* scale)
-{
-    VKSWAPCHAIN* vkSwapchain = reinterpret_cast<VKSWAPCHAIN*>(swapchain);
-    if (vkSwapchain == nullptr)
-        return 0;
-
-    if (scale)
-    {
-        (*scale) = vkSwapchain->scale;
-    }
-
-    uint32_t imageIndex = vkSwapchain->imageIndex;
-    VkFramebuffer framebuffer = vkSwapchain->framebuffers[imageIndex];
-    vkSwapchain->framebuffer = framebuffer;
-
-    return static_cast<uint64_t>(framebuffer);
-}
-//==============================================================================
-//  Command Buffer
-//==============================================================================
 bool xxBeginCommandBufferVulkan(uint64_t commandBuffer)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandBuffer);
@@ -1432,6 +1444,77 @@ uint64_t xxCreateStorageBufferVulkan(uint64_t device, int size)
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = size;
     bufferInfo.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    VkBuffer buffer = VK_NULL_HANDLE;
+    VkResult bufferResult = vkCreateBuffer(vkDevice, &bufferInfo, g_callbacks, &buffer);
+    if (bufferResult != VK_SUCCESS)
+        return 0;
+
+    VkMemoryRequirements req;
+    vkGetBufferMemoryRequirements(vkDevice, buffer, &req);
+
+    VkPhysicalDeviceMemoryProperties prop;
+    vkGetPhysicalDeviceMemoryProperties(g_physicalDevice, &prop);
+
+    uint32_t persistentMemoryTypeIndex = UINT32_MAX;
+    for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
+    {
+        if ((prop.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == VK_MEMORY_PROPERTY_HOST_COHERENT_BIT && req.memoryTypeBits & (1 << i))
+        {
+            persistentMemoryTypeIndex = i;
+            break;
+        }
+    }
+
+    uint32_t localMemoryTypeIndex = UINT32_MAX;
+    for (uint32_t i = 0; i < prop.memoryTypeCount; i++)
+    {
+        if ((prop.memoryTypes[i].propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) == VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT && req.memoryTypeBits & (1 << i))
+        {
+            localMemoryTypeIndex = i;
+            break;
+        }
+    }
+
+    VkMemoryAllocateInfo allocInfo = {};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = req.size;
+    allocInfo.memoryTypeIndex = persistentMemoryTypeIndex != UINT32_MAX ? persistentMemoryTypeIndex : localMemoryTypeIndex;
+
+    VkDeviceMemory memory = VK_NULL_HANDLE;
+    VkResult memoryResult = vkAllocateMemory(vkDevice, &allocInfo, g_callbacks, &memory);
+    if (memoryResult != VK_SUCCESS)
+        return 0;
+
+    VkResult bindResult = vkBindBufferMemory(vkDevice, buffer, memory, 0);
+    if (bindResult != VK_SUCCESS)
+        return 0;
+
+    vkBuffer->buffer = buffer;
+    vkBuffer->memory = memory;
+    vkBuffer->size = size;
+    vkBuffer->ptr = nullptr;
+    vkBuffer->persistent = (persistentMemoryTypeIndex != UINT32_MAX);
+
+    return reinterpret_cast<uint64_t>(vkBuffer);
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateInstanceBufferVulkan(uint64_t device, int size)
+{
+    VkDevice vkDevice = reinterpret_cast<VkDevice>(device);
+    if (vkDevice == VK_NULL_HANDLE)
+        return 0;
+
+    VKBUFFER* vkBuffer = xxAlloc(VKBUFFER);
+    if (vkBuffer == nullptr)
+        return 0;
+    memset(vkBuffer, 0, sizeof(VKBUFFER));
+
+    VkBufferCreateInfo bufferInfo = {};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = size;
+    bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
     VkBuffer buffer = VK_NULL_HANDLE;
@@ -2329,6 +2412,33 @@ void xxSetVertexBuffersVulkan(uint64_t commandEncoder, int count, const uint64_t
     vkCmdBindVertexBuffers(vkCommandBuffer, 0, count, vkBuffers, vkOffsets);
 }
 //------------------------------------------------------------------------------
+void xxSetMeshTexturesVulkan(uint64_t commandEncoder, int count, const uint64_t* textures)
+{
+    VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
+    VkDescriptorImageInfo imageInfos[xxGraphicDescriptor::VERTEX_TEXTURE_COUNT];
+    VkWriteDescriptorSet sets[xxGraphicDescriptor::VERTEX_TEXTURE_COUNT];
+
+    for (int i = 0; i < count; ++i)
+    {
+        VKTEXTURE* vkTexture = reinterpret_cast<VKTEXTURE*>(textures[i]);
+        imageInfos[i].sampler = VK_NULL_HANDLE;
+        imageInfos[i].imageView = vkTexture->imageView;
+        imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        sets[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        sets[i].pNext = nullptr;
+        sets[i].dstSet = VK_NULL_HANDLE;
+        sets[i].dstBinding = xxGraphicDescriptor::VERTEX_TEXTURE + i;
+        sets[i].dstArrayElement = 0;
+        sets[i].descriptorCount = 1;
+        sets[i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        sets[i].pImageInfo = &imageInfos[i];
+        sets[i].pBufferInfo = nullptr;
+        sets[i].pTexelBufferView = nullptr;
+    }
+
+    vkCmdPushDescriptorSetKHR(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
+}
+//------------------------------------------------------------------------------
 void xxSetVertexTexturesVulkan(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
     VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
@@ -2375,6 +2485,33 @@ void xxSetFragmentTexturesVulkan(uint64_t commandEncoder, int count, const uint6
         sets[i].dstArrayElement = 0;
         sets[i].descriptorCount = 1;
         sets[i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        sets[i].pImageInfo = &imageInfos[i];
+        sets[i].pBufferInfo = nullptr;
+        sets[i].pTexelBufferView = nullptr;
+    }
+
+    vkCmdPushDescriptorSetKHR(vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_pipelineLayout, 0, count, sets);
+}
+//------------------------------------------------------------------------------
+void xxSetMeshSamplersVulkan(uint64_t commandEncoder, int count, const uint64_t* samplers)
+{
+    VkCommandBuffer vkCommandBuffer = reinterpret_cast<VkCommandBuffer>(commandEncoder);
+    VkDescriptorImageInfo imageInfos[xxGraphicDescriptor::VERTEX_SAMPLER_COUNT];
+    VkWriteDescriptorSet sets[xxGraphicDescriptor::VERTEX_SAMPLER_COUNT];
+
+    for (int i = 0; i < count; ++i)
+    {
+        VkSampler vkSampler = static_cast<VkSampler>(samplers[i]);
+        imageInfos[i].sampler = vkSampler;
+        imageInfos[i].imageView = VK_NULL_HANDLE;
+        imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        sets[i].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        sets[i].pNext = nullptr;
+        sets[i].dstSet = VK_NULL_HANDLE;
+        sets[i].dstBinding = xxGraphicDescriptor::VERTEX_SAMPLER + i;
+        sets[i].dstArrayElement = 0;
+        sets[i].descriptorCount = 1;
+        sets[i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
         sets[i].pImageInfo = &imageInfos[i];
         sets[i].pBufferInfo = nullptr;
         sets[i].pTexelBufferView = nullptr;

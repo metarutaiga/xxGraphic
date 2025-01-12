@@ -26,19 +26,21 @@ void            xxDestroyDeviceMantle(uint64_t device);
 bool            xxResetDeviceMantle(uint64_t device);
 bool            xxTestDeviceMantle(uint64_t device);
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-//==============================================================================
 //  Swapchain
 //==============================================================================
 uint64_t        xxCreateSwapchainMantle(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain);
 void            xxDestroySwapchainMantle(uint64_t swapchain);
 void            xxPresentSwapchainMantle(uint64_t swapchain);
-uint64_t        xxGetCommandBufferMantle(uint64_t device, uint64_t swapchain);
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t        xxCreateFramebufferMantle(uint64_t device, uint64_t texture);
+void            xxDestroyFramebufferMantle(uint64_t framebuffer);
 uint64_t        xxGetFramebufferMantle(uint64_t device, uint64_t swapchain, float* scale);
 //==============================================================================
 //  Command Buffer
 //==============================================================================
+uint64_t        xxGetCommandBufferMantle(uint64_t device, uint64_t swapchain);
 bool            xxBeginCommandBufferMantle(uint64_t commandBuffer);
 void            xxEndCommandBufferMantle(uint64_t commandBuffer);
 void            xxSubmitCommandBufferMantle(uint64_t commandBuffer, uint64_t swapchain);
@@ -61,6 +63,7 @@ uint64_t        xxCreateConstantBufferMantle(uint64_t device, int size);
 uint64_t        xxCreateIndexBufferMantle(uint64_t device, int size, int bits);
 uint64_t        xxCreateVertexBufferMantle(uint64_t device, int size, uint64_t vertexAttribute);
 uint64_t        xxCreateStorageBufferMantle(uint64_t device, int size);
+uint64_t        xxCreateInstanceBufferMantle(uint64_t device, int size);
 void            xxDestroyBufferMantle(uint64_t device, uint64_t buffer);
 void*           xxMapBufferMantle(uint64_t device, uint64_t buffer);
 void            xxUnmapBufferMantle(uint64_t device, uint64_t buffer);
@@ -102,8 +105,10 @@ void            xxSetScissorMantle(uint64_t commandEncoder, int x, int y, int wi
 void            xxSetPipelineMantle(uint64_t commandEncoder, uint64_t pipeline);
 void            xxSetMeshBuffersMantle(uint64_t commandEncoder, int count, const uint64_t* buffers);
 void            xxSetVertexBuffersMantle(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
+void            xxSetMeshTexturesMantle(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetVertexTexturesMantle(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetFragmentTexturesMantle(uint64_t commandEncoder, int count, const uint64_t* textures);
+void            xxSetMeshSamplersMantle(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetVertexSamplersMantle(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetFragmentSamplersMantle(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetMeshConstantBufferMantle(uint64_t commandEncoder, uint64_t buffer, int size);

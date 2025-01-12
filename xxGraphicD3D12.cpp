@@ -620,7 +620,39 @@ void xxPresentSwapchainD3D12(uint64_t swapchain)
 
     d3dSwapchain->dxgiSwapchain->Present(0, 0);
 }
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t xxCreateFramebufferD3D12(uint64_t device, uint64_t texture)
+{
+    return 0;
+}
 //------------------------------------------------------------------------------
+void xxDestroyFramebufferD3D12(uint64_t framebuffer)
+{
+
+}
+//------------------------------------------------------------------------------
+uint64_t xxGetFramebufferD3D12(uint64_t device, uint64_t swapchain, float* scale)
+{
+    if (scale)
+    {
+        (*scale) = 1.0f;
+    }
+
+    D3D12SWAPCHAIN* d3dSwapchain = reinterpret_cast<D3D12SWAPCHAIN*>(swapchain);
+    if (d3dSwapchain == nullptr)
+        return 0;
+
+    int bufferIndex = d3dSwapchain->dxgiSwapchain->GetCurrentBackBufferIndex();
+    d3dSwapchain->renderTargetResource = d3dSwapchain->renderTargetResources[bufferIndex];
+    d3dSwapchain->renderTargetHandle = d3dSwapchain->renderTargetHandles[bufferIndex];
+
+    return swapchain;
+}
+//==============================================================================
+//  Command Buffer
+//==============================================================================
 uint64_t xxGetCommandBufferD3D12(uint64_t device, uint64_t swapchain)
 {
     D3D12SWAPCHAIN* d3dSwapchain = reinterpret_cast<D3D12SWAPCHAIN*>(swapchain);
@@ -645,26 +677,6 @@ uint64_t xxGetCommandBufferD3D12(uint64_t device, uint64_t swapchain)
     return reinterpret_cast<uint64_t>(commandList);
 }
 //------------------------------------------------------------------------------
-uint64_t xxGetFramebufferD3D12(uint64_t device, uint64_t swapchain, float* scale)
-{
-    if (scale)
-    {
-        (*scale) = 1.0f;
-    }
-
-    D3D12SWAPCHAIN* d3dSwapchain = reinterpret_cast<D3D12SWAPCHAIN*>(swapchain);
-    if (d3dSwapchain == nullptr)
-        return 0;
-
-    int bufferIndex = d3dSwapchain->dxgiSwapchain->GetCurrentBackBufferIndex();
-    d3dSwapchain->renderTargetResource = d3dSwapchain->renderTargetResources[bufferIndex];
-    d3dSwapchain->renderTargetHandle = d3dSwapchain->renderTargetHandles[bufferIndex];
-
-    return swapchain;
-}
-//==============================================================================
-//  Command Buffer
-//==============================================================================
 bool xxBeginCommandBufferD3D12(uint64_t commandBuffer)
 {
     ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandBuffer);
@@ -978,6 +990,50 @@ uint64_t xxCreateVertexBufferD3D12(uint64_t device, int size, uint64_t vertexAtt
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateStorageBufferD3D12(uint64_t device, int size)
+{
+    ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
+    if (d3dDevice == nullptr)
+        return 0;
+    D3D12RESOURCE* d3dResource = xxAlloc(D3D12RESOURCE);
+    if (d3dResource == nullptr)
+        return 0;
+
+    D3D12_HEAP_PROPERTIES properties = {};
+    properties.Type = D3D12_HEAP_TYPE_UPLOAD;
+    properties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    properties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+
+    D3D12_RESOURCE_DESC desc = {};
+    desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    desc.Width = (size + 255) & ~255;
+    desc.Height = 1;
+    desc.DepthOrArraySize = 1;
+    desc.MipLevels = 1;
+    desc.SampleDesc.Count = 1;
+    desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+    ID3D12Resource* resource = nullptr;
+    HRESULT hResult = d3dDevice->CreateCommittedResource(&properties, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&resource));
+    if (hResult != S_OK)
+        return 0;
+
+    d3dResource->resource = resource;
+    d3dResource->resourceCPUHandle = {};
+    d3dResource->resourceGPUHandle = {};
+    d3dResource->size = size;
+    d3dResource->cpuAddress = nullptr;
+    d3dResource->gpuAddress = resource->GetGPUVirtualAddress();
+    createShaderHeap(d3dResource->resourceCPUHandle, d3dResource->resourceGPUHandle);
+
+    D3D12_CONSTANT_BUFFER_VIEW_DESC viewDesc = {};
+    viewDesc.BufferLocation = d3dResource->gpuAddress;
+    viewDesc.SizeInBytes = (size + 255) & ~255;
+    d3dDevice->CreateConstantBufferView(&viewDesc, d3dResource->resourceCPUHandle);
+
+    return reinterpret_cast<uint64_t>(d3dResource);
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateInstanceBufferD3D12(uint64_t device, int size)
 {
     ID3D12Device* d3dDevice = reinterpret_cast<ID3D12Device*>(device);
     if (d3dDevice == nullptr)
@@ -1684,6 +1740,17 @@ void xxSetVertexBuffersD3D12(uint64_t commandEncoder, int count, const uint64_t*
     d3dCommandList->IASetVertexBuffers(0, count, views);
 }
 //------------------------------------------------------------------------------
+void xxSetMeshTexturesD3D12(uint64_t commandEncoder, int count, const uint64_t* textures)
+{
+    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
+
+    for (int i = 0; i < count; ++i)
+    {
+        D3D12TEXTURE* d3dTexture = reinterpret_cast<D3D12TEXTURE*>(textures[i]);
+        d3dCommandList->SetGraphicsRootDescriptorTable(xxGraphicDescriptor::VERTEX_TEXTURE + i, d3dTexture->textureGPUHandle);
+    }
+}
+//------------------------------------------------------------------------------
 void xxSetVertexTexturesD3D12(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
     ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
@@ -1703,6 +1770,17 @@ void xxSetFragmentTexturesD3D12(uint64_t commandEncoder, int count, const uint64
     {
         D3D12TEXTURE* d3dTexture = reinterpret_cast<D3D12TEXTURE*>(textures[i]);
         d3dCommandList->SetGraphicsRootDescriptorTable(xxGraphicDescriptor::FRAGMENT_TEXTURE + i, d3dTexture->textureGPUHandle);
+    }
+}
+//------------------------------------------------------------------------------
+void xxSetMeshSamplersD3D12(uint64_t commandEncoder, int count, const uint64_t* samplers)
+{
+    ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
+
+    for (int i = 0; i < count; ++i)
+    {
+        D3D12_GPU_DESCRIPTOR_HANDLE d3dHandle = { samplers[i] };
+        d3dCommandList->SetGraphicsRootDescriptorTable(xxGraphicDescriptor::VERTEX_SAMPLER + i, d3dHandle);
     }
 }
 //------------------------------------------------------------------------------

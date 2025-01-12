@@ -26,19 +26,21 @@ void            xxDestroyDeviceD3D8(uint64_t device);
 bool            xxResetDeviceD3D8(uint64_t device);
 bool            xxTestDeviceD3D8(uint64_t device);
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-//==============================================================================
 //  Swapchain
 //==============================================================================
 uint64_t        xxCreateSwapchainD3D8(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain);
 void            xxDestroySwapchainD3D8(uint64_t swapchain);
 void            xxPresentSwapchainD3D8(uint64_t swapchain);
-uint64_t        xxGetCommandBufferD3D8(uint64_t device, uint64_t swapchain);
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t        xxCreateFramebufferD3D8(uint64_t device, uint64_t texture);
+void            xxDestroyFramebufferD3D8(uint64_t framebuffer);
 uint64_t        xxGetFramebufferD3D8(uint64_t device, uint64_t swapchain, float* scale);
 //==============================================================================
 //  Command Buffer
 //==============================================================================
+uint64_t        xxGetCommandBufferD3D8(uint64_t device, uint64_t swapchain);
 bool            xxBeginCommandBufferD3D8(uint64_t commandBuffer);
 void            xxEndCommandBufferD3D8(uint64_t commandBuffer);
 void            xxSubmitCommandBufferD3D8(uint64_t commandBuffer, uint64_t swapchain);
@@ -61,6 +63,7 @@ uint64_t        xxCreateConstantBufferD3D8(uint64_t device, int size);
 uint64_t        xxCreateIndexBufferD3D8(uint64_t device, int size, int bits);
 uint64_t        xxCreateVertexBufferD3D8(uint64_t device, int size, uint64_t vertexAttribute);
 uint64_t        xxCreateStorageBufferD3D8(uint64_t device, int size);
+uint64_t        xxCreateInstanceBufferD3D8(uint64_t device, int size);
 void            xxDestroyBufferD3D8(uint64_t device, uint64_t buffer);
 void*           xxMapBufferD3D8(uint64_t device, uint64_t buffer);
 void            xxUnmapBufferD3D8(uint64_t device, uint64_t buffer);
@@ -102,8 +105,10 @@ void            xxSetScissorD3D8(uint64_t commandEncoder, int x, int y, int widt
 void            xxSetPipelineD3D8(uint64_t commandEncoder, uint64_t pipeline);
 void            xxSetMeshBuffersD3D8(uint64_t commandEncoder, int count, const uint64_t* buffers);
 void            xxSetVertexBuffersD3D8(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
+void            xxSetMeshTexturesD3D8(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetVertexTexturesD3D8(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetFragmentTexturesD3D8(uint64_t commandEncoder, int count, const uint64_t* textures);
+void            xxSetMeshSamplersD3D8(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetVertexSamplersD3D8(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetFragmentSamplersD3D8(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetMeshConstantBufferD3D8(uint64_t commandEncoder, uint64_t buffer, int size);

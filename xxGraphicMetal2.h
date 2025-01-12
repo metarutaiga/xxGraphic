@@ -19,7 +19,7 @@ xxInline char const*    xxGetInstanceNameMetal2() { return "Metal 2"; }
 //==============================================================================
 xxAPI id        xxCreateInstanceMetal2();
 //==============================================================================
-//  Swapchain
+//  Command Buffer
 //==============================================================================
 MTLSWAPCHAIN*   xxGetCommandBufferMetal2(id <MTLDevice> device, MTLSWAPCHAIN* swapchain);
 //==============================================================================
@@ -49,8 +49,10 @@ void            xxSetScissorMetal2(MTLSWAPCHAIN* swapchain, int x, int y, int wi
 void            xxSetPipelineMetal2(MTLSWAPCHAIN* swapchain, MTLPIPELINE* pipeline);
 void            xxSetMeshBuffersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLBuffer> __unsafe_unretained* buffers);
 void            xxSetVertexBuffersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLBuffer> __unsafe_unretained* buffers, MTLVertexDescriptor* vertexAttribute);
+void            xxSetMeshTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE** textures);
 void            xxSetVertexTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE** textures);
 void            xxSetFragmentTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE** textures);
+void            xxSetMeshSamplersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLSamplerState> __unsafe_unretained* samplers);
 void            xxSetVertexSamplersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLSamplerState> __unsafe_unretained* samplers);
 void            xxSetFragmentSamplersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLSamplerState> __unsafe_unretained* samplers);
 void            xxSetMeshConstantBufferMetal2(MTLSWAPCHAIN* swapchain, id <MTLBuffer> __unsafe_unretained buffer, int size);

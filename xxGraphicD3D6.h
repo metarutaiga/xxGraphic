@@ -26,19 +26,21 @@ void            xxDestroyDeviceD3D6(uint64_t device);
 bool            xxResetDeviceD3D6(uint64_t device);
 bool            xxTestDeviceD3D6(uint64_t device);
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-//==============================================================================
 //  Swapchain
 //==============================================================================
 uint64_t        xxCreateSwapchainD3D6(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain);
 void            xxDestroySwapchainD3D6(uint64_t swapchain);
 void            xxPresentSwapchainD3D6(uint64_t swapchain);
-uint64_t        xxGetCommandBufferD3D6(uint64_t device, uint64_t swapchain);
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t        xxCreateFramebufferD3D6(uint64_t device, uint64_t texture);
+void            xxDestroyFramebufferD3D6(uint64_t framebuffer);
 uint64_t        xxGetFramebufferD3D6(uint64_t device, uint64_t swapchain, float* scale);
 //==============================================================================
 //  Command Buffer
 //==============================================================================
+uint64_t        xxGetCommandBufferD3D6(uint64_t device, uint64_t swapchain);
 bool            xxBeginCommandBufferD3D6(uint64_t commandBuffer);
 void            xxEndCommandBufferD3D6(uint64_t commandBuffer);
 void            xxSubmitCommandBufferD3D6(uint64_t commandBuffer, uint64_t swapchain);
@@ -61,6 +63,7 @@ uint64_t        xxCreateConstantBufferD3D6(uint64_t device, int size);
 uint64_t        xxCreateIndexBufferD3D6(uint64_t device, int size, int bits);
 uint64_t        xxCreateVertexBufferD3D6(uint64_t device, int size, uint64_t vertexAttribute);
 uint64_t        xxCreateStorageBufferD3D6(uint64_t device, int size);
+uint64_t        xxCreateInstanceBufferD3D6(uint64_t device, int size);
 void            xxDestroyBufferD3D6(uint64_t device, uint64_t buffer);
 void*           xxMapBufferD3D6(uint64_t device, uint64_t buffer);
 void            xxUnmapBufferD3D6(uint64_t device, uint64_t buffer);
@@ -102,8 +105,10 @@ void            xxSetScissorD3D6(uint64_t commandEncoder, int x, int y, int widt
 void            xxSetPipelineD3D6(uint64_t commandEncoder, uint64_t pipeline);
 void            xxSetMeshBuffersD3D6(uint64_t commandEncoder, int count, const uint64_t* buffers);
 void            xxSetVertexBuffersD3D6(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
+void            xxSetMeshTexturesD3D6(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetVertexTexturesD3D6(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetFragmentTexturesD3D6(uint64_t commandEncoder, int count, const uint64_t* textures);
+void            xxSetMeshSamplersD3D6(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetVertexSamplersD3D6(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetFragmentSamplersD3D6(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetMeshConstantBufferD3D6(uint64_t commandEncoder, uint64_t buffer, int size);

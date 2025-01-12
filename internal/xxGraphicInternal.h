@@ -13,7 +13,7 @@
 
 enum xxGraphicDescriptor
 {
-    MESH_UNIFORM            = 8,
+    MESH_UNIFORM            = 30,
     VERTEX_UNIFORM          = 0,
     FRAGMENT_UNIFORM        = 1,
     VERTEX_TEXTURE          = 2,
@@ -46,14 +46,13 @@ enum xxGraphicDescriptor
     xxRegisterFunctionSingle(xxResetDevice, xxResetDevice ## API); \
     xxRegisterFunctionSingle(xxTestDevice, xxTestDevice ## API); \
 \
-    xxRegisterFunctionSingle(xxGetFramebuffer, xxGetFramebuffer ## API); \
-\
     xxRegisterFunctionSingle(xxCreateSwapchain, xxCreateSwapchain ## API); \
     xxRegisterFunctionSingle(xxDestroySwapchain, xxDestroySwapchain ## API); \
     xxRegisterFunctionSingle(xxPresentSwapchain, xxPresentSwapchain ## API); \
 \
-    xxRegisterFunctionSingle(xxCreateVertexAttribute, xxCreateVertexAttribute ## API); \
-    xxRegisterFunctionSingle(xxDestroyVertexAttribute, xxDestroyVertexAttribute ## API); \
+    xxRegisterFunctionSingle(xxCreateFramebuffer, xxCreateFramebuffer ## API); \
+    xxRegisterFunctionSingle(xxDestroyFramebuffer, xxDestroyFramebuffer ## API); \
+    xxRegisterFunctionSingle(xxGetFramebuffer, xxGetFramebuffer ## API); \
 \
     xxRegisterFunctionSingle(xxGetCommandBuffer, xxGetCommandBuffer ## API); \
     xxRegisterFunctionSingle(xxBeginCommandBuffer, xxBeginCommandBuffer ## API); \
@@ -65,10 +64,14 @@ enum xxGraphicDescriptor
     xxRegisterFunctionSingle(xxBeginRenderPass, xxBeginRenderPass ## API); \
     xxRegisterFunctionSingle(xxEndRenderPass, xxEndRenderPass ## API); \
 \
+    xxRegisterFunctionSingle(xxCreateVertexAttribute, xxCreateVertexAttribute ## API); \
+    xxRegisterFunctionSingle(xxDestroyVertexAttribute, xxDestroyVertexAttribute ## API); \
+\
     xxRegisterFunctionSingle(xxCreateConstantBuffer, xxCreateConstantBuffer ## API); \
     xxRegisterFunctionSingle(xxCreateIndexBuffer, xxCreateIndexBuffer ## API); \
     xxRegisterFunctionSingle(xxCreateVertexBuffer, xxCreateVertexBuffer ## API); \
     xxRegisterFunctionSingle(xxCreateStorageBuffer, xxCreateStorageBuffer ## API); \
+    xxRegisterFunctionSingle(xxCreateInstanceBuffer, xxCreateInstanceBuffer ## API); \
     xxRegisterFunctionSingle(xxDestroyBuffer, xxDestroyBuffer ## API); \
     xxRegisterFunctionSingle(xxMapBuffer, xxMapBuffer ## API); \
     xxRegisterFunctionSingle(xxUnmapBuffer, xxUnmapBuffer ## API); \
@@ -100,8 +103,10 @@ enum xxGraphicDescriptor
     xxRegisterFunctionSingle(xxSetPipeline, xxSetPipeline ## API); \
     xxRegisterFunctionSingle(xxSetMeshBuffers, xxSetMeshBuffers ## API); \
     xxRegisterFunctionSingle(xxSetVertexBuffers, xxSetVertexBuffers ## API); \
+    xxRegisterFunctionSingle(xxSetMeshTextures, xxSetMeshTextures ## API); \
     xxRegisterFunctionSingle(xxSetVertexTextures, xxSetVertexTextures ## API); \
     xxRegisterFunctionSingle(xxSetFragmentTextures, xxSetFragmentTextures ## API); \
+    xxRegisterFunctionSingle(xxSetMeshSamplers, xxSetMeshSamplers ## API); \
     xxRegisterFunctionSingle(xxSetVertexSamplers, xxSetVertexSamplers ## API); \
     xxRegisterFunctionSingle(xxSetFragmentSamplers, xxSetFragmentSamplers ## API); \
     xxRegisterFunctionSingle(xxSetMeshConstantBuffer, xxSetMeshConstantBuffer ## API); \
@@ -121,11 +126,13 @@ enum xxGraphicDescriptor
     xxResetDevice = nullptr; \
     xxTestDevice = nullptr; \
 \
-    xxGetFramebuffer = nullptr; \
-\
     xxCreateSwapchain = nullptr; \
     xxDestroySwapchain = nullptr; \
     xxPresentSwapchain = nullptr; \
+\
+    xxCreateFramebuffer = nullptr; \
+    xxDestroyFramebuffer = nullptr; \
+    xxGetFramebuffer = nullptr; \
 \
     xxGetCommandBuffer = nullptr; \
     xxBeginCommandBuffer = nullptr; \
@@ -144,6 +151,7 @@ enum xxGraphicDescriptor
     xxCreateIndexBuffer = nullptr; \
     xxCreateVertexBuffer = nullptr; \
     xxCreateStorageBuffer = nullptr; \
+    xxCreateInstanceBuffer = nullptr; \
     xxDestroyBuffer = nullptr; \
     xxMapBuffer = nullptr; \
     xxUnmapBuffer = nullptr; \
@@ -174,8 +182,10 @@ enum xxGraphicDescriptor
     xxSetScissor = nullptr; \
     xxSetPipeline = nullptr; \
     xxSetVertexBuffers = nullptr; \
+    xxSetMeshTextures = nullptr; \
     xxSetVertexTextures = nullptr; \
     xxSetFragmentTextures = nullptr; \
+    xxSetMeshSamplers = nullptr; \
     xxSetVertexSamplers = nullptr; \
     xxSetFragmentSamplers = nullptr; \
     xxSetMeshConstantBuffer = nullptr; \

@@ -12,7 +12,8 @@
 
 typedef LPDIRECT3D8 (WINAPI *PFN_DIRECT3D_CREATE8)(UINT);
 #define D3DRTYPE_CONSTANTBUFFER     0
-#define D3DRTYPE_STORAGEBUFFER      5
+#define D3DRTYPE_STORAGEBUFFER      3
+#define D3DRTYPE_INSTANCEBUFFER     4
 
 static void*                        g_d3dLibrary = nullptr;
 
@@ -201,10 +202,17 @@ void xxPresentSwapchainD3D8(uint64_t swapchain)
 
     d3dSwapchain->swapchain->Present(nullptr, nullptr, d3dSwapchain->hWnd, nullptr);
 }
-//------------------------------------------------------------------------------
-uint64_t xxGetCommandBufferD3D8(uint64_t device, uint64_t swapchain)
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t xxCreateFramebufferD3D8(uint64_t device, uint64_t texture)
 {
-    return device;
+    return 0;
+}
+//------------------------------------------------------------------------------
+void xxDestroyFramebufferD3D8(uint64_t framebuffer)
+{
+
 }
 //------------------------------------------------------------------------------
 uint64_t xxGetFramebufferD3D8(uint64_t device, uint64_t swapchain, float* scale)
@@ -231,6 +239,11 @@ uint64_t xxGetFramebufferD3D8(uint64_t device, uint64_t swapchain, float* scale)
 //==============================================================================
 //  Command Buffer
 //==============================================================================
+uint64_t xxGetCommandBufferD3D8(uint64_t device, uint64_t swapchain)
+{
+    return device;
+}
+//------------------------------------------------------------------------------
 bool xxBeginCommandBufferD3D8(uint64_t commandBuffer)
 {
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(commandBuffer);
@@ -397,12 +410,20 @@ uint64_t xxCreateStorageBufferD3D8(uint64_t device, int size)
     return reinterpret_cast<uint64_t>(d3dBuffer) | D3DRTYPE_STORAGEBUFFER;
 }
 //------------------------------------------------------------------------------
+uint64_t xxCreateInstanceBufferD3D8(uint64_t device, int size)
+{
+    char* d3dBuffer = xxAlloc(char, size);
+
+    return reinterpret_cast<uint64_t>(d3dBuffer) | D3DRTYPE_INSTANCEBUFFER;
+}
+//------------------------------------------------------------------------------
 void xxDestroyBufferD3D8(uint64_t device, uint64_t buffer)
 {
     switch (getResourceType(buffer))
     {
     case D3DRTYPE_CONSTANTBUFFER:
     case D3DRTYPE_STORAGEBUFFER:
+    case D3DRTYPE_INSTANCEBUFFER:
     {
         char* d3dBuffer = reinterpret_cast<char*>(getResourceData(buffer));
 
@@ -429,6 +450,8 @@ void* xxMapBufferD3D8(uint64_t device, uint64_t buffer)
     switch (getResourceType(buffer))
     {
     case D3DRTYPE_CONSTANTBUFFER:
+    case D3DRTYPE_STORAGEBUFFER:
+    case D3DRTYPE_INSTANCEBUFFER:
     {
         char* ptr = reinterpret_cast<char*>(getResourceData(buffer));
         if (ptr == nullptr)
@@ -474,6 +497,8 @@ void xxUnmapBufferD3D8(uint64_t device, uint64_t buffer)
     switch (getResourceType(buffer))
     {
     case D3DRTYPE_CONSTANTBUFFER:
+    case D3DRTYPE_STORAGEBUFFER:
+    case D3DRTYPE_INSTANCEBUFFER:
     {
         return;
     }
@@ -911,6 +936,11 @@ void xxSetVertexBuffersD3D8(uint64_t commandEncoder, int count, const uint64_t* 
     }
 }
 //------------------------------------------------------------------------------
+void xxSetMeshTexturesD3D8(uint64_t commandEncoder, int count, const uint64_t* textures)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetVertexTexturesD3D8(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
 
@@ -925,6 +955,11 @@ void xxSetFragmentTexturesD3D8(uint64_t commandEncoder, int count, const uint64_
         LPDIRECT3DBASETEXTURE8 d3dBaseTexture = reinterpret_cast<LPDIRECT3DBASETEXTURE8>(getResourceData(textures[i]));
         d3dDevice->SetTexture(i, d3dBaseTexture);
     }
+}
+//------------------------------------------------------------------------------
+void xxSetMeshSamplersD3D8(uint64_t commandEncoder, int count, const uint64_t* samplers)
+{
+
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersD3D8(uint64_t commandEncoder, int count, const uint64_t* samplers)

@@ -108,7 +108,9 @@ void xxPresentSwapchainGLES31(uint64_t swapchain)
 
     xxPresentSwapchainGLES2(swapchain);
 }
-//------------------------------------------------------------------------------
+//==============================================================================
+//  Command Buffer
+//==============================================================================
 uint64_t xxGetCommandBufferGLES31(uint64_t device, uint64_t swapchain)
 {
     uint64_t commandBuffer = xxGetCommandBufferGLES2(0, swapchain);

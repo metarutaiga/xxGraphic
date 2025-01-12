@@ -18,6 +18,7 @@ typedef HRESULT (WINAPI *PFN_DIRECT_DRAW_CREATE)(GUID*, LPDIRECTDRAW*, IUnknown*
 #define D3DRTYPE_INDEXBUFFER        1
 #define D3DRTYPE_VERTEXBUFFER       2
 #define D3DRTYPE_STORAGEBUFFER      3
+#define D3DRTYPE_INSTANCEBUFFER     4
 
 static void*                        g_ddrawLibrary = nullptr;
 static LPDIRECTDRAW4                g_ddraw = nullptr;
@@ -290,7 +291,31 @@ void xxPresentSwapchainD3D6(uint64_t swapchain)
     g_primarySurface->SetClipper(d3dSwapchain->clipper);
     g_primarySurface->Blt(&rect, d3dSwapchain->backSurface, nullptr, DDBLT_WAIT, nullptr);
 }
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t xxCreateFramebufferD3D6(uint64_t device, uint64_t texture)
+{
+    return 0;
+}
 //------------------------------------------------------------------------------
+void xxDestroyFramebufferD3D6(uint64_t framebuffer)
+{
+
+}
+//------------------------------------------------------------------------------
+uint64_t xxGetFramebufferD3D6(uint64_t device, uint64_t swapchain, float* scale)
+{
+    if (scale)
+    {
+        (*scale) = 1.0f;
+    }
+
+    return swapchain;
+}
+//==============================================================================
+//  Command Buffer
+//==============================================================================
 uint64_t xxGetCommandBufferD3D6(uint64_t device, uint64_t swapchain)
 {
     LPDIRECT3DDEVICE3 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE3>(device);
@@ -307,18 +332,6 @@ uint64_t xxGetCommandBufferD3D6(uint64_t device, uint64_t swapchain)
     return device;
 }
 //------------------------------------------------------------------------------
-uint64_t xxGetFramebufferD3D6(uint64_t device, uint64_t swapchain, float* scale)
-{
-    if (scale)
-    {
-        (*scale) = 1.0f;
-    }
-
-    return swapchain;
-}
-//==============================================================================
-//  Command Buffer
-//==============================================================================
 bool xxBeginCommandBufferD3D6(uint64_t commandBuffer)
 {
     LPDIRECT3DDEVICE3 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE3>(commandBuffer);
@@ -562,6 +575,13 @@ uint64_t xxCreateStorageBufferD3D6(uint64_t device, int size)
     return reinterpret_cast<uint64_t>(d3dBuffer) | D3DRTYPE_STORAGEBUFFER;
 }
 //------------------------------------------------------------------------------
+uint64_t xxCreateInstanceBufferD3D6(uint64_t device, int size)
+{
+    char* d3dBuffer = xxAlloc(char, size);
+
+    return reinterpret_cast<uint64_t>(d3dBuffer) | D3DRTYPE_INSTANCEBUFFER;
+}
+//------------------------------------------------------------------------------
 void xxDestroyBufferD3D6(uint64_t device, uint64_t buffer)
 {
     switch (getResourceType(buffer))
@@ -569,6 +589,7 @@ void xxDestroyBufferD3D6(uint64_t device, uint64_t buffer)
     case D3DRTYPE_CONSTANTBUFFER:
     case D3DRTYPE_INDEXBUFFER:
     case D3DRTYPE_STORAGEBUFFER:
+    case D3DRTYPE_INSTANCEBUFFER:
     {
         char* d3dBuffer = reinterpret_cast<char*>(getResourceData(buffer));
 
@@ -605,6 +626,8 @@ void* xxMapBufferD3D6(uint64_t device, uint64_t buffer)
     {
     case D3DRTYPE_CONSTANTBUFFER:
     case D3DRTYPE_INDEXBUFFER:
+    case D3DRTYPE_STORAGEBUFFER:
+    case D3DRTYPE_INSTANCEBUFFER:
     {
         char* ptr = reinterpret_cast<char*>(getResourceData(buffer));
         if (ptr == nullptr)
@@ -646,6 +669,8 @@ void xxUnmapBufferD3D6(uint64_t device, uint64_t buffer)
     {
     case D3DRTYPE_CONSTANTBUFFER:
     case D3DRTYPE_INDEXBUFFER:
+    case D3DRTYPE_STORAGEBUFFER:
+    case D3DRTYPE_INSTANCEBUFFER:
     {
         return;
     }
@@ -997,6 +1022,11 @@ void xxSetVertexBuffersD3D6(uint64_t commandEncoder, int count, const uint64_t* 
 #endif
 }
 //------------------------------------------------------------------------------
+void xxSetMeshTexturesD3D6(uint64_t commandEncoder, int count, const uint64_t* textures)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetVertexTexturesD3D6(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
 
@@ -1011,6 +1041,11 @@ void xxSetFragmentTexturesD3D6(uint64_t commandEncoder, int count, const uint64_
         LPDIRECT3DTEXTURE2 texture = reinterpret_cast<LPDIRECT3DTEXTURE2>(textures[i]);
         d3dDevice->SetTexture(i, texture);
     }
+}
+//------------------------------------------------------------------------------
+void xxSetMeshSamplersD3D6(uint64_t commandEncoder, int count, const uint64_t* samplers)
+{
+
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersD3D6(uint64_t commandEncoder, int count, const uint64_t* samplers)
