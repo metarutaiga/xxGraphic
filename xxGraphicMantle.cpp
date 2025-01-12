@@ -263,7 +263,35 @@ void xxPresentSwapchainMantle(uint64_t swapchain)
     if (grSwapchain->commandBufferIndex >= NUM_BACK_BUFFERS)
         grSwapchain->commandBufferIndex = 0;
 }
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t xxCreateFramebufferMantle(uint64_t device, uint64_t texture)
+{
+    return 0;
+}
 //------------------------------------------------------------------------------
+void xxDestroyFramebufferMantle(uint64_t framebuffer)
+{
+
+}
+//------------------------------------------------------------------------------
+uint64_t xxGetFramebufferMantle(uint64_t device, uint64_t swapchain, float* scale)
+{
+    if (scale)
+    {
+        (*scale) = 1.0f;
+    }
+
+    GRFRAMEBUFFER* grFramebuffer = reinterpret_cast<GRSWAPCHAIN*>(swapchain);
+    if (grFramebuffer == nullptr)
+        return 0;
+
+    return reinterpret_cast<uint64_t>(grFramebuffer);
+}
+//==============================================================================
+//  Command Buffer
+//==============================================================================
 uint64_t xxGetCommandBufferMantle(uint64_t device, uint64_t swapchain)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
@@ -286,22 +314,6 @@ uint64_t xxGetCommandBufferMantle(uint64_t device, uint64_t swapchain)
     return reinterpret_cast<uint64_t>(commandBuffer);
 }
 //------------------------------------------------------------------------------
-uint64_t xxGetFramebufferMantle(uint64_t device, uint64_t swapchain, float* scale)
-{
-    if (scale)
-    {
-        (*scale) = 1.0f;
-    }
-
-    GRFRAMEBUFFER* grFramebuffer = reinterpret_cast<GRSWAPCHAIN*>(swapchain);
-    if (grFramebuffer == nullptr)
-        return 0;
-
-    return reinterpret_cast<uint64_t>(grFramebuffer);
-}
-//==============================================================================
-//  Command Buffer
-//==============================================================================
 bool xxBeginCommandBufferMantle(uint64_t commandBuffer)
 {
     GR_CMD_BUFFER grCommandBuffer = reinterpret_cast<GR_CMD_BUFFER>(commandBuffer);
@@ -521,6 +533,27 @@ uint64_t xxCreateVertexBufferMantle(uint64_t device, int size, uint64_t vertexAt
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateStorageBufferMantle(uint64_t device, int size)
+{
+    GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
+    if (grDevice == GR_NULL_HANDLE)
+        return 0;
+
+    intptr_t pageSize = (intptr_t)g_heapProps.pageSize;
+
+    GR_MEMORY_ALLOC_INFO allocInfo = {};
+    allocInfo.size = ((1 + size) / pageSize) * pageSize;
+    allocInfo.alignment = 0;
+    allocInfo.memPriority = GR_MEMORY_PRIORITY_HIGH;
+    allocInfo.heapCount = 1;
+    allocInfo.heaps[0] = g_suitableHeap;
+
+    GR_GPU_MEMORY memory = GR_NULL_HANDLE;
+    grAllocMemory(grDevice, &allocInfo, &memory);
+
+    return reinterpret_cast<uint64_t>(memory);
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateInstanceBufferMantle(uint64_t device, int size)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
@@ -875,6 +908,10 @@ void xxSetVertexBuffersMantle(uint64_t commandEncoder, int count, const uint64_t
     grAttachMemoryViewDescriptors(0, BASE_VERTEX_ATTRIBUTE, count, infos);
 }
 //------------------------------------------------------------------------------
+void xxSetMeshTexturesMantle(uint64_t commandEncoder, int count, const uint64_t* textures)
+{
+}
+//------------------------------------------------------------------------------
 void xxSetVertexTexturesMantle(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
     GR_IMAGE_VIEW_ATTACH_INFO infos[8];
@@ -901,6 +938,10 @@ void xxSetFragmentTexturesMantle(uint64_t commandEncoder, int count, const uint6
     }
 
     grAttachImageViewDescriptors(0, BASE_PIXEL_TEXTURE, count, infos);
+}
+//------------------------------------------------------------------------------
+void xxSetMeshSamplersMantle(uint64_t commandEncoder, int count, const uint64_t* samplers)
+{
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersMantle(uint64_t commandEncoder, int count, const uint64_t* samplers)

@@ -26,19 +26,21 @@ void            xxDestroyDeviceGlide(uint64_t device);
 bool            xxResetDeviceGlide(uint64_t device);
 bool            xxTestDeviceGlide(uint64_t device);
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-//==============================================================================
 //  Swapchain
 //==============================================================================
 uint64_t        xxCreateSwapchainGlide(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain);
 void            xxDestroySwapchainGlide(uint64_t swapchain);
 void            xxPresentSwapchainGlide(uint64_t swapchain);
-uint64_t        xxGetCommandBufferGlide(uint64_t device, uint64_t swapchain);
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t        xxCreateFramebufferGlide(uint64_t device, uint64_t texture);
+void            xxDestroyFramebufferGlide(uint64_t framebuffer);
 uint64_t        xxGetFramebufferGlide(uint64_t device, uint64_t swapchain, float* scale);
 //==============================================================================
 //  Command Buffer
 //==============================================================================
+uint64_t        xxGetCommandBufferGlide(uint64_t device, uint64_t swapchain);
 bool            xxBeginCommandBufferGlide(uint64_t commandBuffer);
 void            xxEndCommandBufferGlide(uint64_t commandBuffer);
 void            xxSubmitCommandBufferGlide(uint64_t commandBuffer, uint64_t swapchain);
@@ -61,6 +63,7 @@ uint64_t        xxCreateConstantBufferGlide(uint64_t device, int size);
 uint64_t        xxCreateIndexBufferGlide(uint64_t device, int size, int bits);
 uint64_t        xxCreateVertexBufferGlide(uint64_t device, int size, uint64_t vertexAttribute);
 uint64_t        xxCreateStorageBufferGlide(uint64_t device, int size);
+uint64_t        xxCreateInstanceBufferGlide(uint64_t device, int size);
 void            xxDestroyBufferGlide(uint64_t device, uint64_t buffer);
 void*           xxMapBufferGlide(uint64_t device, uint64_t buffer);
 void            xxUnmapBufferGlide(uint64_t device, uint64_t buffer);
@@ -102,8 +105,10 @@ void            xxSetScissorGlide(uint64_t commandEncoder, int x, int y, int wid
 void            xxSetPipelineGlide(uint64_t commandEncoder, uint64_t pipeline);
 void            xxSetMeshBuffersGlide(uint64_t commandEncoder, int count, const uint64_t* buffers);
 void            xxSetVertexBuffersGlide(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
+void            xxSetMeshTexturesGlide(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetVertexTexturesGlide(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetFragmentTexturesGlide(uint64_t commandEncoder, int count, const uint64_t* textures);
+void            xxSetMeshSamplersGlide(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetVertexSamplersGlide(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetFragmentSamplersGlide(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetMeshConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, int size);

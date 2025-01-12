@@ -110,9 +110,6 @@ bool xxTestDeviceGLES2(uint64_t device)
     return true;
 }
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-//==============================================================================
 //  Swapchain
 //==============================================================================
 uint64_t xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain)
@@ -166,24 +163,17 @@ void xxPresentSwapchainGLES2(uint64_t swapchain)
 
     glPresentContext(glSwapchain->context, glSwapchain->display);
 }
-//------------------------------------------------------------------------------
-uint64_t xxGetCommandBufferGLES2(uint64_t device, uint64_t swapchain)
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t xxCreateFramebufferGLES2(uint64_t device, uint64_t texture)
 {
-    GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(swapchain);
-    if (glSwapchain == nullptr)
-        return 0;
+    return 0;
+}
+//------------------------------------------------------------------------------
+void xxDestroyFramebufferGLES2(uint64_t framebuffer)
+{
 
-    glMakeCurrentContext(glSwapchain->context, glSwapchain->display);
-    glViewport(0, 0, glSwapchain->width, glSwapchain->height);
-    glScissor(0, 0, glSwapchain->width, glSwapchain->height);
-    glFrontFace(GL_CW);
-
-    glSwapchain->pipeline = 0;
-    memset(glSwapchain->vertexBuffers, 0, sizeof(glSwapchain->vertexBuffers));
-    memset(glSwapchain->textureTargets, 0, sizeof(glSwapchain->textureTargets));
-    memset(glSwapchain->textureMipmaps, 0, sizeof(glSwapchain->textureMipmaps));
-
-    return reinterpret_cast<uint64_t>(glSwapchain);
 }
 //------------------------------------------------------------------------------
 uint64_t xxGetFramebufferGLES2(uint64_t device, uint64_t swapchain, float* scale)
@@ -209,6 +199,25 @@ uint64_t xxGetFramebufferGLES2(uint64_t device, uint64_t swapchain, float* scale
 //==============================================================================
 //  Command Buffer
 //==============================================================================
+uint64_t xxGetCommandBufferGLES2(uint64_t device, uint64_t swapchain)
+{
+    GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(swapchain);
+    if (glSwapchain == nullptr)
+        return 0;
+
+    glMakeCurrentContext(glSwapchain->context, glSwapchain->display);
+    glViewport(0, 0, glSwapchain->width, glSwapchain->height);
+    glScissor(0, 0, glSwapchain->width, glSwapchain->height);
+    glFrontFace(GL_CW);
+
+    glSwapchain->pipeline = 0;
+    memset(glSwapchain->vertexBuffers, 0, sizeof(glSwapchain->vertexBuffers));
+    memset(glSwapchain->textureTargets, 0, sizeof(glSwapchain->textureTargets));
+    memset(glSwapchain->textureMipmaps, 0, sizeof(glSwapchain->textureMipmaps));
+
+    return reinterpret_cast<uint64_t>(glSwapchain);
+}
+//------------------------------------------------------------------------------
 bool xxBeginCommandBufferGLES2(uint64_t commandBuffer)
 {
     return true;
@@ -445,6 +454,20 @@ uint64_t xxCreateStorageBufferGLES2(uint64_t device, int size)
         return 0;
 
     glBuffer->type = GL_SHADER_STORAGE_BUFFER;
+    glBuffer->buffer = 0;
+    glBuffer->memory = xxAlloc(char, size);
+    glBuffer->size = size;
+
+    return reinterpret_cast<uint64_t>(glBuffer);
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateInstanceBufferGLES2(uint64_t device, int size)
+{
+    GLBUFFER* glBuffer = xxAlloc(GLBUFFER);
+    if (glBuffer == nullptr)
+        return 0;
+
+    glBuffer->type = GL_ARRAY_BUFFER;
     glBuffer->buffer = 0;
     glBuffer->memory = xxAlloc(char, size);
     glBuffer->size = size;
@@ -1124,6 +1147,11 @@ void xxSetVertexBuffersGLES2(uint64_t commandEncoder, int count, const uint64_t*
     }
 }
 //------------------------------------------------------------------------------
+void xxSetMeshTexturesGLES2(uint64_t commandEncoder, int count, const uint64_t* textures)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetVertexTexturesGLES2(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
 
@@ -1143,6 +1171,11 @@ void xxSetFragmentTexturesGLES2(uint64_t commandEncoder, int count, const uint64
         glSwapchain->textureTargets[i] = glTexture->target;
         glSwapchain->textureMipmaps[i] = (glTexture->mipmap > 1);
     }
+}
+//------------------------------------------------------------------------------
+void xxSetMeshSamplersGLES2(uint64_t commandEncoder, int count, const uint64_t* samplers)
+{
+
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersGLES2(uint64_t commandEncoder, int count, const uint64_t* samplers)

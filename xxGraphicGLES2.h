@@ -26,19 +26,21 @@ void            xxDestroyDeviceGLES2(uint64_t device);
 bool            xxResetDeviceGLES2(uint64_t device);
 bool            xxTestDeviceGLES2(uint64_t device);
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-//==============================================================================
 //  Swapchain
 //==============================================================================
 uint64_t        xxCreateSwapchainGLES2(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain);
 void            xxDestroySwapchainGLES2(uint64_t swapchain);
 void            xxPresentSwapchainGLES2(uint64_t swapchain);
-uint64_t        xxGetCommandBufferGLES2(uint64_t device, uint64_t swapchain);
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t        xxCreateFramebufferGLES2(uint64_t device, uint64_t texture);
+void            xxDestroyFramebufferGLES2(uint64_t framebuffer);
 uint64_t        xxGetFramebufferGLES2(uint64_t device, uint64_t swapchain, float* scale);
 //==============================================================================
 //  Command Buffer
 //==============================================================================
+uint64_t        xxGetCommandBufferGLES2(uint64_t device, uint64_t swapchain);
 bool            xxBeginCommandBufferGLES2(uint64_t commandBuffer);
 void            xxEndCommandBufferGLES2(uint64_t commandBuffer);
 void            xxSubmitCommandBufferGLES2(uint64_t commandBuffer, uint64_t swapchain);
@@ -61,6 +63,7 @@ uint64_t        xxCreateConstantBufferGLES2(uint64_t device, int size);
 uint64_t        xxCreateIndexBufferGLES2(uint64_t device, int size, int bits);
 uint64_t        xxCreateVertexBufferGLES2(uint64_t device, int size, uint64_t vertexAttribute);
 uint64_t        xxCreateStorageBufferGLES2(uint64_t device, int size);
+uint64_t        xxCreateInstanceBufferGLES2(uint64_t device, int size);
 void            xxDestroyBufferGLES2(uint64_t device, uint64_t buffer);
 void*           xxMapBufferGLES2(uint64_t device, uint64_t buffer);
 void            xxUnmapBufferGLES2(uint64_t device, uint64_t buffer);
@@ -102,8 +105,10 @@ void            xxSetScissorGLES2(uint64_t commandEncoder, int x, int y, int wid
 void            xxSetPipelineGLES2(uint64_t commandEncoder, uint64_t pipeline);
 void            xxSetMeshBuffersGLES2(uint64_t commandEncoder, int count, const uint64_t* buffers);
 void            xxSetVertexBuffersGLES2(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
+void            xxSetMeshTexturesGLES2(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetVertexTexturesGLES2(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetFragmentTexturesGLES2(uint64_t commandEncoder, int count, const uint64_t* textures);
+void            xxSetMeshSamplersGLES2(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetVertexSamplersGLES2(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetFragmentSamplersGLES2(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetMeshConstantBufferGLES2(uint64_t commandEncoder, uint64_t buffer, int size);

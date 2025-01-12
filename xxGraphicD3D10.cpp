@@ -258,10 +258,17 @@ void xxPresentSwapchainD3D10(uint64_t swapchain)
 
     d3dSwapchain->dxgiSwapchain->Present(0, 0);
 }
-//------------------------------------------------------------------------------
-uint64_t xxGetCommandBufferD3D10(uint64_t device, uint64_t swapchain)
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t xxCreateFramebufferD3D10(uint64_t device, uint64_t texture)
 {
-    return device;
+    return 0;
+}
+//------------------------------------------------------------------------------
+void xxDestroyFramebufferD3D10(uint64_t framebuffer)
+{
+
 }
 //------------------------------------------------------------------------------
 uint64_t xxGetFramebufferD3D10(uint64_t device, uint64_t swapchain, float* scale)
@@ -276,6 +283,11 @@ uint64_t xxGetFramebufferD3D10(uint64_t device, uint64_t swapchain, float* scale
 //==============================================================================
 //  Command Buffer
 //==============================================================================
+uint64_t xxGetCommandBufferD3D10(uint64_t device, uint64_t swapchain)
+{
+    return device;
+}
+//------------------------------------------------------------------------------
 bool xxBeginCommandBufferD3D10(uint64_t commandBuffer)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandBuffer);
@@ -590,6 +602,34 @@ uint64_t xxCreateVertexBufferD3D10(uint64_t device, int size, uint64_t vertexAtt
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateStorageBufferD3D10(uint64_t device, int size)
+{
+    ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(device);
+    if (d3dDevice == nullptr)
+        return 0;
+    D3D10BUFFER* d3dBuffer = xxAlloc(D3D10BUFFER);
+    if (d3dBuffer == nullptr)
+        return 0;
+
+    D3D10_BUFFER_DESC desc = {};
+    desc.ByteWidth = size;
+    desc.Usage = D3D10_USAGE_DYNAMIC;
+    desc.BindFlags = D3D10_BIND_VERTEX_BUFFER;
+    desc.CPUAccessFlags = D3D10_CPU_ACCESS_WRITE;
+
+    ID3D10Buffer* buffer = nullptr;
+    HRESULT hResult = d3dDevice->CreateBuffer(&desc, nullptr, &buffer);
+    if (hResult != S_OK)
+        return 0;
+
+    d3dBuffer->buffer = buffer;
+    d3dBuffer->size = size;
+    d3dBuffer->map = D3D10_MAP_WRITE_NO_OVERWRITE;
+    d3dBuffer->address = nullptr;
+
+    return reinterpret_cast<uint64_t>(d3dBuffer);
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateInstanceBufferD3D10(uint64_t device, int size)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(device);
     if (d3dDevice == nullptr)
@@ -1273,6 +1313,10 @@ void xxSetVertexBuffersD3D10(uint64_t commandEncoder, int count, const uint64_t*
     d3dDevice->IASetVertexBuffers(0, count, d3dBuffers, strides, offsets);
 }
 //------------------------------------------------------------------------------
+void xxSetMeshTexturesD3D10(uint64_t commandEncoder, int count, const uint64_t* textures)
+{
+}
+//------------------------------------------------------------------------------
 void xxSetVertexTexturesD3D10(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
@@ -1299,6 +1343,10 @@ void xxSetFragmentTexturesD3D10(uint64_t commandEncoder, int count, const uint64
     }
 
     d3dDevice->PSSetShaderResources(0, count, d3dTextures);
+}
+//------------------------------------------------------------------------------
+void xxSetMeshSamplersD3D10(uint64_t commandEncoder, int count, const uint64_t* samplers)
+{
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersD3D10(uint64_t commandEncoder, int count, const uint64_t* samplers)

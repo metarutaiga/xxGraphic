@@ -289,17 +289,17 @@ void xxPresentSwapchainD3D11(uint64_t swapchain)
 
     d3dSwapchain->dxgiSwapchain->Present(0, 0);
 }
-//------------------------------------------------------------------------------
-uint64_t xxGetCommandBufferD3D11(uint64_t device, uint64_t swapchain)
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t xxCreateFramebufferD3D11(uint64_t device, uint64_t texture)
 {
-    D3D11SWAPCHAIN* d3dSwapchain = reinterpret_cast<D3D11SWAPCHAIN*>(swapchain);
-    if (d3dSwapchain == nullptr)
-        return 0;
-    ID3D11DeviceContext* d3dDeviceContext = d3dSwapchain->deviceContext;
-    if (d3dDeviceContext == nullptr)
-        return 0;
+    return 0;
+}
+//------------------------------------------------------------------------------
+void xxDestroyFramebufferD3D11(uint64_t framebuffer)
+{
 
-    return reinterpret_cast<uint64_t>(d3dDeviceContext);
 }
 //------------------------------------------------------------------------------
 uint64_t xxGetFramebufferD3D11(uint64_t device, uint64_t swapchain, float* scale)
@@ -314,6 +314,18 @@ uint64_t xxGetFramebufferD3D11(uint64_t device, uint64_t swapchain, float* scale
 //==============================================================================
 //  Command Buffer
 //==============================================================================
+uint64_t xxGetCommandBufferD3D11(uint64_t device, uint64_t swapchain)
+{
+    D3D11SWAPCHAIN* d3dSwapchain = reinterpret_cast<D3D11SWAPCHAIN*>(swapchain);
+    if (d3dSwapchain == nullptr)
+        return 0;
+    ID3D11DeviceContext* d3dDeviceContext = d3dSwapchain->deviceContext;
+    if (d3dDeviceContext == nullptr)
+        return 0;
+
+    return reinterpret_cast<uint64_t>(d3dDeviceContext);
+}
+//------------------------------------------------------------------------------
 bool xxBeginCommandBufferD3D11(uint64_t commandBuffer)
 {
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandBuffer);
@@ -628,6 +640,34 @@ uint64_t xxCreateVertexBufferD3D11(uint64_t device, int size, uint64_t vertexAtt
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateStorageBufferD3D11(uint64_t device, int size)
+{
+    ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
+    if (d3dDevice == nullptr)
+        return 0;
+    D3D11BUFFER* d3dBuffer = xxAlloc(D3D11BUFFER);
+    if (d3dBuffer == nullptr)
+        return 0;
+
+    D3D11_BUFFER_DESC desc = {};
+    desc.ByteWidth = size;
+    desc.Usage = D3D11_USAGE_DYNAMIC;
+    desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+    desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+    ID3D11Buffer* buffer = nullptr;
+    HRESULT hResult = d3dDevice->CreateBuffer(&desc, nullptr, &buffer);
+    if (hResult != S_OK)
+        return 0;
+
+    d3dBuffer->buffer = buffer;
+    d3dBuffer->size = size;
+    d3dBuffer->map = D3D11_MAP_WRITE_NO_OVERWRITE;
+    d3dBuffer->address = nullptr;
+
+    return reinterpret_cast<uint64_t>(d3dBuffer);
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateInstanceBufferD3D11(uint64_t device, int size)
 {
     ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
     if (d3dDevice == nullptr)
@@ -1346,6 +1386,11 @@ void xxSetVertexBuffersD3D11(uint64_t commandEncoder, int count, const uint64_t*
     d3dDeviceContext->IASetVertexBuffers(0, count, d3dBuffers, strides, offsets);
 }
 //------------------------------------------------------------------------------
+void xxSetMeshTexturesD3D11(uint64_t commandEncoder, int count, const uint64_t* textures)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetVertexTexturesD3D11(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandEncoder);
@@ -1372,6 +1417,11 @@ void xxSetFragmentTexturesD3D11(uint64_t commandEncoder, int count, const uint64
     }
 
     d3dDeviceContext->PSSetShaderResources(0, count, d3dTextures);
+}
+//------------------------------------------------------------------------------
+void xxSetMeshSamplersD3D11(uint64_t commandEncoder, int count, const uint64_t* samplers)
+{
+
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersD3D11(uint64_t commandEncoder, int count, const uint64_t* samplers)

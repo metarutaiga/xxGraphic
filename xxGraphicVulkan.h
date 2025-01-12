@@ -26,19 +26,21 @@ void            xxDestroyDeviceVulkan(uint64_t device);
 bool            xxResetDeviceVulkan(uint64_t device);
 bool            xxTestDeviceVulkan(uint64_t device);
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-//==============================================================================
 //  Swapchain
 //==============================================================================
 uint64_t        xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain);
 void            xxDestroySwapchainVulkan(uint64_t swapchain);
 void            xxPresentSwapchainVulkan(uint64_t swapchain);
-uint64_t        xxGetCommandBufferVulkan(uint64_t device, uint64_t swapchain);
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t        xxCreateFramebufferVulkan(uint64_t device, uint64_t texture);
+void            xxDestroyFramebufferVulkan(uint64_t framebuffer);
 uint64_t        xxGetFramebufferVulkan(uint64_t device, uint64_t swapchain, float* scale);
 //==============================================================================
 //  Command Buffer
 //==============================================================================
+uint64_t        xxGetCommandBufferVulkan(uint64_t device, uint64_t swapchain);
 bool            xxBeginCommandBufferVulkan(uint64_t commandBuffer);
 void            xxEndCommandBufferVulkan(uint64_t commandBuffer);
 void            xxSubmitCommandBufferVulkan(uint64_t commandBuffer, uint64_t swapchain);
@@ -61,6 +63,7 @@ uint64_t        xxCreateConstantBufferVulkan(uint64_t device, int size);
 uint64_t        xxCreateIndexBufferVulkan(uint64_t device, int size, int bits);
 uint64_t        xxCreateVertexBufferVulkan(uint64_t device, int size, uint64_t vertexAttribute);
 uint64_t        xxCreateStorageBufferVulkan(uint64_t device, int size);
+uint64_t        xxCreateInstanceBufferVulkan(uint64_t device, int size);
 void            xxDestroyBufferVulkan(uint64_t device, uint64_t buffer);
 void*           xxMapBufferVulkan(uint64_t device, uint64_t buffer);
 void            xxUnmapBufferVulkan(uint64_t device, uint64_t buffer);
@@ -102,8 +105,10 @@ void            xxSetScissorVulkan(uint64_t commandEncoder, int x, int y, int wi
 void            xxSetPipelineVulkan(uint64_t commandEncoder, uint64_t pipeline);
 void            xxSetMeshBuffersVulkan(uint64_t commandEncoder, int count, const uint64_t* buffers);
 void            xxSetVertexBuffersVulkan(uint64_t commandEncoder, int count, const uint64_t* buffers, uint64_t vertexAttribute);
+void            xxSetMeshTexturesVulkan(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetVertexTexturesVulkan(uint64_t commandEncoder, int count, const uint64_t* textures);
 void            xxSetFragmentTexturesVulkan(uint64_t commandEncoder, int count, const uint64_t* textures);
+void            xxSetMeshSamplersVulkan(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetVertexSamplersVulkan(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetFragmentSamplersVulkan(uint64_t commandEncoder, int count, const uint64_t* samplers);
 void            xxSetMeshConstantBufferVulkan(uint64_t commandEncoder, uint64_t buffer, int size);

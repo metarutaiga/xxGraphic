@@ -223,12 +223,17 @@ void xxPresentSwapchainMetal(MTLSWAPCHAIN* swapchain)
     swapchain->drawable = nil;
     swapchain->commandBuffer = nil;
 }
-//------------------------------------------------------------------------------
-id xxGetCommandBufferMetal(id <MTLDevice> __unsafe_unretained device, MTLSWAPCHAIN* swapchain)
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+MTLFRAMEBUFFER* xxCreateFramebufferMetal(id <MTLDevice> __unsafe_unretained device, MTLTEXTURE* texture)
 {
-    swapchain->commandBuffer = [swapchain->commandQueue commandBuffer];
-
-    return swapchain->commandBuffer;
+    return nullptr;
+}
+//------------------------------------------------------------------------------
+void xxDestroyFramebufferMetal(MTLFRAMEBUFFER* framebuffer)
+{
+    
 }
 //------------------------------------------------------------------------------
 MTLFRAMEBUFFER* xxGetFramebufferMetal(id <MTLDevice> __unsafe_unretained device, MTLSWAPCHAIN* swapchain, float* scale)
@@ -258,6 +263,13 @@ MTLFRAMEBUFFER* xxGetFramebufferMetal(id <MTLDevice> __unsafe_unretained device,
 //==============================================================================
 //  Command Buffer
 //==============================================================================
+id xxGetCommandBufferMetal(id <MTLDevice> __unsafe_unretained device, MTLSWAPCHAIN* swapchain)
+{
+    swapchain->commandBuffer = [swapchain->commandQueue commandBuffer];
+
+    return swapchain->commandBuffer;
+}
+//------------------------------------------------------------------------------
 bool xxBeginCommandBufferMetal(uint64_t commandBuffer)
 {
     return true;
@@ -433,6 +445,18 @@ id xxCreateVertexBufferMetal(id <MTLDevice> __unsafe_unretained device, int size
 }
 //------------------------------------------------------------------------------
 id xxCreateStorageBufferMetal(id <MTLDevice> __unsafe_unretained device, int size)
+{
+    if (device == nil)
+        return 0;
+
+    id <MTLBuffer> buffer = [device newBufferWithLength:size
+                                                options:MTLResourceStorageModeShared];
+
+    objc_retain(buffer);
+    return buffer;
+}
+//------------------------------------------------------------------------------
+id xxCreateInstanceBufferMetal(id <MTLDevice> __unsafe_unretained device, int size)
 {
     if (device == nil)
         return 0;
@@ -993,6 +1017,19 @@ void xxSetVertexBuffersMetal(id <MTLRenderCommandEncoder> __unsafe_unretained co
 #endif
 }
 //------------------------------------------------------------------------------
+void xxSetMeshTexturesMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, MTLTEXTURE** textures)
+{
+    id <MTLTexture> __unsafe_unretained meshTextures[8];
+
+    for (int i = 0; i < count; ++i)
+    {
+        meshTextures[i] = textures[i]->texture;
+    }
+
+    [commandEncoder setMeshTextures:meshTextures
+                          withRange:NSMakeRange(0, count)];
+}
+//------------------------------------------------------------------------------
 void xxSetVertexTexturesMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, MTLTEXTURE** textures)
 {
     id <MTLTexture> __unsafe_unretained vertexTextures[8];
@@ -1017,6 +1054,12 @@ void xxSetFragmentTexturesMetal(id <MTLRenderCommandEncoder> __unsafe_unretained
 
     [commandEncoder setFragmentTextures:fragmentTextures
                               withRange:NSMakeRange(0, count)];
+}
+//------------------------------------------------------------------------------
+void xxSetMeshSamplersMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, id <MTLSamplerState> __unsafe_unretained* samplers)
+{
+    [commandEncoder setMeshSamplerStates:samplers
+                               withRange:NSMakeRange(0, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, id <MTLSamplerState> __unsafe_unretained* samplers)

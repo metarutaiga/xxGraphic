@@ -40,8 +40,10 @@ id xxCreateInstanceMetal2()
     xxRegisterFunctionSingle(xxSetPipeline, xxSetPipelineMetal2);
     xxRegisterFunctionSingle(xxSetMeshBuffers, xxSetMeshBuffersMetal2);
     xxRegisterFunctionSingle(xxSetVertexBuffers, xxSetVertexBuffersMetal2);
+    xxRegisterFunctionSingle(xxSetMeshTextures, xxSetMeshTexturesMetal2);
     xxRegisterFunctionSingle(xxSetVertexTextures, xxSetVertexTexturesMetal2);
     xxRegisterFunctionSingle(xxSetFragmentTextures, xxSetFragmentTexturesMetal2);
+    xxRegisterFunctionSingle(xxSetMeshSamplers, xxSetMeshSamplersMetal2);
     xxRegisterFunctionSingle(xxSetVertexSamplers, xxSetVertexSamplersMetal2);
     xxRegisterFunctionSingle(xxSetFragmentSamplers, xxSetFragmentSamplersMetal2);
     xxRegisterFunctionSingle(xxSetMeshConstantBuffer, xxSetMeshConstantBufferMetal2);
@@ -54,7 +56,7 @@ id xxCreateInstanceMetal2()
     return instance;
 }
 //==============================================================================
-//  Swapchain
+//  Command Buffer
 //==============================================================================
 MTLSWAPCHAIN* xxGetCommandBufferMetal2(id <MTLDevice> __unsafe_unretained device, MTLSWAPCHAIN* swapchain)
 {
@@ -284,7 +286,8 @@ void xxSetMeshBuffersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLBuffer> _
 
         if (buffer == nil)
             continue;
-        if (buffer.label != swapchain->frameString)
+        NSString* __unsafe_unretained label = buffer.label;
+        if (label != swapchain->frameString)
         {
             buffer.label = swapchain->frameString;
             [swapchain->commandEncoder useResource:buffer
@@ -306,21 +309,48 @@ void xxSetVertexBuffersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLBuffer>
     xxSetVertexBuffersMetal(swapchain->commandEncoder, count, buffers, vertexAttribute);
 }
 //------------------------------------------------------------------------------
+void xxSetMeshTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE** textures)
+{
+    id <MTLTexture> __unsafe_unretained meshTextures[8];
+
+    for (int i = 0; i < count; ++i)
+    {
+        id <MTLTexture> __unsafe_unretained texture = textures[i] ? textures[i]->texture : nil;
+        meshTextures[i] = texture;
+
+        if (texture == nil)
+            continue;
+        NSString* __unsafe_unretained label = texture.label;
+        if (label != swapchain->frameString)
+        {
+            texture.label = swapchain->frameString;
+            [swapchain->commandEncoder useResource:texture
+                                             usage:MTLResourceUsageRead
+                                            stages:MTLRenderStageMesh];
+        }
+    }
+
+    mtlUpdateArgumentEncoder(swapchain);
+    [swapchain->meshArgumentEncoder setTextures:meshTextures
+                                      withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_TEXTURE, count)];
+}
+//------------------------------------------------------------------------------
 void xxSetVertexTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE** textures)
 {
     id <MTLTexture> __unsafe_unretained vertexTextures[8];
 
     for (int i = 0; i < count; ++i)
     {
-        MTLTEXTURE* texture = textures[i];
-        vertexTextures[i] = texture ? texture->texture : nil;
+        id <MTLTexture> __unsafe_unretained texture = textures[i] ? textures[i]->texture : nil;
+        vertexTextures[i] = texture;
 
-        if (texture == nullptr)
+        if (texture == nil)
             continue;
-        if (texture->frameCount != swapchain->frameCount)
+        NSString* __unsafe_unretained label = texture.label;
+        if (label != swapchain->frameString)
         {
-            texture->frameCount = swapchain->frameCount;
-            [swapchain->commandEncoder useResource:texture->texture
+            texture.label = swapchain->frameString;
+            [swapchain->commandEncoder useResource:texture
                                              usage:MTLResourceUsageRead
                                             stages:MTLRenderStageVertex];
         }
@@ -337,15 +367,16 @@ void xxSetFragmentTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE*
 
     for (int i = 0; i < count; ++i)
     {
-        MTLTEXTURE* texture = textures[i];
-        fragmentTextures[i] = texture ? texture->texture : nil;
+        id <MTLTexture> __unsafe_unretained texture = textures[i] ? textures[i]->texture : nil;
+        fragmentTextures[i] = texture;
 
-        if (texture == nullptr)
+        if (texture == nil)
             continue;
-        if (texture->frameCount != swapchain->frameCount)
+        NSString* __unsafe_unretained label = texture.label;
+        if (label != swapchain->frameString)
         {
-            texture->frameCount = swapchain->frameCount;
-            [swapchain->commandEncoder useResource:texture->texture
+            texture.label = swapchain->frameString;
+            [swapchain->commandEncoder useResource:texture
                                              usage:MTLResourceUsageRead
                                             stages:MTLRenderStageFragment];
         }
@@ -354,6 +385,13 @@ void xxSetFragmentTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE*
     mtlUpdateArgumentEncoder(swapchain);
     [swapchain->fragmentArgumentEncoder setTextures:fragmentTextures
                                           withRange:NSMakeRange(xxGraphicDescriptor::FRAGMENT_TEXTURE, count)];
+}
+//------------------------------------------------------------------------------
+void xxSetMeshSamplersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLSamplerState> __unsafe_unretained* samplers)
+{
+    mtlUpdateArgumentEncoder(swapchain);
+    [swapchain->meshArgumentEncoder setSamplerStates:samplers
+                                           withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_SAMPLER, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLSamplerState> __unsafe_unretained* samplers)

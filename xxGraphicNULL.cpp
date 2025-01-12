@@ -45,9 +45,6 @@ bool xxTestDeviceNULL(uint64_t device)
     return true;
 }
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-//==============================================================================
 //  Swapchain
 //==============================================================================
 uint64_t xxCreateSwapchainNULL(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain)
@@ -64,10 +61,17 @@ void xxPresentSwapchainNULL(uint64_t swapchain)
 {
 
 }
-//------------------------------------------------------------------------------
-uint64_t xxGetCommandBufferNULL(uint64_t device, uint64_t swapchain)
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t xxCreateFramebufferNULL(uint64_t device, uint64_t texture)
 {
     return 0;
+}
+//------------------------------------------------------------------------------
+void xxDestroyFramebufferNULL(uint64_t framebuffer)
+{
+
 }
 //------------------------------------------------------------------------------
 uint64_t xxGetFramebufferNULL(uint64_t device, uint64_t swapchain, float* scale)
@@ -77,6 +81,11 @@ uint64_t xxGetFramebufferNULL(uint64_t device, uint64_t swapchain, float* scale)
 //==============================================================================
 //  Command Buffer
 //==============================================================================
+uint64_t xxGetCommandBufferNULL(uint64_t device, uint64_t swapchain)
+{
+    return 0;
+}
+//------------------------------------------------------------------------------
 bool xxBeginCommandBufferNULL(uint64_t commandBuffer)
 {
     return true;
@@ -143,6 +152,11 @@ uint64_t xxCreateVertexBufferNULL(uint64_t device, int size, uint64_t vertexAttr
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateStorageBufferNULL(uint64_t device, int size)
+{
+    return 0;
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateInstanceBufferNULL(uint64_t device, int size)
 {
     return 0;
 }
@@ -287,12 +301,22 @@ void xxSetVertexBuffersNULL(uint64_t commandEncoder, int count, const uint64_t* 
 
 }
 //------------------------------------------------------------------------------
+void xxSetMeshTexturesNULL(uint64_t commandEncoder, int count, const uint64_t* textures)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetVertexTexturesNULL(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
 
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentTexturesNULL(uint64_t commandEncoder, int count, const uint64_t* textures)
+{
+
+}
+//------------------------------------------------------------------------------
+void xxSetMeshSamplersNULL(uint64_t commandEncoder, int count, const uint64_t* samplers)
 {
 
 }

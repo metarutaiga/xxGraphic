@@ -99,9 +99,6 @@ bool xxTestDeviceGlide(uint64_t device)
     return true;
 }
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-//==============================================================================
 //  Swapchain
 //==============================================================================
 uint64_t xxCreateSwapchainGlide(uint64_t device, uint64_t renderPass, void* view, int width, int height, uint64_t oldSwapchain)
@@ -142,14 +139,17 @@ void xxPresentSwapchainGlide(uint64_t swapchain)
     grSelectContext(grContext->context);
     grBufferSwap(0);
 }
-//------------------------------------------------------------------------------
-uint64_t xxGetCommandBufferGlide(uint64_t device, uint64_t swapchain)
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+uint64_t xxCreateFramebufferGlide(uint64_t device, uint64_t texture)
 {
-    GrContext* grContext = reinterpret_cast<GrContext*>(swapchain);
+    return 0;
+}
+//------------------------------------------------------------------------------
+void xxDestroyFramebufferGlide(uint64_t framebuffer)
+{
 
-    grSelectContext(grContext->context);
-
-    return reinterpret_cast<uint64_t>(grContext);
 }
 //------------------------------------------------------------------------------
 uint64_t xxGetFramebufferGlide(uint64_t device, uint64_t swapchain, float* scale)
@@ -169,6 +169,15 @@ uint64_t xxGetFramebufferGlide(uint64_t device, uint64_t swapchain, float* scale
 //==============================================================================
 //  Command Buffer
 //==============================================================================
+uint64_t xxGetCommandBufferGlide(uint64_t device, uint64_t swapchain)
+{
+    GrContext* grContext = reinterpret_cast<GrContext*>(swapchain);
+
+    grSelectContext(grContext->context);
+
+    return reinterpret_cast<uint64_t>(grContext);
+}
+//------------------------------------------------------------------------------
 bool xxBeginCommandBufferGlide(uint64_t commandBuffer)
 {
     return true;
@@ -297,6 +306,13 @@ uint64_t xxCreateVertexBufferGlide(uint64_t device, int size, uint64_t vertexAtt
 }
 //------------------------------------------------------------------------------
 uint64_t xxCreateStorageBufferGlide(uint64_t device, int size)
+{
+    char* grBuffer = xxAlloc(char, size);
+
+    return reinterpret_cast<uint64_t>(grBuffer);
+}
+//------------------------------------------------------------------------------
+uint64_t xxCreateInstanceBufferGlide(uint64_t device, int size)
 {
     char* grBuffer = xxAlloc(char, size);
 
@@ -526,6 +542,11 @@ void xxSetVertexBuffersGlide(uint64_t commandEncoder, int count, const uint64_t*
     g_vertexAttribute = vertexAttribute;
 }
 //------------------------------------------------------------------------------
+void xxSetMeshTexturesGlide(uint64_t commandEncoder, int count, const uint64_t* textures)
+{
+
+}
+//------------------------------------------------------------------------------
 void xxSetVertexTexturesGlide(uint64_t commandEncoder, int count, const uint64_t* textures)
 {
 
@@ -538,6 +559,11 @@ void xxSetFragmentTexturesGlide(uint64_t commandEncoder, int count, const uint64
         GrTexture* info = reinterpret_cast<GrTexture*>(textures[i]);
         grTexSource(GR_TMU0 + i, info->startAddress, GR_MIPMAPLEVELMASK_BOTH, info);
     }
+}
+//------------------------------------------------------------------------------
+void xxSetMeshSamplersGlide(uint64_t commandEncoder, int count, const uint64_t* samplers)
+{
+
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersGlide(uint64_t commandEncoder, int count, const uint64_t* samplers)

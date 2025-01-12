@@ -27,19 +27,21 @@ void            xxDestroyDeviceMetal(id <MTLDevice> device);
 bool            xxResetDeviceMetal(id <MTLDevice> device);
 bool            xxTestDeviceMetal(id <MTLDevice> device);
 //==============================================================================
-//  Framebuffer
-//==============================================================================
-//==============================================================================
 //  Swapchain
 //==============================================================================
 MTLSWAPCHAIN*   xxCreateSwapchainMetal(id <MTLDevice> device, MTLRenderPassDescriptor* renderPass, void* view, int width, int height, MTLSWAPCHAIN* oldSwapchain);
 void            xxDestroySwapchainMetal(MTLSWAPCHAIN* swapchain);
 void            xxPresentSwapchainMetal(MTLSWAPCHAIN* swapchain);
-id              xxGetCommandBufferMetal(id <MTLDevice> device, MTLSWAPCHAIN* swapchain);
+//==============================================================================
+//  Framebuffer
+//==============================================================================
+MTLFRAMEBUFFER* xxCreateFramebufferMetal(id <MTLDevice> device, MTLTEXTURE* texture);
+void            xxDestroyFramebufferMetal(MTLFRAMEBUFFER* framebuffer);
 MTLFRAMEBUFFER* xxGetFramebufferMetal(id <MTLDevice> device, MTLSWAPCHAIN* swapchain, float* scale);
 //==============================================================================
 //  Command Buffer
 //==============================================================================
+id              xxGetCommandBufferMetal(id <MTLDevice> device, MTLSWAPCHAIN* swapchain);
 bool            xxBeginCommandBufferMetal(uint64_t commandBuffer);
 void            xxEndCommandBufferMetal(uint64_t commandBuffer);
 void            xxSubmitCommandBufferMetal(uint64_t commandBuffer, uint64_t swapchain);
@@ -62,6 +64,7 @@ id              xxCreateConstantBufferMetal(id <MTLDevice> device, int size);
 id              xxCreateIndexBufferMetal(id <MTLDevice> device, int size, int bits);
 id              xxCreateVertexBufferMetal(id <MTLDevice> device, int size, MTLVertexDescriptor* vertexAttribute);
 id              xxCreateStorageBufferMetal(id <MTLDevice> device, int size);
+id              xxCreateInstanceBufferMetal(id <MTLDevice> device, int size);
 void            xxDestroyBufferMetal(id <MTLDevice> device, id <MTLBuffer> buffer);
 void*           xxMapBufferMetal(id <MTLDevice> device, id <MTLBuffer> buffer);
 void            xxUnmapBufferMetal(id <MTLDevice> device, id <MTLBuffer> buffer);
@@ -103,8 +106,10 @@ void            xxSetScissorMetal(id <MTLRenderCommandEncoder> commandEncoder, i
 void            xxSetPipelineMetal(id <MTLRenderCommandEncoder> commandEncoder, MTLPIPELINE* pipeline);
 void            xxSetMeshBuffersMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, id <MTLBuffer> __unsafe_unretained* buffers);
 void            xxSetVertexBuffersMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, id <MTLBuffer> __unsafe_unretained* buffers, MTLVertexDescriptor* vertexAttribute);
+void            xxSetMeshTexturesMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, MTLTEXTURE** textures);
 void            xxSetVertexTexturesMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, MTLTEXTURE** textures);
 void            xxSetFragmentTexturesMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, MTLTEXTURE** textures);
+void            xxSetMeshSamplersMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, id <MTLSamplerState> __unsafe_unretained* samplers);
 void            xxSetVertexSamplersMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, id <MTLSamplerState> __unsafe_unretained* samplers);
 void            xxSetFragmentSamplersMetal(id <MTLRenderCommandEncoder> commandEncoder, int count, id <MTLSamplerState> __unsafe_unretained* samplers);
 void            xxSetMeshConstantBufferMetal(id <MTLRenderCommandEncoder> commandEncoder, id <MTLBuffer> buffer, int size);
