@@ -246,7 +246,7 @@ void xxMaterial::UpdateConstant(xxDrawData const& data) const
                 size -= 3 * sizeof(xxMatrix4);
             }
 
-            if (size >= 12 * sizeof(xxVector4) && m_meshShader && (BackfaceCulling || FrustumCulling))
+            if (size >= 6 * sizeof(xxMatrix4x2) && m_meshShader && (BackfaceCulling || FrustumCulling))
             {
                 xxMatrix4x2* frustum = reinterpret_cast<xxMatrix4x2*>(vector);
 
@@ -264,7 +264,7 @@ void xxMaterial::UpdateConstant(xxDrawData const& data) const
                         frustum[i] = {};
                     }
                 }
-                vector += 6;
+                vector += 6 * 2;
                 size -= 6 * sizeof(xxMatrix4x2);
             }
 
@@ -386,7 +386,7 @@ int xxMaterial::GetVertexConstantSize(xxDrawData const& data) const
     int size = 3 * sizeof(xxMatrix4);
     if (m_meshShader && (BackfaceCulling || FrustumCulling))
     {
-        size += 12 * sizeof(xxVector4);
+        size += 6 * sizeof(xxMatrix4x2);
     }
     if (data.mesh->Skinning)
     {
@@ -632,87 +632,11 @@ R"(
 #define mul(a, b) (b * a)
 #endif)"
 //------------------------------------------------------------------------------
-//  Structure
-//------------------------------------------------------------------------------
-R"(
-#if SHADER_MESH
-#if SHADER_MSL
-struct Vertex
-{
-    packed_float3 Position;
-#if SHADER_SKINNING
-    packed_float3 BoneWeight;
-    packed_uint4 BoneIndices;
-#endif
-#if SHADER_NORMAL
-    packed_float3 Normal;
-#endif
-#if SHADER_COLOR
-    packed_float4 Color;
-#endif
-#if SHADER_TEXTURE
-    packed_float2 UV0;
-#endif
-};
-struct Meshlet
-{
-    uint VertexOffset;
-    uint TriangleOffset;
-    uint VertexCount;
-    uint TriangleCount;
-    float4 CenterRadius;
-    float4 ConeApex;
-    float4 ConeAxisCutoff;
-};
-#endif
-#endif)"
-//------------------------------------------------------------------------------
-//  Uniform
-//------------------------------------------------------------------------------
-R"(
-#if SHADER_GLSL || SHADER_HLSL
-#if SHADER_UNIFORM
-uniform float4 uniBuffer[SHADER_UNIFORM];
-#endif
-#if SHADER_HLSL >= 10
-sampler samDiffuse;
-Texture2D<float4> texDiffuse;
-#else
-uniform sampler2D samDiffuse;
-#endif
-#elif SHADER_MSL
-struct Uniform
-{
-#if SHADER_MSL >= 2
-#if SHADER_MESH
-    device Vertex* Vertices     [[id(0)]];
-    device Meshlet* Meshlets    [[id(1)]];
-    device uint* VertexIndices  [[id(2)]];
-    device uint* TriangeIndices [[id(3)]];
-    device float4* Buffer       [[id(8)]];
-#elif SHADER_VERTEX
-    device float4* Buffer       [[id(0)]];
-#else
-    device float4* Buffer       [[id(1)]];
-    texture2d<float> Diffuse    [[id(4)]];
-    sampler DiffuseSampler      [[id(18)]];
-#endif
-#elif SHADER_UNIFORM
-    float4 Buffer[SHADER_UNIFORM];
-#endif
-};
-struct Sampler
-{
-    texture2d<float> Diffuse    [[texture(0)]];
-    sampler DiffuseSampler      [[sampler(0)]];
-};
-#endif)"
-//------------------------------------------------------------------------------
 //  Attribute
 //------------------------------------------------------------------------------
 R"(
-#if SHADER_VERTEX
 #if SHADER_GLSL
+#if SHADER_VERTEX
 attribute vec3 attrPosition;
 #if SHADER_SKINNING
 attribute vec3 attrBoneWeight;
@@ -727,7 +651,9 @@ attribute vec4 attrColor;
 #if SHADER_TEXTURE
 attribute vec2 attrUV0;
 #endif
+#endif
 #elif SHADER_HLSL
+#if SHADER_VERTEX
 struct Attribute
 {
     float3 Position     : POSITION;
@@ -745,7 +671,27 @@ struct Attribute
     float2 UV0          : TEXCOORD;
 #endif
 };
+#endif
 #elif SHADER_MSL
+#if SHADER_MESH
+struct Vertex
+{
+    packed_float3 Position;
+#if SHADER_SKINNING
+    packed_float3 BoneWeight;
+    packed_uint4 BoneIndices;
+#endif
+#if SHADER_NORMAL
+    packed_float3 Normal;
+#endif
+#if SHADER_COLOR
+    packed_float4 Color;
+#endif
+#if SHADER_TEXTURE
+    packed_float2 UV0;
+#endif
+};
+#elif SHADER_VERTEX
 struct Attribute
 {
     float3 Position     [[attribute(__COUNTER__)]];
@@ -809,6 +755,59 @@ struct Varying
 #if SHADER_TEXTURE
     float2 UV0;
 #endif
+};
+#endif)"
+//------------------------------------------------------------------------------
+//  Uniform
+//------------------------------------------------------------------------------
+R"(
+#if SHADER_MESH
+struct Meshlet
+{
+    uint VertexOffset;
+    uint TriangleOffset;
+    uint VertexCount;
+    uint TriangleCount;
+    float4 CenterRadius;
+    float4 ConeApex;
+    float4 ConeAxisCutoff;
+};
+#endif
+#if SHADER_GLSL || SHADER_HLSL
+#if SHADER_UNIFORM
+uniform float4 uniBuffer[SHADER_UNIFORM];
+#endif
+#if SHADER_HLSL >= 10
+sampler samDiffuse;
+Texture2D<float4> texDiffuse;
+#else
+uniform sampler2D samDiffuse;
+#endif
+#elif SHADER_MSL
+struct Uniform
+{
+#if SHADER_MSL >= 2
+#if SHADER_MESH
+    device Vertex* Vertices     [[id(0)]];
+    device Meshlet* Meshlets    [[id(1)]];
+    device uint* VertexIndices  [[id(2)]];
+    device uint* TriangeIndices [[id(3)]];
+    device float4* Buffer       [[id(30)]];
+#elif SHADER_VERTEX
+    device float4* Buffer       [[id(0)]];
+#else
+    device float4* Buffer       [[id(1)]];
+    texture2d<float> Diffuse    [[id(4)]];
+    sampler DiffuseSampler      [[id(18)]];
+#endif
+#elif SHADER_UNIFORM
+    float4 Buffer[SHADER_UNIFORM];
+#endif
+};
+struct Sampler
+{
+    texture2d<float> Diffuse    [[texture(0)]];
+    sampler DiffuseSampler      [[sampler(0)]];
 };
 #endif)"
 //------------------------------------------------------------------------------
