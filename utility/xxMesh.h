@@ -21,10 +21,10 @@ public:
         STORAGE2                = 2,
         STORAGE3                = 3,
         STORAGE4                = 4,
-        STORAGE5                = 5,
         STORAGEMAX,
-        INDEX                   = 6,
-        VERTEX                  = 7,
+        INDEX                   = 5,
+        VERTEX                  = 6,
+        INSTANCE                = 7,
         MAX,
     };
 
@@ -38,6 +38,7 @@ public:
     void                        SetIndexCount(int count);
     void                        SetVertexCount(int count);
     void                        SetStorageCount(int index, int count, int stride);
+    void                        SetInstanceCount(int count, int stride);
 
     xxStrideIterator<xxVector3> GetPosition() const;
     xxStrideIterator<xxVector3> GetBoneWeight() const;
@@ -89,15 +90,18 @@ public:
         };
         struct
         {
-            int const           DummyCount[MAX - 2];
+            int const           DummyCount[MAX - 3];
             int const           IndexCount;
             int const           VertexCount;
-            int const           DummyStride[MAX - 2];
+            int const           InstanceCount;
+            int const           DummyStride[MAX - 3];
             int const           IndexStride;
             int const           VertexStride;
-            char* const         DummyStorage[MAX - 2];
+            int const           InstanceStride;
+            char* const         DummyStorage[MAX - 3];
             char* const         Index;
             char* const         Vertex;
+            char* const         Instance;
         };
     };
 
