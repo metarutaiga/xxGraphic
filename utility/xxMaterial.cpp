@@ -30,7 +30,6 @@ void xxMaterial::Invalidate()
     xxDestroyBlendState(m_blendState);
     xxDestroyDepthStencilState(m_depthStencilState);
     xxDestroyRasterizerState(m_rasterizerState);
-    xxDestroyShader(m_device, m_meshShader);
     xxDestroyShader(m_device, m_vertexShader);
     xxDestroyShader(m_device, m_fragmentShader);
     xxDestroyRenderPass(m_renderPass);
@@ -40,7 +39,6 @@ void xxMaterial::Invalidate()
     m_blendState = 0;
     m_depthStencilState = 0;
     m_rasterizerState = 0;
-    m_meshShader = 0;
     m_vertexShader = 0;
     m_fragmentShader = 0;
     m_renderPass = 0;
@@ -81,14 +79,7 @@ void xxMaterial::Draw(xxDrawData const& data) const
     xxSetPipeline(data.commandEncoder, constantData->pipeline);
     if (constantData->vertexConstant)
     {
-        if (m_meshShader)
-        {
-            xxSetMeshConstantBuffer(data.commandEncoder, constantData->vertexConstant, constantData->vertexConstantSize);
-        }
-        else
-        {
-            xxSetVertexConstantBuffer(data.commandEncoder, constantData->vertexConstant, constantData->vertexConstantSize);
-        }
+        xxSetVertexConstantBuffer(data.commandEncoder, constantData->vertexConstant, constantData->vertexConstantSize);
     }
     if (constantData->fragmentConstant)
     {
@@ -165,26 +156,22 @@ void xxMaterial::CreatePipeline(xxDrawData const& data)
         {
             m_rasterizerState = xxCreateRasterizerState(m_device, Cull, Scissor);
         }
-        if (m_meshShader == 0 && m_vertexShader == 0 && m_fragmentShader == 0)
+        if (m_vertexShader == 0 && m_fragmentShader == 0)
         {
-            if (m_meshShader == 0 && mesh->Count[xxMesh::STORAGE0] && mesh->Count[xxMesh::STORAGE1] && mesh->Count[xxMesh::STORAGE2])
+            if (m_vertexShader == 0)
             {
-                m_meshShader = xxCreateMeshShader(m_device, GetShader(data, 0).c_str());
-            }
-            if (m_meshShader == 0 && m_vertexShader == 0)
-            {
-                m_vertexShader = xxCreateVertexShader(m_device, GetShader(data, 0).c_str(), vertexAttribute);
+                m_vertexShader = xxCreateVertexShader(m_device, GetShader(data, 'vert').c_str(), vertexAttribute);
             }
             if (m_fragmentShader == 0)
             {
-                m_fragmentShader = xxCreateFragmentShader(m_device, GetShader(data, 1).c_str());
+                m_fragmentShader = xxCreateFragmentShader(m_device, GetShader(data, 'frag').c_str());
             }
         }
         if (m_renderPass == 0)
         {
             m_renderPass = xxCreateRenderPass(m_device, true, true, true, true, true, true);
         }
-        m_pipeline = xxCreatePipeline(m_device, m_renderPass, m_blendState, m_depthStencilState, m_rasterizerState, vertexAttribute, m_meshShader, m_vertexShader, m_fragmentShader);
+        m_pipeline = xxCreatePipeline(m_device, m_renderPass, m_blendState, m_depthStencilState, m_rasterizerState, vertexAttribute, 0, m_vertexShader, m_fragmentShader);
     }
 }
 //------------------------------------------------------------------------------
@@ -244,28 +231,6 @@ void xxMaterial::UpdateConstant(xxDrawData const& data) const
                 }
                 vector += 3 * 4;
                 size -= 3 * sizeof(xxMatrix4);
-            }
-
-            if (size >= 6 * sizeof(xxMatrix4x2) && m_meshShader && (BackfaceCulling || FrustumCulling))
-            {
-                xxMatrix4x2* frustum = reinterpret_cast<xxMatrix4x2*>(vector);
-
-                if (camera)
-                {
-                    for (int i = 0; i < 6; ++i)
-                    {
-                        frustum[i] = data.frustum[i];
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < 6; ++i)
-                    {
-                        frustum[i] = {};
-                    }
-                }
-                vector += 6 * 2;
-                size -= 6 * sizeof(xxMatrix4x2);
             }
 
             if (size >= 75 * sizeof(xxMatrix4x3) && data.mesh->Skinning)
@@ -355,24 +320,22 @@ std::string xxMaterial::GetShader(xxDrawData const& data, int type) const
     size_t constantSize = 0;
     switch (type)
     {
-    case 0:
+    case 'vert':
         constantSize = GetVertexConstantSize(data) / sizeof(xxVector4);
         break;
-    case 1:
+    case 'frag':
         constantSize = GetFragmentConstantSize(data) / sizeof(xxVector4);
         break;
     }
 
     std::string shader;
-    shader += define("SHADER_BACKFACE_CULLING", type == 0 && BackfaceCulling ? 1 : 0);
-    shader += define("SHADER_FRUSTUM_CULLING", type == 0 && FrustumCulling ? 1 : 0);
-    shader += define("SHADER_SKINNING", type == 0 && mesh->Skinning ? 1 : 0);
+    shader += define("SHADER_SKINNING", type == 'vert' && mesh->Skinning ? 1 : 0);
     shader += define("SHADER_NORMAL", mesh->NormalCount);
     shader += define("SHADER_COLOR", mesh->ColorCount);
     shader += define("SHADER_TEXTURE", mesh->TextureCount);
     shader += define("SHADER_UNIFORM", constantSize);
-    shader += define("SHADER_ALPHATEST", type == 1 && AlphaTest ? 1 : 0);
-    shader += define("SHADER_OPACITY", type == 0 && Blending ? 1 : 0);
+    shader += define("SHADER_ALPHATEST", type == 'frag' && AlphaTest ? 1 : 0);
+    shader += define("SHADER_OPACITY", type == 'vert' && Blending ? 1 : 0);
     shader += define("SHADER_LIGHTING", mesh->NormalCount && Lighting ? 1 : 0);
     shader += define("SHADER_SPECULAR", mesh->NormalCount && Lighting && Specular ? 1 : 0);
     shader += ShaderOption;
@@ -384,10 +347,6 @@ std::string xxMaterial::GetShader(xxDrawData const& data, int type) const
 int xxMaterial::GetVertexConstantSize(xxDrawData const& data) const
 {
     int size = 3 * sizeof(xxMatrix4);
-    if (m_meshShader && (BackfaceCulling || FrustumCulling))
-    {
-        size += 6 * sizeof(xxMatrix4x2);
-    }
     if (data.mesh->Skinning)
     {
         size += 75 * sizeof(xxMatrix4x3);
@@ -473,12 +432,6 @@ void xxMaterial::BinaryRead(xxBinary& binary)
     binary.Read(Cull);
     binary.Read(Scissor);
 
-    if (binary.Version >= 0x20241221)
-    {
-        binary.Read(BackfaceCulling);
-        binary.Read(FrustumCulling);
-    }
-
     binary.ReadContainer(Colors);
     binary.ReadReferences(Textures);
     for (auto& texture : Textures)
@@ -532,9 +485,6 @@ void xxMaterial::BinaryWrite(xxBinary& binary) const
     binary.Write(Cull);
     binary.Write(Scissor);
 
-    binary.Write(BackfaceCulling);
-    binary.Write(FrustumCulling);
-
     binary.WriteContainer(Colors);
     binary.WriteReferences(Textures);
 
@@ -567,20 +517,11 @@ R"(
 #ifndef SHADER_MSL
 #define SHADER_MSL 0
 #endif
-#ifndef SHADER_MESH
-#define SHADER_MESH 0
-#endif
 #ifndef SHADER_VERTEX
 #define SHADER_VERTEX 0
 #endif
 #ifndef SHADER_FRAGMENT
 #define SHADER_FRAGMENT 0
-#endif
-#ifndef SHADER_BACKFACE_CULLING
-#define SHADER_BACKFACE_CULLING 0
-#endif
-#ifndef SHADER_FRUSTUM_CULLING
-#define SHADER_FRUSTUM_CULLING 0
 #endif
 #ifndef SHADER_SKINNING
 #define SHADER_SKINNING 0
@@ -673,25 +614,7 @@ struct Attribute
 };
 #endif
 #elif SHADER_MSL
-#if SHADER_MESH
-struct Vertex
-{
-    packed_float3 Position;
-#if SHADER_SKINNING
-    packed_float3 BoneWeight;
-    packed_uint4 BoneIndices;
-#endif
-#if SHADER_NORMAL
-    packed_float3 Normal;
-#endif
-#if SHADER_COLOR
-    packed_float4 Color;
-#endif
-#if SHADER_TEXTURE
-    packed_float2 UV0;
-#endif
-};
-#elif SHADER_VERTEX
+#if SHADER_VERTEX
 struct Attribute
 {
     float3 Position     [[attribute(__COUNTER__)]];
@@ -761,18 +684,6 @@ struct Varying
 //  Uniform
 //------------------------------------------------------------------------------
 R"(
-#if SHADER_MESH
-struct Meshlet
-{
-    uint VertexOffset;
-    uint TriangleOffset;
-    uint VertexCount;
-    uint TriangleCount;
-    float4 CenterRadius;
-    float4 ConeApex;
-    float4 ConeAxisCutoff;
-};
-#endif
 #if SHADER_GLSL || SHADER_HLSL
 #if SHADER_UNIFORM
 uniform float4 uniBuffer[SHADER_UNIFORM];
@@ -787,13 +698,7 @@ uniform sampler2D samDiffuse;
 struct Uniform
 {
 #if SHADER_MSL >= 2
-#if SHADER_MESH
-    device Vertex* Vertices     [[id(0)]];
-    device Meshlet* Meshlets    [[id(1)]];
-    device uint* VertexIndices  [[id(2)]];
-    device uint* TriangeIndices [[id(3)]];
-    device float4* Buffer       [[id(30)]];
-#elif SHADER_VERTEX
+#if SHADER_VERTEX
     device float4* Buffer       [[id(0)]];
 #else
     device float4* Buffer       [[id(1)]];
@@ -811,26 +716,9 @@ struct Sampler
 };
 #endif)"
 //------------------------------------------------------------------------------
-//  Mesh / Vertex Shader
+//  Vertex Shader
 //------------------------------------------------------------------------------
 R"(
-#if SHADER_MESH
-#if SHADER_MSL
-[[mesh]]
-#if SHADER_MSL >= 2
-void Main(constant Uniform& uni [[buffer(0)]],
-#else
-void Main(constant Uniform& uni [[buffer(8)]],
-          device Vertex* Vertices [[buffer(0)]],
-          device Meshlet* Meshlets [[buffer(1)]],
-          device uint* VertexIndices [[buffer(2)]],
-          device uint* TriangeIndices [[buffer(3)]],
-#endif
-          uint gtid [[thread_position_in_threadgroup]],
-          uint gid [[threadgroup_position_in_grid]],
-          mesh<Varying, void, 64, 128, topology::triangle> output)
-#endif
-#endif
 #if SHADER_VERTEX
 #if SHADER_GLSL
 void main()
@@ -839,76 +727,12 @@ Varying Main(Attribute attr)
 #elif SHADER_MSL
 vertex Varying Main(Attribute attr [[stage_in]], constant Uniform& uni [[buffer(0)]])
 #endif
-#endif
-#if SHADER_MESH || SHADER_VERTEX
 {
     int uniIndex = 0;
 #if SHADER_MSL
     auto uniBuffer = uni.Buffer;
 #endif
 
-#if SHADER_MESH
-#if SHADER_MSL
-#if SHADER_MSL >= 2
-    device Vertex* Vertices = uni.Vertices;
-    device Meshlet* Meshlets = uni.Meshlets;
-    device uint* VertexIndices = uni.VertexIndices;
-    device uint* TriangeIndices = uni.TriangeIndices;
-#endif
-    device Meshlet& m = Meshlets[gid];
-#if SHADER_BACKFACE_CULLING || SHADER_FRUSTUM_CULLING
-    uint visible = 1;
-    if (simd_is_first())
-    {
-#if SHADER_BACKFACE_CULLING
-        if (visible)
-        {
-            float c = m.ConeAxisCutoff.w; 
-            float d = dot(m.ConeAxisCutoff.xyz, normalize(m.ConeApex.xyz - uniBuffer[13].xyz));
-            if (d >= c)
-                visible = 0;
-        }
-#endif
-#if SHADER_FRUSTUM_CULLING
-        if (visible)
-        {
-            float r = -m.CenterRadius.w;
-            float d0 = dot(uniBuffer[12].xyz, m.CenterRadius.xyz - uniBuffer[13].xyz);
-            float d1 = dot(uniBuffer[14].xyz, m.CenterRadius.xyz - uniBuffer[15].xyz);
-            float d2 = dot(uniBuffer[16].xyz, m.CenterRadius.xyz - uniBuffer[17].xyz);
-            float d3 = dot(uniBuffer[18].xyz, m.CenterRadius.xyz - uniBuffer[19].xyz);
-            float d4 = dot(uniBuffer[20].xyz, m.CenterRadius.xyz - uniBuffer[21].xyz);
-            float d5 = dot(uniBuffer[22].xyz, m.CenterRadius.xyz - uniBuffer[23].xyz);
-            if (d0 < r || d1 < r || d2 < r || d3 < r || d4 < r || d5 < r)
-                visible = 0;
-        }
-#endif
-    }
-    visible = simd_broadcast_first(visible);
-    if (visible == 0)
-        return;
-    uniIndex += 12;
-#endif
-    if (gtid == 0)
-    {
-        output.set_primitive_count(m.TriangleCount);
-    }
-
-    if (gtid < m.TriangleCount)
-    {
-        uint index = 3 * gtid;
-        uint packed = TriangeIndices[m.TriangleOffset + gtid];
-        output.set_index(index + 0, (packed >>  0) & 0xFF);
-        output.set_index(index + 1, (packed >>  8) & 0xFF);
-        output.set_index(index + 2, (packed >> 16) & 0xFF);
-    }
-
-    if (gtid >= m.VertexCount)
-        return;
-    uint vertexIndex = VertexIndices[m.VertexOffset + gtid];
-    device Vertex& attr = Vertices[vertexIndex];
-#endif
-#endif
 #if SHADER_HLSL || SHADER_MSL
     float3 attrPosition = attr.Position;
 #if SHADER_SKINNING
@@ -994,9 +818,6 @@ vertex Varying Main(Attribute attr [[stage_in]], constant Uniform& uni [[buffer(
 #endif
 #if SHADER_TEXTURE
     vary.UV0 = attrUV0;
-#endif
-#if SHADER_MESH
-    output.set_vertex(gtid, vary);
 #endif
 #if SHADER_VERTEX
     return vary;
