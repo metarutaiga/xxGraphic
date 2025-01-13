@@ -39,8 +39,10 @@ struct xxConstantData
 {
     uint64_t    device = 0;
     uint64_t    pipeline = 0;
+    uint64_t    meshConstant = 0;
     uint64_t    vertexConstant = 0;
     uint64_t    fragmentConstant = 0;
+    int         meshConstantSize = 0;
     int         vertexConstantSize = 0;
     int         fragmentConstantSize = 0;
     int         ready = 0;

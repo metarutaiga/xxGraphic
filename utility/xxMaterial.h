@@ -11,10 +11,10 @@
 class xxPlusAPI xxMaterial
 {
 public:
-    void                        Invalidate();
-    void                        Update(float time);
-    void                        Setup(xxDrawData const& data);
-    void                        Draw(xxDrawData const& data) const;
+    virtual void                Invalidate();
+    virtual void                Update(float time);
+    virtual void                Setup(xxDrawData const& data);
+    virtual void                Draw(xxDrawData const& data) const;
 
     xxTexturePtr const&         GetTexture(size_t index) const;
     void                        SetTexture(size_t index, xxTexturePtr const& texture);
@@ -41,7 +41,6 @@ protected:
     uint64_t                    m_blendState = 0;
     uint64_t                    m_depthStencilState = 0;
     uint64_t                    m_rasterizerState = 0;
-    uint64_t                    m_meshShader = 0;
     uint64_t                    m_vertexShader = 0;
     uint64_t                    m_fragmentShader = 0;
     uint64_t                    m_renderPass = 0;
@@ -79,9 +78,6 @@ public:
 
     bool                        Cull = false;
     bool                        Scissor = false;
-
-    bool                        BackfaceCulling = false;
-    bool                        FrustumCulling = false;
 
     std::vector<xxVector4>      Colors;
     std::vector<xxTexturePtr>   Textures;
