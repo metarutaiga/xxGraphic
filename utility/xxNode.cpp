@@ -432,12 +432,15 @@ void xxNode::Invalidate()
 {
     for (auto& constantData : ConstantDatas)
     {
+        xxDestroyBuffer(constantData.device, constantData.meshConstant);
         xxDestroyBuffer(constantData.device, constantData.vertexConstant);
         xxDestroyBuffer(constantData.device, constantData.fragmentConstant);
         constantData.device = 0;
         constantData.pipeline = 0;
+        constantData.meshConstant = 0;
         constantData.vertexConstant = 0;
         constantData.fragmentConstant = 0;
+        constantData.meshConstantSize = 0;
         constantData.vertexConstantSize = 0;
         constantData.fragmentConstantSize = 0;
         constantData.ready = 0;
