@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : Direct3D 9Ex Header
 //
-// Copyright (c) 2019-2024 TAiGA
+// Copyright (c) 2019-2025 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #pragma once
