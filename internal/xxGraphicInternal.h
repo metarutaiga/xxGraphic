@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : Graphic Internal Header
 //
-// Copyright (c) 2019-2024 TAiGA
+// Copyright (c) 2019-2025 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #pragma once

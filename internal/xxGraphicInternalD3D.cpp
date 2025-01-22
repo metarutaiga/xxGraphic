@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : Direct3D Internal Source
 //
-// Copyright (c) 2019-2024 TAiGA
+// Copyright (c) 2019-2025 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #include "xxGraphicInternalD3D.h"

@@ -1,7 +1,7 @@
 //==============================================================================
 // xxGraphic : Direct3D 6.0 Source
 //
-// Copyright (c) 2019-2024 TAiGA
+// Copyright (c) 2019-2025 TAiGA
 // https://github.com/metarutaiga/xxGraphic
 //==============================================================================
 #define DIRECTDRAW_VERSION          0x600
