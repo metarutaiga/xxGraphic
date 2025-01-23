@@ -42,6 +42,7 @@ public:
     size_t                      GetChildCount() const { return m_children.size(); }
     bool                        AttachChild(xxNodePtr const& child);
     bool                        DetachChild(xxNodePtr const& child);
+    void                        RemoveAllChildren();
 
     void                        CreateLinearMatrix();
     void                        UpdateMatrix();

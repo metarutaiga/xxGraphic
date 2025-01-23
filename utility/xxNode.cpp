@@ -131,6 +131,15 @@ bool xxNode::DetachChild(xxNodePtr const& node)
     return false;
 }
 //------------------------------------------------------------------------------
+void xxNode::RemoveAllChildren()
+{
+    for (xxNodePtr const& child : m_children)
+    {
+        child->m_parent.reset();
+    }
+    m_children.clear();
+}
+//------------------------------------------------------------------------------
 void xxNode::CreateLinearMatrix()
 {
 #if HAVE_LINEAR_MATRIX

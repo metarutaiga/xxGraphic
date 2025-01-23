@@ -110,6 +110,8 @@ struct xxPlusAPI xxVector3
     xxVector3           Cross           (xxVector3 const& v) const   { return xxVector3{ y, z, x } * xxVector3{ v.z, v.x, v.y } -
                                                                               xxVector3{ z, x, y } * xxVector3{ v.y, v.z, v.x }; }
 
+    int                 BoundIntersect  (xxVector3 const& v);
+
     static const xxVector3 ZERO;
     static const xxVector3 ONE;
 
@@ -173,6 +175,7 @@ struct xxPlusAPI xxVector4
     xxVector4           Minimum         (xxVector4 const& v) const   { xxVector4 t; for (size_t i = 0; i < N; ++i) t.f[i] = f[i] < v.f[i] ? f[i] : v.f[i]; return t; }
     xxVector4           Maximum         (xxVector4 const& v) const   { xxVector4 t; for (size_t i = 0; i < N; ++i) t.f[i] = f[i] > v.f[i] ? f[i] : v.f[i]; return t; }
 
+    int                 BoundIntersect  (xxVector4 const& v);
     xxVector4&          BoundMerge      (xxVector3 const& v);
     xxVector4&          BoundMerge      (xxVector4 const& v);
     xxVector4           BoundTransform  (xxMatrix4 const& m, float s) const;

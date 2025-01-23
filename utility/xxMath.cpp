@@ -76,8 +76,34 @@ static_assert(sizeof(xxMatrix4x2) == 32);
 static_assert(sizeof(xxMatrix4x3) == 48);
 static_assert(sizeof(xxMatrix4x4) == 64);
 //==============================================================================
+//  Vector3
+//==============================================================================
+int xxVector3::BoundIntersect(xxVector3 const& v)
+{
+    float distance = (xy - v.xy).Length();
+    if (distance <= v.z - z)
+        return 2;
+    if (distance <= z - v.z)
+        return 1;
+    if (distance <= z + v.z)
+        return 0;
+    return -1;
+}
+//==============================================================================
 //  Vector4
 //==============================================================================
+int xxVector4::BoundIntersect(xxVector4 const& v)
+{
+    float distance = (xyz - v.xyz).Length();
+    if (distance <= v.w - w)
+        return 2;
+    if (distance <= w - v.w)
+        return 1;
+    if (distance <= w + v.w)
+        return 0;
+    return -1;
+}
+//------------------------------------------------------------------------------
 xxVector4& xxVector4::BoundMerge(xxVector3 const& v)
 {
     if (w == 0.0f)
