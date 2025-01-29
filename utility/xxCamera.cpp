@@ -27,16 +27,16 @@ void xxCamera::Update()
     float n = FrustumNear;
     float f = FrustumFar;
 
-    ViewMatrix.v[0] = {  Right.x,              Up.x,              Direction.x,             0 };
-    ViewMatrix.v[1] = {  Right.y,              Up.y,              Direction.y,             0 };
-    ViewMatrix.v[2] = {  Right.z,              Up.z,              Direction.z,             0 };
-    ViewMatrix.v[3] = { -Right.Dot(Location), -Up.Dot(Location), -Direction.Dot(Location), 1 };
+    ViewMatrix[0] = {  Right.x,              Up.x,              Direction.x,             0 };
+    ViewMatrix[1] = {  Right.y,              Up.y,              Direction.y,             0 };
+    ViewMatrix[2] = {  Right.z,              Up.z,              Direction.z,             0 };
+    ViewMatrix[3] = { -Right.Dot(Location), -Up.Dot(Location), -Direction.Dot(Location), 1 };
 
-    ProjectionMatrix.v[0] = {    (-2) / (l - r),                 0,                  0, 0 };
-    ProjectionMatrix.v[1] = {                 0,    (-2) / (b - t),                  0, 0 };
-//  ProjectionMatrix.v[2] = { (l + r) / (l - r), (b + t) / (b - t),      (f) / (f - n), 1 };
-    ProjectionMatrix.v[2] = {                 0,                 0,      (f) / (f - n), 1 };
-    ProjectionMatrix.v[3] = {                 0,                 0, (f * -n) / (f - n), 0 };
+    ProjectionMatrix[0] = {    (-2) / (l - r),                 0,                  0, 0 };
+    ProjectionMatrix[1] = {                 0,    (-2) / (b - t),                  0, 0 };
+//  ProjectionMatrix[2] = { (l + r) / (l - r), (b + t) / (b - t),      (f) / (f - n), 1 };
+    ProjectionMatrix[2] = {                 0,                 0,      (f) / (f - n), 1 };
+    ProjectionMatrix[3] = {                 0,                 0, (f * -n) / (f - n), 0 };
 
     ViewProjectionMatrix = ProjectionMatrix * ViewMatrix;
 }
