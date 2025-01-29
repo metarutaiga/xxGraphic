@@ -51,8 +51,8 @@ public:
     xxMatrix3                   GetRotate() const;
     xxVector3 const&            GetTranslate() const;
     float                       GetScale() const { return m_legacyScale; }
-    xxMatrix3                   GetWorldRotate() const { return { WorldMatrix.v[0].xyz, WorldMatrix.v[1].xyz, WorldMatrix.v[2].xyz }; }
-    xxVector3 const&            GetWorldTranslate() const { return WorldMatrix.v[3].xyz; }
+    xxMatrix3                   GetWorldRotate() const { return { WorldMatrix[0].xyz, WorldMatrix[1].xyz, WorldMatrix[2].xyz }; }
+    xxVector3 const&            GetWorldTranslate() const { return WorldMatrix[3].xyz; }
     float                       GetWorldScale() const;
     void                        SetRotate(xxMatrix3 const& rotate);
     void                        SetTranslate(xxVector3 const& translate);

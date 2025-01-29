@@ -81,11 +81,11 @@ static_assert(sizeof(xxMatrix4x4) == 64);
 int xxVector3::BoundIntersect(xxVector3 const& v)
 {
     float distance = (xy - v.xy).Length();
-    if (distance <= v.z - z)
+    if (distance <= v.radius - radius)
         return 2;
-    if (distance <= z - v.z)
+    if (distance <= radius - v.radius)
         return 1;
-    if (distance <= z + v.z)
+    if (distance <= radius + v.radius)
         return 0;
     return -1;
 }
@@ -95,49 +95,49 @@ int xxVector3::BoundIntersect(xxVector3 const& v)
 int xxVector4::BoundIntersect(xxVector4 const& v)
 {
     float distance = (xyz - v.xyz).Length();
-    if (distance <= v.w - w)
+    if (distance <= v.radius - radius)
         return 2;
-    if (distance <= w - v.w)
+    if (distance <= radius - v.radius)
         return 1;
-    if (distance <= w + v.w)
+    if (distance <= radius + v.radius)
         return 0;
     return -1;
 }
 //------------------------------------------------------------------------------
 xxVector4& xxVector4::BoundMerge(xxVector3 const& v)
 {
-    if (w == 0.0f)
+    if (radius == 0.0f)
     {
         xyz = v;
-        w = FLT_EPSILON;
+        radius = FLT_EPSILON;
         return (*this);
     }
 
     xxVector3 diff = v - xyz;
 
     float length = diff.Length();
-    float radius1 = w;
+    float radius1 = radius;
 
     if (radius1 >= length)
     {
         return (*this);
     }
 
-    float radius = (radius1 + length) / 2.0f;
-    float ratio = (radius - radius1) / length;
+    float radius2 = (radius1 + length) / 2.0f;
+    float ratio = (radius2 - radius1) / length;
     xyz += diff * ratio;
-    w = radius;
+    radius = radius2;
 
     return (*this);
 }
 //------------------------------------------------------------------------------
 xxVector4& xxVector4::BoundMerge(xxVector4 const& v)
 {
-    if (v.w == 0.0f)
+    if (v.radius == 0.0f)
     {
         return (*this);
     }
-    if (w == 0.0f)
+    if (radius == 0.0f)
     {
         return (*this) = v;
     }
@@ -145,8 +145,8 @@ xxVector4& xxVector4::BoundMerge(xxVector4 const& v)
     xxVector3 diff = v.xyz - xyz;
 
     float length = diff.Length();
-    float radius1 = w;
-    float radius2 = v.w;
+    float radius1 = radius;
+    float radius2 = v.radius;
 
     if (radius1 + radius2 >= length)
     {
@@ -161,10 +161,10 @@ xxVector4& xxVector4::BoundMerge(xxVector4 const& v)
         }
     }
 
-    float radius = (radius1 + length + radius2) / 2.0f;
-    float ratio = (radius - radius1) / length;
+    float radius3 = (radius1 + length + radius2) / 2.0f;
+    float ratio = (radius3 - radius1) / length;
     xyz += diff * ratio;
-    w = radius;
+    radius = radius3;
 
     return (*this);
 }
@@ -173,7 +173,7 @@ xxVector4 xxVector4::BoundTransform(xxMatrix4 const& m, float s) const
 {
     xxVector4 t;
     t.xyz = (m * (*this)).xyz;
-    t.w = s * w;
+    t.radius = s * radius;
     return t;
 }
 //==============================================================================
@@ -208,7 +208,7 @@ xxMatrix2 xxMatrix2::Transpose() const
 
     for (int y = 0; y < M; y++)
         for (int x = 0; x < N; x++)
-            m.v[x].f[y] = v[y].f[x];
+            m[x].f[y] = v[y].f[x];
 
     return m;
 }
@@ -262,7 +262,7 @@ xxMatrix3 xxMatrix3::Transpose() const
 
     for (int y = 0; y < M; y++)
         for (int x = 0; x < N; x++)
-            m.v[x].f[y] = v[y].f[x];
+            m[x].f[y] = v[y].f[x];
 
     return m;
 }
@@ -280,9 +280,9 @@ xxMatrix3 xxMatrix3::Quaternion(xxVector4 const& q)
     xxVector4 b = zxyw_2 * wwww + xyzw * yzxw_2;
     xxVector4 c = xyzw * zxyw_2 - yzxw_2 * wwww;
     xxMatrix3 m;
-    m.v[0] = { a.f[0], b.f[0], c.f[0] };
-    m.v[1] = { c.f[1], a.f[1], b.f[1] };
-    m.v[2] = { b.f[2], c.f[2], a.f[2] };
+    m[0] = { a.x, b.x, c.x };
+    m[1] = { c.y, a.y, b.y };
+    m[2] = { b.z, c.z, a.z };
     return m;
 }
 //==============================================================================
@@ -294,7 +294,7 @@ xxMatrix4x3 xxMatrix4x3::FromMatrix4(xxMatrix4 const& m)
 
     for (int y = 0; y < 4; y++)
         for (int x = 0; x < 3; x++)
-            t.v[x].f[y] = m[y].f[x];
+            t[x].f[y] = m[y].f[x];
 
     return t;
 }
@@ -305,7 +305,7 @@ xxMatrix4 xxMatrix4x3::ToMatrix4() const
 
     for (int y = 0; y < 3; y++)
         for (int x = 0; x < 4; x++)
-            t.v[x].f[y] = v[y].f[x];
+            t[x].f[y] = v[y].f[x];
 
     t[3].f[3] = 1.0f;
     return t;
@@ -391,7 +391,7 @@ xxMatrix4 xxMatrix4::Transpose() const
 
     for (int y = 0; y < M; y++)
         for (int x = 0; x < N; x++)
-            m.v[x].f[y] = v[y].f[x];
+            m[x].f[y] = v[y].f[x];
 
     return m;
 }
@@ -414,9 +414,9 @@ void xxMatrix4::FastDecompose(xxMatrix3& __restrict rotate, xxVector3& __restric
     float invScale = 1.0f / scale;
     for (int i = 0; i < 3; ++i)
     {
-        rotate.v[i].x = v[i].x * invScale;
-        rotate.v[i].y = v[i].y * invScale;
-        rotate.v[i].z = v[i].z * invScale;
+        rotate[i].x = v[i].x * invScale;
+        rotate[i].y = v[i].y * invScale;
+        rotate[i].z = v[i].z * invScale;
     }
 }
 //------------------------------------------------------------------------------
@@ -439,10 +439,10 @@ void xxMatrix4::MultiplyArray(size_t count, xxMatrix4 const* __restrict input, i
 
     for (size_t i = 0; i < count; ++i)
     {
-        (*output).v[0].v = __builtin_multiplyvector(&matrix.v->v, (*input).v[0].v);
-        (*output).v[1].v = __builtin_multiplyvector(&matrix.v->v, (*input).v[1].v);
-        (*output).v[2].v = __builtin_multiplyvector(&matrix.v->v, (*input).v[2].v);
-        (*output).v[3].v = __builtin_multiplyvector(&matrix.v->v, (*input).v[3].v);
+        (*output)[0].v = __builtin_multiplyvector(&matrix.v->v, (*input)[0].v);
+        (*output)[1].v = __builtin_multiplyvector(&matrix.v->v, (*input)[1].v);
+        (*output)[2].v = __builtin_multiplyvector(&matrix.v->v, (*input)[2].v);
+        (*output)[3].v = __builtin_multiplyvector(&matrix.v->v, (*input)[3].v);
 
         input = reinterpret_cast<xxMatrix4*>((char*)input + inputStride);
         output = reinterpret_cast<xxMatrix4*>((char*)output + outputStride);
@@ -455,10 +455,10 @@ void xxMatrix4::MultiplyLink(size_t count, xxMatrix4 const* __restrict input, in
 
     for (size_t i = 0; i < count; ++i)
     {
-        (*output).v[0].v = __builtin_multiplyvector(&matrix.v->v, (*input).v[0].v);
-        (*output).v[1].v = __builtin_multiplyvector(&matrix.v->v, (*input).v[1].v);
-        (*output).v[2].v = __builtin_multiplyvector(&matrix.v->v, (*input).v[2].v);
-        (*output).v[3].v = __builtin_multiplyvector(&matrix.v->v, (*input).v[3].v);
+        (*output)[0].v = __builtin_multiplyvector(&matrix.v->v, (*input)[0].v);
+        (*output)[1].v = __builtin_multiplyvector(&matrix.v->v, (*input)[1].v);
+        (*output)[2].v = __builtin_multiplyvector(&matrix.v->v, (*input)[2].v);
+        (*output)[3].v = __builtin_multiplyvector(&matrix.v->v, (*input)[3].v);
         matrix = (*output);
 
         input = reinterpret_cast<xxMatrix4*>((char*)input + inputStride);

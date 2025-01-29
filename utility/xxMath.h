@@ -9,16 +9,16 @@
 #include <xxGraphic/xxSystem.h>
 #include <xxGraphic/xxVector.h>
 
-typedef struct xxMatrix2x2 xxMatrix2;
-typedef struct xxMatrix3x3 xxMatrix3;
-typedef struct xxMatrix4x4 xxMatrix4;
+typedef union xxMatrix2x2 xxMatrix2;
+typedef union xxMatrix3x3 xxMatrix3;
+typedef union xxMatrix4x4 xxMatrix4;
 
-struct xxPlusAPI xxVector2
+union xxPlusAPI xxVector2
 {
     enum { N = 2 };
+    float f[N];
     union
     {
-        float f[N];
         struct { float x, y; };
         struct { float u, v; };
     };
@@ -63,16 +63,16 @@ struct xxPlusAPI xxVector2
     static const xxVector2 Y;
 };
 
-struct xxPlusAPI xxVector3
+union xxPlusAPI xxVector3
 {
     enum { N = 3 };
+    float f[N];
     union
     {
-        float f[N];
         struct { float x, y, z; };
         struct { float r, g, b; };
-        xxVector2 xy;
-        xxVector2 rg;
+        struct { xxVector2 xy; float radius; };
+        struct { xxVector2 rg; };
         struct { float _0; union { xxVector2 yz; xxVector2 gb; }; };
     };
 
@@ -126,19 +126,19 @@ struct xxPlusAPI xxVector3
     static const xxVector3 WHITE;
 };
 
-struct xxPlusAPI xxVector4
+union xxPlusAPI xxVector4
 {
     enum { N = 4 };
+    v4sf v;
     union
     {
-        v4sf v;
         float f[N];
         struct { float x, y, z, w; };
         struct { float r, g, b, a; };
         struct { xxVector2 xy; xxVector2 zw; };
         struct { xxVector2 rg; xxVector2 ba; };
-        xxVector3 xyz;
-        xxVector3 rgb;
+        struct { xxVector3 xyz; float radius; };
+        struct { xxVector3 rgb; };
         struct { float _0; union { xxVector2 yz; xxVector2 gb; }; };
         struct { float __0; union { xxVector3 yzw; xxVector3 gba; }; };
     };
@@ -198,12 +198,12 @@ struct xxPlusAPI xxVector4
     static const xxVector4 WHITE;
 };
 
-struct xxPlusAPI xxMatrix2x2
+union xxPlusAPI xxMatrix2x2
 {
     enum { M = 2, N = 2 };
+    xxVector2 v[N];
     union
     {
-        xxVector2 v[N];
         float f[M * N];
         struct
         {
@@ -245,12 +245,12 @@ struct xxPlusAPI xxMatrix2x2
     static const xxMatrix2x2 IDENTITY;
 };
 
-struct xxPlusAPI xxMatrix2x3
+union xxPlusAPI xxMatrix2x3
 {
     enum { M = 2, N = 3 };
+    xxVector2 v[N];
     union
     {
-        xxVector2 v[N];
         float f[M * N];
         struct
         {
@@ -285,12 +285,12 @@ struct xxPlusAPI xxMatrix2x3
     static const xxMatrix2x3 IDENTITY;
 };
 
-struct xxPlusAPI xxMatrix2x4
+union xxPlusAPI xxMatrix2x4
 {
     enum { M = 2, N = 4 };
+    xxVector2 v[N];
     union
     {
-        xxVector2 v[N];
         float f[M * N];
         struct
         {
@@ -326,12 +326,12 @@ struct xxPlusAPI xxMatrix2x4
     static const xxMatrix2x4 IDENTITY;
 };
 
-struct xxPlusAPI xxMatrix3x2
+union xxPlusAPI xxMatrix3x2
 {
     enum { M = 3, N = 2 };
+    xxVector3 v[N];
     union
     {
-        xxVector3 v[N];
         float f[M * N];
         struct
         {
@@ -365,12 +365,12 @@ struct xxPlusAPI xxMatrix3x2
     static const xxMatrix3x2 IDENTITY;
 };
 
-struct xxPlusAPI xxMatrix3x3
+union xxPlusAPI xxMatrix3x3
 {
     enum { M = 3, N = 3 };
+    xxVector3 v[N];
     union
     {
-        xxVector3 v[N];
         float f[M * N];
         struct
         {
@@ -415,12 +415,12 @@ struct xxPlusAPI xxMatrix3x3
     static const xxMatrix3x3 IDENTITY;
 };
 
-struct xxPlusAPI xxMatrix3x4
+union xxPlusAPI xxMatrix3x4
 {
     enum { M = 3, N = 4 };
+    xxVector3 v[N];
     union
     {
-        xxVector3 v[N];
         float f[M * N];
         struct
         {
@@ -456,12 +456,12 @@ struct xxPlusAPI xxMatrix3x4
     static const xxMatrix3x4 IDENTITY;
 };
 
-struct xxPlusAPI xxMatrix4x2
+union xxPlusAPI xxMatrix4x2
 {
     enum { M = 4, N = 2 };
+    xxVector4 v[N];
     union
     {
-        xxVector4 v[N];
         float f[M * N];
         struct
         {
@@ -495,12 +495,12 @@ struct xxPlusAPI xxMatrix4x2
     static const xxMatrix4x2 IDENTITY;
 };
 
-struct xxPlusAPI xxMatrix4x3
+union xxPlusAPI xxMatrix4x3
 {
     enum { M = 4, N = 3 };
+    xxVector4 v[N];
     union
     {
-        xxVector4 v[N];
         float f[M * N];
         struct
         {
@@ -538,12 +538,12 @@ struct xxPlusAPI xxMatrix4x3
     static const xxMatrix4x3 IDENTITY;
 };
 
-struct xxPlusAPI xxMatrix4x4
+union xxPlusAPI xxMatrix4x4
 {
     enum { M = 4, N = 4 };
+    xxVector4 v[N];
     union
     {
-        xxVector4 v[N];
         float f[M * N];
         struct
         {

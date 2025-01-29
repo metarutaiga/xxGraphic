@@ -373,7 +373,7 @@ xxVector3 const& xxNode::GetTranslate() const
 {
     if (m_legacyScale == 1.0f)
     {
-        return LocalMatrix.v[3].xyz;
+        return LocalMatrix[3].xyz;
     }
 
     return m_legacyTranslate;
@@ -381,16 +381,16 @@ xxVector3 const& xxNode::GetTranslate() const
 //------------------------------------------------------------------------------
 float xxNode::GetWorldScale() const
 {
-    return WorldMatrix.v[0].xyz.Length();
+    return WorldMatrix[0].xyz.Length();
 }
 //------------------------------------------------------------------------------
 void xxNode::SetRotate(xxMatrix3 const& rotate)
 {
     if (m_legacyScale == 1.0f)
     {
-        LocalMatrix.v[0].xyz = rotate.v[0];
-        LocalMatrix.v[1].xyz = rotate.v[1];
-        LocalMatrix.v[2].xyz = rotate.v[2];
+        LocalMatrix[0].xyz = rotate[0];
+        LocalMatrix[1].xyz = rotate[1];
+        LocalMatrix[2].xyz = rotate[2];
         return;
     }
 
@@ -401,7 +401,7 @@ void xxNode::SetTranslate(xxVector3 const& translate)
 {
     if (m_legacyScale == 1.0f)
     {
-        LocalMatrix.v[3].xyz = translate;
+        LocalMatrix[3].xyz = translate;
         return;
     }
 
@@ -431,10 +431,10 @@ void xxNode::UpdateRotateTranslateScale()
     if (m_legacyScale == 1.0f)
         return;
 
-    LocalMatrix.v[0].xyz = m_legacyRotate.v[0] * m_legacyScale;
-    LocalMatrix.v[1].xyz = m_legacyRotate.v[1] * m_legacyScale;
-    LocalMatrix.v[2].xyz = m_legacyRotate.v[2] * m_legacyScale;
-    LocalMatrix.v[3].xyz = m_legacyTranslate;
+    LocalMatrix[0].xyz = m_legacyRotate[0] * m_legacyScale;
+    LocalMatrix[1].xyz = m_legacyRotate[1] * m_legacyScale;
+    LocalMatrix[2].xyz = m_legacyRotate[2] * m_legacyScale;
+    LocalMatrix[3].xyz = m_legacyTranslate;
 }
 //------------------------------------------------------------------------------
 void xxNode::Invalidate()
