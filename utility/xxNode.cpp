@@ -329,7 +329,7 @@ void xxNode::UpdateMatrix()
 void xxNode::UpdateBound()
 {
     WorldBound.xyz = GetWorldTranslate();
-    WorldBound.w = 0.0f;
+    WorldBound.radius = 0.0f;
     if (Bones.empty() == false)
     {
         for (auto const& data : Bones)

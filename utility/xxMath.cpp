@@ -78,30 +78,42 @@ static_assert(sizeof(xxMatrix4x4) == 64);
 //==============================================================================
 //  Vector3
 //==============================================================================
-int xxVector3::BoundIntersect(xxVector3 const& v)
+int xxVector3::Intersect(xxVector3 const& sphere)
 {
-    float distance = (xy - v.xy).Length();
-    if (distance <= v.radius - radius)
+    float distance = (xy - sphere.xy).Length();
+    if (distance <= sphere.radius - radius)
         return 2;
-    if (distance <= radius - v.radius)
+    if (distance <= radius - sphere.radius)
         return 1;
-    if (distance <= radius + v.radius)
+    if (distance <= radius + sphere.radius)
         return 0;
     return -1;
 }
 //==============================================================================
 //  Vector4
 //==============================================================================
-int xxVector4::BoundIntersect(xxVector4 const& v)
+int xxVector4::Intersect(xxVector4 const& sphere)
 {
-    float distance = (xyz - v.xyz).Length();
-    if (distance <= v.radius - radius)
+    float distance = (xyz - sphere.xyz).Length();
+    if (distance <= sphere.radius - radius)
         return 2;
-    if (distance <= radius - v.radius)
+    if (distance <= radius - sphere.radius)
         return 1;
-    if (distance <= radius + v.radius)
+    if (distance <= radius + sphere.radius)
         return 0;
     return -1;
+}
+//------------------------------------------------------------------------------
+bool xxVector4::Intersect(xxVector3 const& point, xxVector3 const& direction)
+{
+    xxVector3 diff = xyz - point;
+    float t0 = diff.Dot(direction);
+    float t2 = diff.Dot(diff) - t0 * t0;
+    if (radius * radius < t2)
+        return false;
+    float t1 = sqrtf(radius * radius - t2);
+    float distance = t0 > t1 + FLT_EPSILON ? t0 - t1 : t0 + t1;
+    return distance > FLT_EPSILON;
 }
 //------------------------------------------------------------------------------
 xxVector4& xxVector4::BoundMerge(xxVector3 const& v)

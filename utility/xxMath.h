@@ -72,8 +72,7 @@ union xxPlusAPI xxVector3
         struct { float x, y, z; };
         struct { float r, g, b; };
         struct { xxVector2 xy; float radius; };
-        struct { xxVector2 rg; };
-        struct { float _0; union { xxVector2 yz; xxVector2 gb; }; };
+        struct { float _x; xxVector2 yz; };
     };
 
     xxVector3           operator -      () const                     { xxVector3 t;     for (size_t i = 0; i < N; ++i) t.f[i] =   -f[i]; return t;       }
@@ -110,7 +109,8 @@ union xxPlusAPI xxVector3
     xxVector3           Cross           (xxVector3 const& v) const   { return xxVector3{ y, z, x } * xxVector3{ v.z, v.x, v.y } -
                                                                               xxVector3{ z, x, y } * xxVector3{ v.y, v.z, v.x }; }
 
-    int                 BoundIntersect  (xxVector3 const& v);
+    int                 Intersect       (xxVector2 const& point)     { return Intersect({ point.x, point.y, 0 }); }
+    int                 Intersect       (xxVector3 const& sphere);
 
     static const xxVector3 ZERO;
     static const xxVector3 ONE;
@@ -136,11 +136,9 @@ union xxPlusAPI xxVector4
         struct { float x, y, z, w; };
         struct { float r, g, b, a; };
         struct { xxVector2 xy; xxVector2 zw; };
-        struct { xxVector2 rg; xxVector2 ba; };
         struct { xxVector3 xyz; float radius; };
-        struct { xxVector3 rgb; };
-        struct { float _0; union { xxVector2 yz; xxVector2 gb; }; };
-        struct { float __0; union { xxVector3 yzw; xxVector3 gba; }; };
+        struct { float _x; xxVector2 yz; };
+        struct { float __x; xxVector3 yzw; };
     };
 
     xxVector4           operator -      () const                     { xxVector4 t;     for (size_t i = 0; i < N; ++i) t.f[i] =   -f[i]; return t;       }
@@ -175,7 +173,10 @@ union xxPlusAPI xxVector4
     xxVector4           Minimum         (xxVector4 const& v) const   { xxVector4 t; for (size_t i = 0; i < N; ++i) t.f[i] = f[i] < v.f[i] ? f[i] : v.f[i]; return t; }
     xxVector4           Maximum         (xxVector4 const& v) const   { xxVector4 t; for (size_t i = 0; i < N; ++i) t.f[i] = f[i] > v.f[i] ? f[i] : v.f[i]; return t; }
 
-    int                 BoundIntersect  (xxVector4 const& v);
+    int                 Intersect       (xxVector3 const& point)     { return Intersect({ point.x, point.y, point.z, 0 }); }
+    int                 Intersect       (xxVector4 const& sphere);
+    bool                Intersect       (xxVector3 const& point, xxVector3 const& direction);
+
     xxVector4&          BoundMerge      (xxVector3 const& v);
     xxVector4&          BoundMerge      (xxVector4 const& v);
     xxVector4           BoundTransform  (xxMatrix4 const& m, float s) const;
