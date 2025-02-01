@@ -42,7 +42,7 @@ void xxNode::BoneData::ResetPointer()
 //------------------------------------------------------------------------------
 xxNodePtr const& xxNode::GetParent() const
 {
-    if (m_parent.expired())
+    if (m_parent.use_count() == 0)
     {
         static xxNodePtr empty;
         return empty;

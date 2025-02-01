@@ -116,16 +116,16 @@ bool xxVector4::Intersect(xxVector3 const& point, xxVector3 const& direction)
     return distance > FLT_EPSILON;
 }
 //------------------------------------------------------------------------------
-xxVector4& xxVector4::BoundMerge(xxVector3 const& v)
+xxVector4& xxVector4::BoundMerge(xxVector3 const& point)
 {
     if (radius == 0.0f)
     {
-        xyz = v;
+        xyz = point;
         radius = FLT_EPSILON;
         return (*this);
     }
 
-    xxVector3 diff = v - xyz;
+    xxVector3 diff = point - xyz;
 
     float length = diff.Length();
     float radius1 = radius;
@@ -143,22 +143,22 @@ xxVector4& xxVector4::BoundMerge(xxVector3 const& v)
     return (*this);
 }
 //------------------------------------------------------------------------------
-xxVector4& xxVector4::BoundMerge(xxVector4 const& v)
+xxVector4& xxVector4::BoundMerge(xxVector4 const& sphere)
 {
-    if (v.radius == 0.0f)
+    if (sphere.radius == 0.0f)
     {
         return (*this);
     }
     if (radius == 0.0f)
     {
-        return (*this) = v;
+        return (*this) = sphere;
     }
 
-    xxVector3 diff = v.xyz - xyz;
+    xxVector3 diff = sphere.xyz - xyz;
 
     float length = diff.Length();
     float radius1 = radius;
-    float radius2 = v.radius;
+    float radius2 = sphere.radius;
 
     if (radius1 + radius2 >= length)
     {
@@ -169,7 +169,7 @@ xxVector4& xxVector4::BoundMerge(xxVector4 const& v)
 
         if (radius2 - radius1 >= length)
         {
-            return (*this) = v;
+            return (*this) = sphere;
         }
     }
 
@@ -181,11 +181,11 @@ xxVector4& xxVector4::BoundMerge(xxVector4 const& v)
     return (*this);
 }
 //------------------------------------------------------------------------------
-xxVector4 xxVector4::BoundTransform(xxMatrix4 const& m, float s) const
+xxVector4 xxVector4::BoundTransform(xxMatrix4 const& transform, float scale) const
 {
     xxVector4 t;
-    t.xyz = (m * (*this)).xyz;
-    t.radius = s * radius;
+    t = xxVector4{ x, y, z, 1 } * transform;
+    t.radius = scale * radius;
     return t;
 }
 //==============================================================================
@@ -438,7 +438,7 @@ void xxMatrix4::MultiplyArray(size_t count, xxVector4 const* __restrict input, i
 
     for (size_t i = 0; i < count; ++i)
     {
-        (*output).v = __builtin_multiplyvector(&matrix.v->v, (*input).v);
+        (*output).v = __builtin_vectormultiply((*input).v, &matrix.v->v);
 
         input = reinterpret_cast<xxVector4*>((char*)input + inputStride);
         output = reinterpret_cast<xxVector4*>((char*)output + outputStride);
@@ -451,10 +451,10 @@ void xxMatrix4::MultiplyArray(size_t count, xxMatrix4 const* __restrict input, i
 
     for (size_t i = 0; i < count; ++i)
     {
-        (*output)[0].v = __builtin_multiplyvector(&matrix.v->v, (*input)[0].v);
-        (*output)[1].v = __builtin_multiplyvector(&matrix.v->v, (*input)[1].v);
-        (*output)[2].v = __builtin_multiplyvector(&matrix.v->v, (*input)[2].v);
-        (*output)[3].v = __builtin_multiplyvector(&matrix.v->v, (*input)[3].v);
+        (*output)[0].v = __builtin_vectormultiply((*input)[0].v, &matrix.v->v);
+        (*output)[1].v = __builtin_vectormultiply((*input)[1].v, &matrix.v->v);
+        (*output)[2].v = __builtin_vectormultiply((*input)[2].v, &matrix.v->v);
+        (*output)[3].v = __builtin_vectormultiply((*input)[3].v, &matrix.v->v);
 
         input = reinterpret_cast<xxMatrix4*>((char*)input + inputStride);
         output = reinterpret_cast<xxMatrix4*>((char*)output + outputStride);
@@ -467,10 +467,10 @@ void xxMatrix4::MultiplyLink(size_t count, xxMatrix4 const* __restrict input, in
 
     for (size_t i = 0; i < count; ++i)
     {
-        (*output)[0].v = __builtin_multiplyvector(&matrix.v->v, (*input)[0].v);
-        (*output)[1].v = __builtin_multiplyvector(&matrix.v->v, (*input)[1].v);
-        (*output)[2].v = __builtin_multiplyvector(&matrix.v->v, (*input)[2].v);
-        (*output)[3].v = __builtin_multiplyvector(&matrix.v->v, (*input)[3].v);
+        (*output)[0].v = __builtin_vectormultiply((*input)[0].v, &matrix.v->v);
+        (*output)[1].v = __builtin_vectormultiply((*input)[1].v, &matrix.v->v);
+        (*output)[2].v = __builtin_vectormultiply((*input)[2].v, &matrix.v->v);
+        (*output)[3].v = __builtin_vectormultiply((*input)[3].v, &matrix.v->v);
         matrix = (*output);
 
         input = reinterpret_cast<xxMatrix4*>((char*)input + inputStride);
