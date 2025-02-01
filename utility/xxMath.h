@@ -41,6 +41,8 @@ union xxPlusAPI xxVector2
     xxVector2           operator *      (float s) const              { return xxVector2(*this) *= s; }
     xxVector2           operator /      (float s) const              { return xxVector2(*this) /= s; }
 
+    xxVector2           operator *      (xxMatrix2 const& m) const;
+
     float&              operator []     (size_t i)                   { return f[i]; }
     float               operator []     (size_t i) const             { return f[i]; }
 
@@ -92,6 +94,8 @@ union xxPlusAPI xxVector3
     xxVector3           operator /      (xxVector3 const& v) const   { return xxVector3(*this) /= v; }
     xxVector3           operator *      (float s) const              { return xxVector3(*this) *= s; }
     xxVector3           operator /      (float s) const              { return xxVector3(*this) /= s; }
+
+    xxVector3           operator *      (xxMatrix3 const& m) const;
 
     float&              operator []     (size_t i)                   { return f[i]; }
     float               operator []     (size_t i) const             { return f[i]; }
@@ -159,6 +163,8 @@ union xxPlusAPI xxVector4
     xxVector4           operator *      (float s) const              { return xxVector4(*this) *= s; }
     xxVector4           operator /      (float s) const              { return xxVector4(*this) /= s; }
 
+    xxVector4           operator *      (xxMatrix4 const& m) const;
+
     float&              operator []     (size_t i)                   { return f[i]; }
     float               operator []     (size_t i) const             { return f[i]; }
 
@@ -177,9 +183,9 @@ union xxPlusAPI xxVector4
     int                 Intersect       (xxVector4 const& sphere);
     bool                Intersect       (xxVector3 const& point, xxVector3 const& direction);
 
-    xxVector4&          BoundMerge      (xxVector3 const& v);
-    xxVector4&          BoundMerge      (xxVector4 const& v);
-    xxVector4           BoundTransform  (xxMatrix4 const& m, float s) const;
+    xxVector4&          BoundMerge      (xxVector3 const& point);
+    xxVector4&          BoundMerge      (xxVector4 const& sphere);
+    xxVector4           BoundTransform  (xxMatrix4 const& transform, float scale) const;
 
     static xxVector4    FromInteger     (uint32_t v)                 { xxVector4 t;    for (size_t i = 0; i < N; ++i) t.f[i] = (v >> (i * 8) & 0xFF) / 255.0f; return t; }
            uint32_t     ToInteger       () const                     { uint32_t t = 0; for (size_t i = 0; i < N; ++i) t |= uint32_t(f[i] * 255.0f) << (i * 8); return t; }
@@ -213,15 +219,15 @@ union xxPlusAPI xxMatrix2x2
         };
     };
 
-    xxMatrix2x2         operator -      () const                     { xxMatrix2x2 t;   for (size_t i = 0; i < N; ++i) t.v[i]  =  -v[i]; return t;       }
-    xxMatrix2x2&        operator +=     (xxMatrix2x2 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] += m.v[i]; return (*this); }
-    xxMatrix2x2&        operator -=     (xxMatrix2x2 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] -= m.v[i]; return (*this); }
-    xxMatrix2x2&        operator *=     (xxMatrix2x2 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i]  = m*v[i]; return (*this); }
-    xxMatrix2x2&        operator *=     (float s)                    {                  for (size_t i = 0; i < N; ++i)   v[i] *= s;      return (*this); }
-    xxMatrix2x2&        operator /=     (float s)                    { float r = 1 / s; for (size_t i = 0; i < N; ++i)   v[i] *= r;      return (*this); }
+    xxMatrix2x2         operator -      () const                     { xxMatrix2x2 t;        for (size_t i = 0; i < N; ++i) t.v[i]  = -v[i];  return t;       }
+    xxMatrix2x2&        operator +=     (xxMatrix2x2 const& m)       {                       for (size_t i = 0; i < N; ++i)   v[i] += m[i];   return (*this); }
+    xxMatrix2x2&        operator -=     (xxMatrix2x2 const& m)       {                       for (size_t i = 0; i < N; ++i)   v[i] -= m[i];   return (*this); }
+    xxMatrix2x2&        operator *=     (xxMatrix2x2 const& m)       { xxMatrix2x2 t(*this); for (size_t i = 0; i < N; ++i)   v[i]  = m[i]*t; return (*this); }
+    xxMatrix2x2&        operator *=     (float s)                    {                       for (size_t i = 0; i < N; ++i)   v[i] *= s;      return (*this); }
+    xxMatrix2x2&        operator /=     (float s)                    { float r = 1 / s;      for (size_t i = 0; i < N; ++i)   v[i] *= r;      return (*this); }
 
-    bool                operator ==     (xxMatrix2x2 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m.v[i]) return false; return true;  }
-    bool                operator !=     (xxMatrix2x2 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m.v[i]) return true;  return false; }
+    bool                operator ==     (xxMatrix2x2 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m[i]) return false; return true;  }
+    bool                operator !=     (xxMatrix2x2 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m[i]) return true;  return false; }
 
     xxMatrix2x2         operator +      (xxMatrix2x2 const& m) const { return xxMatrix2x2(*this) += m; }
     xxMatrix2x2         operator -      (xxMatrix2x2 const& m) const { return xxMatrix2x2(*this) -= m; }
@@ -261,14 +267,14 @@ union xxPlusAPI xxMatrix2x3
         };
     };
 
-    xxMatrix2x3         operator -      () const                     { xxMatrix2x3 t;   for (size_t i = 0; i < N; ++i) t.v[i]  =  -v[i]; return t;       }
-    xxMatrix2x3&        operator +=     (xxMatrix2x3 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] += m.v[i]; return (*this); }
-    xxMatrix2x3&        operator -=     (xxMatrix2x3 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] -= m.v[i]; return (*this); }
-    xxMatrix2x3&        operator *=     (float s)                    {                  for (size_t i = 0; i < N; ++i)   v[i] *= s;      return (*this); }
-    xxMatrix2x3&        operator /=     (float s)                    { float r = 1 / s; for (size_t i = 0; i < N; ++i)   v[i] *= r;      return (*this); }
+    xxMatrix2x3         operator -      () const                     { xxMatrix2x3 t;   for (size_t i = 0; i < N; ++i) t.v[i]  = -v[i]; return t;       }
+    xxMatrix2x3&        operator +=     (xxMatrix2x3 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] += m[i];  return (*this); }
+    xxMatrix2x3&        operator -=     (xxMatrix2x3 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] -= m[i];  return (*this); }
+    xxMatrix2x3&        operator *=     (float s)                    {                  for (size_t i = 0; i < N; ++i)   v[i] *= s;     return (*this); }
+    xxMatrix2x3&        operator /=     (float s)                    { float r = 1 / s; for (size_t i = 0; i < N; ++i)   v[i] *= r;     return (*this); }
 
-    bool                operator ==     (xxMatrix2x3 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m.v[i]) return false; return true;  }
-    bool                operator !=     (xxMatrix2x3 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m.v[i]) return true;  return false; }
+    bool                operator ==     (xxMatrix2x3 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m[i]) return false; return true;  }
+    bool                operator !=     (xxMatrix2x3 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m[i]) return true;  return false; }
 
     xxMatrix2x3         operator +      (xxMatrix2x3 const& m) const { return xxMatrix2x3(*this) += m; }
     xxMatrix2x3         operator -      (xxMatrix2x3 const& m) const { return xxMatrix2x3(*this) -= m; }
@@ -302,14 +308,14 @@ union xxPlusAPI xxMatrix2x4
         };
     };
 
-    xxMatrix2x4         operator -      () const                     { xxMatrix2x4 t;   for (size_t i = 0; i < N; ++i) t.v[i]  =  -v[i]; return t;       }
-    xxMatrix2x4&        operator +=     (xxMatrix2x4 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] += m.v[i]; return (*this); }
-    xxMatrix2x4&        operator -=     (xxMatrix2x4 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] -= m.v[i]; return (*this); }
-    xxMatrix2x4&        operator *=     (float s)                    {                  for (size_t i = 0; i < N; ++i)   v[i] *= s;      return (*this); }
-    xxMatrix2x4&        operator /=     (float s)                    { float r = 1 / s; for (size_t i = 0; i < N; ++i)   v[i] *= r;      return (*this); }
+    xxMatrix2x4         operator -      () const                     { xxMatrix2x4 t;   for (size_t i = 0; i < N; ++i) t.v[i]  = -v[i]; return t;       }
+    xxMatrix2x4&        operator +=     (xxMatrix2x4 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] += m[i];  return (*this); }
+    xxMatrix2x4&        operator -=     (xxMatrix2x4 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] -= m[i];  return (*this); }
+    xxMatrix2x4&        operator *=     (float s)                    {                  for (size_t i = 0; i < N; ++i)   v[i] *= s;     return (*this); }
+    xxMatrix2x4&        operator /=     (float s)                    { float r = 1 / s; for (size_t i = 0; i < N; ++i)   v[i] *= r;     return (*this); }
 
-    bool                operator ==     (xxMatrix2x4 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m.v[i]) return false; return true;  }
-    bool                operator !=     (xxMatrix2x4 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m.v[i]) return true;  return false; }
+    bool                operator ==     (xxMatrix2x4 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m[i]) return false; return true;  }
+    bool                operator !=     (xxMatrix2x4 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m[i]) return true;  return false; }
 
     xxMatrix2x4         operator +      (xxMatrix2x4 const& m) const { return xxMatrix2x4(*this) += m; }
     xxMatrix2x4         operator -      (xxMatrix2x4 const& m) const { return xxMatrix2x4(*this) -= m; }
@@ -341,14 +347,14 @@ union xxPlusAPI xxMatrix3x2
         };
     };
 
-    xxMatrix3x2         operator -      () const                     { xxMatrix3x2 t;   for (size_t i = 0; i < N; ++i) t.v[i]  =  -v[i]; return t;       }
-    xxMatrix3x2&        operator +=     (xxMatrix3x2 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] += m.v[i]; return (*this); }
-    xxMatrix3x2&        operator -=     (xxMatrix3x2 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] -= m.v[i]; return (*this); }
-    xxMatrix3x2&        operator *=     (float s)                    {                  for (size_t i = 0; i < N; ++i)   v[i] *= s;      return (*this); }
-    xxMatrix3x2&        operator /=     (float s)                    { float r = 1 / s; for (size_t i = 0; i < N; ++i)   v[i] *= r;      return (*this); }
+    xxMatrix3x2         operator -      () const                     { xxMatrix3x2 t;   for (size_t i = 0; i < N; ++i) t.v[i]  = -v[i]; return t;       }
+    xxMatrix3x2&        operator +=     (xxMatrix3x2 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] += m[i];  return (*this); }
+    xxMatrix3x2&        operator -=     (xxMatrix3x2 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] -= m[i];  return (*this); }
+    xxMatrix3x2&        operator *=     (float s)                    {                  for (size_t i = 0; i < N; ++i)   v[i] *= s;     return (*this); }
+    xxMatrix3x2&        operator /=     (float s)                    { float r = 1 / s; for (size_t i = 0; i < N; ++i)   v[i] *= r;     return (*this); }
 
-    bool                operator ==     (xxMatrix3x2 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m.v[i]) return false; return true;  }
-    bool                operator !=     (xxMatrix3x2 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m.v[i]) return true;  return false; }
+    bool                operator ==     (xxMatrix3x2 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m[i]) return false; return true;  }
+    bool                operator !=     (xxMatrix3x2 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m[i]) return true;  return false; }
 
     xxMatrix3x2         operator +      (xxMatrix3x2 const& m) const { return xxMatrix3x2(*this) += m; }
     xxMatrix3x2         operator -      (xxMatrix3x2 const& m) const { return xxMatrix3x2(*this) -= m; }
@@ -381,15 +387,15 @@ union xxPlusAPI xxMatrix3x3
         };
     };
 
-    xxMatrix3x3         operator -      () const                     { xxMatrix3x3 t;   for (size_t i = 0; i < N; ++i) t.v[i]  =  -v[i]; return t;       }
-    xxMatrix3x3&        operator +=     (xxMatrix3x3 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] += m.v[i]; return (*this); }
-    xxMatrix3x3&        operator -=     (xxMatrix3x3 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] -= m.v[i]; return (*this); }
-    xxMatrix3x3&        operator *=     (xxMatrix3x3 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i]  = m*v[i]; return (*this); }
-    xxMatrix3x3&        operator *=     (float s)                    {                  for (size_t i = 0; i < N; ++i)   v[i] *= s;      return (*this); }
-    xxMatrix3x3&        operator /=     (float s)                    { float r = 1 / s; for (size_t i = 0; i < N; ++i)   v[i] *= r;      return (*this); }
+    xxMatrix3x3         operator -      () const                     { xxMatrix3x3 t;        for (size_t i = 0; i < N; ++i) t.v[i]  = -v[i];  return t;       }
+    xxMatrix3x3&        operator +=     (xxMatrix3x3 const& m)       {                       for (size_t i = 0; i < N; ++i)   v[i] += m[i];   return (*this); }
+    xxMatrix3x3&        operator -=     (xxMatrix3x3 const& m)       {                       for (size_t i = 0; i < N; ++i)   v[i] -= m[i];   return (*this); }
+    xxMatrix3x3&        operator *=     (xxMatrix3x3 const& m)       { xxMatrix3x3 t(*this); for (size_t i = 0; i < N; ++i)   v[i]  = m[i]*t; return (*this); }
+    xxMatrix3x3&        operator *=     (float s)                    {                       for (size_t i = 0; i < N; ++i)   v[i] *= s;      return (*this); }
+    xxMatrix3x3&        operator /=     (float s)                    { float r = 1 / s;      for (size_t i = 0; i < N; ++i)   v[i] *= r;      return (*this); }
 
-    bool                operator ==     (xxMatrix3x3 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m.v[i]) return false; return true;  }
-    bool                operator !=     (xxMatrix3x3 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m.v[i]) return true;  return false; }
+    bool                operator ==     (xxMatrix3x3 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m[i]) return false; return true;  }
+    bool                operator !=     (xxMatrix3x3 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m[i]) return true;  return false; }
 
     xxMatrix3x3         operator +      (xxMatrix3x3 const& m) const { return xxMatrix3x3(*this) += m; }
     xxMatrix3x3         operator -      (xxMatrix3x3 const& m) const { return xxMatrix3x3(*this) -= m; }
@@ -432,14 +438,14 @@ union xxPlusAPI xxMatrix3x4
         };
     };
 
-    xxMatrix3x4         operator -      () const                     { xxMatrix3x4 t;   for (size_t i = 0; i < N; ++i) t.v[i]  =  -v[i]; return t;       }
-    xxMatrix3x4&        operator +=     (xxMatrix3x4 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] += m.v[i]; return (*this); }
-    xxMatrix3x4&        operator -=     (xxMatrix3x4 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] -= m.v[i]; return (*this); }
-    xxMatrix3x4&        operator *=     (float s)                    {                  for (size_t i = 0; i < N; ++i)   v[i] *= s;      return (*this); }
-    xxMatrix3x4&        operator /=     (float s)                    { float r = 1 / s; for (size_t i = 0; i < N; ++i)   v[i] *= r;      return (*this); }
+    xxMatrix3x4         operator -      () const                     { xxMatrix3x4 t;   for (size_t i = 0; i < N; ++i) t.v[i]  = -v[i]; return t;       }
+    xxMatrix3x4&        operator +=     (xxMatrix3x4 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] += m[i];  return (*this); }
+    xxMatrix3x4&        operator -=     (xxMatrix3x4 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] -= m[i];  return (*this); }
+    xxMatrix3x4&        operator *=     (float s)                    {                  for (size_t i = 0; i < N; ++i)   v[i] *= s;     return (*this); }
+    xxMatrix3x4&        operator /=     (float s)                    { float r = 1 / s; for (size_t i = 0; i < N; ++i)   v[i] *= r;     return (*this); }
 
-    bool                operator ==     (xxMatrix3x4 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m.v[i]) return false; return true;  }
-    bool                operator !=     (xxMatrix3x4 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m.v[i]) return true;  return false; }
+    bool                operator ==     (xxMatrix3x4 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m[i]) return false; return true;  }
+    bool                operator !=     (xxMatrix3x4 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m[i]) return true;  return false; }
 
     xxMatrix3x4         operator +      (xxMatrix3x4 const& m) const { return xxMatrix3x4(*this) += m; }
     xxMatrix3x4         operator -      (xxMatrix3x4 const& m) const { return xxMatrix3x4(*this) -= m; }
@@ -471,14 +477,14 @@ union xxPlusAPI xxMatrix4x2
         };
     };
 
-    xxMatrix4x2         operator -      () const                     { xxMatrix4x2 t;   for (size_t i = 0; i < N; ++i) t.v[i]  =  -v[i]; return t;       }
-    xxMatrix4x2&        operator +=     (xxMatrix4x2 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] += m.v[i]; return (*this); }
-    xxMatrix4x2&        operator -=     (xxMatrix4x2 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] -= m.v[i]; return (*this); }
-    xxMatrix4x2&        operator *=     (float s)                    {                  for (size_t i = 0; i < N; ++i)   v[i] *= s;      return (*this); }
-    xxMatrix4x2&        operator /=     (float s)                    { float r = 1 / s; for (size_t i = 0; i < N; ++i)   v[i] *= r;      return (*this); }
+    xxMatrix4x2         operator -      () const                     { xxMatrix4x2 t;   for (size_t i = 0; i < N; ++i) t.v[i]  = -v[i]; return t;       }
+    xxMatrix4x2&        operator +=     (xxMatrix4x2 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] += m[i];  return (*this); }
+    xxMatrix4x2&        operator -=     (xxMatrix4x2 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] -= m[i];  return (*this); }
+    xxMatrix4x2&        operator *=     (float s)                    {                  for (size_t i = 0; i < N; ++i)   v[i] *= s;     return (*this); }
+    xxMatrix4x2&        operator /=     (float s)                    { float r = 1 / s; for (size_t i = 0; i < N; ++i)   v[i] *= r;     return (*this); }
 
-    bool                operator ==     (xxMatrix4x2 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m.v[i]) return false; return true;  }
-    bool                operator !=     (xxMatrix4x2 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m.v[i]) return true;  return false; }
+    bool                operator ==     (xxMatrix4x2 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m[i]) return false; return true;  }
+    bool                operator !=     (xxMatrix4x2 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m[i]) return true;  return false; }
 
     xxMatrix4x2         operator +      (xxMatrix4x2 const& m) const { return xxMatrix4x2(*this) += m; }
     xxMatrix4x2         operator -      (xxMatrix4x2 const& m) const { return xxMatrix4x2(*this) -= m; }
@@ -511,14 +517,14 @@ union xxPlusAPI xxMatrix4x3
         };
     };
 
-    xxMatrix4x3         operator -      () const                     { xxMatrix4x3 t;   for (size_t i = 0; i < N; ++i) t.v[i]  =  -v[i]; return t;       }
-    xxMatrix4x3&        operator +=     (xxMatrix4x3 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] += m.v[i]; return (*this); }
-    xxMatrix4x3&        operator -=     (xxMatrix4x3 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] -= m.v[i]; return (*this); }
-    xxMatrix4x3&        operator *=     (float s)                    {                  for (size_t i = 0; i < N; ++i)   v[i] *= s;      return (*this); }
-    xxMatrix4x3&        operator /=     (float s)                    { float r = 1 / s; for (size_t i = 0; i < N; ++i)   v[i] *= r;      return (*this); }
+    xxMatrix4x3         operator -      () const                     { xxMatrix4x3 t;   for (size_t i = 0; i < N; ++i) t.v[i]  = -v[i]; return t;       }
+    xxMatrix4x3&        operator +=     (xxMatrix4x3 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] += m[i];  return (*this); }
+    xxMatrix4x3&        operator -=     (xxMatrix4x3 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] -= m[i];  return (*this); }
+    xxMatrix4x3&        operator *=     (float s)                    {                  for (size_t i = 0; i < N; ++i)   v[i] *= s;     return (*this); }
+    xxMatrix4x3&        operator /=     (float s)                    { float r = 1 / s; for (size_t i = 0; i < N; ++i)   v[i] *= r;     return (*this); }
 
-    bool                operator ==     (xxMatrix4x3 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m.v[i]) return false; return true;  }
-    bool                operator !=     (xxMatrix4x3 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m.v[i]) return true;  return false; }
+    bool                operator ==     (xxMatrix4x3 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m[i]) return false; return true;  }
+    bool                operator !=     (xxMatrix4x3 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m[i]) return true;  return false; }
 
     xxMatrix4x3         operator +      (xxMatrix4x3 const& m) const { return xxMatrix4x3(*this) += m; }
     xxMatrix4x3         operator -      (xxMatrix4x3 const& m) const { return xxMatrix4x3(*this) -= m; }
@@ -555,23 +561,21 @@ union xxPlusAPI xxMatrix4x4
         };
     };
 
-    xxMatrix4x4         operator -      () const                     { xxMatrix4x4 t;   for (size_t i = 0; i < N; ++i) t.v[i]  =  -v[i]; return t;       }
-    xxMatrix4x4&        operator +=     (xxMatrix4x4 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] += m.v[i]; return (*this); }
-    xxMatrix4x4&        operator -=     (xxMatrix4x4 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i] -= m.v[i]; return (*this); }
-    xxMatrix4x4&        operator *=     (xxMatrix4x4 const& m)       {                  for (size_t i = 0; i < N; ++i)   v[i]  = m*v[i]; return (*this); }
-    xxMatrix4x4&        operator *=     (float s)                    {                  for (size_t i = 0; i < N; ++i)   v[i] *= s;      return (*this); }
-    xxMatrix4x4&        operator /=     (float s)                    { float r = 1 / s; for (size_t i = 0; i < N; ++i)   v[i] *= r;      return (*this); }
+    xxMatrix4x4         operator -      () const                     { xxMatrix4x4 t;        for (size_t i = 0; i < N; ++i) t.v[i]  = -v[i];  return t;       }
+    xxMatrix4x4&        operator +=     (xxMatrix4x4 const& m)       {                       for (size_t i = 0; i < N; ++i)   v[i] += m[i];   return (*this); }
+    xxMatrix4x4&        operator -=     (xxMatrix4x4 const& m)       {                       for (size_t i = 0; i < N; ++i)   v[i] -= m[i];   return (*this); }
+    xxMatrix4x4&        operator *=     (xxMatrix4x4 const& m)       { xxMatrix4x4 t(*this); for (size_t i = 0; i < N; ++i)   v[i]  = m[i]*t; return (*this); }
+    xxMatrix4x4&        operator *=     (float s)                    {                       for (size_t i = 0; i < N; ++i)   v[i] *= s;      return (*this); }
+    xxMatrix4x4&        operator /=     (float s)                    { float r = 1 / s;      for (size_t i = 0; i < N; ++i)   v[i] *= r;      return (*this); }
 
-    bool                operator ==     (xxMatrix4x4 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m.v[i]) return false; return true;  }
-    bool                operator !=     (xxMatrix4x4 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m.v[i]) return true;  return false; }
+    bool                operator ==     (xxMatrix4x4 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m[i]) return false; return true;  }
+    bool                operator !=     (xxMatrix4x4 const& m) const { for (size_t i = 0; i < N; ++i) if (v[i] != m[i]) return true;  return false; }
 
     xxMatrix4x4         operator +      (xxMatrix4x4 const& m) const { return xxMatrix4x4(*this) += m; }
     xxMatrix4x4         operator -      (xxMatrix4x4 const& m) const { return xxMatrix4x4(*this) -= m; }
-    xxMatrix4x4         operator *      (xxMatrix4x4 const& m) const { return xxMatrix4x4(m) *= *this; }
+    xxMatrix4x4         operator *      (xxMatrix4x4 const& m) const { return xxMatrix4x4(*this) *= m; }
     xxMatrix4x4         operator *      (float s) const              { return xxMatrix4x4(*this) *= s; }
     xxMatrix4x4         operator /      (float s) const              { return xxMatrix4x4(*this) /= s; }
-
-    xxVector4           operator *      (xxVector4 const& c) const   { return v[0] * c.x + v[1] * c.y + v[2] * c.z + v[3] * c.w; }
 
     xxVector4&          operator []     (size_t i)                   { return v[i]; }
     xxVector4 const&    operator []     (size_t i) const             { return v[i]; }
@@ -592,3 +596,19 @@ union xxPlusAPI xxMatrix4x4
 
     static const xxMatrix4x4 IDENTITY;
 };
+
+inline xxVector2 xxVector2::operator * (xxMatrix2 const& m) const
+{
+    return m[0] * x + m[1] * y;
+}
+
+inline xxVector3 xxVector3::operator * (xxMatrix3 const& m) const
+{
+    return m[0] * x + m[1] * y + m[2] * z;
+}
+
+inline xxVector4 xxVector4::operator * (xxMatrix4 const& m) const
+{
+//  return m.v[0] * x + m.v[1] * y + m.v[2] * z + m.v[3] * w;
+    return { __builtin_vectormultiply(v, &m.v->v) };
+}

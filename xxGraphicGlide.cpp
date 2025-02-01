@@ -627,10 +627,10 @@ void xxSetVertexConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, in
         { halfWidth, halfHeight, 0, 1 },
     };
 
-    g_worldViewProjectionScreenMatrix[0] = __builtin_multiplyvector(screenMatrix, __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[0])));
-    g_worldViewProjectionScreenMatrix[1] = __builtin_multiplyvector(screenMatrix, __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[1])));
-    g_worldViewProjectionScreenMatrix[2] = __builtin_multiplyvector(screenMatrix, __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[2])));
-    g_worldViewProjectionScreenMatrix[3] = __builtin_multiplyvector(screenMatrix, __builtin_multiplyvector(g_projectionMatrix, __builtin_multiplyvector(g_viewMatrix, g_worldMatrix[3])));
+    g_worldViewProjectionScreenMatrix[0] = __builtin_vectormultiply(__builtin_vectormultiply(__builtin_vectormultiply(g_worldMatrix[0], g_viewMatrix), g_projectionMatrix), screenMatrix);
+    g_worldViewProjectionScreenMatrix[1] = __builtin_vectormultiply(__builtin_vectormultiply(__builtin_vectormultiply(g_worldMatrix[1], g_viewMatrix), g_projectionMatrix), screenMatrix);
+    g_worldViewProjectionScreenMatrix[2] = __builtin_vectormultiply(__builtin_vectormultiply(__builtin_vectormultiply(g_worldMatrix[2], g_viewMatrix), g_projectionMatrix), screenMatrix);
+    g_worldViewProjectionScreenMatrix[3] = __builtin_vectormultiply(__builtin_vectormultiply(__builtin_vectormultiply(g_worldMatrix[3], g_viewMatrix), g_projectionMatrix), screenMatrix);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferGlide(uint64_t commandEncoder, uint64_t buffer, int size)
@@ -652,9 +652,9 @@ void xxDrawGlide(uint64_t commandEncoder, int vertexCount, int instanceCount, in
 
         if (grVertexAttribute.flags & GR_PARAM_XY)
         {
-            v4sf p0 = __builtin_multiplyvector(g_worldViewProjectionScreenMatrix, v4sf{ v0[0], v0[1], v0[2], 1.0f });
-            v4sf p1 = __builtin_multiplyvector(g_worldViewProjectionScreenMatrix, v4sf{ v1[0], v1[1], v1[2], 1.0f });
-            v4sf p2 = __builtin_multiplyvector(g_worldViewProjectionScreenMatrix, v4sf{ v2[0], v2[1], v2[2], 1.0f });
+            v4sf p0 = __builtin_vectormultiply(v4sf{ v0[0], v0[1], v0[2], 1.0f }, g_worldViewProjectionScreenMatrix);
+            v4sf p1 = __builtin_vectormultiply(v4sf{ v1[0], v1[1], v1[2], 1.0f }, g_worldViewProjectionScreenMatrix);
+            v4sf p2 = __builtin_vectormultiply(v4sf{ v2[0], v2[1], v2[2], 1.0f }, g_worldViewProjectionScreenMatrix);
 
             t0.oow = 1.0f / p0[3];
             t1.oow = 1.0f / p1[3];
@@ -749,9 +749,9 @@ void xxDrawIndexedGlide(uint64_t commandEncoder, uint64_t indexBuffer, int index
 
         if (grVertexAttribute.flags & GR_PARAM_XY)
         {
-            v4sf p0 = __builtin_multiplyvector(g_worldViewProjectionScreenMatrix, v4sf{ v0[0], v0[1], v0[2], 1.0f });
-            v4sf p1 = __builtin_multiplyvector(g_worldViewProjectionScreenMatrix, v4sf{ v1[0], v1[1], v1[2], 1.0f });
-            v4sf p2 = __builtin_multiplyvector(g_worldViewProjectionScreenMatrix, v4sf{ v2[0], v2[1], v2[2], 1.0f });
+            v4sf p0 = __builtin_vectormultiply(v4sf{ v0[0], v0[1], v0[2], 1.0f }, g_worldViewProjectionScreenMatrix);
+            v4sf p1 = __builtin_vectormultiply(v4sf{ v1[0], v1[1], v1[2], 1.0f }, g_worldViewProjectionScreenMatrix);
+            v4sf p2 = __builtin_vectormultiply(v4sf{ v2[0], v2[1], v2[2], 1.0f }, g_worldViewProjectionScreenMatrix);
 
             t0.oow = 1.0f / p0[3];
             t1.oow = 1.0f / p1[3];

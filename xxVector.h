@@ -115,7 +115,7 @@ template<> inline v4sf __builtin_shufflevector<3, 3, 3, 3>(v4sf const& a, v4sf c
 #define __builtin_shufflevector(a, b, c, d, e, f) __builtin_shufflevector<c, d, e, f>(a, b)
 #endif
 
-inline v4sf __builtin_multiplyvector(v4sf const m[4], v4sf const& v)
+inline v4sf __builtin_vectormultiply(v4sf const& v, v4sf const m[4])
 {
     v4sf v0 = __builtin_shufflevector(v, v, 0, 0, 0, 0);
     v4sf v1 = __builtin_shufflevector(v, v, 1, 1, 1, 1);
