@@ -104,16 +104,16 @@ int xxVector4::Intersect(xxVector4 const& sphere)
     return -1;
 }
 //------------------------------------------------------------------------------
-bool xxVector4::Intersect(xxVector3 const& point, xxVector3 const& direction)
+float xxVector4::Intersect(xxVector3 const& point, xxVector3 const& direction)
 {
     xxVector3 diff = xyz - point;
     float t0 = diff.Dot(direction);
     float t2 = diff.Dot(diff) - t0 * t0;
     if (radius * radius < t2)
-        return false;
+        return -1.0f;
     float t1 = sqrtf(radius * radius - t2);
-    float distance = t0 > t1 + FLT_EPSILON ? t0 - t1 : t0 + t1;
-    return distance > FLT_EPSILON;
+    float distance = t0 > t1 ? t0 - t1 : t0 + t1;
+    return distance;
 }
 //------------------------------------------------------------------------------
 xxVector4& xxVector4::BoundMerge(xxVector3 const& point)

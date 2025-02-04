@@ -181,7 +181,7 @@ union xxPlusAPI xxVector4
 
     int                 Intersect       (xxVector3 const& point)     { return Intersect({ point.x, point.y, point.z, 0 }); }
     int                 Intersect       (xxVector4 const& sphere);
-    bool                Intersect       (xxVector3 const& point, xxVector3 const& direction);
+    float               Intersect       (xxVector3 const& point, xxVector3 const& direction);
 
     xxVector4&          BoundMerge      (xxVector3 const& point);
     xxVector4&          BoundMerge      (xxVector4 const& sphere);
