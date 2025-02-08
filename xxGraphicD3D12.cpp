@@ -824,9 +824,17 @@ uint64_t xxCreateVertexAttributeD3D12(uint64_t device, int count, int* attribute
             continue;
         }
 
-        if (element == 'NOR3' && size == sizeof(float) * 3)
+        if (element == 'NOR3')
         {
-            inputElement.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+            switch (size)
+            {
+            case sizeof(char) * 4:
+                inputElement.Format = DXGI_FORMAT_R8G8B8A8_UINT;
+                break;
+            case sizeof(float) * 3:
+                inputElement.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+                break;
+            }
             switch (normalIndex)
             {
             case 0: inputElement.SemanticName = "NORMAL"; break;
@@ -1534,6 +1542,7 @@ uint64_t xxCreateFragmentShaderD3D12(uint64_t device, char const* shader)
 void xxDestroyShaderD3D12(uint64_t device, uint64_t shader)
 {
     void* d3dShader = reinterpret_cast<void*>(shader);
+
     xxFree(d3dShader);
 }
 //==============================================================================

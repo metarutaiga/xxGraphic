@@ -31,6 +31,7 @@ uint64_t xxCreateInstanceD3D9PS()
     xxRegisterFunctionSingle(xxDestroyShader, xxDestroyShaderD3D9PS);
 
     xxRegisterFunctionSingle(xxCreatePipeline, xxCreatePipelineD3D9PS);
+    xxRegisterFunctionSingle(xxDestroyPipeline, xxDestroyPipelineD3D9PS);
 
     xxRegisterFunctionSingle(xxSetVertexBuffers, xxSetVertexBuffersD3D9PS);
     xxRegisterFunctionSingle(xxSetVertexConstantBuffer, xxSetVertexConstantBufferD3D9PS);
@@ -93,9 +94,17 @@ uint64_t xxCreateVertexAttributeD3D9PS(uint64_t device, int count, int* attribut
             continue;
         }
 
-        if (element == 'NOR3' && size == sizeof(float) * 3)
+        if (element == 'NOR3')
         {
-            vertexElement.Type = D3DDECLTYPE_FLOAT3;
+            switch (size)
+            {
+            case sizeof(char) * 4:
+                vertexElement.Type = D3DDECLTYPE_UBYTE4;
+                break;
+            case sizeof(float) * 3:
+                vertexElement.Type = D3DDECLTYPE_FLOAT3;
+                break;
+            }
             switch (normalIndex)
             {
             case 0: vertexElement.Usage = D3DDECLUSAGE_NORMAL; break;
@@ -157,12 +166,12 @@ uint64_t xxCreateVertexShaderD3D9PS(uint64_t device, char const* shader, uint64_
     if (d3dDevice == nullptr)
         return 0;
 
-    LPDIRECT3DVERTEXSHADER9 d3dShader = nullptr;
     if (strcmp(shader, "default") == 0)
     {
-        HRESULT hResult = d3dDevice->CreateVertexShader(vertexShaderCode11, &d3dShader);
-        if (hResult != S_OK)
+        void* d3dShader = xxAlloc(char, vertexShaderCode11Size);
+        if (d3dShader == nullptr)
             return 0;
+        memcpy(d3dShader, vertexShaderCode11, vertexShaderCode11Size);
 
         return reinterpret_cast<uint64_t>(d3dShader);
     }
@@ -175,10 +184,10 @@ uint64_t xxCreateVertexShaderD3D9PS(uint64_t device, char const* shader, uint64_
         if (blob == nullptr)
             return 0;
 
-        HRESULT hResult = d3dDevice->CreateVertexShader((DWORD*)blob->GetBufferPointer(), &d3dShader);
-        blob->Release();
-        if (hResult != S_OK)
+        void* d3dShader = xxAlloc(char, blob->GetBufferSize());
+        if (d3dShader == nullptr)
             return 0;
+        memcpy(d3dShader, blob->GetBufferPointer(), blob->GetBufferSize());
 
         return reinterpret_cast<uint64_t>(d3dShader);
     }
@@ -192,12 +201,12 @@ uint64_t xxCreateFragmentShaderD3D9PS(uint64_t device, char const* shader)
     if (d3dDevice == nullptr)
         return 0;
 
-    LPDIRECT3DPIXELSHADER9 d3dShader = nullptr;
     if (strcmp(shader, "default") == 0)
     {
-        HRESULT hResult = d3dDevice->CreatePixelShader(pixelShaderCode10, &d3dShader);
-        if (hResult != S_OK)
+        void* d3dShader = xxAlloc(char, pixelShaderCode10Size);
+        if (d3dShader == nullptr)
             return 0;
+        memcpy(d3dShader, pixelShaderCode10, pixelShaderCode10Size);
 
         return reinterpret_cast<uint64_t>(d3dShader);
     }
@@ -210,10 +219,10 @@ uint64_t xxCreateFragmentShaderD3D9PS(uint64_t device, char const* shader)
         if (blob == nullptr)
             return 0;
 
-        HRESULT hResult = d3dDevice->CreatePixelShader((DWORD*)blob->GetBufferPointer(), &d3dShader);
-        blob->Release();
-        if (hResult != S_OK)
+        void* d3dShader = xxAlloc(char, blob->GetBufferSize());
+        if (d3dShader == nullptr)
             return 0;
+        memcpy(d3dShader, blob->GetBufferPointer(), blob->GetBufferSize());
 
         return reinterpret_cast<uint64_t>(d3dShader);
     }
@@ -223,26 +232,51 @@ uint64_t xxCreateFragmentShaderD3D9PS(uint64_t device, char const* shader)
 //------------------------------------------------------------------------------
 void xxDestroyShaderD3D9PS(uint64_t device, uint64_t shader)
 {
-    LPUNKNOWN d3dShader = reinterpret_cast<LPUNKNOWN>(shader);
+    void* d3dShader = reinterpret_cast<void*>(shader);
 
-    SafeRelease(d3dShader);
+    xxFree(d3dShader);
 }
 //==============================================================================
 //  Pipeline
 //==============================================================================
 uint64_t xxCreatePipelineD3D9PS(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t meshShader, uint64_t vertexShader, uint64_t fragmentShader)
 {
-    uint64_t pipeline = xxCreatePipelineD3D9(device, renderPass, blendState, depthStencilState, rasterizerState, 0, meshShader, vertexShader, fragmentShader);
-    if (pipeline == 0)
-        return pipeline;
+    LPDIRECT3DDEVICE9 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE9>(device);
+    if (d3dDevice == nullptr)
+        return 0;
     D3DVERTEXATTRIBUTE9PS* d3dVertexAttribute = reinterpret_cast<D3DVERTEXATTRIBUTE9PS*>(vertexAttribute);
     if (d3dVertexAttribute == nullptr)
-        return pipeline;
-    LPDIRECT3DVERTEXDECLARATION9* d3dVertexDeclaration = reinterpret_cast<LPDIRECT3DVERTEXDECLARATION9*>(pipeline);
+        return 0;
+    DWORD* d3dVertexShader = reinterpret_cast<DWORD*>(vertexShader);
+    if (d3dVertexShader == nullptr)
+        return 0;
+    DWORD* d3dPixelShader = reinterpret_cast<DWORD*>(fragmentShader);
+    if (d3dPixelShader == nullptr)
+        return 0;
 
-    (*d3dVertexDeclaration) = d3dVertexAttribute->vertexDeclaration;
+    uint64_t pipeline = xxCreatePipelineD3D9(device, renderPass, blendState, depthStencilState, rasterizerState, 0, 0, 0, 0);
+    D3DPIPELINE9* d3dPipeline = reinterpret_cast<D3DPIPELINE9*>(pipeline);
+    if (d3dPipeline == nullptr)
+        return 0;
+
+    d3dPipeline->vertexShader = 0;
+    d3dPipeline->pixelShader = 0;
+    d3dDevice->CreateVertexShader(d3dVertexShader, &d3dPipeline->vertexShader);
+    d3dDevice->CreatePixelShader(d3dPixelShader, &d3dPipeline->pixelShader);
+    d3dPipeline->vertexDeclaration = d3dVertexAttribute->vertexDeclaration;
 
     return pipeline;
+}
+//------------------------------------------------------------------------------
+void xxDestroyPipelineD3D9PS(uint64_t pipeline)
+{
+    D3DPIPELINE9* d3dPipeline = reinterpret_cast<D3DPIPELINE9*>(pipeline);
+    if (d3dPipeline == nullptr)
+        return;
+
+    SafeRelease(d3dPipeline->vertexShader);
+    SafeRelease(d3dPipeline->pixelShader);
+    xxFree(d3dPipeline);
 }
 //==============================================================================
 //  Command

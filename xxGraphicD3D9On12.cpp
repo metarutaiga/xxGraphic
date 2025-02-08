@@ -66,6 +66,7 @@ uint64_t xxCreateInstanceD3D9On12PS()
     xxRegisterFunctionSingle(xxDestroyShader, xxDestroyShaderD3D9PS);
 
     xxRegisterFunctionSingle(xxCreatePipeline, xxCreatePipelineD3D9PS);
+    xxRegisterFunctionSingle(xxDestroyPipeline, xxDestroyPipelineD3D9PS);
 
     xxRegisterFunctionSingle(xxSetVertexBuffers, xxSetVertexBuffersD3D9PS);
     xxRegisterFunctionSingle(xxSetVertexConstantBuffer, xxSetVertexConstantBufferD3D9PS);
@@ -123,6 +124,7 @@ uint64_t xxCreateInstanceD3D9On12ExPS()
     xxRegisterFunctionSingle(xxDestroyShader, xxDestroyShaderD3D9PS);
 
     xxRegisterFunctionSingle(xxCreatePipeline, xxCreatePipelineD3D9PS);
+    xxRegisterFunctionSingle(xxDestroyPipeline, xxDestroyPipelineD3D9PS);
 
     xxRegisterFunctionSingle(xxSetVertexBuffers, xxSetVertexBuffersD3D9PS);
     xxRegisterFunctionSingle(xxSetVertexConstantBuffer, xxSetVertexConstantBufferD3D9PS);

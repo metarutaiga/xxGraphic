@@ -69,6 +69,7 @@ uint64_t xxCreateInstanceD3D9ExPS()
     xxRegisterFunctionSingle(xxDestroyShader, xxDestroyShaderD3D9PS);
 
     xxRegisterFunctionSingle(xxCreatePipeline, xxCreatePipelineD3D9PS);
+    xxRegisterFunctionSingle(xxDestroyPipeline, xxDestroyPipelineD3D9PS);
 
     xxRegisterFunctionSingle(xxSetVertexBuffers, xxSetVertexBuffersD3D9PS);
     xxRegisterFunctionSingle(xxSetVertexConstantBuffer, xxSetVertexConstantBufferD3D9PS);

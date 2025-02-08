@@ -449,9 +449,17 @@ uint64_t xxCreateVertexAttributeD3D11(uint64_t device, int count, int* attribute
             continue;
         }
 
-        if (element == 'NOR3' && size == sizeof(float) * 3)
+        if (element == 'NOR3')
         {
-            inputElement.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+            switch (size)
+            {
+            case sizeof(char) * 4:
+                inputElement.Format = DXGI_FORMAT_R8G8B8A8_UINT;
+                break;
+            case sizeof(float) * 3:
+                inputElement.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+                break;
+            }
             switch (normalIndex)
             {
             case 0: inputElement.SemanticName = "NORMAL"; break;
@@ -480,55 +488,7 @@ uint64_t xxCreateVertexAttributeD3D11(uint64_t device, int count, int* attribute
     }
 
     DWORD dxbc[256] = {};
-    DWORD dxbcChunkCount = 1;
-    DWORD dxbcCount = 8 + dxbcChunkCount;
-    DWORD inputSignatureCount = 4 + (6 * count) + (4 * count);
-    DWORD dxbcSize = (dxbcCount + inputSignatureCount) * sizeof(DWORD);
-    DWORD* dxbcChunk = dxbc + 8;
-    DWORD* inputSignatureHeader = dxbc + dxbcCount;
-    DWORD* inputSignature = inputSignatureHeader + 4;
-    char* inputSignatureName = (char*)(inputSignature + (6 * count));
-
-    dxbc[0] = *(DWORD*)"DXBC";
-    dxbc[5] = 1;
-    dxbc[6] = dxbcSize;
-    dxbc[7] = dxbcChunkCount;
-
-    dxbcChunk[0] = (uint32_t)(inputSignatureHeader - dxbc) * sizeof(DWORD);
-
-    inputSignatureHeader[0] = *(DWORD*)"ISGN";
-    inputSignatureHeader[1] = (inputSignatureCount - 2) * sizeof(DWORD);
-    inputSignatureHeader[2] = count;
-    inputSignatureHeader[3] = 8;
-    for (int i = 0; i < count; ++i)
-    {
-        const D3D11_INPUT_ELEMENT_DESC& inputElement = inputElements[i];
-        inputSignature[0] = (DWORD)(inputSignatureName - (char*)inputSignatureHeader - 8);
-        inputSignature[1] = inputElement.SemanticIndex;
-        inputSignature[2] = 0;
-        inputSignature[3] = 3;
-        inputSignature[4] = i;
-        switch (inputElement.Format)
-        {
-        case DXGI_FORMAT_R32_FLOAT:
-            inputSignature[5] = 0x0101;
-            break;
-        case DXGI_FORMAT_R32G32_FLOAT:
-            inputSignature[5] = 0x0303;
-            break;
-        case DXGI_FORMAT_R32G32B32_FLOAT:
-            inputSignature[5] = 0x0707;
-            break;
-        case DXGI_FORMAT_R32G32B32A32_FLOAT:
-        default:
-            inputSignature[5] = 0x0F0F;
-            break;
-        }
-        strcpy(inputSignatureName, inputElement.SemanticName);
-        inputSignature += 6;
-        inputSignatureName += strlen(inputSignatureName) + 1;
-    }
-    xxDXBCChecksum(dxbc, dxbcSize, (uint8_t*)&dxbc[1]);
+    DWORD dxbcSize = D3DInputLayout(dxbc, inputElements, count);
 
     ID3D11InputLayout* inputLayout = nullptr;
     HRESULT hResult = d3dDevice->CreateInputLayout(inputElements, count, dxbc, dxbcSize, &inputLayout);
@@ -1124,9 +1084,10 @@ uint64_t xxCreateVertexShaderD3D11(uint64_t device, char const* shader, uint64_t
     ID3D11VertexShader* d3dShader = nullptr;
     if (strcmp(shader, "default") == 0)
     {
-        HRESULT hResult = d3dDevice->CreateVertexShader(vertexShaderCode40, vertexShaderCode40[6], nullptr, &d3dShader);
-        if (hResult != S_OK)
+        void* d3dShader = xxAlloc(char, vertexShaderCode40[6]);
+        if (d3dShader == nullptr)
             return 0;
+        memcpy(d3dShader, vertexShaderCode40, vertexShaderCode40[6]);
 
         return reinterpret_cast<uint64_t>(d3dShader);
     }
@@ -1139,10 +1100,10 @@ uint64_t xxCreateVertexShaderD3D11(uint64_t device, char const* shader, uint64_t
         if (blob == nullptr)
             return 0;
 
-        HRESULT hResult = d3dDevice->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &d3dShader);
-        blob->Release();
-        if (hResult != S_OK)
+        void* d3dShader = xxAlloc(char, blob->GetBufferSize());
+        if (d3dShader == nullptr)
             return 0;
+        memcpy(d3dShader, blob->GetBufferPointer(), blob->GetBufferSize());
 
         return reinterpret_cast<uint64_t>(d3dShader);
     }
@@ -1159,9 +1120,10 @@ uint64_t xxCreateFragmentShaderD3D11(uint64_t device, char const* shader)
     ID3D11PixelShader* d3dShader = nullptr;
     if (strcmp(shader, "default") == 0)
     {
-        HRESULT hResult = d3dDevice->CreatePixelShader(pixelShaderCode40, pixelShaderCode40[6], nullptr, &d3dShader);
-        if (hResult != S_OK)
+        void* d3dShader = xxAlloc(char, pixelShaderCode40[6]);
+        if (d3dShader == nullptr)
             return 0;
+        memcpy(d3dShader, pixelShaderCode40, pixelShaderCode40[6]);
 
         return reinterpret_cast<uint64_t>(d3dShader);
     }
@@ -1174,10 +1136,10 @@ uint64_t xxCreateFragmentShaderD3D11(uint64_t device, char const* shader)
         if (blob == nullptr)
             return 0;
 
-        HRESULT hResult = d3dDevice->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &d3dShader);
-        blob->Release();
-        if (hResult != S_OK)
+        void* d3dShader = xxAlloc(char, blob->GetBufferSize());
+        if (d3dShader == nullptr)
             return 0;
+        memcpy(d3dShader, blob->GetBufferPointer(), blob->GetBufferSize());
 
         return reinterpret_cast<uint64_t>(d3dShader);
     }
@@ -1187,9 +1149,9 @@ uint64_t xxCreateFragmentShaderD3D11(uint64_t device, char const* shader)
 //------------------------------------------------------------------------------
 void xxDestroyShaderD3D11(uint64_t device, uint64_t shader)
 {
-    IUnknown* d3dShader = reinterpret_cast<IUnknown*>(shader);
+    void* d3dShader = reinterpret_cast<void*>(shader);
 
-    SafeRelease(d3dShader);
+    xxFree(d3dShader);
 }
 //==============================================================================
 //  Pipeline
@@ -1269,23 +1231,29 @@ uint64_t xxCreateRasterizerStateD3D11(uint64_t device, bool cull, bool scissor)
 //------------------------------------------------------------------------------
 uint64_t xxCreatePipelineD3D11(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t meshShader, uint64_t vertexShader, uint64_t fragmentShader)
 {
+    ID3D11Device* d3dDevice = reinterpret_cast<ID3D11Device*>(device);
+    if (d3dDevice == nullptr)
+        return 0;
     D3D11PIPELINE* d3dPipeline = xxAlloc(D3D11PIPELINE);
     if (d3dPipeline == nullptr)
         return 0;
     D3D11VERTEXATTRIBUTE* d3dVertexAttribute = reinterpret_cast<D3D11VERTEXATTRIBUTE*>(vertexAttribute);
     if (d3dVertexAttribute == nullptr)
         return 0;
-    ID3D11VertexShader* d3dVertexShader = reinterpret_cast<ID3D11VertexShader*>(vertexShader);
-    ID3D11PixelShader* d3dPixelShader = reinterpret_cast<ID3D11PixelShader*>(fragmentShader);
-    ID3D11BlendState* d3dBlendState = reinterpret_cast<ID3D11BlendState*>(blendState);
-    ID3D11DepthStencilState* d3dDepthStencilState = reinterpret_cast<ID3D11DepthStencilState*>(depthStencilState);
-    ID3D11RasterizerState* d3dRasterizerState = reinterpret_cast<ID3D11RasterizerState*>(rasterizerState);
+    DWORD* d3dVertexShader = reinterpret_cast<DWORD*>(vertexShader);
+    if (d3dVertexShader == nullptr)
+        return 0;
+    DWORD* d3dPixelShader = reinterpret_cast<DWORD*>(fragmentShader);
+    if (d3dPixelShader == nullptr)
+        return 0;
 
-    d3dPipeline->vertexShader = d3dVertexShader;
-    d3dPipeline->pixelShader = d3dPixelShader;
-    d3dPipeline->blendState = d3dBlendState;
-    d3dPipeline->depthStencilState = d3dDepthStencilState;
-    d3dPipeline->rasterizerState = d3dRasterizerState;
+    d3dPipeline->vertexShader = nullptr;
+    d3dPipeline->pixelShader = nullptr;
+    d3dDevice->CreateVertexShader(d3dVertexShader, d3dVertexShader[6], nullptr, &d3dPipeline->vertexShader);
+    d3dDevice->CreatePixelShader(d3dPixelShader, d3dPixelShader[6], nullptr, &d3dPipeline->pixelShader);
+    d3dPipeline->blendState = reinterpret_cast<ID3D11BlendState*>(blendState);
+    d3dPipeline->depthStencilState = reinterpret_cast<ID3D11DepthStencilState*>(depthStencilState);
+    d3dPipeline->rasterizerState = reinterpret_cast<ID3D11RasterizerState*>(rasterizerState);
     d3dPipeline->inputLayout = d3dVertexAttribute->inputLayout;
 
     return reinterpret_cast<uint64_t>(d3dPipeline);
@@ -1315,7 +1283,11 @@ void xxDestroyRasterizerStateD3D11(uint64_t rasterizerState)
 void xxDestroyPipelineD3D11(uint64_t pipeline)
 {
     D3D11PIPELINE* d3dPipeline = reinterpret_cast<D3D11PIPELINE*>(pipeline);
+    if (d3dPipeline == nullptr)
+        return;
 
+    SafeRelease(d3dPipeline->vertexShader);
+    SafeRelease(d3dPipeline->pixelShader);
     xxFree(d3dPipeline);
 }
 //==============================================================================

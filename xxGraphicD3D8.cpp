@@ -801,13 +801,12 @@ uint64_t xxCreatePipelineD3D8(uint64_t device, uint64_t renderPass, uint64_t ble
         return 0;
 
     D3DVERTEXATTRIBUTE8 d3dVertexAttribute          = { vertexAttribute };
-    DWORD d3dVertexShader                           = static_cast<DWORD>(vertexShader);
-    DWORD d3dPixelShader                            = static_cast<DWORD>(fragmentShader);
     D3DRENDERSTATE8 d3dBlendState                   = { blendState };
     D3DRENDERSTATE8 d3dDepthStencilState            = { depthStencilState };
     D3DRENDERSTATE8 d3dRasterizerState              = { rasterizerState };
-    d3dPipeline->vertexShader                       = d3dVertexShader ? d3dVertexShader : d3dVertexAttribute.fvf;
-    d3dPipeline->pixelShader                        = d3dPixelShader;
+    d3dPipeline->device                             = reinterpret_cast<LPDIRECT3DDEVICE8>(device);
+    d3dPipeline->vertexShader                       = d3dVertexAttribute.fvf;
+    d3dPipeline->pixelShader                        = 0;
     d3dPipeline->renderState.blendEnable            = d3dBlendState.blendEnable;
     d3dPipeline->renderState.blendSourceColor       = d3dBlendState.blendSourceColor;
     d3dPipeline->renderState.blendDestinationColor  = d3dBlendState.blendDestinationColor;

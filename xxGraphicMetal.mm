@@ -361,7 +361,10 @@ id xxCreateVertexAttributeMetal(id <MTLDevice> __unsafe_unretained device, int c
                 attribute.format = MTLVertexFormatUChar2Normalized;
                 break;
             case '3':
-                attribute.format = MTLVertexFormatUChar3Normalized;
+                if (element == 'NOR3')
+                    attribute.format = MTLVertexFormatUChar4;
+                else
+                    attribute.format = MTLVertexFormatUChar3Normalized;
                 break;
             case '4':
                 if (element == 'BON4')
