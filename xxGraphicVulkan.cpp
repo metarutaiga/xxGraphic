@@ -1170,9 +1170,17 @@ uint64_t xxCreateVertexAttributeVulkan(uint64_t device, int count, int* attribut
             continue;
         }
 
-        if (element == 'NOR3' && size == sizeof(float) * 3)
+        if (element == 'NOR3')
         {
-            attributeDesc.format = VK_FORMAT_R32G32B32_SFLOAT;
+            switch (size)
+            {
+            case sizeof(char) * 4:
+                attributeDesc.format = VK_FORMAT_R8G8B8A8_UINT;
+                break;
+            case sizeof(float) * 3:
+                attributeDesc.format = VK_FORMAT_R32G32B32_SFLOAT;
+                break;
+            }
             continue;
         }
 

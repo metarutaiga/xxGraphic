@@ -99,6 +99,11 @@ const DWORD pixelShaderCode20[] =
     D3DSIO(MOV, 2), _DST(COLOROUT, 0), _SRC(TEMP, 0),                               // mov oC0, r0
     D3DSIO(END, 0)
 };
+//------------------------------------------------------------------------------
+const DWORD vertexShaderCode10Size = xxSizeOf(vertexShaderCode10);
+const DWORD vertexShaderCode11Size = xxSizeOf(vertexShaderCode11);
+const DWORD pixelShaderCode10Size = xxSizeOf(pixelShaderCode10Size);
+const DWORD pixelShaderCode20Size = xxSizeOf(pixelShaderCode20Size);
 //==============================================================================
 //  Direct3D 10.0 Assembly Shader
 //==============================================================================
@@ -207,4 +212,7 @@ const DWORD pixelShaderCode40[] =
     _OP(MUL, 7), _4M(1D, OUTPUT), 0, _4S(1D, TEMP), 0, _4S(1D, INPUT), 1,                                           // mul o0.xyzw, r0.xyzw, v1.xyzw
     _OP(RET, 1)                                                                                                     // ret
 };
+//------------------------------------------------------------------------------
+const DWORD vertexShaderCode40Size = xxSizeOf(vertexShaderCode40);
+const DWORD pixelShaderCode40Size = xxSizeOf(pixelShaderCode40);
 //------------------------------------------------------------------------------

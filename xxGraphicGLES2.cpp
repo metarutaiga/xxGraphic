@@ -337,8 +337,17 @@ uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, int* attribute
             continue;
         }
 
-        if (element == 'NOR3' && size == sizeof(float) * 3)
+        if (element == 'NOR3')
         {
+            switch (size)
+            {
+            case sizeof(char) * 4:
+                attributes[i].type = GL_UNSIGNED_BYTE;
+                break;
+            case sizeof(float) * 3:
+                attributes[i].type = GL_FLOAT;
+                break;
+            }
             switch (normalIndex)
             {
             case 0: attributes[i].name = "attrNormal"; break;
@@ -814,7 +823,7 @@ static void checkShader(GLuint glShader, char const* shader)
             char* line = strsep(&lasts, "\r\n");
             while (line)
             {
-                xxLog("xxGraphic", "%d : %s", index++, line);
+                xxLog("xxGraphic", "%d : %s", ++index, line);
                 line = strsep(&lasts, "\r\n");
             }
             free(dup);
@@ -1080,6 +1089,9 @@ void xxDestroyPipelineGLES2(uint64_t pipeline)
 //==============================================================================
 void xxSetViewportGLES2(uint64_t commandEncoder, int x, int y, int width, int height, float minZ, float maxZ)
 {
+    GLSWAPCHAIN* glSwapchain = reinterpret_cast<GLSWAPCHAIN*>(commandEncoder);
+
+    y = (int)(glSwapchain->height * glSwapchain->scale) - y - height;
     glViewport(x, y, width, height);
 }
 //------------------------------------------------------------------------------

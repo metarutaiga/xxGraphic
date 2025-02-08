@@ -6,6 +6,7 @@
 //==============================================================================
 #include "xxGraphicInternalD3D.h"
 #include <dxsdk/d3d9.h>
+#include <dxsdk/d3d10.h>
 
 //==============================================================================
 struct D3DBlob : public IUnknown
@@ -13,6 +14,34 @@ struct D3DBlob : public IUnknown
     virtual LPCSTR STDMETHODCALLTYPE GetBufferPointer() = 0;
     virtual SIZE_T STDMETHODCALLTYPE GetBufferSize() = 0;
 };
+//------------------------------------------------------------------------------
+static void LogText(char const* label, void const* text, size_t size, bool number)
+{
+    char* temp = xxAlloc(char, size + 1);
+    if (temp)
+    {
+        memcpy(temp, text, size);
+        temp[size] = 0;
+
+        int index = 0;
+        char* lasts = temp;
+        char* line = strsep(&lasts, "\r\n");
+        while (line)
+        {
+            if (number)
+            {
+                xxLog(label, "%d : %s", ++index, line);
+            }
+            else
+            {
+                xxLog(label, "%s", line);
+            }
+            line = strsep(&lasts, "\r\n");
+        }
+
+        xxFree(temp);
+    }
+}
 //------------------------------------------------------------------------------
 struct ID3D10Blob* D3DCompileShader(char const* shader, char const*const* macro, char const* entry, char const* target)
 {
@@ -38,7 +67,12 @@ struct ID3D10Blob* D3DCompileShader(char const* shader, char const*const* macro,
         {
             D3D10CompileShader(shader, strlen(shader), nullptr, macro, nullptr, entry, target, 0, &blob, &error);
         }
-        D3DDumpBlob(error, "D3DCompileShader");
+        if (error)
+        {
+            LogText("D3DCompileShader", shader, strlen(shader), true);
+            LogText("D3DCompileShader", error->GetBufferPointer(), error->GetBufferSize(), false);
+            error->Release();
+        }
         return blob;
     }
 
@@ -69,7 +103,11 @@ void D3DDisassembleShader(struct ID3D10Blob* shader)
         {
             D3D10DisassembleShader(blob->GetBufferPointer(), blob->GetBufferSize(), 0, nullptr, &text);
         }
-        D3DDumpBlob(text, "D3DDisassembleShader");
+        if (text)
+        {
+            LogText("D3DDisassembleShader", text->GetBufferPointer(), text->GetBufferSize(), false);
+            text->Release();
+        }
     }
 }
 //------------------------------------------------------------------------------
@@ -210,31 +248,61 @@ void D3DDowngradeShader(struct ID3D10Blob* shader, char const* target)
     }
 }
 //------------------------------------------------------------------------------
-void D3DDumpBlob(struct ID3D10Blob* blob, char const* label)
+DWORD D3DInputLayout(DWORD dxbc[256], void const* input, int count)
 {
-    if (blob == nullptr)
-        return;
-    D3DBlob* text = (D3DBlob*)blob;
+    D3D10_INPUT_ELEMENT_DESC const* inputElements = (D3D10_INPUT_ELEMENT_DESC*)input;
 
-    size_t size = text->GetBufferSize();
-    char* temp = xxAlloc(char, size + 1);
-    if (temp)
+    DWORD dxbcChunkCount = 1;
+    DWORD dxbcCount = 8 + dxbcChunkCount;
+    DWORD inputSignatureCount = 4 + (6 * count) + (4 * count);
+    DWORD dxbcSize = (dxbcCount + inputSignatureCount) * sizeof(DWORD);
+    DWORD* dxbcChunk = dxbc + 8;
+    DWORD* inputSignatureHeader = dxbc + dxbcCount;
+    DWORD* inputSignature = inputSignatureHeader + 4;
+    char* inputSignatureName = (char*)(inputSignature + (6 * count));
+
+    dxbc[0] = *(DWORD*)"DXBC";
+    dxbc[5] = 1;
+    dxbc[6] = dxbcSize;
+    dxbc[7] = dxbcChunkCount;
+
+    dxbcChunk[0] = (DWORD)(inputSignatureHeader - dxbc) * sizeof(DWORD);
+
+    inputSignatureHeader[0] = *(DWORD*)"ISGN";
+    inputSignatureHeader[1] = (inputSignatureCount - 2) * sizeof(DWORD);
+    inputSignatureHeader[2] = count;
+    inputSignatureHeader[3] = 8;
+    for (int i = 0; i < count; ++i)
     {
-        memcpy(temp, text->GetBufferPointer(), size);
-        temp[size] = 0;
-
-        char* lasts = temp;
-        char* line = strsep(&lasts, "\r\n");
-        while (line)
+        const D3D10_INPUT_ELEMENT_DESC& inputElement = inputElements[i];
+        inputSignature[0] = (DWORD)(inputSignatureName - (char*)inputSignatureHeader - 8);
+        inputSignature[1] = inputElement.SemanticIndex;
+        inputSignature[2] = 0;
+        inputSignature[3] = 3;
+        inputSignature[4] = i;
+        switch (inputElement.Format)
         {
-            xxLog(label, "%s", line);
-            line = strsep(&lasts, "\r\n");
+        case DXGI_FORMAT_R32_FLOAT:
+            inputSignature[5] = 0x0101;
+            break;
+        case DXGI_FORMAT_R32G32_FLOAT:
+            inputSignature[5] = 0x0303;
+            break;
+        case DXGI_FORMAT_R32G32B32_FLOAT:
+            inputSignature[5] = 0x0707;
+            break;
+        case DXGI_FORMAT_R32G32B32A32_FLOAT:
+        default:
+            inputSignature[5] = 0x0F0F;
+            break;
         }
-
-        xxFree(temp);
+        strcpy(inputSignatureName, inputElement.SemanticName);
+        inputSignature += 6;
+        inputSignatureName += strlen(inputSignatureName) + 1;
     }
+    xxDXBCChecksum(dxbc, dxbcSize, (uint8_t*)&dxbc[1]);
 
-    text->Release();
+    return dxbcSize;
 }
 //------------------------------------------------------------------------------
 void PatchD3DIM(char const* name)

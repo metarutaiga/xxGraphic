@@ -861,15 +861,13 @@ uint64_t xxCreatePipelineD3D9(uint64_t device, uint64_t renderPass, uint64_t ble
         return 0;
 
     D3DVERTEXATTRIBUTE9 d3dVertexAttribute          = { vertexAttribute };
-    LPDIRECT3DVERTEXSHADER9 d3dVertexShader         = reinterpret_cast<LPDIRECT3DVERTEXSHADER9>(vertexShader);
-    LPDIRECT3DPIXELSHADER9 d3dPixelShader           = reinterpret_cast<LPDIRECT3DPIXELSHADER9>(fragmentShader);
     D3DRENDERSTATE9 d3dBlendState                   = { blendState };
     D3DRENDERSTATE9 d3dDepthStencilState            = { depthStencilState };
     D3DRENDERSTATE9 d3dRasterizerState              = { rasterizerState };
     d3dPipeline->vertexDeclaration                  = nullptr;
     d3dPipeline->fvf                                = d3dVertexAttribute.fvf;
-    d3dPipeline->vertexShader                       = d3dVertexShader;
-    d3dPipeline->pixelShader                        = d3dPixelShader;
+    d3dPipeline->vertexShader                       = 0;
+    d3dPipeline->pixelShader                        = 0;
     d3dPipeline->renderState.blendEnable            = d3dBlendState.blendEnable;
     d3dPipeline->renderState.blendSourceColor       = d3dBlendState.blendSourceColor;
     d3dPipeline->renderState.blendDestinationColor  = d3dBlendState.blendDestinationColor;

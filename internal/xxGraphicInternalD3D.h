@@ -343,7 +343,7 @@ inline ULONG SafeRelease(T*& ptr)
 struct ID3D10Blob* D3DCompileShader(char const* shader, char const*const* macro, char const* entry, char const* target);
 void D3DDisassembleShader(struct ID3D10Blob* shader);
 void D3DDowngradeShader(struct ID3D10Blob* shader, char const* target);
-void D3DDumpBlob(struct ID3D10Blob* blob, char const* label);
+DWORD D3DInputLayout(DWORD dxbc[256], void const* input, int count);
 void PatchD3DIM(char const* name);
 void ViewportFromScissor(float projectionMatrix[4][4], int fromX, int fromY, int fromWidth, int fromHeight, int toX, int toY, int toWidth, int toHeight);
 
@@ -862,6 +862,7 @@ struct D3DPIPELINE7
 //------------------------------------------------------------------------------
 struct D3DPIPELINE8
 {
+    IDirect3DDevice8*           device;
     DWORD                       vertexShader;
     DWORD                       pixelShader;
     D3DRENDERSTATE8             renderState;
