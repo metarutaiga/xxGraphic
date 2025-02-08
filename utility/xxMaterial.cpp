@@ -497,13 +497,10 @@ void xxMaterial::BinaryWrite(xxBinary& binary) const
 //  Default Shader
 //==============================================================================
 #if defined(__clang__)
-extern char const* const glDefaultShaderCode = xxMaterial::DefaultShader;
-extern char const* const mtlDefaultShaderCode = xxMaterial::DefaultShader;
+char const xxMaterial::DefaultShader[] __attribute__((weak)) =
 #else
-#pragma comment(linker, "/alternatename:glDefaultShaderCode=?DefaultShader@xxMaterial@@2QBDB")
-#endif
-//------------------------------------------------------------------------------
 char const xxMaterial::DefaultShader[] =
+#endif
 //------------------------------------------------------------------------------
 //  Default
 //------------------------------------------------------------------------------
