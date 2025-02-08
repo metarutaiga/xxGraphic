@@ -58,15 +58,15 @@ uint64_t xxCreateInstanceGLES32()
 
     xxRegisterFunction(GLES2);
 
-    xxCreateInstance = xxCreateInstanceGLES32;
-    xxGetInstanceName = xxGetInstanceNameGLES32;
-    xxCreateIndexBuffer = xxCreateIndexBufferGLES3;
-    xxCreateVertexBuffer = xxCreateVertexBufferGLES3;
-    xxMapBuffer = xxMapBufferGLES3;
-    xxUnmapBuffer = xxUnmapBufferGLES3;
-    xxSetVertexBuffers = xxSetVertexBuffersGLES32;
-    xxDraw = xxDrawGLES32;
-    xxDrawIndexed = xxDrawIndexedGLES32;
+    xxRegisterFunctionSingle(xxCreateInstance, xxCreateInstanceGLES32);
+    xxRegisterFunctionSingle(xxGetInstanceName, xxGetInstanceNameGLES32);
+    xxRegisterFunctionSingle(xxCreateIndexBuffer, xxCreateIndexBufferGLES3);
+    xxRegisterFunctionSingle(xxCreateVertexBuffer, xxCreateVertexBufferGLES3);
+    xxRegisterFunctionSingle(xxMapBuffer, xxMapBufferGLES3);
+    xxRegisterFunctionSingle(xxUnmapBuffer, xxUnmapBufferGLES3);
+    xxRegisterFunctionSingle(xxSetVertexBuffers, xxSetVertexBuffersGLES32);
+    xxRegisterFunctionSingle(xxDraw, xxDrawGLES32);
+    xxRegisterFunctionSingle(xxDrawIndexed, xxDrawIndexedGLES32);
 
     return instance;
 }

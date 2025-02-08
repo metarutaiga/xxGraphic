@@ -14,35 +14,35 @@ char const* const glDefaultShaderCode __attribute__((weak)) =
 #else
 char const* const glDefaultShaderCode =
 #endif
-R"(uniform vec4 uniBuffer[12];
+"uniform vec4 uniBuffer[12];"
 
-attribute vec3 attrPosition;
-attribute vec4 attrColor;
-attribute vec2 attrUV0;
+"attribute vec3 attrPosition;"
+"attribute vec4 attrColor;"
+"attribute vec2 attrUV0;"
 
-varying vec4 varyColor;
-varying vec2 varyUV0;
+"varying vec4 varyColor;"
+"varying vec2 varyUV0;"
 
-uniform sampler2D samDiffuse;
+"uniform sampler2D samDiffuse;"
 
-#if SHADER_VERTEX
-void main()
-{
-    mat4 world = mat4(uniBuffer[0], uniBuffer[1], uniBuffer[2], uniBuffer[3]);
-    mat4 view = mat4(uniBuffer[4], uniBuffer[5], uniBuffer[6], uniBuffer[7]);
-    mat4 projection = mat4(uniBuffer[8], uniBuffer[9], uniBuffer[10], uniBuffer[11]);
-    gl_Position = projection * (view * (world * vec4(attrPosition, 1)));
-    varyColor = attrColor;
-    varyUV0 = attrUV0;
-}
-#endif
+"\n#if SHADER_VERTEX\n"
+"void main()"
+"{"
+    "mat4 w = mat4(uniBuffer[0], uniBuffer[1], uniBuffer[2], uniBuffer[3]);"
+    "mat4 v = mat4(uniBuffer[4], uniBuffer[5], uniBuffer[6], uniBuffer[7]);"
+    "mat4 p = mat4(uniBuffer[8], uniBuffer[9], uniBuffer[10], uniBuffer[11]);"
+    "gl_Position = p * (v * (w * vec4(attrPosition, 1)));"
+    "varyColor = attrColor;"
+    "varyUV0 = attrUV0;"
+"}"
+"\n#endif"
 
-#if SHADER_FRAGMENT
-void main()
-{
-    gl_FragColor = varyColor * texture2D(samDiffuse, varyUV0);
-}
-#endif)";
+"\n#if SHADER_FRAGMENT\n"
+"void main()"
+"{"
+    "gl_FragColor = varyColor * texture2D(samDiffuse, varyUV0);"
+"}"
+"\n#endif";
 //==============================================================================
 //  Function
 //==============================================================================

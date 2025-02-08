@@ -13,66 +13,65 @@ char const* const mtlDefaultShaderCode __attribute__((weak)) =
 #else
 char const* const mtlDefaultShaderCode =
 #endif
-R"(
-struct Uniform
-{
-#if SHADER_MSL >= 2
-#if SHADER_VERTEX
-    device float4* Buffer       [[id(0)]];
-#else
-    texture2d<float> Diffuse    [[id(4)]];
-    sampler DiffuseSampler      [[id(18)]];
-#endif
-#elif SHADER_UNIFORM
-    float4 Buffer[SHADER_UNIFORM];
-#endif
-};
+"struct Uniform"
+"{"
+"\n#if SHADER_MSL >= 2"
+"\n#if SHADER_VERTEX\n"
+    "device float4* Buffer [[id(0)]];"
+"\n#else\n"
+    "texture2d<float> Diffuse [[id(4)]];"
+    "sampler DiffuseSampler [[id(18)]];"
+"\n#endif"
+"\n#elif SHADER_UNIFORM\n"
+    "float4 Buffer[SHADER_UNIFORM];"
+"\n#endif\n"
+"};"
 
-struct Sampler
-{
-    texture2d<float> Diffuse    [[texture(0)]];
-    sampler DiffuseSampler      [[sampler(0)]];
-};
+"struct Sampler"
+"{"
+    "texture2d<float> Diffuse [[texture(0)]];"
+    "sampler DiffuseSampler [[sampler(0)]];"
+"};"
 
-struct Attribute
-{
-    float3 Position [[attribute(0)]];
-    float4 Color    [[attribute(1)]];
-    float2 UV0      [[attribute(2)]];
-};
+"struct Attribute"
+"{"
+    "float3 Position [[attribute(0)]];"
+    "float4 Color [[attribute(1)]];"
+    "float2 UV0 [[attribute(2)]];"
+"};"
 
-struct Varying
-{
-    float4 Position [[position]];
-    float4 Color;
-    float2 UV0;
-};
+"struct Varying"
+"{"
+    "float4 Position [[position]];"
+    "float4 Color;"
+    "float2 UV0;"
+"};"
 
-#if SHADER_VERTEX
-vertex Varying Main(Attribute attr [[stage_in]], constant Uniform& uni [[buffer(0)]])
-{
-    auto uniBuffer = uni.Buffer;
-    float4x4 world = float4x4(uniBuffer[0], uniBuffer[1], uniBuffer[2], uniBuffer[3]);
-    float4x4 view = float4x4(uniBuffer[4], uniBuffer[5], uniBuffer[6], uniBuffer[7]);
-    float4x4 projection = float4x4(uniBuffer[8], uniBuffer[9], uniBuffer[10], uniBuffer[11]);
-    Varying vary;
-    vary.Position = projection * (view * (world * float4(attr.Position, 1.0)));
-    vary.Color = attr.Color;
-    vary.UV0 = attr.UV0;
-    return vary;
-}
-#endif
+"\n#if SHADER_VERTEX\n"
+"vertex Varying Main(Attribute attr [[stage_in]], constant Uniform& uni [[buffer(0)]])"
+"{"
+    "auto uniBuffer = uni.Buffer;"
+    "float4x4 w = float4x4(uniBuffer[0], uniBuffer[1], uniBuffer[2], uniBuffer[3]);"
+    "float4x4 v = float4x4(uniBuffer[4], uniBuffer[5], uniBuffer[6], uniBuffer[7]);"
+    "float4x4 p = float4x4(uniBuffer[8], uniBuffer[9], uniBuffer[10], uniBuffer[11]);"
+    "Varying vary;"
+    "vary.Position = p * (v * (w * float4(attr.Position, 1.0)));"
+    "vary.Color = attr.Color;"
+    "vary.UV0 = attr.UV0;"
+    "return vary;"
+"}"
+"\n#endif"
 
-#if SHADER_FRAGMENT
-fragment float4 Main(Varying vary [[stage_in]], constant Uniform& uni [[buffer(0)]], Sampler sam)
-{
-#if SHADER_MSL >= 2
-    return vary.Color * uni.Diffuse.sample(uni.DiffuseSampler, vary.UV0);
-#else
-    return vary.Color * sam.Diffuse.sample(sam.DiffuseSampler, vary.UV0);
-#endif
-}
-#endif)";
+"\n#if SHADER_FRAGMENT\n"
+"fragment float4 Main(Varying vary [[stage_in]], constant Uniform& uni [[buffer(0)]], Sampler sam)"
+"{"
+"\n#if SHADER_MSL >= 2\n"
+    "return vary.Color * uni.Diffuse.sample(uni.DiffuseSampler, vary.UV0);"
+"\n#else\n"
+    "return vary.Color * sam.Diffuse.sample(sam.DiffuseSampler, vary.UV0);"
+"\n#endif\n"
+"}"
+"\n#endif";
 //==============================================================================
 void mtlUpdateArgumentEncoderInternal(MTLSWAPCHAIN* swapchain)
 {
