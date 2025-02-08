@@ -160,16 +160,6 @@ void xxMesh::Draw(uint64_t commandEncoder, int instanceCount, int firstIndex, in
         xxSetVertexBuffers(commandEncoder, 1, &m_buffers[VERTEX][m_bufferIndex[VERTEX]], m_vertexAttribute);
         xxDraw(commandEncoder, Count[VERTEX] - firstIndex * 3, instanceCount, vertexOffset + firstIndex * 3, firstInstance);
     }
-    else if (Count[STORAGE0] != 0)
-    {
-        uint64_t buffers[4];
-        buffers[0] = m_buffers[VERTEX][m_bufferIndex[VERTEX]];
-        buffers[1] = m_buffers[STORAGE0][m_bufferIndex[STORAGE0]];
-        buffers[2] = m_buffers[STORAGE1][m_bufferIndex[STORAGE1]];
-        buffers[3] = m_buffers[STORAGE2][m_bufferIndex[STORAGE2]];
-        xxSetMeshBuffers(commandEncoder, 4, buffers);
-        xxDrawMeshed(commandEncoder, Count[STORAGE0], 1, 1);
-    }
     else
     {
         xxSetVertexBuffers(commandEncoder, 1, &m_buffers[VERTEX][m_bufferIndex[VERTEX]], m_vertexAttribute);
@@ -276,31 +266,6 @@ void xxMesh::SetStorageCount(int index, int count, int stride)
         const_cast<char*&>(Storage[index]) = storage;
     }
     m_dataModified[index] = true;
-}
-//------------------------------------------------------------------------------
-void xxMesh::SetInstanceCount(int count, int stride)
-{
-    if (count != Count[INSTANCE] || stride != Stride[INSTANCE])
-    {
-        char* instance = nullptr;
-        if (count)
-        {
-            instance = xxRealloc(Storage[INSTANCE], char, count * stride);
-        }
-        if (instance == nullptr)
-        {
-            xxFree(Storage[INSTANCE]);
-            count = 0;
-        }
-        for (int i = 0; i < ms_transitionBufferCount; ++i)
-        {
-            m_sizeChanged[INSTANCE][i] = true;
-        }
-        const_cast<int&>(Count[INSTANCE]) = count;
-        const_cast<int&>(Stride[INSTANCE]) = stride;
-        const_cast<char*&>(Storage[INSTANCE]) = instance;
-    }
-    m_dataModified[INSTANCE] = true;
 }
 //------------------------------------------------------------------------------
 xxStrideIterator<xxVector3> xxMesh::GetPosition() const
@@ -423,12 +388,10 @@ void xxMesh::BinaryRead(xxBinary& binary)
         for (int i = STORAGE0; i < MAX; ++i)
         {
             binary.ReadSize(count[i]);
-        }
-        for (int i = STORAGE0; i < STORAGEMAX; ++i)
-        {
             binary.ReadSize(stride[i]);
         }
-        binary.ReadSize(stride[INSTANCE]);
+        const_cast<int&>(Stride[INDEX]) = static_cast<int>(stride[INDEX]);
+        const_cast<int&>(Stride[VERTEX]) = static_cast<int>(stride[VERTEX]);
     }
 
     SetIndexCount(static_cast<int>(count[INDEX]));
@@ -437,7 +400,6 @@ void xxMesh::BinaryRead(xxBinary& binary)
     {
         SetStorageCount(i, static_cast<int>(count[i]), static_cast<int>(stride[i]));
     }
-    SetInstanceCount(static_cast<int>(count[INSTANCE]), static_cast<int>(stride[INSTANCE]));
 
     if (binary.Version < 0x20241221)
     {
@@ -467,12 +429,8 @@ void xxMesh::BinaryWrite(xxBinary& binary) const
     for (int i = STORAGE0; i < MAX; ++i)
     {
         binary.WriteSize(Count[i]);
-    }
-    for (int i = STORAGE0; i < STORAGEMAX; ++i)
-    {
         binary.WriteSize(Stride[i]);
     }
-    binary.WriteSize(Stride[INSTANCE]);
 
     for (int i = STORAGE0; i < MAX; ++i)
     {
