@@ -71,18 +71,18 @@ uint64_t xxCreateInstanceGLES31()
 
     xxRegisterFunction(GLES2);
 
-    xxCreateInstance = xxCreateInstanceGLES31;
-    xxDestroyInstance = xxDestroyInstanceGLES31;
-    xxGetInstanceName = xxGetInstanceNameGLES31;
-    xxCreateIndexBuffer = xxCreateIndexBufferGLES3;
-    xxCreateVertexBuffer = xxCreateVertexBufferGLES3;
-    xxMapBuffer = xxMapBufferGLES3;
-    xxUnmapBuffer = xxUnmapBufferGLES3;
-    xxPresentSwapchain = xxPresentSwapchainGLES31;
-    xxGetCommandBuffer = xxGetCommandBufferGLES31;
-    xxSetVertexBuffers = xxSetVertexBuffersGLES31;
-    xxDraw = xxDrawGLES31;
-    xxDrawIndexed = xxDrawIndexedGLES31;
+    xxRegisterFunctionSingle(xxCreateInstance, xxCreateInstanceGLES31);
+    xxRegisterFunctionSingle(xxDestroyInstance, xxDestroyInstanceGLES31);
+    xxRegisterFunctionSingle(xxGetInstanceName, xxGetInstanceNameGLES31);
+    xxRegisterFunctionSingle(xxCreateIndexBuffer, xxCreateIndexBufferGLES3);
+    xxRegisterFunctionSingle(xxCreateVertexBuffer, xxCreateVertexBufferGLES3);
+    xxRegisterFunctionSingle(xxMapBuffer, xxMapBufferGLES3);
+    xxRegisterFunctionSingle(xxUnmapBuffer, xxUnmapBufferGLES3);
+    xxRegisterFunctionSingle(xxPresentSwapchain, xxPresentSwapchainGLES31);
+    xxRegisterFunctionSingle(xxGetCommandBuffer, xxGetCommandBufferGLES31);
+    xxRegisterFunctionSingle(xxSetVertexBuffers, xxSetVertexBuffersGLES31);
+    xxRegisterFunctionSingle(xxDraw, xxDrawGLES31);
+    xxRegisterFunctionSingle(xxDrawIndexed, xxDrawIndexedGLES31);
 
     return instance;
 }

@@ -56,12 +56,12 @@ uint64_t xxCreateInstanceGLES3()
 
     xxRegisterFunction(GLES2);
 
-    xxCreateInstance = xxCreateInstanceGLES3;
-    xxGetInstanceName = xxGetInstanceNameGLES3;
-    xxCreateIndexBuffer = xxCreateIndexBufferGLES3;
-    xxCreateVertexBuffer = xxCreateVertexBufferGLES3;
-    xxMapBuffer = xxMapBufferGLES3;
-    xxUnmapBuffer = xxUnmapBufferGLES3;
+    xxRegisterFunctionSingle(xxCreateInstance, xxCreateInstanceGLES3);
+    xxRegisterFunctionSingle(xxGetInstanceName, xxGetInstanceNameGLES3);
+    xxRegisterFunctionSingle(xxCreateIndexBuffer, xxCreateIndexBufferGLES3);
+    xxRegisterFunctionSingle(xxCreateVertexBuffer, xxCreateVertexBufferGLES3);
+    xxRegisterFunctionSingle(xxMapBuffer, xxMapBufferGLES3);
+    xxRegisterFunctionSingle(xxUnmapBuffer, xxUnmapBufferGLES3);
 
     return instance;
 }

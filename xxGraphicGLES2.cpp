@@ -342,6 +342,7 @@ uint64_t xxCreateVertexAttributeGLES2(uint64_t device, int count, int* attribute
             switch (size)
             {
             case sizeof(char) * 4:
+                attributes[i].size = 4;
                 attributes[i].type = GL_UNSIGNED_BYTE;
                 break;
             case sizeof(float) * 3:
@@ -860,6 +861,7 @@ uint64_t xxCreateVertexShaderGLES2(uint64_t device, char const* shader, uint64_t
     {
         { "SHADER_GLSL", "1" },
         { "SHADER_VERTEX", "1" },
+        { "SHADER_FRAGMENT", "0" },
         { "uniBuffer", "uniBufferVS" },
         { "uniform", "uniform highp" },
         { "attribute", "attribute" },
@@ -902,6 +904,7 @@ uint64_t xxCreateFragmentShaderGLES2(uint64_t device, char const* shader)
     static char const* const macro[][2] =
     {
         { "SHADER_GLSL", "1" },
+        { "SHADER_VERTEX", "0" },
         { "SHADER_FRAGMENT", "1" },
         { "uniBuffer", "uniBufferFS" },
         { "uniform", "uniform highp" },
@@ -1217,6 +1220,7 @@ void xxSetFragmentSamplersGLES2(uint64_t commandEncoder, int count, const uint64
             minFilter = glSampler.minFilter ? GL_LINEAR : GL_NEAREST;
         }
         glTexParameteri(glSwapchain->textureTargets[i], GL_TEXTURE_MIN_FILTER, minFilter);
+        glTexParameterf(glSwapchain->textureTargets[i], GL_TEXTURE_MAX_ANISOTROPY_EXT, glSampler.anisotropy);
     }
 }
 //------------------------------------------------------------------------------
