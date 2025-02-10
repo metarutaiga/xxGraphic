@@ -686,10 +686,10 @@ R"(
 uniform float4 uniBuffer[SHADER_UNIFORM];
 #endif
 #if SHADER_HLSL >= 10
-sampler samDiffuse;
-Texture2D<float4> texDiffuse;
+Texture2D<float4> Base;
+sampler BaseSampler;
 #else
-uniform sampler2D samDiffuse;
+uniform sampler2D BaseSampler;
 #endif
 #elif SHADER_MSL
 struct Uniform
@@ -699,8 +699,8 @@ struct Uniform
     device float4* Buffer       [[id(0)]];
 #else
     device float4* Buffer       [[id(1)]];
-    texture2d<float> Diffuse    [[id(4)]];
-    sampler DiffuseSampler      [[id(18)]];
+    texture2d<float> Base       [[id(4)]];
+    sampler BaseSampler         [[id(18)]];
 #endif
 #elif SHADER_UNIFORM
     float4 Buffer[SHADER_UNIFORM];
@@ -708,8 +708,8 @@ struct Uniform
 };
 struct Sampler
 {
-    texture2d<float> Diffuse    [[texture(0)]];
-    sampler DiffuseSampler      [[sampler(0)]];
+    texture2d<float> Base       [[texture(0)]];
+    sampler BaseSampler         [[sampler(0)]];
 };
 #endif)"
 //------------------------------------------------------------------------------
@@ -851,18 +851,18 @@ fragment float4 Main(Varying vary [[stage_in]], constant Uniform& uni [[buffer(0
 #endif
 
 #if SHADER_GLSL && SHADER_TEXTURE
-    color = color * texture2D(samDiffuse, varyUV0);
+    color = color * texture2D(BaseSampler, varyUV0);
 #elif SHADER_HLSL && SHADER_TEXTURE
 #if SHADER_HLSL >= 10
-    color = color * texDiffuse.Sample(samDiffuse, vary.UV0);
+    color = color * Base.Sample(BaseSampler, vary.UV0);
 #else
-    color = color * tex2D(samDiffuse, vary.UV0);
+    color = color * tex2D(BaseSampler, vary.UV0);
 #endif
 #elif SHADER_MSL && SHADER_TEXTURE
 #if SHADER_MSL >= 2
-    color = color * uni.Diffuse.sample(uni.DiffuseSampler, vary.UV0);
+    color = color * uni.Base.sample(uni.BaseSampler, vary.UV0);
 #else
-    color = color * sam.Diffuse.sample(sam.DiffuseSampler, vary.UV0);
+    color = color * sam.Base.sample(sam.BaseSampler, vary.UV0);
 #endif
 #endif
 
