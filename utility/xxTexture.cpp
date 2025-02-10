@@ -73,9 +73,9 @@ void* xxTexture::operator () (int x, int y, int z, int mipmap, int array)
     if (mipmap >= Mipmap)
         return nullptr;
 
-    int levelWidth = (Width << mipmap);
-    int levelHeight = (Height << mipmap);
-    int levelDepth = (Depth << mipmap);
+    int levelWidth = (Width >> mipmap);
+    int levelHeight = (Height >> mipmap);
+    int levelDepth = (Depth >> mipmap);
     if (levelWidth == 0)
         levelWidth = 1;
     if (levelHeight == 0)
