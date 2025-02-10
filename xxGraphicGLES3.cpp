@@ -58,8 +58,10 @@ uint64_t xxCreateInstanceGLES3()
 
     xxRegisterFunctionSingle(xxCreateInstance, xxCreateInstanceGLES3);
     xxRegisterFunctionSingle(xxGetInstanceName, xxGetInstanceNameGLES3);
+
     xxRegisterFunctionSingle(xxCreateIndexBuffer, xxCreateIndexBufferGLES3);
     xxRegisterFunctionSingle(xxCreateVertexBuffer, xxCreateVertexBufferGLES3);
+
     xxRegisterFunctionSingle(xxMapBuffer, xxMapBufferGLES3);
     xxRegisterFunctionSingle(xxUnmapBuffer, xxUnmapBufferGLES3);
 

@@ -730,6 +730,9 @@ uint64_t xxCreateTextureD3D10(uint64_t device, uint64_t format, int width, int h
     ID3D10Resource* d3dTextureGPU = nullptr;
     ID3D10Resource* d3dTextureCPU = nullptr;
 
+    D3D10_USAGE usage = mipmap > 1 ? D3D10_USAGE_DEFAULT : D3D10_USAGE_DYNAMIC;
+    D3D10_CPU_ACCESS_FLAG cpuAccessFlags = mipmap > 1 ? D3D10_CPU_ACCESS_FLAG(0) : D3D10_CPU_ACCESS_WRITE;
+
     if (external)
     {
         ID3D10Texture2D* d3dTexture2D = nullptr;
@@ -759,9 +762,9 @@ uint64_t xxCreateTextureD3D10(uint64_t device, uint64_t format, int width, int h
         texture2DDesc.ArraySize = array;
         texture2DDesc.Format = pixelFormat;
         texture2DDesc.SampleDesc.Count = 1;
-        texture2DDesc.Usage = mipmap > 1 ? D3D10_USAGE_DEFAULT : D3D10_USAGE_DYNAMIC;
+        texture2DDesc.Usage = usage;
         texture2DDesc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
-        texture2DDesc.CPUAccessFlags = mipmap > 1 ? 0 : D3D10_CPU_ACCESS_WRITE;
+        texture2DDesc.CPUAccessFlags = cpuAccessFlags;
 
         HRESULT hResult = d3dDevice->CreateTexture2D(&texture2DDesc, nullptr, (ID3D10Texture2D**)&d3dTextureGPU);
         if (hResult != S_OK)
@@ -801,9 +804,9 @@ uint64_t xxCreateTextureD3D10(uint64_t device, uint64_t format, int width, int h
         texture2DDesc.ArraySize = array;
         texture2DDesc.Format = pixelFormat;
         texture2DDesc.SampleDesc.Count = 1;
-        texture2DDesc.Usage = mipmap > 1 ? D3D10_USAGE_DEFAULT : D3D10_USAGE_DYNAMIC;
+        texture2DDesc.Usage = usage;
         texture2DDesc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
-        texture2DDesc.CPUAccessFlags = mipmap > 1 ? 0 : D3D10_CPU_ACCESS_WRITE;
+        texture2DDesc.CPUAccessFlags = cpuAccessFlags;
         texture2DDesc.MiscFlags = D3D10_RESOURCE_MISC_TEXTURECUBE;
 
         HRESULT hResult = d3dDevice->CreateTexture2D(&texture2DDesc, nullptr, (ID3D10Texture2D**)&d3dTextureGPU);
@@ -843,9 +846,9 @@ uint64_t xxCreateTextureD3D10(uint64_t device, uint64_t format, int width, int h
         texture3DDesc.Depth = depth;
         texture3DDesc.MipLevels = mipmap;
         texture3DDesc.Format = pixelFormat;
-        texture3DDesc.Usage = mipmap > 1 ? D3D10_USAGE_DEFAULT : D3D10_USAGE_DYNAMIC;
+        texture3DDesc.Usage = usage;
         texture3DDesc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
-        texture3DDesc.CPUAccessFlags = mipmap > 1 ? 0 : D3D10_CPU_ACCESS_WRITE;
+        texture3DDesc.CPUAccessFlags = cpuAccessFlags;
 
         HRESULT hResult = d3dDevice->CreateTexture3D(&texture3DDesc, nullptr, (ID3D10Texture3D**)&d3dTextureGPU);
         if (hResult != S_OK)

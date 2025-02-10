@@ -221,7 +221,6 @@ struct GLPIPELINE
 {
     GLuint              program;
     GLVERTEXATTRIBUTE*  vertexAttribute;
-    GLint               texture;
     GLint               uniformVS;
     GLint               uniformFS;
     GLBLEND             blend;

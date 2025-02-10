@@ -19,18 +19,18 @@ char const* const mtlDefaultShaderCode =
 "\n#if SHADER_VERTEX\n"
     "device float4* Buffer [[id(0)]];"
 "\n#else\n"
-    "texture2d<float> Diffuse [[id(4)]];"
-    "sampler DiffuseSampler [[id(18)]];"
+    "texture2d<float> Base [[id(4)]];"
+    "sampler BaseSampler [[id(18)]];"
 "\n#endif"
-"\n#elif SHADER_UNIFORM\n"
-    "float4 Buffer[SHADER_UNIFORM];"
+"\n#else\n"
+    "float4 Buffer[12];"
 "\n#endif\n"
 "};"
 
 "struct Sampler"
 "{"
-    "texture2d<float> Diffuse [[texture(0)]];"
-    "sampler DiffuseSampler [[sampler(0)]];"
+    "texture2d<float> Base [[texture(0)]];"
+    "sampler BaseSampler [[sampler(0)]];"
 "};"
 
 "struct Attribute"
@@ -66,9 +66,9 @@ char const* const mtlDefaultShaderCode =
 "fragment float4 Main(Varying vary [[stage_in]], constant Uniform& uni [[buffer(0)]], Sampler sam)"
 "{"
 "\n#if SHADER_MSL >= 2\n"
-    "return vary.Color * uni.Diffuse.sample(uni.DiffuseSampler, vary.UV0);"
+    "return vary.Color * uni.Base.sample(uni.BaseSampler, vary.UV0);"
 "\n#else\n"
-    "return vary.Color * sam.Diffuse.sample(sam.DiffuseSampler, vary.UV0);"
+    "return vary.Color * sam.Base.sample(sam.BaseSampler, vary.UV0);"
 "\n#endif\n"
 "}"
 "\n#endif";
@@ -123,12 +123,21 @@ void mtlUpdateArgumentEncoderInternal(MTLSWAPCHAIN* swapchain)
     }
     else
     {
-        [swapchain->commandEncoder setMeshBufferOffset:meshOffset
-                                               atIndex:0];
-        [swapchain->commandEncoder setVertexBufferOffset:vertexOffset
-                                                 atIndex:0];
-        [swapchain->commandEncoder setFragmentBufferOffset:fragmentOffset
+        if (meshLength)
+        {
+            [swapchain->commandEncoder setMeshBufferOffset:meshOffset
                                                    atIndex:0];
+        }
+        if (vertexLength)
+        {
+            [swapchain->commandEncoder setVertexBufferOffset:vertexOffset
+                                                     atIndex:0];
+        }
+        if (fragmentLength)
+        {
+            [swapchain->commandEncoder setFragmentBufferOffset:fragmentOffset
+                                                       atIndex:0];
+        }
     }
 }
 //==============================================================================

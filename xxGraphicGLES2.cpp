@@ -1046,10 +1046,10 @@ uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t bl
     glAttachShader(glProgram, glFragmentShader);
     glLinkProgram(glProgram);
     checkProgram(glProgram);
+    glUseProgram(glProgram);
 
     glPipeline->program = glProgram;
     glPipeline->vertexAttribute = glVertexAttribute;
-    glPipeline->texture = glGetUniformLocation(glProgram, "samDiffuse");
     glPipeline->uniformVS = glGetUniformLocation(glProgram, "uniBufferVS");
     glPipeline->uniformFS = glGetUniformLocation(glProgram, "uniBufferFS");
     glPipeline->blend = glBlendState ? (*glBlendState) : GLBLEND{ .blendEnable = GL_FALSE };
@@ -1057,6 +1057,22 @@ uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t bl
     glPipeline->state.depthWrite = glDepthStencilState.depthWrite;
     glPipeline->state.cull = glRasterizerState.cull;
     glPipeline->state.scissor = glRasterizerState.scissor;
+
+    int index = 0;
+    int uniforms = 0;
+    glGetProgramiv(glProgram, GL_ACTIVE_UNIFORMS, &uniforms);
+    for (int i = 0; i < uniforms; ++i)
+    {
+        GLsizei length = 0;
+        GLint size = 0;
+        GLenum type = 0;
+        char name[256];
+        glGetActiveUniform(glProgram, i, 256, &length, &size, &type, name);
+        if (type == GL_SAMPLER_2D || type == GL_SAMPLER_CUBE || type == GL_SAMPLER_3D_OES)
+        {
+            glUniform1i(glGetUniformLocation(glProgram, name), index++);
+        }
+    }
 
     return reinterpret_cast<uint64_t>(glPipeline);
 }
@@ -1143,7 +1159,6 @@ void xxSetPipelineGLES2(uint64_t commandEncoder, uint64_t pipeline)
     glPipeline->state.scissor ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST);
 
     glUseProgram(glPipeline->program);
-    glUniform1i(glPipeline->texture, 0);
     glSwapchain->pipeline = pipeline;
 }
 //------------------------------------------------------------------------------
