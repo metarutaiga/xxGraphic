@@ -23,7 +23,7 @@ char const* const glDefaultShaderCode =
 "varying vec4 varyColor;"
 "varying vec2 varyUV0;"
 
-"uniform sampler2D samDiffuse;"
+"uniform sampler2D BaseSampler;"
 
 "\n#if SHADER_VERTEX\n"
 "void main()"
@@ -40,7 +40,7 @@ char const* const glDefaultShaderCode =
 "\n#if SHADER_FRAGMENT\n"
 "void main()"
 "{"
-    "gl_FragColor = varyColor * texture2D(samDiffuse, varyUV0);"
+    "gl_FragColor = varyColor * texture2D(BaseSampler, varyUV0);"
 "}"
 "\n#endif";
 //==============================================================================

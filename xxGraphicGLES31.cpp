@@ -74,10 +74,12 @@ uint64_t xxCreateInstanceGLES31()
     xxRegisterFunctionSingle(xxCreateInstance, xxCreateInstanceGLES31);
     xxRegisterFunctionSingle(xxDestroyInstance, xxDestroyInstanceGLES31);
     xxRegisterFunctionSingle(xxGetInstanceName, xxGetInstanceNameGLES31);
+
     xxRegisterFunctionSingle(xxCreateIndexBuffer, xxCreateIndexBufferGLES3);
     xxRegisterFunctionSingle(xxCreateVertexBuffer, xxCreateVertexBufferGLES3);
     xxRegisterFunctionSingle(xxMapBuffer, xxMapBufferGLES3);
     xxRegisterFunctionSingle(xxUnmapBuffer, xxUnmapBufferGLES3);
+
     xxRegisterFunctionSingle(xxPresentSwapchain, xxPresentSwapchainGLES31);
     xxRegisterFunctionSingle(xxGetCommandBuffer, xxGetCommandBufferGLES31);
     xxRegisterFunctionSingle(xxSetVertexBuffers, xxSetVertexBuffersGLES31);

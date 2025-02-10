@@ -393,7 +393,6 @@ VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetKHREmulate(VkDevice device, VkD
 namespace glslang {
 static void*                    glslangLibrary = nullptr;
 static void*                    glslangResourceLibrary = nullptr;
-static void*                    spirvLibrary = nullptr;
 static int                      (*initialize_process)(void);
 static void                     (*finalize_process)(void);
 static const glslang_resource_t*(*default_resource)(void);
@@ -417,21 +416,19 @@ static const char*              (*program_get_info_log)(glslang_program_t* progr
 //------------------------------------------------------------------------------
 VKAPI_ATTR void VKAPI_CALL vkCompileShader(char const* code, char const*const* macro, int type, uint32_t** output, size_t* size)
 {
-    if (glslang::glslangLibrary == nullptr || glslang::glslangResourceLibrary == nullptr || glslang::spirvLibrary == nullptr)
+    if (glslang::glslangLibrary == nullptr || glslang::glslangResourceLibrary == nullptr)
     {
 #if defined(xxMACOS)
         if (glslang::glslangLibrary == nullptr)
             glslang::glslangLibrary = xxLoadLibrary("libglslang.dylib");
         if (glslang::glslangResourceLibrary == nullptr)
             glslang::glslangResourceLibrary = xxLoadLibrary("libglslang-default-resource-limits.dylib");
-        if (glslang::spirvLibrary == nullptr)
-            glslang::spirvLibrary = xxLoadLibrary("libSPIRV.dylib");
 #endif
-        if (glslang::glslangLibrary == nullptr || glslang::glslangResourceLibrary == nullptr || glslang::spirvLibrary == nullptr)
+        if (glslang::glslangLibrary == nullptr || glslang::glslangResourceLibrary == nullptr)
             return;
         (void*&)glslang::initialize_process = xxGetProcAddress(glslang::glslangLibrary, "glslang_initialize_process");
         (void*&)glslang::finalize_process = xxGetProcAddress(glslang::glslangLibrary, "glslang_finalize_process");
-        (void*&)glslang::default_resource =xxGetProcAddress(glslang::glslangResourceLibrary, "glslang_default_resource");
+        (void*&)glslang::default_resource = xxGetProcAddress(glslang::glslangResourceLibrary, "glslang_default_resource");
         (void*&)glslang::shader_create = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_create");
         (void*&)glslang::shader_delete = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_delete");
         (void*&)glslang::shader_set_preamble = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_set_preamble");
@@ -444,9 +441,9 @@ VKAPI_ATTR void VKAPI_CALL vkCompileShader(char const* code, char const*const* m
         (void*&)glslang::program_delete = xxGetProcAddress(glslang::glslangLibrary, "glslang_program_delete");
         (void*&)glslang::program_add_shader = xxGetProcAddress(glslang::glslangLibrary, "glslang_program_add_shader");
         (void*&)glslang::program_link = xxGetProcAddress(glslang::glslangLibrary, "glslang_program_link");
-        (void*&)glslang::program_SPIRV_generate = xxGetProcAddress(glslang::spirvLibrary, "glslang_program_SPIRV_generate");
-        (void*&)glslang::program_SPIRV_get_size = xxGetProcAddress(glslang::spirvLibrary, "glslang_program_SPIRV_get_size");
-        (void*&)glslang::program_SPIRV_get = xxGetProcAddress(glslang::spirvLibrary, "glslang_program_SPIRV_get");
+        (void*&)glslang::program_SPIRV_generate = xxGetProcAddress(glslang::glslangLibrary, "glslang_program_SPIRV_generate");
+        (void*&)glslang::program_SPIRV_get_size = xxGetProcAddress(glslang::glslangLibrary, "glslang_program_SPIRV_get_size");
+        (void*&)glslang::program_SPIRV_get = xxGetProcAddress(glslang::glslangLibrary, "glslang_program_SPIRV_get");
         (void*&)glslang::program_get_info_log = xxGetProcAddress(glslang::glslangLibrary, "glslang_program_get_info_log");
     }
 
