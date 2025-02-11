@@ -115,9 +115,7 @@ uint64_t xxCreateInstanceVulkan()
         }
     }
     instanceLayerCount = 0;
-    instanceLayerNames[0] = "VK_LAYER_LUNARG_core_validation";
-    instanceLayerNames[1] = "VK_LAYER_LUNARG_standard_validation";
-    instanceLayerNames[2] = "VK_LAYER_LUNARG_parameter_validation";
+    instanceLayerNames[0] = "VK_LAYER_KHRONOS_validation";
 #else
     uint32_t instanceLayerCount = 0;
     VkLayerProperties* instanceLayerProperties = nullptr;
@@ -312,6 +310,9 @@ uint64_t xxCreateDeviceVulkan(uint64_t instance)
 
     float queuePriority = 1.0f;
 
+    VkPhysicalDeviceFeatures features = {};
+    vkGetPhysicalDeviceFeatures(vkPhysicalDevice, &features);
+
     VkDeviceQueueCreateInfo queueCreateInfo = {};
     queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     queueCreateInfo.queueFamilyIndex = g_graphicFamily;
@@ -324,6 +325,7 @@ uint64_t xxCreateDeviceVulkan(uint64_t instance)
     deviceCreateInfo.queueCreateInfoCount = 1;
     deviceCreateInfo.enabledExtensionCount = deviceExtensionCount;
     deviceCreateInfo.ppEnabledExtensionNames = deviceExtensionNames;
+    deviceCreateInfo.pEnabledFeatures = &features;
 
     VkDevice vkDevice = VK_NULL_HANDLE;
     VkResult deviceResult = vkCreateDevice(vkPhysicalDevice, &deviceCreateInfo, g_callbacks, &vkDevice);
@@ -602,7 +604,7 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
     vkGetPhysicalDeviceSurfaceFormatsKHR(g_physicalDevice, surface, &surfaceFormatCount, surfaceFormats);
 
     VkFormat imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-#if defined(xxWINDOWS)
+#if defined(xxMACOS) || defined(xxIOS) || defined(xxWINDOWS)
     if (imageFormat == VK_FORMAT_R8G8B8A8_UNORM)
     {
         for (uint32_t i = 0; i < surfaceFormatCount; ++i)
@@ -741,8 +743,10 @@ uint64_t xxCreateSwapchainVulkan(uint64_t device, uint64_t renderPass, void* vie
         VKTEXTURE* vkTexture = reinterpret_cast<VKTEXTURE*>(depthStencil);
         vkSwapchain->depthStencil = vkTexture->image;
         vkSwapchain->depthStencilView = vkTexture->imageView;
+        vkSwapchain->depthStencilMemory = vkTexture->memory;
         vkTexture->image = VK_NULL_HANDLE;
         vkTexture->imageView = VK_NULL_HANDLE;
+        vkTexture->memory = VK_NULL_HANDLE;
         xxDestroyTextureVulkan(depthStencil);
     }
 
@@ -832,6 +836,8 @@ void xxDestroySwapchainVulkan(uint64_t swapchain)
         vkDestroyImage(g_device, vkSwapchain->depthStencil, g_callbacks);
     if (vkSwapchain->depthStencilView)
         vkDestroyImageView(g_device, vkSwapchain->depthStencilView, g_callbacks);
+    if (vkSwapchain->depthStencilMemory)
+        vkFreeMemory(g_device, vkSwapchain->depthStencilMemory, g_callbacks);
     if (vkSwapchain->swapchain)
         vkDestroySwapchainKHR(g_device, vkSwapchain->swapchain, g_callbacks);
     if (vkSwapchain->surface)
@@ -1006,7 +1012,7 @@ uint64_t xxCreateRenderPassVulkan(uint64_t device, bool clearColor, bool clearDe
     if (vkDevice == VK_NULL_HANDLE)
         return 0;
 
-#if defined(xxWINDOWS)
+#if defined(xxMACOS) || defined(xxIOS) || defined(xxWINDOWS)
     VkFormat colorFormat = VK_FORMAT_B8G8R8A8_UNORM;
 #else
     VkFormat colorFormat = VK_FORMAT_R8G8B8A8_UNORM;
@@ -1721,6 +1727,10 @@ uint64_t xxCreateTextureVulkan(uint64_t device, uint64_t format, int width, int 
     imageInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    if (T.imageFormat >= VK_FORMAT_D16_UNORM && T.imageFormat <= VK_FORMAT_D32_SFLOAT_S8_UINT)
+    {
+        imageInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    }
 
     VkImage image = VK_NULL_HANDLE;
     VkResult imageResult = vkCreateImage(vkDevice, &imageInfo, g_callbacks, &image);
@@ -1974,9 +1984,9 @@ void xxUnmapTextureVulkan(uint64_t device, uint64_t texture, int level, int arra
     copyBarrier.image = vkTexture->image;
     copyBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     copyBarrier.subresourceRange.baseMipLevel = level;
-    copyBarrier.subresourceRange.levelCount = vkTexture->mipmap;
+    copyBarrier.subresourceRange.levelCount = 1;
     copyBarrier.subresourceRange.baseArrayLayer = array;
-    copyBarrier.subresourceRange.layerCount = vkTexture->array;
+    copyBarrier.subresourceRange.layerCount = 1;
     vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &copyBarrier);
 
     VkBufferImageCopy region = {};

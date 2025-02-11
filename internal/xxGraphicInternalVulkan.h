@@ -117,6 +117,7 @@ struct VKSWAPCHAIN : public VKFRAMEBUFFER
     VkImageView         imageViews[8];
     VkImage             depthStencil;
     VkImageView         depthStencilView;
+    VkDeviceMemory      depthStencilMemory;
 
     VkSurfaceKHR        surface;
     VkFormat            surfaceFormat;

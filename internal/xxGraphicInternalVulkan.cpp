@@ -418,11 +418,16 @@ VKAPI_ATTR void VKAPI_CALL vkCompileShader(char const* code, char const*const* m
 {
     if (glslang::glslangLibrary == nullptr || glslang::glslangResourceLibrary == nullptr)
     {
-#if defined(xxMACOS)
+#if defined(xxMACOS) || defined(xxIOS)
         if (glslang::glslangLibrary == nullptr)
             glslang::glslangLibrary = xxLoadLibrary("libglslang.dylib");
         if (glslang::glslangResourceLibrary == nullptr)
             glslang::glslangResourceLibrary = xxLoadLibrary("libglslang-default-resource-limits.dylib");
+#elif defined(xxWINDOWS)
+        if (glslang::glslangLibrary == nullptr)
+            glslang::glslangLibrary = xxLoadLibrary("glslang.dll");
+        if (glslang::glslangResourceLibrary == nullptr)
+            glslang::glslangResourceLibrary = xxLoadLibrary("glslang-default-resource-limits.dll");
 #endif
         if (glslang::glslangLibrary == nullptr || glslang::glslangResourceLibrary == nullptr)
             return;
@@ -432,8 +437,13 @@ VKAPI_ATTR void VKAPI_CALL vkCompileShader(char const* code, char const*const* m
         (void*&)glslang::shader_create = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_create");
         (void*&)glslang::shader_delete = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_delete");
         (void*&)glslang::shader_set_preamble = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_set_preamble");
+#if defined(xxWINDOWS)
+        (void*&)glslang::shader_set_entry_point = xxGetProcAddress(glslang::glslangLibrary, "?setEntryPoint@TShader@glslang@@QEAAXPEBD@Z");
+        (void*&)glslang::shader_set_invertY = xxGetProcAddress(glslang::glslangLibrary, "?setInvertY@TShader@glslang@@QEAAX_N@Z");
+#else
         (void*&)glslang::shader_set_entry_point = xxGetProcAddress(glslang::glslangLibrary, "_ZN7glslang7TShader13setEntryPointEPKc");
         (void*&)glslang::shader_set_invertY = xxGetProcAddress(glslang::glslangLibrary, "_ZN7glslang7TShader10setInvertYEb");
+#endif
         (void*&)glslang::shader_preprocess = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_preprocess");
         (void*&)glslang::shader_parse = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_parse");
         (void*&)glslang::shader_get_info_log = xxGetProcAddress(glslang::glslangLibrary, "glslang_shader_get_info_log");
