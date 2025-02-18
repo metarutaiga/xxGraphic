@@ -1326,7 +1326,7 @@ void xxSetPipelineD3D11(uint64_t commandEncoder, uint64_t pipeline)
 {
     ID3D11DeviceContext* d3dDeviceContext = reinterpret_cast<ID3D11DeviceContext*>(commandEncoder);
     D3D11PIPELINE* d3dPipeline = reinterpret_cast<D3D11PIPELINE*>(pipeline);
-    static const float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    static float const blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
     d3dDeviceContext->VSSetShader(d3dPipeline->vertexShader, nullptr, 0);
     d3dDeviceContext->PSSetShader(d3dPipeline->pixelShader, nullptr, 0);

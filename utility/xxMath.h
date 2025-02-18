@@ -58,11 +58,11 @@ union xxPlusAPI xxVector2
     xxVector2           Maximum         (xxVector2 const& v) const   { xxVector2 t; for (size_t i = 0; i < N; ++i) t.f[i] = f[i] > v.f[i] ? f[i] : v.f[i]; return t; }
     float               Cross           (xxVector2 const& v) const   { return x * v.y - y * v.x;      }
 
-    static const xxVector2 ZERO;
-    static const xxVector2 ONE;
+    static xxVector2 const ZERO;
+    static xxVector2 const ONE;
 
-    static const xxVector2 X;
-    static const xxVector2 Y;
+    static xxVector2 const X;
+    static xxVector2 const Y;
 };
 
 union xxPlusAPI xxVector3
@@ -116,18 +116,18 @@ union xxPlusAPI xxVector3
     int                 Intersect       (xxVector2 const& point)     { return Intersect({ point.x, point.y, 0 }); }
     int                 Intersect       (xxVector3 const& sphere);
 
-    static const xxVector3 ZERO;
-    static const xxVector3 ONE;
+    static xxVector3 const ZERO;
+    static xxVector3 const ONE;
 
-    static const xxVector3 X;
-    static const xxVector3 Y;
-    static const xxVector3 Z;
+    static xxVector3 const X;
+    static xxVector3 const Y;
+    static xxVector3 const Z;
 
-    static const xxVector3 BLACK;
-    static const xxVector3 BLUE;
-    static const xxVector3 GREEN;
-    static const xxVector3 RED;
-    static const xxVector3 WHITE;
+    static xxVector3 const BLACK;
+    static xxVector3 const BLUE;
+    static xxVector3 const GREEN;
+    static xxVector3 const RED;
+    static xxVector3 const WHITE;
 };
 
 union xxPlusAPI xxVector4
@@ -190,19 +190,19 @@ union xxPlusAPI xxVector4
     static xxVector4    FromInteger     (uint32_t v)                 { xxVector4 t;    for (size_t i = 0; i < N; ++i) t.f[i] = (v >> (i * 8) & 0xFF) / 255.0f; return t; }
            uint32_t     ToInteger       () const                     { uint32_t t = 0; for (size_t i = 0; i < N; ++i) t |= uint32_t(f[i] * 255.0f) << (i * 8); return t; }
 
-    static const xxVector4 ZERO;
-    static const xxVector4 ONE;
+    static xxVector4 const ZERO;
+    static xxVector4 const ONE;
 
-    static const xxVector4 X;
-    static const xxVector4 Y;
-    static const xxVector4 Z;
-    static const xxVector4 W;
+    static xxVector4 const X;
+    static xxVector4 const Y;
+    static xxVector4 const Z;
+    static xxVector4 const W;
 
-    static const xxVector4 BLACK;
-    static const xxVector4 BLUE;
-    static const xxVector4 GREEN;
-    static const xxVector4 RED;
-    static const xxVector4 WHITE;
+    static xxVector4 const BLACK;
+    static xxVector4 const BLUE;
+    static xxVector4 const GREEN;
+    static xxVector4 const RED;
+    static xxVector4 const WHITE;
 };
 
 union xxPlusAPI xxMatrix2x2
@@ -249,7 +249,7 @@ union xxPlusAPI xxMatrix2x2
     xxMatrix2x2         Inverse         () const;
     xxMatrix2x2         Transpose       () const;
 
-    static const xxMatrix2x2 IDENTITY;
+    static xxMatrix2x2 const IDENTITY;
 };
 
 union xxPlusAPI xxMatrix2x3
@@ -289,7 +289,7 @@ union xxPlusAPI xxMatrix2x3
                         operator        float const* () const        { return f; }
                         operator        float* ()                    { return f; }
 
-    static const xxMatrix2x3 IDENTITY;
+    static xxMatrix2x3 const IDENTITY;
 };
 
 union xxPlusAPI xxMatrix2x4
@@ -330,7 +330,7 @@ union xxPlusAPI xxMatrix2x4
                         operator        float const* () const        { return f; }
                         operator        float* ()                    { return f; }
 
-    static const xxMatrix2x4 IDENTITY;
+    static xxMatrix2x4 const IDENTITY;
 };
 
 union xxPlusAPI xxMatrix3x2
@@ -369,7 +369,7 @@ union xxPlusAPI xxMatrix3x2
                         operator        float const* () const        { return f; }
                         operator        float* ()                    { return f; }
 
-    static const xxMatrix3x2 IDENTITY;
+    static xxMatrix3x2 const IDENTITY;
 };
 
 union xxPlusAPI xxMatrix3x3
@@ -419,7 +419,7 @@ union xxPlusAPI xxMatrix3x3
 
     static xxMatrix3x3  Quaternion      (xxVector4 const& q);
 
-    static const xxMatrix3x3 IDENTITY;
+    static xxMatrix3x3 const IDENTITY;
 };
 
 union xxPlusAPI xxMatrix3x4
@@ -460,7 +460,7 @@ union xxPlusAPI xxMatrix3x4
                         operator        float const* () const        { return f; }
                         operator        float* ()                    { return f; }
 
-    static const xxMatrix3x4 IDENTITY;
+    static xxMatrix3x4 const IDENTITY;
 };
 
 union xxPlusAPI xxMatrix4x2
@@ -499,7 +499,7 @@ union xxPlusAPI xxMatrix4x2
                         operator        float const* () const        { return f; }
                         operator        float* ()                    { return f; }
 
-    static const xxMatrix4x2 IDENTITY;
+    static xxMatrix4x2 const IDENTITY;
 };
 
 union xxPlusAPI xxMatrix4x3
@@ -542,7 +542,7 @@ union xxPlusAPI xxMatrix4x3
     static xxMatrix4x3  FromMatrix4     (xxMatrix4 const& m);
            xxMatrix4    ToMatrix4       () const;
 
-    static const xxMatrix4x3 IDENTITY;
+    static xxMatrix4x3 const IDENTITY;
 };
 
 union xxPlusAPI xxMatrix4x4
@@ -594,7 +594,7 @@ union xxPlusAPI xxMatrix4x4
     void                MultiplyArray   (size_t count, xxMatrix4 const* input, int inputStride, xxMatrix4* output, int outputStride) const;
     void                MultiplyLink    (size_t count, xxMatrix4 const* input, int inputStride, xxMatrix4* output, int outputStride) const;
 
-    static const xxMatrix4x4 IDENTITY;
+    static xxMatrix4x4 const IDENTITY;
 };
 
 inline xxVector2 xxVector2::operator * (xxMatrix2 const& m) const

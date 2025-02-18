@@ -1253,7 +1253,7 @@ void xxSetPipelineD3D10(uint64_t commandEncoder, uint64_t pipeline)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(commandEncoder);
     D3D10PIPELINE* d3dPipeline = reinterpret_cast<D3D10PIPELINE*>(pipeline);
-    static const float blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    static float const blendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
     d3dDevice->VSSetShader(d3dPipeline->vertexShader);
     d3dDevice->PSSetShader(d3dPipeline->pixelShader);

@@ -1001,7 +1001,7 @@ void xxSetPipelineMetal(id <MTLRenderCommandEncoder> __unsafe_unretained command
 //------------------------------------------------------------------------------
 void xxSetMeshBuffersMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, id <MTLBuffer> __unsafe_unretained* buffers)
 {
-    static const NSUInteger offsets[8] = {};
+    static NSUInteger const offsets[8] = {};
 
     [commandEncoder setMeshBuffers:buffers
                            offsets:offsets
@@ -1010,7 +1010,7 @@ void xxSetMeshBuffersMetal(id <MTLRenderCommandEncoder> __unsafe_unretained comm
 //------------------------------------------------------------------------------
 void xxSetVertexBuffersMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, id <MTLBuffer> __unsafe_unretained* buffers, MTLVertexDescriptor* __unsafe_unretained vertexAttribute)
 {
-    static const NSUInteger offsets[8] = {};
+    static NSUInteger const offsets[8] = {};
 
     [commandEncoder setVertexBuffers:buffers
                              offsets:offsets
