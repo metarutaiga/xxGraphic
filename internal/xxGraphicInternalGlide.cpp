@@ -257,7 +257,7 @@ static GrContext_t FX_CALL gto_grSstWinOpen(void *window, GrScreenResolution_t s
         break;
     }
 #if defined(xxMACOS)
-    static const NSOpenGLPixelFormatAttribute attributes[] =
+    static NSOpenGLPixelFormatAttribute const attributes[] =
     {
         NSOpenGLPFADoubleBuffer,
         NSOpenGLPFADepthSize, 24,
@@ -282,7 +282,7 @@ static GrContext_t FX_CALL gto_grSstWinOpen(void *window, GrScreenResolution_t s
         }
     }
 #elif defined(xxWINDOWS)
-    static const PIXELFORMATDESCRIPTOR desc =
+    static PIXELFORMATDESCRIPTOR const desc =
     {
         .nSize = sizeof(PIXELFORMATDESCRIPTOR),
         .nVersion = 1,
@@ -360,7 +360,7 @@ static FxBool FX_CALL gto_grSelectContext(GrContext_t context)
 //------------------------------------------------------------------------------
 static void FX_CALL gto_grAlphaBlendFunction(GrAlphaBlendFnc_t rgb_sf, GrAlphaBlendFnc_t rgb_df, GrAlphaBlendFnc_t alpha_sf, GrAlphaBlendFnc_t alpha_df)
 {
-    static const GLenum glAlphaBlend[8] =
+    static GLenum const glAlphaBlend[8] =
     {
         GL_ZERO,
         GL_SRC_ALPHA,
@@ -384,7 +384,7 @@ static void FX_CALL gto_grClipWindow(FxU32 minx, FxU32 miny, FxU32 maxx, FxU32 m
     gto_glScissor(minx, g_height - maxy, maxx - minx, maxy - miny);
 }
 //------------------------------------------------------------------------------
-static const char * FX_CALL gto_grGetString(FxU32 pname)
+static char const* FX_CALL gto_grGetString(FxU32 pname)
 {
     switch (pname)
     {

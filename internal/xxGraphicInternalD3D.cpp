@@ -317,7 +317,7 @@ void PatchD3DIM(char const* name)
     char* codeBase = (char*)d3dim + ntHeader->OptionalHeader.BaseOfCode;
     DWORD codeSize = ntHeader->OptionalHeader.SizeOfCode;
 
-    static const BYTE wantedBytes[] = { 0xB8, 0x00, 0x08, 0x00, 0x00, 0x39 };
+    static BYTE const wantedBytes[] = { 0xB8, 0x00, 0x08, 0x00, 0x00, 0x39 };
     for (DWORD i = 0, size = codeSize - sizeof(wantedBytes); i < size; ++i)
     {
         if (memcmp(codeBase + i, wantedBytes, sizeof(wantedBytes)) == 0)

@@ -589,7 +589,7 @@ void (*xxLog)(char const* tag, char const* format, ...) = xxLogDefault;
 //  MD5 - omaha
 //  Copyright 2007-2009 Google Inc.
 //==============================================================================
-static const char Kr[64] =
+static char const Kr[64] =
 {
     7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,
     5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,
@@ -597,7 +597,7 @@ static const char Kr[64] =
     6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21
 };
 //------------------------------------------------------------------------------
-static const unsigned int KK[64] =
+static unsigned int const KK[64] =
 {
     0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
     0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
@@ -777,7 +777,7 @@ const uint8_t* xxDXBCChecksum(void const* data, int len, uint8_t* digest)
         MD5_update(&ctx, lastChunkData, lastChunkSize);
 
         /* Pad out to 56 mod 64 */
-        static const unsigned char MD5_PADDING[64] = { 0x80 };
+        static unsigned char const MD5_PADDING[64] = { 0x80 };
         MD5_update(&ctx, MD5_PADDING, paddingSize);
 
         // Pass in the number of bits
@@ -803,7 +803,7 @@ const uint8_t* xxDXBCChecksum(void const* data, int len, uint8_t* digest)
         paddingSize -= sizeof(uint32_t);
 
         /* Pad out to 56 mod 64 */
-        static const unsigned char MD5_PADDING[64] = { 0x80 };
+        static unsigned char const MD5_PADDING[64] = { 0x80 };
         memcpy(&ctx.buf[lastChunkSize], MD5_PADDING, paddingSize);
 
         // Pass in the number of bits

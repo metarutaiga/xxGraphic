@@ -395,7 +395,7 @@ static void*                    glslangLibrary = nullptr;
 static void*                    glslangResourceLibrary = nullptr;
 static int                      (*initialize_process)(void);
 static void                     (*finalize_process)(void);
-static const glslang_resource_t*(*default_resource)(void);
+static glslang_resource_t const*(*default_resource)(void);
 static glslang_shader_t*        (*shader_create)(const glslang_input_t* input);
 static void                     (*shader_delete)(glslang_shader_t* shader);
 static void                     (*shader_set_preamble)(glslang_shader_t* shader, const char* s);
@@ -403,7 +403,7 @@ static void                     (*shader_set_entry_point)(void*, const char* s);
 static void                     (*shader_set_invertY)(void*, bool invertY);
 static int                      (*shader_preprocess)(glslang_shader_t* shader, const glslang_input_t* input);
 static int                      (*shader_parse)(glslang_shader_t* shader, const glslang_input_t* input);
-static const char*              (*shader_get_info_log)(glslang_shader_t* shader);
+static char const*              (*shader_get_info_log)(glslang_shader_t* shader);
 static glslang_program_t*       (*program_create)(void);
 static void                     (*program_delete)(glslang_program_t* program);
 static void                     (*program_add_shader)(glslang_program_t* program, glslang_shader_t* shader);
@@ -411,7 +411,7 @@ static int                      (*program_link)(glslang_program_t* program, int 
 static void                     (*program_SPIRV_generate)(glslang_program_t* program, glslang_stage_t stage);
 static size_t                   (*program_SPIRV_get_size)(glslang_program_t* program);
 static void                     (*program_SPIRV_get)(glslang_program_t* program, unsigned int*);
-static const char*              (*program_get_info_log)(glslang_program_t* program);
+static char const*              (*program_get_info_log)(glslang_program_t* program);
 }
 //------------------------------------------------------------------------------
 VKAPI_ATTR void VKAPI_CALL vkCompileShader(char const* code, char const*const* macro, int type, uint32_t** output, size_t* size)
