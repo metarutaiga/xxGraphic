@@ -94,7 +94,7 @@ xxFile* (*xxFile::Save)(char const* name) = [](char const* name) -> xxFile*
     return output;
 };
 //------------------------------------------------------------------------------
-std::string xxFile::GetName(char const* name)
+std::string xxFile::GetName(char const* name, bool extension)
 {
     size_t dot = std::string::npos;
     std::string output;
@@ -106,7 +106,7 @@ std::string xxFile::GetName(char const* name)
             output.clear();
             continue;
         }
-        if (c == '.')
+        if (c == '.' && extension == false)
         {
             dot = output.size();
         }

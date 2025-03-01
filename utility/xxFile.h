@@ -23,7 +23,7 @@ public:
     static xxFile*    (*Load)(char const* name);
     static xxFile*    (*Save)(char const* name);
 
-    static std::string  GetName(char const* name);
+    static std::string  GetName(char const* name, bool extension = false);
     static std::string  GetPath(char const* name);
 
 protected:
