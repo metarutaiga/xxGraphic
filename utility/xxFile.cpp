@@ -117,7 +117,7 @@ std::string xxFile::GetName(char const* name, bool extension)
     return output;
 }
 //------------------------------------------------------------------------------
-std::string xxFile::GetPath(char const* name)
+std::string xxFile::GetPath(char const* name, bool appendSlash)
 {
     size_t slash = std::string::npos;
     std::string output;
@@ -131,6 +131,14 @@ std::string xxFile::GetPath(char const* name)
     }
     if (slash != std::string::npos)
         output.resize(slash);
+    if (appendSlash)
+    {
+#if defined(xxWINDOWS)
+        output += '\\';
+#else
+        output += '/';
+#endif
+    }
     return output;
 }
 //==============================================================================
