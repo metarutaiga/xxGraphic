@@ -120,6 +120,11 @@ struct xxStrideIterator
         return reinterpret_cast<T&>(*m_now);
     }
 
+    bool operator == (xxStrideIterator const& it) const
+    {
+        return m_now == it.m_now;
+    }
+
     bool operator != (xxStrideIterator const& it) const
     {
         return m_now != it.m_now;
