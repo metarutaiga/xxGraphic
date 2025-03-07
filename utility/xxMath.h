@@ -414,6 +414,7 @@ union xxPlusAPI xxMatrix3x3
                         operator        float* ()                    { return f; }
 
     float               Determinant     () const;
+    xxVector3           EularAngles     () const;
     xxMatrix3x3         Inverse         () const;
     xxMatrix3x3         Transpose       () const;
 

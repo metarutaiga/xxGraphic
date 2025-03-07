@@ -240,6 +240,31 @@ float xxMatrix3::Determinant() const
     return det;
 }
 //------------------------------------------------------------------------------
+xxVector3 xxMatrix3::EularAngles() const
+{
+    xxVector3 t;
+
+    float singular = sqrtf(m11 * m11 + m12 * m12);
+    if (singular > FLT_EPSILON)
+    {
+        t.x = atan2f(m23, m33);
+        t.y = atan2f(-m13, singular);
+        t.z = atan2f(m12, m11);
+    }
+    else
+    {
+        t.x = atan2f(-m32, m22);
+        t.y = atan2f(-m13, singular);
+        t.z = 0.0f;
+    }
+
+    t.x = t.x * (180.0f / float(M_PI));
+    t.y = t.y * (180.0f / float(M_PI));
+    t.z = t.z * (180.0f / float(M_PI));
+
+    return t;
+}
+//------------------------------------------------------------------------------
 xxMatrix3 xxMatrix3::Inverse() const
 {
     xxVector3 t;
