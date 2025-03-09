@@ -329,6 +329,17 @@ typedef UINT64 D3D12_GPU_VIRTUAL_ADDRESS;
 #endif
 
 template <class T>
+inline ULONG SafeAddRef(T* ptr)
+{
+    ULONG ref = 0;
+    if (ptr)
+    {
+        ref = ptr->AddRef();
+    }
+    return ref;
+}
+
+template <class T>
 inline ULONG SafeRelease(T*& ptr)
 {
     ULONG ref = 0;

@@ -1014,10 +1014,14 @@ uint64_t xxCreateVertexShaderD3D10(uint64_t device, char const* shader, uint64_t
     ID3D10VertexShader* d3dShader = nullptr;
     if (strcmp(shader, "default") == 0)
     {
-        void* d3dShader = xxAlloc(char, vertexShaderCode40[6]);
+        char* d3dShader = xxAlloc(char, 16 + vertexShaderCode40[6]);
         if (d3dShader == nullptr)
             return 0;
-        memcpy(d3dShader, vertexShaderCode40, vertexShaderCode40[6]);
+        memcpy(d3dShader + 16, vertexShaderCode40, vertexShaderCode40[6]);
+
+        ID3D10VertexShader* vertexShader = nullptr;
+        d3dDevice->CreateVertexShader(vertexShaderCode40, vertexShaderCode40[6], &vertexShader);
+        memcpy(d3dShader, &vertexShader, sizeof(vertexShader));
 
         return reinterpret_cast<uint64_t>(d3dShader);
     }
@@ -1030,10 +1034,14 @@ uint64_t xxCreateVertexShaderD3D10(uint64_t device, char const* shader, uint64_t
         if (blob == nullptr)
             return 0;
 
-        void* d3dShader = xxAlloc(char, blob->GetBufferSize());
+        char* d3dShader = xxAlloc(char, 16 + blob->GetBufferSize());
         if (d3dShader == nullptr)
             return 0;
-        memcpy(d3dShader, blob->GetBufferPointer(), blob->GetBufferSize());
+        memcpy(d3dShader + 16, blob->GetBufferPointer(), blob->GetBufferSize());
+
+        ID3D10VertexShader* vertexShader = nullptr;
+        d3dDevice->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), &vertexShader);
+        memcpy(d3dShader, &vertexShader, sizeof(vertexShader));
 
         return reinterpret_cast<uint64_t>(d3dShader);
     }
@@ -1050,10 +1058,14 @@ uint64_t xxCreateFragmentShaderD3D10(uint64_t device, char const* shader)
     ID3D10PixelShader* d3dShader = nullptr;
     if (strcmp(shader, "default") == 0)
     {
-        void* d3dShader = xxAlloc(char, pixelShaderCode40[6]);
+        char* d3dShader = xxAlloc(char, 16 + pixelShaderCode40[6]);
         if (d3dShader == nullptr)
             return 0;
-        memcpy(d3dShader, pixelShaderCode40, pixelShaderCode40[6]);
+        memcpy(d3dShader + 16, pixelShaderCode40, pixelShaderCode40[6]);
+
+        ID3D10PixelShader* pixelShader = nullptr;
+        d3dDevice->CreatePixelShader(pixelShaderCode40, pixelShaderCode40[6], &pixelShader);
+        memcpy(d3dShader, &pixelShader, sizeof(pixelShader));
 
         return reinterpret_cast<uint64_t>(d3dShader);
     }
@@ -1066,10 +1078,14 @@ uint64_t xxCreateFragmentShaderD3D10(uint64_t device, char const* shader)
         if (blob == nullptr)
             return 0;
 
-        void* d3dShader = xxAlloc(char, blob->GetBufferSize());
+        char* d3dShader = xxAlloc(char, 16 + blob->GetBufferSize());
         if (d3dShader == nullptr)
             return 0;
-        memcpy(d3dShader, blob->GetBufferPointer(), blob->GetBufferSize());
+        memcpy(d3dShader + 16, blob->GetBufferPointer(), blob->GetBufferSize());
+
+        ID3D10PixelShader* pixelShader = nullptr;
+        d3dDevice->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), &pixelShader);
+        memcpy(d3dShader, &pixelShader, sizeof(pixelShader));
 
         return reinterpret_cast<uint64_t>(d3dShader);
     }
@@ -1079,7 +1095,13 @@ uint64_t xxCreateFragmentShaderD3D10(uint64_t device, char const* shader)
 //------------------------------------------------------------------------------
 void xxDestroyShaderD3D10(uint64_t device, uint64_t shader)
 {
-    void* d3dShader = reinterpret_cast<void*>(shader);
+    void** d3dShader = reinterpret_cast<void**>(shader);
+
+    if (d3dShader && d3dShader[0])
+    {
+        IUnknown* unknown = reinterpret_cast<IUnknown*>(d3dShader[0]);
+        SafeRelease(unknown);
+    }
 
     xxFree(d3dShader);
 }
@@ -1170,21 +1192,25 @@ uint64_t xxCreatePipelineD3D10(uint64_t device, uint64_t renderPass, uint64_t bl
     D3D10VERTEXATTRIBUTE* d3dVertexAttribute = reinterpret_cast<D3D10VERTEXATTRIBUTE*>(vertexAttribute);
     if (d3dVertexAttribute == nullptr)
         return 0;
-    DWORD* d3dVertexShader = reinterpret_cast<DWORD*>(vertexShader);
+    ID3D10VertexShader** d3dVertexShader = reinterpret_cast<ID3D10VertexShader**>(vertexShader);
     if (d3dVertexShader == nullptr)
         return 0;
-    DWORD* d3dPixelShader = reinterpret_cast<DWORD*>(fragmentShader);
+    ID3D10PixelShader** d3dPixelShader = reinterpret_cast<ID3D10PixelShader**>(fragmentShader);
     if (d3dPixelShader == nullptr)
         return 0;
 
-    d3dPipeline->vertexShader = nullptr;
-    d3dPipeline->pixelShader = nullptr;
-    d3dDevice->CreateVertexShader(d3dVertexShader, d3dVertexShader[6], &d3dPipeline->vertexShader);
-    d3dDevice->CreatePixelShader(d3dPixelShader, d3dPixelShader[6], &d3dPipeline->pixelShader);
+    d3dPipeline->vertexShader = d3dVertexShader[0];
+    d3dPipeline->pixelShader = d3dPixelShader[0];
     d3dPipeline->blendState = reinterpret_cast<ID3D10BlendState*>(blendState);
     d3dPipeline->depthStencilState = reinterpret_cast<ID3D10DepthStencilState*>(depthStencilState);
     d3dPipeline->rasterizerState = reinterpret_cast<ID3D10RasterizerState*>(rasterizerState);
     d3dPipeline->inputLayout = d3dVertexAttribute->inputLayout;
+    SafeAddRef(d3dPipeline->vertexShader);
+    SafeAddRef(d3dPipeline->pixelShader);
+    SafeAddRef(d3dPipeline->blendState);
+    SafeAddRef(d3dPipeline->depthStencilState);
+    SafeAddRef(d3dPipeline->rasterizerState);
+    SafeAddRef(d3dPipeline->inputLayout);
 
     return reinterpret_cast<uint64_t>(d3dPipeline);
 }
@@ -1218,6 +1244,10 @@ void xxDestroyPipelineD3D10(uint64_t pipeline)
 
     SafeRelease(d3dPipeline->vertexShader);
     SafeRelease(d3dPipeline->pixelShader);
+    SafeRelease(d3dPipeline->blendState);
+    SafeRelease(d3dPipeline->depthStencilState);
+    SafeRelease(d3dPipeline->rasterizerState);
+    SafeRelease(d3dPipeline->inputLayout);
     xxFree(d3dPipeline);
 }
 //==============================================================================

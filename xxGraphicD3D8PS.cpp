@@ -135,13 +135,21 @@ uint64_t xxCreateVertexShaderD3D8PS(uint64_t device, char const* shader, uint64_
     LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(device);
     if (d3dDevice == nullptr)
         return 0;
+    D3DVERTEXATTRIBUTE8PS* d3dVertexAttribute = reinterpret_cast<D3DVERTEXATTRIBUTE8PS*>(vertexAttribute);
+    if (d3dVertexAttribute == nullptr)
+        return 0;
 
     if (strcmp(shader, "default") == 0)
     {
-        void* d3dShader = xxAlloc(char, vertexShaderCode10Size);
+        char* d3dShader = xxAlloc(char, 16 + vertexShaderCode10Size);
         if (d3dShader == nullptr)
             return 0;
-        memcpy(d3dShader, vertexShaderCode10, vertexShaderCode10Size);
+        memcpy(d3dShader + 16, vertexShaderCode10, vertexShaderCode10Size);
+
+        DWORD handle = 0;
+        d3dDevice->CreateVertexShader(d3dVertexAttribute->declaration, vertexShaderCode10, &handle, 0);
+        handle = handle ? handle + 1 : 0;
+        memcpy(d3dShader, &handle, sizeof(handle));
 
         return reinterpret_cast<uint64_t>(d3dShader);
     }
@@ -159,10 +167,15 @@ uint64_t xxCreateVertexShaderD3D8PS(uint64_t device, char const* shader, uint64_
         D3DDisassembleShader(blob);
 #endif
 
-        void* d3dShader = xxAlloc(char, blob->GetBufferSize());
+        char* d3dShader = xxAlloc(char, 16 + blob->GetBufferSize());
         if (d3dShader == nullptr)
             return 0;
-        memcpy(d3dShader, blob->GetBufferPointer(), blob->GetBufferSize());
+        memcpy(d3dShader + 16, blob->GetBufferPointer(), blob->GetBufferSize());
+
+        DWORD handle = 0;
+        d3dDevice->CreateVertexShader(d3dVertexAttribute->declaration, (DWORD*)blob->GetBufferPointer(), &handle, 0);
+        handle = handle ? handle + 1 : 0;
+        memcpy(d3dShader, &handle, sizeof(handle));
 
         return reinterpret_cast<uint64_t>(d3dShader);
     }
@@ -178,10 +191,15 @@ uint64_t xxCreateFragmentShaderD3D8PS(uint64_t device, char const* shader)
 
     if (strcmp(shader, "default") == 0)
     {
-        void* d3dShader = xxAlloc(char, pixelShaderCode10Size);
+        char* d3dShader = xxAlloc(char, 16 + pixelShaderCode10Size);
         if (d3dShader == nullptr)
             return 0;
-        memcpy(d3dShader, pixelShaderCode10, pixelShaderCode10Size);
+        memcpy(d3dShader + 16, pixelShaderCode10, pixelShaderCode10Size);
+
+        DWORD handle = 0;
+        d3dDevice->CreatePixelShader(pixelShaderCode10, &handle);
+        handle = handle ? handle + 2 : 0;
+        memcpy(d3dShader, &handle, sizeof(handle));
 
         return reinterpret_cast<uint64_t>(d3dShader);
     }
@@ -199,10 +217,15 @@ uint64_t xxCreateFragmentShaderD3D8PS(uint64_t device, char const* shader)
         D3DDisassembleShader(blob);
 #endif
 
-        void* d3dShader = xxAlloc(char, blob->GetBufferSize());
+        char* d3dShader = xxAlloc(char, 16 + blob->GetBufferSize());
         if (d3dShader == nullptr)
             return 0;
-        memcpy(d3dShader, blob->GetBufferPointer(), blob->GetBufferSize());
+        memcpy(d3dShader + 16, blob->GetBufferPointer(), blob->GetBufferSize());
+
+        DWORD handle = 0;
+        d3dDevice->CreatePixelShader((DWORD*)blob->GetBufferPointer(), &handle);
+        handle = handle ? handle + 2 : 0;
+        memcpy(d3dShader, &handle, sizeof(handle));
 
         return reinterpret_cast<uint64_t>(d3dShader);
     }
@@ -212,7 +235,24 @@ uint64_t xxCreateFragmentShaderD3D8PS(uint64_t device, char const* shader)
 //------------------------------------------------------------------------------
 void xxDestroyShaderD3D8PS(uint64_t device, uint64_t shader)
 {
-    void* d3dShader = reinterpret_cast<void*>(shader);
+    DWORD* d3dShader = reinterpret_cast<DWORD*>(shader);
+
+    if (d3dShader && d3dShader[0])
+    {
+        LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(device);
+        if (d3dDevice)
+        {
+            switch (d3dShader[0] & 3)
+            {
+            case 1:
+                d3dDevice->DeleteVertexShader(d3dShader[0] & ~3);
+                break;
+            case 2:
+                d3dDevice->DeletePixelShader(d3dShader[0] & ~3);
+                break;
+            }
+        }
+    }
 
     xxFree(d3dShader);
 }
@@ -221,12 +261,6 @@ void xxDestroyShaderD3D8PS(uint64_t device, uint64_t shader)
 //==============================================================================
 uint64_t xxCreatePipelineD3D8PS(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t meshShader, uint64_t vertexShader, uint64_t fragmentShader)
 {
-    LPDIRECT3DDEVICE8 d3dDevice = reinterpret_cast<LPDIRECT3DDEVICE8>(device);
-    if (d3dDevice == nullptr)
-        return 0;
-    D3DVERTEXATTRIBUTE8PS* d3dVertexAttribute = reinterpret_cast<D3DVERTEXATTRIBUTE8PS*>(vertexAttribute);
-    if (d3dVertexAttribute == nullptr)
-        return 0;
     DWORD* d3dVertexShader = reinterpret_cast<DWORD*>(vertexShader);
     if (d3dVertexShader == nullptr)
         return 0;
@@ -239,10 +273,8 @@ uint64_t xxCreatePipelineD3D8PS(uint64_t device, uint64_t renderPass, uint64_t b
     if (d3dPipeline == nullptr)
         return 0;
 
-    d3dPipeline->vertexShader = 0;
-    d3dPipeline->pixelShader = 0;
-    d3dDevice->CreateVertexShader(d3dVertexAttribute->declaration, d3dVertexShader, &d3dPipeline->vertexShader, 0);
-    d3dDevice->CreatePixelShader(d3dPixelShader, &d3dPipeline->pixelShader);
+    d3dPipeline->vertexShader = d3dVertexShader[0] & ~3;
+    d3dPipeline->pixelShader = d3dPixelShader[0] & ~3;
 
     return pipeline;
 }
@@ -250,11 +282,7 @@ uint64_t xxCreatePipelineD3D8PS(uint64_t device, uint64_t renderPass, uint64_t b
 void xxDestroyPipelineD3D8PS(uint64_t pipeline)
 {
     D3DPIPELINE8* d3dPipeline = reinterpret_cast<D3DPIPELINE8*>(pipeline);
-    if (d3dPipeline == nullptr)
-        return;
 
-    d3dPipeline->device->DeleteVertexShader(d3dPipeline->vertexShader);
-    d3dPipeline->device->DeletePixelShader(d3dPipeline->pixelShader);
     xxFree(d3dPipeline);
 }
 //==============================================================================
