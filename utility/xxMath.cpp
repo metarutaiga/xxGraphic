@@ -446,7 +446,7 @@ float xxMatrix4::FastDeterminant() const
 void xxMatrix4::FastDecompose(xxMatrix3& __restrict rotate, xxVector3& __restrict translate, float& __restrict scale) const
 {
     scale = v[0].xyz.Length();
-    translate = v[3].xyz;
+    translate = Translate();
 
     float invScale = 1.0f / scale;
     for (int i = 0; i < 3; ++i)

@@ -363,7 +363,7 @@ xxMatrix3 xxNode::GetRotate() const
 {
     if (m_legacyScale == 1.0f)
     {
-        return { LocalMatrix[0].xyz, LocalMatrix[1].xyz, LocalMatrix[2].xyz };
+        return LocalMatrix.Rotate();
     }
 
     return m_legacyRotate;
@@ -373,7 +373,7 @@ xxVector3 const& xxNode::GetTranslate() const
 {
     if (m_legacyScale == 1.0f)
     {
-        return LocalMatrix[3].xyz;
+        return LocalMatrix.Translate();
     }
 
     return m_legacyTranslate;

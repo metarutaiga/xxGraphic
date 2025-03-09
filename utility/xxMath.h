@@ -399,7 +399,7 @@ union xxPlusAPI xxMatrix3x3
 
     xxMatrix3x3         operator +      (xxMatrix3x3 const& m) const { return xxMatrix3x3(*this) += m; }
     xxMatrix3x3         operator -      (xxMatrix3x3 const& m) const { return xxMatrix3x3(*this) -= m; }
-    xxMatrix3x3         operator *      (xxMatrix3x3 const& m) const { return xxMatrix3x3(m) *= *this; }
+    xxMatrix3x3         operator *      (xxMatrix3x3 const& m) const { return xxMatrix3x3(*this) *= m; }
     xxMatrix3x3         operator *      (float s) const              { return xxMatrix3x3(*this) *= s; }
     xxMatrix3x3         operator /      (float s) const              { return xxMatrix3x3(*this) /= s; }
 
@@ -585,6 +585,9 @@ union xxPlusAPI xxMatrix4x4
                         operator        xxVector4* ()                { return v; }
                         operator        float const* () const        { return f; }
                         operator        float* ()                    { return f; }
+
+    xxMatrix3           Rotate          () const                     { return { v[0].xyz, v[1].xyz, v[2].xyz }; }
+    xxVector3 const&    Translate       () const                     { return v[3].xyz; }
 
     float               Determinant     () const;
     xxMatrix4x4         Inverse         () const;
