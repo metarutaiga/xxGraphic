@@ -29,9 +29,9 @@ public:
     };
 
 public:
-    virtual void                Invalidate();
-    virtual void                Setup(uint64_t device);
-    virtual void                Draw(uint64_t commandEncoder, int instanceCount = 1, int firstIndex = 0, int vertexOffset = 0, int firstInstance = 0);
+    void                        Invalidate();
+    void                        Setup(uint64_t device);
+    void                        Draw(uint64_t commandEncoder, int instanceCount = 1, int firstIndex = 0, int vertexOffset = 0, int firstInstance = 0);
 
     uint64_t                    GetVertexAttribute() const;
 
