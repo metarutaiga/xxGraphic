@@ -272,10 +272,10 @@ uint64_t xxCreatePipelineD3D9PS(uint64_t device, uint64_t renderPass, uint64_t b
     D3DVERTEXATTRIBUTE9PS* d3dVertexAttribute = reinterpret_cast<D3DVERTEXATTRIBUTE9PS*>(vertexAttribute);
     if (d3dVertexAttribute == nullptr)
         return 0;
-    IDirect3DVertexShader9* d3dVertexShader = reinterpret_cast<IDirect3DVertexShader9*>(vertexShader);
+    IDirect3DVertexShader9** d3dVertexShader = reinterpret_cast<IDirect3DVertexShader9**>(vertexShader);
     if (d3dVertexShader == nullptr)
         return 0;
-    IDirect3DPixelShader9* d3dPixelShader = reinterpret_cast<IDirect3DPixelShader9*>(fragmentShader);
+    IDirect3DPixelShader9** d3dPixelShader = reinterpret_cast<IDirect3DPixelShader9**>(fragmentShader);
     if (d3dPixelShader == nullptr)
         return 0;
 
@@ -285,8 +285,8 @@ uint64_t xxCreatePipelineD3D9PS(uint64_t device, uint64_t renderPass, uint64_t b
         return 0;
 
     d3dPipeline->vertexDeclaration = d3dVertexAttribute->vertexDeclaration;
-    d3dPipeline->vertexShader = d3dVertexShader;
-    d3dPipeline->pixelShader = d3dPixelShader;
+    d3dPipeline->vertexShader = d3dVertexShader[0];
+    d3dPipeline->pixelShader = d3dPixelShader[0];
     SafeAddRef(d3dPipeline->vertexDeclaration);
     SafeAddRef(d3dPipeline->vertexShader);
     SafeAddRef(d3dPipeline->pixelShader);
