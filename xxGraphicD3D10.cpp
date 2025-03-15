@@ -1161,17 +1161,16 @@ uint64_t xxCreateDepthStencilStateD3D10(uint64_t device, char const* depthTest, 
     return reinterpret_cast<uint64_t>(d3dDepthStencilState);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateRasterizerStateD3D10(uint64_t device, bool cull, bool scissor)
+uint64_t xxCreateRasterizerStateD3D10(uint64_t device, bool cull, bool fill, bool scissor)
 {
     ID3D10Device* d3dDevice = reinterpret_cast<ID3D10Device*>(device);
     if (d3dDevice == nullptr)
         return 0;
 
     D3D10_RASTERIZER_DESC desc = {};
-    desc.FillMode = D3D10_FILL_SOLID;
+    desc.FillMode = fill ? D3D10_FILL_SOLID : D3D10_FILL_WIREFRAME;
     desc.CullMode = cull ? D3D10_CULL_BACK : D3D10_CULL_NONE;
     desc.ScissorEnable = scissor;
-    desc.DepthClipEnable = true;
 
     ID3D10RasterizerState* d3dRasterizerState = nullptr;
     HRESULT hResult = d3dDevice->CreateRasterizerState(&desc, &d3dRasterizerState);

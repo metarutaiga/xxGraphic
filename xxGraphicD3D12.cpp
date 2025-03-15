@@ -1593,7 +1593,7 @@ uint64_t xxCreateDepthStencilStateD3D12(uint64_t device, char const* depthTest, 
     return reinterpret_cast<uint64_t>(d3dDesc);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateRasterizerStateD3D12(uint64_t device, bool cull, bool scissor)
+uint64_t xxCreateRasterizerStateD3D12(uint64_t device, bool cull, bool fill, bool scissor)
 {
     D3D12_RASTERIZER_DESC* d3dDesc = xxAlloc(D3D12_RASTERIZER_DESC);
     if (d3dDesc == nullptr)
@@ -1601,9 +1601,8 @@ uint64_t xxCreateRasterizerStateD3D12(uint64_t device, bool cull, bool scissor)
     memset(d3dDesc, 0, sizeof(D3D12_RASTERIZER_DESC));
 
     D3D12_RASTERIZER_DESC& desc = (*d3dDesc);
-    desc.FillMode = D3D12_FILL_MODE_SOLID;
+    desc.FillMode = fill ? D3D12_FILL_MODE_SOLID : D3D12_FILL_MODE_WIREFRAME;
     desc.CullMode = cull ? D3D12_CULL_MODE_BACK : D3D12_CULL_MODE_NONE;
-    desc.DepthClipEnable = true;
 
     return reinterpret_cast<uint64_t>(d3dDesc);
 }

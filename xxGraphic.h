@@ -87,7 +87,7 @@ xxAPI void          (*xxDestroyShader)(uint64_t device, uint64_t shader);
 //==============================================================================
 xxAPI uint64_t      (*xxCreateBlendState)(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha);
 xxAPI uint64_t      (*xxCreateDepthStencilState)(uint64_t device, char const* depthTest, bool depthWrite);
-xxAPI uint64_t      (*xxCreateRasterizerState)(uint64_t device, bool cull, bool scissor);
+xxAPI uint64_t      (*xxCreateRasterizerState)(uint64_t device, bool cull, bool fill, bool scissor);
 xxAPI uint64_t      (*xxCreatePipeline)(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t meshShader, uint64_t vertexShader, uint64_t fragmentShader);
 xxAPI void          (*xxDestroyBlendState)(uint64_t blendState);
 xxAPI void          (*xxDestroyDepthStencilState)(uint64_t depthStencilState);

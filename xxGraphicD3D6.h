@@ -91,7 +91,7 @@ void            xxDestroyShaderD3D6(uint64_t device, uint64_t shader);
 //==============================================================================
 uint64_t        xxCreateBlendStateD3D6(uint64_t device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha);
 uint64_t        xxCreateDepthStencilStateD3D6(uint64_t device, char const* depthTest, bool depthWrite);
-uint64_t        xxCreateRasterizerStateD3D6(uint64_t device, bool cull, bool scissor);
+uint64_t        xxCreateRasterizerStateD3D6(uint64_t device, bool cull, bool fill, bool scissor);
 uint64_t        xxCreatePipelineD3D6(uint64_t device, uint64_t renderPass, uint64_t blendState, uint64_t depthStencilState, uint64_t rasterizerState, uint64_t vertexAttribute, uint64_t meshShader, uint64_t vertexShader, uint64_t fragmentShader);
 void            xxDestroyBlendStateD3D6(uint64_t blendState);
 void            xxDestroyDepthStencilStateD3D6(uint64_t depthStencilState);

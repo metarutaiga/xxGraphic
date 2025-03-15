@@ -92,7 +92,7 @@ void            xxDestroyShaderMetal(id <MTLDevice> device, id <MTLFunction> sha
 //==============================================================================
 id              xxCreateBlendStateMetal(id <MTLDevice> device, char const* sourceColor, char const* operationColor, char const* destinationColor, char const* sourceAlpha, char const* operationAlpha, char const* destinationAlpha);
 id              xxCreateDepthStencilStateMetal(id <MTLDevice> device, char const* depthTest, bool depthWrite);
-uint64_t        xxCreateRasterizerStateMetal(id <MTLDevice> device, bool cull, bool scissor);
+uint64_t        xxCreateRasterizerStateMetal(id <MTLDevice> device, bool cull, bool fill, bool scissor);
 MTLPIPELINE*    xxCreatePipelineMetal(id <MTLDevice> device, MTLRenderPassDescriptor* renderPass, MTLRenderPipelineColorAttachmentDescriptor* blendState, id <MTLDepthStencilState> depthStencilState, uint64_t rasterizerState, MTLVertexDescriptor* vertexAttribute, id <MTLFunction> meshShader, id <MTLFunction> vertexShader, id <MTLFunction> fragmentShader);
 void            xxDestroyBlendStateMetal(MTLRenderPipelineColorAttachmentDescriptor* blendState);
 void            xxDestroyDepthStencilStateMetal(id <MTLDepthStencilState> depthStencilState);

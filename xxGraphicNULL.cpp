@@ -244,7 +244,7 @@ uint64_t xxCreateDepthStencilStateNULL(uint64_t device, char const* depthTest, b
     return 0;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateRasterizerStateNULL(uint64_t device, bool cull, bool scissor)
+uint64_t xxCreateRasterizerStateNULL(uint64_t device, bool cull, bool fill, bool scissor)
 {
     return 0;
 }

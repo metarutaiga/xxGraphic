@@ -138,6 +138,7 @@ struct MTLPIPELINE
     id <MTLRenderPipelineState>     pipeline;
     id <MTLDepthStencilState>       depthStencil;
     MTLCullMode                     cullMode;
+    MTLTriangleFillMode             fillMode;
     bool                            scissorEnable;
 
     // Metal 2

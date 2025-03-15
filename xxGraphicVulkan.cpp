@@ -2233,7 +2233,7 @@ uint64_t xxCreateDepthStencilStateVulkan(uint64_t device, char const* depthTest,
     return reinterpret_cast<uint64_t>(depthStencilState);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateRasterizerStateVulkan(uint64_t device, bool cull, bool scissor)
+uint64_t xxCreateRasterizerStateVulkan(uint64_t device, bool cull, bool fill, bool scissor)
 {
     VkPipelineRasterizationStateCreateInfo* rasterizerState = xxAlloc(VkPipelineRasterizationStateCreateInfo);
     if (rasterizerState == nullptr)
@@ -2241,7 +2241,7 @@ uint64_t xxCreateRasterizerStateVulkan(uint64_t device, bool cull, bool scissor)
     memset(rasterizerState, 0, sizeof(VkPipelineRasterizationStateCreateInfo));
 
     rasterizerState->sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    rasterizerState->polygonMode = VK_POLYGON_MODE_FILL;
+    rasterizerState->polygonMode = fill ? VK_POLYGON_MODE_FILL : VK_POLYGON_MODE_LINE;
     rasterizerState->cullMode = cull ? VK_CULL_MODE_BACK_BIT : VK_CULL_MODE_NONE;
     rasterizerState->frontFace = VK_FRONT_FACE_CLOCKWISE;
     rasterizerState->lineWidth = 1.0f;

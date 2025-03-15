@@ -10,6 +10,8 @@
 #include "xxGraphicMetal.h"
 #include "xxGraphicMetal2.h"
 
+#define HAVE_CHECK_USE_RESOURCE 0
+
 //==============================================================================
 //  Instance
 //==============================================================================
@@ -286,10 +288,14 @@ void xxSetMeshBuffersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLBuffer> _
 
         if (buffer == nil)
             continue;
+#if HAVE_CHECK_USE_RESOURCE
         NSString* __unsafe_unretained label = buffer.label;
         if (label != swapchain->frameString)
         {
             buffer.label = swapchain->frameString;
+#else
+        {
+#endif
             [swapchain->commandEncoder useResource:buffer
                                              usage:MTLResourceUsageRead
                                             stages:MTLRenderStageMesh];
@@ -320,10 +326,14 @@ void xxSetMeshTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE** te
 
         if (texture == nil)
             continue;
+#if HAVE_CHECK_USE_RESOURCE
         NSString* __unsafe_unretained label = texture.label;
         if (label != swapchain->frameString)
         {
             texture.label = swapchain->frameString;
+#else
+        {
+#endif
             [swapchain->commandEncoder useResource:texture
                                              usage:MTLResourceUsageRead
                                             stages:MTLRenderStageMesh];
@@ -346,10 +356,14 @@ void xxSetVertexTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE** 
 
         if (texture == nil)
             continue;
+#if HAVE_CHECK_USE_RESOURCE
         NSString* __unsafe_unretained label = texture.label;
         if (label != swapchain->frameString)
         {
             texture.label = swapchain->frameString;
+#else
+        {
+#endif
             [swapchain->commandEncoder useResource:texture
                                              usage:MTLResourceUsageRead
                                             stages:MTLRenderStageVertex];
@@ -372,10 +386,14 @@ void xxSetFragmentTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE*
 
         if (texture == nil)
             continue;
+#if HAVE_CHECK_USE_RESOURCE
         NSString* __unsafe_unretained label = texture.label;
         if (label != swapchain->frameString)
         {
             texture.label = swapchain->frameString;
+#else
+        {
+#endif
             [swapchain->commandEncoder useResource:texture
                                              usage:MTLResourceUsageRead
                                             stages:MTLRenderStageFragment];
@@ -410,10 +428,14 @@ void xxSetFragmentSamplersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLSamp
 //------------------------------------------------------------------------------
 void xxSetMeshConstantBufferMetal2(MTLSWAPCHAIN* swapchain, id <MTLBuffer> __unsafe_unretained buffer, int size)
 {
+#if HAVE_CHECK_USE_RESOURCE
     NSString* __unsafe_unretained label = buffer.label;
     if (label != swapchain->frameString)
     {
         buffer.label = swapchain->frameString;
+#else
+    {
+#endif
         [swapchain->commandEncoder useResource:buffer
                                          usage:MTLResourceUsageRead
                                         stages:MTLRenderStageMesh];
@@ -427,10 +449,14 @@ void xxSetMeshConstantBufferMetal2(MTLSWAPCHAIN* swapchain, id <MTLBuffer> __uns
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferMetal2(MTLSWAPCHAIN* swapchain, id <MTLBuffer> __unsafe_unretained buffer, int size)
 {
+#if HAVE_CHECK_USE_RESOURCE
     NSString* __unsafe_unretained label = buffer.label;
     if (label != swapchain->frameString)
     {
         buffer.label = swapchain->frameString;
+#else
+    {
+#endif
         [swapchain->commandEncoder useResource:buffer
                                          usage:MTLResourceUsageRead
                                         stages:MTLRenderStageVertex];
@@ -444,10 +470,14 @@ void xxSetVertexConstantBufferMetal2(MTLSWAPCHAIN* swapchain, id <MTLBuffer> __u
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferMetal2(MTLSWAPCHAIN* swapchain, id <MTLBuffer> __unsafe_unretained buffer, int size)
 {
+#if HAVE_CHECK_USE_RESOURCE
     NSString* __unsafe_unretained label = buffer.label;
     if (label != swapchain->frameString)
     {
         buffer.label = swapchain->frameString;
+#else
+    {
+#endif
         [swapchain->commandEncoder useResource:buffer
                                          usage:MTLResourceUsageRead
                                         stages:MTLRenderStageFragment];

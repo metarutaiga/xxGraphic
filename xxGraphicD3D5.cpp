@@ -766,10 +766,11 @@ uint64_t xxCreateDepthStencilStateD3D5(uint64_t device, char const* depthTest, b
     return static_cast<uint64_t>(d3dRenderState.value);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateRasterizerStateD3D5(uint64_t device, bool cull, bool scissor)
+uint64_t xxCreateRasterizerStateD3D5(uint64_t device, bool cull, bool fill, bool scissor)
 {
     D3DRENDERSTATE2 d3dRenderState = {};
     d3dRenderState.cull = cull;
+    d3dRenderState.fill = fill;
     d3dRenderState.scissor = scissor;
     return static_cast<uint64_t>(d3dRenderState.value);
 }
@@ -792,6 +793,7 @@ uint64_t xxCreatePipelineD3D5(uint64_t device, uint64_t renderPass, uint64_t ble
     d3dPipeline->renderState.depthTest              = d3dDepthStencilState.depthTest;
     d3dPipeline->renderState.depthWrite             = d3dDepthStencilState.depthWrite;
     d3dPipeline->renderState.cull                   = d3dRasterizerState.cull;
+    d3dPipeline->renderState.fill                   = d3dRasterizerState.fill;
     d3dPipeline->renderState.scissor                = d3dRasterizerState.scissor;
 
     return reinterpret_cast<uint64_t>(d3dPipeline);
@@ -880,6 +882,7 @@ void xxSetPipelineD3D5(uint64_t commandEncoder, uint64_t pipeline)
     d3dDevice->SetRenderState(D3DRENDERSTATE_FOGENABLE, FALSE);
     d3dDevice->SetRenderState(D3DRENDERSTATE_SPECULARENABLE, FALSE);
     d3dDevice->SetRenderState(D3DRENDERSTATE_CULLMODE, d3dPipeline->renderState.cull ? D3DCULL_CCW : D3DCULL_NONE);
+    d3dDevice->SetRenderState(D3DRENDERSTATE_FILLMODE, d3dPipeline->renderState.fill ? D3DFILL_SOLID : D3DFILL_WIREFRAME);
     d3dDevice->SetRenderState(D3DRENDERSTATE_ZENABLE, d3dPipeline->renderState.depthEnable);
     if (d3dPipeline->renderState.depthEnable)
     {

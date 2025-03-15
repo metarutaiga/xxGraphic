@@ -122,6 +122,7 @@ union GrPipeline
         uint64_t    depthTest:3;
         uint64_t    depthWrite:1;
         uint64_t    cull:1;
+        uint64_t    fill:1;
         uint64_t    scissor:1;
     };
 };

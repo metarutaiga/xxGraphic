@@ -463,10 +463,11 @@ uint64_t xxCreateDepthStencilStateGlide(uint64_t device, char const* depthTest, 
     return static_cast<uint64_t>(grPipeline.value);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateRasterizerStateGlide(uint64_t device, bool cull, bool scissor)
+uint64_t xxCreateRasterizerStateGlide(uint64_t device, bool cull, bool fill, bool scissor)
 {
     GrPipeline grPipeline = {};
     grPipeline.cull = cull;
+    grPipeline.fill = fill;
     grPipeline.scissor = scissor;
     return static_cast<uint64_t>(grPipeline.value);
 }
@@ -483,6 +484,7 @@ uint64_t xxCreatePipelineGlide(uint64_t device, uint64_t renderPass, uint64_t bl
     grPipeline.depthTest = grDepthStencilState.depthTest;
     grPipeline.depthWrite = grDepthStencilState.depthWrite;
     grPipeline.cull = grRasterizerState.cull;
+    grPipeline.fill = grRasterizerState.fill;
     grPipeline.scissor = grRasterizerState.scissor;
 
     return static_cast<uint64_t>(grPipeline.value);

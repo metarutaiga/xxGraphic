@@ -19,9 +19,11 @@ Class                       classMTLTextureDescriptor = nil;
 Class                       classMTLVertexDescriptor = nil;
 
 static void*                metalLibrary = nullptr;
+static MTLCullMode          metalCullMode;
+static MTLTriangleFillMode  metalFillMode;
 static MTLViewport          metalViewport;
 static MTLScissorRect       metalScissor;
-static bool                 metalScissorEnable = false;
+static bool                 metalScissorEnable;
 static MTLVertexDescriptor* metalVertexAttribute __unused = nil;
 static id <MTLDevice>       (*MTLCreateSystemDefaultDevice)() NS_RETURNS_RETAINED = nullptr;
 static NSArray*             (*MTLCopyAllDevices)() NS_RETURNS_RETAINED = nullptr;
@@ -320,6 +322,10 @@ id xxBeginRenderPassMetal(id <MTLCommandBuffer> __unsafe_unretained commandBuffe
     id <MTLRenderCommandEncoder> commandEncoder = [commandBuffer renderCommandEncoderWithDescriptor:renderPass];
     if (commandEncoder == nil)
         return nil;
+
+    metalCullMode = MTLCullMode(-1);
+    metalFillMode = MTLTriangleFillMode(-1);
+    metalScissorEnable = bool(-1);
 
     return commandEncoder;
 }
@@ -867,11 +873,12 @@ id xxCreateDepthStencilStateMetal(id <MTLDevice> __unsafe_unretained device, cha
     return depthStencilState;
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateRasterizerStateMetal(id <MTLDevice> __unsafe_unretained device, bool cull, bool scissor)
+uint64_t xxCreateRasterizerStateMetal(id <MTLDevice> __unsafe_unretained device, bool cull, bool fill, bool scissor)
 {
     uint64_t state = 0;
-    state |= (cull << 0);
-    state |= (scissor << 1);
+    state |= cull       ? 0b001 : 0b000;
+    state |= fill       ? 0b010 : 0b000;
+    state |= scissor    ? 0b100 : 0b000;
     return state;
 }
 //------------------------------------------------------------------------------
@@ -916,8 +923,9 @@ MTLPIPELINE* xxCreatePipelineMetal(id <MTLDevice> __unsafe_unretained device, MT
     }
 
     pipeline->depthStencil = depthStencilState;
-    pipeline->cullMode = (rasterizerState & 1) ? MTLCullModeBack : MTLCullModeNone;
-    pipeline->scissorEnable = (rasterizerState & 2) != 0;
+    pipeline->cullMode = (rasterizerState & 0b001) ? MTLCullModeBack : MTLCullModeNone;
+    pipeline->fillMode = (rasterizerState & 0b010) ? MTLTriangleFillModeFill : MTLTriangleFillModeLines;
+    pipeline->scissorEnable = (rasterizerState & 0b100) != 0;
 
     return pipeline;
 }
@@ -977,14 +985,23 @@ void xxSetPipelineMetal(id <MTLRenderCommandEncoder> __unsafe_unretained command
 {
     [commandEncoder setRenderPipelineState:pipeline->pipeline];
     [commandEncoder setDepthStencilState:pipeline->depthStencil];
-    [commandEncoder setCullMode:pipeline->cullMode];
 
+    if (metalCullMode != pipeline->cullMode)
+    {
+        metalCullMode = pipeline->cullMode;
+        [commandEncoder setCullMode:pipeline->cullMode];
+    }
+    if (metalFillMode != pipeline->fillMode)
+    {
+        metalFillMode = pipeline->fillMode;
+        [commandEncoder setTriangleFillMode:pipeline->fillMode];
+    }
     if (metalScissorEnable != pipeline->scissorEnable)
     {
+        metalScissorEnable = pipeline->scissorEnable;
         if (pipeline->scissorEnable)
         {
             [commandEncoder setScissorRect:metalScissor];
-            metalScissorEnable = true;
         }
         else
         {
@@ -994,7 +1011,6 @@ void xxSetPipelineMetal(id <MTLRenderCommandEncoder> __unsafe_unretained command
             rect.width = metalViewport.width;
             rect.height = metalViewport.height;
             [commandEncoder setScissorRect:rect];
-            metalScissorEnable = false;
         }
     }
 }

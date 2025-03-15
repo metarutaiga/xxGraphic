@@ -775,14 +775,14 @@ uint64_t xxCreateDepthStencilStateMantle(uint64_t device, char const* depthTest,
     return reinterpret_cast<uint64_t>(depthStencilState);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateRasterizerStateMantle(uint64_t device, bool cull, bool scissor)
+uint64_t xxCreateRasterizerStateMantle(uint64_t device, bool cull, bool fill, bool scissor)
 {
     GR_DEVICE grDevice = reinterpret_cast<GR_DEVICE>(device);
     if (grDevice == GR_NULL_HANDLE)
         return 0;
 
     GR_RASTER_STATE_CREATE_INFO info = {};
-    info.fillMode = GR_FILL_SOLID;
+    info.fillMode = fill ? GR_FILL_SOLID : GR_FILL_WIREFRAME;
     info.cullMode = cull ? GR_CULL_BACK : GR_CULL_NONE;
     info.frontFace = GR_FRONT_FACE_CW;
 

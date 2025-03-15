@@ -1010,10 +1010,11 @@ uint64_t xxCreateDepthStencilStateGLES2(uint64_t device, char const* depthTest, 
     return static_cast<uint64_t>(glState.value);
 }
 //------------------------------------------------------------------------------
-uint64_t xxCreateRasterizerStateGLES2(uint64_t device, bool cull, bool scissor)
+uint64_t xxCreateRasterizerStateGLES2(uint64_t device, bool cull, bool fill, bool scissor)
 {
     GLSTATE glState = {};
     glState.cull = cull;
+    glState.fill = fill;
     glState.scissor = scissor;
     return static_cast<uint64_t>(glState.value);
 }
@@ -1056,6 +1057,7 @@ uint64_t xxCreatePipelineGLES2(uint64_t device, uint64_t renderPass, uint64_t bl
     glPipeline->state.depthTest = glDepthStencilState.depthTest;
     glPipeline->state.depthWrite = glDepthStencilState.depthWrite;
     glPipeline->state.cull = glRasterizerState.cull;
+    glPipeline->state.fill = glRasterizerState.fill;
     glPipeline->state.scissor = glRasterizerState.scissor;
 
     int index = 0;
