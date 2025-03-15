@@ -50,6 +50,9 @@ struct xxConstantData
     int         meshConstantSize = 0;
     int         vertexConstantSize = 0;
     int         fragmentConstantSize = 0;
+    int         meshTextureSlot = 0;
+    int         vertexTextureSlot = 0;
+    int         fragmentTextureSlot = 0;
     int         ready = 0;
 };
 

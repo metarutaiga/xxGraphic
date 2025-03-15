@@ -154,7 +154,7 @@ void xxMaterial::CreatePipeline(xxDrawData const& data)
         }
         if (m_rasterizerState == 0)
         {
-            m_rasterizerState = xxCreateRasterizerState(m_device, Cull, Scissor);
+            m_rasterizerState = xxCreateRasterizerState(m_device, Cull, true, Scissor);
         }
         if (m_vertexShader == 0 && m_fragmentShader == 0)
         {
