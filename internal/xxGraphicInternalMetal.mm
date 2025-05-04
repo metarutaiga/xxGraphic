@@ -17,10 +17,10 @@ char const* const mtlDefaultShaderCode =
 "{"
 "\n#if SHADER_MSL >= 2"
 "\n#if SHADER_VERTEX\n"
-    "device float4* Buffer [[id(0)]];"
+    "device float4* Buffer [[id(" xxStringify(VERTEX_UNIFORM) ")]];"
 "\n#else\n"
-    "texture2d<float> Base [[id(4)]];"
-    "sampler BaseSampler [[id(18)]];"
+    "texture2d<float> Base [[id(" xxStringify(FRAGMENT_TEXTURE) ")]];"
+    "sampler BaseSampler [[id(" xxStringify(FRAGMENT_SAMPLER) ")]];"
 "\n#endif"
 "\n#else\n"
     "float4 Buffer[12];"
@@ -48,7 +48,7 @@ char const* const mtlDefaultShaderCode =
 "};"
 
 "\n#if SHADER_VERTEX\n"
-"vertex Varying Main(Attribute attr [[stage_in]], constant Uniform& uni [[buffer(0)]])"
+"vertex Varying Main(Attribute attr [[stage_in]], constant Uniform& uni [[buffer(" xxStringify(VERTEX_UNIFORM) ")]])"
 "{"
     "auto uniBuffer = uni.Buffer;"
     "float4x4 w = float4x4(uniBuffer[0], uniBuffer[1], uniBuffer[2], uniBuffer[3]);"
@@ -63,7 +63,7 @@ char const* const mtlDefaultShaderCode =
 "\n#endif"
 
 "\n#if SHADER_FRAGMENT\n"
-"fragment float4 Main(Varying vary [[stage_in]], constant Uniform& uni [[buffer(0)]], Sampler sam)"
+"fragment float4 Main(Varying vary [[stage_in]], constant Uniform& uni [[buffer(" xxStringify(FRAGMENT_UNIFORM) ")]], Sampler sam)"
 "{"
 "\n#if SHADER_MSL >= 2\n"
     "return vary.Color * uni.Base.sample(uni.BaseSampler, vary.UV0);"
@@ -113,30 +113,30 @@ void mtlUpdateArgumentEncoderInternal(MTLSWAPCHAIN* swapchain)
     {
         [swapchain->commandEncoder setMeshBuffer:argumentBuffer
                                           offset:meshOffset
-                                         atIndex:0];
+                                         atIndex:MESH_UNIFORM];
         [swapchain->commandEncoder setVertexBuffer:argumentBuffer
                                             offset:vertexOffset
-                                           atIndex:0];
+                                           atIndex:VERTEX_UNIFORM];
         [swapchain->commandEncoder setFragmentBuffer:argumentBuffer
                                               offset:fragmentOffset
-                                             atIndex:0];
+                                             atIndex:FRAGMENT_UNIFORM];
     }
     else
     {
         if (meshLength)
         {
             [swapchain->commandEncoder setMeshBufferOffset:meshOffset
-                                                   atIndex:0];
+                                                   atIndex:MESH_UNIFORM];
         }
         if (vertexLength)
         {
             [swapchain->commandEncoder setVertexBufferOffset:vertexOffset
-                                                     atIndex:0];
+                                                     atIndex:VERTEX_UNIFORM];
         }
         if (fragmentLength)
         {
             [swapchain->commandEncoder setFragmentBufferOffset:fragmentOffset
-                                                       atIndex:0];
+                                                       atIndex:FRAGMENT_UNIFORM];
         }
     }
 }

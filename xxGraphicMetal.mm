@@ -353,7 +353,7 @@ id xxCreateVertexAttributeMetal(id <MTLDevice> __unsafe_unretained device, int c
 
         MTLVertexAttributeDescriptor* __unsafe_unretained attribute = vertexDescriptor.attributes[i];
         attribute.offset = offset;
-        attribute.bufferIndex = xxGraphicDescriptor::VERTEX_BUFFER + stream;
+        attribute.bufferIndex = VERTEX_BUFFER + stream;
 
         switch (size / ((element & 0xFF) - '0'))
         {
@@ -401,7 +401,7 @@ id xxCreateVertexAttributeMetal(id <MTLDevice> __unsafe_unretained device, int c
         }
     }
 
-    MTLVertexBufferLayoutDescriptor* __unsafe_unretained layout = vertexDescriptor.layouts[xxGraphicDescriptor::VERTEX_BUFFER];
+    MTLVertexBufferLayoutDescriptor* __unsafe_unretained layout = vertexDescriptor.layouts[VERTEX_BUFFER];
     layout.stride = stride;
     layout.stepRate = MTLVertexStepFunctionPerVertex;
 
@@ -1030,7 +1030,7 @@ void xxSetVertexBuffersMetal(id <MTLRenderCommandEncoder> __unsafe_unretained co
 
     [commandEncoder setVertexBuffers:buffers
                              offsets:offsets
-                           withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_BUFFER, count)];
+                           withRange:NSMakeRange(VERTEX_BUFFER, count)];
 #if TARGET_OS_SIMULATOR
     metalVertexAttribute = vertexAttribute;
 #endif
@@ -1097,21 +1097,21 @@ void xxSetMeshConstantBufferMetal(id <MTLRenderCommandEncoder> __unsafe_unretain
 {
     [commandEncoder setMeshBuffer:buffer
                            offset:0
-                          atIndex:xxGraphicDescriptor::MESH_UNIFORM];
+                          atIndex:MESH_UNIFORM];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, id <MTLBuffer> __unsafe_unretained buffer, int size)
 {
     [commandEncoder setVertexBuffer:buffer
                              offset:0
-                            atIndex:0];
+                            atIndex:VERTEX_UNIFORM];
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, id <MTLBuffer> __unsafe_unretained buffer, int size)
 {
     [commandEncoder setFragmentBuffer:buffer
                                offset:0
-                              atIndex:0];
+                              atIndex:FRAGMENT_UNIFORM];
 }
 //------------------------------------------------------------------------------
 void xxDrawMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)
@@ -1135,9 +1135,9 @@ void xxDrawIndexedMetal(id <MTLRenderCommandEncoder> __unsafe_unretained command
     MTLIndexType indexType = vertexCount < 65536 ? MTLIndexTypeUInt16 : MTLIndexTypeUInt32;
 #if TARGET_OS_SIMULATOR
     MTLVertexDescriptor* __unsafe_unretained desc = (__bridge id)reinterpret_cast<void*>(metalVertexAttribute);
-    MTLVertexBufferLayoutDescriptor* __unsafe_unretained layout = desc.layouts[xxGraphicDescriptor::VERTEX_BUFFER];
+    MTLVertexBufferLayoutDescriptor* __unsafe_unretained layout = desc.layouts[VERTEX_BUFFER];
     [commandEncoder setVertexBufferOffset:vertexOffset * layout.stride
-                                  atIndex:xxGraphicDescriptor::VERTEX_BUFFER];
+                                  atIndex:VERTEX_BUFFER];
     [commandEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle
                                indexCount:indexCount
                                 indexType:indexType

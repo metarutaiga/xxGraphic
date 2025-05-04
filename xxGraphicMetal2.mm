@@ -246,9 +246,9 @@ MTLPIPELINE* xxCreatePipelineMetal2(id <MTLDevice> __unsafe_unretained device, M
     pipeline->meshShader = meshShader;
     pipeline->vertexShader = vertexShader;
     pipeline->fragmentShader = fragmentShader;
-    pipeline->meshArgumentEncoder = [pipeline->meshShader newArgumentEncoderWithBufferIndex:0];
-    pipeline->vertexArgumentEncoder = [pipeline->vertexShader newArgumentEncoderWithBufferIndex:0];
-    pipeline->fragmentArgumentEncoder = [pipeline->fragmentShader newArgumentEncoderWithBufferIndex:0];
+    pipeline->meshArgumentEncoder = [pipeline->meshShader newArgumentEncoderWithBufferIndex:MESH_UNIFORM];
+    pipeline->vertexArgumentEncoder = [pipeline->vertexShader newArgumentEncoderWithBufferIndex:VERTEX_UNIFORM];
+    pipeline->fragmentArgumentEncoder = [pipeline->fragmentShader newArgumentEncoderWithBufferIndex:FRAGMENT_UNIFORM];
     pipeline->meshArgumentEncodedLength = pipeline->meshArgumentEncoder.encodedLength;
     pipeline->vertexArgumentEncodedLength = pipeline->vertexArgumentEncoder.encodedLength;
     pipeline->fragmentArgumentEncodedLength = pipeline->fragmentArgumentEncoder.encodedLength;
@@ -342,7 +342,7 @@ void xxSetMeshTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE** te
 
     mtlUpdateArgumentEncoder(swapchain);
     [swapchain->meshArgumentEncoder setTextures:meshTextures
-                                      withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_TEXTURE, count)];
+                                      withRange:NSMakeRange(VERTEX_TEXTURE, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE** textures)
@@ -372,7 +372,7 @@ void xxSetVertexTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE** 
 
     mtlUpdateArgumentEncoder(swapchain);
     [swapchain->vertexArgumentEncoder setTextures:vertexTextures
-                                        withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_TEXTURE, count)];
+                                        withRange:NSMakeRange(VERTEX_TEXTURE, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE** textures)
@@ -402,28 +402,28 @@ void xxSetFragmentTexturesMetal2(MTLSWAPCHAIN* swapchain, int count, MTLTEXTURE*
 
     mtlUpdateArgumentEncoder(swapchain);
     [swapchain->fragmentArgumentEncoder setTextures:fragmentTextures
-                                          withRange:NSMakeRange(xxGraphicDescriptor::FRAGMENT_TEXTURE, count)];
+                                          withRange:NSMakeRange(FRAGMENT_TEXTURE, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetMeshSamplersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLSamplerState> __unsafe_unretained* samplers)
 {
     mtlUpdateArgumentEncoder(swapchain);
     [swapchain->meshArgumentEncoder setSamplerStates:samplers
-                                           withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_SAMPLER, count)];
+                                           withRange:NSMakeRange(VERTEX_SAMPLER, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLSamplerState> __unsafe_unretained* samplers)
 {
     mtlUpdateArgumentEncoder(swapchain);
     [swapchain->vertexArgumentEncoder setSamplerStates:samplers
-                                             withRange:NSMakeRange(xxGraphicDescriptor::VERTEX_SAMPLER, count)];
+                                             withRange:NSMakeRange(VERTEX_SAMPLER, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentSamplersMetal2(MTLSWAPCHAIN* swapchain, int count, id <MTLSamplerState> __unsafe_unretained* samplers)
 {
     mtlUpdateArgumentEncoder(swapchain);
     [swapchain->fragmentArgumentEncoder setSamplerStates:samplers
-                                               withRange:NSMakeRange(xxGraphicDescriptor::FRAGMENT_SAMPLER, count)];
+                                               withRange:NSMakeRange(FRAGMENT_SAMPLER, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetMeshConstantBufferMetal2(MTLSWAPCHAIN* swapchain, id <MTLBuffer> __unsafe_unretained buffer, int size)
@@ -444,7 +444,7 @@ void xxSetMeshConstantBufferMetal2(MTLSWAPCHAIN* swapchain, id <MTLBuffer> __uns
     mtlUpdateArgumentEncoder(swapchain);
     [swapchain->meshArgumentEncoder setBuffer:buffer
                                        offset:0
-                                      atIndex:xxGraphicDescriptor::MESH_UNIFORM];
+                                      atIndex:MESH_UNIFORM];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferMetal2(MTLSWAPCHAIN* swapchain, id <MTLBuffer> __unsafe_unretained buffer, int size)
@@ -465,7 +465,7 @@ void xxSetVertexConstantBufferMetal2(MTLSWAPCHAIN* swapchain, id <MTLBuffer> __u
     mtlUpdateArgumentEncoder(swapchain);
     [swapchain->vertexArgumentEncoder setBuffer:buffer
                                          offset:0
-                                        atIndex:xxGraphicDescriptor::VERTEX_UNIFORM];
+                                        atIndex:VERTEX_UNIFORM];
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferMetal2(MTLSWAPCHAIN* swapchain, id <MTLBuffer> __unsafe_unretained buffer, int size)
@@ -486,7 +486,7 @@ void xxSetFragmentConstantBufferMetal2(MTLSWAPCHAIN* swapchain, id <MTLBuffer> _
     mtlUpdateArgumentEncoder(swapchain);
     [swapchain->fragmentArgumentEncoder setBuffer:buffer
                                            offset:0
-                                          atIndex:xxGraphicDescriptor::FRAGMENT_UNIFORM];
+                                          atIndex:FRAGMENT_UNIFORM];
 }
 //------------------------------------------------------------------------------
 void xxDrawMetal2(MTLSWAPCHAIN* swapchain, int vertexCount, int instanceCount, int firstVertex, int firstInstance)

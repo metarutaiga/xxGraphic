@@ -11,27 +11,24 @@
 
 #define NUM_BACK_BUFFERS 3
 
-enum xxGraphicDescriptor
-{
-    MESH_UNIFORM            = 30,
-    VERTEX_UNIFORM          = 0,
-    FRAGMENT_UNIFORM        = 1,
-    VERTEX_TEXTURE          = 2,
-    FRAGMENT_TEXTURE        = 4,
-    VERTEX_SAMPLER          = 16,
-    FRAGMENT_SAMPLER        = 18,
-    TOTAL                   = 30,
+#define VERTEX_TEXTURE          0
+#define VERTEX_SAMPLER          4
+#define MESH_UNIFORM            8
+#define VERTEX_UNIFORM          8
+#define FRAGMENT_UNIFORM        9
+#define FRAGMENT_TEXTURE        10
+#define FRAGMENT_SAMPLER        20
+#define DESCRIPTOR_TOTAL        30
 
-    VERTEX_UNIFORM_COUNT    = FRAGMENT_UNIFORM  - VERTEX_UNIFORM,
-    FRAGMENT_UNIFORM_COUNT  = VERTEX_TEXTURE    - FRAGMENT_UNIFORM,
-    VERTEX_TEXTURE_COUNT    = FRAGMENT_TEXTURE  - VERTEX_TEXTURE,
-    FRAGMENT_TEXTURE_COUNT  = VERTEX_SAMPLER    - FRAGMENT_TEXTURE,
-    VERTEX_SAMPLER_COUNT    = FRAGMENT_SAMPLER  - VERTEX_SAMPLER,
-    FRAGMENT_SAMPLER_COUNT  = TOTAL             - FRAGMENT_SAMPLER,
+#define VERTEX_TEXTURE_COUNT    4
+#define VERTEX_SAMPLER_COUNT    4
+#define VERTEX_UNIFORM_COUNT    1
+#define FRAGMENT_UNIFORM_COUNT  1
+#define FRAGMENT_TEXTURE_COUNT  10
+#define FRAGMENT_SAMPLER_COUNT  10
 
-    VERTEX_BUFFER           = TOTAL,
-    VERTEX_BUFFER_COUNT     = 4,
-};
+#define VERTEX_BUFFER           30
+#define VERTEX_BUFFER_COUNT     4
 
 #define xxRegisterFunctionSingle(T, S) \
     (void*&)T = (void*)S;

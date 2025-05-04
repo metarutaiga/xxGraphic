@@ -769,8 +769,6 @@ struct D3D11BUFFER
 struct D3D12RESOURCE
 {
     ID3D12Resource*             resource;
-    D3D12_CPU_DESCRIPTOR_HANDLE resourceCPUHandle;
-    D3D12_GPU_DESCRIPTOR_HANDLE resourceGPUHandle;
     UINT                        size;
     void*                       cpuAddress;
     D3D12_GPU_VIRTUAL_ADDRESS   gpuAddress;

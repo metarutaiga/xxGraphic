@@ -250,64 +250,50 @@ uint64_t xxCreateDeviceD3D12(uint64_t instance)
 
     if (g_rootSignature == nullptr)
     {
-        D3D12_DESCRIPTOR_RANGE constantRanges[16] = {};
-        D3D12_DESCRIPTOR_RANGE resourceRanges[16] = {};
-        D3D12_DESCRIPTOR_RANGE samplerRanges[16] = {};
-        for (int i = 0; i < 16; ++i)
+        D3D12_DESCRIPTOR_RANGE ranges[DESCRIPTOR_TOTAL] = {};
+        D3D12_ROOT_PARAMETER parameters[DESCRIPTOR_TOTAL] = {};
+        for (int i = 0; i < DESCRIPTOR_TOTAL; ++i)
         {
-            constantRanges[i].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
-            constantRanges[i].BaseShaderRegister = i;
-            constantRanges[i].NumDescriptors = 1;
-            resourceRanges[i].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-            resourceRanges[i].BaseShaderRegister = i;
-            resourceRanges[i].NumDescriptors = 1;
-            samplerRanges[i].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
-            samplerRanges[i].BaseShaderRegister = i;
-            samplerRanges[i].NumDescriptors = 1;
-        }
-
-        D3D12_ROOT_PARAMETER parameters[xxGraphicDescriptor::TOTAL] = {};
-        for (int i = 0; i < xxGraphicDescriptor::VERTEX_UNIFORM_COUNT; ++i)
-        {
-            parameters[xxGraphicDescriptor::VERTEX_UNIFORM + i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-            parameters[xxGraphicDescriptor::VERTEX_UNIFORM + i].DescriptorTable.NumDescriptorRanges = 1;
-            parameters[xxGraphicDescriptor::VERTEX_UNIFORM + i].DescriptorTable.pDescriptorRanges = &constantRanges[i];
-            parameters[xxGraphicDescriptor::VERTEX_UNIFORM + i].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-        }
-        for (int i = 0; i < xxGraphicDescriptor::FRAGMENT_UNIFORM_COUNT; ++i)
-        {
-            parameters[xxGraphicDescriptor::FRAGMENT_UNIFORM + i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-            parameters[xxGraphicDescriptor::FRAGMENT_UNIFORM + i].DescriptorTable.NumDescriptorRanges = 1;
-            parameters[xxGraphicDescriptor::FRAGMENT_UNIFORM + i].DescriptorTable.pDescriptorRanges = &constantRanges[i];
-            parameters[xxGraphicDescriptor::FRAGMENT_UNIFORM + i].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-        }
-        for (int i = 0; i < xxGraphicDescriptor::VERTEX_TEXTURE_COUNT; ++i)
-        {
-            parameters[xxGraphicDescriptor::VERTEX_TEXTURE + i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-            parameters[xxGraphicDescriptor::VERTEX_TEXTURE + i].DescriptorTable.NumDescriptorRanges = 1;
-            parameters[xxGraphicDescriptor::VERTEX_TEXTURE + i].DescriptorTable.pDescriptorRanges = &resourceRanges[i];
-            parameters[xxGraphicDescriptor::VERTEX_TEXTURE + i].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-        }
-        for (int i = 0; i < xxGraphicDescriptor::FRAGMENT_TEXTURE_COUNT; ++i)
-        {
-            parameters[xxGraphicDescriptor::FRAGMENT_TEXTURE + i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-            parameters[xxGraphicDescriptor::FRAGMENT_TEXTURE + i].DescriptorTable.NumDescriptorRanges = 1;
-            parameters[xxGraphicDescriptor::FRAGMENT_TEXTURE + i].DescriptorTable.pDescriptorRanges = &resourceRanges[i];
-            parameters[xxGraphicDescriptor::FRAGMENT_TEXTURE + i].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-        }
-        for (int i = 0; i < xxGraphicDescriptor::VERTEX_SAMPLER_COUNT; ++i)
-        {
-            parameters[xxGraphicDescriptor::VERTEX_SAMPLER + i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-            parameters[xxGraphicDescriptor::VERTEX_SAMPLER + i].DescriptorTable.NumDescriptorRanges = 1;
-            parameters[xxGraphicDescriptor::VERTEX_SAMPLER + i].DescriptorTable.pDescriptorRanges = &samplerRanges[i];
-            parameters[xxGraphicDescriptor::VERTEX_SAMPLER + i].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-        }
-        for (int i = 0; i < xxGraphicDescriptor::FRAGMENT_SAMPLER_COUNT; ++i)
-        {
-            parameters[xxGraphicDescriptor::FRAGMENT_SAMPLER + i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-            parameters[xxGraphicDescriptor::FRAGMENT_SAMPLER + i].DescriptorTable.NumDescriptorRanges = 1;
-            parameters[xxGraphicDescriptor::FRAGMENT_SAMPLER + i].DescriptorTable.pDescriptorRanges = &samplerRanges[i];
-            parameters[xxGraphicDescriptor::FRAGMENT_SAMPLER + i].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+            parameters[i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+            parameters[i].DescriptorTable.NumDescriptorRanges = 1;
+            parameters[i].DescriptorTable.pDescriptorRanges = &ranges[i];
+            if (i >= FRAGMENT_SAMPLER)
+            {
+                ranges[i].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
+                ranges[i].BaseShaderRegister = i - FRAGMENT_SAMPLER;
+            }
+            else if (i >= FRAGMENT_TEXTURE)
+            {
+                parameters[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+                ranges[i].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+                ranges[i].BaseShaderRegister = i - FRAGMENT_TEXTURE;
+            }
+            else if (i >= FRAGMENT_UNIFORM)
+            {
+                parameters[i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+                parameters[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+                parameters[i].Descriptor.ShaderRegister = i - FRAGMENT_UNIFORM;
+                parameters[i].Descriptor.RegisterSpace = 0;
+            }
+            else if (i >= VERTEX_UNIFORM)
+            {
+                parameters[i].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+                parameters[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+                parameters[i].Descriptor.ShaderRegister = i - VERTEX_UNIFORM;
+                parameters[i].Descriptor.RegisterSpace = 0;
+            }
+            else if (i >= VERTEX_SAMPLER)
+            {
+                ranges[i].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
+                ranges[i].BaseShaderRegister = i - VERTEX_SAMPLER;
+            }
+            else if (i >= VERTEX_TEXTURE)
+            {
+                parameters[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+                ranges[i].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+                ranges[i].BaseShaderRegister = i - VERTEX_TEXTURE;
+            }
+            ranges[i].NumDescriptors = 1;
         }
 
         D3D12_ROOT_SIGNATURE_DESC desc = {};
@@ -489,18 +475,18 @@ uint64_t xxCreateSwapchainD3D12(uint64_t device, uint64_t renderPass, void* view
 
     HWND hWnd = (HWND)view;
 
-    DXGI_SWAP_CHAIN_DESC1 desc = {};
-    desc.Width = width;
-    desc.Height = height;
-    desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-    desc.SampleDesc.Count = 1;
-    desc.BufferUsage = DXGI_USAGE_SHADER_INPUT | DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    desc.BufferCount = NUM_BACK_BUFFERS;
-    desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-
     IDXGISwapChain1* dxgiSwapchain1 = nullptr;
     if (dxgiSwapchain1 == nullptr)
     {
+        DXGI_SWAP_CHAIN_DESC1 desc = {};
+        desc.Width = width;
+        desc.Height = height;
+        desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        desc.SampleDesc.Count = 1;
+        desc.BufferUsage = DXGI_USAGE_SHADER_INPUT | DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        desc.BufferCount = NUM_BACK_BUFFERS;
+        desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+
         HRESULT hResult = g_dxgiFactory->CreateSwapChainForHwnd(g_commandQueue, hWnd, &desc, nullptr, nullptr, &dxgiSwapchain1);
         if (hResult != S_OK)
         {
@@ -906,17 +892,9 @@ uint64_t xxCreateConstantBufferD3D12(uint64_t device, int size)
         return 0;
 
     d3dResource->resource = resource;
-    d3dResource->resourceCPUHandle = {};
-    d3dResource->resourceGPUHandle = {};
     d3dResource->size = size;
     d3dResource->cpuAddress = nullptr;
     d3dResource->gpuAddress = resource->GetGPUVirtualAddress();
-    createShaderHeap(d3dResource->resourceCPUHandle, d3dResource->resourceGPUHandle);
-
-    D3D12_CONSTANT_BUFFER_VIEW_DESC viewDesc = {};
-    viewDesc.BufferLocation = d3dResource->gpuAddress;
-    viewDesc.SizeInBytes = (size + 255) & ~255;
-    d3dDevice->CreateConstantBufferView(&viewDesc, d3dResource->resourceCPUHandle);
 
     return reinterpret_cast<uint64_t>(d3dResource);
 }
@@ -950,8 +928,6 @@ uint64_t xxCreateIndexBufferD3D12(uint64_t device, int size, int bits)
         return 0;
 
     d3dResource->resource = resource;
-    d3dResource->resourceCPUHandle = {};
-    d3dResource->resourceGPUHandle = {};
     d3dResource->size = size;
     d3dResource->cpuAddress = nullptr;
     d3dResource->gpuAddress = resource->GetGPUVirtualAddress();
@@ -988,8 +964,6 @@ uint64_t xxCreateVertexBufferD3D12(uint64_t device, int size, uint64_t vertexAtt
         return 0;
 
     d3dResource->resource = resource;
-    d3dResource->resourceCPUHandle = {};
-    d3dResource->resourceGPUHandle = {};
     d3dResource->size = size;
     d3dResource->cpuAddress = nullptr;
     d3dResource->gpuAddress = resource->GetGPUVirtualAddress();
@@ -1026,17 +1000,9 @@ uint64_t xxCreateStorageBufferD3D12(uint64_t device, int size)
         return 0;
 
     d3dResource->resource = resource;
-    d3dResource->resourceCPUHandle = {};
-    d3dResource->resourceGPUHandle = {};
     d3dResource->size = size;
     d3dResource->cpuAddress = nullptr;
     d3dResource->gpuAddress = resource->GetGPUVirtualAddress();
-    createShaderHeap(d3dResource->resourceCPUHandle, d3dResource->resourceGPUHandle);
-
-    D3D12_CONSTANT_BUFFER_VIEW_DESC viewDesc = {};
-    viewDesc.BufferLocation = d3dResource->gpuAddress;
-    viewDesc.SizeInBytes = (size + 255) & ~255;
-    d3dDevice->CreateConstantBufferView(&viewDesc, d3dResource->resourceCPUHandle);
 
     return reinterpret_cast<uint64_t>(d3dResource);
 }
@@ -1070,17 +1036,9 @@ uint64_t xxCreateInstanceBufferD3D12(uint64_t device, int size)
         return 0;
 
     d3dResource->resource = resource;
-    d3dResource->resourceCPUHandle = {};
-    d3dResource->resourceGPUHandle = {};
     d3dResource->size = size;
     d3dResource->cpuAddress = nullptr;
     d3dResource->gpuAddress = resource->GetGPUVirtualAddress();
-    createShaderHeap(d3dResource->resourceCPUHandle, d3dResource->resourceGPUHandle);
-
-    D3D12_CONSTANT_BUFFER_VIEW_DESC viewDesc = {};
-    viewDesc.BufferLocation = d3dResource->gpuAddress;
-    viewDesc.SizeInBytes = (size + 255) & ~255;
-    d3dDevice->CreateConstantBufferView(&viewDesc, d3dResource->resourceCPUHandle);
 
     return reinterpret_cast<uint64_t>(d3dResource);
 }
@@ -1103,7 +1061,6 @@ void xxDestroyBufferD3D12(uint64_t device, uint64_t buffer)
         }
         d3dResource->resource->Release();
     }
-    destroyShaderHeap(d3dResource->resourceCPUHandle, d3dResource->resourceGPUHandle);
     xxFree(d3dResource);
 }
 //------------------------------------------------------------------------------
@@ -1727,7 +1684,7 @@ void xxSetMeshBuffersD3D12(uint64_t commandEncoder, int count, const uint64_t* b
     for (int i = 0; i < count; ++i)
     {
         D3D12RESOURCE* d3dBuffer = reinterpret_cast<D3D12RESOURCE*>(buffers[i]);
-        d3dCommandList->SetGraphicsRootDescriptorTable(i, d3dBuffer->resourceGPUHandle);
+        d3dCommandList->SetGraphicsRootShaderResourceView(i, d3dBuffer->gpuAddress);
     }
 }
 //------------------------------------------------------------------------------
@@ -1755,7 +1712,7 @@ void xxSetMeshTexturesD3D12(uint64_t commandEncoder, int count, const uint64_t* 
     for (int i = 0; i < count; ++i)
     {
         D3D12TEXTURE* d3dTexture = reinterpret_cast<D3D12TEXTURE*>(textures[i]);
-        d3dCommandList->SetGraphicsRootDescriptorTable(xxGraphicDescriptor::VERTEX_TEXTURE + i, d3dTexture->textureGPUHandle);
+        d3dCommandList->SetGraphicsRootDescriptorTable(VERTEX_TEXTURE + i, d3dTexture->textureGPUHandle);
     }
 }
 //------------------------------------------------------------------------------
@@ -1766,7 +1723,7 @@ void xxSetVertexTexturesD3D12(uint64_t commandEncoder, int count, const uint64_t
     for (int i = 0; i < count; ++i)
     {
         D3D12TEXTURE* d3dTexture = reinterpret_cast<D3D12TEXTURE*>(textures[i]);
-        d3dCommandList->SetGraphicsRootDescriptorTable(xxGraphicDescriptor::VERTEX_TEXTURE + i, d3dTexture->textureGPUHandle);
+        d3dCommandList->SetGraphicsRootDescriptorTable(VERTEX_TEXTURE + i, d3dTexture->textureGPUHandle);
     }
 }
 //------------------------------------------------------------------------------
@@ -1777,7 +1734,7 @@ void xxSetFragmentTexturesD3D12(uint64_t commandEncoder, int count, const uint64
     for (int i = 0; i < count; ++i)
     {
         D3D12TEXTURE* d3dTexture = reinterpret_cast<D3D12TEXTURE*>(textures[i]);
-        d3dCommandList->SetGraphicsRootDescriptorTable(xxGraphicDescriptor::FRAGMENT_TEXTURE + i, d3dTexture->textureGPUHandle);
+        d3dCommandList->SetGraphicsRootDescriptorTable(FRAGMENT_TEXTURE + i, d3dTexture->textureGPUHandle);
     }
 }
 //------------------------------------------------------------------------------
@@ -1788,7 +1745,7 @@ void xxSetMeshSamplersD3D12(uint64_t commandEncoder, int count, const uint64_t* 
     for (int i = 0; i < count; ++i)
     {
         D3D12_GPU_DESCRIPTOR_HANDLE d3dHandle = { samplers[i] };
-        d3dCommandList->SetGraphicsRootDescriptorTable(xxGraphicDescriptor::VERTEX_SAMPLER + i, d3dHandle);
+        d3dCommandList->SetGraphicsRootDescriptorTable(VERTEX_SAMPLER + i, d3dHandle);
     }
 }
 //------------------------------------------------------------------------------
@@ -1799,7 +1756,7 @@ void xxSetVertexSamplersD3D12(uint64_t commandEncoder, int count, const uint64_t
     for (int i = 0; i < count; ++i)
     {
         D3D12_GPU_DESCRIPTOR_HANDLE d3dHandle = { samplers[i] };
-        d3dCommandList->SetGraphicsRootDescriptorTable(xxGraphicDescriptor::VERTEX_SAMPLER + i, d3dHandle);
+        d3dCommandList->SetGraphicsRootDescriptorTable(VERTEX_SAMPLER + i, d3dHandle);
     }
 }
 //------------------------------------------------------------------------------
@@ -1810,7 +1767,7 @@ void xxSetFragmentSamplersD3D12(uint64_t commandEncoder, int count, const uint64
     for (int i = 0; i < count; ++i)
     {
         D3D12_GPU_DESCRIPTOR_HANDLE d3dHandle = { samplers[i] };
-        d3dCommandList->SetGraphicsRootDescriptorTable(xxGraphicDescriptor::FRAGMENT_SAMPLER + i, d3dHandle);
+        d3dCommandList->SetGraphicsRootDescriptorTable(FRAGMENT_SAMPLER + i, d3dHandle);
     }
 }
 //------------------------------------------------------------------------------
@@ -1819,7 +1776,7 @@ void xxSetMeshConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, int 
     ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
     D3D12RESOURCE* d3dBuffer = reinterpret_cast<D3D12RESOURCE*>(buffer);
 
-    d3dCommandList->SetGraphicsRootDescriptorTable(xxGraphicDescriptor::MESH_UNIFORM, d3dBuffer->resourceGPUHandle);
+    d3dCommandList->SetGraphicsRootConstantBufferView(MESH_UNIFORM, d3dBuffer->gpuAddress);
 }
 //------------------------------------------------------------------------------
 void xxSetVertexConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, int size)
@@ -1827,7 +1784,7 @@ void xxSetVertexConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, in
     ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
     D3D12RESOURCE* d3dBuffer = reinterpret_cast<D3D12RESOURCE*>(buffer);
 
-    d3dCommandList->SetGraphicsRootDescriptorTable(xxGraphicDescriptor::VERTEX_UNIFORM, d3dBuffer->resourceGPUHandle);
+    d3dCommandList->SetGraphicsRootConstantBufferView(VERTEX_UNIFORM, d3dBuffer->gpuAddress);
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, int size)
@@ -1835,7 +1792,7 @@ void xxSetFragmentConstantBufferD3D12(uint64_t commandEncoder, uint64_t buffer, 
     ID3D12GraphicsCommandList* d3dCommandList = reinterpret_cast<ID3D12GraphicsCommandList*>(commandEncoder);
     D3D12RESOURCE* d3dBuffer = reinterpret_cast<D3D12RESOURCE*>(buffer);
 
-    d3dCommandList->SetGraphicsRootDescriptorTable(xxGraphicDescriptor::FRAGMENT_UNIFORM, d3dBuffer->resourceGPUHandle);
+    d3dCommandList->SetGraphicsRootConstantBufferView(FRAGMENT_UNIFORM, d3dBuffer->gpuAddress);
 }
 //------------------------------------------------------------------------------
 void xxDrawD3D12(uint64_t commandEncoder, int vertexCount, int instanceCount, int firstVertex, int firstInstance)

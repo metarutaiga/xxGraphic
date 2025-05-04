@@ -275,11 +275,11 @@ static VKAPI_ATTR void VKAPI_CALL vkCmdPushDescriptorSetKHRInternal(VkCommandBuf
 
                 VkDescriptorPoolSize sizes[3];
                 sizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                sizes[0].descriptorCount = (xxGraphicDescriptor::VERTEX_UNIFORM_COUNT + xxGraphicDescriptor::FRAGMENT_UNIFORM_COUNT) * count;
+                sizes[0].descriptorCount = (VERTEX_UNIFORM_COUNT + FRAGMENT_UNIFORM_COUNT) * count;
                 sizes[1].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-                sizes[1].descriptorCount = (xxGraphicDescriptor::VERTEX_TEXTURE_COUNT + xxGraphicDescriptor::FRAGMENT_TEXTURE_COUNT) * count;
+                sizes[1].descriptorCount = (VERTEX_TEXTURE_COUNT + FRAGMENT_TEXTURE_COUNT) * count;
                 sizes[2].type = VK_DESCRIPTOR_TYPE_SAMPLER;
-                sizes[2].descriptorCount = (xxGraphicDescriptor::VERTEX_SAMPLER_COUNT + xxGraphicDescriptor::FRAGMENT_SAMPLER_COUNT) * count;
+                sizes[2].descriptorCount = (VERTEX_SAMPLER_COUNT + FRAGMENT_SAMPLER_COUNT) * count;
 
                 VkDescriptorPoolCreateInfo info = {};
                 info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
