@@ -259,6 +259,7 @@ uint64_t xxCreateDeviceD3D12(uint64_t instance)
             parameters[i].DescriptorTable.pDescriptorRanges = &ranges[i];
             if (i >= FRAGMENT_SAMPLER)
             {
+                parameters[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
                 ranges[i].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
                 ranges[i].BaseShaderRegister = i - FRAGMENT_SAMPLER;
             }
@@ -284,6 +285,7 @@ uint64_t xxCreateDeviceD3D12(uint64_t instance)
             }
             else if (i >= VERTEX_SAMPLER)
             {
+                parameters[i].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
                 ranges[i].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
                 ranges[i].BaseShaderRegister = i - VERTEX_SAMPLER;
             }
@@ -297,7 +299,7 @@ uint64_t xxCreateDeviceD3D12(uint64_t instance)
         }
 
         D3D12_ROOT_SIGNATURE_DESC desc = {};
-        desc.NumParameters = xxCountOf(parameters);
+        desc.NumParameters = DESCRIPTOR_TOTAL;
         desc.pParameters = parameters;
         desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
                      D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |

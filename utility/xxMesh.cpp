@@ -20,6 +20,12 @@ xxMesh::xxMesh(bool skinning, char normal, char color, char texture)
     ,ColorCount(color)
     ,TextureCount(texture)
 {
+    for (int i = 0; i < MAX; ++i)
+    {
+        (int&)Count[i] = 0;
+        (int&)Stride[i] = 0;
+        (void*&)Storage[i] = nullptr;
+    }
 }
 //------------------------------------------------------------------------------
 xxMesh::~xxMesh()

@@ -9,6 +9,8 @@
 #include <xxGraphic/xxSystem.h>
 #include "xxMath.h"
 
+#include <algorithm>
+#include <array>
 #include <functional>
 #include <memory>
 #include <span>

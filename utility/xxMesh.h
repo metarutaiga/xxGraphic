@@ -83,9 +83,9 @@ public:
     {
         struct
         {
-            int const           Count[MAX] = {};
-            int const           Stride[MAX] = {};
-            char* const         Storage[MAX] = {};
+            int const           Count[MAX];
+            int const           Stride[MAX];
+            char* const         Storage[MAX];
         };
         struct
         {
