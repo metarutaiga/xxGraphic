@@ -64,7 +64,7 @@ public:
     void                        Update(float time, bool updateMatrix = true);
     void                        Draw(xxDrawData const& data);
 
-    static bool                 Traversal(xxNodePtr const& node, std::function<int(xxNodePtr const&)> callback);
+    static bool                 Traversal(xxNodePtr const& node, std::function<int(xxNodePtr const&)> const& callback);
 
     static xxNodePtr            Create();
 

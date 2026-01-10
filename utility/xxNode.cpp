@@ -516,7 +516,7 @@ void xxNode::Draw(xxDrawData const& data)
     Mesh->Draw(data.commandEncoder);
 }
 //------------------------------------------------------------------------------
-bool xxNode::Traversal(xxNodePtr const& node, std::function<int(xxNodePtr const&)> callback)
+bool xxNode::Traversal(xxNodePtr const& node, std::function<int(xxNodePtr const&)> const& callback)
 {
     if (node == nullptr)
         return true;
