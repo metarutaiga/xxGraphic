@@ -108,12 +108,18 @@ float xxVector4::Intersect(xxVector3 const& point, xxVector3 const& direction)
 {
     xxVector3 diff = xyz - point;
     float t0 = diff.Dot(direction);
-    float t2 = diff.Dot(diff) - t0 * t0;
-    if (radius * radius < t2)
+    float d2 = diff.Dot(diff) - t0 * t0;
+    float r2 = radius * radius;
+    if (r2 < d2)
         return -1.0f;
-    float t1 = sqrtf(radius * radius - t2);
-    float distance = t0 > t1 ? t0 - t1 : t0 + t1;
-    return distance;
+    float t1 = sqrtf(r2 - d2);
+    float near = t0 - t1;
+    if (near >= 0.0f)
+        return near;
+    float far = t0 + t1;
+    if (far >= 0.0f)
+        return far;
+    return -1.0f;
 }
 //------------------------------------------------------------------------------
 xxVector4& xxVector4::BoundMerge(xxVector3 const& point)

@@ -516,11 +516,14 @@ void xxNode::Draw(xxDrawData const& data)
     Mesh->Draw(data.commandEncoder);
 }
 //------------------------------------------------------------------------------
-bool xxNode::Traversal(xxNodePtr const& node, std::function<bool(xxNodePtr const&)> callback)
+bool xxNode::Traversal(xxNodePtr const& node, std::function<int(xxNodePtr const&)> callback)
 {
     if (node == nullptr)
-        return false;
-    if (callback(node) == false)
+        return true;
+    int result = callback(node);
+    if (result == 0)
+        return true;
+    if (result == -1)
         return false;
     for (xxNodePtr const& child : node->m_children)
         if (Traversal(child, callback) == false)
