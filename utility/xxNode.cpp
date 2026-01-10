@@ -146,7 +146,7 @@ void xxNode::CreateLinearMatrix()
     if (m_parent.use_count())
         return;
 
-    std::function<size_t(xxNode*)> countMatrix = [&countMatrix](xxNode* node)
+    auto countMatrix = [&](auto&& countMatrix, xxNode* node) -> size_t
     {
         size_t count = 0;
 
@@ -183,18 +183,18 @@ void xxNode::CreateLinearMatrix()
         {
             if (child == nullptr)
                 continue;
-            count += countMatrix(child.get());
+            count += countMatrix(countMatrix, child.get());
         }
 
         return count;
     };
 
-    size_t newLinearMatrixSize = 2 + countMatrix(this) + 1;
+    size_t newLinearMatrixSize = 2 + countMatrix(countMatrix, this) + 1;
     std::vector<xxMatrix4> newLinearMatrix(newLinearMatrixSize);
     if (newLinearMatrix.empty())
         return;
 
-    std::function<void(xxNode*, xxMatrix4*&)> createLinearMatrix = [&createLinearMatrix](xxNode* node, xxMatrix4*& linearMatrix)
+    auto createLinearMatrix = [&](auto&& createLinearMatrix, xxNode* node, xxMatrix4*& linearMatrix) -> void
     {
         // Children
         if (node->m_children.empty() == false)
@@ -245,7 +245,7 @@ void xxNode::CreateLinearMatrix()
         {
             if (child == nullptr)
                 continue;
-            createLinearMatrix(child.get(), linearMatrix);
+            createLinearMatrix(createLinearMatrix, child.get(), linearMatrix);
         }
     };
 
@@ -259,7 +259,7 @@ void xxNode::CreateLinearMatrix()
     linearMatrix += 2;
 
     // Traversal
-    createLinearMatrix(this, linearMatrix);
+    createLinearMatrix(createLinearMatrix, this, linearMatrix);
 
     // Final
     LinearMatrixHeader* header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
