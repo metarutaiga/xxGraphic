@@ -187,11 +187,11 @@ xxVector4& xxVector4::BoundMerge(xxVector4 const& sphere)
     return (*this);
 }
 //------------------------------------------------------------------------------
-xxVector4 xxVector4::BoundTransform(xxMatrix4 const& transform, float scale) const
+xxVector4 xxVector4::BoundTransform(xxMatrix4 const& transform) const
 {
     xxVector4 t;
     t = xxVector4{ x, y, z, 1 } * transform;
-    t.radius = scale * radius;
+    t.radius = radius;
     return t;
 }
 //==============================================================================

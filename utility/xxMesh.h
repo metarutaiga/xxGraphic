@@ -8,9 +8,6 @@
 
 #include "xxUtility.h"
 
-template<class T>
-struct xxStrideIterator;
-
 class xxPlusAPI xxMesh
 {
 public:
@@ -102,71 +99,4 @@ public:
     };
 
     xxVector4 const             Bound = xxVector4::ZERO;
-};
-
-template<class T>
-struct xxStrideIterator
-{
-    xxStrideIterator(void* base, size_t stride, size_t size)
-        :m_stride(stride)
-        ,m_now(reinterpret_cast<char*>(base))
-        ,m_begin(reinterpret_cast<char*>(base))
-        ,m_end(reinterpret_cast<char*>(base) + stride * size)
-    {
-    }
-
-    T& operator * () const
-    {
-        return reinterpret_cast<T&>(*m_now);
-    }
-
-    bool operator == (xxStrideIterator const& it) const
-    {
-        return m_now == it.m_now;
-    }
-
-    bool operator != (xxStrideIterator const& it) const
-    {
-        return m_now != it.m_now;
-    }
-
-    xxStrideIterator operator + (size_t offset) const
-    {
-        xxStrideIterator iterator = (*this);
-        iterator.m_now = m_now + m_stride * offset;
-        return iterator;
-    }
-
-    xxStrideIterator& operator ++ ()
-    {
-        m_now = m_now + m_stride;
-        return (*this);
-    }
-
-    xxStrideIterator operator ++ (int)
-    {
-        xxStrideIterator iterator = (*this);
-        m_now = m_now + m_stride;
-        return iterator;
-    }
-
-    xxStrideIterator begin() const
-    {
-        xxStrideIterator iterator = (*this);
-        iterator.m_now = m_begin;
-        return iterator;
-    }
-
-    xxStrideIterator end() const
-    {
-        xxStrideIterator iterator = (*this);
-        iterator.m_now = m_end;
-        return iterator;
-    }
-
-private:
-    char*   m_now;
-    char*   m_begin;
-    char*   m_end;
-    size_t  m_stride;
 };

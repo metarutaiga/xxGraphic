@@ -337,15 +337,13 @@ void xxNode::UpdateBound()
             if (data.bone.use_count())
             {
                 xxNodePtr const& bone = (xxNodePtr&)data.bone;
-                WorldBound.BoundMerge(data.bound.BoundTransform(bone->WorldMatrix, bone->GetScale()));
-                continue;
+                WorldBound.BoundMerge(data.bound.BoundTransform(bone->WorldMatrix));
             }
-            data.boneMatrix = xxMatrix4::IDENTITY;
         }
     }
     else if (Mesh)
     {
-        WorldBound = Mesh->Bound.BoundTransform(WorldMatrix, GetScale());
+        WorldBound = Mesh->Bound.BoundTransform(WorldMatrix);
     }
 
     for (xxNodePtr const& child : m_children)
