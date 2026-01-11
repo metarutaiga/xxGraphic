@@ -6,7 +6,7 @@
 //==============================================================================
 #include "xxSystem.h"
 #include "dxsdk/d3d9.h"
-#include "dxsdk/d3d10TokenizedProgramFormat.hpp"
+#include "dxsdk/D3D12TokenizedProgramFormat.hpp"
 #include "internal/xxGraphicInternal.h"
 #include "xxGraphicD3DAsm.h"
 
