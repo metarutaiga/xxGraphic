@@ -50,6 +50,7 @@ void xxModifier::BinaryRead(xxBinary& binary)
     size_t length = 0;
     binary.ReadSize(length);
     binary.ReadArray(&*Data.insert(Data.end(), length, 0), length);
+    binary.ReadReferences(Modifiers);
 
     Loader(*this, DataType);
 }
@@ -61,5 +62,6 @@ void xxModifier::BinaryWrite(xxBinary& binary) const
     size_t length = Data.size();
     binary.WriteSize(length);
     binary.WriteArray(Data.data(), length);
+    binary.WriteReferences(Modifiers);
 }
 //==============================================================================

@@ -72,9 +72,11 @@ struct xxDrawData
 
 struct xxModifierData
 {
-    xxModifierPtr   modifier;
-    float           time = FLT_MIN;
-    size_t          index = 0;
+    xxModifierPtr       modifier;
+    float               time = FLT_MIN;
+    float               start = 0.0f;
+    size_t              index = 0;
+    std::vector<char>   temp;
 };
 
 template<class T>

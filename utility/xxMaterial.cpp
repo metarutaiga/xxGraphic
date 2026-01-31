@@ -49,7 +49,7 @@ void xxMaterial::Update(float time)
 {
     for (auto& data : Modifiers)
     {
-        data.modifier->Update(data.modifier.get(), this, &data, time);
+        data.modifier->Update(this, &data, time);
     }
 }
 //------------------------------------------------------------------------------
