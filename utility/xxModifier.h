@@ -11,8 +11,8 @@
 class xxPlusAPI xxModifier
 {
 public:
-    virtual void                Assign(void* target, xxModifierData* data, float time) {}
-    virtual void                Update(void* target, xxModifierData* data, float time) {}
+    virtual void                Assign(void* source, float time) {}
+    virtual void                Update(void* target, float time, xxModifierData* data) {}
 
     static xxModifierPtr        Create(size_t size = 0);
 

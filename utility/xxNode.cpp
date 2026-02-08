@@ -460,7 +460,7 @@ void xxNode::Update(float time, bool updateMatrix)
     {
         if (data.modifier == nullptr)
             continue;
-        data.modifier->Update(this, &data, time);
+        data.modifier->Update(this, time, &data);
     }
 
 #if HAVE_LINEAR_MATRIX
