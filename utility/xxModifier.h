@@ -11,12 +11,8 @@
 class xxPlusAPI xxModifier
 {
 public:
-    typedef void  (xxModifier::*UpdateDeclaration)(void*, xxModifierData*, float);
-    void                        UpdateDummy(void* target, xxModifierData* data, float time) {};
-    UpdateDeclaration const     UpdateFunction = &xxModifier::UpdateDummy;
-
-public:
-    void                        Update(void* target, xxModifierData* data, float time) { ((*this).*UpdateFunction)(target, data, time); }
+    virtual void                Assign(void* target, xxModifierData* data, float time) {}
+    virtual void                Update(void* target, xxModifierData* data, float time) {}
 
     static xxModifierPtr        Create(size_t size = 0);
 
