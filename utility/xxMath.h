@@ -28,6 +28,8 @@ union xxPlusAPI xxVector2
     xxVector2&          operator -=     (xxVector2 const& v)         {                  for (int i = 0; i < N; ++i)   f[i] -= v.f[i]; return (*this); }
     xxVector2&          operator *=     (xxVector2 const& v)         {                  for (int i = 0; i < N; ++i)   f[i] *= v.f[i]; return (*this); }
     xxVector2&          operator /=     (xxVector2 const& v)         {                  for (int i = 0; i < N; ++i)   f[i] /= v.f[i]; return (*this); }
+    xxVector2&          operator +=     (float s)                    {                  for (int i = 0; i < N; ++i)   f[i] += s;      return (*this); }
+    xxVector2&          operator -=     (float s)                    {                  for (int i = 0; i < N; ++i)   f[i] -= s;      return (*this); }
     xxVector2&          operator *=     (float s)                    {                  for (int i = 0; i < N; ++i)   f[i] *= s;      return (*this); }
     xxVector2&          operator /=     (float s)                    { float r = 1 / s; for (int i = 0; i < N; ++i)   f[i] *= r;      return (*this); }
 
@@ -38,6 +40,8 @@ union xxPlusAPI xxVector2
     xxVector2           operator -      (xxVector2 const& v) const   { return xxVector2(*this) -= v; }
     xxVector2           operator *      (xxVector2 const& v) const   { return xxVector2(*this) *= v; }
     xxVector2           operator /      (xxVector2 const& v) const   { return xxVector2(*this) /= v; }
+    xxVector2           operator +      (float s) const              { return xxVector2(*this) += s; }
+    xxVector2           operator -      (float s) const              { return xxVector2(*this) -= s; }
     xxVector2           operator *      (float s) const              { return xxVector2(*this) *= s; }
     xxVector2           operator /      (float s) const              { return xxVector2(*this) /= s; }
 
@@ -82,6 +86,8 @@ union xxPlusAPI xxVector3
     xxVector3&          operator -=     (xxVector3 const& v)         {                  for (int i = 0; i < N; ++i)   f[i] -= v.f[i]; return (*this); }
     xxVector3&          operator *=     (xxVector3 const& v)         {                  for (int i = 0; i < N; ++i)   f[i] *= v.f[i]; return (*this); }
     xxVector3&          operator /=     (xxVector3 const& v)         {                  for (int i = 0; i < N; ++i)   f[i] /= v.f[i]; return (*this); }
+    xxVector3&          operator +=     (float s)                    {                  for (int i = 0; i < N; ++i)   f[i] += s;      return (*this); }
+    xxVector3&          operator -=     (float s)                    {                  for (int i = 0; i < N; ++i)   f[i] -= s;      return (*this); }
     xxVector3&          operator *=     (float s)                    {                  for (int i = 0; i < N; ++i)   f[i] *= s;      return (*this); }
     xxVector3&          operator /=     (float s)                    { float r = 1 / s; for (int i = 0; i < N; ++i)   f[i] *= r;      return (*this); }
 
@@ -92,6 +98,8 @@ union xxPlusAPI xxVector3
     xxVector3           operator -      (xxVector3 const& v) const   { return xxVector3(*this) -= v; }
     xxVector3           operator *      (xxVector3 const& v) const   { return xxVector3(*this) *= v; }
     xxVector3           operator /      (xxVector3 const& v) const   { return xxVector3(*this) /= v; }
+    xxVector3           operator +      (float s) const              { return xxVector3(*this) += s; }
+    xxVector3           operator -      (float s) const              { return xxVector3(*this) -= s; }
     xxVector3           operator *      (float s) const              { return xxVector3(*this) *= s; }
     xxVector3           operator /      (float s) const              { return xxVector3(*this) /= s; }
 
@@ -150,6 +158,8 @@ union xxPlusAPI xxVector4
     xxVector4&          operator -=     (xxVector4 const& v)         {                  for (int i = 0; i < N; ++i)   f[i] -= v.f[i]; return (*this); }
     xxVector4&          operator *=     (xxVector4 const& v)         {                  for (int i = 0; i < N; ++i)   f[i] *= v.f[i]; return (*this); }
     xxVector4&          operator /=     (xxVector4 const& v)         {                  for (int i = 0; i < N; ++i)   f[i] /= v.f[i]; return (*this); }
+    xxVector4&          operator +=     (float s)                    {                  for (int i = 0; i < N; ++i)   f[i] += s;      return (*this); }
+    xxVector4&          operator -=     (float s)                    {                  for (int i = 0; i < N; ++i)   f[i] -= s;      return (*this); }
     xxVector4&          operator *=     (float s)                    {                  for (int i = 0; i < N; ++i)   f[i] *= s;      return (*this); }
     xxVector4&          operator /=     (float s)                    { float r = 1 / s; for (int i = 0; i < N; ++i)   f[i] *= r;      return (*this); }
 
@@ -160,6 +170,8 @@ union xxPlusAPI xxVector4
     xxVector4           operator -      (xxVector4 const& v) const   { return xxVector4(*this) -= v; }
     xxVector4           operator *      (xxVector4 const& v) const   { return xxVector4(*this) *= v; }
     xxVector4           operator /      (xxVector4 const& v) const   { return xxVector4(*this) /= v; }
+    xxVector4           operator +      (float s) const              { return xxVector4(*this) += s; }
+    xxVector4           operator -      (float s) const              { return xxVector4(*this) -= s; }
     xxVector4           operator *      (float s) const              { return xxVector4(*this) *= s; }
     xxVector4           operator /      (float s) const              { return xxVector4(*this) /= s; }
 
