@@ -59,7 +59,7 @@ void xxCamera::LookAt(xxVector3 const& worldPoint, xxVector3 const& worldUp)
 //------------------------------------------------------------------------------
 void xxCamera::SetFOV(float aspect, float fov, float depth)
 {
-    float halfHeight = tanf(fov * (float)M_PI / 180.0f * 0.5f);
+    float halfHeight = tanf(fov * float(M_PI / 180.0f * 0.5f));
     float halfWidth = halfHeight * aspect;
 
     FrustumLeft = -halfWidth;

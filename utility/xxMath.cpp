@@ -264,9 +264,9 @@ xxVector3 xxMatrix3::EularAngles() const
         t.z = 0.0f;
     }
 
-    t.x = t.x * (180.0f / float(M_PI));
-    t.y = t.y * (180.0f / float(M_PI));
-    t.z = t.z * (180.0f / float(M_PI));
+    t.x = t.x * float(180.0f / M_PI);
+    t.y = t.y * float(180.0f / M_PI);
+    t.z = t.z * float(180.0f / M_PI);
 
     return t;
 }
