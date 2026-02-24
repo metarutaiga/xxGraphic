@@ -22,7 +22,8 @@ public:
         STORAGEMAX,
         INDEX                   = 6,
         VERTEX                  = 7,
-        MAX,
+        BUFFERMAX,
+        TRANSITIONMAX           = 4,
     };
 
 public:
@@ -60,11 +61,11 @@ protected:
 
     uint64_t                    m_device = 0;
     uint64_t                    m_vertexAttribute = 0;
-    uint64_t                    m_buffers[MAX][4] = {};
+    uint64_t                    m_buffers[BUFFERMAX][TRANSITIONMAX] = {};
 
-    char                        m_bufferIndex[MAX] = {};
-    bool                        m_dataModified[MAX] = {};
-    bool                        m_sizeChanged[MAX][4] = {};
+    char                        m_bufferIndex[BUFFERMAX] = {};
+    bool                        m_dataModified[BUFFERMAX] = {};
+    bool                        m_sizeChanged[BUFFERMAX][TRANSITIONMAX] = {};
 
     static int                  ms_transitionBufferCount;
 
@@ -80,19 +81,19 @@ public:
     {
         struct
         {
-            int const           Count[MAX];
-            int const           Stride[MAX];
-            char* const         Storage[MAX];
+            int const           Count[BUFFERMAX];
+            int const           Stride[BUFFERMAX];
+            char* const         Storage[BUFFERMAX];
         };
         struct
         {
-            int const           DummyCount[MAX - 2];
+            int const           DummyCount[BUFFERMAX - 2];
             int const           IndexCount;
             int const           VertexCount;
-            int const           DummyStride[MAX - 2];
+            int const           DummyStride[BUFFERMAX - 2];
             int const           IndexStride;
             int const           VertexStride;
-            char* const         DummyStorage[MAX - 2];
+            char* const         DummyStorage[BUFFERMAX - 2];
             char* const         Index;
             char* const         Vertex;
         };

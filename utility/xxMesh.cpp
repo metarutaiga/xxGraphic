@@ -10,7 +10,7 @@
 #include "xxNode.h"
 
 //==============================================================================
-int xxMesh::ms_transitionBufferCount = 4;
+int xxMesh::ms_transitionBufferCount = xxMesh::TRANSITIONMAX;
 //==============================================================================
 //  Mesh
 //==============================================================================
@@ -20,7 +20,7 @@ xxMesh::xxMesh(bool skinning, char normal, char color, char texture)
     ,ColorCount(color)
     ,TextureCount(texture)
 {
-    for (int i = 0; i < MAX; ++i)
+    for (int i = 0; i < BUFFERMAX; ++i)
     {
         (int&)Count[i] = 0;
         (int&)Stride[i] = 0;
@@ -31,16 +31,16 @@ xxMesh::xxMesh(bool skinning, char normal, char color, char texture)
 xxMesh::~xxMesh()
 {
     Invalidate();
-    for (int i = STORAGE0; i < MAX; ++i)
+    for (int i = STORAGE0; i < BUFFERMAX; ++i)
         xxFree(Storage[i]);
 }
 //------------------------------------------------------------------------------
 void xxMesh::Invalidate()
 {
     xxDestroyVertexAttribute(m_vertexAttribute);
-    for (int i = STORAGE0; i < MAX; ++i)
+    for (int i = STORAGE0; i < BUFFERMAX; ++i)
     {
-        for (int j = 0; j < 4; ++j)
+        for (int j = 0; j < TRANSITIONMAX; ++j)
         {
             xxDestroyBuffer(m_device, m_buffers[i][j]);
             m_buffers[i][j] = 0;
@@ -103,7 +103,7 @@ void xxMesh::Setup(uint64_t device)
         m_vertexAttribute = xxCreateVertexAttribute(m_device, count, attribute);
     }
 
-    for (int i = STORAGE0; i < MAX; ++i)
+    for (int i = STORAGE0; i < BUFFERMAX; ++i)
     {
         int bufferIndex = m_bufferIndex[i];
         if (m_dataModified[i] || m_sizeChanged[i][bufferIndex])
@@ -345,7 +345,7 @@ void xxMesh::CalculateBound() const
 //------------------------------------------------------------------------------
 void xxMesh::TransitionBufferCount(int count)
 {
-    ms_transitionBufferCount = std::clamp(count, 1, 4);
+    ms_transitionBufferCount = std::clamp<int>(count, 1, TRANSITIONMAX);
 }
 //------------------------------------------------------------------------------
 xxMeshPtr xxMesh::Create(bool skinning, char normal, char color, char texture)
@@ -382,8 +382,8 @@ void xxMesh::BinaryRead(xxBinary& binary)
     binary.Read(const_cast<char&>(ColorCount));
     binary.Read(const_cast<char&>(TextureCount));
 
-    size_t count[MAX] = {};
-    size_t stride[MAX] = {};
+    size_t count[BUFFERMAX] = {};
+    size_t stride[BUFFERMAX] = {};
     if (binary.Version < 0x20241221)
     {
         binary.ReadSize(count[VERTEX]);
@@ -391,7 +391,7 @@ void xxMesh::BinaryRead(xxBinary& binary)
     }
     else
     {
-        for (int i = STORAGE0; i < MAX; ++i)
+        for (int i = STORAGE0; i < BUFFERMAX; ++i)
         {
             binary.ReadSize(count[i]);
             binary.ReadSize(stride[i]);
@@ -414,7 +414,7 @@ void xxMesh::BinaryRead(xxBinary& binary)
     }
     else
     {
-        for (int i = STORAGE0; i < MAX; ++i)
+        for (int i = STORAGE0; i < BUFFERMAX; ++i)
         {
             binary.ReadArray(Storage[i], Count[i] * Stride[i]);
         }
@@ -432,13 +432,13 @@ void xxMesh::BinaryWrite(xxBinary& binary) const
     binary.Write(ColorCount);
     binary.Write(TextureCount);
 
-    for (int i = STORAGE0; i < MAX; ++i)
+    for (int i = STORAGE0; i < BUFFERMAX; ++i)
     {
         binary.WriteSize(Count[i]);
         binary.WriteSize(Stride[i]);
     }
 
-    for (int i = STORAGE0; i < MAX; ++i)
+    for (int i = STORAGE0; i < BUFFERMAX; ++i)
     {
         binary.WriteArray(Storage[i], Count[i] * Stride[i]);
     }
