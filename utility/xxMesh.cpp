@@ -22,9 +22,9 @@ xxMesh::xxMesh(bool skinning, char normal, char color, char texture)
 {
     for (int i = 0; i < BUFFERMAX; ++i)
     {
-        (int&)Count[i] = 0;
-        (int&)Stride[i] = 0;
-        (void*&)Storage[i] = nullptr;
+        const_cast<int&>(Count[i]) = 0;
+        const_cast<int&>(Stride[i]) = 0;
+        const_cast<char*&>(Storage[i]) = nullptr;
     }
 }
 //------------------------------------------------------------------------------

@@ -48,7 +48,7 @@ xxNodePtr const& xxNode::GetParent() const
         return empty;
     }
 
-    return (xxNodePtr&)m_parent;
+    return reinterpret_cast<xxNodePtr const&>(m_parent);
 }
 //------------------------------------------------------------------------------
 xxNodePtr const& xxNode::GetChild(size_t index) const
@@ -223,7 +223,7 @@ void xxNode::CreateLinearMatrix()
         {
             if (data.bone.use_count())
             {
-                xxNodePtr const& bone = (xxNodePtr&)data.bone;
+                xxNodePtr const& bone = reinterpret_cast<xxNodePtr const&>(data.bone);
 
                 // Header
                 LinearMatrixHeader* header = reinterpret_cast<LinearMatrixHeader*>(linearMatrix++);
@@ -318,7 +318,7 @@ void xxNode::UpdateMatrix()
     {
         if (data.bone.use_count())
         {
-            xxNodePtr const& bone = (xxNodePtr&)data.bone;
+            xxNodePtr const& bone = reinterpret_cast<xxNodePtr const&>(data.bone);
             data.boneMatrix = bone->WorldMatrix * data.skinMatrix;
             continue;
         }
@@ -336,7 +336,7 @@ void xxNode::UpdateBound()
         {
             if (data.bone.use_count())
             {
-                xxNodePtr const& bone = (xxNodePtr&)data.bone;
+                xxNodePtr const& bone = reinterpret_cast<xxNodePtr const&>(data.bone);
                 WorldBound.BoundMerge(data.bound.BoundTransform(bone->WorldMatrix));
             }
         }
@@ -590,7 +590,7 @@ void xxNode::BinaryWrite(xxBinary& binary) const
 
     binary.WriteContainer(Bones, [](xxBinary& binary, BoneData const& data)
     {
-        binary.WriteReference((xxNodePtr const&)data.bone);
+        binary.WriteReference(reinterpret_cast<xxNodePtr const&>(data.bone));
         binary.Write(data.bound);
         binary.Write(data.classSkinMatrix);
     });

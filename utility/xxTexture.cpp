@@ -122,7 +122,7 @@ void xxTexture::Update(uint64_t device)
         if (Format == 0)
         {
             destroy = true;
-            Reader((xxTexturePtr&)m_this);
+            Reader(reinterpret_cast<xxTexturePtr&>(m_this));
         }
         const_cast<uint64_t&>(Texture) = xxCreateTexture(device, Format, Width, Height, Depth, Mipmap, Array, nullptr);
     }
