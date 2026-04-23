@@ -62,8 +62,8 @@ id xxCreateInstanceMetal2()
 //==============================================================================
 MTLSWAPCHAIN* xxGetCommandBufferMetal2(id <MTLDevice> __unsafe_unretained device, MTLSWAPCHAIN* swapchain)
 {
-    id commandBuffer = xxGetCommandBufferMetal(device, swapchain);
-    if (commandBuffer == 0)
+    swapchain->commandBuffer = [swapchain->commandQueue commandBuffer];
+    if (swapchain->commandBuffer == 0)
         return 0;
 
     swapchain->pipeline = nullptr;
@@ -243,12 +243,9 @@ MTLPIPELINE* xxCreatePipelineMetal2(id <MTLDevice> __unsafe_unretained device, M
     if (pipeline == 0)
         return 0;
 
-    pipeline->meshShader = meshShader;
-    pipeline->vertexShader = vertexShader;
-    pipeline->fragmentShader = fragmentShader;
-    pipeline->meshArgumentEncoder = [pipeline->meshShader newArgumentEncoderWithBufferIndex:MESH_UNIFORM];
-    pipeline->vertexArgumentEncoder = [pipeline->vertexShader newArgumentEncoderWithBufferIndex:VERTEX_UNIFORM];
-    pipeline->fragmentArgumentEncoder = [pipeline->fragmentShader newArgumentEncoderWithBufferIndex:FRAGMENT_UNIFORM];
+    pipeline->meshArgumentEncoder = [meshShader newArgumentEncoderWithBufferIndex:MESH_UNIFORM];
+    pipeline->vertexArgumentEncoder = [vertexShader newArgumentEncoderWithBufferIndex:VERTEX_UNIFORM];
+    pipeline->fragmentArgumentEncoder = [fragmentShader newArgumentEncoderWithBufferIndex:FRAGMENT_UNIFORM];
     pipeline->meshArgumentEncodedLength = pipeline->meshArgumentEncoder.encodedLength;
     pipeline->vertexArgumentEncodedLength = pipeline->vertexArgumentEncoder.encodedLength;
     pipeline->fragmentArgumentEncodedLength = pipeline->fragmentArgumentEncoder.encodedLength;

@@ -11,13 +11,13 @@
 
 #define NUM_BACK_BUFFERS 3
 
-#define VERTEX_TEXTURE          0
-#define VERTEX_SAMPLER          4
-#define MESH_UNIFORM            8
-#define VERTEX_UNIFORM          8
-#define FRAGMENT_UNIFORM        9
-#define FRAGMENT_TEXTURE        10
-#define FRAGMENT_SAMPLER        20
+#define MESH_UNIFORM            VERTEX_UNIFORM
+#define VERTEX_UNIFORM          0
+#define FRAGMENT_UNIFORM        1
+#define VERTEX_SAMPLER          2
+#define FRAGMENT_SAMPLER        6
+#define VERTEX_TEXTURE          16
+#define FRAGMENT_TEXTURE        20
 #define DESCRIPTOR_TOTAL        30
 
 #define VERTEX_TEXTURE_COUNT    4

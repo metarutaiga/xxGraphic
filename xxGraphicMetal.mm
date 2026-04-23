@@ -17,6 +17,14 @@ Class                       classMTLRenderPipelineDescriptor = nil;
 Class                       classMTLSamplerDescriptor = nil;
 Class                       classMTLTextureDescriptor = nil;
 Class                       classMTLVertexDescriptor = nil;
+Class                       classMTLResidencySetDescriptor = nil;
+Class                       classMTL4ArgumentTableDescriptor = nil;
+Class                       classMTL4CompilerDescriptor = nil;
+Class                       classMTL4LibraryFunctionDescriptor = nil;
+Class                       classMTL4MeshRenderPipelineDescriptor = nil;
+Class                       classMTL4RenderPassDescriptor = nil;
+Class                       classMTL4RenderPipelineColorAttachmentDescriptor = nil;
+Class                       classMTL4RenderPipelineDescriptor = nil;
 
 static void*                metalLibrary = nullptr;
 static MTLCullMode          metalCullMode;
@@ -74,6 +82,14 @@ id xxCreateInstanceMetal()
     classMTLSamplerDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLSamplerDescriptor");
     classMTLTextureDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLTextureDescriptor");
     classMTLVertexDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLVertexDescriptor");
+    classMTLResidencySetDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLResidencySetDescriptor");
+    classMTL4ArgumentTableDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTL4ArgumentTableDescriptor");
+    classMTL4CompilerDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTL4CompilerDescriptor");
+    classMTL4LibraryFunctionDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTL4LibraryFunctionDescriptor");
+    classMTL4MeshRenderPipelineDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTL4MeshRenderPipelineDescriptor");
+    classMTL4RenderPassDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTL4RenderPassDescriptor");
+    classMTL4RenderPipelineColorAttachmentDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTL4RenderPipelineColorAttachmentDescriptor");
+    classMTL4RenderPipelineDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTL4RenderPipelineDescriptor");
 
 #if defined(xxMACOS)
     NSArray* allDevices = MTLCopyAllDevices();
@@ -1046,7 +1062,7 @@ void xxSetMeshTexturesMetal(id <MTLRenderCommandEncoder> __unsafe_unretained com
     }
 
     [commandEncoder setMeshTextures:meshTextures
-                          withRange:NSMakeRange(0, count)];
+                          withRange:NSMakeRange(VERTEX_TEXTURE, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexTexturesMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, MTLTEXTURE** textures)
@@ -1059,7 +1075,7 @@ void xxSetVertexTexturesMetal(id <MTLRenderCommandEncoder> __unsafe_unretained c
     }
 
     [commandEncoder setVertexTextures:vertexTextures
-                            withRange:NSMakeRange(0, count)];
+                            withRange:NSMakeRange(VERTEX_TEXTURE, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentTexturesMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, MTLTEXTURE** textures)
@@ -1072,25 +1088,25 @@ void xxSetFragmentTexturesMetal(id <MTLRenderCommandEncoder> __unsafe_unretained
     }
 
     [commandEncoder setFragmentTextures:fragmentTextures
-                              withRange:NSMakeRange(0, count)];
+                              withRange:NSMakeRange(FRAGMENT_TEXTURE, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetMeshSamplersMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, id <MTLSamplerState> __unsafe_unretained* samplers)
 {
     [commandEncoder setMeshSamplerStates:samplers
-                               withRange:NSMakeRange(0, count)];
+                               withRange:NSMakeRange(VERTEX_SAMPLER, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetVertexSamplersMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, id <MTLSamplerState> __unsafe_unretained* samplers)
 {
     [commandEncoder setVertexSamplerStates:samplers
-                                 withRange:NSMakeRange(0, count)];
+                                 withRange:NSMakeRange(VERTEX_SAMPLER, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetFragmentSamplersMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, int count, id <MTLSamplerState> __unsafe_unretained* samplers)
 {
     [commandEncoder setFragmentSamplerStates:samplers
-                                   withRange:NSMakeRange(0, count)];
+                                   withRange:NSMakeRange(FRAGMENT_SAMPLER, count)];
 }
 //------------------------------------------------------------------------------
 void xxSetMeshConstantBufferMetal(id <MTLRenderCommandEncoder> __unsafe_unretained commandEncoder, id <MTLBuffer> __unsafe_unretained buffer, int size)

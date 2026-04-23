@@ -25,12 +25,21 @@
 
 extern Class classMTLCompileOptions;
 extern Class classMTLDepthStencilDescriptor;
+extern Class classMTLMeshRenderPipelineDescriptor;
 extern Class classMTLRenderPassDescriptor;
 extern Class classMTLRenderPipelineColorAttachmentDescriptor;
 extern Class classMTLRenderPipelineDescriptor;
 extern Class classMTLSamplerDescriptor;
 extern Class classMTLTextureDescriptor;
 extern Class classMTLVertexDescriptor;
+extern Class classMTLResidencySetDescriptor;
+extern Class classMTL4ArgumentTableDescriptor;
+extern Class classMTL4CompilerDescriptor;
+extern Class classMTL4LibraryFunctionDescriptor;
+extern Class classMTL4MeshRenderPipelineDescriptor;
+extern Class classMTL4RenderPassDescriptor;
+extern Class classMTL4RenderPipelineColorAttachmentDescriptor;
+extern Class classMTL4RenderPipelineDescriptor;
 
 struct MTLPIPELINE;
 struct MTLSWAPCHAIN;
@@ -119,6 +128,14 @@ struct MTLSWAPCHAIN : public MTLFRAMEBUFFER
     id <MTLArgumentEncoder>         vertexArgumentEncoder;
     id <MTLArgumentEncoder>         fragmentArgumentEncoder;
     bool                            argumentEncoderComplete;
+
+    // Metal 4
+    id <MTL4CommandQueue>           commandQueue4;
+    id <MTL4CommandBuffer>          commandBuffer4;
+    int                             commandAllocatorIndex4;
+    id <MTL4CommandAllocator>       commandAllocators4[4];
+    id <MTL4RenderCommandEncoder>   commandEncoder4;
+    id <MTL4ArgumentTable>          argumentTable;
 };
 //==============================================================================
 //  Texture
@@ -142,9 +159,6 @@ struct MTLPIPELINE
     bool                            scissorEnable;
 
     // Metal 2
-    id <MTLFunction>                meshShader;
-    id <MTLFunction>                vertexShader;
-    id <MTLFunction>                fragmentShader;
     id <MTLArgumentEncoder>         meshArgumentEncoder;
     id <MTLArgumentEncoder>         vertexArgumentEncoder;
     id <MTLArgumentEncoder>         fragmentArgumentEncoder;
