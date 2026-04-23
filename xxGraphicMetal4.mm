@@ -23,6 +23,7 @@ id xxCreateInstanceMetal4()
         return 0;
 
     xxRegisterFunctionSingle(xxCreateInstance, xxCreateInstanceMetal4);
+    xxRegisterFunctionSingle(xxDestroyInstance, xxDestroyInstanceMetal4);
     xxRegisterFunctionSingle(xxGetInstanceName, xxGetInstanceNameMetal4);
 
     xxRegisterFunctionSingle(xxCreateSwapchain, xxCreateSwapchainMetal4);
@@ -72,6 +73,13 @@ id xxCreateInstanceMetal4()
     xxRegisterFunctionSingle(xxDrawIndexed, xxDrawIndexedMetal4);
 
     return instance;
+}
+//------------------------------------------------------------------------------
+void xxDestroyInstanceMetal4(id instance)
+{
+    residencySetDirty = false;
+    residencySet = nil;
+    xxDestroyInstanceMetal(instance);
 }
 //==============================================================================
 //  Swapchain
@@ -629,7 +637,7 @@ void xxDrawIndexedMetal4(MTLSWAPCHAIN* swapchain, id <MTLBuffer> __unsafe_unreta
                                            indexCount:indexCount
                                             indexType:indexType
                                           indexBuffer:indexBuffer.gpuAddress + firstIndex * (vertexCount < 65536 ? 2 : 4)
-                                    indexBufferLength:indexCount * (vertexCount < 65536 ? 2 : 4)
+                                    indexBufferLength:indexBuffer.length
                                         instanceCount:instanceCount
                                            baseVertex:vertexOffset
                                          baseInstance:firstInstance];

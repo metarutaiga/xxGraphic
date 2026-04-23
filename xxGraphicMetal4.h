@@ -18,6 +18,7 @@ xxInline char const*    xxGetInstanceNameMetal4() { return "Metal 4"; }
 //  Instance
 //==============================================================================
 xxAPI id        xxCreateInstanceMetal4();
+void            xxDestroyInstanceMetal4(id instance);
 //==============================================================================
 //  Swapchain
 //==============================================================================
