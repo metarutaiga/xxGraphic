@@ -11,6 +11,9 @@
 
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 
+#import <os/availability.h>
+#undef API_AVAILABLE
+#define API_AVAILABLE(...)
 #define MTLCreateSystemDefaultDevice MTLCreateSystemDefaultDevice_unused
 #define MTLCopyAllDevices MTLCopyAllDevices_unused
 #import <Metal/Metal.h>

@@ -91,13 +91,7 @@ MTLSWAPCHAIN* xxCreateSwapchainMetal4(id <MTLDevice> __unsafe_unretained device,
         return nullptr;
 
     id commandQueue = [device newMTL4CommandQueue];
-    if (commandQueue == nil)
-        return nullptr;
-
     id commandBuffer = [device newCommandBuffer];
-    if (commandBuffer == nil)
-        return nullptr;
-
     swapchain->commandQueue = commandQueue;
     swapchain->commandQueue4 = commandQueue;
     swapchain->commandBuffer = commandBuffer;
