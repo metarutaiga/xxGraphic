@@ -26,6 +26,7 @@
 #undef MTLCreateSystemDefaultDevice
 #undef MTLCopyAllDevices
 
+extern void* metalLibrary;
 extern Class classMTLCompileOptions;
 extern Class classMTLDepthStencilDescriptor;
 extern Class classMTLMeshRenderPipelineDescriptor;

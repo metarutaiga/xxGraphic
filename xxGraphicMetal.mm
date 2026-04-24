@@ -8,6 +8,7 @@
 #include "internal/xxGraphicInternalMetal.h"
 #include "xxGraphicMetal.h"
 
+void*                       metalLibrary = nullptr;
 Class                       classMTLCompileOptions = nil;
 Class                       classMTLDepthStencilDescriptor = nil;
 Class                       classMTLMeshRenderPipelineDescriptor = nil;
@@ -17,16 +18,7 @@ Class                       classMTLRenderPipelineDescriptor = nil;
 Class                       classMTLSamplerDescriptor = nil;
 Class                       classMTLTextureDescriptor = nil;
 Class                       classMTLVertexDescriptor = nil;
-Class                       classMTLResidencySetDescriptor = nil;
-Class                       classMTL4ArgumentTableDescriptor = nil;
-Class                       classMTL4CompilerDescriptor = nil;
-Class                       classMTL4LibraryFunctionDescriptor = nil;
-Class                       classMTL4MeshRenderPipelineDescriptor = nil;
-Class                       classMTL4RenderPassDescriptor = nil;
-Class                       classMTL4RenderPipelineColorAttachmentDescriptor = nil;
-Class                       classMTL4RenderPipelineDescriptor = nil;
 
-static void*                metalLibrary = nullptr;
 static MTLCullMode          metalCullMode;
 static MTLTriangleFillMode  metalFillMode;
 static MTLViewport          metalViewport;
@@ -82,14 +74,6 @@ id xxCreateInstanceMetal()
     classMTLSamplerDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLSamplerDescriptor");
     classMTLTextureDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLTextureDescriptor");
     classMTLVertexDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLVertexDescriptor");
-    classMTLResidencySetDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTLResidencySetDescriptor");
-    classMTL4ArgumentTableDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTL4ArgumentTableDescriptor");
-    classMTL4CompilerDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTL4CompilerDescriptor");
-    classMTL4LibraryFunctionDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTL4LibraryFunctionDescriptor");
-    classMTL4MeshRenderPipelineDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTL4MeshRenderPipelineDescriptor");
-    classMTL4RenderPassDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTL4RenderPassDescriptor");
-    classMTL4RenderPipelineColorAttachmentDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTL4RenderPipelineColorAttachmentDescriptor");
-    classMTL4RenderPipelineDescriptor = (__bridge Class)xxGetProcAddress(metalLibrary, "OBJC_CLASS_$_MTL4RenderPipelineDescriptor");
 
 #if defined(xxMACOS)
     NSArray* allDevices = MTLCopyAllDevices();
